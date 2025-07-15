@@ -10,6 +10,10 @@ import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
+import HomeVisitReports from "./pages/HomeVisitReports";
+import SchoolVisitReports from "./pages/SchoolVisitReports";
+import ProgramReports from "./pages/ProgramReports";
+import ActivityReports from "./pages/ActivityReports";
 import Settings from "./pages/Settings";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
@@ -107,6 +111,34 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Reports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/home-visits" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <HomeVisitReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/school-visits" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SchoolVisitReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/program-reports" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ProgramReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/activity-reports" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ActivityReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

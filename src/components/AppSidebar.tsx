@@ -67,8 +67,8 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-primary text-primary-foreground font-medium shadow-soft" 
-      : "hover:bg-accent hover:text-accent-foreground";
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
 
   const handleLogout = async () => {
     await signOut();
@@ -81,18 +81,18 @@ export function AppSidebar() {
           <div className="p-2 bg-gradient-primary rounded-lg">
             <Heart className="w-6 h-6 text-white" />
           </div>
-          {!isCollapsed && (
-            <div>
-              <h2 className="font-bold text-foreground">Heart to Heart</h2>
-              <p className="text-xs text-muted-foreground">Organization</p>
-            </div>
-          )}
+           {!isCollapsed && (
+             <div>
+               <h2 className="font-bold text-sidebar-foreground">Heart to Heart</h2>
+               <p className="text-xs text-sidebar-foreground/70">Organization</p>
+             </div>
+           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
-        <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+         <SidebarGroup>
+           <SidebarGroupLabel className="text-sidebar-foreground/80">Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => (
@@ -109,8 +109,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Programs</SidebarGroupLabel>
+         <SidebarGroup>
+           <SidebarGroupLabel className="text-sidebar-foreground/80">Programs</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {programItems.map((item) => (
@@ -127,8 +127,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Reports</SidebarGroupLabel>
+         <SidebarGroup>
+           <SidebarGroupLabel className="text-sidebar-foreground/80">Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {reportsItems.map((item) => (
@@ -145,8 +145,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>System</SidebarGroupLabel>
+         <SidebarGroup>
+           <SidebarGroupLabel className="text-sidebar-foreground/80">System</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {systemItems.map((item) => (
@@ -164,13 +164,13 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          className="w-full justify-start text-muted-foreground hover:text-foreground"
-        >
+       <SidebarFooter className="border-t border-sidebar-border p-2">
+         <Button
+           variant="ghost"
+           size="sm"
+           onClick={handleLogout}
+           className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+         >
           <LogOut className="h-4 w-4" />
           {!isCollapsed && <span>Logout</span>}
         </Button>
