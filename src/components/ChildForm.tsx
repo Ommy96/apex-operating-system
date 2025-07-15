@@ -14,13 +14,21 @@ const childSchema = z.object({
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   date_of_birth: z.string().optional(),
-  gender: z.string().optional(),
+  gender: z.enum(['Male', 'Female']).optional(),
+  residence: z.enum(['Kibera', 'Kawangware', 'Diaspora', 'Outside Nairobi']).optional(),
+  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary', 'Secondary School', 'Tertiary', 'Special School', 'Junior School']).optional(),
+  institution_name: z.string().optional(),
+  grade: z.string().optional(),
+  parental_status: z.enum(['Both alive', 'Both deceased', 'Partial']).optional(),
   address: z.string().optional(),
   guardian_name: z.string().optional(),
+  relation: z.string().optional(),
   guardian_phone: z.string().optional(),
   guardian_email: z.string().email('Invalid email').optional().or(z.literal('')),
+  contact: z.string().optional(),
   medical_notes: z.string().optional(),
   special_needs: z.string().optional(),
+  special_condition: z.string().optional(),
   status: z.string(),
 });
 
@@ -42,12 +50,20 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       last_name: child?.last_name || '',
       date_of_birth: child?.date_of_birth || '',
       gender: child?.gender || '',
+      residence: child?.residence || '',
+      academic_level: child?.academic_level || '',
+      institution_name: child?.institution_name || '',
+      grade: child?.grade || '',
+      parental_status: child?.parental_status || '',
       address: child?.address || '',
       guardian_name: child?.guardian_name || '',
+      relation: child?.relation || '',
       guardian_phone: child?.guardian_phone || '',
       guardian_email: child?.guardian_email || '',
+      contact: child?.contact || '',
       medical_notes: child?.medical_notes || '',
       special_needs: child?.special_needs || '',
+      special_condition: child?.special_condition || '',
       status: child?.status || 'active',
     },
   });
@@ -159,7 +175,6 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
                   <SelectContent>
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -167,6 +182,113 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="residence"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Residence</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select residence" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Kibera">Kibera</SelectItem>
+                    <SelectItem value="Kawangware">Kawangware</SelectItem>
+                    <SelectItem value="Diaspora">Diaspora</SelectItem>
+                    <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="academic_level"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Academic Level</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select academic level" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Pre Primary">Pre Primary</SelectItem>
+                    <SelectItem value="Lower Primary">Lower Primary</SelectItem>
+                    <SelectItem value="Upper Primary">Upper Primary</SelectItem>
+                    <SelectItem value="Junior Secondary">Junior Secondary</SelectItem>
+                    <SelectItem value="Secondary School">Secondary School</SelectItem>
+                    <SelectItem value="Tertiary">Tertiary</SelectItem>
+                    <SelectItem value="Special School">Special School</SelectItem>
+                    <SelectItem value="Junior School">Junior School</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="institution_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Institution Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter institution name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="grade"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grade</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter grade/class" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="parental_status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parental Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select parental status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Both alive">Both alive</SelectItem>
+                  <SelectItem value="Both deceased">Both deceased</SelectItem>
+                  <SelectItem value="Partial">Partial</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -199,6 +321,36 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="relation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Relation</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter relation to child" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="contact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter contact information" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -255,6 +407,20 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
                 <FormLabel>Special Needs</FormLabel>
                 <FormControl>
                   <Textarea placeholder="Enter any special needs or requirements" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="special_condition"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Special Condition</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Enter any special conditions" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

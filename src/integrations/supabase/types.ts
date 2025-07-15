@@ -71,6 +71,48 @@ export type Database = {
           },
         ]
       }
+      activity_reports: {
+        Row: {
+          beneficiary_impact: string
+          challenges: string
+          created_at: string
+          created_by: string | null
+          executive_summary: string
+          id: string
+          program: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations: string
+          reporting_date: string
+          staff: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_impact: string
+          challenges: string
+          created_at?: string
+          created_by?: string | null
+          executive_summary: string
+          id?: string
+          program: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations: string
+          reporting_date: string
+          staff: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_impact?: string
+          challenges?: string
+          created_at?: string
+          created_by?: string | null
+          executive_summary?: string
+          id?: string
+          program?: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations?: string
+          reporting_date?: string
+          staff?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       child_programs: {
         Row: {
           child_id: string
@@ -127,58 +169,94 @@ export type Database = {
       }
       children: {
         Row: {
+          academic_level:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
           address: string | null
+          contact: string | null
           created_at: string
           created_by: string | null
           date_of_birth: string | null
           enrollment_date: string
           first_name: string
-          gender: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          grade: string | null
           guardian_email: string | null
           guardian_name: string | null
           guardian_phone: string | null
           id: string
+          institution_name: string | null
           last_name: string
           medical_notes: string | null
+          parental_status:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
           photo_url: string | null
+          relation: string | null
+          residence: Database["public"]["Enums"]["residence_type"] | null
+          special_condition: string | null
           special_needs: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
           address?: string | null
+          contact?: string | null
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
           enrollment_date?: string
           first_name: string
-          gender?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
           guardian_email?: string | null
           guardian_name?: string | null
           guardian_phone?: string | null
           id?: string
+          institution_name?: string | null
           last_name: string
           medical_notes?: string | null
+          parental_status?:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
           photo_url?: string | null
+          relation?: string | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          special_condition?: string | null
           special_needs?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
           address?: string | null
+          contact?: string | null
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
           enrollment_date?: string
           first_name?: string
-          gender?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
           guardian_email?: string | null
           guardian_name?: string | null
           guardian_phone?: string | null
           id?: string
+          institution_name?: string | null
           last_name?: string
           medical_notes?: string | null
+          parental_status?:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
           photo_url?: string | null
+          relation?: string | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          special_condition?: string | null
           special_needs?: string | null
           status?: string
           updated_at?: string
@@ -235,6 +313,213 @@ export type Database = {
           },
         ]
       }
+      family_adoption: {
+        Row: {
+          actual_name: string | null
+          category: Database["public"]["Enums"]["family_category_type"] | null
+          created_at: string
+          created_by: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          id: string
+          known_name: string
+          no_of_beneficiaries: number | null
+          residence: Database["public"]["Enums"]["residence_type"] | null
+          sponsor: Database["public"]["Enums"]["sponsor_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          actual_name?: string | null
+          category?: Database["public"]["Enums"]["family_category_type"] | null
+          created_at?: string
+          created_by?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          known_name: string
+          no_of_beneficiaries?: number | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          actual_name?: string | null
+          category?: Database["public"]["Enums"]["family_category_type"] | null
+          created_at?: string
+          created_by?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          known_name?: string
+          no_of_beneficiaries?: number | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feeding_program: {
+        Row: {
+          academic_level:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          education_sponsorship: boolean | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          grade: string | null
+          id: string
+          name: string
+          type: Database["public"]["Enums"]["feeding_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          education_sponsorship?: boolean | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          id?: string
+          name: string
+          type?: Database["public"]["Enums"]["feeding_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          education_sponsorship?: boolean | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          id?: string
+          name?: string
+          type?: Database["public"]["Enums"]["feeding_type"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      home_visit_reports: {
+        Row: {
+          challenges_identified: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings: string
+          reason_for_visit: string | null
+          recommendations: string
+          staff: string
+          student_id: string | null
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          challenges_identified: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings: string
+          reason_for_visit?: string | null
+          recommendations: string
+          staff: string
+          student_id?: string | null
+          updated_at?: string
+          visit_date: string
+        }
+        Update: {
+          challenges_identified?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings?: string
+          reason_for_visit?: string | null
+          recommendations?: string
+          staff?: string
+          student_id?: string | null
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: []
+      }
+      kipawa_sato: {
+        Row: {
+          academic_level:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          age: number | null
+          awards_recognition: string | null
+          coach_mentor_name: string | null
+          created_at: string
+          created_by: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          id: string
+          location: Database["public"]["Enums"]["residence_type"] | null
+          school_support_given: boolean | null
+          specific_skill:
+            | Database["public"]["Enums"]["specific_skill_type"]
+            | null
+          talent_category:
+            | Database["public"]["Enums"]["talent_category_type"]
+            | null
+          updated_at: string
+          year_enrolled: number | null
+        }
+        Insert: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          age?: number | null
+          awards_recognition?: string | null
+          coach_mentor_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          full_name: string
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          school_support_given?: boolean | null
+          specific_skill?:
+            | Database["public"]["Enums"]["specific_skill_type"]
+            | null
+          talent_category?:
+            | Database["public"]["Enums"]["talent_category_type"]
+            | null
+          updated_at?: string
+          year_enrolled?: number | null
+        }
+        Update: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          age?: number | null
+          awards_recognition?: string | null
+          coach_mentor_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          school_support_given?: boolean | null
+          specific_skill?:
+            | Database["public"]["Enums"]["specific_skill_type"]
+            | null
+          talent_category?:
+            | Database["public"]["Enums"]["talent_category_type"]
+            | null
+          updated_at?: string
+          year_enrolled?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -265,6 +550,48 @@ export type Database = {
         }
         Relationships: []
       }
+      program_reports: {
+        Row: {
+          beneficiary_impact: string
+          challenges: string
+          created_at: string
+          created_by: string | null
+          executive_summary: string
+          id: string
+          program: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations: string
+          reporting_date: string
+          staff: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_impact: string
+          challenges: string
+          created_at?: string
+          created_by?: string | null
+          executive_summary: string
+          id?: string
+          program: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations: string
+          reporting_date: string
+          staff: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_impact?: string
+          challenges?: string
+          created_at?: string
+          created_by?: string | null
+          executive_summary?: string
+          id?: string
+          program?: Database["public"]["Enums"]["program_type"]
+          proposed_recommendations?: string
+          reporting_date?: string
+          staff?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       programs: {
         Row: {
           created_at: string
@@ -286,6 +613,159 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+        }
+        Relationships: []
+      }
+      school_visit_reports: {
+        Row: {
+          challenges_identified: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings: string
+          reason_for_visit: string | null
+          recommendations: string
+          school: string
+          staff: string
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          challenges_identified: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings: string
+          reason_for_visit?: string | null
+          recommendations: string
+          school: string
+          staff: string
+          updated_at?: string
+          visit_date: string
+        }
+        Update: {
+          challenges_identified?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["residence_type"] | null
+          observation_findings?: string
+          reason_for_visit?: string | null
+          recommendations?: string
+          school?: string
+          staff?: string
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: []
+      }
+      self_empowerment: {
+        Row: {
+          amount_approved: number | null
+          amount_requested: number | null
+          amount_status:
+            | Database["public"]["Enums"]["amount_status_type"]
+            | null
+          applicant_id: string | null
+          business_location: string | null
+          business_name: string | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          current_status: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          id: string
+          residence: Database["public"]["Enums"]["residence_type"] | null
+          start_date: string | null
+          support_status: string | null
+          type_of_business: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_approved?: number | null
+          amount_requested?: number | null
+          amount_status?:
+            | Database["public"]["Enums"]["amount_status_type"]
+            | null
+          applicant_id?: string | null
+          business_location?: string | null
+          business_name?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          full_name: string
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          start_date?: string | null
+          support_status?: string | null
+          type_of_business?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_approved?: number | null
+          amount_requested?: number | null
+          amount_status?:
+            | Database["public"]["Enums"]["amount_status_type"]
+            | null
+          applicant_id?: string | null
+          business_location?: string | null
+          business_name?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          start_date?: string | null
+          support_status?: string | null
+          type_of_business?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_groups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          facilitator: string | null
+          id: string
+          location: string | null
+          meeting_schedule: string | null
+          member_count: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          facilitator?: string | null
+          id?: string
+          location?: string | null
+          meeting_schedule?: string | null
+          member_count?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          facilitator?: string | null
+          id?: string
+          location?: string | null
+          meeting_schedule?: string | null
+          member_count?: number | null
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -356,6 +836,47 @@ export type Database = {
       }
     }
     Enums: {
+      academic_level_type:
+        | "Pre Primary"
+        | "Lower Primary"
+        | "Upper Primary"
+        | "Junior Secondary"
+        | "Secondary School"
+        | "Tertiary"
+        | "Special School"
+        | "Junior School"
+      amount_status_type: "Loan" | "Grant"
+      family_category_type: "Guardian Ration" | "Home Based Care"
+      feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
+      gender_type: "Male" | "Female"
+      parental_status_type: "Both alive" | "Both deceased" | "Partial"
+      program_type:
+        | "Education"
+        | "Kibera Early Dinner"
+        | "Kawangware Lunch Hour"
+        | "Kipawa Sato"
+        | "Self-Empowerment"
+        | "Support Groups"
+      residence_type: "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi"
+      specific_skill_type:
+        | "Singing"
+        | "Spoken Word"
+        | "Drawing"
+        | "Instruments"
+        | "Football"
+        | "Basketball"
+        | "Chess"
+        | "Fashion"
+        | "Modern"
+        | "Traditional"
+      sponsor_type: "NSP-AID" | "Donation"
+      talent_category_type:
+        | "Music"
+        | "Dance"
+        | "Poetry"
+        | "Art & Craft"
+        | "Sport"
+        | "Boardgames"
       user_role: "admin" | "coordinator" | "volunteer" | "viewer"
     }
     CompositeTypes: {
@@ -484,6 +1005,51 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      academic_level_type: [
+        "Pre Primary",
+        "Lower Primary",
+        "Upper Primary",
+        "Junior Secondary",
+        "Secondary School",
+        "Tertiary",
+        "Special School",
+        "Junior School",
+      ],
+      amount_status_type: ["Loan", "Grant"],
+      family_category_type: ["Guardian Ration", "Home Based Care"],
+      feeding_type: ["Kawangware Lunch Hour", "Kibera Early Dinner"],
+      gender_type: ["Male", "Female"],
+      parental_status_type: ["Both alive", "Both deceased", "Partial"],
+      program_type: [
+        "Education",
+        "Kibera Early Dinner",
+        "Kawangware Lunch Hour",
+        "Kipawa Sato",
+        "Self-Empowerment",
+        "Support Groups",
+      ],
+      residence_type: ["Kibera", "Kawangware", "Diaspora", "Outside Nairobi"],
+      specific_skill_type: [
+        "Singing",
+        "Spoken Word",
+        "Drawing",
+        "Instruments",
+        "Football",
+        "Basketball",
+        "Chess",
+        "Fashion",
+        "Modern",
+        "Traditional",
+      ],
+      sponsor_type: ["NSP-AID", "Donation"],
+      talent_category_type: [
+        "Music",
+        "Dance",
+        "Poetry",
+        "Art & Craft",
+        "Sport",
+        "Boardgames",
+      ],
       user_role: ["admin", "coordinator", "volunteer", "viewer"],
     },
   },

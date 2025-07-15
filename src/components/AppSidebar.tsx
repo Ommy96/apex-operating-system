@@ -38,17 +38,19 @@ const mainMenuItems = [
 ];
 
 const programItems = [
-  { title: "Education", url: "/programs/Education", icon: GraduationCap },
-  { title: "Feeding", url: "/programs/Feeding", icon: UtensilsCrossed },
-  { title: "Guardian/F.A.", url: "/programs/Guardian%2FF.A.", icon: UserCheck },
-  { title: "Kipawa", url: "/programs/Kipawa", icon: Lightbulb },
-  { title: "Empowerment", url: "/programs/Empowerment", icon: TrendingUp },
-  { title: "Visits", url: "/programs/Visits", icon: Home },
-  { title: "Alumni", url: "/programs/Alumni", icon: Trophy },
+  { title: "Education", url: "/programs/education", icon: GraduationCap },
+  { title: "Feeding Program", url: "/programs/feeding", icon: UtensilsCrossed },
+  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: Lightbulb },
+  { title: "Family Adoption", url: "/programs/family-adoption", icon: UserCheck },
+  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: TrendingUp },
+  { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
 const reportsItems = [
-  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "Home Visits", url: "/reports/home-visits", icon: Home },
+  { title: "School Visits", url: "/reports/school-visits", icon: School },
+  { title: "Program Reports", url: "/reports/program-reports", icon: FileText },
+  { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
 ];
 
 const systemItems = [

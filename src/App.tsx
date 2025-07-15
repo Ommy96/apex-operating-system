@@ -11,6 +11,8 @@ import ChildProfile from "./pages/ChildProfile";
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import FeedingProgram from "./pages/FeedingProgram";
+import KipawaSato from "./pages/KipawaSato";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -46,6 +48,27 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ChildProfile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/education" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Children />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/feeding" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <FeedingProgram />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/kipawa-sato" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <KipawaSato />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
