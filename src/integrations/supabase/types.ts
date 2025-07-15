@@ -177,6 +177,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_of_birth: string | null
+          donation_received_ksh: number | null
+          donor: string | null
           enrollment_date: string
           first_name: string
           gender: Database["public"]["Enums"]["gender_type"] | null
@@ -208,6 +210,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
+          donation_received_ksh?: number | null
+          donor?: string | null
           enrollment_date?: string
           first_name: string
           gender?: Database["public"]["Enums"]["gender_type"] | null
@@ -239,6 +243,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
+          donation_received_ksh?: number | null
+          donor?: string | null
           enrollment_date?: string
           first_name?: string
           gender?: Database["public"]["Enums"]["gender_type"] | null

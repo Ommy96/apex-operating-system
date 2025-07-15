@@ -31,6 +31,8 @@ const childSchema = z.object({
   special_needs: z.string().optional(),
   special_condition: z.string().optional(),
   status: z.string(),
+  donor: z.string().optional(),
+  donation_received_ksh: z.number().optional(),
 });
 
 type ChildFormData = z.infer<typeof childSchema>;
@@ -66,6 +68,8 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       special_needs: child?.special_needs || '',
       special_condition: child?.special_condition || '',
       status: child?.status || 'active',
+      donor: child?.donor || '',
+      donation_received_ksh: child?.donation_received_ksh || undefined,
     },
   });
 
@@ -386,6 +390,52 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Additional Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="donor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Donor</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select donor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="NSP-AID">NSP-AID</SelectItem>
+                      <SelectItem value="Sebastian">Sebastian</SelectItem>
+                      <SelectItem value="Ivar">Ivar</SelectItem>
+                      <SelectItem value="Donation">Donation</SelectItem>
+                      <SelectItem value="Add donor option">Add donor option</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="donation_received_ksh"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Donation Received (Ksh)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number"
+                      placeholder="Enter amount in Ksh"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           
           <FormField
             control={form.control}
