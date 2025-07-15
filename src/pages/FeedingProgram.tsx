@@ -31,8 +31,8 @@ export default function FeedingProgram() {
 
   const filteredPrograms = feedingPrograms?.filter(program => {
     const matchesSearch = program.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !typeFilter || program.type === typeFilter;
-    const matchesLevel = !levelFilter || program.academic_level === levelFilter;
+    const matchesType = !typeFilter || typeFilter === 'all' || program.type === typeFilter;
+    const matchesLevel = !levelFilter || levelFilter === 'all' || program.academic_level === levelFilter;
     
     return matchesSearch && matchesType && matchesLevel;
   });
@@ -85,7 +85,7 @@ export default function FeedingProgram() {
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="Kawangware Lunch Hour">Kawangware Lunch Hour</SelectItem>
             <SelectItem value="Kibera Early Dinner">Kibera Early Dinner</SelectItem>
           </SelectContent>
@@ -96,7 +96,7 @@ export default function FeedingProgram() {
             <SelectValue placeholder="Filter by level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Levels</SelectItem>
+            <SelectItem value="all">All Levels</SelectItem>
             <SelectItem value="Pre Primary">Pre Primary</SelectItem>
             <SelectItem value="Lower Primary">Lower Primary</SelectItem>
             <SelectItem value="Upper Primary">Upper Primary</SelectItem>
