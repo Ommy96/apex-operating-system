@@ -14,16 +14,349 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          activity_date: string
+          attachments: Json | null
+          child_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          outcome: string | null
+          program_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date?: string
+          attachments?: Json | null
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          outcome?: string | null
+          program_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string
+          attachments?: Json | null
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          outcome?: string | null
+          program_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      child_programs: {
+        Row: {
+          child_id: string
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          enrollment_date: string
+          id: string
+          notes: string | null
+          program_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          program_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          program_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_programs_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_programs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          address: string | null
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          enrollment_date: string
+          first_name: string
+          gender: string | null
+          guardian_email: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          id: string
+          last_name: string
+          medical_notes: string | null
+          photo_url: string | null
+          special_needs: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          enrollment_date?: string
+          first_name: string
+          gender?: string | null
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          last_name: string
+          medical_notes?: string | null
+          photo_url?: string | null
+          special_needs?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          enrollment_date?: string
+          first_name?: string
+          gender?: string | null
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          last_name?: string
+          medical_notes?: string | null
+          photo_url?: string | null
+          special_needs?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          category: string | null
+          child_id: string | null
+          created_at: string
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          title: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          child_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          title: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          child_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          title?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          child_id: string
+          created_at: string
+          duration_minutes: number | null
+          findings: string | null
+          id: string
+          location: string | null
+          next_visit_date: string | null
+          purpose: string | null
+          recommendations: string | null
+          updated_at: string
+          visit_date: string
+          visit_type: string
+          visited_by: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          findings?: string | null
+          id?: string
+          location?: string | null
+          next_visit_date?: string | null
+          purpose?: string | null
+          recommendations?: string | null
+          updated_at?: string
+          visit_date: string
+          visit_type: string
+          visited_by?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          findings?: string | null
+          id?: string
+          location?: string | null
+          next_visit_date?: string | null
+          purpose?: string | null
+          recommendations?: string | null
+          updated_at?: string
+          visit_date?: string
+          visit_type?: string
+          visited_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "coordinator" | "volunteer" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +483,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "coordinator", "volunteer", "viewer"],
+    },
   },
 } as const
