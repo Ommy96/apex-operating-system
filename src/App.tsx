@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
+import Education from "./pages/Education";
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
 import HomeVisitReports from "./pages/HomeVisitReports";
@@ -61,7 +62,7 @@ const App = () => (
             <Route path="/programs/education" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <Children />
+                  <Education />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
