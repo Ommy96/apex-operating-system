@@ -314,7 +314,7 @@ export default function Reports() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(reportData.programBreakdown || {}).map(([program, count]) => (
+                  {Object.entries(reportData?.programBreakdown || {}).map(([program, count]) => (
                     <div key={program} className="flex justify-between items-center">
                       <span className="text-sm font-medium">{program}</span>
                       <div className="flex items-center space-x-2">
@@ -322,7 +322,7 @@ export default function Reports() {
                           <div 
                             className="h-full bg-primary rounded-full"
                             style={{ 
-                              width: `${((count as number) / Math.max(...Object.values(reportData.programBreakdown || {}).map(v => v as number))) * 100}%` 
+                              width: `${((count as number) / Math.max(...Object.values(reportData?.programBreakdown || {}).map(v => v as number))) * 100}%` 
                             }}
                           />
                         </div>
@@ -341,7 +341,7 @@ export default function Reports() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(reportData.monthlyActivities || {}).slice(-6).map(([month, count]) => (
+                  {Object.entries(reportData?.monthlyActivities || {}).slice(-6).map(([month, count]) => (
                     <div key={month} className="flex justify-between items-center">
                       <span className="text-sm font-medium">{month}</span>
                       <div className="flex items-center space-x-2">
@@ -349,7 +349,7 @@ export default function Reports() {
                           <div 
                             className="h-full bg-secondary rounded-full"
                             style={{ 
-                              width: `${((count as number) / Math.max(...Object.values(reportData.monthlyActivities || {}).map(v => v as number))) * 100}%` 
+                              width: `${((count as number) / Math.max(...Object.values(reportData?.monthlyActivities || {}).map(v => v as number))) * 100}%` 
                             }}
                           />
                         </div>
