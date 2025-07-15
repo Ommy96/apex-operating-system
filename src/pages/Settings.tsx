@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Users, Shield, Database, Bell } from 'lucide-react';
+import { Save, Users, Shield, Database, Bell, User, Mail, Phone, MapPin, Clock, Settings as SettingsIcon, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -101,90 +103,161 @@ export default function Settings() {
     }
   };
 
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'admin': return 'destructive';
+      case 'coordinator': return 'default';
+      case 'volunteer': return 'secondary';
+      case 'viewer': return 'outline';
+      default: return 'outline';
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage system settings and configurations</p>
+    <div className="space-y-6 animate-fade-in">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-primary rounded-lg">
+            <SettingsIcon className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Settings
+            </h1>
+            <p className="text-muted-foreground">Manage system settings and configurations</p>
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="programs">Programs</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        <TabsList className="grid grid-cols-4 bg-gradient-to-r from-muted/50 to-muted/80">
+          <TabsTrigger value="users" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
+            <Users className="h-4 w-4 mr-2" />
+            User Management
+          </TabsTrigger>
+          <TabsTrigger value="programs" className="data-[state=active]:bg-gradient-secondary data-[state=active]:text-white">
+            <Database className="h-4 w-4 mr-2" />
+            Programs
+          </TabsTrigger>
+          <TabsTrigger value="system" className="data-[state=active]:bg-gradient-warm data-[state=active]:text-white">
+            <Shield className="h-4 w-4 mr-2" />
+            System
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-accent data-[state=active]:text-white">
+            <Bell className="h-4 w-4 mr-2" />
+            Notifications
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-soft border-primary/20">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
               <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+                <div className="p-2 bg-gradient-primary rounded-lg mr-3">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
                 User Management
               </CardTitle>
               <CardDescription>Manage user accounts and permissions</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="space-y-4">
-                {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold">{user.full_name}</h4>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Select
-                        value={user.role}
-                        onValueChange={(newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => updateUserRole(user.user_id, newRole)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                          <SelectItem value="volunteer">Volunteer</SelectItem>
-                          <SelectItem value="coordinator">Coordinator</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                {users.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <User className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                    <p>No users found</p>
                   </div>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-background to-muted/20 hover:from-muted/20 hover:to-muted/40 transition-all duration-200">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-foreground">{user.full_name}</h4>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-3 w-3 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Badge variant={getRoleBadgeVariant(user.role) as any} className="capitalize">
+                          {user.role}
+                        </Badge>
+                        <Select
+                          value={user.role}
+                          onValueChange={(newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => updateUserRole(user.user_id, newRole)}
+                        >
+                          <SelectTrigger className="w-32 bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="viewer">Viewer</SelectItem>
+                            <SelectItem value="volunteer">Volunteer</SelectItem>
+                            <SelectItem value="coordinator">Coordinator</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="programs" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-soft border-secondary/20">
+            <CardHeader className="bg-gradient-to-r from-secondary/5 to-accent/5">
               <CardTitle className="flex items-center">
-                <Database className="h-5 w-5 mr-2" />
+                <div className="p-2 bg-gradient-secondary rounded-lg mr-3">
+                  <Database className="h-5 w-5 text-white" />
+                </div>
                 Program Management
               </CardTitle>
               <CardDescription>Configure available programs and their settings</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="space-y-4">
-                {programs.map((program) => (
-                  <div key={program.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{program.name}</h4>
-                      <p className="text-sm text-muted-foreground">{program.description}</p>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Label htmlFor={`program-${program.id}`} className="text-sm">
-                        Active
-                      </Label>
-                      <Switch
-                        id={`program-${program.id}`}
-                        checked={program.is_active}
-                        onCheckedChange={(checked) => updateProgramStatus(program.id, checked)}
-                      />
-                    </div>
+                {programs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Database className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                    <p>No programs found</p>
                   </div>
-                ))}
+                ) : (
+                  programs.map((program, index) => (
+                    <div key={program.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-background to-secondary/10 hover:from-secondary/10 hover:to-secondary/20 transition-all duration-200">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-10 h-10 bg-gradient-secondary rounded-full flex items-center justify-center">
+                          <Database className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">{program.name}</h4>
+                          <p className="text-sm text-muted-foreground">{program.description || 'No description available'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Badge variant={program.is_active ? "default" : "outline"} className={program.is_active ? "bg-success text-success-foreground" : ""}>
+                          {program.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`program-${program.id}`} className="text-sm font-medium">
+                            Active
+                          </Label>
+                          <Switch
+                            id={`program-${program.id}`}
+                            checked={program.is_active}
+                            onCheckedChange={(checked) => updateProgramStatus(program.id, checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
