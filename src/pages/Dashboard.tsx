@@ -133,15 +133,15 @@ const Dashboard = () => {
               Common tasks and operations
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {quickActions.map((action, index) => (
               <Button
                 key={action.title}
                 variant={action.variant}
-                className="h-20 flex-col gap-2 text-xs"
+                className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4"
               >
-                <action.icon className="h-5 w-5" />
-                {action.title}
+                <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-center leading-tight">{action.title}</span>
               </Button>
             ))}
           </CardContent>

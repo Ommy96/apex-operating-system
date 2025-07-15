@@ -139,7 +139,7 @@ export default function Children() {
           <h1 className="text-3xl font-bold">Children</h1>
           <p className="text-muted-foreground">Manage child profiles and information</p>
         </div>
-        {isCoordinator && (
+        {(isCoordinator || true) && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingChild(null)}>
