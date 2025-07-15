@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Calendar, Users, TrendingUp, BarChart3 } from 'lucide-react';
+import { FileText, Download, Calendar, Users, TrendingUp, BarChart3, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,14 +7,38 @@ import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Reports() {
   const { userRole } = useAuth();
+  const navigate = useNavigate();
   const [programs, setPrograms] = useState<any[]>([]);
   const [selectedProgram, setSelectedProgram] = useState<string>('all');
   const [dateRange, setDateRange] = useState<any>(null);
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+
+  // Fetch real-time statistics
+  const { data: realtimeStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['reports-stats'],
+    queryFn: async () => {
+      const [childrenRes, activitiesRes, enrollmentsRes, visitsRes] = await Promise.all([
+        supabase.from('children').select('*', { count: 'exact' }).eq('status', 'active'),
+        supabase.from('activities').select('*', { count: 'exact' }),
+        supabase.from('child_programs').select('*', { count: 'exact' }),
+        supabase.from('visits').select('*', { count: 'exact' })
+      ]);
+
+      return {
+        totalChildren: childrenRes.count || 0,
+        totalActivities: activitiesRes.count || 0,
+        totalEnrollments: enrollmentsRes.count || 0,
+        totalVisits: visitsRes.count || 0,
+      };
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   useEffect(() => {
     fetchPrograms();
@@ -226,7 +250,7 @@ export default function Reports() {
         </Button>
       </div>
 
-      {reportData && (
+      {(reportData || realtimeStats) && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -235,7 +259,9 @@ export default function Reports() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportData.totalChildren}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "..." : (reportData?.totalChildren || realtimeStats?.totalChildren || 0)}
+                </div>
                 <p className="text-xs text-muted-foreground">Currently enrolled</p>
               </CardContent>
             </Card>
@@ -246,7 +272,9 @@ export default function Reports() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportData.totalActivities}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "..." : (reportData?.totalActivities || realtimeStats?.totalActivities || 0)}
+                </div>
                 <p className="text-xs text-muted-foreground">All time</p>
               </CardContent>
             </Card>
@@ -257,7 +285,9 @@ export default function Reports() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportData.totalEnrollments}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "..." : (reportData?.totalEnrollments || realtimeStats?.totalEnrollments || 0)}
+                </div>
                 <p className="text-xs text-muted-foreground">Total enrollments</p>
               </CardContent>
             </Card>
@@ -268,7 +298,9 @@ export default function Reports() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportData.totalVisits}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "..." : (reportData?.totalVisits || realtimeStats?.totalVisits || 0)}
+                </div>
                 <p className="text-xs text-muted-foreground">All visits</p>
               </CardContent>
             </Card>
@@ -336,18 +368,38 @@ export default function Reports() {
               <CardDescription>Generate specific reports for different purposes</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex-col">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => navigate('/children')}
+                >
                   <FileText className="h-6 w-6 mb-2" />
                   <span>Child Progress Report</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => navigate('/reports/program-reports')}
+                >
                   <Users className="h-6 w-6 mb-2" />
                   <span>Program Summary</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => generateReport()}
+                >
                   <BarChart3 className="h-6 w-6 mb-2" />
                   <span>Monthly Statistics</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => navigate('/reports/academic-performance')}
+                >
+                  <GraduationCap className="h-6 w-6 mb-2" />
+                  <span>Academic Performance</span>
                 </Button>
               </div>
             </CardContent>
