@@ -10,40 +10,66 @@ import {
   Plus,
   Eye
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
+  // Fetch dashboard statistics from database
+  const { data: dashboardStats, isLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
+        supabase.from('children').select('*', { count: 'exact' }),
+        supabase.from('feeding_program').select('*', { count: 'exact' }),
+        supabase.from('kipawa_sato').select('*', { count: 'exact' }),
+        supabase.from('self_empowerment').select('*', { count: 'exact' })
+      ]);
+
+      return {
+        totalChildren: childrenRes.count || 0,
+        feedingProgram: feedingRes.count || 0,
+        kipawaProgram: kipawaRes.count || 0,
+        empowermentProgram: selfEmpowermentRes.count || 0
+      };
+    }
+  });
+
   const stats = [
     {
       title: "Total Children",
-      value: "847",
+      value: isLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
       description: "Active beneficiaries",
       icon: Users,
       gradient: "bg-gradient-primary",
-      change: "+23 this month"
+      change: "Real-time data"
     },
     {
       title: "Education Program",
-      value: "623",
+      value: isLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
       description: "Children in school",
       icon: GraduationCap,
       gradient: "bg-gradient-secondary",
-      change: "+12 this month"
+      change: "Real-time data"
     },
     {
       title: "Feeding Program",
-      value: "502",
-      description: "Daily meals served",
+      value: isLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0",
+      description: "Children enrolled",
       icon: UtensilsCrossed,
       gradient: "bg-gradient-warm",
-      change: "+8 this month"
+      change: "Real-time data"
     },
     {
       title: "Kipawa Program",
-      value: "156",
+      value: isLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0",
       description: "Talent development",
       icon: Heart,
       gradient: "bg-accent",
-      change: "+5 this month"
+      change: "Real-time data"
     }
   ];
 
@@ -75,10 +101,30 @@ const Dashboard = () => {
   ];
 
   const quickActions = [
-    { title: "Add New Child", icon: Plus, variant: "default" as const },
-    { title: "Submit Report", icon: FileText, variant: "secondary" as const },
-    { title: "View Reports", icon: Eye, variant: "outline" as const },
-    { title: "Schedule Visit", icon: Users, variant: "accent" as const }
+    { 
+      title: "Add New Child", 
+      icon: Plus, 
+      variant: "default" as const,
+      onClick: () => navigate('/children')
+    },
+    { 
+      title: "Submit Report", 
+      icon: FileText, 
+      variant: "secondary" as const,
+      onClick: () => navigate('/reports')
+    },
+    { 
+      title: "View Reports", 
+      icon: Eye, 
+      variant: "outline" as const,
+      onClick: () => navigate('/reports')
+    },
+    { 
+      title: "Schedule Visit", 
+      icon: Users, 
+      variant: "accent" as const,
+      onClick: () => navigate('/children')
+    }
   ];
 
   return (
@@ -139,6 +185,7 @@ const Dashboard = () => {
                 key={action.title}
                 variant={action.variant}
                 className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4"
+                onClick={action.onClick}
               >
                 <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="text-center leading-tight">{action.title}</span>
