@@ -13,6 +13,9 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
+import FamilyAdoption from "./pages/FamilyAdoption";
+import SelfEmpowerment from "./pages/SelfEmpowerment";
+import SupportGroups from "./pages/SupportGroups";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -69,6 +72,27 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <KipawaSato />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/family-adoption" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <FamilyAdoption />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/self-empowerment" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SelfEmpowerment />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/support-groups" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SupportGroups />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
