@@ -8,7 +8,11 @@ import {
   TrendingUp,
   FileText,
   Plus,
-  Eye
+  Eye,
+  Calendar,
+  BookOpen,
+  Sparkles,
+  Target
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -18,8 +22,8 @@ import { useEffect, useState } from "react";
 const Dashboard = () => {
   const navigate = useNavigate();
   
-  // Fetch dashboard statistics from database
-  const { data: dashboardStats, isLoading } = useQuery({
+  // Fetch dashboard statistics with real-time updates every 30 seconds
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
@@ -35,13 +39,77 @@ const Dashboard = () => {
         kipawaProgram: kipawaRes.count || 0,
         empowermentProgram: selfEmpowermentRes.count || 0
       };
-    }
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  // Fetch recent activities with real-time updates
+  const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
+    queryKey: ['recent-activities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activities')
+        .select(`
+          *,
+          children (first_name, last_name),
+          programs (name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+      
+      return data?.map(activity => ({
+        title: activity.title,
+        description: activity.description || `Activity for ${activity.children?.first_name} ${activity.children?.last_name}`,
+        time: new Date(activity.created_at).toLocaleString(),
+        type: 'success' as const
+      })) || [];
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Calculate program distribution percentages
+  const totalPrograms = (dashboardStats?.totalChildren || 0) + 
+                       (dashboardStats?.feedingProgram || 0) + 
+                       (dashboardStats?.kipawaProgram || 0) + 
+                       (dashboardStats?.empowermentProgram || 0);
+
+  const programDistribution = [
+    {
+      name: "Education Program",
+      count: dashboardStats?.totalChildren || 0,
+      percentage: totalPrograms > 0 ? ((dashboardStats?.totalChildren || 0) / totalPrograms * 100).toFixed(1) : "0",
+      color: "bg-gradient-primary",
+      textColor: "text-primary"
+    },
+    {
+      name: "Feeding Program", 
+      count: dashboardStats?.feedingProgram || 0,
+      percentage: totalPrograms > 0 ? ((dashboardStats?.feedingProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
+      color: "bg-gradient-secondary",
+      textColor: "text-secondary"
+    },
+    {
+      name: "Kipawa Program",
+      count: dashboardStats?.kipawaProgram || 0,
+      percentage: totalPrograms > 0 ? ((dashboardStats?.kipawaProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
+      color: "bg-gradient-warm",
+      textColor: "text-accent"
+    },
+    {
+      name: "Empowerment",
+      count: dashboardStats?.empowermentProgram || 0,
+      percentage: totalPrograms > 0 ? ((dashboardStats?.empowermentProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
+      color: "bg-warning",
+      textColor: "text-warning"
+    }
+  ];
 
   const stats = [
     {
       title: "Total Children",
-      value: isLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
+      value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
       description: "Active beneficiaries",
       icon: Users,
       gradient: "bg-gradient-primary",
@@ -49,7 +117,7 @@ const Dashboard = () => {
     },
     {
       title: "Education Program",
-      value: isLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
+      value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
       description: "Children in school",
       icon: GraduationCap,
       gradient: "bg-gradient-secondary",
@@ -57,7 +125,7 @@ const Dashboard = () => {
     },
     {
       title: "Feeding Program",
-      value: isLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0",
+      value: statsLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0",
       description: "Children enrolled",
       icon: UtensilsCrossed,
       gradient: "bg-gradient-warm",
@@ -65,38 +133,11 @@ const Dashboard = () => {
     },
     {
       title: "Kipawa Program",
-      value: isLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0",
+      value: statsLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0",
       description: "Talent development",
       icon: Heart,
       gradient: "bg-accent",
       change: "Real-time data"
-    }
-  ];
-
-  const recentActivities = [
-    {
-      title: "New child registration",
-      description: "Mary Wanjiku (Age 8) added to Education Program",
-      time: "2 hours ago",
-      type: "success"
-    },
-    {
-      title: "School visit completed",
-      description: "Kibera Primary School - 15 children visited",
-      time: "4 hours ago",
-      type: "info"
-    },
-    {
-      title: "Feeding report submitted",
-      description: "Kawangware site - 89 meals served today",
-      time: "6 hours ago",
-      type: "success"
-    },
-    {
-      title: "Home visit scheduled",
-      description: "5 families in Kibera - Tomorrow 9:00 AM",
-      time: "1 day ago",
-      type: "warning"
     }
   ];
 
@@ -207,28 +248,53 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                    activity.type === 'success' ? 'bg-success' :
-                    activity.type === 'warning' ? 'bg-warning' :
-                    'bg-primary'
-                  }`} />
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      {activity.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </p>
-                  </div>
+              {activitiesLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <div className="w-2 h-2 rounded-full mt-2 bg-muted animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded animate-pulse" />
+                        <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
+                        <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : recentActivities && recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-muted/30 to-muted/50 hover:from-muted/50 hover:to-muted/70 transition-all duration-200 border border-muted">
+                    <div className={`w-3 h-3 rounded-full mt-2 shadow-sm ${
+                      activity.type === 'success' ? 'bg-gradient-to-r from-success to-success/80' :
+                      activity.type === 'warning' ? 'bg-gradient-to-r from-warning to-warning/80' :
+                      'bg-gradient-to-r from-primary to-primary/80'
+                    }`} />
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium text-foreground">
+                        {activity.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-primary font-medium">
+                        {activity.time}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                  <p>No recent activities found</p>
+                </div>
+              )}
             </div>
-            <Button variant="outline" className="w-full mt-4">
+            <Button 
+              variant="outline" 
+              className="w-full mt-4 bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 border-primary/20"
+              onClick={() => navigate('/reports/activity-reports')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
               View All Activities
             </Button>
           </CardContent>
@@ -246,34 +312,32 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-primary rounded-full"></div>
-                  <span className="text-sm">Education Program</span>
+              {statsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-muted rounded-full animate-pulse"></div>
+                        <div className="h-4 bg-muted rounded w-24 animate-pulse"></div>
+                      </div>
+                      <div className="h-4 bg-muted rounded w-16 animate-pulse"></div>
+                    </div>
+                  ))}
                 </div>
-                <span className="font-medium">623 (73.6%)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-secondary rounded-full"></div>
-                  <span className="text-sm">Feeding Program</span>
-                </div>
-                <span className="font-medium">502 (59.3%)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-accent rounded-full"></div>
-                  <span className="text-sm">Kipawa Program</span>
-                </div>
-                <span className="font-medium">156 (18.4%)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-warning rounded-full"></div>
-                  <span className="text-sm">Empowerment</span>
-                </div>
-                <span className="font-medium">89 (10.5%)</span>
-              </div>
+              ) : (
+                programDistribution.map((program, index) => (
+                  <div key={program.name} className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-background to-muted/30 hover:from-muted/20 hover:to-muted/40 transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full shadow-sm ${program.color}`}></div>
+                      <span className={`text-sm font-medium ${program.textColor}`}>{program.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-foreground">{program.count}</span>
+                      <span className="text-xs text-muted-foreground ml-1">({program.percentage}%)</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -287,16 +351,41 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {["Monthly Education Report", "Feeding Program Update", "Home Visit Summary", "Kipawa Progress Report"].map((report, index) => (
-                <div key={index} className="flex items-center justify-between p-2 rounded-md bg-muted/30">
-                  <span className="text-sm">{report}</span>
-                  <Button variant="ghost" size="sm">
+              {[
+                { name: "Monthly Education Report", path: "/reports/program-reports", icon: BookOpen, color: "text-primary" },
+                { name: "Feeding Program Update", path: "/reports/activity-reports", icon: UtensilsCrossed, color: "text-secondary" },
+                { name: "Home Visit Summary", path: "/reports/home-visits", icon: Users, color: "text-accent" },
+                { name: "Kipawa Progress Report", path: "/reports/activity-reports", icon: Heart, color: "text-warning" }
+              ].map((report, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/20 to-muted/40 hover:from-muted/30 hover:to-muted/60 transition-all duration-200 border border-muted/50 cursor-pointer group"
+                  onClick={() => navigate(report.path)}
+                >
+                  <div className="flex items-center gap-3">
+                    <report.icon className={`h-4 w-4 ${report.color}`} />
+                    <span className="text-sm font-medium">{report.name}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="group-hover:bg-primary/10 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(report.path);
+                    }}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-4">
+            <Button 
+              variant="outline" 
+              className="w-full mt-4 bg-gradient-to-r from-accent/10 to-primary/10 hover:from-accent/20 hover:to-primary/20 border-accent/30"
+              onClick={() => navigate('/reports')}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
               View All Reports
             </Button>
           </CardContent>
