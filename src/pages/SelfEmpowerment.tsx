@@ -32,8 +32,8 @@ export default function SelfEmpowerment() {
   const filteredRecords = selfEmpowermentRecords?.filter(record => {
     const matchesSearch = record.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (record.business_name && record.business_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = !statusFilter || record.amount_status === statusFilter;
-    const matchesResidence = !residenceFilter || record.residence === residenceFilter;
+    const matchesStatus = !statusFilter || statusFilter === 'all' || record.amount_status === statusFilter;
+    const matchesResidence = !residenceFilter || residenceFilter === 'all' || record.residence === residenceFilter;
     
     return matchesSearch && matchesStatus && matchesResidence;
   });
@@ -86,7 +86,7 @@ export default function SelfEmpowerment() {
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="Loan">Loan</SelectItem>
             <SelectItem value="Grant">Grant</SelectItem>
           </SelectContent>
@@ -97,7 +97,7 @@ export default function SelfEmpowerment() {
             <SelectValue placeholder="Filter by residence" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Residences</SelectItem>
+            <SelectItem value="all">All Residences</SelectItem>
             <SelectItem value="Kibera">Kibera</SelectItem>
             <SelectItem value="Kawangware">Kawangware</SelectItem>
             <SelectItem value="Diaspora">Diaspora</SelectItem>
