@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ProgramReportForm } from "@/components/ProgramReportForm";
 
 export default function ProgramReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -54,10 +55,13 @@ export default function ProgramReports() {
             <DialogHeader>
               <DialogTitle>Add Program Report</DialogTitle>
             </DialogHeader>
-            {/* Form component would go here */}
-            <div className="p-4 text-center text-muted-foreground">
-              Program Report Form - To be implemented
-            </div>
+            <ProgramReportForm 
+              onSuccess={() => {
+                setIsDialogOpen(false);
+                refetch();
+              }} 
+              onCancel={() => setIsDialogOpen(false)} 
+            />
           </DialogContent>
         </Dialog>
       </div>

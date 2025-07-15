@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -113,8 +114,9 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <ScrollArea className="h-[80vh]">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -460,7 +462,8 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             {isLoading ? 'Saving...' : child ? 'Update Child' : 'Add Child'}
           </Button>
         </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </ScrollArea>
   );
 }

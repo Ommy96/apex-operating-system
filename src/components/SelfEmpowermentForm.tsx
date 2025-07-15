@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -84,7 +85,8 @@ export function SelfEmpowermentForm({ onSuccess, onCancel }: SelfEmpowermentForm
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <ScrollArea className="h-[80vh]">
+      <form onSubmit={handleSubmit} className="space-y-4 p-1">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="applicant_id">Applicant ID</Label>
@@ -243,6 +245,7 @@ export function SelfEmpowermentForm({ onSuccess, onCancel }: SelfEmpowermentForm
           {isSubmitting ? "Creating..." : "Create Application"}
         </Button>
       </div>
-    </form>
+      </form>
+    </ScrollArea>
   );
 }
