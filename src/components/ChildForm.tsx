@@ -21,7 +21,7 @@ const childSchema = z.object({
   guardian_email: z.string().email('Invalid email').optional().or(z.literal('')),
   medical_notes: z.string().optional(),
   special_needs: z.string().optional(),
-  status: z.string().default('active'),
+  status: z.string(),
 });
 
 type ChildFormData = z.infer<typeof childSchema>;

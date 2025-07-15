@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, GraduationCap, UtensilsCrossed, Shield, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const features = [
     {
@@ -45,11 +47,11 @@ const Index = () => {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(user ? '/dashboard' : '/auth')}
               className="bg-white/20 hover:bg-white/30 text-white border-white/30"
               variant="outline"
             >
-              Staff Login
+              {user ? 'Dashboard' : 'Staff Login'}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -72,10 +74,10 @@ const Index = () => {
           <div className="flex gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(user ? '/dashboard' : '/auth')}
               className="bg-white text-primary hover:bg-white/90 shadow-strong"
             >
-              Access System
+              {user ? 'Go to Dashboard' : 'Access System'}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 

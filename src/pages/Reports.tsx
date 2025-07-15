@@ -147,7 +147,8 @@ export default function Reports() {
 
     // Add program breakdown
     if (reportData?.programBreakdown) {
-      doc.text('Program Enrollment Breakdown', 20, doc.lastAutoTable.finalY + 20);
+      const lastTableY = (doc as any).lastAutoTable?.finalY || 120;
+      doc.text('Program Enrollment Breakdown', 20, lastTableY + 20);
       
       const programData = Object.entries(reportData.programBreakdown).map(([program, count]) => [
         program,
@@ -155,7 +156,7 @@ export default function Reports() {
       ]);
 
       autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 30,
+        startY: lastTableY + 30,
         head: [['Program', 'Enrollments']],
         body: programData,
         theme: 'grid',
@@ -289,11 +290,11 @@ export default function Reports() {
                           <div 
                             className="h-full bg-primary rounded-full"
                             style={{ 
-                              width: `${(count / Math.max(...Object.values(reportData.programBreakdown || {}))) * 100}%` 
+                              width: `${((count as number) / Math.max(...Object.values(reportData.programBreakdown || {}).map(v => v as number))) * 100}%` 
                             }}
                           />
                         </div>
-                        <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+                        <span className="text-sm text-muted-foreground w-8 text-right">{count as number}</span>
                       </div>
                     </div>
                   ))}
@@ -316,11 +317,11 @@ export default function Reports() {
                           <div 
                             className="h-full bg-secondary rounded-full"
                             style={{ 
-                              width: `${(count / Math.max(...Object.values(reportData.monthlyActivities || {}))) * 100}%` 
+                              width: `${((count as number) / Math.max(...Object.values(reportData.monthlyActivities || {}).map(v => v as number))) * 100}%` 
                             }}
                           />
                         </div>
-                        <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+                        <span className="text-sm text-muted-foreground w-8 text-right">{count as number}</span>
                       </div>
                     </div>
                   ))}

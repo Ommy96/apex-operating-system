@@ -30,21 +30,24 @@ import {
   LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Children", url: "/children", icon: Users },
-  { title: "Education", url: "/education", icon: GraduationCap },
-  { title: "Feeding Program", url: "/feeding", icon: UtensilsCrossed },
-  { title: "Guardian/F.A", url: "/guardians", icon: UserCheck },
-  { title: "Kipawa Program", url: "/kipawa", icon: Lightbulb },
-  { title: "Empowerment", url: "/empowerment", icon: TrendingUp },
+];
+
+const programItems = [
+  { title: "Education", url: "/programs/Education", icon: GraduationCap },
+  { title: "Feeding", url: "/programs/Feeding", icon: UtensilsCrossed },
+  { title: "Guardian/F.A.", url: "/programs/Guardian%2FF.A.", icon: UserCheck },
+  { title: "Kipawa", url: "/programs/Kipawa", icon: Lightbulb },
+  { title: "Empowerment", url: "/programs/Empowerment", icon: TrendingUp },
+  { title: "Visits", url: "/programs/Visits", icon: Home },
+  { title: "Alumni", url: "/programs/Alumni", icon: Trophy },
 ];
 
 const reportsItems = [
-  { title: "Home Visits", url: "/visits/home", icon: Home },
-  { title: "School Visits", url: "/visits/school", icon: School },
-  { title: "Alumni Tracking", url: "/alumni", icon: Trophy },
   { title: "Reports", url: "/reports", icon: FileText },
 ];
 
@@ -54,6 +57,7 @@ const systemItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { signOut } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -64,9 +68,8 @@ export function AppSidebar() {
       ? "bg-primary text-primary-foreground font-medium shadow-soft" 
       : "hover:bg-accent hover:text-accent-foreground";
 
-  const handleLogout = () => {
-    // Handle logout logic here
-    window.location.href = "/";
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -105,7 +108,25 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Reports & Tracking</SidebarGroupLabel>
+          <SidebarGroupLabel>Programs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {programItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} end className={getNavClasses}>
+                      <item.icon className="h-4 w-4" />
+                      {!isCollapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {reportsItems.map((item) => (

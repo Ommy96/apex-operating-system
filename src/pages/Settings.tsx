@@ -51,7 +51,7 @@ export default function Settings() {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: string) => {
+  const updateUserRole = async (userId: string, newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -136,7 +136,7 @@ export default function Settings() {
                     <div className="flex items-center space-x-4">
                       <Select
                         value={user.role}
-                        onValueChange={(newRole) => updateUserRole(user.user_id, newRole)}
+                        onValueChange={(newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => updateUserRole(user.user_id, newRole)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
