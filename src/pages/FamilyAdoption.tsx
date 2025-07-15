@@ -31,8 +31,8 @@ export default function FamilyAdoption() {
 
   const filteredFamilies = familyAdoptions?.filter(family => {
     const matchesSearch = family.known_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || family.category === categoryFilter;
-    const matchesResidence = !residenceFilter || family.residence === residenceFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === 'all' || family.category === categoryFilter;
+    const matchesResidence = !residenceFilter || residenceFilter === 'all' || family.residence === residenceFilter;
     
     return matchesSearch && matchesCategory && matchesResidence;
   });
@@ -85,7 +85,7 @@ export default function FamilyAdoption() {
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="Guardian Ration">Guardian Ration</SelectItem>
             <SelectItem value="Home Based Care">Home Based Care</SelectItem>
           </SelectContent>
@@ -96,7 +96,7 @@ export default function FamilyAdoption() {
             <SelectValue placeholder="Filter by residence" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Residences</SelectItem>
+            <SelectItem value="all">All Residences</SelectItem>
             <SelectItem value="Kibera">Kibera</SelectItem>
             <SelectItem value="Kawangware">Kawangware</SelectItem>
             <SelectItem value="Diaspora">Diaspora</SelectItem>
