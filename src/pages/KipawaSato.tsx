@@ -31,8 +31,8 @@ export default function KipawaSato() {
 
   const filteredMembers = kipawaSatoMembers?.filter(member => {
     const matchesSearch = member.full_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || member.talent_category === categoryFilter;
-    const matchesLocation = !locationFilter || member.location === locationFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === 'all' || member.talent_category === categoryFilter;
+    const matchesLocation = !locationFilter || locationFilter === 'all' || member.location === locationFilter;
     
     return matchesSearch && matchesCategory && matchesLocation;
   });
@@ -94,7 +94,7 @@ export default function KipawaSato() {
             <SelectValue placeholder="Filter by talent" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Talents</SelectItem>
+            <SelectItem value="all">All Talents</SelectItem>
             <SelectItem value="Music">Music</SelectItem>
             <SelectItem value="Dance">Dance</SelectItem>
             <SelectItem value="Poetry">Poetry</SelectItem>
@@ -109,7 +109,7 @@ export default function KipawaSato() {
             <SelectValue placeholder="Filter by location" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Locations</SelectItem>
+            <SelectItem value="all">All Locations</SelectItem>
             <SelectItem value="Kibera">Kibera</SelectItem>
             <SelectItem value="Kawangware">Kawangware</SelectItem>
           </SelectContent>
