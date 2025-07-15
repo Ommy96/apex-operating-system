@@ -362,6 +362,76 @@ export default function Reports() {
             </Card>
           </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Reports</CardTitle>
+                <CardDescription>Quick access to recently generated reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/reports/activity-reports')}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Activity Reports
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/reports/program-reports')}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Program Reports
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/reports/home-visits')}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Home Visit Reports
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/reports/school-visits')}
+                  >
+                    <GraduationCap className="h-4 w-4 mr-2" />
+                    School Visit Reports
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activities</CardTitle>
+                <CardDescription>Latest program activities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="text-sm text-muted-foreground">
+                    Total Activities: {statsLoading ? "..." : (realtimeStats?.totalActivities || 0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    This Month: {(Object.values(reportData?.monthlyActivities || {}).slice(-1)[0] as number) || 0}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate('/reports/activity-reports')}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    View All Activities
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Quick Report Templates</CardTitle>
@@ -372,10 +442,10 @@ export default function Reports() {
                 <Button 
                   variant="outline" 
                   className="h-20 flex-col"
-                  onClick={() => navigate('/children')}
+                  onClick={() => navigate('/reports/activity-reports')}
                 >
                   <FileText className="h-6 w-6 mb-2" />
-                  <span>Child Progress Report</span>
+                  <span>Activity Reports</span>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -388,10 +458,10 @@ export default function Reports() {
                 <Button 
                   variant="outline" 
                   className="h-20 flex-col"
-                  onClick={() => generateReport()}
+                  onClick={() => navigate('/reports/home-visits')}
                 >
                   <BarChart3 className="h-6 w-6 mb-2" />
-                  <span>Monthly Statistics</span>
+                  <span>Home Visit Reports</span>
                 </Button>
                 <Button 
                   variant="outline" 
