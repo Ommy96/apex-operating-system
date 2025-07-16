@@ -60,7 +60,7 @@ const systemItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -146,23 +146,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-         <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/80">System</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {systemItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavClasses}>
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-sidebar-foreground/80">System</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {systemItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url} end className={getNavClasses}>
+                        <item.icon className="h-4 w-4" />
+                        {!isCollapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
        <SidebarFooter className="border-t border-sidebar-border p-2">

@@ -2,13 +2,32 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
-import { Bell, User } from "lucide-react";
+import { Bell, User, LogOut, Settings } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { user, signOut, isAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
+  // Extract user name from metadata or email
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -33,10 +52,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Button variant="ghost" size="sm">
                 <Bell className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Admin User</span>
-              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full hover:bg-muted/80">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{userName}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="text-xs text-muted-foreground">
+                    {user?.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 

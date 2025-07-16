@@ -22,7 +22,10 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
+  
+  // Extract user name from metadata or email
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   
   // Fetch dashboard statistics with real-time updates every 30 seconds
   const { data: dashboardStats, isLoading: statsLoading } = useQuery({
@@ -188,7 +191,7 @@ const Dashboard = () => {
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Welcome back, Admin
+          Welcome back, {userName}
         </h1>
         <p className="text-muted-foreground">
           Here's what's happening with Heart to Heart Organization today.
