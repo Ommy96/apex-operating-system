@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, Activity } from "lucide-react";
+import { Plus, Search, Calendar, Activity, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityReportForm } from "@/components/ActivityReportForm";
+import { downloadExcel, formatActivityReportsData } from "@/lib/downloadUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ActivityReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("");
+  const { toast } = useToast();
 
   const { data: activityReports, refetch } = useQuery({
     queryKey: ['activity-reports'],
@@ -36,6 +39,25 @@ export default function ActivityReports() {
     return matchesSearch && matchesProgram;
   });
 
+  const handleDownload = () => {
+    if (!filteredReports || filteredReports.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No activity reports to download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatActivityReportsData(filteredReports);
+    downloadExcel(formattedData, 'Activity_Reports', 'Activity Reports');
+    
+    toast({
+      title: "Success",
+      description: "Activity reports downloaded successfully",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -44,13 +66,19 @@ export default function ActivityReports() {
           <p className="text-muted-foreground">Track and manage activity reports</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Report
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button onClick={handleDownload} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Excel
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Report
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>Add Activity Report</DialogTitle>
@@ -62,8 +90,9 @@ export default function ActivityReports() {
               }} 
               onCancel={() => setIsDialogOpen(false)} 
             />
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

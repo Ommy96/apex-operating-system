@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,12 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FeedingProgramForm } from "@/components/FeedingProgramForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadExcel, formatFeedingProgramData } from "@/lib/downloadUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FeedingProgram() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
+  const { toast } = useToast();
 
   const { data: feedingPrograms, refetch } = useQuery({
     queryKey: ['feeding-programs'],
@@ -42,6 +45,25 @@ export default function FeedingProgram() {
     refetch();
   };
 
+  const handleDownload = () => {
+    if (!filteredPrograms || filteredPrograms.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No feeding program data to download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatFeedingProgramData(filteredPrograms);
+    downloadExcel(formattedData, 'Feeding_Program', 'Feeding Program');
+    
+    toast({
+      title: "Success",
+      description: "Feeding program data downloaded successfully",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -50,23 +72,30 @@ export default function FeedingProgram() {
           <p className="text-muted-foreground">Manage feeding program beneficiaries</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Beneficiary
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add Feeding Program Beneficiary</DialogTitle>
-            </DialogHeader>
-            <FeedingProgramForm
-              onSuccess={handleSuccess}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button onClick={handleDownload} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Excel
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Beneficiary
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Add Feeding Program Beneficiary</DialogTitle>
+              </DialogHeader>
+              <FeedingProgramForm
+                onSuccess={handleSuccess}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

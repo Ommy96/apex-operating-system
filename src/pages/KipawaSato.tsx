@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Trophy, Star } from "lucide-react";
+import { Plus, Search, Trophy, Star, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,12 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { KipawaSatoForm } from "@/components/KipawaSatoForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadExcel, formatKipawaSatoData } from "@/lib/downloadUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function KipawaSato() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const { toast } = useToast();
 
   const { data: kipawaSatoMembers, refetch } = useQuery({
     queryKey: ['kipawa-sato'],
@@ -42,6 +45,25 @@ export default function KipawaSato() {
     refetch();
   };
 
+  const handleDownload = () => {
+    if (!filteredMembers || filteredMembers.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No Kipawa Sato members to download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatKipawaSatoData(filteredMembers);
+    downloadExcel(formattedData, 'Kipawa_Sato_Members', 'Kipawa Sato');
+    
+    toast({
+      title: "Success",
+      description: "Kipawa Sato data downloaded successfully",
+    });
+  };
+
   const getTalentIcon = (category: string) => {
     switch (category) {
       case 'Sport':
@@ -59,13 +81,19 @@ export default function KipawaSato() {
           <p className="text-muted-foreground">Talent development and mentorship program</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Member
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button onClick={handleDownload} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Excel
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Member
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add Kipawa Sato Member</DialogTitle>
@@ -75,7 +103,8 @@ export default function KipawaSato() {
               onCancel={() => setIsDialogOpen(false)}
             />
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

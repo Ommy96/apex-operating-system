@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, BookOpen, TrendingUp } from 'lucide-react';
+import { GraduationCap, BookOpen, TrendingUp, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const academicPerformanceSchema = z.object({
   child_id: z.string().min(1, 'Please select a child'),
@@ -34,6 +35,7 @@ export default function AcademicPerformance() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<AcademicPerformanceFormData>({
     resolver: zodResolver(academicPerformanceSchema),
@@ -115,14 +117,24 @@ export default function AcademicPerformance() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-gradient-secondary rounded-lg">
-          <GraduationCap className="h-6 w-6 text-white" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-secondary rounded-lg">
+            <GraduationCap className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Academic Performance</h1>
+            <p className="text-muted-foreground">Record and track children's academic progress</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold">Academic Performance</h1>
-          <p className="text-muted-foreground">Record and track children's academic progress</p>
-        </div>
+        <Button 
+          onClick={() => navigate('/reports/academic-performance-reports')}
+          className="gap-2"
+          variant="outline"
+        >
+          <Eye className="h-4 w-4" />
+          View Reports
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

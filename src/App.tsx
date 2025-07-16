@@ -16,6 +16,7 @@ import SchoolVisitReports from "./pages/SchoolVisitReports";
 import ProgramReports from "./pages/ProgramReports";
 import ActivityReports from "./pages/ActivityReports";
 import AcademicPerformance from "./pages/AcademicPerformance";
+import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
@@ -148,6 +149,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <AcademicPerformance />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/academic-performance-reports" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AcademicPerformanceReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
