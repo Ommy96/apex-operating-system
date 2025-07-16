@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface HomeVisitReportFormProps {
   onSuccess: () => void;
@@ -25,6 +26,20 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
     observation_findings: "",
     challenges_identified: "",
     recommendations: "",
+  });
+
+  // Fetch students for the dropdown
+  const { data: students = [] } = useQuery({
+    queryKey: ['students'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('children')
+        .select('id, first_name, last_name')
+        .order('first_name');
+      
+      if (error) throw error;
+      return data;
+    },
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -98,13 +113,19 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
           </div>
 
           <div>
-            <Label htmlFor="student_id">Student ID</Label>
-            <Input
-              id="student_id"
-              value={formData.student_id}
-              onChange={(e) => handleInputChange('student_id', e.target.value)}
-              placeholder="Optional student identifier"
-            />
+            <Label htmlFor="student_id">Student Name</Label>
+            <Select value={formData.student_id} onValueChange={(value) => handleInputChange('student_id', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a student (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {students.map((student) => (
+                  <SelectItem key={student.id} value={student.id}>
+                    {student.first_name} {student.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
