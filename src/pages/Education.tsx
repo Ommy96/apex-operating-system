@@ -33,7 +33,7 @@ interface EducationStats {
 }
 
 export default function Education() {
-  const { isCoordinator } = useAuth();
+  const { isAdmin } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -265,7 +265,7 @@ const handleDownload = () => {
                   <Eye className="h-4 w-4 mr-2" />
                   View Progress
                 </Button>
-                {isCoordinator && (
+                {isAdmin && (
                   <Button size="sm" variant="outline">
                     <Edit2 className="h-4 w-4 mr-2" />
                     Edit

@@ -18,9 +18,11 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   
   // Fetch dashboard statistics with real-time updates every 30 seconds
   const { data: dashboardStats, isLoading: statsLoading } = useQuery({
@@ -141,7 +143,7 @@ const Dashboard = () => {
     }
   ];
 
-  const quickActions = [
+  const quickActions = isAdmin ? [
     { 
       title: "Add New Child", 
       icon: Plus, 
@@ -162,6 +164,19 @@ const Dashboard = () => {
     },
     { 
       title: "Schedule Visit", 
+      icon: Users, 
+      variant: "accent" as const,
+      onClick: () => navigate('/children')
+    }
+  ] : [
+    { 
+      title: "View Reports", 
+      icon: Eye, 
+      variant: "outline" as const,
+      onClick: () => navigate('/reports')
+    },
+    { 
+      title: "View Children", 
       icon: Users, 
       variant: "accent" as const,
       onClick: () => navigate('/children')

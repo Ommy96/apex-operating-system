@@ -11,8 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function FamilyAdoption() {
+  const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -71,13 +73,14 @@ export default function FamilyAdoption() {
           <p className="text-muted-foreground">Support families through adoption programs</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Family
-            </Button>
-          </DialogTrigger>
+        {isAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Family
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add Family Adoption</DialogTitle>
@@ -88,6 +91,7 @@ export default function FamilyAdoption() {
             />
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

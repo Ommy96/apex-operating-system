@@ -45,7 +45,7 @@ interface Child {
 
 export default function Children() {
   const navigate = useNavigate();
-  const { isCoordinator } = useAuth();
+  const { isAdmin } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -139,7 +139,7 @@ export default function Children() {
           <h1 className="text-3xl font-bold">Children</h1>
           <p className="text-muted-foreground">Manage child profiles and information</p>
         </div>
-        {(isCoordinator || true) && (
+        {isAdmin && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingChild(null)}>
@@ -208,7 +208,7 @@ export default function Children() {
                       <Eye className="h-4 w-4 mr-2" />
                       View Profile
                     </DropdownMenuItem>
-                    {isCoordinator && (
+                    {isAdmin && (
                       <>
                         <DropdownMenuItem onClick={() => {
                           setEditingChild(child);

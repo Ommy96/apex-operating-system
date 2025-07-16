@@ -10,8 +10,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SupportGroups() {
+  const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -67,13 +69,14 @@ export default function SupportGroups() {
           <p className="text-muted-foreground">Community support and group activities</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Group
-            </Button>
-          </DialogTrigger>
+        {isAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Group
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add Support Group</DialogTitle>
@@ -84,6 +87,7 @@ export default function SupportGroups() {
             />
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

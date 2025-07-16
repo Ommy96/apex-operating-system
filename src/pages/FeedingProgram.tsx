@@ -11,8 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFeedingProgramData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function FeedingProgram() {
+  const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -78,9 +80,10 @@ export default function FeedingProgram() {
             Download Excel
           </Button>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
+          {isAdmin && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Beneficiary
               </Button>
@@ -95,6 +98,7 @@ export default function FeedingProgram() {
               />
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </div>
 

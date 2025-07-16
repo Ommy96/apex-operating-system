@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { GraduationCap, BookOpen, TrendingUp, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const academicPerformanceSchema = z.object({
   child_id: z.string().min(1, 'Please select a child'),
@@ -31,6 +32,7 @@ interface Child {
 }
 
 export default function AcademicPerformance() {
+  const { isAdmin } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,18 +141,19 @@ export default function AcademicPerformance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form Section */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Academic Performance Form
-              </CardTitle>
-              <CardDescription>
-                Record academic grades and performance for children
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        {isAdmin && (
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Academic Performance Form
+                </CardTitle>
+                <CardDescription>
+                  Record academic grades and performance for children
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
@@ -260,6 +263,7 @@ export default function AcademicPerformance() {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {/* Info Section */}
         <div className="space-y-6">

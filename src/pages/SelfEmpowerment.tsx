@@ -11,8 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SelfEmpowerment() {
+  const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -72,13 +74,14 @@ export default function SelfEmpowerment() {
           <p className="text-muted-foreground">Business support and empowerment program</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Application
-            </Button>
-          </DialogTrigger>
+        {isAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Application
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add Self-Empowerment Application</DialogTitle>
@@ -89,6 +92,7 @@ export default function SelfEmpowerment() {
             />
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
