@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award } from 'lucide-react';
+import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { downloadExcel, formatEducationData } from '@/lib/downloadUtils';
 
 interface Child {
   id: string;
@@ -96,8 +97,27 @@ export default function Education() {
       age--;
     }
     
-    return age;
-  };
+  return age;
+};
+
+const handleDownload = () => {
+  if (children.length === 0) {
+    toast({
+      title: "No data to download",
+      description: "There are no education records to export.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const formattedData = formatEducationData(children);
+  downloadExcel(formattedData, 'education_records', 'Education Records');
+  
+  toast({
+    title: "Download started",
+    description: "Your education records are being downloaded.",
+  });
+};
 
   if (loading) {
     return (
@@ -188,6 +208,10 @@ export default function Education() {
         <Button variant="outline">
           <Filter className="h-4 w-4 mr-2" />
           Filter
+        </Button>
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
         </Button>
       </div>
 

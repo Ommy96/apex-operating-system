@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Users } from "lucide-react";
+import { Plus, Search, Users, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { SupportGroupForm } from "@/components/SupportGroupForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function SupportGroups() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,6 +38,25 @@ export default function SupportGroups() {
   const handleSuccess = () => {
     setIsDialogOpen(false);
     refetch();
+  };
+
+  const handleDownload = () => {
+    if (!supportGroups || supportGroups.length === 0) {
+      toast({
+        title: "No data to download",
+        description: "There are no support groups to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatSupportGroupsData(supportGroups);
+    downloadExcel(formattedData, 'support_groups', 'Support Groups');
+    
+    toast({
+      title: "Download started",
+      description: "Your support groups are being downloaded.",
+    });
   };
 
   return (
@@ -75,6 +96,11 @@ export default function SupportGroups() {
             className="pl-10"
           />
         </div>
+        
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

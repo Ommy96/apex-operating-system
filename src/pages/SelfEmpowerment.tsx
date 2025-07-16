@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, DollarSign } from "lucide-react";
+import { Plus, Search, DollarSign, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SelfEmpowermentForm } from "@/components/SelfEmpowermentForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function SelfEmpowerment() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,6 +43,25 @@ export default function SelfEmpowerment() {
   const handleSuccess = () => {
     setIsDialogOpen(false);
     refetch();
+  };
+
+  const handleDownload = () => {
+    if (!selfEmpowermentRecords || selfEmpowermentRecords.length === 0) {
+      toast({
+        title: "No data to download",
+        description: "There are no self-empowerment records to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatSelfEmpowermentData(selfEmpowermentRecords);
+    downloadExcel(formattedData, 'self_empowerment_records', 'Self Empowerment Records');
+    
+    toast({
+      title: "Download started",
+      description: "Your self-empowerment records are being downloaded.",
+    });
   };
 
   return (
@@ -104,6 +125,11 @@ export default function SelfEmpowerment() {
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

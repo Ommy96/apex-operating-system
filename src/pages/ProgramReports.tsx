@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, FileText } from "lucide-react";
+import { Plus, Search, Calendar, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProgramReportForm } from "@/components/ProgramReportForm";
+import { downloadExcel, formatProgramReportsData } from "@/lib/downloadUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function ProgramReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -35,6 +37,25 @@ export default function ProgramReports() {
     
     return matchesSearch && matchesProgram;
   });
+
+  const handleDownload = () => {
+    if (!programReports || programReports.length === 0) {
+      toast({
+        title: "No data to download",
+        description: "There are no program reports to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatProgramReportsData(programReports);
+    downloadExcel(formattedData, 'program_reports', 'Program Reports');
+    
+    toast({
+      title: "Download started",
+      description: "Your program reports are being downloaded.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -91,6 +112,11 @@ export default function ProgramReports() {
             <SelectItem value="Support Groups">Support Groups</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

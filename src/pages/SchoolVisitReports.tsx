@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, School } from "lucide-react";
+import { Plus, Search, Calendar, School, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SchoolVisitReportForm } from "@/components/SchoolVisitReportForm";
+import { downloadExcel, formatSchoolVisitReportsData } from "@/lib/downloadUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function SchoolVisitReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,6 +38,25 @@ export default function SchoolVisitReports() {
     
     return matchesSearch && matchesLocation;
   });
+
+  const handleDownload = () => {
+    if (!schoolVisitReports || schoolVisitReports.length === 0) {
+      toast({
+        title: "No data to download",
+        description: "There are no school visit reports to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatSchoolVisitReportsData(schoolVisitReports);
+    downloadExcel(formattedData, 'school_visit_reports', 'School Visit Reports');
+    
+    toast({
+      title: "Download started",
+      description: "Your school visit reports are being downloaded.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -90,6 +111,11 @@ export default function SchoolVisitReports() {
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

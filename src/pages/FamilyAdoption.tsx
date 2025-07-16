@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FamilyAdoptionForm } from "@/components/FamilyAdoptionForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function FamilyAdoption() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -40,6 +42,25 @@ export default function FamilyAdoption() {
   const handleSuccess = () => {
     setIsDialogOpen(false);
     refetch();
+  };
+
+  const handleDownload = () => {
+    if (!familyAdoptions || familyAdoptions.length === 0) {
+      toast({
+        title: "No data to download",
+        description: "There are no family adoption records to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedData = formatFamilyAdoptionData(familyAdoptions);
+    downloadExcel(formattedData, 'family_adoption_records', 'Family Adoption Records');
+    
+    toast({
+      title: "Download started",
+      description: "Your family adoption records are being downloaded.",
+    });
   };
 
   return (
@@ -103,6 +124,11 @@ export default function FamilyAdoption() {
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Button onClick={handleDownload} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Download Excel
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

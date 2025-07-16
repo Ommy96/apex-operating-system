@@ -141,3 +141,23 @@ export const formatSchoolVisitReportsData = (reports: any[]) => {
     'Created Date': new Date(report.created_at).toLocaleDateString(),
   }));
 };
+
+export const formatEducationData = (children: any[]) => {
+  return children.map(child => ({
+    'First Name': child.first_name,
+    'Last Name': child.last_name,
+    'Gender': child.gender || 'Not specified',
+    'Date of Birth': child.date_of_birth ? new Date(child.date_of_birth).toLocaleDateString() : 'Not specified',
+    'Academic Level': child.academic_level || 'Not specified',
+    'Grade': child.grade || 'Not specified',
+    'Institution': child.institution_name || 'Not specified',
+    'Status': child.status,
+    'Enrollment Date': new Date(child.enrollment_date).toLocaleDateString(),
+    'Contact': child.contact || 'Not specified',
+    'Address': child.address || 'Not specified',
+    'Guardian Name': child.guardian_name || 'Not specified',
+    'Guardian Phone': child.guardian_phone || 'Not specified',
+    'Special Needs': child.special_needs || 'None',
+    'Created Date': new Date(child.created_at).toLocaleDateString(),
+  }));
+};
