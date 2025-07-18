@@ -38,8 +38,14 @@ const Dashboard = () => {
         supabase.from('self_empowerment').select('*', { count: 'exact' })
       ]);
 
+      const totalChildrenFromAllPrograms = (childrenRes.count || 0) + 
+                                          (feedingRes.count || 0) + 
+                                          (kipawaRes.count || 0) + 
+                                          (selfEmpowermentRes.count || 0);
+
       return {
-        totalChildren: childrenRes.count || 0,
+        totalChildren: totalChildrenFromAllPrograms,
+        educationProgram: childrenRes.count || 0,
         feedingProgram: feedingRes.count || 0,
         kipawaProgram: kipawaRes.count || 0,
         empowermentProgram: selfEmpowermentRes.count || 0
@@ -52,30 +58,86 @@ const Dashboard = () => {
   const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
     queryKey: ['recent-activities'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('activities')
-        .select(`
-          *,
-          children (first_name, last_name),
-          programs (name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(4);
+      const activities = [];
 
-      if (error) throw error;
-      
-      return data?.map(activity => ({
-        title: activity.title,
-        description: activity.description || `Activity for ${activity.children?.first_name} ${activity.children?.last_name}`,
-        time: new Date(activity.created_at).toLocaleString(),
-        type: 'success' as const
-      })) || [];
+      // Get recent children additions
+      const { data: newChildren } = await supabase
+        .from('children')
+        .select('first_name, last_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(2);
+
+      // Get recent reports submissions
+      const [programReports, homeVisitReports, activityReports, schoolVisitReports] = await Promise.all([
+        supabase.from('program_reports').select('created_at, program').order('created_at', { ascending: false }).limit(1),
+        supabase.from('home_visit_reports').select('created_at, location').order('created_at', { ascending: false }).limit(1),
+        supabase.from('activity_reports').select('created_at, program').order('created_at', { ascending: false }).limit(1),
+        supabase.from('school_visit_reports').select('created_at, school').order('created_at', { ascending: false }).limit(1)
+      ]);
+
+      // Add children activities
+      newChildren?.forEach(child => {
+        activities.push({
+          title: "New Child Added",
+          description: `${child.first_name} ${child.last_name} has been added to the system`,
+          time: new Date(child.created_at).toLocaleString(),
+          type: 'success' as const,
+          timestamp: new Date(child.created_at)
+        });
+      });
+
+      // Add report activities
+      programReports?.data?.forEach(report => {
+        activities.push({
+          title: "Program Report Submitted",
+          description: `${report.program} program report has been submitted`,
+          time: new Date(report.created_at).toLocaleString(),
+          type: 'success' as const,
+          timestamp: new Date(report.created_at)
+        });
+      });
+
+      homeVisitReports?.data?.forEach(report => {
+        activities.push({
+          title: "Home Visit Report Submitted",
+          description: `Home visit report for ${report.location || 'location'} has been submitted`,
+          time: new Date(report.created_at).toLocaleString(),
+          type: 'success' as const,
+          timestamp: new Date(report.created_at)
+        });
+      });
+
+      activityReports?.data?.forEach(report => {
+        activities.push({
+          title: "Activity Report Submitted",
+          description: `${report.program} activity report has been submitted`,
+          time: new Date(report.created_at).toLocaleString(),
+          type: 'success' as const,
+          timestamp: new Date(report.created_at)
+        });
+      });
+
+      schoolVisitReports?.data?.forEach(report => {
+        activities.push({
+          title: "School Visit Report Submitted",
+          description: `School visit report for ${report.school} has been submitted`,
+          time: new Date(report.created_at).toLocaleString(),
+          type: 'success' as const,
+          timestamp: new Date(report.created_at)
+        });
+      });
+
+      // Sort by timestamp and return latest 4
+      return activities
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, 4)
+        .map(({ timestamp, ...activity }) => activity);
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Calculate program distribution percentages
-  const totalPrograms = (dashboardStats?.totalChildren || 0) + 
+  const totalPrograms = (dashboardStats?.educationProgram || 0) + 
                        (dashboardStats?.feedingProgram || 0) + 
                        (dashboardStats?.kipawaProgram || 0) + 
                        (dashboardStats?.empowermentProgram || 0);
@@ -83,8 +145,8 @@ const Dashboard = () => {
   const programDistribution = [
     {
       name: "Education Program",
-      count: dashboardStats?.totalChildren || 0,
-      percentage: totalPrograms > 0 ? ((dashboardStats?.totalChildren || 0) / totalPrograms * 100).toFixed(1) : "0",
+      count: dashboardStats?.educationProgram || 0,
+      percentage: totalPrograms > 0 ? ((dashboardStats?.educationProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
       color: "bg-gradient-primary",
       textColor: "text-primary"
     },
@@ -122,7 +184,7 @@ const Dashboard = () => {
     },
     {
       title: "Education Program",
-      value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
+      value: statsLoading ? "..." : dashboardStats?.educationProgram.toString() || "0",
       description: "Children in school",
       icon: GraduationCap,
       gradient: "bg-gradient-secondary",
