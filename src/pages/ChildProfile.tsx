@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChildForm } from '@/components/ChildForm';
+import { DocumentLinkForm } from '@/components/DocumentLinkForm';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -439,47 +440,134 @@ export default function ChildProfile() {
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Documents</h3>
                 {isCoordinator && (
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Upload Document
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Document Link
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Document Link</DialogTitle>
+                      </DialogHeader>
+                      <DocumentLinkForm childId={id} onSuccess={fetchChildData} />
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
               
-              {documents.length === 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-muted-foreground">No documents uploaded yet.</p>
+                  <CardHeader>
+                    <CardTitle className="text-base">Profile</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {documents.find(doc => doc.category === 'profile') ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => window.open(documents.find(doc => doc.category === 'profile')?.file_url, '_blank')}
+                      >
+                        View Profile
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No link added</p>
+                    )}
                   </CardContent>
                 </Card>
-              ) : (
-                <div className="space-y-4">
-                  {documents.map((document) => (
-                    <Card key={document.id}>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{document.title}</CardTitle>
-                            <CardDescription>{document.description}</CardDescription>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Consent Form</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {documents.find(doc => doc.category === 'consent_form') ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => window.open(documents.find(doc => doc.category === 'consent_form')?.file_url, '_blank')}
+                      >
+                        View Consent Form
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No link added</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Follow-up Form</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {documents.find(doc => doc.category === 'follow_up') ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => window.open(documents.find(doc => doc.category === 'follow_up')?.file_url, '_blank')}
+                      >
+                        View Follow-up Form
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No link added</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Intake Form</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {documents.find(doc => doc.category === 'intake_form') ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => window.open(documents.find(doc => doc.category === 'intake_form')?.file_url, '_blank')}
+                      >
+                        View Intake Form
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No link added</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).length > 0 && (
+                <div>
+                  <h4 className="text-md font-semibold mb-3">Other Documents</h4>
+                  <div className="space-y-3">
+                    {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).map((document) => (
+                      <Card key={document.id}>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{document.title}</p>
+                              {document.description && (
+                                <p className="text-sm text-muted-foreground">{document.description}</p>
+                              )}
+                              {document.category && (
+                                <Badge variant="outline" className="mt-1">{document.category}</Badge>
+                              )}
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(document.file_url, '_blank')}
+                            >
+                              View
+                            </Button>
                           </div>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(document.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="text-sm text-muted-foreground">File: {document.file_name}</span>
-                            {document.category && (
-                              <Badge variant="outline" className="ml-2">{document.category}</Badge>
-                            )}
-                          </div>
-                          <Button size="sm" variant="outline">Download</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
               )}
             </TabsContent>
