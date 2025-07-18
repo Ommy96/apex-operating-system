@@ -269,10 +269,14 @@ export default function ChildProfile() {
             </TabsList>
 
             <TabsContent value="programs" className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Enrolled Programs</h3>
                 {isCoordinator && (
-                  <Button size="sm">
+                  <Button 
+                    size="sm" 
+                    onClick={() => navigate('/programs/education')}
+                    className="w-full sm:w-auto"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Enroll in Program
                   </Button>
@@ -325,10 +329,14 @@ export default function ChildProfile() {
             </TabsContent>
 
             <TabsContent value="activities" className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Recent Activities</h3>
                 {isCoordinator && (
-                  <Button size="sm">
+                  <Button 
+                    size="sm"
+                    onClick={() => navigate('/reports/activity-reports')}
+                    className="w-full sm:w-auto"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Activity
                   </Button>
@@ -379,10 +387,14 @@ export default function ChildProfile() {
             </TabsContent>
 
             <TabsContent value="visits" className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Visits</h3>
                 {isCoordinator && (
-                  <Button size="sm">
+                  <Button 
+                    size="sm"
+                    onClick={() => navigate('/reports/home-visits')}
+                    className="w-full sm:w-auto"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Schedule Visit
                   </Button>
