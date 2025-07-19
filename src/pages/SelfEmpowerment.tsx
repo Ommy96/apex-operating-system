@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, Search, DollarSign, Download } from "lucide-react";
+import { Plus, Search, DollarSign, Download, Receipt, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelfEmpowermentForm } from "@/components/SelfEmpowermentForm";
+import { LoanRepaymentForm } from "@/components/LoanRepaymentForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
@@ -16,6 +18,9 @@ import { useAuth } from "@/hooks/useAuth";
 export default function SelfEmpowerment() {
   const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRepaymentDialogOpen, setIsRepaymentDialogOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [residenceFilter, setResidenceFilter] = useState("");
@@ -44,7 +49,58 @@ export default function SelfEmpowerment() {
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
+    setIsRepaymentDialogOpen(false);
+    setEditingRecord(null);
+    setSelectedRecord(null);
     refetch();
+  };
+
+  const handleEdit = (record: any) => {
+    setEditingRecord(record);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (recordId: string) => {
+    try {
+      const { error } = await supabase
+        .from('self_empowerment')
+        .delete()
+        .eq('id', recordId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Self-empowerment application deleted successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete application",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRepayment = (record: any) => {
+    if (record.amount_status !== 'Loan') {
+      toast({
+        title: "Not Available",
+        description: "Loan repayment is only available for loan recipients",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSelectedRecord(record);
+    setIsRepaymentDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setEditingRecord(null);
   };
 
   const handleDownload = () => {
@@ -74,25 +130,51 @@ export default function SelfEmpowerment() {
           <p className="text-muted-foreground">Business support and empowerment program</p>
         </div>
         
-        {isAdmin && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Application
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add Self-Empowerment Application</DialogTitle>
-            </DialogHeader>
-            <SelfEmpowermentForm
-              onSuccess={handleSuccess}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-        )}
+        <div className="flex gap-2">
+          <Button onClick={handleDownload} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download Excel
+          </Button>
+          
+          {isAdmin && (
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Application
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingRecord ? 'Edit Self-Empowerment Application' : 'Add Self-Empowerment Application'}
+                  </DialogTitle>
+                </DialogHeader>
+                <SelfEmpowermentForm
+                  record={editingRecord}
+                  onSuccess={handleSuccess}
+                  onCancel={handleDialogClose}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+
+          <Dialog open={isRepaymentDialogOpen} onOpenChange={setIsRepaymentDialogOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Record Loan Repayment</DialogTitle>
+              </DialogHeader>
+              {selectedRecord && (
+                <LoanRepaymentForm
+                  selfEmpowermentId={selectedRecord.id}
+                  applicantName={selectedRecord.full_name}
+                  onSuccess={handleSuccess}
+                  onCancel={() => setIsRepaymentDialogOpen(false)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -130,10 +212,6 @@ export default function SelfEmpowerment() {
           </SelectContent>
         </Select>
         
-        <Button onClick={handleDownload} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download Excel
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -142,9 +220,14 @@ export default function SelfEmpowerment() {
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 <span className="text-lg">{record.full_name}</span>
-                <Badge variant={record.amount_status === 'Grant' ? 'default' : 'secondary'}>
-                  {record.amount_status || 'Pending'}
-                </Badge>
+                <div className="flex gap-2">
+                  <Badge variant={record.amount_status === 'Grant' ? 'default' : 'secondary'}>
+                    {record.amount_status || 'Pending'}
+                  </Badge>
+                  <Badge variant={record.is_active ? 'default' : 'destructive'}>
+                    {record.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -178,6 +261,56 @@ export default function SelfEmpowerment() {
               {record.current_status && (
                 <div className="text-sm">
                   <strong>Status:</strong> {record.current_status}
+                </div>
+              )}
+              
+              {isAdmin && (
+                <div className="flex gap-2 pt-3">
+                  {record.amount_status === 'Loan' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleRepayment(record)}
+                      className="flex-1"
+                    >
+                      <Receipt className="h-3 w-3 mr-1" />
+                      Repayment
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(record)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Application</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {record.full_name}'s application? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(record.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
             </CardContent>

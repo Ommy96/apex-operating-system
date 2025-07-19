@@ -129,23 +129,23 @@ export default function FeedingProgram() {
             <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
                 <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Beneficiary
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingProgram ? 'Edit Beneficiary' : 'Add Feeding Program Beneficiary'}
-                </DialogTitle>
-              </DialogHeader>
-              <FeedingProgramForm
-                program={editingProgram}
-                onSuccess={handleSuccess}
-                onCancel={handleDialogClose}
-              />
-            </DialogContent>
-          </Dialog>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Beneficiary
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingProgram ? 'Edit Beneficiary' : 'Add Feeding Program Beneficiary'}
+                  </DialogTitle>
+                </DialogHeader>
+                <FeedingProgramForm
+                  program={editingProgram}
+                  onSuccess={handleSuccess}
+                  onCancel={handleDialogClose}
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>

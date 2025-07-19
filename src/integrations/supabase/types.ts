@@ -529,6 +529,56 @@ export type Database = {
         }
         Relationships: []
       }
+      loan_repayments: {
+        Row: {
+          amount_paid: number
+          balance_after_payment: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          reference_number: string | null
+          repayment_date: string
+          self_empowerment_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid: number
+          balance_after_payment?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          reference_number?: string | null
+          repayment_date?: string
+          self_empowerment_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          balance_after_payment?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          reference_number?: string | null
+          repayment_date?: string
+          self_empowerment_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_repayments_self_empowerment_id_fkey"
+            columns: ["self_empowerment_id"]
+            isOneToOne: false
+            referencedRelation: "self_empowerment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -687,6 +737,7 @@ export type Database = {
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
+          is_active: boolean | null
           residence: Database["public"]["Enums"]["residence_type"] | null
           start_date: string | null
           support_status: string | null
@@ -709,6 +760,7 @@ export type Database = {
           full_name: string
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
+          is_active?: boolean | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
           support_status?: string | null
@@ -731,6 +783,7 @@ export type Database = {
           full_name?: string
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
+          is_active?: boolean | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
           support_status?: string | null
