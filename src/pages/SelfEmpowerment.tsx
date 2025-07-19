@@ -137,14 +137,14 @@ export default function SelfEmpowerment() {
           </Button>
           
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-gradient-primary hover:bg-gradient-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Application
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingRecord ? 'Edit Self-Empowerment Application' : 'Add Self-Empowerment Application'}

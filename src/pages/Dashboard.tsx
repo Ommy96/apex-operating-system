@@ -263,25 +263,28 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
-          <Card key={stat.title} className="shadow-soft hover:shadow-medium transition-all duration-200 animate-scale-in" style={{animationDelay: `${index * 100}ms`}}>
+          <Card key={stat.title} className="bg-gradient-card border-white/20 shadow-strong hover:shadow-medium transition-all duration-300 animate-scale-in backdrop-blur-sm" style={{animationDelay: `${index * 100}ms`}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <div className={`p-2 rounded-md ${stat.gradient}`}>
-                <stat.icon className="h-4 w-4 text-white" />
+              <div className={`p-3 rounded-xl ${stat.gradient} shadow-medium`}>
+                <stat.icon className="h-5 w-5 text-white" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground mb-1">
+              <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-1">
                 {stat.value}
               </div>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 {stat.description}
               </p>
-              <p className="text-xs text-success font-medium">
-                {stat.change}
-              </p>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-gradient-secondary rounded-full animate-pulse"></div>
+                <p className="text-xs text-success font-medium">
+                  {stat.change}
+                </p>
+              </div>
             </CardContent>
           </Card>
         ))}

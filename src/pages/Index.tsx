@@ -3,10 +3,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Heart, Users, GraduationCap, UtensilsCrossed, Shield, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Fetch real-time statistics
+  const { data: childrenCount } = useQuery({
+    queryKey: ['children-count'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('children')
+        .select('*', { count: 'exact', head: true });
+      return count || 0;
+    },
+  });
+
+  const { data: educationCount } = useQuery({
+    queryKey: ['education-count'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('children')
+        .select('*', { count: 'exact', head: true })
+        .not('academic_level', 'is', null);
+      return count || 0;
+    },
+  });
+
+  const { data: feedingCount } = useQuery({
+    queryKey: ['feeding-count'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('feeding_program')
+        .select('*', { count: 'exact', head: true });
+      return count || 0;
+    },
+  });
+
+  const { data: talentCount } = useQuery({
+    queryKey: ['talent-count'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('kipawa_sato')
+        .select('*', { count: 'exact', head: true });
+      return count || 0;
+    },
+  });
 
   const features = [
     {
@@ -120,21 +164,21 @@ const Index = () => {
             <p className="text-white/80">Our impact across Nairobi's communities</p>
           </div>
           <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-accent-light mb-2">847</div>
-              <div className="text-white/80">Children Supported</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="text-4xl font-bold text-accent-light mb-2">{childrenCount}</div>
+              <div className="text-white/80 font-medium">Children Supported</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-accent-light mb-2">623</div>
-              <div className="text-white/80">In Education</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="text-4xl font-bold text-secondary-light mb-2">{educationCount}</div>
+              <div className="text-white/80 font-medium">In Education</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-accent-light mb-2">502</div>
-              <div className="text-white/80">Daily Meals</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="text-4xl font-bold text-primary-light mb-2">{feedingCount}</div>
+              <div className="text-white/80 font-medium">Daily Meals</div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-accent-light mb-2">156</div>
-              <div className="text-white/80">Talent Development</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="text-4xl font-bold text-accent-light mb-2">{talentCount}</div>
+              <div className="text-white/80 font-medium">Talent Development</div>
             </div>
           </div>
         </div>

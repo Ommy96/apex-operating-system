@@ -126,9 +126,9 @@ export default function FeedingProgram() {
           </Button>
           
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-gradient-secondary hover:bg-gradient-secondary/90">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Beneficiary
                 </Button>

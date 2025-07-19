@@ -142,7 +142,7 @@ export default function Children() {
         {isAdmin && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingChild(null)}>
+              <Button onClick={() => setEditingChild(null)} className="bg-gradient-accent hover:bg-gradient-accent/90 shadow-strong">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Child
               </Button>
@@ -186,16 +186,19 @@ export default function Children() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredChildren.map((child) => (
-          <Card key={child.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card key={child.id} className="bg-gradient-card border-white/20 shadow-strong hover:shadow-medium transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-105">
             <CardHeader className="pb-4">
               <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
-                  <AvatarFallback>{getInitials(child.first_name, child.last_name)}</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-14 w-14 ring-2 ring-primary/20 shadow-medium">
+                    <AvatarImage src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
+                    <AvatarFallback className="bg-gradient-primary text-white font-bold">{getInitials(child.first_name, child.last_name)}</AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-secondary rounded-full border-2 border-white shadow-sm"></div>
+                </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">{child.first_name} {child.last_name}</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-lg bg-gradient-primary bg-clip-text text-transparent">{child.first_name} {child.last_name}</CardTitle>
+                  <CardDescription className="font-medium">
                     {child.date_of_birth && `Age ${calculateAge(child.date_of_birth)}`} • {child.gender}
                   </CardDescription>
                 </div>
@@ -271,14 +274,13 @@ export default function Children() {
               <div className="mt-4 flex gap-2">
                 <Button 
                   size="sm" 
-                  variant="outline" 
-                  className="flex-1"
+                  className="flex-1 bg-gradient-primary hover:bg-gradient-primary/90 shadow-soft"
                   onClick={() => navigate(`/children/${child.id}`)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button size="sm" className="bg-gradient-secondary hover:bg-gradient-secondary/90 shadow-soft">
                   <FileText className="h-4 w-4 mr-2" />
                   Report
                 </Button>
