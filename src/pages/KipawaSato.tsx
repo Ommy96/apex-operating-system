@@ -128,7 +128,7 @@ export default function KipawaSato() {
           </Button>
           
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />

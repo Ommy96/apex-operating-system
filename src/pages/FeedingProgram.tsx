@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Plus, Search, Filter, Download } from "lucide-react";
+import { Plus, Search, Filter, Download, Edit, Trash2, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FeedingProgramForm } from "@/components/FeedingProgramForm";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function FeedingProgram() {
   const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProgram, setEditingProgram] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
@@ -44,8 +46,51 @@ export default function FeedingProgram() {
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
+    setEditingProgram(null);
     refetch();
   };
+
+  const handleEdit = (program: any) => {
+    setEditingProgram(program);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (programId: string) => {
+    try {
+      const { error } = await supabase
+        .from('feeding_program')
+        .delete()
+        .eq('id', programId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Beneficiary deleted successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting beneficiary:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete beneficiary",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setEditingProgram(null);
+  };
+
+  // Calculate statistics
+  const totalBeneficiaries = feedingPrograms?.length || 0;
+  const maleCount = feedingPrograms?.filter(p => p.gender === 'Male').length || 0;
+  const femaleCount = feedingPrograms?.filter(p => p.gender === 'Female').length || 0;
+  const kawangwareCount = feedingPrograms?.filter(p => p.type === 'Kawangware Lunch Hour').length || 0;
+  const kiberaCount = feedingPrograms?.filter(p => p.type === 'Kibera Early Dinner').length || 0;
 
   const handleDownload = () => {
     if (!filteredPrograms || filteredPrograms.length === 0) {
@@ -81,25 +126,81 @@ export default function FeedingProgram() {
           </Button>
           
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
                 <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Beneficiary
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Add Feeding Program Beneficiary</DialogTitle>
+                <DialogTitle>
+                  {editingProgram ? 'Edit Beneficiary' : 'Add Feeding Program Beneficiary'}
+                </DialogTitle>
               </DialogHeader>
               <FeedingProgramForm
+                program={editingProgram}
                 onSuccess={handleSuccess}
-                onCancel={() => setIsDialogOpen(false)}
+                onCancel={handleDialogClose}
               />
             </DialogContent>
           </Dialog>
           )}
         </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Beneficiaries</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalBeneficiaries}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Male Students</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{maleCount}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Female Students</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{femaleCount}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Kawangware Program</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kawangwareCount}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Kibera Program</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kiberaCount}</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -170,6 +271,45 @@ export default function FeedingProgram() {
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   Education Sponsorship
                 </Badge>
+              )}
+              
+              {isAdmin && (
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(program)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {program.name}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(program.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               )}
             </CardContent>
           </Card>
