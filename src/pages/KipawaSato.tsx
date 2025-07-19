@@ -135,7 +135,7 @@ export default function KipawaSato() {
                   Add Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-full sm:w-[90vw]">
                 <DialogHeader>
                   <DialogTitle>
                     {editingMember ? 'Edit Kipawa Sato Member' : 'Add Kipawa Sato Member'}

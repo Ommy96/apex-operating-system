@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award, Download } from 'lucide-react';
+import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award, Download, Users, Building2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { downloadExcel, formatEducationData } from '@/lib/downloadUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface Child {
   id: string;
@@ -27,21 +28,22 @@ interface Child {
 
 interface EducationStats {
   totalStudents: number;
-  activePrograms: number;
-  completedThisMonth: number;
-  averageAttendance: number;
+  numberOfMale: number;
+  numberOfSchools: number;
+  percentageInKibera: number;
 }
 
 export default function Education() {
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState<EducationStats>({
     totalStudents: 0,
-    activePrograms: 0,
-    completedThisMonth: 0,
-    averageAttendance: 85
+    numberOfMale: 0,
+    numberOfSchools: 0,
+    percentageInKibera: 0
   });
 
   useEffect(() => {
@@ -59,11 +61,19 @@ export default function Education() {
       if (error) throw error;
       
       setChildren(data || []);
+      
+      // Calculate stats
+      const totalStudents = data?.length || 0;
+      const maleStudents = data?.filter(child => child.gender === 'Male').length || 0;
+      const uniqueSchools = new Set(data?.map(child => child.institution_name).filter(Boolean)).size;
+      const kiberaStudents = data?.filter(child => child.residence === 'Kibera').length || 0;
+      const kiberaPercentage = totalStudents > 0 ? Math.round((kiberaStudents / totalStudents) * 100) : 0;
+      
       setStats({
-        totalStudents: data?.length || 0,
-        activePrograms: 4,
-        completedThisMonth: 12,
-        averageAttendance: 85
+        totalStudents,
+        numberOfMale: maleStudents,
+        numberOfSchools: uniqueSchools,
+        percentageInKibera: kiberaPercentage
       });
     } catch (error) {
       console.error('Error fetching education data:', error);
@@ -156,39 +166,39 @@ const handleDownload = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Programs</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Number of Male</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activePrograms}</div>
+            <div className="text-2xl font-bold">{stats.numberOfMale}</div>
             <p className="text-xs text-muted-foreground">
-              Across all levels
+              Male students enrolled
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Graduated This Month</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Number of Schools</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.completedThisMonth}</div>
+            <div className="text-2xl font-bold">{stats.numberOfSchools}</div>
             <p className="text-xs text-muted-foreground">
-              +4 from last month
+              Different institutions
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Percentage in Kibera</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageAttendance}%</div>
+            <div className="text-2xl font-bold">{stats.percentageInKibera}%</div>
             <p className="text-xs text-muted-foreground">
-              +2% from last month
+              Students in Kibera
             </p>
           </CardContent>
         </Card>
@@ -261,12 +271,17 @@ const handleDownload = () => {
                   size="sm" 
                   variant="outline" 
                   className="flex-1"
+                  onClick={() => navigate(`/reports/academic-performance?childId=${child.id}`)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View Progress
                 </Button>
                 {isAdmin && (
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => navigate(`/children/${child.id}`)}
+                  >
                     <Edit2 className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
