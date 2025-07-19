@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Plus, Search, Trophy, Star, Download } from "lucide-react";
+import { Plus, Search, Trophy, Star, Download, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KipawaSatoForm } from "@/components/KipawaSatoForm";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function KipawaSato() {
   const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
@@ -44,7 +46,43 @@ export default function KipawaSato() {
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
+    setEditingMember(null);
     refetch();
+  };
+
+  const handleEdit = (member: any) => {
+    setEditingMember(member);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from('kipawa_sato')
+        .delete()
+        .eq('id', memberId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Member deleted successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete member",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setEditingMember(null);
   };
 
   const handleDownload = () => {
@@ -90,23 +128,26 @@ export default function KipawaSato() {
           </Button>
           
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Member
                 </Button>
               </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add Kipawa Sato Member</DialogTitle>
-            </DialogHeader>
-            <KipawaSatoForm
-              onSuccess={handleSuccess}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-          </Dialog>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingMember ? 'Edit Kipawa Sato Member' : 'Add Kipawa Sato Member'}
+                  </DialogTitle>
+                </DialogHeader>
+                <KipawaSatoForm
+                  member={editingMember}
+                  onSuccess={handleSuccess}
+                  onCancel={handleDialogClose}
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
@@ -196,6 +237,45 @@ export default function KipawaSato() {
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   School Support Given
                 </Badge>
+              )}
+              
+              {isAdmin && (
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(member)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Member</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {member.full_name}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(member.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               )}
             </CardContent>
           </Card>
