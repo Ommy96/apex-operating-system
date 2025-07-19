@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Plus, Search, Download } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { FamilyAdoptionForm } from "@/components/FamilyAdoptionForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function FamilyAdoption() {
   const { isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingFamily, setEditingFamily] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [residenceFilter, setResidenceFilter] = useState("");
@@ -43,8 +45,55 @@ export default function FamilyAdoption() {
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
+    setEditingFamily(null);
     refetch();
   };
+
+  const handleEdit = (family: any) => {
+    setEditingFamily(family);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (familyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('family_adoption')
+        .delete()
+        .eq('id', familyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Family adoption record deleted successfully",
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error deleting family adoption:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete family adoption record",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Statistics calculations
+  const totalFamilies = familyAdoptions?.length || 0;
+  const maleCount = familyAdoptions?.filter(f => f.gender === 'Male').length || 0;
+  const femaleCount = familyAdoptions?.filter(f => f.gender === 'Female').length || 0;
+  
+  const residenceStats = familyAdoptions?.reduce((acc: any, family) => {
+    const residence = family.residence || 'Unknown';
+    acc[residence] = (acc[residence] || 0) + 1;
+    return acc;
+  }, {}) || {};
+
+  const categoryStats = familyAdoptions?.reduce((acc: any, family) => {
+    const category = family.category || 'Unknown';
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {}) || {};
 
   const handleDownload = () => {
     if (!familyAdoptions || familyAdoptions.length === 0) {
@@ -83,15 +132,72 @@ export default function FamilyAdoption() {
             </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Add Family Adoption</DialogTitle>
+              <DialogTitle>{editingFamily ? 'Edit Family Adoption' : 'Add Family Adoption'}</DialogTitle>
             </DialogHeader>
             <FamilyAdoptionForm
+              family={editingFamily}
               onSuccess={handleSuccess}
-              onCancel={() => setIsDialogOpen(false)}
+              onCancel={() => {
+                setIsDialogOpen(false);
+                setEditingFamily(null);
+              }}
             />
           </DialogContent>
         </Dialog>
         )}
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Families</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalFamilies}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Male</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{maleCount}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Female</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{femaleCount}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Guardian Ration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{categoryStats['Guardian Ration'] || 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Residence Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Object.entries(residenceStats).map(([residence, count]) => (
+          <Card key={residence}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{residence}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{count as number}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -141,9 +247,43 @@ export default function FamilyAdoption() {
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 <span className="text-lg">{family.known_name}</span>
-                <Badge variant={family.category === 'Guardian Ration' ? 'default' : 'secondary'}>
-                  {family.category}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={family.category === 'Guardian Ration' ? 'default' : 'secondary'}>
+                    {family.category}
+                  </Badge>
+                  {isAdmin && (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(family)}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Family Record</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {family.known_name}'s record? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(family.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">

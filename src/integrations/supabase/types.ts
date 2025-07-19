@@ -374,6 +374,7 @@ export type Database = {
           grade: string | null
           id: string
           name: string
+          school: string | null
           type: Database["public"]["Enums"]["feeding_type"] | null
           updated_at: string
         }
@@ -389,6 +390,7 @@ export type Database = {
           grade?: string | null
           id?: string
           name: string
+          school?: string | null
           type?: Database["public"]["Enums"]["feeding_type"] | null
           updated_at?: string
         }
@@ -404,6 +406,7 @@ export type Database = {
           grade?: string | null
           id?: string
           name?: string
+          school?: string | null
           type?: Database["public"]["Enums"]["feeding_type"] | null
           updated_at?: string
         }

@@ -17,6 +17,7 @@ const feedingProgramSchema = z.object({
   academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary', 'Secondary School', 'Tertiary', 'Special School', 'Junior School']).optional(),
   grade: z.string().optional(),
   contact: z.string().optional(),
+  school: z.string().optional(),
   education_sponsorship: z.boolean().optional(),
 });
 
@@ -40,6 +41,7 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
       academic_level: program?.academic_level || '',
       grade: program?.grade || '',
       contact: program?.contact || '',
+      school: program?.school || '',
       education_sponsorship: program?.education_sponsorship ?? false,
     },
   });
@@ -193,19 +195,35 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="contact"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contact</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter contact information" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="contact"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter contact information" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="school"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>School</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter school name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

@@ -8,21 +8,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface FamilyAdoptionFormProps {
+  family?: any;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function FamilyAdoptionForm({ onSuccess, onCancel }: FamilyAdoptionFormProps) {
+export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdoptionFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    known_name: "",
-    actual_name: "",
-    gender: "",
-    residence: "",
-    category: "",
-    no_of_beneficiaries: "",
-    sponsor: "",
+    known_name: family?.known_name || "",
+    actual_name: family?.actual_name || "",
+    gender: family?.gender || "",
+    residence: family?.residence || "",
+    category: family?.category || "",
+    no_of_beneficiaries: family?.no_of_beneficiaries?.toString() || "",
+    sponsor: family?.sponsor || "",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -37,24 +38,40 @@ export function FamilyAdoptionForm({ onSuccess, onCancel }: FamilyAdoptionFormPr
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('family_adoption')
-        .insert({
-          known_name: formData.known_name,
-          actual_name: formData.actual_name || null,
-          gender: formData.gender as "Male" | "Female" | null || null,
-          residence: formData.residence as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
-          category: formData.category as "Guardian Ration" | "Home Based Care" | null || null,
-          no_of_beneficiaries: formData.no_of_beneficiaries ? parseInt(formData.no_of_beneficiaries) : null,
-          sponsor: formData.sponsor as "NSP-AID" | "Donation" | null || null,
+      const familyData = {
+        known_name: formData.known_name,
+        actual_name: formData.actual_name || null,
+        gender: formData.gender as "Male" | "Female" | null || null,
+        residence: formData.residence as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+        category: formData.category as "Guardian Ration" | "Home Based Care" | null || null,
+        no_of_beneficiaries: formData.no_of_beneficiaries ? parseInt(formData.no_of_beneficiaries) : null,
+        sponsor: formData.sponsor as "NSP-AID" | "Donation" | null || null,
+      };
+
+      if (family) {
+        const { error } = await supabase
+          .from('family_adoption')
+          .update(familyData)
+          .eq('id', family.id);
+          
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Family adoption record updated successfully",
         });
+      } else {
+        const { error } = await supabase
+          .from('family_adoption')
+          .insert(familyData);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Family adoption record created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Family adoption record created successfully",
+        });
+      }
 
       onSuccess();
     } catch (error) {
@@ -161,7 +178,7 @@ export function FamilyAdoptionForm({ onSuccess, onCancel }: FamilyAdoptionFormPr
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Record"}
+          {isSubmitting ? (family ? "Updating..." : "Creating...") : (family ? "Update Record" : "Create Record")}
         </Button>
       </div>
     </form>
