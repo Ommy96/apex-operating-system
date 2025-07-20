@@ -32,7 +32,8 @@ export default function SupportGroups() {
 
   const filteredGroups = supportGroups?.filter(group => {
     const matchesSearch = group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (group.facilitator && group.facilitator.toLowerCase().includes(searchTerm.toLowerCase()));
+                         (group.facilitator && group.facilitator.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (group.team_leader_contact && group.team_leader_contact.toLowerCase().includes(searchTerm.toLowerCase()));
     
     return matchesSearch;
   });
@@ -94,7 +95,7 @@ export default function SupportGroups() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by group name or facilitator..."
+            placeholder="Search by group name or team leader..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -126,8 +127,13 @@ export default function SupportGroups() {
                 </div>
               )}
               <div className="text-sm text-muted-foreground">
-                <strong>Facilitator:</strong> {group.facilitator || 'Not assigned'}
+                <strong>Team Leader:</strong> {group.facilitator || 'Not assigned'}
               </div>
+              {group.team_leader_contact && (
+                <div className="text-sm text-muted-foreground">
+                  <strong>Contact:</strong> {group.team_leader_contact}
+                </div>
+              )}
               <div className="text-sm text-muted-foreground">
                 <strong>Location:</strong> {group.location || 'Not specified'}
               </div>

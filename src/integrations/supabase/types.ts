@@ -803,6 +803,7 @@ export type Database = {
           meeting_schedule: string | null
           member_count: number | null
           name: string
+          team_leader_contact: string | null
           updated_at: string
         }
         Insert: {
@@ -815,6 +816,7 @@ export type Database = {
           meeting_schedule?: string | null
           member_count?: number | null
           name: string
+          team_leader_contact?: string | null
           updated_at?: string
         }
         Update: {
@@ -827,6 +829,7 @@ export type Database = {
           meeting_schedule?: string | null
           member_count?: number | null
           name?: string
+          team_leader_contact?: string | null
           updated_at?: string
         }
         Relationships: []

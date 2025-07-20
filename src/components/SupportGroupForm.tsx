@@ -18,6 +18,7 @@ export function SupportGroupForm({ onSuccess, onCancel }: SupportGroupFormProps)
     name: "",
     description: "",
     facilitator: "",
+    team_leader_contact: "",
     location: "",
     meeting_schedule: "",
     member_count: "",
@@ -41,6 +42,7 @@ export function SupportGroupForm({ onSuccess, onCancel }: SupportGroupFormProps)
           name: formData.name,
           description: formData.description || null,
           facilitator: formData.facilitator || null,
+          team_leader_contact: formData.team_leader_contact || null,
           location: formData.location || null,
           meeting_schedule: formData.meeting_schedule || null,
           member_count: formData.member_count ? parseInt(formData.member_count) : null,
@@ -80,11 +82,21 @@ export function SupportGroupForm({ onSuccess, onCancel }: SupportGroupFormProps)
         </div>
 
         <div>
-          <Label htmlFor="facilitator">Facilitator</Label>
+          <Label htmlFor="facilitator">Team Leader</Label>
           <Input
             id="facilitator"
             value={formData.facilitator}
             onChange={(e) => handleInputChange('facilitator', e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="team_leader_contact">Team Leader Contact</Label>
+          <Input
+            id="team_leader_contact"
+            value={formData.team_leader_contact}
+            onChange={(e) => handleInputChange('team_leader_contact', e.target.value)}
+            placeholder="Phone number or email"
           />
         </div>
 
