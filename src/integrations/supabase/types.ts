@@ -939,7 +939,7 @@ export type Database = {
         | "Art & Craft"
         | "Sport"
         | "Boardgames"
-      user_role: "admin" | "coordinator" | "volunteer" | "viewer"
+      user_role: "admin" | "management" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1112,7 +1112,7 @@ export const Constants = {
         "Sport",
         "Boardgames",
       ],
-      user_role: ["admin", "coordinator", "volunteer", "viewer"],
+      user_role: ["admin", "management", "staff"],
     },
   },
 } as const

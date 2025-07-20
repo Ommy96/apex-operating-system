@@ -16,7 +16,7 @@ import { DocumentLinkForm } from '@/components/DocumentLinkForm';
 export default function ChildProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isCoordinator } = useAuth();
+  const { isAdmin } = useAuth();
   const [child, setChild] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
@@ -152,7 +152,7 @@ export default function ChildProfile() {
         </div>
         
         <div className="flex space-x-2">
-          {isCoordinator && (
+          {isAdmin && (
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">
@@ -271,7 +271,7 @@ export default function ChildProfile() {
             <TabsContent value="programs" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Enrolled Programs</h3>
-                {isCoordinator && (
+                {isAdmin && (
                   <Button 
                     size="sm" 
                     onClick={() => navigate('/programs/education')}
@@ -331,7 +331,7 @@ export default function ChildProfile() {
             <TabsContent value="activities" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Recent Activities</h3>
-                {isCoordinator && (
+                {isAdmin && (
                   <Button 
                     size="sm"
                     onClick={() => navigate('/reports/activity-reports')}
@@ -389,7 +389,7 @@ export default function ChildProfile() {
             <TabsContent value="visits" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="text-lg font-semibold">Visits</h3>
-                {isCoordinator && (
+                {isAdmin && (
                   <Button 
                     size="sm"
                     onClick={() => navigate('/reports/home-visits')}
@@ -451,7 +451,7 @@ export default function ChildProfile() {
             <TabsContent value="documents" className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Documents</h3>
-                {isCoordinator && (
+                {isAdmin && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="sm">

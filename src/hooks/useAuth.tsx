@@ -11,7 +11,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
-  isCoordinator: boolean;
+  isManagement: boolean;
+  isStaff: boolean;
   userRole: string | null;
 }
 
@@ -39,10 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .select('role')
                 .eq('user_id', session.user.id)
                 .single();
-              setUserRole(profile?.role || 'viewer');
+              setUserRole(profile?.role || 'staff');
             } catch (error) {
               console.error('Error fetching user role:', error);
-              setUserRole('viewer');
+              setUserRole('staff');
             }
           }, 0);
         } else {
@@ -120,7 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = userRole === 'admin';
-  const isCoordinator = userRole === 'coordinator' || isAdmin;
+  const isManagement = userRole === 'management' || isAdmin;
+  const isStaff = userRole === 'staff';
 
   const value = {
     user,
@@ -130,7 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signOut,
     isAdmin,
-    isCoordinator,
+    isManagement,
+    isStaff,
     userRole,
   };
 

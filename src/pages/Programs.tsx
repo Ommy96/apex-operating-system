@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 export default function Programs() {
   const { programName } = useParams();
-  const { isCoordinator } = useAuth();
+  const { isAdmin } = useAuth();
   const [program, setProgram] = useState<any>(null);
   const [enrolledChildren, setEnrolledChildren] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
@@ -127,7 +127,7 @@ export default function Programs() {
           <h1 className="text-3xl font-bold">{program.name}</h1>
           <p className="text-muted-foreground">{program.description}</p>
         </div>
-        {isCoordinator && (
+        {isAdmin && (
           <div className="flex space-x-2">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -255,7 +255,7 @@ export default function Programs() {
         <TabsContent value="activities" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Recent Activities</h3>
-            {isCoordinator && (
+            {isAdmin && (
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Activity

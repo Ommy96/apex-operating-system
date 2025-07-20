@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requireRole?: 'admin' | 'coordinator';
+  requireRole?: 'admin' | 'management' | 'staff';
 }
 
 export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
@@ -33,7 +33,7 @@ export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
     );
   }
 
-  if (requireRole === 'coordinator' && !['admin', 'coordinator'].includes(userRole || '')) {
+  if (requireRole === 'management' && !['admin', 'management'].includes(userRole || '')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

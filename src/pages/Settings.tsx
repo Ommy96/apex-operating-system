@@ -53,7 +53,7 @@ export default function Settings() {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => {
+  const updateUserRole = async (userId: string, newRole: 'admin' | 'management' | 'staff') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -106,9 +106,8 @@ export default function Settings() {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'coordinator': return 'default';
-      case 'volunteer': return 'secondary';
-      case 'viewer': return 'outline';
+      case 'management': return 'default';
+      case 'staff': return 'secondary';
       default: return 'outline';
     }
   };
@@ -189,15 +188,14 @@ export default function Settings() {
                         </Badge>
                         <Select
                           value={user.role}
-                          onValueChange={(newRole: 'admin' | 'coordinator' | 'volunteer' | 'viewer') => updateUserRole(user.user_id, newRole)}
+                          onValueChange={(newRole: 'admin' | 'management' | 'staff') => updateUserRole(user.user_id, newRole)}
                         >
                           <SelectTrigger className="w-32 bg-background">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="viewer">Viewer</SelectItem>
-                            <SelectItem value="volunteer">Volunteer</SelectItem>
-                            <SelectItem value="coordinator">Coordinator</SelectItem>
+                            <SelectItem value="staff">Staff</SelectItem>
+                            <SelectItem value="management">Management</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
