@@ -124,6 +124,59 @@ export default function SelfEmpowerment() {
 
   return (
     <div className="space-y-6">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{selfEmpowermentRecords?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Applications</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {selfEmpowermentRecords?.filter(r => r.is_active).length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Currently active</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Approved Amount</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              KSH {selfEmpowermentRecords?.reduce((sum, r) => sum + (Number(r.amount_approved) || 0), 0).toLocaleString() || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Total disbursed</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Loan Recipients</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {selfEmpowermentRecords?.filter(r => r.amount_status === 'Loan').length || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Need repayment</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Self-Empowerment</h1>

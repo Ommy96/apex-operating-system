@@ -402,6 +402,13 @@ export default function Reports() {
                     <GraduationCap className="h-4 w-4 mr-2" />
                     School Visit Reports
                   </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Others (Administrative)
+                  </Button>
                 </div>
               </CardContent>
             </Card>

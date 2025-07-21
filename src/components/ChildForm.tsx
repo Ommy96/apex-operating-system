@@ -77,11 +77,13 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
     setIsLoading(true);
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       if (child) {
         // Update existing child
         const { error } = await supabase
           .from('children')
-          .update(data)
+          .update({ ...data, created_by: user?.id })
           .eq('id', child.id);
           
         if (error) throw error;
@@ -94,7 +96,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
         // Create new child - add created_by field
         const { error } = await supabase
           .from('children')
-          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id }]);
+          .insert([{ ...data, created_by: user?.id }]);
           
         if (error) throw error;
         
