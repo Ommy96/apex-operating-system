@@ -79,11 +79,18 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Clean up the data - convert empty strings to null for date fields
+      const cleanedData = {
+        ...data,
+        date_of_birth: data.date_of_birth && data.date_of_birth.trim() !== '' ? data.date_of_birth : null,
+        created_by: user?.id
+      };
+      
       if (child) {
         // Update existing child
         const { error } = await supabase
           .from('children')
-          .update({ ...data, created_by: user?.id })
+          .update(cleanedData)
           .eq('id', child.id);
           
         if (error) throw error;
@@ -93,10 +100,10 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
           description: "Child profile updated successfully",
         });
       } else {
-        // Create new child - add created_by field
+        // Create new child
         const { error } = await supabase
           .from('children')
-          .insert([{ ...data, created_by: user?.id }]);
+          .insert([cleanedData]);
           
         if (error) throw error;
         

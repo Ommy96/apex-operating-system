@@ -405,6 +405,7 @@ export default function Reports() {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start"
+                    onClick={() => navigate('/reports/activity')}
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Others (Administrative)
