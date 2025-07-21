@@ -133,13 +133,30 @@ export default function Settings() {
   const saveSystemSettings = async () => {
     setLoading(true);
     try {
-      // Since we don't have a settings table, just show success message
-      // In a real app, this would save to a settings table
+      // Save settings to the settings table
+      const settingsToSave = [
+        { key: 'system_name', value: systemSettings.organizationName },
+        { key: 'notification_email', value: systemSettings.contactEmail },
+        { key: 'timezone', value: systemSettings.timezone },
+        { key: 'audit_logging', value: systemSettings.auditLogging }
+      ];
+
+      for (const setting of settingsToSave) {
+        await supabase
+          .from('settings')
+          .upsert({ 
+            key: setting.key, 
+            value: JSON.stringify(setting.value),
+            description: `System setting for ${setting.key}`
+          });
+      }
+
       toast({
         title: "Success",
         description: "System settings saved successfully",
       });
     } catch (error) {
+      console.error('Error saving system settings:', error);
       toast({
         title: "Error", 
         description: "Failed to save system settings",
@@ -153,13 +170,29 @@ export default function Settings() {
   const saveNotificationSettings = async () => {
     setLoading(true);
     try {
-      // Since we don't have a settings table, just show success message
-      // In a real app, this would save to a settings table
+      // Save notification settings to the settings table
+      const settingsToSave = [
+        { key: 'new_child_enrollment', value: notificationSettings.newChildEnrollment },
+        { key: 'activity_reminders', value: notificationSettings.activityReminders },
+        { key: 'visit_notifications', value: notificationSettings.visitNotifications }
+      ];
+
+      for (const setting of settingsToSave) {
+        await supabase
+          .from('settings')
+          .upsert({ 
+            key: setting.key, 
+            value: JSON.stringify(setting.value),
+            description: `Notification setting for ${setting.key}`
+          });
+      }
+
       toast({
         title: "Success",
         description: "Notification settings saved successfully",
       });
     } catch (error) {
+      console.error('Error saving notification settings:', error);
       toast({
         title: "Error",
         description: "Failed to save notification settings", 
