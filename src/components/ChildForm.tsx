@@ -91,10 +91,10 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
           description: "Child profile updated successfully",
         });
       } else {
-        // Create new child
+        // Create new child - add created_by field
         const { error } = await supabase
           .from('children')
-          .insert([data]);
+          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id }]);
           
         if (error) throw error;
         
@@ -109,7 +109,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       console.error('Error saving child:', error);
       toast({
         title: "Error",
-        description: "Failed to save child profile",
+        description: "Failed to save child profile. Please ensure you have permission to perform this action.",
         variant: "destructive",
       });
     } finally {
