@@ -175,7 +175,7 @@ const Dashboard = () => {
 
   const stats = [
     {
-      title: "Total Children",
+      title: "Total Beneficiaries",
       value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
       description: "Active beneficiaries",
       icon: Users,
@@ -222,10 +222,10 @@ const Dashboard = () => {
       onClick: () => navigate('/reports')
     },
     { 
-      title: "View Reports", 
-      icon: Eye, 
+      title: "Other Reports", 
+      icon: FileText, 
       variant: "outline" as const,
-      onClick: () => navigate('/reports')
+      onClick: () => navigate('/other-reports')
     },
     { 
       title: "Schedule Visit", 

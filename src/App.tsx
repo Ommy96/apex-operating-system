@@ -15,6 +15,7 @@ import HomeVisitReports from "./pages/HomeVisitReports";
 import SchoolVisitReports from "./pages/SchoolVisitReports";
 import ProgramReports from "./pages/ProgramReports";
 import ActivityReports from "./pages/ActivityReports";
+import OtherReports from "./pages/OtherReports";
 import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
@@ -142,6 +143,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ActivityReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/other-reports" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <OtherReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

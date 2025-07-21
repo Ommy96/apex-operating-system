@@ -74,6 +74,16 @@ export default function Settings() {
   const updateUserRole = async (userId: string, newRole: 'admin' | 'management' | 'staff') => {
     console.log('Updating user role:', { userId, newRole, currentUserRole: userRole });
     
+    // Only allow admins to update roles
+    if (userRole !== 'admin') {
+      toast({
+        title: "Permission Denied",
+        description: "Only administrators can update user roles",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const { error, data } = await supabase
         .from('profiles')
@@ -85,13 +95,18 @@ export default function Settings() {
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "User role updated successfully",
-      });
+      if (data && data.length > 0) {
+        toast({
+          title: "Success",
+          description: "User role updated successfully",
+        });
 
-      fetchUsers();
-    } catch (error) {
+        // Refetch users to update the list
+        fetchUsers();
+      } else {
+        throw new Error('No user was updated');
+      }
+    } catch (error: any) {
       console.error('Error updating user role:', error);
       toast({
         title: "Error",
