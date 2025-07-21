@@ -72,11 +72,16 @@ export default function Settings() {
   };
 
   const updateUserRole = async (userId: string, newRole: 'admin' | 'management' | 'staff') => {
+    console.log('Updating user role:', { userId, newRole, currentUserRole: userRole });
+    
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('profiles')
         .update({ role: newRole })
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select();
+
+      console.log('Update result:', { error, data });
 
       if (error) throw error;
 
@@ -90,7 +95,7 @@ export default function Settings() {
       console.error('Error updating user role:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role",
+        description: `Failed to update user role: ${error.message}`,
         variant: "destructive",
       });
     }
