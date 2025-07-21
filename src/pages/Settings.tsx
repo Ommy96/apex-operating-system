@@ -71,7 +71,7 @@ export default function Settings() {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'staff' | 'viewer') => {
+  const updateUserRole = async (userId: string, newRole: 'admin' | 'management' | 'staff') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -246,14 +246,14 @@ export default function Settings() {
                         </Badge>
                         <Select
                           value={user.role}
-                          onValueChange={(newRole: 'admin' | 'staff' | 'viewer') => updateUserRole(user.user_id, newRole)}
+                          onValueChange={(newRole: 'admin' | 'management' | 'staff') => updateUserRole(user.user_id, newRole)}
                         >
                           <SelectTrigger className="w-32 bg-background">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="viewer">Viewer</SelectItem>
                             <SelectItem value="staff">Staff</SelectItem>
+                            <SelectItem value="management">Management</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
