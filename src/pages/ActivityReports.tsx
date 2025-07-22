@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, Activity, Download } from "lucide-react";
+import { Plus, Search, Calendar, Activity, Download, Edit, Trash2, FileText, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,9 +11,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ActivityReportForm } from "@/components/ActivityReportForm";
 import { downloadExcel, formatActivityReportsData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function ActivityReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("");
   const { toast } = useToast();
@@ -29,6 +32,29 @@ export default function ActivityReports() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch stats for summary cards
+  const { data: reportStats } = useQuery({
+    queryKey: ['activity-reports-stats'],
+    queryFn: async () => {
+      const totalReports = activityReports?.length || 0;
+      const thisMonth = activityReports?.filter(report => {
+        const reportDate = new Date(report.reporting_date);
+        const now = new Date();
+        return reportDate.getMonth() === now.getMonth() && reportDate.getFullYear() === now.getFullYear();
+      }).length || 0;
+      
+      const programBreakdown = activityReports?.reduce((acc, report) => {
+        acc[report.program] = (acc[report.program] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {};
+      
+      const uniqueStaff = new Set(activityReports?.map(r => r.staff) || []).size;
+      
+      return { totalReports, thisMonth, programBreakdown, uniqueStaff };
+    },
+    enabled: !!activityReports,
   });
 
   const filteredReports = activityReports?.filter(report => {
@@ -58,6 +84,41 @@ export default function ActivityReports() {
     });
   };
 
+  const handleEdit = (report: any) => {
+    setEditingReport(report);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('activity_reports')
+        .delete()
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Activity report deleted successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setEditingReport(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -72,7 +133,7 @@ export default function ActivityReports() {
             Download Excel
           </Button>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -81,14 +142,14 @@ export default function ActivityReports() {
             </DialogTrigger>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
-              <DialogTitle>Add Activity Report</DialogTitle>
+              <DialogTitle>{editingReport ? 'Edit Activity Report' : 'Add Activity Report'}</DialogTitle>
             </DialogHeader>
             <ActivityReportForm 
               onSuccess={() => {
-                setIsDialogOpen(false);
+                handleDialogClose();
                 refetch();
               }} 
-              onCancel={() => setIsDialogOpen(false)} 
+              onCancel={handleDialogClose} 
             />
             </DialogContent>
           </Dialog>
@@ -122,16 +183,103 @@ export default function ActivityReports() {
         </Select>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{reportStats?.totalReports || 0}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{reportStats?.thisMonth || 0}</div>
+            <p className="text-xs text-muted-foreground">Reports submitted</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Programs</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{Object.keys(reportStats?.programBreakdown || {}).length}</div>
+            <p className="text-xs text-muted-foreground">Programs with reports</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Staff Contributors</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{reportStats?.uniqueStaff || 0}</div>
+            <p className="text-xs text-muted-foreground">Contributing staff</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredReports?.map((report) => (
           <Card key={report.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 <span className="text-lg">{report.staff}</span>
-                <Badge variant="secondary">
-                  <Activity className="h-3 w-3 mr-1" />
-                  {report.program}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">
+                    <Activity className="h-3 w-3 mr-1" />
+                    {report.program}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <span className="sr-only">Actions</span>
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01" />
+                        </svg>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(report)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Report</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this activity report? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(report.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">

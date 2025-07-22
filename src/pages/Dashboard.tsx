@@ -222,12 +222,6 @@ const Dashboard = () => {
       onClick: () => navigate('/reports')
     },
     { 
-      title: "Other Reports", 
-      icon: FileText, 
-      variant: "outline" as const,
-      onClick: () => navigate('/other-reports')
-    },
-    { 
       title: "Schedule Visit", 
       icon: Users, 
       variant: "accent" as const,
