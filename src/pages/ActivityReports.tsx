@@ -127,7 +127,7 @@ export default function ActivityReports() {
           <p className="text-muted-foreground">Track and manage activity reports</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button onClick={handleDownload} variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
             Download Excel
@@ -135,7 +135,7 @@ export default function ActivityReports() {
           
           <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Report
               </Button>
