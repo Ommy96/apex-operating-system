@@ -29,10 +29,12 @@ const OtherReports = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const administrativePrograms = [
-    "Communication",
-    "Media",
-    "Chess",
-    "Fundraising"
+    "Education",
+    "Kibera Early Dinner", 
+    "Kawangware Lunch Hour",
+    "Kipawa Sato",
+    "Self-Empowerment",
+    "Support Groups"
   ];
 
   const handleInputChange = (field: string, value: string) => {

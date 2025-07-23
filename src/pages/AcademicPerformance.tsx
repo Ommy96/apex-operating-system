@@ -89,7 +89,7 @@ export default function AcademicPerformance() {
         .from('activities')
         .insert({
           child_id: data.child_id,
-          program_id: 'education', // This would need to be a valid program ID
+          program_id: '9fe13aa8-d378-4a29-91e7-4252945acadc', // Education program UUID
           title: `Academic Performance - ${data.subject || 'General'}`,
           description: `Grade/Mark: ${data.academic_grade}${data.notes ? '\nNotes: ' + data.notes : ''}`,
           activity_date: data.assessment_date,
