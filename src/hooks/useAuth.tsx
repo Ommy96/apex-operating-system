@@ -58,6 +58,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Fetch user profile for existing session
+        setTimeout(async () => {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .single();
+            setUserRole(profile?.role || 'staff');
+          } catch (error) {
+            console.error('Error fetching user role:', error);
+            setUserRole('staff');
+          }
+        }, 0);
+      }
+      
       setLoading(false);
     });
 
