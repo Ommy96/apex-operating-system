@@ -240,8 +240,12 @@ export default function Settings() {
         </div>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid grid-cols-4 bg-gradient-to-r from-muted/50 to-muted/80">
+      <Tabs defaultValue="roles" className="space-y-4">
+        <TabsList className="grid grid-cols-5 bg-gradient-to-r from-muted/50 to-muted/80">
+          <TabsTrigger value="roles" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
+            <Shield className="h-4 w-4 mr-2" />
+            Role Assignment
+          </TabsTrigger>
           <TabsTrigger value="users" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
             <Users className="h-4 w-4 mr-2" />
             User Management
@@ -259,6 +263,102 @@ export default function Settings() {
             Notifications
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="roles" className="space-y-4">
+          {userRole !== 'admin' ? (
+            <Card className="shadow-soft border-destructive/20">
+              <CardHeader className="bg-gradient-to-r from-destructive/5 to-destructive/10">
+                <CardTitle className="flex items-center text-destructive">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Access Denied
+                </CardTitle>
+                <CardDescription>You don't have permission to manage user roles. Only administrators can assign roles.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <Card className="shadow-soft border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
+                <CardTitle className="flex items-center">
+                  <div className="p-2 bg-gradient-primary rounded-lg mr-3">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  Role Assignment
+                </CardTitle>
+                <CardDescription>Assign and manage user roles. Only admins can assign Staff or Management roles.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {users.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <User className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                      <p>No users found</p>
+                    </div>
+                  ) : (
+                    users.map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-background to-muted/20 hover:from-muted/20 hover:to-muted/40 transition-all duration-200">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                            <User className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-foreground text-lg">{user.full_name}</h4>
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant={getRoleBadgeVariant(user.role) as any} className="capitalize">
+                                Current: {user.role}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <Label htmlFor={`role-${user.id}`} className="text-sm font-medium">
+                              Assign Role
+                            </Label>
+                            <Select
+                              value={user.role}
+                              onValueChange={(newRole: 'admin' | 'management' | 'staff') => updateUserRole(user.user_id, newRole)}
+                            >
+                              <SelectTrigger className="w-40 bg-background mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="staff">Staff</SelectItem>
+                                <SelectItem value="management">Management</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  <div className="mt-6 p-4 rounded-lg bg-muted/30 border-l-4 border-primary">
+                    <h4 className="font-semibold text-sm text-foreground mb-2">Role Permissions:</h4>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="destructive" className="text-xs">Admin</Badge>
+                        <span>Full system access, can manage all users and assign roles</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-xs">Management</Badge>
+                        <span>Can view reports and manage programs, limited user access</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">Staff</Badge>
+                        <span>Can create and edit reports, view assigned children</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="users" className="space-y-4">
           <Card className="shadow-soft border-primary/20">

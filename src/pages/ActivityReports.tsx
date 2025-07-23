@@ -133,9 +133,9 @@ export default function ActivityReports() {
             Download Excel
           </Button>
           
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto" onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Report
               </Button>
