@@ -78,9 +78,16 @@ export default {
 				}
 			},
 			borderRadius: {
+				'2xl': '1rem',
+				xl: '0.75rem',
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			spacing: {
+				'18': '4.5rem',
+				'88': '22rem',
+				'128': '32rem'
 			},
 			keyframes: {
 				'accordion-down': {

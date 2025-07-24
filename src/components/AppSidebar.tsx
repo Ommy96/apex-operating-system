@@ -69,32 +69,32 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+      ? "bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground font-semibold shadow-medium rounded-2xl" 
+      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-soft rounded-2xl transition-all duration-300";
 
   const handleLogout = async () => {
     await signOut();
   };
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarHeader className="border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-primary rounded-lg">
-            <Heart className="w-6 h-6 text-white" />
+    <Sidebar className={`${isCollapsed ? "w-20" : "w-72"} bg-sidebar-background border-r border-sidebar-border/50 shadow-strong`} collapsible="icon">
+      <SidebarHeader className="border-b border-sidebar-border/30 p-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 rounded-2xl shadow-medium">
+            <Heart className="w-7 h-7 text-white" />
           </div>
            {!isCollapsed && (
              <div>
-               <h2 className="font-bold text-sidebar-foreground">Heart to Heart</h2>
-               <p className="text-xs text-sidebar-foreground/70">Organization</p>
+               <h2 className="font-bold text-lg text-sidebar-foreground">Heart to Heart</h2>
+               <p className="text-sm text-sidebar-foreground/70 font-medium">Organization</p>
              </div>
            )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-4 py-6 space-y-6">
          <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/80">Main Menu</SidebarGroupLabel>
+           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => (
@@ -112,7 +112,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/80">Programs</SidebarGroupLabel>
+           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Programs</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {programItems.map((item) => (
@@ -130,7 +130,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/80">Reports</SidebarGroupLabel>
+           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {reportsItems.map((item) => (
@@ -148,8 +148,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/80">System</SidebarGroupLabel>
+           <SidebarGroup>
+             <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">System</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {systemItems.map((item) => (
@@ -168,15 +168,14 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-       <SidebarFooter className="border-t border-sidebar-border p-2">
+       <SidebarFooter className="border-t border-sidebar-border/30 p-4">
          <Button
            variant="ghost"
-           size="sm"
            onClick={handleLogout}
-           className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+           className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive rounded-2xl p-3 transition-all duration-300"
          >
-          <LogOut className="h-4 w-4" />
-          {!isCollapsed && <span>Logout</span>}
+          <LogOut className="h-5 w-5" />
+          {!isCollapsed && <span className="font-medium">Logout</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
