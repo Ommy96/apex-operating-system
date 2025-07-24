@@ -54,84 +54,61 @@ const Dashboard = () => {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Fetch recent activities with real-time updates
-  const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['recent-activities'],
+  // Fetch beneficiaries distribution by location
+  const { data: locationDistribution, isLoading: locationLoading } = useQuery({
+    queryKey: ['location-distribution'],
     queryFn: async () => {
-      const activities = [];
-
-      // Get recent children additions
-      const { data: newChildren } = await supabase
-        .from('children')
-        .select('first_name, last_name, created_at')
-        .order('created_at', { ascending: false })
-        .limit(2);
-
-      // Get recent reports submissions
-      const [programReports, homeVisitReports, activityReports, schoolVisitReports] = await Promise.all([
-        supabase.from('program_reports').select('created_at, program').order('created_at', { ascending: false }).limit(1),
-        supabase.from('home_visit_reports').select('created_at, location').order('created_at', { ascending: false }).limit(1),
-        supabase.from('activity_reports').select('created_at, program').order('created_at', { ascending: false }).limit(1),
-        supabase.from('school_visit_reports').select('created_at, school').order('created_at', { ascending: false }).limit(1)
+      // Get data from multiple sources
+      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, familyAdoptionRes] = await Promise.all([
+        supabase.from('children').select('residence'),
+        supabase.from('feeding_program').select('id'), // No location field, will count as "Not Specified"
+        supabase.from('kipawa_sato').select('location'),
+        supabase.from('self_empowerment').select('residence'),
+        supabase.from('family_adoption').select('residence')
       ]);
 
-      // Add children activities
-      newChildren?.forEach(child => {
-        activities.push({
-          title: "New Child Added",
-          description: `${child.first_name} ${child.last_name} has been added to the system`,
-          time: new Date(child.created_at).toLocaleString(),
-          type: 'success' as const,
-          timestamp: new Date(child.created_at)
-        });
+      const locationCounts: { [key: string]: number } = {};
+
+      // Count children by residence
+      childrenRes.data?.forEach(child => {
+        const location = child.residence || 'Not Specified';
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
       });
 
-      // Add report activities
-      programReports?.data?.forEach(report => {
-        activities.push({
-          title: "Program Report Submitted",
-          description: `${report.program} program report has been submitted`,
-          time: new Date(report.created_at).toLocaleString(),
-          type: 'success' as const,
-          timestamp: new Date(report.created_at)
-        });
+      // Count feeding program participants (no location data)
+      if (feedingRes.data?.length) {
+        locationCounts['Not Specified'] = (locationCounts['Not Specified'] || 0) + feedingRes.data.length;
+      }
+
+      // Count Kipawa participants by location
+      kipawaRes.data?.forEach(participant => {
+        const location = participant.location || 'Not Specified';
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
       });
 
-      homeVisitReports?.data?.forEach(report => {
-        activities.push({
-          title: "Home Visit Report Submitted",
-          description: `Home visit report for ${report.location || 'location'} has been submitted`,
-          time: new Date(report.created_at).toLocaleString(),
-          type: 'success' as const,
-          timestamp: new Date(report.created_at)
-        });
+      // Count self-empowerment participants by residence
+      selfEmpowermentRes.data?.forEach(participant => {
+        const location = participant.residence || 'Not Specified';
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
       });
 
-      activityReports?.data?.forEach(report => {
-        activities.push({
-          title: "Activity Report Submitted",
-          description: `${report.program} activity report has been submitted`,
-          time: new Date(report.created_at).toLocaleString(),
-          type: 'success' as const,
-          timestamp: new Date(report.created_at)
-        });
+      // Count family adoption participants by residence
+      familyAdoptionRes.data?.forEach(participant => {
+        const location = participant.residence || 'Not Specified';
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
       });
 
-      schoolVisitReports?.data?.forEach(report => {
-        activities.push({
-          title: "School Visit Report Submitted",
-          description: `School visit report for ${report.school} has been submitted`,
-          time: new Date(report.created_at).toLocaleString(),
-          type: 'success' as const,
-          timestamp: new Date(report.created_at)
-        });
-      });
-
-      // Sort by timestamp and return latest 4
-      return activities
-        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-        .slice(0, 4)
-        .map(({ timestamp, ...activity }) => activity);
+      // Convert to array and sort by count
+      const total = Object.values(locationCounts).reduce((sum, count) => sum + count, 0);
+      
+      return Object.entries(locationCounts)
+        .map(([location, count]) => ({
+          location,
+          count,
+          percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0"
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8); // Show top 8 locations
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -312,67 +289,78 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Recent Activities */}
+        {/* Beneficiaries by Location */}
         <Card className="lg:col-span-2 shadow-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              Recent Activities
+              <Target className="h-5 w-5 text-primary" />
+              Beneficiaries by Location
             </CardTitle>
             <CardDescription>
-              Latest updates from all programs
+              Geographic distribution of all program participants
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activitiesLoading ? (
+              {locationLoading ? (
                 <div className="space-y-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                      <div className="w-2 h-2 rounded-full mt-2 bg-muted animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded animate-pulse" />
-                        <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
-                        <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full bg-muted animate-pulse" />
+                        <div className="h-4 bg-muted rounded w-24 animate-pulse" />
                       </div>
+                      <div className="h-4 bg-muted rounded w-16 animate-pulse" />
                     </div>
                   ))}
                 </div>
-              ) : recentActivities && recentActivities.length > 0 ? (
-                recentActivities.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-muted/30 to-muted/50 hover:from-muted/50 hover:to-muted/70 transition-all duration-200 border border-muted">
-                    <div className={`w-3 h-3 rounded-full mt-2 shadow-sm ${
-                      activity.type === 'success' ? 'bg-gradient-to-r from-success to-success/80' :
-                      activity.type === 'warning' ? 'bg-gradient-to-r from-warning to-warning/80' :
-                      'bg-gradient-to-r from-primary to-primary/80'
-                    }`} />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium text-foreground">
-                        {activity.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-primary font-medium">
-                        {activity.time}
-                      </p>
+              ) : locationDistribution && locationDistribution.length > 0 ? (
+                locationDistribution.map((location, index) => {
+                  const colors = [
+                    'bg-gradient-to-r from-primary to-primary/80',
+                    'bg-gradient-to-r from-accent to-accent/80', 
+                    'bg-gradient-to-r from-secondary to-secondary/80',
+                    'bg-gradient-to-r from-warning to-warning/80',
+                    'bg-gradient-to-r from-success to-success/80',
+                    'bg-gradient-to-r from-destructive to-destructive/80',
+                    'bg-gradient-to-r from-muted to-muted/80',
+                    'bg-gradient-to-r from-primary/60 to-accent/60'
+                  ];
+                  
+                  return (
+                    <div key={index} className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-background to-secondary/10 hover:from-secondary/20 hover:to-secondary/30 transition-all duration-300 border border-border/50 shadow-soft hover:shadow-medium">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-5 h-5 rounded-xl shadow-medium ${colors[index % colors.length]}`}></div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">
+                            {location.location}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {location.percentage}% of total beneficiaries
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-xl text-foreground">{location.count}</span>
+                        <p className="text-xs text-muted-foreground">beneficiaries</p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                })
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                  <p>No recent activities found</p>
+                  <Target className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                  <p>No location data available</p>
                 </div>
               )}
             </div>
             <Button 
               variant="outline" 
-              className="w-full mt-4 bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 border-primary/20"
-              onClick={() => navigate('/reports/activity-reports')}
+              className="w-full mt-6 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 border-primary/20"
+              onClick={() => navigate('/children')}
             >
-              <Calendar className="h-4 w-4 mr-2" />
-              View All Activities
+              <Users className="h-4 w-4 mr-2" />
+              View All Beneficiaries
             </Button>
           </CardContent>
         </Card>
