@@ -18,6 +18,30 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: [
+					"Poppins",
+					"Inter",
+					"ui-sans-serif",
+					"system-ui",
+					"-apple-system",
+					"BlinkMacSystemFont",
+					"Segoe UI",
+					"Roboto",
+					"Helvetica Neue",
+					"Arial",
+					"sans-serif"
+				],
+				poppins: ["Poppins", "sans-serif"]
+			},
+			fontWeight: {
+				'300': '300',
+				'400': '400',
+				'500': '500',
+				'600': '600',
+				'700': '700',
+				'800': '800'
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -150,12 +174,14 @@ export default {
 				'gradient-warm': 'var(--gradient-warm)',
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-sidebar': 'var(--gradient-sidebar)'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',
 				'medium': 'var(--shadow-medium)',
-				'strong': 'var(--shadow-strong)'
+				'strong': 'var(--shadow-strong)',
+				'glow': 'var(--shadow-glow)'
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',
