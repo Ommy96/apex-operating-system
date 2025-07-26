@@ -234,12 +234,12 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
-          <Card key={stat.title} className="bg-gradient-card border-white/20 shadow-strong hover:shadow-medium transition-all duration-300 animate-scale-in backdrop-blur-sm" style={{animationDelay: `${index * 100}ms`}}>
+          <Card key={stat.title} className="bg-gradient-card border-white/20 shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-300 animate-scale-in backdrop-blur-sm card-hover" style={{animationDelay: `${index * 100}ms`}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <div className={`p-3 rounded-xl ${stat.gradient} shadow-medium`}>
+              <div className={`p-3 rounded-xl ${stat.gradient} shadow-elevation-2 hover-lift glow-effect`}>
                 <stat.icon className="h-5 w-5 text-white" />
               </div>
             </CardHeader>
@@ -251,7 +251,7 @@ const Dashboard = () => {
                 {stat.description}
               </p>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-gradient-secondary rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-gradient-accent rounded-full animate-pulse glow-effect"></div>
                 <p className="text-xs text-success font-medium">
                   {stat.change}
                 </p>
@@ -264,7 +264,7 @@ const Dashboard = () => {
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Quick Actions */}
-        <Card className="shadow-soft">
+        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -279,7 +279,7 @@ const Dashboard = () => {
               <Button
                 key={action.title}
                 variant={action.variant}
-                className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4"
+                className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4 hover-lift button-press"
                 onClick={action.onClick}
               >
                 <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -290,7 +290,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Beneficiaries by Location */}
-        <Card className="lg:col-span-2 shadow-soft">
+        <Card className="lg:col-span-2 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -328,7 +328,7 @@ const Dashboard = () => {
                   ];
                   
                   return (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-background to-secondary/10 hover:from-secondary/20 hover:to-secondary/30 transition-all duration-300 border border-border/50 shadow-soft hover:shadow-medium">
+                    <div key={index} className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-background to-secondary/10 hover:from-secondary/20 hover:to-secondary/30 transition-all duration-300 border border-border/50 shadow-elevation-1 hover:shadow-elevation-2 hover-lift micro-interaction">
                       <div className="flex items-center gap-4">
                         <div className={`w-5 h-5 rounded-xl shadow-medium ${colors[index % colors.length]}`}></div>
                         <div>
@@ -356,7 +356,7 @@ const Dashboard = () => {
             </div>
             <Button 
               variant="outline" 
-              className="w-full mt-6 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 border-primary/20"
+              className="w-full mt-6 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 border-primary/20 hover-lift button-press"
               onClick={() => navigate('/children')}
             >
               <Users className="h-4 w-4 mr-2" />
@@ -368,7 +368,7 @@ const Dashboard = () => {
 
       {/* Program Overview */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="shadow-soft">
+        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
           <CardHeader>
             <CardTitle>Program Distribution</CardTitle>
             <CardDescription>
@@ -391,9 +391,9 @@ const Dashboard = () => {
                 </div>
               ) : (
                 programDistribution.map((program, index) => (
-                  <div key={program.name} className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-background to-muted/30 hover:from-muted/20 hover:to-muted/40 transition-all duration-200">
+                  <div key={program.name} className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-background to-muted/30 hover:from-muted/20 hover:to-muted/40 transition-all duration-200 hover-lift micro-interaction">
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full shadow-sm ${program.color}`}></div>
+                      <div className={`w-4 h-4 rounded-full shadow-elevation-1 ${program.color} glow-effect`}></div>
                       <span className={`text-sm font-medium ${program.textColor}`}>{program.name}</span>
                     </div>
                     <div className="text-right">
@@ -407,7 +407,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
+        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
           <CardHeader>
             <CardTitle>Recent Reports</CardTitle>
             <CardDescription>
@@ -424,7 +424,7 @@ const Dashboard = () => {
               ].map((report, index) => (
                 <div 
                   key={index} 
-                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/20 to-muted/40 hover:from-muted/30 hover:to-muted/60 transition-all duration-200 border border-muted/50 cursor-pointer group"
+                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/20 to-muted/40 hover:from-muted/30 hover:to-muted/60 transition-all duration-200 border border-muted/50 cursor-pointer group hover-lift micro-interaction shadow-elevation-1 hover:shadow-elevation-2"
                   onClick={() => navigate(report.path)}
                 >
                   <div className="flex items-center gap-3">

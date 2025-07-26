@@ -5,25 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold tracking-wide ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-105 active:scale-95 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold tracking-wide ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:shadow-elevation-2 active:scale-95 button-press micro-interaction ripple [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-medium hover:shadow-strong hover:from-accent-light hover:to-accent",
+        default: "bg-gradient-accent text-accent-foreground hover:shadow-elevation-3 hover:-translate-y-0.5 shadow-elevation-1",
         destructive:
-          "bg-gradient-to-r from-destructive to-destructive/90 text-destructive-foreground shadow-medium hover:shadow-strong",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-elevation-2 shadow-elevation-1",
         outline:
-          "border-2 border-accent bg-background text-accent hover:bg-accent hover:text-accent-foreground shadow-soft",
+          "border-2 border-border bg-background/80 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground hover:border-accent hover:shadow-elevation-2 shadow-soft",
         secondary:
-          "bg-gradient-to-r from-secondary to-secondary-dark text-secondary-foreground shadow-soft hover:shadow-medium hover:from-secondary-light hover:to-secondary",
-        primary:
-          "bg-gradient-to-r from-primary to-primary-dark text-primary-foreground shadow-medium hover:shadow-strong hover:from-primary-light hover:to-primary",
-        success:
-          "bg-gradient-to-r from-success to-success/90 text-success-foreground shadow-medium hover:shadow-strong",
-        warning:
-          "bg-gradient-to-r from-warning to-warning/90 text-warning-foreground shadow-medium hover:shadow-strong",
-        ghost: "text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground",
-        link: "text-accent underline-offset-4 hover:underline hover:text-accent-light",
+          "bg-gradient-secondary text-secondary-foreground hover:shadow-elevation-2 hover:-translate-y-0.5 shadow-elevation-1",
+        ghost: "hover:bg-accent/10 hover:text-accent-foreground backdrop-blur-sm",
+        link: "text-primary underline-offset-4 hover:underline hover:text-accent",
+        primary: "bg-gradient-primary text-primary-foreground hover:shadow-glow hover:-translate-y-1 shadow-elevation-2 glow-effect",
+        success: "bg-success text-success-foreground hover:bg-success/90 hover:shadow-elevation-2 shadow-elevation-1",
+        warning: "bg-warning text-warning-foreground hover:bg-warning/90 hover:shadow-elevation-2 shadow-elevation-1",
+        accent: "bg-gradient-accent text-accent-foreground hover:shadow-glow hover:-translate-y-1 shadow-elevation-2 glow-effect",
       },
       size: {
         default: "h-12 px-6 py-3",
