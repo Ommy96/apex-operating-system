@@ -54,6 +54,7 @@ const reportsItems = [
   { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
   { title: "Academic Performance", url: "/reports/academic-performance", icon: EducationIcon },
   { title: "Other Reports", url: "/other-reports", icon: ReportsIcon },
+  { title: "Program Report Generator", url: "/program-report-generator", icon: TrendingUp },
 ];
 
 const systemItems = [
