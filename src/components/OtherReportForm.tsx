@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,12 +33,11 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const administrativePrograms = [
-    "Education",
-    "Kibera Early Dinner", 
-    "Kawangware Lunch Hour",
-    "Kipawa Sato",
-    "Self-Empowerment",
-    "Support Groups"
+    "Communication",
+    "Chess",
+    "Fundraising",
+    "Admin",
+    "Content Creation"
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -63,7 +63,7 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
 
     try {
       const reportData = {
-        program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
+        program: formData.program as "Communication" | "Chess" | "Fundraising" | "Admin" | "Content Creation",
         reporting_date: formData.reportingDate,
         staff: formData.staff,
         executive_summary: formData.executiveSummary,
