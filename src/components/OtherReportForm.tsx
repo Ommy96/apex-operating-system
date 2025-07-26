@@ -63,7 +63,7 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
 
     try {
       const reportData = {
-        program: formData.program as "Communication" | "Chess" | "Fundraising" | "Admin" | "Content Creation",
+        program: formData.program as any,
         reporting_date: formData.reportingDate,
         staff: formData.staff,
         executive_summary: formData.executiveSummary,
@@ -112,119 +112,121 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="program">Program *</Label>
-          <Select
-            value={formData.program}
-            onValueChange={(value) => handleInputChange('program', value)}
+    <ScrollArea className="max-h-[80vh] pr-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="program">Program *</Label>
+            <Select
+              value={formData.program}
+              onValueChange={(value) => handleInputChange('program', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select administrative program" />
+              </SelectTrigger>
+              <SelectContent>
+                {administrativePrograms.map((program) => (
+                  <SelectItem key={program} value={program}>
+                    {program}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reportingDate">Reporting Date *</Label>
+            <Input
+              id="reportingDate"
+              type="date"
+              value={formData.reportingDate}
+              onChange={(e) => handleInputChange('reportingDate', e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="staff">Staff/Team Members *</Label>
+            <Input
+              id="staff"
+              value={formData.staff}
+              onChange={(e) => handleInputChange('staff', e.target.value)}
+              placeholder="Enter staff names involved in this program"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="executiveSummary">Executive Summary *</Label>
+            <Textarea
+              id="executiveSummary"
+              value={formData.executiveSummary}
+              onChange={(e) => handleInputChange('executiveSummary', e.target.value)}
+              placeholder="Provide a comprehensive overview of the program activities and outcomes"
+              className="min-h-32"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="beneficiaryImpact">Beneficiary Impact</Label>
+            <Textarea
+              id="beneficiaryImpact"
+              value={formData.beneficiaryImpact}
+              onChange={(e) => handleInputChange('beneficiaryImpact', e.target.value)}
+              placeholder="Describe the impact on beneficiaries and community"
+              className="min-h-24"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="challenges">Challenges Encountered</Label>
+            <Textarea
+              id="challenges"
+              value={formData.challenges}
+              onChange={(e) => handleInputChange('challenges', e.target.value)}
+              placeholder="Describe any challenges or obstacles faced during implementation"
+              className="min-h-24"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="proposedRecommendations">Proposed Recommendations</Label>
+            <Textarea
+              id="proposedRecommendations"
+              value={formData.proposedRecommendations}
+              onChange={(e) => handleInputChange('proposedRecommendations', e.target.value)}
+              placeholder="Provide recommendations for future improvement and sustainability"
+              className="min-h-24"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex items-center gap-2"
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select administrative program" />
-            </SelectTrigger>
-            <SelectContent>
-              {administrativePrograms.map((program) => (
-                <SelectItem key={program} value={program}>
-                  {program}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {isSubmitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                {editingReport ? 'Updating...' : 'Submitting...'}
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                {editingReport ? 'Update Report' : 'Submit Report'}
+              </>
+            )}
+          </Button>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="reportingDate">Reporting Date *</Label>
-          <Input
-            id="reportingDate"
-            type="date"
-            value={formData.reportingDate}
-            onChange={(e) => handleInputChange('reportingDate', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="staff">Staff/Team Members *</Label>
-          <Input
-            id="staff"
-            value={formData.staff}
-            onChange={(e) => handleInputChange('staff', e.target.value)}
-            placeholder="Enter staff names involved in this program"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="executiveSummary">Executive Summary *</Label>
-          <Textarea
-            id="executiveSummary"
-            value={formData.executiveSummary}
-            onChange={(e) => handleInputChange('executiveSummary', e.target.value)}
-            placeholder="Provide a comprehensive overview of the program activities and outcomes"
-            className="min-h-32"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="beneficiaryImpact">Beneficiary Impact</Label>
-          <Textarea
-            id="beneficiaryImpact"
-            value={formData.beneficiaryImpact}
-            onChange={(e) => handleInputChange('beneficiaryImpact', e.target.value)}
-            placeholder="Describe the impact on beneficiaries and community"
-            className="min-h-24"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="challenges">Challenges Encountered</Label>
-          <Textarea
-            id="challenges"
-            value={formData.challenges}
-            onChange={(e) => handleInputChange('challenges', e.target.value)}
-            placeholder="Describe any challenges or obstacles faced during implementation"
-            className="min-h-24"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="proposedRecommendations">Proposed Recommendations</Label>
-          <Textarea
-            id="proposedRecommendations"
-            value={formData.proposedRecommendations}
-            onChange={(e) => handleInputChange('proposedRecommendations', e.target.value)}
-            placeholder="Provide recommendations for future improvement and sustainability"
-            className="min-h-24"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex items-center gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-              {editingReport ? 'Updating...' : 'Submitting...'}
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4" />
-              {editingReport ? 'Update Report' : 'Submit Report'}
-            </>
-          )}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </ScrollArea>
   );
 };

@@ -952,6 +952,11 @@ export type Database = {
         | "Kipawa Sato"
         | "Self-Empowerment"
         | "Support Groups"
+        | "Communication"
+        | "Chess"
+        | "Fundraising"
+        | "Admin"
+        | "Content Creation"
       residence_type: "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi"
       specific_skill_type:
         | "Singing"
@@ -1122,6 +1127,11 @@ export const Constants = {
         "Kipawa Sato",
         "Self-Empowerment",
         "Support Groups",
+        "Communication",
+        "Chess",
+        "Fundraising",
+        "Admin",
+        "Content Creation",
       ],
       residence_type: ["Kibera", "Kawangware", "Diaspora", "Outside Nairobi"],
       specific_skill_type: [
