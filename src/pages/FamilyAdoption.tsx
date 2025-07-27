@@ -155,49 +155,39 @@ export default function FamilyAdoption() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalFamilies}</div>
+            <p className="text-xs text-muted-foreground">Registered families</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Male</CardTitle>
+            <CardTitle className="text-sm font-medium">Male Guardians</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{maleCount}</div>
+            <p className="text-xs text-muted-foreground">Male family heads</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Female</CardTitle>
+            <CardTitle className="text-sm font-medium">Female Guardians</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{femaleCount}</div>
+            <p className="text-xs text-muted-foreground">Female family heads</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Guardian Ration</CardTitle>
+            <CardTitle className="text-sm font-medium">Guardian Rations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{categoryStats['Guardian Ration'] || 0}</div>
+            <p className="text-xs text-muted-foreground">Active ration recipients</p>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Residence Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {Object.entries(residenceStats).map(([residence, count]) => (
-          <Card key={residence}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{residence}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{count as number}</div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
