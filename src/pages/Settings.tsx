@@ -221,11 +221,20 @@ export default function Settings() {
       // Store old role for comparison
       const oldRole = user.role;
       
-      const { error, data } = await supabase
+      console.log('Attempting to update user:', {
+        userId: user.user_id,
+        currentRole: oldRole,
+        newRole: newRole,
+        userObject: user
+      });
+      
+      const { error, data, count } = await supabase
         .from('profiles')
         .update({ role: newRole })
         .eq('user_id', user.user_id)
         .select();
+
+      console.log('Update result:', { error, data, count });
 
       if (error) throw error;
 
@@ -249,13 +258,13 @@ export default function Settings() {
         // Close modal
         setConfirmationModal({ isOpen: false, user: null, newRole: 'staff' });
       } else {
-        throw new Error('No user was updated');
+        throw new Error(`No user was updated. Query result: ${JSON.stringify({ data, count })}`);
       }
     } catch (error: any) {
       console.error('Error updating user role:', error);
       toast({
         title: "Error",
-        description: `Failed to update user role: ${error.message}`,
+        description: `Failed to update user role. ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -442,12 +451,8 @@ export default function Settings() {
         </div>
       </div>
 
-      <Tabs defaultValue="roles" className="space-y-4">
-        <TabsList className="grid grid-cols-8 bg-gradient-to-r from-muted/50 to-muted/80">
-          <TabsTrigger value="roles" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
-            <Shield className="h-4 w-4 mr-2" />
-            Role Assignment
-          </TabsTrigger>
+      <Tabs defaultValue="users" className="space-y-4">
+        <TabsList className="grid grid-cols-7 bg-gradient-to-r from-muted/50 to-muted/80">
           <TabsTrigger value="users" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
             <Users className="h-4 w-4 mr-2" />
             User Management
@@ -478,7 +483,7 @@ export default function Settings() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="roles" className="space-y-4">
+        <TabsContent value="users" className="space-y-4">
           {userRole !== 'admin' ? (
             <Card className="shadow-soft border-destructive/20">
               <CardHeader className="bg-gradient-to-r from-destructive/5 to-destructive/10">
@@ -486,7 +491,7 @@ export default function Settings() {
                   <Shield className="h-5 w-5 mr-2" />
                   Access Denied
                 </CardTitle>
-                <CardDescription>You don't have permission to manage user roles. Only administrators can assign roles.</CardDescription>
+                <CardDescription>You don't have permission to manage users. Only administrators can manage user accounts and assign roles.</CardDescription>
               </CardHeader>
             </Card>
           ) : (
@@ -494,11 +499,11 @@ export default function Settings() {
               <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
                 <CardTitle className="flex items-center">
                   <div className="p-2 bg-gradient-primary rounded-lg mr-3">
-                    <Shield className="h-5 w-5 text-white" />
+                    <Users className="h-5 w-5 text-white" />
                   </div>
-                  Role Assignment
+                  User Management & Role Assignment
                 </CardTitle>
-                <CardDescription>Assign and manage user roles. Only admins can assign Staff or Management roles.</CardDescription>
+                <CardDescription>Manage user accounts, permissions, and role assignments. Only admins can assign Staff or Management roles.</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
@@ -573,66 +578,6 @@ export default function Settings() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
-          <Card className="shadow-soft border-primary/20">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
-              <CardTitle className="flex items-center">
-                <div className="p-2 bg-gradient-primary rounded-lg mr-3">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-                User Management
-              </CardTitle>
-              <CardDescription>Manage user accounts and permissions</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {users.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <User className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                    <p>No users found</p>
-                  </div>
-                ) : (
-                  users.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-background to-muted/20 hover:from-muted/20 hover:to-muted/40 transition-all duration-200">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">{user.full_name}</h4>
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <Badge variant={getRoleBadgeVariant(user.role) as any} className="capitalize">
-                          {user.role}
-                        </Badge>
-                         <Select
-                           value={user.role}
-                           onValueChange={(newRole: 'admin' | 'management' | 'staff') => handleRoleChangeRequest(user, newRole)}
-                           disabled={roleUpdateLoading}
-                         >
-                          <SelectTrigger className="w-32 bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="staff">Staff</SelectItem>
-                            <SelectItem value="management">Management</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="programs" className="space-y-4">
