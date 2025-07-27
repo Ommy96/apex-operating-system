@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, Calendar, DollarSign, Receipt } from "lucide-react";
+import { Eye, Calendar, Coins, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Original Loan Amount</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <Coins className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">KSH {originalAmount.toLocaleString()}</div>
@@ -103,7 +103,7 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
-                <DollarSign className="h-4 w-4 text-orange-500" />
+                <Coins className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">KSH {currentBalance.toLocaleString()}</div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, DollarSign, Download, Receipt, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Coins, Download, Receipt, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +130,7 @@ export default function SelfEmpowerment() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{selfEmpowermentRecords?.length || 0}</div>
@@ -141,7 +141,7 @@ export default function SelfEmpowerment() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Applications</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -154,7 +154,7 @@ export default function SelfEmpowerment() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Approved Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -167,7 +167,7 @@ export default function SelfEmpowerment() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Loan Recipients</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -299,13 +299,13 @@ export default function SelfEmpowerment() {
               </div>
               {record.amount_requested && (
                 <div className="text-sm text-muted-foreground flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
+                  <Coins className="h-3 w-3" />
                   <strong>Requested:</strong> {Number(record.amount_requested).toLocaleString()}
                 </div>
               )}
               {record.amount_approved && (
                 <div className="text-sm text-green-600 flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
+                  <Coins className="h-3 w-3" />
                   <strong>Approved:</strong> {Number(record.amount_approved).toLocaleString()}
                 </div>
               )}
