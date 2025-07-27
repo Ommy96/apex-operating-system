@@ -113,6 +113,66 @@ export type Database = {
         }
         Relationships: []
       }
+      approval_requests: {
+        Row: {
+          approved_at: string | null
+          approver_id: string | null
+          created_at: string
+          current_values: Json
+          expires_at: string
+          id: string
+          priority: string
+          reason: string | null
+          rejected_at: string | null
+          request_type: string
+          requested_changes: Json
+          requester_id: string
+          reviewer_comments: string | null
+          status: string
+          target_entity_id: string
+          target_entity_type: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          current_values?: Json
+          expires_at?: string
+          id?: string
+          priority?: string
+          reason?: string | null
+          rejected_at?: string | null
+          request_type: string
+          requested_changes?: Json
+          requester_id: string
+          reviewer_comments?: string | null
+          status?: string
+          target_entity_id: string
+          target_entity_type: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          current_values?: Json
+          expires_at?: string
+          id?: string
+          priority?: string
+          reason?: string | null
+          rejected_at?: string | null
+          request_type?: string
+          requested_changes?: Json
+          requester_id?: string
+          reviewer_comments?: string | null
+          status?: string
+          target_entity_id?: string
+          target_entity_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           created_at: string
@@ -1000,6 +1060,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_approve_request: {
+        Args: { request_id: string }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           user_id_param: string

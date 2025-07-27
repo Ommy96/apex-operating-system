@@ -18,6 +18,9 @@ import { PasswordConfirmationModal } from '@/components/PasswordConfirmationModa
 import { RealtimeStatusDemo } from '@/components/RealtimeStatusDemo';
 import { RateLimitManager } from '@/lib/rateLimitManager';
 import { SecurityDashboard } from '@/components/SecurityDashboard';
+import { ApprovalWorkflow } from '@/components/ApprovalWorkflow';
+import { AdvancedAuditTrail } from '@/components/AdvancedAuditTrail';
+import { RoleIndicator, PermissionMatrix, RoleComparison } from '@/components/RoleIndicatorSystem';
 
 export default function Settings() {
   const { userRole } = useAuth();
@@ -440,7 +443,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="roles" className="space-y-4">
-        <TabsList className="grid grid-cols-6 bg-gradient-to-r from-muted/50 to-muted/80">
+        <TabsList className="grid grid-cols-8 bg-gradient-to-r from-muted/50 to-muted/80">
           <TabsTrigger value="roles" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
             <Shield className="h-4 w-4 mr-2" />
             Role Assignment
@@ -464,6 +467,14 @@ export default function Settings() {
           <TabsTrigger value="audit" className="data-[state=active]:bg-gradient-accent data-[state=active]:text-white">
             <History className="h-4 w-4 mr-2" />
             Audit Logs
+          </TabsTrigger>
+          <TabsTrigger value="approval" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
+            <Clock className="h-4 w-4 mr-2" />
+            Approvals
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="data-[state=active]:bg-gradient-secondary data-[state=active]:text-white">
+            <User className="h-4 w-4 mr-2" />
+            Permissions
           </TabsTrigger>
         </TabsList>
 
@@ -967,7 +978,74 @@ export default function Settings() {
             </Card>
           )}
         </TabsContent>
+
+        <TabsContent value="approval" className="space-y-4">
+          <ApprovalWorkflow userRole={userRole || 'staff'} />
+        </TabsContent>
+
+        <TabsContent value="permissions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Role & Permission System
+              </CardTitle>
+              <CardDescription>Visual role indicators and permission matrix</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="font-medium mb-4">Your Current Role</h4>
+                <RoleIndicator 
+                  role={userRole as any} 
+                  variant="full" 
+                  showPermissions={true}
+                  userName={users.find(u => u.user_id === userRole)?.full_name}
+                />
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium mb-4">All Role Types</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <RoleIndicator role="admin" variant="full" showPermissions={true} />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <RoleIndicator role="management" variant="full" showPermissions={true} />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <RoleIndicator role="staff" variant="full" showPermissions={true} />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {userRole && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-medium mb-4">Your Permission Matrix</h4>
+                    <PermissionMatrix userRole={userRole} />
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Enhanced Audit Trail for Admins */}
+      {userRole === 'admin' && (
+        <div className="mt-8">
+          <AdvancedAuditTrail userRole={userRole} />
+        </div>
+      )}
 
       {/* Role Change Confirmation Modal */}
       <RoleChangeConfirmationModal
