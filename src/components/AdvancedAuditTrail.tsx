@@ -264,12 +264,12 @@ export function AdvancedAuditTrail({ userRole }: AdvancedAuditTrailProps) {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <Select value={filters.event_type} onValueChange={(value) => setFilters({...filters, event_type: value})}>
+              <Select value={filters.event_type} onValueChange={(value) => setFilters({...filters, event_type: value === 'all' ? '' : value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Event Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Events</SelectItem>
+                  <SelectItem value="all">All Events</SelectItem>
                   <SelectItem value="created">Created</SelectItem>
                   <SelectItem value="updated">Updated</SelectItem>
                   <SelectItem value="deleted">Deleted</SelectItem>
@@ -279,12 +279,12 @@ export function AdvancedAuditTrail({ userRole }: AdvancedAuditTrailProps) {
               </Select>
             </div>
             <div>
-              <Select value={filters.entity_type} onValueChange={(value) => setFilters({...filters, entity_type: value})}>
+              <Select value={filters.entity_type} onValueChange={(value) => setFilters({...filters, entity_type: value === 'all' ? '' : value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Entity Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Entities</SelectItem>
+                  <SelectItem value="all">All Entities</SelectItem>
                   <SelectItem value="profiles">Profiles</SelectItem>
                   <SelectItem value="children">Children</SelectItem>
                   <SelectItem value="programs">Programs</SelectItem>
