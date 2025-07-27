@@ -14,7 +14,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { RoleChangeConfirmationModal } from '@/components/RoleChangeConfirmationModal';
+import { PasswordConfirmationModal } from '@/components/PasswordConfirmationModal';
 import { RealtimeStatusDemo } from '@/components/RealtimeStatusDemo';
+import { RateLimitManager } from '@/lib/rateLimitManager';
+import { SecurityDashboard } from '@/components/SecurityDashboard';
 
 export default function Settings() {
   const { userRole } = useAuth();
@@ -31,6 +34,13 @@ export default function Settings() {
     isOpen: false,
     user: null,
     newRole: 'staff'
+  });
+  const [passwordModal, setPasswordModal] = useState<{
+    isOpen: boolean;
+    pendingAction: (() => Promise<void>) | null;
+  }>({
+    isOpen: false,
+    pendingAction: null
   });
   const [systemSettings, setSystemSettings] = useState({
     organizationName: 'Heart 2 Heart',
@@ -151,7 +161,7 @@ export default function Settings() {
     }
   };
 
-  const handleRoleChangeRequest = (user: any, newRole: 'admin' | 'management' | 'staff') => {
+  const handleRoleChangeRequest = async (user: any, newRole: 'admin' | 'management' | 'staff') => {
     if (userRole !== 'admin') {
       toast({
         title: "Permission Denied",
@@ -165,6 +175,17 @@ export default function Settings() {
       return; // No change needed
     }
 
+    // Check rate limits first
+    const rateLimitResult = await RateLimitManager.checkRateLimit('role_change', 5, 60);
+    
+    if (!rateLimitResult.allowed) {
+      RateLimitManager.handleRateLimitExceeded(rateLimitResult);
+      return;
+    }
+
+    // Show remaining attempts if getting close to limit
+    RateLimitManager.displayRemainingAttempts(rateLimitResult);
+
     setConfirmationModal({
       isOpen: true,
       user,
@@ -172,8 +193,25 @@ export default function Settings() {
     });
   };
 
-  const updateUserRole = async () => {
+  const proceedWithRoleChange = async () => {
+    // For critical role changes (admin assignments or demotions), require password confirmation
     const { user, newRole } = confirmationModal;
+    const isAdminChange = newRole === 'admin' || user.role === 'admin';
+    
+    if (isAdminChange) {
+      // Close the confirmation modal and open password modal
+      setConfirmationModal({ isOpen: false, user: null, newRole: 'staff' });
+      setPasswordModal({
+        isOpen: true,
+        pendingAction: () => executeRoleChange(user, newRole)
+      });
+    } else {
+      // For non-admin changes, proceed directly
+      await executeRoleChange(user, newRole);
+    }
+  };
+
+  const executeRoleChange = async (user: any, newRole: 'admin' | 'management' | 'staff') => {
     setRoleUpdateLoading(true);
     
     try {
@@ -194,12 +232,11 @@ export default function Settings() {
           description: `User role updated from ${oldRole} to ${newRole}`,
         });
 
-        // Dispatch custom event for the affected user if they're currently logged in
-        // This will be picked up by the SessionManager component
-        if (user.user_id) {
-          // The real-time subscription will handle the notification automatically
-          console.log(`Role change completed for user ${user.user_id}: ${oldRole} → ${newRole}`);
-        }
+        // Trigger email notification (will be implemented after Resend setup)
+        await triggerEmailNotification(user, oldRole, newRole);
+
+        // The real-time subscription will handle the notification automatically
+        console.log(`Role change completed for user ${user.user_id}: ${oldRole} → ${newRole}`);
 
         // Refetch users to update the list
         fetchUsers();
@@ -220,6 +257,41 @@ export default function Settings() {
       });
     } finally {
       setRoleUpdateLoading(false);
+    }
+  };
+
+  const handlePasswordConfirmed = async (password: string) => {
+    if (passwordModal.pendingAction) {
+      setPasswordModal({ isOpen: false, pendingAction: null });
+      await passwordModal.pendingAction();
+    }
+  };
+
+  const triggerEmailNotification = async (user: any, oldRole: string, newRole: string) => {
+    try {
+      // Call the email notification edge function (to be implemented)
+      const { error } = await supabase.functions.invoke('send-role-change-notification', {
+        body: {
+          targetUser: {
+            email: user.email,
+            name: user.full_name
+          },
+          oldRole,
+          newRole,
+          changedBy: {
+            email: user?.email,
+            // Admin info will be added by the edge function
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Email notification failed:', error);
+        // Don't block the role change if email fails
+      }
+    } catch (error) {
+      console.error('Email notification error:', error);
+      // Don't block the role change if email fails
     }
   };
 
@@ -340,6 +412,11 @@ export default function Settings() {
               <h3 className="text-sm font-medium text-green-700 dark:text-green-300">Real-time Updates Active</h3>
               <p className="text-xs text-green-600 dark:text-green-400">Role changes and audit logs are updated instantly across all sessions</p>
         </div>
+
+        {/* Security Dashboard (only for admins) */}
+        {userRole === 'admin' && (
+          <SecurityDashboard />
+        )}
 
         {/* Real-time Demo Component (only for admins) */}
         {userRole === 'admin' && (
@@ -895,10 +972,20 @@ export default function Settings() {
       {/* Role Change Confirmation Modal */}
       <RoleChangeConfirmationModal
         isOpen={confirmationModal.isOpen}
-        onConfirm={updateUserRole}
+        onConfirm={proceedWithRoleChange}
         onCancel={() => setConfirmationModal({ isOpen: false, user: null, newRole: 'staff' })}
         user={confirmationModal.user}
         newRole={confirmationModal.newRole}
+        isLoading={roleUpdateLoading}
+      />
+
+      {/* Password Confirmation Modal */}
+      <PasswordConfirmationModal
+        isOpen={passwordModal.isOpen}
+        onConfirm={handlePasswordConfirmed}
+        onCancel={() => setPasswordModal({ isOpen: false, pendingAction: null })}
+        title="Confirm Admin Role Change"
+        description="This action involves admin privileges. Please enter your password to confirm."
         isLoading={roleUpdateLoading}
       />
     </div>
