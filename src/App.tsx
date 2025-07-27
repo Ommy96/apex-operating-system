@@ -28,6 +28,7 @@ import SupportGroups from "./pages/SupportGroups";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,8 +36,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
+      <SessionManager>
+        <TooltipProvider>
+          <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -189,6 +191,7 @@ const App = () => (
         </BrowserRouter>
         </div>
       </TooltipProvider>
+      </SessionManager>
     </AuthProvider>
   </QueryClientProvider>
 );

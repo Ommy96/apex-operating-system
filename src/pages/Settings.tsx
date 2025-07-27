@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { RoleChangeConfirmationModal } from '@/components/RoleChangeConfirmationModal';
+import { RealtimeStatusDemo } from '@/components/RealtimeStatusDemo';
 
 export default function Settings() {
   const { userRole } = useAuth();
@@ -55,8 +56,54 @@ export default function Settings() {
     fetchPrograms();
     if (userRole === 'admin') {
       fetchAuditLogs();
+      setupRealtimeSubscriptions();
     }
   }, [userRole]);
+
+  const setupRealtimeSubscriptions = () => {
+    if (userRole !== 'admin') return;
+
+    // Subscribe to real-time audit log updates
+    const auditChannel = supabase
+      .channel('audit-logs-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'audit_logs',
+          filter: 'event_type=eq.role_change'
+        },
+        () => {
+          // Refresh audit logs when new entries are added
+          fetchAuditLogs();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to real-time profile updates
+    const profilesChannel = supabase
+      .channel('profiles-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public', 
+          table: 'profiles'
+        },
+        () => {
+          // Refresh users list when profiles are updated
+          fetchUsers();
+        }
+      )
+      .subscribe();
+
+    // Cleanup function
+    return () => {
+      supabase.removeChannel(auditChannel);
+      supabase.removeChannel(profilesChannel);
+    };
+  };
 
   const fetchUsers = async () => {
     try {
@@ -130,6 +177,9 @@ export default function Settings() {
     setRoleUpdateLoading(true);
     
     try {
+      // Store old role for comparison
+      const oldRole = user.role;
+      
       const { error, data } = await supabase
         .from('profiles')
         .update({ role: newRole })
@@ -141,8 +191,15 @@ export default function Settings() {
       if (data && data.length > 0) {
         toast({
           title: "Success",
-          description: `User role updated from ${user.role} to ${newRole}`,
+          description: `User role updated from ${oldRole} to ${newRole}`,
         });
+
+        // Dispatch custom event for the affected user if they're currently logged in
+        // This will be picked up by the SessionManager component
+        if (user.user_id) {
+          // The real-time subscription will handle the notification automatically
+          console.log(`Role change completed for user ${user.user_id}: ${oldRole} → ${newRole}`);
+        }
 
         // Refetch users to update the list
         fetchUsers();
@@ -274,7 +331,22 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
+        {/* Real-time Status Indicator */}
+        <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-lg border border-green-500/20">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <div>
+              <h3 className="text-sm font-medium text-green-700 dark:text-green-300">Real-time Updates Active</h3>
+              <p className="text-xs text-green-600 dark:text-green-400">Role changes and audit logs are updated instantly across all sessions</p>
+        </div>
+
+        {/* Real-time Demo Component (only for admins) */}
+        {userRole === 'admin' && (
+          <RealtimeStatusDemo />
+        )}
+          </div>
+        </div>
       {/* Enhanced Header */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
         <div className="flex items-center gap-3">

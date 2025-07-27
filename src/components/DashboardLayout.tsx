@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { RoleIndicator } from "@/components/RoleIndicator";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -65,7 +66,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center glow-effect">
                       <User className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-foreground">{userName}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-semibold text-foreground">{userName}</span>
+                      <RoleIndicator />
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-elevation-3 border border-border/50 bg-card/95 backdrop-blur-sm">
