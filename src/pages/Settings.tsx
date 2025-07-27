@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Users, Shield, Database, Bell, User, Mail, Phone, MapPin, Clock, Settings as SettingsIcon, Palette } from 'lucide-react';
+import { Save, Users, Shield, Database, Bell, User, Mail, Phone, MapPin, Clock, Settings as SettingsIcon, Palette, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,12 +13,24 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { RoleChangeConfirmationModal } from '@/components/RoleChangeConfirmationModal';
 
 export default function Settings() {
   const { userRole } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    user: any;
+    newRole: 'admin' | 'management' | 'staff';
+  }>({
+    isOpen: false,
+    user: null,
+    newRole: 'staff'
+  });
   const [systemSettings, setSystemSettings] = useState({
     organizationName: 'Heart 2 Heart',
     contactEmail: '',
@@ -41,7 +53,10 @@ export default function Settings() {
   useEffect(() => {
     fetchUsers();
     fetchPrograms();
-  }, []);
+    if (userRole === 'admin') {
+      fetchAuditLogs();
+    }
+  }, [userRole]);
 
   const fetchUsers = async () => {
     try {
@@ -71,10 +86,25 @@ export default function Settings() {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'management' | 'staff') => {
-    console.log('Updating user role:', { userId, newRole, currentUserRole: userRole });
+  const fetchAuditLogs = async () => {
+    if (userRole !== 'admin') return;
     
-    // Only allow admins to update roles
+    try {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('event_type', 'role_change')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setAuditLogs(data || []);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+    }
+  };
+
+  const handleRoleChangeRequest = (user: any, newRole: 'admin' | 'management' | 'staff') => {
     if (userRole !== 'admin') {
       toast({
         title: "Permission Denied",
@@ -83,26 +113,44 @@ export default function Settings() {
       });
       return;
     }
+
+    if (user.role === newRole) {
+      return; // No change needed
+    }
+
+    setConfirmationModal({
+      isOpen: true,
+      user,
+      newRole
+    });
+  };
+
+  const updateUserRole = async () => {
+    const { user, newRole } = confirmationModal;
+    setRoleUpdateLoading(true);
     
     try {
       const { error, data } = await supabase
         .from('profiles')
         .update({ role: newRole })
-        .eq('user_id', userId)
+        .eq('user_id', user.user_id)
         .select();
-
-      console.log('Update result:', { error, data });
 
       if (error) throw error;
 
       if (data && data.length > 0) {
         toast({
           title: "Success",
-          description: "User role updated successfully",
+          description: `User role updated from ${user.role} to ${newRole}`,
         });
 
         // Refetch users to update the list
         fetchUsers();
+        // Refetch audit logs to show the new entry
+        fetchAuditLogs();
+        
+        // Close modal
+        setConfirmationModal({ isOpen: false, user: null, newRole: 'staff' });
       } else {
         throw new Error('No user was updated');
       }
@@ -113,6 +161,8 @@ export default function Settings() {
         description: `Failed to update user role: ${error.message}`,
         variant: "destructive",
       });
+    } finally {
+      setRoleUpdateLoading(false);
     }
   };
 
@@ -241,7 +291,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="roles" className="space-y-4">
-        <TabsList className="grid grid-cols-5 bg-gradient-to-r from-muted/50 to-muted/80">
+        <TabsList className="grid grid-cols-6 bg-gradient-to-r from-muted/50 to-muted/80">
           <TabsTrigger value="roles" className="data-[state=active]:bg-gradient-primary data-[state=active]:text-white">
             <Shield className="h-4 w-4 mr-2" />
             Role Assignment
@@ -261,6 +311,10 @@ export default function Settings() {
           <TabsTrigger value="notifications" className="data-[state=active]:bg-accent data-[state=active]:text-white">
             <Bell className="h-4 w-4 mr-2" />
             Notifications
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="data-[state=active]:bg-gradient-accent data-[state=active]:text-white">
+            <History className="h-4 w-4 mr-2" />
+            Audit Logs
           </TabsTrigger>
         </TabsList>
 
@@ -320,7 +374,8 @@ export default function Settings() {
                             </Label>
                             <Select
                               value={user.role}
-                              onValueChange={(newRole: 'admin' | 'management' | 'staff') => updateUserRole(user.user_id, newRole)}
+                              onValueChange={(newRole: 'admin' | 'management' | 'staff') => handleRoleChangeRequest(user, newRole)}
+                              disabled={roleUpdateLoading}
                             >
                               <SelectTrigger className="w-40 bg-background mt-1">
                                 <SelectValue />
@@ -397,10 +452,11 @@ export default function Settings() {
                         <Badge variant={getRoleBadgeVariant(user.role) as any} className="capitalize">
                           {user.role}
                         </Badge>
-                        <Select
-                          value={user.role}
-                          onValueChange={(newRole: 'admin' | 'management' | 'staff') => updateUserRole(user.user_id, newRole)}
-                        >
+                         <Select
+                           value={user.role}
+                           onValueChange={(newRole: 'admin' | 'management' | 'staff') => handleRoleChangeRequest(user, newRole)}
+                           disabled={roleUpdateLoading}
+                         >
                           <SelectTrigger className="w-32 bg-background">
                             <SelectValue />
                           </SelectTrigger>
@@ -696,7 +752,83 @@ export default function Settings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="audit" className="space-y-4">
+          {userRole !== 'admin' ? (
+            <Card className="shadow-soft border-destructive/20">
+              <CardHeader className="bg-gradient-to-r from-destructive/5 to-destructive/10">
+                <CardTitle className="flex items-center text-destructive">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Access Denied
+                </CardTitle>
+                <CardDescription>You don't have permission to view audit logs. Only administrators can access this information.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <Card className="shadow-soft border-accent/20">
+              <CardHeader className="bg-gradient-to-r from-accent/5 to-primary/5">
+                <CardTitle className="flex items-center">
+                  <div className="p-2 bg-gradient-accent rounded-lg mr-3">
+                    <History className="h-5 w-5 text-white" />
+                  </div>
+                  Role Change Audit Logs
+                </CardTitle>
+                <CardDescription>Track all role changes and system modifications</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {auditLogs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <History className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                      <p>No audit logs found</p>
+                    </div>
+                  ) : (
+                    auditLogs.map((log) => (
+                      <div key={log.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-background to-accent/5 hover:from-accent/5 hover:to-accent/10 transition-all duration-200">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
+                            <History className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-foreground">Role Change</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {log.metadata?.target_user_name || 'Unknown User'}: {log.old_values?.role} → {log.new_values?.role}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(log.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs">
+                            {log.event_type}
+                          </Badge>
+                          <Badge variant={log.old_values?.role === 'admin' ? 'destructive' : 'default'} className="text-xs">
+                            From: {log.old_values?.role}
+                          </Badge>
+                          <Badge variant={log.new_values?.role === 'admin' ? 'destructive' : 'default'} className="text-xs">
+                            To: {log.new_values?.role}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
+
+      {/* Role Change Confirmation Modal */}
+      <RoleChangeConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        onConfirm={updateUserRole}
+        onCancel={() => setConfirmationModal({ isOpen: false, user: null, newRole: 'staff' })}
+        user={confirmationModal.user}
+        newRole={confirmationModal.newRole}
+        isLoading={roleUpdateLoading}
+      />
     </div>
   );
 }
