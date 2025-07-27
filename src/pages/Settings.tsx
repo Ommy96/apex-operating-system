@@ -403,27 +403,27 @@ export default function Settings() {
   };
 
   return (
-      <div className="space-y-6 animate-fade-in">
-        {/* Real-time Status Indicator */}
-        <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-lg border border-green-500/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <div>
-              <h3 className="text-sm font-medium text-green-700 dark:text-green-300">Real-time Updates Active</h3>
-              <p className="text-xs text-green-600 dark:text-green-400">Role changes and audit logs are updated instantly across all sessions</p>
-        </div>
-
-        {/* Security Dashboard (only for admins) */}
-        {userRole === 'admin' && (
-          <SecurityDashboard />
-        )}
-
-        {/* Real-time Demo Component (only for admins) */}
-        {userRole === 'admin' && (
-          <RealtimeStatusDemo />
-        )}
+    <div className="space-y-6 animate-fade-in">
+      {/* Real-time Status Indicator */}
+      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-lg border border-green-500/20">
+        <div className="flex items-center gap-3">
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <div>
+            <h3 className="text-sm font-medium text-green-700 dark:text-green-300">Real-time Updates Active</h3>
+            <p className="text-xs text-green-600 dark:text-green-400">Role changes and audit logs are updated instantly across all sessions</p>
           </div>
         </div>
+      </div>
+
+      {/* Security Dashboard (only for admins) */}
+      {userRole === 'admin' && (
+        <SecurityDashboard />
+      )}
+
+      {/* Real-time Demo Component (only for admins) */}
+      {userRole === 'admin' && (
+        <RealtimeStatusDemo />
+      )}
       {/* Enhanced Header */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
         <div className="flex items-center gap-3">
