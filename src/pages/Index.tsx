@@ -128,6 +128,7 @@ const Index = () => {
               size="lg" 
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10"
+              onClick={() => window.open('https://www.hearttoheartorganization.org', '_blank')}
             >
               Learn More
             </Button>
@@ -164,20 +165,20 @@ const Index = () => {
             <p className="text-white/80">Our impact across Nairobi's communities</p>
           </div>
           <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
-              <div className="text-4xl font-bold text-accent-light mb-2">{childrenCount}</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '0ms'}}>
+              <div className="text-4xl font-bold text-accent-light mb-2 transition-colors duration-300">{childrenCount || 0}</div>
               <div className="text-white/80 font-medium">Children Supported</div>
             </div>
-            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
-              <div className="text-4xl font-bold text-secondary-light mb-2">{educationCount}</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '100ms'}}>
+              <div className="text-4xl font-bold text-secondary-light mb-2 transition-colors duration-300">{educationCount || 0}</div>
               <div className="text-white/80 font-medium">In Education</div>
             </div>
-            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
-              <div className="text-4xl font-bold text-primary-light mb-2">{feedingCount}</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '200ms'}}>
+              <div className="text-4xl font-bold text-primary-light mb-2 transition-colors duration-300">{feedingCount || 0}</div>
               <div className="text-white/80 font-medium">Daily Meals</div>
             </div>
-            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10">
-              <div className="text-4xl font-bold text-accent-light mb-2">{talentCount}</div>
+            <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '300ms'}}>
+              <div className="text-4xl font-bold text-accent-light mb-2 transition-colors duration-300">{talentCount || 0}</div>
               <div className="text-white/80 font-medium">Talent Development</div>
             </div>
           </div>
