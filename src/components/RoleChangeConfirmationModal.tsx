@@ -12,7 +12,7 @@ interface RoleChangeConfirmationModalProps {
     full_name: string;
     email: string;
     role: string;
-  };
+  } | null;
   newRole: string;
   isLoading: boolean;
 }
@@ -44,14 +44,21 @@ export function RoleChangeConfirmationModal({
   };
 
   const isPrivilegeEscalation = () => {
+    if (!user) return false;
     const roleHierarchy = { staff: 1, management: 2, admin: 3 };
     return roleHierarchy[newRole as keyof typeof roleHierarchy] > roleHierarchy[user.role as keyof typeof roleHierarchy];
   };
 
   const isPrivilegeReduction = () => {
+    if (!user) return false;
     const roleHierarchy = { staff: 1, management: 2, admin: 3 };
     return roleHierarchy[newRole as keyof typeof roleHierarchy] < roleHierarchy[user.role as keyof typeof roleHierarchy];
   };
+
+  // Don't render if user is null
+  if (!user) {
+    return null;
+  }
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onCancel}>
