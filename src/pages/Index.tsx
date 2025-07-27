@@ -167,19 +167,19 @@ const Index = () => {
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '0ms'}}>
               <div className="text-4xl font-bold text-primary mb-2 transition-colors duration-300">{childrenCount || 0}</div>
-              <div className="text-white/80 font-medium">Children Supported</div>
+              <div className="text-primary font-medium">Children Supported</div>
             </div>
             <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '100ms'}}>
               <div className="text-4xl font-bold text-primary mb-2 transition-colors duration-300">{educationCount || 0}</div>
-              <div className="text-white/80 font-medium">In Education</div>
+              <div className="text-primary font-medium">In Education</div>
             </div>
             <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '200ms'}}>
               <div className="text-4xl font-bold text-primary mb-2 transition-colors duration-300">{feedingCount || 0}</div>
-              <div className="text-white/80 font-medium">Daily Meals</div>
+              <div className="text-primary font-medium">Daily Meals</div>
             </div>
             <div className="bg-gradient-card p-6 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 animate-scale-in shadow-elevation-2 hover:shadow-elevation-4" style={{animationDelay: '300ms'}}>
               <div className="text-4xl font-bold text-primary mb-2 transition-colors duration-300">{talentCount || 0}</div>
-              <div className="text-white/80 font-medium">Talent Development</div>
+              <div className="text-primary font-medium">Talent Development</div>
             </div>
           </div>
         </div>
