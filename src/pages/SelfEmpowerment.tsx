@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelfEmpowermentForm } from "@/components/SelfEmpowermentForm";
 import { LoanRepaymentForm } from "@/components/LoanRepaymentForm";
+import { LoanPaymentsView } from "@/components/LoanPaymentsView";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
@@ -318,52 +319,57 @@ export default function SelfEmpowerment() {
               )}
               
               {isAdmin && (
-                <div className="flex gap-2 pt-3">
+                <div className="flex flex-col gap-2 pt-3">
                   {record.amount_status === 'Loan' && (
+                    <div className="flex gap-2">
+                      <LoanPaymentsView selfEmpowermentRecord={record} />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRepayment(record)}
+                        className="flex-1"
+                      >
+                        <Receipt className="h-3 w-3 mr-1" />
+                        Repayment
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleRepayment(record)}
+                      onClick={() => handleEdit(record)}
                       className="flex-1"
                     >
-                      <Receipt className="h-3 w-3 mr-1" />
-                      Repayment
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(record)}
-                    className="flex-1"
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Application</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete {record.full_name}'s application? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(record.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                          <Trash2 className="h-3 w-3 mr-1" />
                           Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Application</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {record.full_name}'s application? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(record.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               )}
             </CardContent>
