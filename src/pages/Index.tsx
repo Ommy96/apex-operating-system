@@ -52,7 +52,39 @@ const Index = () => {
     },
   });
 
-  const features = [
+  // Fetch active programs for dynamic features
+  const { data: programsData } = useQuery({
+    queryKey: ['active-programs'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('programs')
+        .select('*')
+        .eq('is_active', true)
+        .limit(4);
+      return data || [];
+    },
+  });
+
+  // Create dynamic features based on programs, with fallback to static content
+  const features = programsData && programsData.length > 0 ? [
+    ...programsData.map((program, index) => {
+      const icons = [Users, GraduationCap, UtensilsCrossed, Shield];
+      return {
+        icon: icons[index % icons.length],
+        title: program.name,
+        description: program.description || "Supporting our community through dedicated programs"
+      };
+    }),
+    // Add any additional static features if we have less than 4 programs
+    ...(programsData.length < 4 ? [
+      {
+        icon: Shield,
+        title: "Secure & Reliable",
+        description: "Role-based access with comprehensive reporting"
+      }
+    ].slice(0, 4 - programsData.length) : [])
+  ] : [
+    // Fallback static features when no programs data
     {
       icon: Users,
       title: "Child Management",
@@ -60,7 +92,7 @@ const Index = () => {
     },
     {
       icon: GraduationCap,
-      title: "Education Programs",
+      title: "Education Programs", 
       description: "Monitor academic progress and school support"
     },
     {
