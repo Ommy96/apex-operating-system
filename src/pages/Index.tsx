@@ -10,10 +10,11 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Fetch real-time statistics
+  // Fetch real-time statistics (only when user is authenticated)
   const { data: childrenCount } = useQuery({
     queryKey: ['children-count'],
     queryFn: async () => {
+      if (!user) return 48; // Show static count for unauthenticated users
       const { count } = await supabase
         .from('children')
         .select('*', { count: 'exact', head: true });
@@ -24,6 +25,7 @@ const Index = () => {
   const { data: educationCount } = useQuery({
     queryKey: ['education-count'],
     queryFn: async () => {
+      if (!user) return 48; // Show static count for unauthenticated users
       const { count } = await supabase
         .from('children')
         .select('*', { count: 'exact', head: true })
@@ -35,6 +37,7 @@ const Index = () => {
   const { data: feedingCount } = useQuery({
     queryKey: ['feeding-count'],
     queryFn: async () => {
+      if (!user) return 2; // Show static count for unauthenticated users
       const { count } = await supabase
         .from('feeding_program')
         .select('*', { count: 'exact', head: true });
@@ -45,6 +48,7 @@ const Index = () => {
   const { data: talentCount } = useQuery({
     queryKey: ['talent-count'],
     queryFn: async () => {
+      if (!user) return 1; // Show static count for unauthenticated users
       const { count } = await supabase
         .from('kipawa_sato')
         .select('*', { count: 'exact', head: true });
