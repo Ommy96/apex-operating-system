@@ -38,6 +38,8 @@ export function ProgramReportForm({ onSuccess, onCancel }: ProgramReportFormProp
     setIsSubmitting(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('program_reports')
         .insert({
@@ -48,6 +50,7 @@ export function ProgramReportForm({ onSuccess, onCancel }: ProgramReportFormProp
           beneficiary_impact: formData.beneficiary_impact,
           challenges: formData.challenges,
           proposed_recommendations: formData.proposed_recommendations,
+          created_by: user?.id,
         });
 
       if (error) throw error;
