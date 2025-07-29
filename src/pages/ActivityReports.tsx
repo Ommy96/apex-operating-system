@@ -13,8 +13,10 @@ import { downloadExcel, formatActivityReportsData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ActivityReports() {
+  const { isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any>(null);
@@ -135,10 +137,12 @@ export default function ActivityReports() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={handleDownload} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Download Excel
-          </Button>
+          {isManagement && (
+            <Button onClick={handleDownload} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Excel
+            </Button>
+          )}
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function FamilyAdoption() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFamily, setEditingFamily] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -225,10 +225,12 @@ export default function FamilyAdoption() {
           </SelectContent>
         </Select>
         
-        <Button onClick={handleDownload} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download Excel
-        </Button>
+        {isManagement && (
+          <Button onClick={handleDownload} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download Excel
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function FeedingProgram() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,10 +120,12 @@ export default function FeedingProgram() {
         </div>
         
         <div className="flex gap-2">
-          <Button onClick={handleDownload} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Download Excel
-          </Button>
+          {isManagement && (
+            <Button onClick={handleDownload} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Excel
+            </Button>
+          )}
           
           {isAdmin && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

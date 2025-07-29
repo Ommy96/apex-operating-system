@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AcademicRecord {
   id: string;
@@ -26,6 +27,7 @@ interface AcademicRecord {
 }
 
 export default function AcademicPerformanceReports() {
+  const { isManagement } = useAuth();
   const [records, setRecords] = useState<AcademicRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<AcademicRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,10 +240,12 @@ export default function AcademicPerformanceReports() {
               <Filter className="h-5 w-5" />
               Filters & Search
             </CardTitle>
+          {isManagement && (
             <Button onClick={downloadExcel} className="gap-2">
               <Download className="h-4 w-4" />
               Download Excel
             </Button>
+          )}
           </div>
         </CardHeader>
         <CardContent>

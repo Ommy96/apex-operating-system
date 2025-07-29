@@ -34,7 +34,7 @@ interface EducationStats {
 }
 
 export default function Education() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManagement } = useAuth();
   const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
@@ -219,10 +219,12 @@ const handleDownload = () => {
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
-        <Button onClick={handleDownload} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Download Excel
-        </Button>
+        {isManagement && (
+          <Button onClick={handleDownload} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download Excel
+          </Button>
+        )}
       </div>
 
       {/* Students Grid */}

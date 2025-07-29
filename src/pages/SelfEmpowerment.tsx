@@ -185,10 +185,12 @@ export default function SelfEmpowerment() {
         </div>
         
         <div className="flex gap-2">
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Download Excel
-          </Button>
+          {isAdmin && (
+            <Button onClick={handleDownload} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Download Excel
+            </Button>
+          )}
           
           {isAdmin && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
