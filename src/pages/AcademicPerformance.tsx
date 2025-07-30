@@ -326,7 +326,7 @@ export default function AcademicPerformance() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
 
   // Fetch academic performance records
   const { data: academicRecords, refetch } = useQuery({
@@ -357,29 +357,29 @@ export default function AcademicPerformance() {
         return recordDate.getMonth() === now.getMonth() && recordDate.getFullYear() === now.getFullYear();
       }).length || 0;
       
-      const subjectBreakdown = academicRecords?.reduce((acc, record) => {
-        const subject = record.title.replace('Academic Performance - ', '');
-        acc[subject] = (acc[subject] || 0) + 1;
+      const courseBreakdown = academicRecords?.reduce((acc, record) => {
+        const course = record.title.replace('Academic Performance - ', '');
+        acc[course] = (acc[course] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {};
       
       const uniqueStudents = new Set(academicRecords?.map(r => r.child_id) || []).size;
       
-      return { totalRecords, thisMonth, subjectBreakdown, uniqueStudents };
+      return { totalRecords, thisMonth, courseBreakdown, uniqueStudents };
     },
     enabled: !!academicRecords,
   });
 
   const filteredRecords = academicRecords?.filter(record => {
     const childName = record.children ? `${record.children.first_name} ${record.children.last_name}` : '';
-    const subject = record.title.replace('Academic Performance - ', '');
+    const course = record.title.replace('Academic Performance - ', '');
     
     const matchesSearch = childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.outcome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = !subjectFilter || subjectFilter === 'all' || subject === subjectFilter;
+    const matchesCourse = !courseFilter || courseFilter === 'all' || course === courseFilter;
     
-    return matchesSearch && matchesSubject;
+    return matchesSearch && matchesCourse;
   });
 
   const handleEdit = (record: any) => {
@@ -417,8 +417,8 @@ export default function AcademicPerformance() {
     setEditingRecord(null);
   };
 
-  // Get unique subjects for filter
-  const subjects = Array.from(new Set(academicRecords?.map(record => 
+  // Get unique courses for filter
+  const courses = Array.from(new Set(academicRecords?.map(record => 
     record.title.replace('Academic Performance - ', '')
   ) || []));
 
@@ -475,21 +475,21 @@ export default function AcademicPerformance() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by student name, subject, or grade..."
+            placeholder="Search by student name, course, or grade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
         
-        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by subject" />
+            <SelectValue placeholder="Filter by course" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Subjects</SelectItem>
-            {subjects.map((subject) => (
-              <SelectItem key={subject} value={subject}>{subject || 'General'}</SelectItem>
+            <SelectItem value="all">All Courses</SelectItem>
+            {courses.map((course) => (
+              <SelectItem key={course} value={course}>{course || 'General'}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -521,12 +521,12 @@ export default function AcademicPerformance() {
 
         <Card className="bg-gradient-to-br from-accent to-accent-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-accent-foreground">Subjects</CardTitle>
+            <CardTitle className="text-sm font-medium text-accent-foreground">Courses</CardTitle>
             <BarChart3 className="h-4 w-4 text-accent-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent-foreground">{Object.keys(recordStats?.subjectBreakdown || {}).length}</div>
-            <p className="text-xs text-accent-foreground/80">Subjects tracked</p>
+            <div className="text-2xl font-bold text-accent-foreground">{Object.keys(recordStats?.courseBreakdown || {}).length}</div>
+            <p className="text-xs text-accent-foreground/80">Courses tracked</p>
           </CardContent>
         </Card>
 
@@ -552,8 +552,11 @@ export default function AcademicPerformance() {
                 </span>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(record.activity_date).toLocaleDateString()}
+                    {(() => {
+                      const year = record.description?.match(/Year: (\d+)/)?.[1];
+                      const term = record.description?.match(/Term: (Term [123])/)?.[1];
+                      return year && term ? `${year} - ${term}` : new Date(record.activity_date).toLocaleDateString();
+                    })()}
                   </Badge>
                   {isAdmin && (
                     <DropdownMenu>
@@ -600,7 +603,7 @@ export default function AcademicPerformance() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Subject:</span>
+                <span className="text-sm font-medium">Course:</span>
                 <Badge variant="secondary">
                   {record.title.replace('Academic Performance - ', '') || 'General'}
                 </Badge>
@@ -611,6 +614,18 @@ export default function AcademicPerformance() {
                   {record.outcome}
                 </Badge>
               </div>
+              {(() => {
+                const year = record.description?.match(/Year: (\d+)/)?.[1];
+                const term = record.description?.match(/Term: (Term [123])/)?.[1];
+                return year && term ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Academic Period:</span>
+                    <Badge variant="outline">
+                      {year} - {term}
+                    </Badge>
+                  </div>
+                ) : null;
+              })()}
               {record.children?.institution_name && (
                 <div className="text-sm">
                   <strong>School:</strong> {record.children.institution_name}
@@ -621,7 +636,7 @@ export default function AcademicPerformance() {
                   <strong>Class:</strong> {record.children.grade}
                 </div>
               )}
-              {record.description && record.description.includes('Notes:') && (
+              {record.description?.includes('Notes:') && (
                 <div className="text-sm">
                   <strong>Notes:</strong> {record.description.split('Notes: ')[1]?.substring(0, 100)}...
                 </div>
