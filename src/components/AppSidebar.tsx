@@ -47,15 +47,22 @@ const programItems = [
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
-const reportsItems = [
-  { title: "Home Visits", url: "/reports/home-visits", icon: Home },
-  { title: "School Visits", url: "/reports/school-visits", icon: EducationIcon },
-  { title: "Program Reports", url: "/reports/program-reports", icon: AnalyticsIcon },
-  { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
-  { title: "Academic Performance", url: "/reports/academic-performance", icon: EducationIcon },
-  { title: "Other Reports", url: "/other-reports", icon: ReportsIcon },
-  { title: "Program Report Generator", url: "/program-report-generator", icon: TrendingUp },
-];
+const getReportsItems = (isManagement: boolean) => {
+  const baseItems = [
+    { title: "Home Visits", url: "/reports/home-visits", icon: Home },
+    { title: "School Visits", url: "/reports/school-visits", icon: EducationIcon },
+    { title: "Program Reports", url: "/reports/program-reports", icon: AnalyticsIcon },
+    { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
+    { title: "Academic Performance", url: "/reports/academic-performance", icon: EducationIcon },
+    { title: "Other Reports", url: "/other-reports", icon: ReportsIcon },
+  ];
+  
+  if (isManagement) {
+    baseItems.push({ title: "Program Report Generator", url: "/program-report-generator", icon: TrendingUp });
+  }
+  
+  return baseItems;
+};
 
 const systemItems = [
   { title: "Settings", url: "/settings", icon: Settings },
@@ -63,7 +70,7 @@ const systemItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { signOut, isAdmin } = useAuth();
+  const { signOut, isAdmin, isManagement } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -135,7 +142,7 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {reportsItems.map((item) => (
+              {getReportsItems(isManagement).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavClasses}>
