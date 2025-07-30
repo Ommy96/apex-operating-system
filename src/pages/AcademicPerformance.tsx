@@ -21,8 +21,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const academicPerformanceSchema = z.object({
   child_id: z.string().min(1, 'Please select a child'),
   academic_grade: z.string().min(1, 'Please enter the academic grade/mark'),
-  subject: z.string().optional(),
-  assessment_date: z.string().min(1, 'Please enter the assessment date'),
+  course: z.string().optional(),
+  year: z.string().min(1, 'Please select a year'),
+  term: z.string().min(1, 'Please select a term/semester'),
   notes: z.string().optional(),
 });
 
@@ -54,8 +55,9 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
     defaultValues: {
       child_id: editingRecord?.child_id || '',
       academic_grade: editingRecord?.outcome || '',
-      subject: editingRecord?.title?.replace('Academic Performance - ', '') || '',
-      assessment_date: editingRecord?.activity_date || '',
+      course: editingRecord?.title?.replace('Academic Performance - ', '') || '',
+      year: editingRecord?.activity_date ? new Date(editingRecord.activity_date).getFullYear().toString() : '',
+      term: editingRecord?.description?.match(/Term: (Term [123])/)?.[1] || '',
       notes: editingRecord?.description?.split('\nNotes: ')[1] || '',
     },
   });
@@ -100,9 +102,9 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
       const activityData = {
         child_id: data.child_id,
         program_id: '9fe13aa8-d378-4a29-91e7-4252945acadc', // Education program UUID
-        title: `Academic Performance - ${data.subject || 'General'}`,
-        description: `Grade/Mark: ${data.academic_grade}${data.notes ? '\nNotes: ' + data.notes : ''}`,
-        activity_date: data.assessment_date,
+        title: `Academic Performance - ${data.course || 'General'}`,
+        description: `Grade/Mark: ${data.academic_grade}\nYear: ${data.year}\nTerm: ${data.term}${data.notes ? '\nNotes: ' + data.notes : ''}`,
+        activity_date: `${data.year}-01-01`, // Use year as a reference date
         outcome: data.academic_grade,
       };
 
@@ -211,10 +213,10 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="subject"
+                name="course"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Subject (Optional)</FormLabel>
+                    <FormLabel>Course (Optional)</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="e.g., Mathematics, English" />
                     </FormControl>
@@ -238,19 +240,55 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="assessment_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assessment Date</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="date" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Year</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="term"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Term/Semester</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select term" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Term 1">Term 1</SelectItem>
+                        <SelectItem value="Term 2">Term 2</SelectItem>
+                        <SelectItem value="Term 3">Term 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
