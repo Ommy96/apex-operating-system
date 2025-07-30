@@ -117,9 +117,10 @@ export default function AcademicPerformanceReports() {
       'Student Name': `${record.children.first_name} ${record.children.last_name}`,
       'School': record.children.institution_name || 'Not specified',
       'Grade/Class': record.children.grade || 'Not specified',
-      'Subject': record.title.replace('Academic Performance - ', ''),
+      'Course': record.title.replace('Academic Performance - ', ''),
       'Score/Grade': record.outcome,
-      'Assessment Date': new Date(record.activity_date).toLocaleDateString(),
+      'Year': new Date(record.activity_date).getFullYear(),
+      'Term/Semester': 'Term 1', // Default since we don't have this data yet
       'Notes': record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '',
     }));
 
@@ -132,9 +133,10 @@ export default function AcademicPerformanceReports() {
       { wch: 20 }, // Student Name
       { wch: 25 }, // School
       { wch: 12 }, // Grade/Class
-      { wch: 15 }, // Subject
+      { wch: 15 }, // Course
       { wch: 12 }, // Score/Grade
-      { wch: 15 }, // Assessment Date
+      { wch: 10 }, // Year
+      { wch: 15 }, // Term/Semester
       { wch: 30 }, // Notes
     ];
     worksheet['!cols'] = colWidths;
@@ -255,7 +257,7 @@ export default function AcademicPerformanceReports() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search students, subjects, grades..."
+                  placeholder="Search students, courses, grades..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -325,9 +327,10 @@ export default function AcademicPerformanceReports() {
                     <TableHead>Student</TableHead>
                     <TableHead>School</TableHead>
                     <TableHead>Grade/Class</TableHead>
-                    <TableHead>Subject</TableHead>
+                    <TableHead>Course</TableHead>
                     <TableHead>Score/Grade</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Term/Semester</TableHead>
                     <TableHead>Notes</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -345,7 +348,8 @@ export default function AcademicPerformanceReports() {
                           {record.outcome}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date(record.activity_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(record.activity_date).getFullYear()}</TableCell>
+                      <TableCell>Term 1</TableCell>
                       <TableCell className="max-w-xs truncate">
                         {record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '-'}
                       </TableCell>
