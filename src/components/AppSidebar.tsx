@@ -58,7 +58,7 @@ const getReportsItems = (isManagement: boolean) => {
   ];
   
   if (isManagement) {
-    baseItems.push({ title: "Program Report Generator", url: "/program-report-generator", icon: TrendingUp });
+    baseItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp });
   }
   
   return baseItems;

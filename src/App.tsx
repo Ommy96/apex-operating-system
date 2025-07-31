@@ -19,7 +19,7 @@ import OtherReports from "./pages/OtherReports";
 import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
-import { ProgramReportGenerator } from "./pages/ProgramReportGenerator";
+import ReportsAnalytics from "./pages/ReportsAnalytics";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
 import FamilyAdoption from "./pages/FamilyAdoption";
@@ -171,10 +171,10 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/program-report-generator" element={
+            <Route path="/reports-analytics" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ProgramReportGenerator />
+                  <ReportsAnalytics />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
