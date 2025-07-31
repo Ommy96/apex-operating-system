@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Filter, Download, Edit, Trash2, Users, User } from "lucide-react";
+import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ export default function FeedingProgram() {
   const { isAdmin, isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
+  const [viewingProgram, setViewingProgram] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
@@ -53,6 +55,11 @@ export default function FeedingProgram() {
   const handleEdit = (program: any) => {
     setEditingProgram(program);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (program: any) => {
+    setViewingProgram(program);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = async (programId: string) => {
@@ -275,44 +282,55 @@ export default function FeedingProgram() {
                 </Badge>
               )}
               
-              {isAdmin && (
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(program)}
-                    className="flex-1"
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete {program.name}? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(program.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
+              <div className="flex gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(program)}
+                  className="flex-1"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                {isAdmin && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(program)}
+                      className="flex-1"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                          <Trash2 className="h-3 w-3 mr-1" />
                           Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {program.name}? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(program.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -323,6 +341,74 @@ export default function FeedingProgram() {
           <p className="text-muted-foreground">No feeding program beneficiaries found.</p>
         </div>
       )}
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Beneficiary Details</DialogTitle>
+          </DialogHeader>
+          {viewingProgram && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Name</h4>
+                  <p className="text-base">{viewingProgram.name}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Program Type</h4>
+                  <Badge variant={viewingProgram.type === 'Kawangware Lunch Hour' ? 'default' : 'secondary'}>
+                    {viewingProgram.type}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
+                  <p className="text-base">{viewingProgram.gender || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Academic Level</h4>
+                  <p className="text-base">{viewingProgram.academic_level || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Grade</h4>
+                  <p className="text-base">{viewingProgram.grade || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">School</h4>
+                  <p className="text-base">{viewingProgram.school || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Contact Information</h4>
+                <p className="text-base">{viewingProgram.contact || 'Not provided'}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Education Sponsorship</h4>
+                {viewingProgram.education_sponsorship ? (
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    Active Education Sponsorship
+                  </Badge>
+                ) : (
+                  <p className="text-base text-muted-foreground">No education sponsorship</p>
+                )}
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
+                <p className="text-base">{new Date(viewingProgram.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
