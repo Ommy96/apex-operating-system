@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, MapPin, Download, FileText, Users, TrendingUp, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Calendar, MapPin, Download, FileText, Users, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,8 @@ export default function HomeVisitReports() {
   const { isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [viewingReport, setViewingReport] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
 
@@ -88,6 +90,11 @@ export default function HomeVisitReports() {
   const handleEdit = (report: any) => {
     setEditingReport(report);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (report: any) => {
+    setViewingReport(report);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = async (reportId: string) => {
@@ -242,44 +249,6 @@ export default function HomeVisitReports() {
                     <Calendar className="h-3 w-3 mr-1" />
                     {new Date(report.visit_date).toLocaleDateString()}
                   </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <span className="sr-only">Actions</span>
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01" />
-                        </svg>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(report)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Report</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this home visit report? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(report.id)}>
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -301,6 +270,49 @@ export default function HomeVisitReports() {
               <div className="text-sm">
                 <strong>Challenges:</strong> {report.challenges_identified.substring(0, 100)}...
               </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(report)}
+                  className="flex-1"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEdit(report)}
+                  className="flex-1"
+                >
+                  <Edit className="h-3 w-3 mr-1" />
+                  Edit
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Report</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this home visit report? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(report.id)}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -311,6 +323,65 @@ export default function HomeVisitReports() {
           <p className="text-muted-foreground">No home visit reports found.</p>
         </div>
       )}
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Home Visit Report Details</DialogTitle>
+          </DialogHeader>
+          {viewingReport && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Staff Member</h4>
+                  <p className="text-base">{viewingReport.staff}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Visit Date</h4>
+                  <p className="text-base">{new Date(viewingReport.visit_date).toLocaleDateString()}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Location</h4>
+                  <p className="text-base">{viewingReport.location || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Student ID</h4>
+                  <p className="text-base">{viewingReport.student_id || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Reason for Visit</h4>
+                <p className="text-base">{viewingReport.reason_for_visit || 'Not specified'}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Observation Findings</h4>
+                <p className="text-base whitespace-pre-wrap">{viewingReport.observation_findings}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Challenges Identified</h4>
+                <p className="text-base whitespace-pre-wrap">{viewingReport.challenges_identified}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Recommendations</h4>
+                <p className="text-base whitespace-pre-wrap">{viewingReport.recommendations}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Report Created</h4>
+                <p className="text-base">{new Date(viewingReport.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

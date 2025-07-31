@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Trophy, Star, Download, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ export default function KipawaSato() {
   const { isAdmin, isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+  const [viewingMember, setViewingMember] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
@@ -53,6 +55,11 @@ export default function KipawaSato() {
   const handleEdit = (member: any) => {
     setEditingMember(member);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (member: any) => {
+    setViewingMember(member);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = async (memberId: string) => {
@@ -241,44 +248,55 @@ export default function KipawaSato() {
                 </Badge>
               )}
               
-              {isAdmin && (
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(member)}
-                    className="flex-1"
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Member</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete {member.full_name}? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(member.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
+              <div className="flex gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(member)}
+                  className="flex-1"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                {isAdmin && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(member)}
+                      className="flex-1"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                          <Trash2 className="h-3 w-3 mr-1" />
                           Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Member</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {member.full_name}? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(member.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -289,6 +307,95 @@ export default function KipawaSato() {
           <p className="text-muted-foreground">No Kipawa Sato members found.</p>
         </div>
       )}
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Member Details</DialogTitle>
+          </DialogHeader>
+          {viewingMember && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Full Name</h4>
+                  <p className="text-base">{viewingMember.full_name}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Talent Category</h4>
+                  <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                    {getTalentIcon(viewingMember.talent_category)}
+                    {viewingMember.talent_category}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Age</h4>
+                  <p className="text-base">{viewingMember.age || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
+                  <p className="text-base">{viewingMember.gender || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Specific Skill</h4>
+                  <p className="text-base">{viewingMember.specific_skill || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Location</h4>
+                  <p className="text-base">{viewingMember.location || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Academic Level</h4>
+                  <p className="text-base">{viewingMember.academic_level || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Year Enrolled</h4>
+                  <p className="text-base">{viewingMember.year_enrolled || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              {viewingMember.coach_mentor_name && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Coach/Mentor</h4>
+                  <p className="text-base">{viewingMember.coach_mentor_name}</p>
+                </div>
+              )}
+              
+              {viewingMember.awards_recognition && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Awards & Recognition</h4>
+                  <p className="text-base">{viewingMember.awards_recognition}</p>
+                </div>
+              )}
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">School Support</h4>
+                {viewingMember.school_support_given ? (
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    School Support Given
+                  </Badge>
+                ) : (
+                  <p className="text-base text-muted-foreground">No school support provided</p>
+                )}
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
+                <p className="text-base">{new Date(viewingMember.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

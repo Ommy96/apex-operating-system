@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Download, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ export default function FamilyAdoption() {
   const { isAdmin, isManagement } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFamily, setEditingFamily] = useState<any>(null);
+  const [viewingFamily, setViewingFamily] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [residenceFilter, setResidenceFilter] = useState("");
@@ -52,6 +54,11 @@ export default function FamilyAdoption() {
   const handleEdit = (family: any) => {
     setEditingFamily(family);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (family: any) => {
+    setViewingFamily(family);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = async (familyId: string) => {
@@ -243,38 +250,6 @@ export default function FamilyAdoption() {
                   <Badge variant={family.category === 'Guardian Ration' ? 'default' : 'secondary'}>
                     {family.category}
                   </Badge>
-                  {isAdmin && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(family)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Family Record</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete {family.known_name}'s record? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(family.id)}>
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
                 </div>
               </CardTitle>
             </CardHeader>
@@ -296,6 +271,53 @@ export default function FamilyAdoption() {
               <div className="text-sm text-muted-foreground">
                 <strong>Sponsor:</strong> {family.sponsor || 'Not specified'}
               </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(family)}
+                  className="flex-1"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                {isAdmin && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(family)}
+                      className="flex-1"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="flex-1 text-red-600 hover:text-red-700">
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Family Record</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {family.known_name}'s record? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(family.id)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -306,6 +328,65 @@ export default function FamilyAdoption() {
           <p className="text-muted-foreground">No family adoption records found.</p>
         </div>
       )}
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Family Details</DialogTitle>
+          </DialogHeader>
+          {viewingFamily && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Known Name</h4>
+                  <p className="text-base">{viewingFamily.known_name}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Category</h4>
+                  <Badge variant={viewingFamily.category === 'Guardian Ration' ? 'default' : 'secondary'}>
+                    {viewingFamily.category}
+                  </Badge>
+                </div>
+              </div>
+              
+              {viewingFamily.actual_name && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Actual Name</h4>
+                  <p className="text-base">{viewingFamily.actual_name}</p>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
+                  <p className="text-base">{viewingFamily.gender || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Residence</h4>
+                  <p className="text-base">{viewingFamily.residence || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Number of Beneficiaries</h4>
+                  <p className="text-base">{viewingFamily.no_of_beneficiaries || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Sponsor</h4>
+                  <p className="text-base">{viewingFamily.sponsor || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
+                <p className="text-base">{new Date(viewingFamily.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
