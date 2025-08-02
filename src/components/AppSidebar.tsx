@@ -13,6 +13,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Heart,
   LayoutDashboard,
@@ -69,17 +70,24 @@ const systemItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const { signOut, isAdmin, isManagement } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
+  const isMobile = useIsMobile();
 
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
     isActive 
       ? "bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground font-semibold shadow-elevation-2 rounded-2xl glow-effect" 
       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-elevation-1 rounded-2xl transition-all duration-300 hover-lift micro-interaction";
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -109,7 +117,7 @@ export function AppSidebar() {
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="ripple">
-                    <NavLink to={item.url} end className={getNavClasses}>
+                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
                     </NavLink>
@@ -127,7 +135,7 @@ export function AppSidebar() {
               {programItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavClasses}>
+                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -145,7 +153,7 @@ export function AppSidebar() {
               {getReportsItems(isManagement).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavClasses}>
+                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -164,7 +172,7 @@ export function AppSidebar() {
                 {systemItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink to={item.url} end className={getNavClasses}>
+                      <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
                         <item.icon className="h-4 w-4" />
                         {!isCollapsed && <span>{item.title}</span>}
                       </NavLink>
