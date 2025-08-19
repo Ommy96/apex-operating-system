@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award, Download, Users, Building2, MapPin } from 'lucide-react';
+import { GraduationCap, Plus, Search, Filter, Eye, Edit2, BookOpen, Award, Download, Users, Building2, MapPin, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -24,6 +26,7 @@ interface Child {
   institution_name: string;
   enrollment_date: string;
   status: string;
+  residence: string;
 }
 
 interface EducationStats {
@@ -33,12 +36,45 @@ interface EducationStats {
   percentageInKibera: number;
 }
 
+type ResidenceType = 'Kibera' | 'Kawangware' | 'Diaspora' | 'Outside Nairobi';
+type AcademicLevelType = 'Pre Primary' | 'Lower Primary' | 'Upper Primary' | 'Junior Secondary' | 'Secondary School' | 'Tertiary' | 'Special School' | 'Junior School';
+
+interface Filters {
+  location: string;
+  academicLevel: string;
+}
+
 export default function Education() {
   const { isAdmin, isManagement } = useAuth();
   const navigate = useNavigate();
+  
+  const academicLevels = [
+    'Pre Primary',
+    'Lower Primary',
+    'Upper Primary',
+    'Junior Secondary',
+    'Secondary School',
+    'Tertiary',
+    'Special School',
+    'Junior School'
+  ];
+
+  const residenceTypes = [
+    'Kibera',
+    'Kawangware', 
+    'Diaspora',
+    'Outside Nairobi'
+  ];
+  
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Filters>({
+    location: '',
+    academicLevel: ''
+  });
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
   const [stats, setStats] = useState<EducationStats>({
     totalStudents: 0,
     numberOfMale: 0,
@@ -49,6 +85,12 @@ export default function Education() {
   useEffect(() => {
     fetchEducationData();
   }, []);
+
+  useEffect(() => {
+    if (filters.location || filters.academicLevel) {
+      fetchFilteredData();
+    }
+  }, [filters]);
 
   const fetchEducationData = async () => {
     try {
@@ -61,6 +103,9 @@ export default function Education() {
       if (error) throw error;
       
       setChildren(data || []);
+      
+      // Get unique locations for filter - use all available residence types
+      setAvailableLocations(residenceTypes);
       
       // Calculate stats
       const totalStudents = data?.length || 0;
@@ -87,11 +132,52 @@ export default function Education() {
     }
   };
 
+  const fetchFilteredData = async () => {
+    setFilterLoading(true);
+    try {
+      let query = supabase
+        .from('children')
+        .select('*')
+        .not('academic_level', 'is', null);
+
+      if (filters.location) {
+        query = query.eq('residence', filters.location as ResidenceType);
+      }
+
+      if (filters.academicLevel) {
+        query = query.eq('academic_level', filters.academicLevel as AcademicLevelType);
+      }
+
+      const { data, error } = await query.order('first_name');
+
+      if (error) throw error;
+      
+      setChildren(data || []);
+    } catch (error) {
+      console.error('Error fetching filtered data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to apply filters",
+        variant: "destructive",
+      });
+    } finally {
+      setFilterLoading(false);
+    }
+  };
+
   const filteredChildren = children.filter(child =>
     `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     child.institution_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     child.academic_level?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+
+  const clearFilters = () => {
+    setFilters({ location: '', academicLevel: '' });
+    fetchEducationData();
+  };
+
+  const hasActiveFilters = filters.location || filters.academicLevel;
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -205,7 +291,7 @@ const handleDownload = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -215,17 +301,125 @@ const handleDownload = () => {
             className="pl-10"
           />
         </div>
-        <Button variant="outline">
-          <Filter className="h-4 w-4 mr-2" />
-          Filter
-        </Button>
-        {isManagement && (
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Download Excel
-          </Button>
-        )}
+        
+        <div className="flex gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={hasActiveFilters ? 'border-primary' : ''}>
+                {filterLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Filter className="h-4 w-4 mr-2" />
+                )}
+                Filter
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="ml-2 h-5 min-w-5 flex items-center justify-center p-0">
+                    {Object.values(filters).filter(Boolean).length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Filter Students</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Filter by location and academic level
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Location</label>
+                    <Select
+                      value={filters.location}
+                      onValueChange={(value) => setFilters(prev => ({ ...prev, location: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {residenceTypes.map((location) => (
+                          <SelectItem key={location} value={location}>
+                            {location}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Academic Level</label>
+                    <Select
+                      value={filters.academicLevel}
+                      onValueChange={(value) => setFilters(prev => ({ ...prev, academicLevel: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select academic level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {academicLevels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {hasActiveFilters && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearFilters}
+                    className="w-full"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          {isManagement && (
+            <Button onClick={handleDownload} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Download Excel</span>
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Active Filters Display */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm text-muted-foreground">Active filters:</span>
+          {filters.location && (
+            <Badge variant="secondary" className="gap-1">
+              Location: {filters.location}
+              <button
+                onClick={() => setFilters(prev => ({ ...prev, location: '' }))}
+                className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {filters.academicLevel && (
+            <Badge variant="secondary" className="gap-1">
+              Level: {filters.academicLevel}
+              <button
+                onClick={() => setFilters(prev => ({ ...prev, academicLevel: '' }))}
+                className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
 
       {/* Students Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
