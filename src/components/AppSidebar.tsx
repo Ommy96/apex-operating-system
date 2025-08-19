@@ -40,7 +40,6 @@ const mainMenuItems = [
 ];
 
 const programItems = [
-  { title: "Education", url: "/programs/education", icon: EducationIcon },
   { title: "Feeding Program", url: "/programs/feeding", icon: FeedingIcon },
   { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: KipawaIcon },
   { title: "Family Adoption", url: "/programs/family-adoption", icon: HeartIcon },
