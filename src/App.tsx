@@ -9,7 +9,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
-import Education from "./pages/Education";
+
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
 import HomeVisitReports from "./pages/HomeVisitReports";
@@ -65,13 +65,6 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ChildProfile />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/education" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Education />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
