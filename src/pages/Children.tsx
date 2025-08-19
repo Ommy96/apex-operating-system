@@ -690,20 +690,37 @@ export default function Children() {
                       size="sm" 
                       variant="outline" 
                       className="flex-1"
-                      onClick={() => navigate(`/reports/academic-performance?childId=${child.id}`)}
+                      onClick={() => navigate(`/children/${child.id}`)}
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      View Progress
+                      View
                     </Button>
                     {isAdmin && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => navigate(`/children/${child.id}`)}
-                      >
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the child's record and all associated data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(child.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </CardContent>
