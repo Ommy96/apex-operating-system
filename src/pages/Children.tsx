@@ -75,7 +75,7 @@ export default function Children() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
+  
   const [filters, setFilters] = useState<Filters>({
     location: '',
     academicLevel: ''
@@ -111,10 +111,10 @@ export default function Children() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'education' && (filters.location || filters.academicLevel)) {
+    if (filters.location || filters.academicLevel) {
       fetchFilteredData();
     }
-  }, [filters, activeTab]);
+  }, [filters]);
 
   const fetchChildren = async () => {
     try {
@@ -218,11 +218,8 @@ export default function Children() {
   const hasActiveFilters = filters.location || filters.academicLevel;
 
   const getFilteredChildren = () => {
-    let filtered = children;
-    
-    if (activeTab === 'education') {
-      filtered = children.filter(child => child.academic_level);
-    }
+    // Only show children with academic_level (education program)
+    const filtered = children.filter(child => child.academic_level);
     
     return filtered.filter(child =>
       `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -284,22 +281,11 @@ export default function Children() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            {activeTab === 'education' ? (
-              <>
-                <GraduationCap className="h-8 w-8" />
-                Children & Education
-              </>
-            ) : (
-              <>
-                Children & Education
-              </>
-            )}
+            <GraduationCap className="h-8 w-8" />
+            Children & Education
           </h1>
           <p className="text-muted-foreground">
-            {activeTab === 'education' 
-              ? 'Monitor academic progress and educational support'
-              : 'Manage child profiles and information'
-            }
+            Monitor academic progress and educational support
           </p>
         </div>
         {isAdmin && (
@@ -331,133 +317,8 @@ export default function Children() {
         )}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="all">All Children</TabsTrigger>
-          <TabsTrigger value="education">Education Program</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by name or guardian..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredChildren.map((child) => (
-              <Card key={child.id} className="bg-gradient-card border-white/20 shadow-strong hover:shadow-medium transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-105">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <Avatar className="h-14 w-14 ring-2 ring-primary/20 shadow-medium">
-                        <AvatarImage src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
-                        <AvatarFallback className="bg-gradient-primary text-white font-bold">{getInitials(child.first_name, child.last_name)}</AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-secondary rounded-full border-2 border-white shadow-sm"></div>
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg bg-gradient-primary bg-clip-text text-transparent">{child.first_name} {child.last_name}</CardTitle>
-                      <CardDescription className="font-medium">
-                        {child.date_of_birth && `Age ${calculateAge(child.date_of_birth)}`} • {child.gender}
-                      </CardDescription>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">⋮</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/children/${child.id}`)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Profile
-                        </DropdownMenuItem>
-                        {isAdmin && (
-                          <>
-                            <DropdownMenuItem onClick={() => {
-                              setEditingChild(child);
-                              setIsDialogOpen(true);
-                            }}>
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the child's record and all associated data.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(child.id)}>
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Guardian:</span>
-                      <span>{child.guardian_name || 'Not specified'}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Phone:</span>
-                      <span>{child.guardian_phone || 'Not specified'}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Status:</span>
-                      <Badge variant={child.status === 'active' ? 'default' : 'secondary'}>
-                        {child.status}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Enrolled:</span>
-                      <span>{new Date(child.enrollment_date).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="flex-1 bg-gradient-primary hover:bg-gradient-primary/90 shadow-soft"
-                      onClick={() => navigate(`/children/${child.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                    <Button size="sm" className="bg-gradient-secondary hover:bg-gradient-secondary/90 shadow-soft">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Report
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="education" className="space-y-6">
+      {/* Education Program Content */}
+      <div className="space-y-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
@@ -727,15 +588,14 @@ export default function Children() {
               </Card>
             ))}
           </div>
-        </TabsContent>
-      </Tabs>
-
-      {filteredChildren.length === 0 && (
-        <div className="text-center py-12">
-          <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No children found matching your criteria.</p>
         </div>
-      )}
-    </div>
-  );
-}
+
+        {filteredChildren.length === 0 && (
+          <div className="text-center py-12">
+            <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No children found matching your criteria.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
