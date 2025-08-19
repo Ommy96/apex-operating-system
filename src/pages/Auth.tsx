@@ -6,10 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { supabase } from '@/integrations/supabase/client';
+import { CheckCircle2, Mail } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -26,12 +30,20 @@ const signUpSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email'),
+});
+
 type SignInFormData = z.infer<typeof signInSchema>;
 type SignUpFormData = z.infer<typeof signUpSchema>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function Auth() {
   const { user, signIn, signUp, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const signInForm = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
@@ -48,6 +60,13 @@ export default function Auth() {
       email: '',
       password: '',
       confirmPassword: '',
+    },
+  });
+
+  const forgotPasswordForm = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
     },
   });
 
@@ -73,6 +92,25 @@ export default function Auth() {
     setIsLoading(true);
     await signUp(data.email, data.password, data.fullName);
     setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (data: ForgotPasswordFormData) => {
+    setIsForgotPasswordLoading(true);
+    
+    const redirectUrl = `${window.location.origin}/reset-password`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: redirectUrl,
+    });
+    
+    setIsForgotPasswordLoading(false);
+    
+    if (error) {
+      console.error('Error sending password reset email:', error);
+    } else {
+      setForgotPasswordSuccess(true);
+      forgotPasswordForm.reset();
+    }
   };
 
   return (
@@ -124,6 +162,80 @@ export default function Auth() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>
+                  
+                  <div className="text-center">
+                    <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="text-sm text-muted-foreground hover:text-primary">
+                          Forgot your password?
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Mail className="h-5 w-5" />
+                            Reset Password
+                          </DialogTitle>
+                          <DialogDescription>
+                            Enter your email address and we'll send you a link to reset your password.
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        {forgotPasswordSuccess ? (
+                          <Alert className="border-success/50 bg-success/10">
+                            <CheckCircle2 className="h-4 w-4 text-success" />
+                            <AlertDescription className="text-success">
+                              Password reset email sent! Check your inbox and follow the instructions to reset your password.
+                            </AlertDescription>
+                          </Alert>
+                        ) : (
+                          <Form {...forgotPasswordForm}>
+                            <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
+                              <FormField
+                                control={forgotPasswordForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="email" 
+                                        placeholder="Enter your email address" 
+                                        {...field} 
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <div className="flex gap-3">
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  className="flex-1"
+                                  onClick={() => {
+                                    setForgotPasswordOpen(false);
+                                    setForgotPasswordSuccess(false);
+                                    forgotPasswordForm.reset();
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  type="submit" 
+                                  className="flex-1" 
+                                  disabled={isForgotPasswordLoading}
+                                >
+                                  {isForgotPasswordLoading ? 'Sending...' : 'Send Reset Email'}
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </form>
               </Form>
             </TabsContent>
