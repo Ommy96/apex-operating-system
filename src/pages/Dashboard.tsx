@@ -355,20 +355,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Real-time Activity & Live Users */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <LiveUserPresence 
-          channelName="dashboard_page" 
-          pageName="dashboard" 
-        />
-        
-        <ActivityFeed 
-          activities={recentActivity}
-          maxItems={5}
-          showTimestamp={true}
-          className="h-fit"
-        />
-      </div>
 
       {/* Role-based Permissions Demo - Shows current user's access level */}
       {isStaff && (
