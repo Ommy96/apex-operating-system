@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CalendarIcon, Download, Filter, RefreshCw, BarChart3, PieChart, TrendingUp, Users, Activity, Target, DollarSign, MapPin, FileText, Brain, ExternalLink, Eye } from "lucide-react";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CalendarIcon, Download, Filter, RefreshCw, BarChart3, PieChart, TrendingUp, Users, Activity, Target, DollarSign, MapPin, FileText, Brain, ExternalLink, Eye, ArrowUpDown, Search, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,11 +55,20 @@ export default function ReportsAnalytics() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
+  const [selectedReportType, setSelectedReportType] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortField, setSortField] = useState<string>("created_at");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [staffReports, setStaffReports] = useState<StaffReport[]>([]);
+  const [allStaffReports, setAllStaffReports] = useState<StaffReport[]>([]);
   const [programLinks, setProgramLinks] = useState<ProgramLink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPrograms();
@@ -70,6 +81,86 @@ export default function ReportsAnalytics() {
     generateAnalytics();
     fetchStaffReports();
   }, [dateRange, selectedProgram, selectedLocation]);
+
+  // Filtered and sorted staff reports
+  const filteredStaffReports = useMemo(() => {
+    let filtered = [...allStaffReports];
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(report => 
+        report.staff_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.report_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (report.program_name && report.program_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (report.location && report.location.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    // Apply report type filter
+    if (selectedReportType !== "all") {
+      filtered = filtered.filter(report => {
+        switch (selectedReportType) {
+          case "activity": return report.report_type === "Activity Report";
+          case "home": return report.report_type === "Home Visit Report";
+          case "school": return report.report_type === "School Visit Report";
+          case "program": return report.report_type === "Program Report";
+          default: return true;
+        }
+      });
+    }
+
+    // Apply program filter
+    if (selectedProgram !== "all") {
+      const programName = programs.find(p => p.id === selectedProgram)?.name;
+      if (programName) {
+        filtered = filtered.filter(report => report.program_name === programName);
+      }
+    }
+
+    // Apply location filter
+    if (selectedLocation !== "all") {
+      filtered = filtered.filter(report => report.location === selectedLocation);
+    }
+
+    // Apply date range filter
+    if (dateRange?.from) {
+      filtered = filtered.filter(report => 
+        new Date(report.created_at) >= dateRange.from!
+      );
+    }
+    if (dateRange?.to) {
+      filtered = filtered.filter(report => 
+        new Date(report.created_at) <= dateRange.to!
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue: any = a[sortField as keyof StaffReport] || "";
+      let bValue: any = b[sortField as keyof StaffReport] || "";
+      
+      if (sortField === "created_at") {
+        aValue = new Date(aValue as string).getTime();
+        bValue = new Date(bValue as string).getTime();
+      }
+      
+      if (sortDirection === "asc") {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+    return filtered;
+  }, [allStaffReports, searchQuery, selectedReportType, selectedProgram, selectedLocation, dateRange, sortField, sortDirection, programs]);
+
+  // Paginated reports
+  const paginatedReports = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredStaffReports.slice(startIndex, startIndex + pageSize);
+  }, [filteredStaffReports, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredStaffReports.length / pageSize);
 
   const fetchPrograms = async () => {
     try {
@@ -88,15 +179,25 @@ export default function ReportsAnalytics() {
 
   const fetchStaffReports = async () => {
     try {
+      setError(null);
       const reports: StaffReport[] = [];
       
-      // Fetch activity reports
-      const { data: activityReports } = await supabase
-        .from('activity_reports')
-        .select('id, staff, created_at, program')
-        .order('created_at', { ascending: false });
+      // Use Promise.all for better performance
+      const [activityReports, homeReports, schoolReports, programReports] = await Promise.all([
+        supabase.from('activity_reports').select('id, staff, created_at, program').order('created_at', { ascending: false }),
+        supabase.from('home_visit_reports').select('id, staff, created_at, location').order('created_at', { ascending: false }),
+        supabase.from('school_visit_reports').select('id, staff, created_at, location').order('created_at', { ascending: false }),
+        supabase.from('program_reports').select('id, staff, created_at, program').order('created_at', { ascending: false })
+      ]);
+
+      // Check for errors
+      if (activityReports.error) throw activityReports.error;
+      if (homeReports.error) throw homeReports.error;
+      if (schoolReports.error) throw schoolReports.error;
+      if (programReports.error) throw programReports.error;
       
-      activityReports?.forEach(report => {
+      // Process activity reports
+      activityReports.data?.forEach(report => {
         reports.push({
           id: report.id,
           staff_name: report.staff,
@@ -106,13 +207,8 @@ export default function ReportsAnalytics() {
         });
       });
 
-      // Fetch home visit reports
-      const { data: homeReports } = await supabase
-        .from('home_visit_reports')
-        .select('id, staff, created_at, location')
-        .order('created_at', { ascending: false });
-      
-      homeReports?.forEach(report => {
+      // Process home visit reports
+      homeReports.data?.forEach(report => {
         reports.push({
           id: report.id,
           staff_name: report.staff,
@@ -122,13 +218,8 @@ export default function ReportsAnalytics() {
         });
       });
 
-      // Fetch school visit reports
-      const { data: schoolReports } = await supabase
-        .from('school_visit_reports')
-        .select('id, staff, created_at, location')
-        .order('created_at', { ascending: false });
-      
-      schoolReports?.forEach(report => {
+      // Process school visit reports
+      schoolReports.data?.forEach(report => {
         reports.push({
           id: report.id,
           staff_name: report.staff,
@@ -138,13 +229,8 @@ export default function ReportsAnalytics() {
         });
       });
 
-      // Fetch program reports
-      const { data: programReports } = await supabase
-        .from('program_reports')
-        .select('id, staff, created_at, program')
-        .order('created_at', { ascending: false });
-      
-      programReports?.forEach(report => {
+      // Process program reports
+      programReports.data?.forEach(report => {
         reports.push({
           id: report.id,
           staff_name: report.staff,
@@ -154,23 +240,12 @@ export default function ReportsAnalytics() {
         });
       });
 
-      // Sort by date and filter based on date range
-      let filteredReports = reports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
-      if (dateRange?.from) {
-        filteredReports = filteredReports.filter(report => 
-          new Date(report.created_at) >= dateRange.from!
-        );
-      }
-      if (dateRange?.to) {
-        filteredReports = filteredReports.filter(report => 
-          new Date(report.created_at) <= dateRange.to!
-        );
-      }
-
-      setStaffReports(filteredReports);
+      // Sort by date
+      const sortedReports = reports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setAllStaffReports(sortedReports);
     } catch (error) {
       console.error('Error fetching staff reports:', error);
+      setError('Failed to fetch staff reports');
       toast.error('Failed to fetch staff reports');
     }
   };
@@ -287,8 +362,100 @@ export default function ReportsAnalytics() {
   };
 
   const exportData = async (format: 'csv' | 'pdf') => {
-    toast.info(`Exporting data as ${format.toUpperCase()}...`);
-    // Implementation for export functionality
+    setExporting(true);
+    try {
+      toast.info(`Exporting data as ${format.toUpperCase()}...`);
+      
+      if (format === 'csv') {
+        // Create CSV content
+        const headers = ['Staff Member', 'Report Type', 'Date Submitted', 'Program/Location'];
+        const csvContent = [
+          headers.join(','),
+          ...filteredStaffReports.map(report => [
+            `"${report.staff_name}"`,
+            `"${report.report_type}"`,
+            `"${new Date(report.created_at).toLocaleDateString()}"`,
+            `"${report.program_name || report.location || '-'}"`
+          ].join(','))
+        ].join('\n');
+
+        // Download CSV
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reports-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        toast.success('CSV exported successfully!');
+      } else {
+        // For PDF export, we'll use a simple approach
+        toast.info('PDF export functionality will be implemented with a PDF library');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        generateAnalytics(), 
+        fetchStaffReports()
+      ]);
+      toast.success('Data refreshed successfully!');
+    } catch (error) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+    setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  const viewReport = (report: StaffReport) => {
+    // Navigate to appropriate report page based on report type
+    switch (report.report_type) {
+      case 'Activity Report':
+        navigate('/activity-reports');
+        break;
+      case 'Home Visit Report':
+        navigate('/home-visit-reports');
+        break;
+      case 'School Visit Report':
+        navigate('/school-visit-reports');
+        break;
+      case 'Program Report':
+        navigate('/program-reports');
+        break;
+      default:
+        toast.info('Report details will be shown here');
+    }
+  };
+
+  const clearFilters = () => {
+    setDateRange(undefined);
+    setSelectedProgram("all");
+    setSelectedLocation("all");
+    setSelectedReportType("all");
+    setSearchQuery("");
+    setCurrentPage(1);
+    toast.success('Filters cleared');
   };
 
   if (loading) {
@@ -309,17 +476,17 @@ export default function ReportsAnalytics() {
           <p className="text-muted-foreground">Comprehensive reporting hub with AI-powered insights</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => exportData('csv')}>
+          <Button variant="outline" onClick={() => exportData('csv')} disabled={exporting}>
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            {exporting ? 'Exporting...' : 'Export CSV'}
           </Button>
-          <Button variant="outline" onClick={() => exportData('pdf')}>
+          <Button variant="outline" onClick={() => exportData('pdf')} disabled={exporting}>
             <Download className="h-4 w-4 mr-2" />
-            Export PDF
+            {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
-          <Button onClick={() => { generateAnalytics(); fetchStaffReports(); }}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+          <Button onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
       </div>
@@ -333,7 +500,7 @@ export default function ReportsAnalytics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="date-range">Date Range</Label>
               <Popover>
@@ -366,6 +533,7 @@ export default function ReportsAnalytics() {
                     selected={dateRange}
                     onSelect={setDateRange}
                     numberOfMonths={2}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -402,7 +570,45 @@ export default function ReportsAnalytics() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <Label>Actions</Label>
+              <Button variant="outline" onClick={clearFilters} className="w-full">
+                Clear Filters
+              </Button>
+            </div>
           </div>
+
+          {/* Filter Summary */}
+          {(dateRange || selectedProgram !== "all" || selectedLocation !== "all" || selectedReportType !== "all" || searchQuery) && (
+            <div className="mt-4 p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Filter className="h-4 w-4" />
+                <span className="text-sm font-medium">Active Filters:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {dateRange && (
+                  <Badge variant="secondary">
+                    Date: {format(dateRange.from!, "MMM dd")} - {dateRange.to ? format(dateRange.to, "MMM dd") : "Present"}
+                  </Badge>
+                )}
+                {selectedProgram !== "all" && (
+                  <Badge variant="secondary">
+                    Program: {programs.find(p => p.id === selectedProgram)?.name}
+                  </Badge>
+                )}
+                {selectedLocation !== "all" && (
+                  <Badge variant="secondary">Location: {selectedLocation}</Badge>
+                )}
+                {selectedReportType !== "all" && (
+                  <Badge variant="secondary">Type: {selectedReportType}</Badge>
+                )}
+                {searchQuery && (
+                  <Badge variant="secondary">Search: "{searchQuery}"</Badge>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -476,13 +682,18 @@ export default function ReportsAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex gap-4 items-center">
-                  <Input 
-                    placeholder="Search by staff name..." 
-                    className="max-w-sm"
-                  />
-                  <Select defaultValue="all">
-                    <SelectTrigger className="w-48">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search by staff name, report type..." 
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <Select value={selectedReportType} onValueChange={setSelectedReportType}>
+                    <SelectTrigger className="w-full sm:w-48">
                       <SelectValue placeholder="Report Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -494,37 +705,132 @@ export default function ReportsAnalytics() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-sm">{error}</span>
+                  </div>
+                )}
+
+                {filteredStaffReports.length === 0 && !loading && (
+                  <div className="text-center py-8">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-muted-foreground">No reports found</h3>
+                    <p className="text-sm text-muted-foreground">Try adjusting your filters or search criteria</p>
+                  </div>
+                )}
                 
-                <div className="border rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Staff Member</TableHead>
-                        <TableHead>Report Type</TableHead>
-                        <TableHead>Date Submitted</TableHead>
-                        <TableHead>Program/Location</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {staffReports.slice(0, 10).map((report) => (
-                        <TableRow key={report.id}>
-                          <TableCell className="font-medium">{report.staff_name}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{report.report_type}</Badge>
-                          </TableCell>
-                          <TableCell>{format(new Date(report.created_at), 'MMM dd, yyyy')}</TableCell>
-                          <TableCell>{report.program_name || report.location || '-'}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                {filteredStaffReports.length > 0 && (
+                  <>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Showing {paginatedReports.length} of {filteredStaffReports.length} reports
+                    </div>
+                    
+                    <div className="border rounded-lg">
+                      <ScrollArea className="h-[400px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleSort('staff_name')}
+                                  className="hover:bg-transparent p-0 h-auto font-medium"
+                                >
+                                  Staff Member
+                                  <ArrowUpDown className="ml-2 h-3 w-3" />
+                                </Button>
+                              </TableHead>
+                              <TableHead>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleSort('report_type')}
+                                  className="hover:bg-transparent p-0 h-auto font-medium"
+                                >
+                                  Report Type
+                                  <ArrowUpDown className="ml-2 h-3 w-3" />
+                                </Button>
+                              </TableHead>
+                              <TableHead>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleSort('created_at')}
+                                  className="hover:bg-transparent p-0 h-auto font-medium"
+                                >
+                                  Date Submitted
+                                  <ArrowUpDown className="ml-2 h-3 w-3" />
+                                </Button>
+                              </TableHead>
+                              <TableHead>Program/Location</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedReports.map((report) => (
+                              <TableRow key={report.id}>
+                                <TableCell className="font-medium">{report.staff_name}</TableCell>
+                                <TableCell>
+                                  <Badge variant="outline">{report.report_type}</Badge>
+                                </TableCell>
+                                <TableCell>{format(new Date(report.created_at), 'MMM dd, yyyy')}</TableCell>
+                                <TableCell>{report.program_name || report.location || '-'}</TableCell>
+                                <TableCell>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => viewReport(report)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                            const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                            return (
+                              <PaginationItem key={pageNum}>
+                                <PaginationLink
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  isActive={currentPage === pageNum}
+                                  className="cursor-pointer"
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -544,18 +850,28 @@ export default function ReportsAnalytics() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {programLinks.map((program) => (
-                  <Card key={program.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(program.route)}>
+                  <Card 
+                    key={program.id} 
+                    className="hover:shadow-md transition-all hover:scale-105 cursor-pointer group" 
+                    onClick={() => {
+                      toast.info(`Navigating to ${program.name}...`);
+                      navigate(program.route);
+                    }}
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{program.name}</CardTitle>
-                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">{program.name}</CardTitle>
+                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">{program.description}</p>
                       <div className="flex items-center justify-between">
                         <Badge variant="secondary">{program.total_reports} reports</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(program.route);
+                        }}>
                           View <ExternalLink className="h-3 w-3 ml-1" />
                         </Button>
                       </div>
