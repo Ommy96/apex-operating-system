@@ -62,7 +62,7 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
         const { error } = await supabase
           .from('program_reports')
           .update({
-            program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
+            program: formData.program,
             staff: formData.staff,
             reporting_date: formData.reporting_date,
             executive_summary: formData.executive_summary,
@@ -83,7 +83,7 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
         const { error } = await supabase
           .from('program_reports')
           .insert({
-            program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
+            program: formData.program,
             staff: formData.staff,
             reporting_date: formData.reporting_date,
             executive_summary: formData.executive_summary,
