@@ -156,7 +156,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
               <SelectItem value="Emergency Visit">Emergency Visit</SelectItem>
               <SelectItem value="New Intake">New Intake</SelectItem>
               <SelectItem value="Information Required">Information Required</SelectItem>
-              <SelectItem value="Donor Visit">Donor Visit</SelectItem>
+              <SelectItem value="Visitor/Donor Visit">Visitor/Donor Visit</SelectItem>
             </SelectContent>
           </Select>
         </div>
