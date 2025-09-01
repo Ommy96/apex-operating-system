@@ -11,13 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CalendarIcon, Download, Filter, RefreshCw, BarChart3, PieChart, TrendingUp, Users, Activity, Target, DollarSign, MapPin, FileText, Brain, ExternalLink, Eye, ArrowUpDown, Search, AlertCircle } from "lucide-react";
+import { CalendarIcon, Download, Filter, RefreshCw, BarChart3, PieChart, TrendingUp, Users, Activity, Target, DollarSign, MapPin, FileText, Brain, ExternalLink, Eye, ArrowUpDown, Search, AlertCircle, ChartBar, TrendingDown, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface StaffReport {
   id: string;
@@ -35,6 +36,18 @@ interface ProgramLink {
   description: string;
   total_reports: number;
   route: string;
+}
+
+interface ProgramSummary {
+  id: string;
+  name: string;
+  description: string;
+  route: string;
+  totalBeneficiaries: number;
+  genderDistribution: { male: number; female: number; other: number };
+  locationDistribution: Array<{ location: string; count: number }>;
+  additionalStats: { [key: string]: any };
+  gradient: string;
 }
 
 interface AnalyticsData {
@@ -64,6 +77,8 @@ export default function ReportsAnalytics() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [allStaffReports, setAllStaffReports] = useState<StaffReport[]>([]);
   const [programLinks, setProgramLinks] = useState<ProgramLink[]>([]);
+  const [programSummaries, setProgramSummaries] = useState<ProgramSummary[]>([]);
+  const [selectedProgramDetail, setSelectedProgramDetail] = useState<ProgramSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -75,6 +90,7 @@ export default function ReportsAnalytics() {
     generateAnalytics();
     fetchStaffReports();
     fetchProgramLinks();
+    fetchProgramSummaries();
   }, []);
 
   useEffect(() => {
@@ -268,6 +284,184 @@ export default function ReportsAnalytics() {
       setProgramLinks(programRoutes);
     } catch (error) {
       console.error('Error fetching program links:', error);
+    }
+  };
+
+  const fetchProgramSummaries = async () => {
+    try {
+      // Fetch data from all program tables
+      const [
+        childrenData,
+        feedingData,
+        familyAdoptionData,
+        kipawaData,
+        selfEmpowermentData,
+        supportGroupsData
+      ] = await Promise.all([
+        supabase.from('children').select('gender, residence, academic_level, status'),
+        supabase.from('feeding_program').select('gender, academic_level, education_sponsorship, school'),
+        supabase.from('family_adoption').select('gender, residence, no_of_beneficiaries, category'),
+        supabase.from('kipawa_sato').select('gender, location, academic_level, talent_category'),
+        supabase.from('self_empowerment').select('gender, residence, business_name, current_status, is_active'),
+        supabase.from('support_groups').select('location, member_count, name')
+      ]);
+
+      const gradients = [
+        'from-blue-500/20 to-indigo-600/20',
+        'from-emerald-500/20 to-teal-600/20',
+        'from-purple-500/20 to-pink-600/20',
+        'from-orange-500/20 to-red-600/20',
+        'from-cyan-500/20 to-blue-600/20',
+        'from-rose-500/20 to-pink-600/20'
+      ];
+
+      const summaries: ProgramSummary[] = [
+        {
+          id: '1',
+          name: 'Children Management',
+          description: 'Comprehensive child profiles and enrollment tracking',
+          route: '/children',
+          totalBeneficiaries: childrenData.data?.length || 0,
+          genderDistribution: {
+            male: childrenData.data?.filter(c => c.gender === 'Male').length || 0,
+            female: childrenData.data?.filter(c => c.gender === 'Female').length || 0,
+            other: childrenData.data?.filter(c => c.gender && c.gender !== 'Male' && c.gender !== 'Female').length || 0
+          },
+          locationDistribution: Object.entries(
+            childrenData.data?.reduce((acc, child) => {
+              const location = child.residence || 'Unknown';
+              acc[location] = (acc[location] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            activeChildren: childrenData.data?.filter(c => c.status === 'active').length || 0,
+            academicLevels: [...new Set(childrenData.data?.map(c => c.academic_level).filter(Boolean) || [])]
+          },
+          gradient: gradients[0]
+        },
+        {
+          id: '2',
+          name: 'Feeding Program',
+          description: 'Nutritional support and feeding program management',
+          route: '/feeding-program',
+          totalBeneficiaries: feedingData.data?.length || 0,
+          genderDistribution: {
+            male: feedingData.data?.filter(c => c.gender === 'Male').length || 0,
+            female: feedingData.data?.filter(c => c.gender === 'Female').length || 0,
+            other: feedingData.data?.filter(c => c.gender && c.gender !== 'Male' && c.gender !== 'Female').length || 0
+          },
+          locationDistribution: Object.entries(
+            feedingData.data?.reduce((acc, item) => {
+              const location = item.school || 'Unknown';
+              acc[location] = (acc[location] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            withSponsorship: feedingData.data?.filter(f => f.education_sponsorship).length || 0,
+            academicLevels: [...new Set(feedingData.data?.map(f => f.academic_level).filter(Boolean) || [])]
+          },
+          gradient: gradients[1]
+        },
+        {
+          id: '3',
+          name: 'Family Adoption',
+          description: 'Family adoption and sponsorship programs',
+          route: '/family-adoption',
+          totalBeneficiaries: familyAdoptionData.data?.reduce((sum, family) => sum + (family.no_of_beneficiaries || 1), 0) || 0,
+          genderDistribution: {
+            male: familyAdoptionData.data?.filter(f => f.gender === 'Male').length || 0,
+            female: familyAdoptionData.data?.filter(f => f.gender === 'Female').length || 0,
+            other: familyAdoptionData.data?.filter(f => f.gender && f.gender !== 'Male' && f.gender !== 'Female').length || 0
+          },
+          locationDistribution: Object.entries(
+            familyAdoptionData.data?.reduce((acc, family) => {
+              const location = family.residence || 'Unknown';
+              acc[location] = (acc[location] || 0) + (family.no_of_beneficiaries || 1);
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            families: familyAdoptionData.data?.length || 0,
+            categories: [...new Set(familyAdoptionData.data?.map(f => f.category).filter(Boolean) || [])]
+          },
+          gradient: gradients[2]
+        },
+        {
+          id: '4',
+          name: 'Kipawa Sato (Talents)',
+          description: 'Talent development and skills enhancement program',
+          route: '/kipawa-sato',
+          totalBeneficiaries: kipawaData.data?.length || 0,
+          genderDistribution: {
+            male: kipawaData.data?.filter(k => k.gender === 'Male').length || 0,
+            female: kipawaData.data?.filter(k => k.gender === 'Female').length || 0,
+            other: kipawaData.data?.filter(k => k.gender && k.gender !== 'Male' && k.gender !== 'Female').length || 0
+          },
+          locationDistribution: Object.entries(
+            kipawaData.data?.reduce((acc, talent) => {
+              const location = talent.location || 'Unknown';
+              acc[location] = (acc[location] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            talentCategories: [...new Set(kipawaData.data?.map(k => k.talent_category).filter(Boolean) || [])],
+            academicLevels: [...new Set(kipawaData.data?.map(k => k.academic_level).filter(Boolean) || [])]
+          },
+          gradient: gradients[3]
+        },
+        {
+          id: '5',
+          name: 'Self Empowerment',
+          description: 'Microfinance and business empowerment initiatives',
+          route: '/self-empowerment',
+          totalBeneficiaries: selfEmpowermentData.data?.length || 0,
+          genderDistribution: {
+            male: selfEmpowermentData.data?.filter(s => s.gender === 'Male').length || 0,
+            female: selfEmpowermentData.data?.filter(s => s.gender === 'Female').length || 0,
+            other: selfEmpowermentData.data?.filter(s => s.gender && s.gender !== 'Male' && s.gender !== 'Female').length || 0
+          },
+          locationDistribution: Object.entries(
+            selfEmpowermentData.data?.reduce((acc, business) => {
+              const location = business.residence || 'Unknown';
+              acc[location] = (acc[location] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            activeBusinesses: selfEmpowermentData.data?.filter(s => s.is_active).length || 0,
+            businessTypes: [...new Set(selfEmpowermentData.data?.map(s => s.business_name).filter(Boolean) || [])]
+          },
+          gradient: gradients[4]
+        },
+        {
+          id: '6',
+          name: 'Support Groups',
+          description: 'Community support groups and social programs',
+          route: '/support-groups',
+          totalBeneficiaries: supportGroupsData.data?.reduce((sum, group) => sum + (group.member_count || 0), 0) || 0,
+          genderDistribution: { male: 0, female: 0, other: 0 }, // Support groups don't track individual gender
+          locationDistribution: Object.entries(
+            supportGroupsData.data?.reduce((acc, group) => {
+              const location = group.location || 'Unknown';
+              acc[location] = (acc[location] || 0) + (group.member_count || 0);
+              return acc;
+            }, {} as Record<string, number>) || {}
+          ).map(([location, count]) => ({ location, count })),
+          additionalStats: {
+            totalGroups: supportGroupsData.data?.length || 0,
+            averageMembers: supportGroupsData.data?.length ? Math.round((supportGroupsData.data.reduce((sum, group) => sum + (group.member_count || 0), 0) / supportGroupsData.data.length)) : 0
+          },
+          gradient: gradients[5]
+        }
+      ];
+
+      setProgramSummaries(summaries);
+    } catch (error) {
+      console.error('Error fetching program summaries:', error);
+      toast.error('Failed to fetch program summaries');
     }
   };
 
@@ -851,49 +1045,291 @@ export default function ReportsAnalytics() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="programs" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Program Navigation Hub
+        <TabsContent value="programs" className="space-y-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-950 dark:via-blue-950/30 dark:to-indigo-950/40 min-h-screen">
+          <Card className="border-0 shadow-none bg-transparent">
+            <CardHeader className="text-center pb-8">
+              <CardTitle className="text-3xl font-bold flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <Target className="h-8 w-8 text-primary" />
+                Program Overview
               </CardTitle>
-              <CardDescription>
-                Central access point for all programs and reports
+              <CardDescription className="text-lg max-w-2xl mx-auto">
+                Comprehensive insights into program beneficiaries, impact metrics, and distribution analytics
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {programLinks.map((program) => (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                {programSummaries.map((program) => (
                   <Card 
                     key={program.id} 
-                    className="hover:shadow-md transition-all hover:scale-105 cursor-pointer group" 
+                    className={`
+                      relative overflow-hidden border-0 shadow-lg
+                      bg-gradient-to-br ${program.gradient} backdrop-blur-sm
+                      hover:shadow-2xl hover:shadow-primary/25 
+                      hover:-translate-y-2 hover:scale-105
+                      transition-all duration-500 cursor-pointer group
+                      before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent 
+                      before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100
+                    `}
                     onClick={() => {
                       toast.info(`Navigating to ${program.name}...`);
                       navigate(program.route);
                     }}
                   >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg group-hover:text-primary transition-colors">{program.name}</CardTitle>
-                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <CardHeader className="relative z-10 pb-4">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="space-y-2 flex-1">
+                          <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300 line-clamp-2">
+                            {program.name}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                            {program.description}
+                          </p>
+                        </div>
+                        <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-300 flex-shrink-0 ml-2" />
                       </div>
+                      
+                      {/* Key Metrics */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="text-center p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                          <div className="text-2xl font-bold text-primary">
+                            {program.totalBeneficiaries}
+                          </div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                            Beneficiaries
+                          </div>
+                        </div>
+                        <div className="text-center p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                          <div className="text-2xl font-bold text-secondary">
+                            {program.locationDistribution.length}
+                          </div>
+                          <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                            Locations
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gender Distribution */}
+                      {program.totalBeneficiaries > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-muted-foreground">Gender Distribution</h4>
+                          <div className="flex gap-2">
+                            {program.genderDistribution.male > 0 && (
+                              <Badge variant="secondary" className="bg-blue-100/80 text-blue-700 hover:bg-blue-200/80">
+                                Male: {program.genderDistribution.male}
+                              </Badge>
+                            )}
+                            {program.genderDistribution.female > 0 && (
+                              <Badge variant="secondary" className="bg-pink-100/80 text-pink-700 hover:bg-pink-200/80">
+                                Female: {program.genderDistribution.female}
+                              </Badge>
+                            )}
+                            {program.genderDistribution.other > 0 && (
+                              <Badge variant="secondary" className="bg-purple-100/80 text-purple-700 hover:bg-purple-200/80">
+                                Other: {program.genderDistribution.other}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">{program.description}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="secondary">{program.total_reports} reports</Badge>
-                        <Button variant="ghost" size="sm" onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(program.route);
-                        }}>
-                          View <ExternalLink className="h-3 w-3 ml-1" />
+
+                    <CardContent className="relative z-10 pt-0">
+                      {/* Top Locations */}
+                      {program.locationDistribution.length > 0 && (
+                        <div className="space-y-2 mb-4">
+                          <h4 className="text-sm font-medium text-muted-foreground">Top Locations</h4>
+                          <div className="space-y-1">
+                            {program.locationDistribution.slice(0, 3).map((location, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">{location.location}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {location.count}
+                                </Badge>
+                              </div>
+                            ))}
+                            {program.locationDistribution.length > 3 && (
+                              <div className="text-xs text-muted-foreground">
+                                +{program.locationDistribution.length - 3} more locations
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1 bg-primary/90 hover:bg-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(program.route);
+                          }}
+                        >
+                          Visit Program
+                          <ExternalLink className="h-3 w-3 ml-2" />
                         </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="bg-white/20 border-white/30 hover:bg-white/30"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View More
+                              <MoreHorizontal className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-3">
+                                <Target className="h-6 w-6 text-primary" />
+                                {program.name} - Detailed Overview
+                              </DialogTitle>
+                              <DialogDescription>
+                                Comprehensive analytics and distribution data for {program.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            
+                            <div className="space-y-6">
+                              {/* Summary Stats */}
+                              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <Card className="p-4 text-center">
+                                  <div className="text-2xl font-bold text-primary">{program.totalBeneficiaries}</div>
+                                  <div className="text-sm text-muted-foreground">Total Beneficiaries</div>
+                                </Card>
+                                <Card className="p-4 text-center">
+                                  <div className="text-2xl font-bold text-blue-600">{program.genderDistribution.male}</div>
+                                  <div className="text-sm text-muted-foreground">Male</div>
+                                </Card>
+                                <Card className="p-4 text-center">
+                                  <div className="text-2xl font-bold text-pink-600">{program.genderDistribution.female}</div>
+                                  <div className="text-sm text-muted-foreground">Female</div>
+                                </Card>
+                                <Card className="p-4 text-center">
+                                  <div className="text-2xl font-bold text-purple-600">{program.locationDistribution.length}</div>
+                                  <div className="text-sm text-muted-foreground">Locations</div>
+                                </Card>
+                              </div>
+
+                              {/* Charts */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Gender Distribution Chart */}
+                                {program.totalBeneficiaries > 0 && (
+                                  <Card className="p-4">
+                                    <h3 className="text-lg font-semibold mb-4">Gender Distribution</h3>
+                                    <ResponsiveContainer width="100%" height={200}>
+                                      <RechartsPieChart>
+                                        <Pie
+                                          data={[
+                                            { name: 'Male', value: program.genderDistribution.male, color: '#3b82f6' },
+                                            { name: 'Female', value: program.genderDistribution.female, color: '#ec4899' },
+                                            { name: 'Other', value: program.genderDistribution.other, color: '#8b5cf6' }
+                                          ].filter(item => item.value > 0)}
+                                          cx="50%"
+                                          cy="50%"
+                                          outerRadius={80}
+                                          dataKey="value"
+                                          label={({ name, value }) => `${name}: ${value}`}
+                                        >
+                                          {[
+                                            { name: 'Male', value: program.genderDistribution.male, color: '#3b82f6' },
+                                            { name: 'Female', value: program.genderDistribution.female, color: '#ec4899' },
+                                            { name: 'Other', value: program.genderDistribution.other, color: '#8b5cf6' }
+                                          ].filter(item => item.value > 0).map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                          ))}
+                                        </Pie>
+                                        <Tooltip />
+                                      </RechartsPieChart>
+                                    </ResponsiveContainer>
+                                  </Card>
+                                )}
+
+                                {/* Location Distribution Chart */}
+                                {program.locationDistribution.length > 0 && (
+                                  <Card className="p-4">
+                                    <h3 className="text-lg font-semibold mb-4">Location Distribution</h3>
+                                    <ResponsiveContainer width="100%" height={200}>
+                                      <BarChart data={program.locationDistribution.slice(0, 8)}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis 
+                                          dataKey="location" 
+                                          angle={-45}
+                                          textAnchor="end"
+                                          height={80}
+                                          fontSize={12}
+                                        />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Bar dataKey="count" fill="hsl(var(--primary))" />
+                                      </BarChart>
+                                    </ResponsiveContainer>
+                                  </Card>
+                                )}
+                              </div>
+
+                              {/* Additional Program Specific Stats */}
+                              {Object.keys(program.additionalStats).length > 0 && (
+                                <Card className="p-4">
+                                  <h3 className="text-lg font-semibold mb-4">Additional Insights</h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {Object.entries(program.additionalStats).map(([key, value]) => (
+                                      <div key={key} className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                                        <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                        <span className="text-muted-foreground">
+                                          {Array.isArray(value) ? value.length : value}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </Card>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Navigation to Report Sections */}
+              <Card className="mt-12 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Quick Access to Reports
+                  </CardTitle>
+                  <CardDescription>
+                    Direct navigation to different report sections
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      { name: 'Activity Reports', route: '/activity-reports', icon: Activity, description: 'View activity reports' },
+                      { name: 'Program Reports', route: '/program-reports', icon: Target, description: 'Program-specific reports' },
+                      { name: 'Home Visits', route: '/home-visit-reports', icon: MapPin, description: 'Home visit documentation' },
+                      { name: 'School Visits', route: '/school-visit-reports', icon: Brain, description: 'School visit reports' }
+                    ].map((report) => (
+                      <Card 
+                        key={report.route}
+                        className="hover:shadow-md transition-all hover:scale-105 cursor-pointer group bg-white/60 hover:bg-white/80"
+                        onClick={() => navigate(report.route)}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <report.icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-secondary transition-colors" />
+                          <h3 className="font-medium text-sm mb-1">{report.name}</h3>
+                          <p className="text-xs text-muted-foreground">{report.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
