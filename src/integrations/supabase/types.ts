@@ -113,6 +113,66 @@ export type Database = {
         }
         Relationships: []
       }
+      alumni: {
+        Row: {
+          achievements: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          current_status: string | null
+          detailed_story: string | null
+          exit_year: number | null
+          full_name: string
+          gender: string | null
+          graduation_year: number | null
+          id: string
+          location: string | null
+          profile_photo_url: string | null
+          short_bio: string | null
+          social_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          achievements?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          detailed_story?: string | null
+          exit_year?: number | null
+          full_name: string
+          gender?: string | null
+          graduation_year?: number | null
+          id?: string
+          location?: string | null
+          profile_photo_url?: string | null
+          short_bio?: string | null
+          social_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          achievements?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          detailed_story?: string | null
+          exit_year?: number | null
+          full_name?: string
+          gender?: string | null
+          graduation_year?: number | null
+          id?: string
+          location?: string | null
+          profile_photo_url?: string | null
+          short_bio?: string | null
+          social_link?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       approval_requests: {
         Row: {
           approved_at: string | null

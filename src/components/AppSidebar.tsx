@@ -37,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
   { title: "Children", url: "/children", icon: Users },
+  { title: "Alumni", url: "/alumni", icon: GraduationCap },
 ];
 
 const programItems = [
