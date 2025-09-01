@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, GraduationCap, MapPin, Calendar, Briefcase, Eye, Edit, Trash2, Users, Award, Mail, Phone, Link as LinkIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, GraduationCap, MapPin, Calendar, Briefcase, Eye, Edit, Trash2, Users, Award, Mail, Phone, Link as LinkIcon, Activity, Clock, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Alumni() {
-  const { isManagement, isAdmin, isStaff } = useAuth();
+  const { isManagement, isAdmin, isStaff, user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingAlumni, setEditingAlumni] = useState<any>(null);
@@ -26,9 +26,12 @@ export default function Alumni() {
   const [yearFilter, setYearFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const { toast } = useToast();
 
-  // Fetch alumni data
+  // Fetch alumni data with real-time updates
   const { data: alumni, refetch } = useQuery({
     queryKey: ['alumni'],
     queryFn: async () => {
@@ -38,9 +41,136 @@ export default function Alumni() {
         .order('exit_year', { ascending: false });
       
       if (error) throw error;
+      setLastUpdated(new Date());
       return data;
     },
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
+
+  // Set up real-time subscriptions and presence tracking
+  useEffect(() => {
+    if (!user) return;
+
+    // Create a channel for the Alumni page
+    const channel = supabase.channel('alumni_page');
+
+    // Track user presence
+    const userStatus = {
+      user_id: user.id,
+      user_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+      user_email: user.email,
+      online_at: new Date().toISOString(),
+      page: 'alumni',
+      role: user.role || 'viewer'
+    };
+
+    // Subscribe to presence changes
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = channel.presenceState();
+        const users = Object.values(presenceState)
+          .flat()
+          .filter((presence: any) => presence.user_id !== user.id);
+        setOnlineUsers(users);
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        const joinedUser = newPresences[0];
+        if (joinedUser?.user_id !== user.id) {
+          toast({
+            title: "👋 Someone joined",
+            description: `${joinedUser.user_name} is now viewing the Alumni page`,
+            duration: 3000,
+          });
+        }
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        const leftUser = leftPresences[0];
+        if (leftUser?.user_id !== user.id) {
+          toast({
+            title: "👋 Someone left",
+            description: `${leftUser.user_name} left the Alumni page`,
+            duration: 3000,
+          });
+        }
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track(userStatus);
+        }
+      });
+
+    // Subscribe to real-time database changes
+    const alumniChannel = supabase
+      .channel('alumni_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'alumni'
+        },
+        (payload) => {
+          console.log('Alumni change detected:', payload);
+          
+          // Show notification for different events
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "🎓 New Alumni Added!",
+              description: `${payload.new.full_name} has been added to the alumni directory`,
+              duration: 5000,
+            });
+            
+            // Add to recent activity
+            setRecentActivity(prev => [{
+              id: Date.now(),
+              type: 'added',
+              alumni_name: payload.new.full_name,
+              user_name: 'System',
+              created_at: new Date().toISOString()
+            }, ...prev.slice(0, 9)]);
+          } else if (payload.eventType === 'UPDATE') {
+            toast({
+              title: "📝 Alumni Updated",
+              description: `${payload.new.full_name}'s profile has been updated`,
+              duration: 3000,
+            });
+            
+            setRecentActivity(prev => [{
+              id: Date.now(),
+              type: 'updated',
+              alumni_name: payload.new.full_name,
+              user_name: 'System',
+              created_at: new Date().toISOString()
+            }, ...prev.slice(0, 9)]);
+          } else if (payload.eventType === 'DELETE') {
+            toast({
+              title: "🗑️ Alumni Removed",
+              description: `An alumni record has been removed`,
+              duration: 3000,
+            });
+            
+            setRecentActivity(prev => [{
+              id: Date.now(),
+              type: 'deleted',
+              alumni_name: 'Alumni Record',
+              user_name: 'System',
+              created_at: new Date().toISOString()
+            }, ...prev.slice(0, 9)]);
+          }
+          
+          // Refresh the data
+          refetch();
+          setLastUpdated(new Date());
+        }
+      )
+      .subscribe();
+
+    // Cleanup function
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(alumniChannel);
+    };
+  }, [user, refetch, toast]);
 
   // Calculate stats
   const stats = {
@@ -124,14 +254,24 @@ export default function Alumni() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
+      {/* Header with Real-time Indicators */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <GraduationCap className="h-8 w-8 text-primary" />
             Alumni
+            <div className="flex items-center gap-2 ml-4">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-xs text-muted-foreground">Live</span>
+            </div>
           </h1>
-          <p className="text-muted-foreground">Celebrating our graduates and their achievements</p>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-muted-foreground">Celebrating our graduates and their achievements</p>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Updated {lastUpdated.toLocaleTimeString()}
+            </span>
+          </div>
         </div>
         
         {/* Add Alumni Button - Only for Management/Admin */}
@@ -158,6 +298,76 @@ export default function Alumni() {
             </DialogContent>
           </Dialog>
         )}
+      </div>
+
+      {/* Real-time Activity & Online Users */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Online Users */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-green-500" />
+              Online Now ({onlineUsers.length + 1})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span className="font-medium">You</span>
+                <Badge variant="secondary" className="text-xs">
+                  {user?.role || 'viewer'}
+                </Badge>
+              </div>
+              {onlineUsers.slice(0, 4).map((onlineUser: any, index) => (
+                <div key={index} className="flex items-center gap-2 text-xs">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <span>{onlineUser.user_name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {onlineUser.role}
+                  </Badge>
+                </div>
+              ))}
+              {onlineUsers.length > 4 && (
+                <div className="text-xs text-muted-foreground">
+                  +{onlineUsers.length - 4} more online
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4 text-blue-500" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-20 overflow-y-auto">
+              {recentActivity.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No recent activity</p>
+              ) : (
+                recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-center gap-2 text-xs">
+                    <div className={`w-2 h-2 rounded-full ${
+                      activity.type === 'added' ? 'bg-green-500' :
+                      activity.type === 'updated' ? 'bg-blue-500' : 'bg-red-500'
+                    }`} />
+                    <span>
+                      <strong>{activity.alumni_name}</strong> was {activity.type}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(activity.created_at).toLocaleTimeString()}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Stats Cards */}
@@ -286,10 +496,10 @@ export default function Alumni() {
         </div>
       </div>
 
-      {/* Alumni Cards */}
+      {/* Alumni Cards with Real-time Updates */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAlumni?.map((alumnus) => (
-          <Card key={alumnus.id} className="hover:shadow-lg transition-all duration-300 group">
+          <Card key={alumnus.id} className="hover:shadow-lg transition-all duration-300 group animate-scale-in">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
