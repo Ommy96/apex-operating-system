@@ -25,6 +25,21 @@ export default function ProgramReports() {
   const [programFilter, setProgramFilter] = useState("");
   const [staffFilter, setStaffFilter] = useState("");
 
+  // Fetch programs for the filter dropdown
+  const { data: programs = [] } = useQuery({
+    queryKey: ['programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: programReports, refetch } = useQuery({
     queryKey: ['program-reports'],
     queryFn: async () => {
@@ -188,12 +203,11 @@ export default function ProgramReports() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Programs</SelectItem>
-              <SelectItem value="Education">Education</SelectItem>
-              <SelectItem value="Kibera Early Dinner">Kibera Early Dinner</SelectItem>
-              <SelectItem value="Kawangware Lunch Hour">Kawangware Lunch Hour</SelectItem>
-              <SelectItem value="Kipawa Sato">Kipawa Sato</SelectItem>
-              <SelectItem value="Self-Empowerment">Self-Empowerment</SelectItem>
-              <SelectItem value="Support Groups">Support Groups</SelectItem>
+              {programs.map((program) => (
+                <SelectItem key={program.id} value={program.name}>
+                  {program.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 

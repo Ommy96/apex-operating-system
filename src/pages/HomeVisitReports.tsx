@@ -26,6 +26,21 @@ export default function HomeVisitReports() {
   const [locationFilter, setLocationFilter] = useState("");
   const [staffFilter, setStaffFilter] = useState("");
 
+  // Fetch programs for the filter dropdown
+  const { data: programs = [] } = useQuery({
+    queryKey: ['programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: homeVisitReports, refetch } = useQuery({
     queryKey: ['home-visit-reports'],
     queryFn: async () => {

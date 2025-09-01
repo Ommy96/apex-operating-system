@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface ActivityReportFormProps {
   onSuccess: () => void;
@@ -25,6 +26,21 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
     beneficiary_impact: initialData?.beneficiary_impact || "",
     challenges: initialData?.challenges || "",
     proposed_recommendations: initialData?.proposed_recommendations || "",
+  });
+
+  // Fetch programs for the dropdown
+  const { data: programs = [] } = useQuery({
+    queryKey: ['programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -106,12 +122,11 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
                 <SelectValue placeholder="Select program" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Education">Education</SelectItem>
-                <SelectItem value="Kibera Early Dinner">Kibera Early Dinner</SelectItem>
-                <SelectItem value="Kawangware Lunch Hour">Kawangware Lunch Hour</SelectItem>
-                <SelectItem value="Kipawa Sato">Kipawa Sato</SelectItem>
-                <SelectItem value="Self-Empowerment">Self-Empowerment</SelectItem>
-                <SelectItem value="Support Groups">Support Groups</SelectItem>
+                {programs.map((program) => (
+                  <SelectItem key={program.id} value={program.name}>
+                    {program.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
