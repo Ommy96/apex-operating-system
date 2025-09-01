@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -957,6 +957,50 @@ export type Database = {
         }
         Relationships: []
       }
+      support_group_activities: {
+        Row: {
+          activity_name: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          frequency: string | null
+          id: string
+          notes: string | null
+          support_group_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_name: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          support_group_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_name?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          support_group_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_group_activities_support_group_id_fkey"
+            columns: ["support_group_id"]
+            isOneToOne: false
+            referencedRelation: "support_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_groups: {
         Row: {
           created_at: string
@@ -1066,9 +1110,9 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
-          user_id_param: string
           action_type_param: string
           max_attempts?: number
+          user_id_param: string
           window_minutes?: number
         }
         Returns: boolean

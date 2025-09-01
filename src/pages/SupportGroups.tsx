@@ -1,21 +1,28 @@
 import { useState } from "react";
-import { Plus, Search, Users, Download } from "lucide-react";
+import { Plus, Search, Users, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SupportGroupForm } from "@/components/SupportGroupForm";
-import { useQuery } from "@tanstack/react-query";
+import { SupportGroupDetails } from "@/components/SupportGroupDetails";
+import { SupportGroupEdit } from "@/components/SupportGroupEdit";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function SupportGroups() {
+  const { toast } = useToast();
   const { isAdmin, isManagement } = useAuth();
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewingGroup, setViewingGroup] = useState<string | null>(null);
+  const [editingGroup, setEditingGroup] = useState<any>(null);
 
   const { data: supportGroups, refetch } = useQuery({
     queryKey: ['support-groups'],
@@ -38,9 +45,47 @@ export default function SupportGroups() {
     return matchesSearch;
   });
 
+  const deleteGroupMutation = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase
+        .from('support_groups')
+        .delete()
+        .eq('id', groupId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['support-groups'] });
+      toast({
+        title: "Success",
+        description: "Support group deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete support group",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSuccess = () => {
     setIsDialogOpen(false);
+    setEditingGroup(null);
     refetch();
+  };
+
+  const handleView = (groupId: string) => {
+    setViewingGroup(groupId);
+  };
+
+  const handleEdit = (group: any) => {
+    setEditingGroup(group);
+  };
+
+  const handleDelete = (groupId: string) => {
+    deleteGroupMutation.mutate(groupId);
   };
 
   const handleDownload = () => {
@@ -122,7 +167,7 @@ export default function SupportGroups() {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3">
               {group.description && (
                 <div className="text-sm text-muted-foreground">
                   <strong>Description:</strong> {group.description}
@@ -144,6 +189,61 @@ export default function SupportGroups() {
                   <strong>Schedule:</strong> {group.meeting_schedule}
                 </div>
               )}
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(group.id)}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                {isAdmin && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(group)}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Support Group</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{group.name}"? This will also delete all associated activities. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(group.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -154,6 +254,37 @@ export default function SupportGroups() {
           <p className="text-muted-foreground">No support groups found.</p>
         </div>
       )}
+
+      {/* View Group Details Dialog */}
+      <Dialog open={!!viewingGroup} onOpenChange={() => setViewingGroup(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Support Group Details</DialogTitle>
+          </DialogHeader>
+          {viewingGroup && (
+            <SupportGroupDetails
+              groupId={viewingGroup}
+              onClose={() => setViewingGroup(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Group Dialog */}
+      <Dialog open={!!editingGroup} onOpenChange={() => setEditingGroup(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Support Group</DialogTitle>
+          </DialogHeader>
+          {editingGroup && (
+            <SupportGroupEdit
+              group={editingGroup}
+              onSuccess={handleSuccess}
+              onCancel={() => setEditingGroup(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
