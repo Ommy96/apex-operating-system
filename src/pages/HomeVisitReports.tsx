@@ -24,6 +24,7 @@ export default function HomeVisitReports() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [staffFilter, setStaffFilter] = useState("");
 
   const { data: homeVisitReports, refetch } = useQuery({
     queryKey: ['home-visit-reports'],
@@ -55,8 +56,9 @@ export default function HomeVisitReports() {
       }, {} as Record<string, number>) || {};
       
       const uniqueStaff = new Set(homeVisitReports?.map(r => r.staff) || []).size;
+      const staffList = Array.from(new Set(homeVisitReports?.map(r => r.staff) || [])).sort();
       
-      return { totalReports, thisMonth, locationBreakdown, uniqueStaff };
+      return { totalReports, thisMonth, locationBreakdown, uniqueStaff, staffList };
     },
     enabled: !!homeVisitReports,
   });
@@ -65,8 +67,9 @@ export default function HomeVisitReports() {
     const matchesSearch = report.staff.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.reason_for_visit?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = !locationFilter || locationFilter === 'all' || report.location === locationFilter;
+    const matchesStaff = !staffFilter || staffFilter === 'all' || report.staff === staffFilter;
     
-    return matchesSearch && matchesLocation;
+    return matchesSearch && matchesLocation && matchesStaff;
   });
 
   const handleDownload = () => {
@@ -189,6 +192,20 @@ export default function HomeVisitReports() {
             <SelectItem value="Kawangware">Kawangware</SelectItem>
             <SelectItem value="Diaspora">Diaspora</SelectItem>
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={staffFilter} onValueChange={setStaffFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by staff" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Staff</SelectItem>
+            {reportStats?.staffList?.map((staff) => (
+              <SelectItem key={staff} value={staff}>
+                {staff}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

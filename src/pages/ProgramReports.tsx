@@ -23,6 +23,7 @@ export default function ProgramReports() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("");
+  const [staffFilter, setStaffFilter] = useState("");
 
   const { data: programReports, refetch } = useQuery({
     queryKey: ['program-reports'],
@@ -54,8 +55,9 @@ export default function ProgramReports() {
       }, {} as Record<string, number>) || {};
       
       const uniqueStaff = new Set(programReports?.map(r => r.staff) || []).size;
+      const staffList = Array.from(new Set(programReports?.map(r => r.staff) || [])).sort();
       
-      return { totalReports, thisMonth, programBreakdown, uniqueStaff };
+      return { totalReports, thisMonth, programBreakdown, uniqueStaff, staffList };
     },
     enabled: !!programReports,
   });
@@ -64,8 +66,9 @@ export default function ProgramReports() {
     const matchesSearch = report.staff.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.executive_summary.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProgram = !programFilter || programFilter === 'all' || report.program === programFilter;
+    const matchesStaff = !staffFilter || staffFilter === 'all' || report.staff === staffFilter;
     
-    return matchesSearch && matchesProgram;
+    return matchesSearch && matchesProgram && matchesStaff;
   });
 
   const handleDownload = () => {
@@ -167,7 +170,7 @@ export default function ProgramReports() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -178,20 +181,36 @@ export default function ProgramReports() {
           />
         </div>
         
-        <Select value={programFilter} onValueChange={setProgramFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by program" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
-            <SelectItem value="Education">Education</SelectItem>
-            <SelectItem value="Kibera Early Dinner">Kibera Early Dinner</SelectItem>
-            <SelectItem value="Kawangware Lunch Hour">Kawangware Lunch Hour</SelectItem>
-            <SelectItem value="Kipawa Sato">Kipawa Sato</SelectItem>
-            <SelectItem value="Self-Empowerment">Self-Empowerment</SelectItem>
-            <SelectItem value="Support Groups">Support Groups</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="Education">Education</SelectItem>
+              <SelectItem value="Kibera Early Dinner">Kibera Early Dinner</SelectItem>
+              <SelectItem value="Kawangware Lunch Hour">Kawangware Lunch Hour</SelectItem>
+              <SelectItem value="Kipawa Sato">Kipawa Sato</SelectItem>
+              <SelectItem value="Self-Empowerment">Self-Empowerment</SelectItem>
+              <SelectItem value="Support Groups">Support Groups</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={staffFilter} onValueChange={setStaffFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by staff" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Staff</SelectItem>
+              {reportStats?.staffList?.map((staff) => (
+                <SelectItem key={staff} value={staff}>
+                  {staff}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Stats Cards */}
