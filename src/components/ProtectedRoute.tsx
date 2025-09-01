@@ -44,5 +44,15 @@ export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
     );
   }
 
+  // Block staff from accessing reports-analytics and settings pages
+  if (userRole === 'staff') {
+    const restrictedPaths = ['/reports-analytics', '/settings'];
+    const currentPath = window.location.pathname;
+    
+    if (restrictedPaths.includes(currentPath)) {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   return <>{children}</>;
 }

@@ -47,7 +47,7 @@ const programItems = [
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
-const getReportsItems = (isManagement: boolean) => {
+const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
   const baseItems = [
     { title: "Home Visits", url: "/reports/home-visits", icon: Home },
     { title: "School Visits", url: "/reports/school-visits", icon: EducationIcon },
@@ -57,7 +57,8 @@ const getReportsItems = (isManagement: boolean) => {
     { title: "Other Reports", url: "/other-reports", icon: ReportsIcon },
   ];
   
-  if (isManagement) {
+  // Only show Reports & Analytics to management and admin (not staff)
+  if (isManagement || (!isStaff)) {
     baseItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp });
   }
   
@@ -70,7 +71,7 @@ const systemItems = [
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const { signOut, isAdmin, isManagement } = useAuth();
+  const { signOut, isAdmin, isManagement, isStaff } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -149,7 +150,7 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {getReportsItems(isManagement).map((item) => (
+              {getReportsItems(isManagement, isStaff).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
@@ -163,7 +164,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
+        {/* Hide Settings from staff - only show to admin and management */}
+        {(isAdmin || isManagement) && (
            <SidebarGroup>
              <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">System</SidebarGroupLabel>
             <SidebarGroupContent>

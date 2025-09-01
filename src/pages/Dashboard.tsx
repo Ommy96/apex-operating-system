@@ -19,10 +19,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { StaffPermissionsDemo } from "@/components/StaffPermissionsDemo";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, isStaff, user } = useAuth();
   
   // Extract user name from metadata or email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
@@ -230,6 +231,13 @@ const Dashboard = () => {
           Here's what's happening with Heart to Heart Organization today.
         </p>
       </div>
+
+      {/* Role-based Permissions Demo - Shows current user's access level */}
+      {isStaff && (
+        <div className="mb-8">
+          <StaffPermissionsDemo />
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

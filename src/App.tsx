@@ -167,14 +167,14 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/reports-analytics" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <ReportsAnalytics />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <Settings />
                 </DashboardLayout>
