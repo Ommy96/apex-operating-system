@@ -303,20 +303,6 @@ export default function Alumni() {
         )}
       </div>
 
-      {/* Real-time Activity & Online Users */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <LiveUserPresence 
-          channelName="alumni_page" 
-          pageName="alumni" 
-        />
-        
-        <ActivityFeed 
-          activities={recentActivity}
-          maxItems={5}
-          showTimestamp={true}
-          className="h-fit"
-        />
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
