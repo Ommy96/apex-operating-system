@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StaffReport {
   id: string;
@@ -549,11 +550,11 @@ export default function ReportsAnalytics() {
             other: feedingData.data?.filter(c => c.gender && c.gender !== 'Male' && c.gender !== 'Female').length || 0
           },
           locationDistribution: Object.entries(
-            feedingData.data?.reduce((acc, item) => {
+            (feedingData.data?.reduce((acc, item) => {
               const location = item.school || 'Unknown';
               acc[location] = (acc[location] || 0) + 1;
               return acc;
-            }, {} as Record<string, number>) || {}
+            }, {} as Record<string, number>) ?? {}) as Record<string, number>
           ).map(([location, count]) => ({ location, count })),
           additionalStats: {
             withSponsorship: feedingData.data?.filter(f => f.education_sponsorship).length || 0,
@@ -573,11 +574,11 @@ export default function ReportsAnalytics() {
             other: familyAdoptionData.data?.filter(f => f.gender && f.gender !== 'Male' && f.gender !== 'Female').length || 0
           },
           locationDistribution: Object.entries(
-            familyAdoptionData.data?.reduce((acc, family) => {
+            (familyAdoptionData.data?.reduce((acc, family) => {
               const location = family.residence || 'Unknown';
               acc[location] = (acc[location] || 0) + (family.no_of_beneficiaries || 1);
               return acc;
-            }, {} as Record<string, number>) || {}
+            }, {} as Record<string, number>) ?? {}) as Record<string, number>
           ).map(([location, count]) => ({ location, count })),
           additionalStats: {
             families: familyAdoptionData.data?.length || 0,
@@ -597,11 +598,11 @@ export default function ReportsAnalytics() {
             other: kipawaData.data?.filter(k => k.gender && k.gender !== 'Male' && k.gender !== 'Female').length || 0
           },
           locationDistribution: Object.entries(
-            kipawaData.data?.reduce((acc, talent) => {
+            (kipawaData.data?.reduce((acc, talent) => {
               const location = talent.location || 'Unknown';
               acc[location] = (acc[location] || 0) + 1;
               return acc;
-            }, {} as Record<string, number>) || {}
+            }, {} as Record<string, number>) ?? {}) as Record<string, number>
           ).map(([location, count]) => ({ location, count })),
           additionalStats: {
             talentCategories: [...new Set(kipawaData.data?.map(k => k.talent_category).filter(Boolean) || [])],
@@ -621,11 +622,11 @@ export default function ReportsAnalytics() {
             other: selfEmpowermentData.data?.filter(s => s.gender && s.gender !== 'Male' && s.gender !== 'Female').length || 0
           },
           locationDistribution: Object.entries(
-            selfEmpowermentData.data?.reduce((acc, business) => {
+            (selfEmpowermentData.data?.reduce((acc, business) => {
               const location = business.residence || 'Unknown';
               acc[location] = (acc[location] || 0) + 1;
               return acc;
-            }, {} as Record<string, number>) || {}
+            }, {} as Record<string, number>) ?? {}) as Record<string, number>
           ).map(([location, count]) => ({ location, count })),
           additionalStats: {
             activeBusinesses: selfEmpowermentData.data?.filter(s => s.is_active).length || 0,
@@ -641,11 +642,11 @@ export default function ReportsAnalytics() {
           totalBeneficiaries: supportGroupsData.data?.reduce((sum, group) => sum + (group.member_count || 0), 0) || 0,
           genderDistribution: { male: 0, female: 0, other: 0 }, // Support groups don't track individual gender
           locationDistribution: Object.entries(
-            supportGroupsData.data?.reduce((acc, group) => {
+            (supportGroupsData.data?.reduce((acc, group) => {
               const location = group.location || 'Unknown';
               acc[location] = (acc[location] || 0) + (group.member_count || 0);
               return acc;
-            }, {} as Record<string, number>) || {}
+            }, {} as Record<string, number>) ?? {}) as Record<string, number>
           ).map(([location, count]) => ({ location, count })),
           additionalStats: {
             totalGroups: supportGroupsData.data?.length || 0,
