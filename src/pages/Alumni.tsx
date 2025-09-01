@@ -14,6 +14,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ActivityFeed } from "@/components/ActivityFeed";
+import { RealTimeIndicator } from "@/components/RealTimeIndicator";
+import { LiveUserPresence } from "@/components/LiveUserPresence";
 
 export default function Alumni() {
   const { isManagement, isAdmin, isStaff, user } = useAuth();
@@ -301,73 +304,18 @@ export default function Alumni() {
       </div>
 
       {/* Real-time Activity & Online Users */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Online Users */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-green-500" />
-              Online Now ({onlineUsers.length + 1})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                <span className="font-medium">You</span>
-                <Badge variant="secondary" className="text-xs">
-                  {user?.role || 'viewer'}
-                </Badge>
-              </div>
-              {onlineUsers.slice(0, 4).map((onlineUser: any, index) => (
-                <div key={index} className="flex items-center gap-2 text-xs">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span>{onlineUser.user_name}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {onlineUser.role}
-                  </Badge>
-                </div>
-              ))}
-              {onlineUsers.length > 4 && (
-                <div className="text-xs text-muted-foreground">
-                  +{onlineUsers.length - 4} more online
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Activity className="h-4 w-4 text-blue-500" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-h-20 overflow-y-auto">
-              {recentActivity.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No recent activity</p>
-              ) : (
-                recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-2 text-xs">
-                    <div className={`w-2 h-2 rounded-full ${
-                      activity.type === 'added' ? 'bg-green-500' :
-                      activity.type === 'updated' ? 'bg-blue-500' : 'bg-red-500'
-                    }`} />
-                    <span>
-                      <strong>{activity.alumni_name}</strong> was {activity.type}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {new Date(activity.created_at).toLocaleTimeString()}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <LiveUserPresence 
+          channelName="alumni_page" 
+          pageName="alumni" 
+        />
+        
+        <ActivityFeed 
+          activities={recentActivity}
+          maxItems={5}
+          showTimestamp={true}
+          className="h-fit"
+        />
       </div>
 
       {/* Stats Cards */}

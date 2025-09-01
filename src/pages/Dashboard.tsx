@@ -428,11 +428,11 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {[
+               {[
                 { name: "Monthly Education Report", path: "/reports/program-reports", icon: BookOpen, color: "text-primary" },
-                { name: "Feeding Program Update", path: "/reports/activity-reports", icon: UtensilsCrossed, color: "text-secondary" },
-                { name: "Home Visit Summary", path: "/reports/home-visits", icon: Users, color: "text-accent" },
-                { name: "Kipawa Progress Report", path: "/reports/activity-reports", icon: Heart, color: "text-warning" }
+                { name: "Alumni Success Stories", path: "/alumni", icon: GraduationCap, color: "text-secondary" },
+                { name: "Feeding Program Update", path: "/reports/activity-reports", icon: UtensilsCrossed, color: "text-accent" },
+                { name: "Home Visit Summary", path: "/reports/home-visits", icon: Users, color: "text-warning" }
               ].map((report, index) => (
                 <div 
                   key={index} 
@@ -460,10 +460,10 @@ const Dashboard = () => {
             <Button 
               variant="outline" 
               className="w-full mt-4 bg-gradient-to-r from-accent/10 to-primary/10 hover:from-accent/20 hover:to-primary/20 border-accent/30"
-              onClick={() => navigate('/reports')}
+              onClick={() => navigate('/alumni')}
             >
               <Sparkles className="h-4 w-4 mr-2" />
-              View All Reports
+              View Alumni Directory
             </Button>
           </CardContent>
         </Card>
