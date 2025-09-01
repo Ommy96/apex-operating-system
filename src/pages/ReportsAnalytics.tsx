@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CalendarIcon, Download, Filter, RefreshCw, BarChart3, PieChart, TrendingUp, Users, Activity, Target, DollarSign, MapPin, FileText, Brain, ExternalLink, Eye, ArrowUpDown, Search, AlertCircle, ChartBar, TrendingDown, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +36,27 @@ interface ProgramLink {
   description: string;
   total_reports: number;
   route: string;
+}
+
+interface ProgramAnalyticsData {
+  totalBeneficiaries: number;
+  children: Array<{ gender?: string; residence?: string; academic_level?: string; status?: string }>;
+  feeding: Array<{ gender?: string; type?: string; school?: string }>;
+  kipawa: Array<{ gender?: string; location?: string; academic_level?: string }>;
+  selfEmpowerment: Array<{ gender?: string; residence?: string; is_active?: boolean }>;
+  familyAdoption: Array<{ gender?: string; residence?: string; category?: string }>;
+  supportGroups: Array<{ location?: string; member_count?: number; name?: string }>;
+}
+
+interface AnalyticsData {
+  totalReports: number;
+  totalPrograms: number;
+  totalStaff: number;
+  activeStaff: number;
+  monthlyReports: Array<{ month: string; reports: number; staff: number }>;
+  reportTypeDistribution: Array<{ name: string; value: number; color: string }>;
+  locationDistribution: Array<{ location: string; count: number }>;
+  aiInsights: Array<{ type: 'trend' | 'alert' | 'recommendation'; message: string; impact: 'high' | 'medium' | 'low' }>;
 }
 
 interface ProgramSummary {
@@ -170,6 +191,32 @@ export default function ReportsAnalytics() {
     return filtered;
   }, [allStaffReports, searchQuery, selectedReportType, selectedProgram, selectedLocation, dateRange, sortField, sortDirection, programs]);
 
+  // Fetch comprehensive analytics data
+  const { data: programAnalyticsData, isLoading: isLoadingAnalytics } = useQuery({
+    queryKey: ['program-analytics-data'],
+    queryFn: async (): Promise<ProgramAnalyticsData> => {
+      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, familyAdoptionRes, supportGroupsRes] = await Promise.all([
+        supabase.from('children').select('gender, residence, academic_level, status'),
+        supabase.from('feeding_program').select('gender, type, school'),
+        supabase.from('kipawa_sato').select('gender, location, academic_level'),
+        supabase.from('self_empowerment').select('gender, residence, is_active'),
+        supabase.from('family_adoption').select('gender, residence, category'),
+        supabase.from('support_groups').select('location, member_count, name')
+      ]);
+      
+      return {
+        totalBeneficiaries: (childrenRes.data?.length || 0) + (feedingRes.data?.length || 0) + (kipawaRes.data?.length || 0) + (selfEmpowermentRes.data?.length || 0) + (familyAdoptionRes.data?.length || 0),
+        children: childrenRes.data || [],
+        feeding: feedingRes.data || [],
+        kipawa: kipawaRes.data || [],
+        selfEmpowerment: selfEmpowermentRes.data || [],
+        familyAdoption: familyAdoptionRes.data || [],
+        supportGroups: supportGroupsRes.data || []
+      };
+    },
+    refetchInterval: 60000,
+  });
+
   // Paginated reports
   const paginatedReports = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -177,6 +224,156 @@ export default function ReportsAnalytics() {
   }, [filteredStaffReports, currentPage, pageSize]);
 
   const totalPages = Math.ceil(filteredStaffReports.length / pageSize);
+
+  // Process analytics data for charts
+  const genderDistributionData = useMemo(() => {
+    if (!programAnalyticsData) return [];
+
+    const genderCounts = { Male: 0, Female: 0, Other: 0 };
+
+    // Count gender from all programs
+    [...programAnalyticsData.children, ...programAnalyticsData.feeding, ...programAnalyticsData.kipawa, 
+     ...programAnalyticsData.selfEmpowerment, ...programAnalyticsData.familyAdoption].forEach(item => {
+      if (item.gender === 'Male') genderCounts.Male++;
+      else if (item.gender === 'Female') genderCounts.Female++;
+      else if (item.gender) genderCounts.Other++;
+    });
+
+    const total = Object.values(genderCounts).reduce((sum, count) => sum + count, 0);
+    
+    return [
+      { 
+        name: 'Male', 
+        value: genderCounts.Male, 
+        percentage: total > 0 ? ((genderCounts.Male / total) * 100).toFixed(1) : '0',
+        color: 'hsl(210, 100%, 56%)'
+      },
+      { 
+        name: 'Female', 
+        value: genderCounts.Female, 
+        percentage: total > 0 ? ((genderCounts.Female / total) * 100).toFixed(1) : '0',
+        color: 'hsl(340, 75%, 55%)'
+      },
+      { 
+        name: 'Other', 
+        value: genderCounts.Other, 
+        percentage: total > 0 ? ((genderCounts.Other / total) * 100).toFixed(1) : '0',
+        color: 'hsl(270, 50%, 60%)'
+      }
+    ].filter(item => item.value > 0);
+  }, [programAnalyticsData]);
+
+  const programDistributionData = useMemo(() => {
+    if (!programAnalyticsData) return [];
+
+    const programs = [
+      { name: 'Children Management', count: programAnalyticsData.children.length, color: 'hsl(215, 28%, 17%)' },
+      { name: 'Feeding Program', count: programAnalyticsData.feeding.length, color: 'hsl(142, 76%, 36%)' },
+      { name: 'Kipawa Sato', count: programAnalyticsData.kipawa.length, color: 'hsl(188, 95%, 53%)' },
+      { name: 'Self Empowerment', count: programAnalyticsData.selfEmpowerment.length, color: 'hsl(43, 96%, 56%)' },
+      { name: 'Family Adoption', count: programAnalyticsData.familyAdoption.length, color: 'hsl(262, 83%, 58%)' }
+    ];
+
+    const total = programs.reduce((sum, program) => sum + program.count, 0);
+    
+    return programs
+      .map(program => ({
+        ...program,
+        percentage: total > 0 ? (program.count / total) * 100 : 0
+      }))
+      .filter(program => program.count > 0);
+  }, [programAnalyticsData]);
+
+  const locationDistributionData = useMemo(() => {
+    if (!programAnalyticsData) return [];
+
+    const locationCounts: { [key: string]: number } = {};
+
+    // Aggregate locations from all programs
+    [...programAnalyticsData.children, ...programAnalyticsData.selfEmpowerment, ...programAnalyticsData.familyAdoption].forEach(item => {
+      const location = item.residence || 'Not Specified';
+      locationCounts[location] = (locationCounts[location] || 0) + 1;
+    });
+
+    programAnalyticsData.kipawa.forEach(item => {
+      const location = item.location || 'Not Specified';
+      locationCounts[location] = (locationCounts[location] || 0) + 1;
+    });
+
+    programAnalyticsData.supportGroups.forEach(group => {
+      const location = group.location || 'Not Specified';
+      locationCounts[location] = (locationCounts[location] || 0) + (group.member_count || 0);
+    });
+
+    const total = Object.values(locationCounts).reduce((sum, count) => sum + count, 0);
+
+    return Object.entries(locationCounts)
+      .map(([location, count]) => ({
+        location,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [programAnalyticsData]);
+
+  const programInsightsData = useMemo(() => {
+    if (!programAnalyticsData) return [];
+
+    const insights = [
+      {
+        id: '1',
+        programName: 'Children Management',
+        totalBeneficiaries: programAnalyticsData.children.length,
+        maleCount: programAnalyticsData.children.filter(c => c.gender === 'Male').length,
+        femaleCount: programAnalyticsData.children.filter(c => c.gender === 'Female').length,
+        otherCount: programAnalyticsData.children.filter(c => c.gender && c.gender !== 'Male' && c.gender !== 'Female').length,
+        topLocations: [...new Set(programAnalyticsData.children.map(c => c.residence).filter(Boolean))].slice(0, 3),
+        status: 'active' as const
+      },
+      {
+        id: '2',
+        programName: 'Feeding Program',
+        totalBeneficiaries: programAnalyticsData.feeding.length,
+        maleCount: programAnalyticsData.feeding.filter(f => f.gender === 'Male').length,
+        femaleCount: programAnalyticsData.feeding.filter(f => f.gender === 'Female').length,
+        otherCount: programAnalyticsData.feeding.filter(f => f.gender && f.gender !== 'Male' && f.gender !== 'Female').length,
+        topLocations: [...new Set(programAnalyticsData.feeding.map(f => f.school).filter(Boolean))].slice(0, 3),
+        status: 'active' as const
+      },
+      {
+        id: '3',
+        programName: 'Kipawa Sato',
+        totalBeneficiaries: programAnalyticsData.kipawa.length,
+        maleCount: programAnalyticsData.kipawa.filter(k => k.gender === 'Male').length,
+        femaleCount: programAnalyticsData.kipawa.filter(k => k.gender === 'Female').length,
+        otherCount: programAnalyticsData.kipawa.filter(k => k.gender && k.gender !== 'Male' && k.gender !== 'Female').length,
+        topLocations: [...new Set(programAnalyticsData.kipawa.map(k => k.location).filter(Boolean))].slice(0, 3),
+        status: 'active' as const
+      },
+      {
+        id: '4',
+        programName: 'Self Empowerment',
+        totalBeneficiaries: programAnalyticsData.selfEmpowerment.length,
+        maleCount: programAnalyticsData.selfEmpowerment.filter(s => s.gender === 'Male').length,
+        femaleCount: programAnalyticsData.selfEmpowerment.filter(s => s.gender === 'Female').length,
+        otherCount: programAnalyticsData.selfEmpowerment.filter(s => s.gender && s.gender !== 'Male' && s.gender !== 'Female').length,
+        topLocations: [...new Set(programAnalyticsData.selfEmpowerment.map(s => s.residence).filter(Boolean))].slice(0, 3),
+        status: 'active' as const
+      },
+      {
+        id: '5',
+        programName: 'Family Adoption',
+        totalBeneficiaries: programAnalyticsData.familyAdoption.length,
+        maleCount: programAnalyticsData.familyAdoption.filter(f => f.gender === 'Male').length,
+        femaleCount: programAnalyticsData.familyAdoption.filter(f => f.gender === 'Female').length,
+        otherCount: programAnalyticsData.familyAdoption.filter(f => f.gender && f.gender !== 'Male' && f.gender !== 'Female').length,
+        topLocations: [...new Set(programAnalyticsData.familyAdoption.map(f => f.residence).filter(Boolean))].slice(0, 3),
+        status: 'active' as const
+      }
+    ].filter(program => program.totalBeneficiaries > 0);
+
+    return insights;
+  }, [programAnalyticsData]);
 
   const fetchPrograms = async () => {
     try {
