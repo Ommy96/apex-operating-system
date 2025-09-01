@@ -310,8 +310,8 @@ export default function ReportsAnalytics() {
     return Object.entries(locationCounts)
       .map(([location, count]) => ({
         location,
-        count,
-        percentage: total > 0 ? (count / total) * 100 : 0
+        count: count as number,
+        percentage: total > 0 ? ((count as number) / total) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count);
   }, [programAnalyticsData]);
@@ -530,7 +530,7 @@ export default function ReportsAnalytics() {
               acc[location] = (acc[location] || 0) + 1;
               return acc;
             }, {} as Record<string, number>) || {}
-          ).map(([location, count]) => ({ location, count })),
+           ).map(([location, count]) => ({ location, count: count as number })),
           additionalStats: {
             activeChildren: childrenData.data?.filter(c => c.status === 'active').length || 0,
             academicLevels: [...new Set(childrenData.data?.map(c => c.academic_level).filter(Boolean) || [])]
