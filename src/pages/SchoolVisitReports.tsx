@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SchoolVisitReportForm } from "@/components/SchoolVisitReportForm";
@@ -156,6 +157,7 @@ export default function SchoolVisitReports() {
                 <DialogTitle>{editingReport ? 'Edit School Visit Report' : 'Add School Visit Report'}</DialogTitle>
               </DialogHeader>
               <SchoolVisitReportForm 
+                initialData={editingReport}
                 onSuccess={() => {
                   handleDialogClose();
                   refetch();
@@ -330,59 +332,136 @@ export default function SchoolVisitReports() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>School Visit Report Details</DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="text-xl font-semibold">School Visit Report Details</DialogTitle>
           </DialogHeader>
           {viewingReport && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Staff Member</h4>
-                  <p className="text-base">{viewingReport.staff}</p>
+            <ScrollArea className="max-h-[70vh] pr-4">
+              <div className="space-y-6 py-4">
+                {/* Basic Information Section */}
+                <div className="bg-muted/20 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-primary">Basic Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm text-muted-foreground">Staff Member</span>
+                      </div>
+                      <p className="text-base font-medium">{viewingReport.staff}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm text-muted-foreground">Visit Date</span>
+                      </div>
+                      <p className="text-base font-medium">{new Date(viewingReport.visit_date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <School className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm text-muted-foreground">School</span>
+                      </div>
+                      <p className="text-base font-medium">{viewingReport.school}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm text-muted-foreground">Location</span>
+                      </div>
+                      <p className="text-base font-medium">{viewingReport.location || 'Not specified'}</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Visit Date</h4>
-                  <p className="text-base">{new Date(viewingReport.visit_date).toLocaleDateString()}</p>
+
+                {/* Visit Purpose Section */}
+                <div className="bg-secondary/10 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-secondary">Visit Purpose</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium text-sm text-muted-foreground">Reason for Visit</span>
+                    </div>
+                    <Badge variant="outline" className="text-sm">
+                      {viewingReport.reason_for_visit || 'Not specified'}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Report Content Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-accent">Report Content</h3>
+                  
+                  <div className="bg-accent/5 rounded-lg p-4 border-l-4 border-accent">
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm text-muted-foreground">Observation Findings</span>
+                      </div>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                        {viewingReport.observation_findings}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-destructive/5 rounded-lg p-4 border-l-4 border-destructive/30">
+                    <div className="space-y-2 mb-3">
+                      <span className="font-medium text-sm text-muted-foreground">Challenges Identified</span>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                        {viewingReport.challenges_identified}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-primary/5 rounded-lg p-4 border-l-4 border-primary">
+                    <div className="space-y-2 mb-3">
+                      <span className="font-medium text-sm text-muted-foreground">Recommendations</span>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                        {viewingReport.recommendations}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Report Metadata Section */}
+                <div className="bg-muted/10 rounded-lg p-4 border-t">
+                  <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Report Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <span className="font-medium text-sm text-muted-foreground">Created On</span>
+                      <p className="text-sm">{new Date(viewingReport.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <span className="font-medium text-sm text-muted-foreground">Last Updated</span>
+                      <p className="text-sm">{new Date(viewingReport.updated_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">School</h4>
-                  <p className="text-base">{viewingReport.school}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Location</h4>
-                  <p className="text-base">{viewingReport.location || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Reason for Visit</h4>
-                <p className="text-base">{viewingReport.reason_for_visit || 'Not specified'}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Observation Findings</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.observation_findings}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Challenges Identified</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.challenges_identified}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Recommendations</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.recommendations}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Report Created</h4>
-                <p className="text-base">{new Date(viewingReport.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
+            </ScrollArea>
           )}
         </DialogContent>
       </Dialog>

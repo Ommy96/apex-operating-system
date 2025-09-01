@@ -11,20 +11,21 @@ import { useToast } from "@/hooks/use-toast";
 interface SchoolVisitReportFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: any;
 }
 
-export function SchoolVisitReportForm({ onSuccess, onCancel }: SchoolVisitReportFormProps) {
+export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: SchoolVisitReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    staff: "",
-    school: "",
-    visit_date: "",
-    location: "",
-    reason_for_visit: "",
-    observation_findings: "",
-    challenges_identified: "",
-    recommendations: "",
+    staff: initialData?.staff || "",
+    school: initialData?.school || "",
+    visit_date: initialData?.visit_date || "",
+    location: initialData?.location || "",
+    reason_for_visit: initialData?.reason_for_visit || "",
+    observation_findings: initialData?.observation_findings || "",
+    challenges_identified: initialData?.challenges_identified || "",
+    recommendations: initialData?.recommendations || "",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -39,32 +40,57 @@ export function SchoolVisitReportForm({ onSuccess, onCancel }: SchoolVisitReport
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('school_visit_reports')
-        .insert({
-          staff: formData.staff,
-          school: formData.school,
-          visit_date: formData.visit_date,
-          location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
-          reason_for_visit: formData.reason_for_visit || null,
-          observation_findings: formData.observation_findings,
-          challenges_identified: formData.challenges_identified,
-          recommendations: formData.recommendations,
+      if (initialData) {
+        // Update existing report
+        const { error } = await supabase
+          .from('school_visit_reports')
+          .update({
+            staff: formData.staff,
+            school: formData.school,
+            visit_date: formData.visit_date,
+            location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+            reason_for_visit: formData.reason_for_visit || null,
+            observation_findings: formData.observation_findings,
+            challenges_identified: formData.challenges_identified,
+            recommendations: formData.recommendations,
+          })
+          .eq('id', initialData.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "School visit report updated successfully",
         });
+      } else {
+        // Create new report
+        const { error } = await supabase
+          .from('school_visit_reports')
+          .insert({
+            staff: formData.staff,
+            school: formData.school,
+            visit_date: formData.visit_date,
+            location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+            reason_for_visit: formData.reason_for_visit || null,
+            observation_findings: formData.observation_findings,
+            challenges_identified: formData.challenges_identified,
+            recommendations: formData.recommendations,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "School visit report created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "School visit report created successfully",
+        });
+      }
 
       onSuccess();
     } catch (error) {
-      console.error('Error creating school visit report:', error);
+      console.error('Error saving school visit report:', error);
       toast({
         title: "Error",
-        description: "Failed to create school visit report",
+        description: `Failed to ${initialData ? 'update' : 'create'} school visit report`,
         variant: "destructive",
       });
     } finally {
@@ -178,7 +204,7 @@ export function SchoolVisitReportForm({ onSuccess, onCancel }: SchoolVisitReport
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Report"}
+            {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Report" : "Create Report")}
           </Button>
         </div>
       </form>
