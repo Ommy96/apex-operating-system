@@ -257,7 +257,7 @@ export default function SupportGroups() {
 
       {/* View Group Details Dialog */}
       <Dialog open={!!viewingGroup} onOpenChange={() => setViewingGroup(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl w-[95vw] max-h-[95vh] overflow-y-auto p-6">
           <DialogHeader>
             <DialogTitle>Support Group Details</DialogTitle>
           </DialogHeader>
