@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { getCardStyles } from '@/lib/cardStyles';
 import { 
   Settings, 
   Save, 
@@ -231,7 +232,7 @@ export function DashboardCustomizer({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Customization Controls */}
-      <Card className="shadow-elevation-1">
+      <Card className={getCardStyles(1)}>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">

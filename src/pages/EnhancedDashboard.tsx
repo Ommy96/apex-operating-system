@@ -206,32 +206,36 @@ const EnhancedDashboard = () => {
       visible: true,
       component: (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 h-full">
-          {stats.map((stat, index) => (
-            <Card key={stat.title} className="bg-gradient-card border-white/20 shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-3 rounded-xl ${stat.gradient} shadow-elevation-2`}>
-                  <stat.icon className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-1">
-                  {stat.value}
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {stat.description}
-                </p>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-gradient-accent rounded-full animate-pulse"></div>
-                  <p className="text-xs text-success font-medium">
-                    {stat.change}
+          {stats.map((stat, index) => {
+            const cardGradients = ["bg-gradient-card-blue", "bg-gradient-card-emerald", "bg-gradient-card-orange", "bg-gradient-card-purple"];
+            const cardBorders = ["border-card-blue", "border-card-emerald", "border-card-orange", "border-card-purple"];
+            return (
+              <Card key={stat.title} className={`${cardGradients[index % cardGradients.length]} ${cardBorders[index % cardBorders.length]} shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-300`}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`p-3 rounded-xl ${stat.gradient} shadow-elevation-2`}>
+                    <stat.icon className="h-5 w-5 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-1">
+                    {stat.value}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {stat.description}
                   </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-gradient-accent rounded-full animate-pulse"></div>
+                    <p className="text-xs text-success font-medium">
+                      {stat.change}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )
     },

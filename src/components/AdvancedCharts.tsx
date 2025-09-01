@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { getCardStyles } from '@/lib/cardStyles';
 import { 
   LineChart, 
   Line, 
@@ -96,7 +97,7 @@ const ActivityHeatmap = () => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <Card className="shadow-elevation-1">
+    <Card className={getCardStyles(0)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
@@ -228,7 +229,7 @@ const SmallMultiples = () => {
   ];
 
   return (
-    <Card className="shadow-elevation-1">
+    <Card className={getCardStyles(1)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" />
@@ -354,7 +355,7 @@ export function AdvancedCharts({ className = '' }: AdvancedChartsProps) {
       <ActivityHeatmap />
 
       {/* Sparklines Grid */}
-      <Card className="shadow-elevation-1">
+      <Card className={getCardStyles(2)}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
@@ -400,7 +401,7 @@ export function AdvancedCharts({ className = '' }: AdvancedChartsProps) {
       <SmallMultiples />
 
       {/* Progress Rings */}
-      <Card className="shadow-elevation-1">
+      <Card className={getCardStyles(3)}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
@@ -439,7 +440,7 @@ export function AdvancedCharts({ className = '' }: AdvancedChartsProps) {
       </Card>
 
       {/* Mini Calendar Heatmap */}
-      <Card className="shadow-elevation-1">
+      <Card className={getCardStyles(4)}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />

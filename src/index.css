@@ -63,6 +63,22 @@
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(188 95% 53%) 0%, hsl(188 95% 43%) 100%);
     
+    /* Card Gradient Variants */
+    --gradient-card-blue: linear-gradient(135deg, hsl(215 85% 97%) 0%, hsl(215 85% 95%) 100%);
+    --gradient-card-emerald: linear-gradient(135deg, hsl(142 76% 97%) 0%, hsl(142 76% 95%) 100%);
+    --gradient-card-orange: linear-gradient(135deg, hsl(24 95% 97%) 0%, hsl(24 95% 95%) 100%);
+    --gradient-card-purple: linear-gradient(135deg, hsl(262 83% 97%) 0%, hsl(262 83% 95%) 100%);
+    --gradient-card-pink: linear-gradient(135deg, hsl(328 85% 97%) 0%, hsl(328 85% 95%) 100%);
+    --gradient-card-indigo: linear-gradient(135deg, hsl(231 48% 97%) 0%, hsl(231 48% 95%) 100%);
+    
+    /* Card Border Variants */
+    --border-card-blue: hsl(215 85% 85%);
+    --border-card-emerald: hsl(142 76% 85%);
+    --border-card-orange: hsl(24 95% 85%);
+    --border-card-purple: hsl(262 83% 85%);
+    --border-card-pink: hsl(328 85% 85%);
+    --border-card-indigo: hsl(231 48% 85%);
+    
     /* Enhanced Material Design Shadows */
     --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     --shadow-medium: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);

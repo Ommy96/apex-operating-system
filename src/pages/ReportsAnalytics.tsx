@@ -307,12 +307,12 @@ export default function ReportsAnalytics() {
       ]);
 
       const gradients = [
-        'from-blue-500/20 to-indigo-600/20',
-        'from-emerald-500/20 to-teal-600/20',
-        'from-purple-500/20 to-pink-600/20',
-        'from-orange-500/20 to-red-600/20',
-        'from-cyan-500/20 to-blue-600/20',
-        'from-rose-500/20 to-pink-600/20'
+        'bg-gradient-card-blue border-card-blue',
+        'bg-gradient-card-emerald border-card-emerald',
+        'bg-gradient-card-purple border-card-purple',
+        'bg-gradient-card-orange border-card-orange',
+        'bg-gradient-card-indigo border-card-indigo',
+        'bg-gradient-card-pink border-card-pink'
       ];
 
       const summaries: ProgramSummary[] = [

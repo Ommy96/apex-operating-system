@@ -150,7 +150,21 @@ export default {
 				'gradient-warm': 'var(--gradient-warm)',
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-card-blue': 'var(--gradient-card-blue)',
+				'gradient-card-emerald': 'var(--gradient-card-emerald)',
+				'gradient-card-orange': 'var(--gradient-card-orange)',
+				'gradient-card-purple': 'var(--gradient-card-purple)',
+				'gradient-card-pink': 'var(--gradient-card-pink)',
+				'gradient-card-indigo': 'var(--gradient-card-indigo)'
+			},
+			borderColor: {
+				'card-blue': 'var(--border-card-blue)',
+				'card-emerald': 'var(--border-card-emerald)',
+				'card-orange': 'var(--border-card-orange)',
+				'card-purple': 'var(--border-card-purple)',
+				'card-pink': 'var(--border-card-pink)',
+				'card-indigo': 'var(--border-card-indigo)'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',
