@@ -429,22 +429,37 @@ export default function ReportsAnalytics() {
   };
 
   const viewReport = (report: StaffReport) => {
-    // Navigate to appropriate report page based on report type
-    switch (report.report_type) {
-      case 'Activity Report':
-        navigate('/activity-reports');
-        break;
-      case 'Home Visit Report':
-        navigate('/home-visit-reports');
-        break;
-      case 'School Visit Report':
-        navigate('/school-visit-reports');
-        break;
-      case 'Program Report':
-        navigate('/program-reports');
-        break;
-      default:
-        toast.info('Report details will be shown here');
+    try {
+      console.log('Viewing report:', report);
+      // Navigate to appropriate report page based on report type
+      switch (report.report_type) {
+        case 'Activity Report':
+          navigate('/activity-reports');
+          toast.success('Navigating to Activity Reports');
+          break;
+        case 'Home Visit Report':
+          navigate('/home-visit-reports');
+          toast.success('Navigating to Home Visit Reports');
+          break;
+        case 'School Visit Report':
+          navigate('/school-visit-reports');
+          toast.success('Navigating to School Visit Reports');
+          break;
+        case 'Program Report':
+          navigate('/program-reports');
+          toast.success('Navigating to Program Reports');
+          break;
+        case 'Other Report':
+          navigate('/other-reports');
+          toast.success('Navigating to Other Reports');
+          break;
+        default:
+          console.log('Unknown report type:', report.report_type);
+          toast.info(`Report type "${report.report_type}" - Navigation not configured yet`);
+      }
+    } catch (error) {
+      console.error('Error navigating to report:', error);
+      toast.error('Failed to navigate to report');
     }
   };
 
