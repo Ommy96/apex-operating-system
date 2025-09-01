@@ -320,7 +320,7 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
 }
 
 export default function AcademicPerformance() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isStaff } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -436,14 +436,16 @@ export default function AcademicPerformance() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={() => navigate('/reports/academic-performance-reports')}
-            variant="outline"
-            className="gap-2"
-          >
-            <Eye className="h-4 w-4" />
-            View Reports
-          </Button>
+          {!isStaff && (
+            <Button 
+              onClick={() => navigate('/reports/academic-performance-reports')}
+              variant="outline"
+              className="gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              View Reports
+            </Button>
+          )}
           
           {isAdmin && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
