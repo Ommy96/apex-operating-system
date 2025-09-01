@@ -12,7 +12,9 @@ import {
   Calendar,
   BookOpen,
   Sparkles,
-  Target
+  Target,
+  Clock,
+  Activity
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -20,16 +22,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { StaffPermissionsDemo } from "@/components/StaffPermissionsDemo";
+import { LiveUserPresence } from "@/components/LiveUserPresence";
+import { ActivityFeed } from "@/components/ActivityFeed";
+import { RealTimeIndicator } from "@/components/RealTimeIndicator";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { isAdmin, isStaff, user } = useAuth();
+  const { toast } = useToast();
+  
+  // State for real-time features
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
   // Extract user name from metadata or email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   
   // Fetch dashboard statistics with real-time updates every 30 seconds
-  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
+  const { data: dashboardStats, isLoading: statsLoading, refetch } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
@@ -113,6 +124,97 @@ const Dashboard = () => {
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  // Set up real-time subscriptions for dashboard activity
+  useEffect(() => {
+    if (!user) return;
+
+    // Multiple database change subscriptions for comprehensive activity tracking
+    const tables = [
+      { name: 'children', displayName: 'Child' },
+      { name: 'alumni', displayName: 'Alumni' },
+      { name: 'feeding_program', displayName: 'Feeding Program' },
+      { name: 'kipawa_sato', displayName: 'Kipawa Program' },
+      { name: 'self_empowerment', displayName: 'Self Empowerment' },
+      { name: 'activities', displayName: 'Activity' },
+      { name: 'program_reports', displayName: 'Program Report' },
+      { name: 'activity_reports', displayName: 'Activity Report' }
+    ];
+
+    const channels = tables.map(table => {
+      const channel = supabase
+        .channel(`dashboard_${table.name}_changes`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: table.name
+          },
+          (payload) => {
+            console.log(`${table.displayName} change detected:`, payload);
+            
+            // Show notification for different events
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: `🎉 New ${table.displayName} Added!`,
+                description: `A new ${table.displayName.toLowerCase()} record has been created`,
+                duration: 4000,
+              });
+              
+              // Add to recent activity
+              setRecentActivity(prev => [{
+                id: Date.now(),
+                type: 'added',
+                entity_name: table.displayName,
+                user_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'System',
+                created_at: new Date().toISOString()
+              }, ...prev.slice(0, 9)]);
+            } else if (payload.eventType === 'UPDATE') {
+              toast({
+                title: `📝 ${table.displayName} Updated`,
+                description: `A ${table.displayName.toLowerCase()} record has been updated`,
+                duration: 3000,
+              });
+              
+              setRecentActivity(prev => [{
+                id: Date.now(),
+                type: 'updated',
+                entity_name: table.displayName,
+                user_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'System',
+                created_at: new Date().toISOString()
+              }, ...prev.slice(0, 9)]);
+            } else if (payload.eventType === 'DELETE') {
+              toast({
+                title: `🗑️ ${table.displayName} Removed`,
+                description: `A ${table.displayName.toLowerCase()} record has been deleted`,
+                duration: 3000,
+              });
+              
+              setRecentActivity(prev => [{
+                id: Date.now(),
+                type: 'deleted',
+                entity_name: table.displayName,
+                user_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'System',
+                created_at: new Date().toISOString()
+              }, ...prev.slice(0, 9)]);
+            }
+            
+            // Refresh the dashboard data
+            refetch();
+            setLastUpdated(new Date());
+          }
+        )
+        .subscribe();
+
+      return channel;
+    });
+
+    // Cleanup function
+    return () => {
+      channels.forEach(channel => supabase.removeChannel(channel));
+    };
+  }, [user, refetch, toast]);
 
   // Calculate program distribution percentages
   const totalPrograms = (dashboardStats?.educationProgram || 0) + 
@@ -222,14 +324,50 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Welcome Section */}
+      {/* Welcome Section with Real-time Indicators */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Welcome back, {userName}
-        </h1>
-        <p className="text-muted-foreground">
-          Here's what's happening with Heart to Heart Organization today.
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
+              Welcome back, {userName}
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-xs text-muted-foreground">Live</span>
+              </div>
+            </h1>
+            <div className="flex items-center gap-4 mt-1">
+              <p className="text-muted-foreground">
+                Here's what's happening with Heart to Heart Organization today.
+              </p>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            </div>
+          </div>
+          
+          <div className="hidden lg:flex">
+            <RealTimeIndicator 
+              isConnected={true} 
+              lastUpdate={lastUpdated}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Real-time Activity & Live Users */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <LiveUserPresence 
+          channelName="dashboard_page" 
+          pageName="dashboard" 
+        />
+        
+        <ActivityFeed 
+          activities={recentActivity}
+          maxItems={5}
+          showTimestamp={true}
+          className="h-fit"
+        />
       </div>
 
       {/* Role-based Permissions Demo - Shows current user's access level */}
