@@ -24,7 +24,6 @@ export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess,
     payment_method: "",
     reference_number: "",
     notes: "",
-    balance_after_payment: "",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -48,7 +47,6 @@ export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess,
           payment_method: formData.payment_method || null,
           reference_number: formData.reference_number || null,
           notes: formData.notes || null,
-          balance_after_payment: formData.balance_after_payment ? parseFloat(formData.balance_after_payment) : null,
         });
 
       if (error) throw error;
@@ -126,18 +124,6 @@ export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess,
               value={formData.reference_number}
               onChange={(e) => handleInputChange('reference_number', e.target.value)}
               placeholder="e.g., M-Pesa transaction ID"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="balance_after_payment">Balance After Payment (KSH)</Label>
-            <Input
-              id="balance_after_payment"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.balance_after_payment}
-              onChange={(e) => handleInputChange('balance_after_payment', e.target.value)}
             />
           </div>
 

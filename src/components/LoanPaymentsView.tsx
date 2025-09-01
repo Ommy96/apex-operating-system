@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Eye, Calendar, Coins, Receipt } from "lucide-react";
+import { Eye, Calendar, Coins, Receipt, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LoanPaymentsViewProps {
   selfEmpowermentRecord: any;
@@ -16,7 +19,6 @@ interface PaymentRecord {
   id: string;
   repayment_date: string;
   amount_paid: number;
-  balance_after_payment: number;
   payment_method?: string;
   reference_number?: string;
   notes?: string;
@@ -26,6 +28,7 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { isAdmin, isManagement } = useAuth();
 
   const fetchPayments = async () => {
     if (!selfEmpowermentRecord?.id) return;
@@ -59,8 +62,74 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
   }, [isOpen, selfEmpowermentRecord?.id]);
 
   const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount_paid), 0);
-  const currentBalance = payments.length > 0 ? Number(payments[0].balance_after_payment) : Number(selfEmpowermentRecord?.amount_approved || 0);
   const originalAmount = Number(selfEmpowermentRecord?.amount_approved || 0);
+  const remainingBalance = Math.max(0, originalAmount - totalPaid);
+
+  const canExport = isAdmin || isManagement;
+
+  const exportToCSV = () => {
+    const csvHeaders = "Date,Amount Paid,Payment Method,Reference,Notes\n";
+    const csvData = payments.map(payment => 
+      `${new Date(payment.repayment_date).toLocaleDateString()},${payment.amount_paid},${payment.payment_method || ''},${payment.reference_number || ''},${payment.notes || ''}`
+    ).join('\n');
+    
+    const csvContent = csvHeaders + csvData;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `loan_payments_${selfEmpowermentRecord?.full_name || 'export'}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    toast({
+      title: "Export Successful",
+      description: "Payment history exported to CSV",
+    });
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text('Loan Payment History', 14, 22);
+    
+    // Borrower info
+    doc.setFontSize(12);
+    doc.text(`Borrower: ${selfEmpowermentRecord?.full_name}`, 14, 35);
+    doc.text(`Business: ${selfEmpowermentRecord?.business_name || 'Not specified'}`, 14, 42);
+    doc.text(`Original Loan: KSH ${originalAmount.toLocaleString()}`, 14, 49);
+    doc.text(`Total Paid: KSH ${totalPaid.toLocaleString()}`, 14, 56);
+    doc.text(`Remaining: KSH ${remainingBalance.toLocaleString()}`, 14, 63);
+    
+    // Payment table
+    const tableColumns = ['Date', 'Amount Paid', 'Method', 'Reference', 'Notes'];
+    const tableRows = payments.map(payment => [
+      new Date(payment.repayment_date).toLocaleDateString(),
+      `KSH ${Number(payment.amount_paid).toLocaleString()}`,
+      payment.payment_method || '-',
+      payment.reference_number || '-',
+      payment.notes || '-'
+    ]);
+    
+    (doc as any).autoTable({
+      head: [tableColumns],
+      body: tableRows,
+      startY: 75,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [41, 128, 185] }
+    });
+    
+    doc.save(`loan_payments_${selfEmpowermentRecord?.full_name || 'export'}.pdf`);
+    
+    toast({
+      title: "Export Successful",
+      description: "Payment history exported to PDF",
+    });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -106,9 +175,9 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
                 <Coins className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600">KSH {currentBalance.toLocaleString()}</div>
-                <Badge variant={currentBalance === 0 ? "default" : "secondary"}>
-                  {currentBalance === 0 ? "Fully Paid" : "Outstanding"}
+                <div className="text-2xl font-bold text-orange-600">KSH {remainingBalance.toLocaleString()}</div>
+                <Badge variant={remainingBalance === 0 ? "default" : "secondary"}>
+                  {remainingBalance === 0 ? "Fully Paid" : "Outstanding"}
                 </Badge>
               </CardContent>
             </Card>
@@ -136,9 +205,33 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
           {/* Payment History Table */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Payment History
+              <CardTitle className="text-lg flex items-center gap-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Payment History
+                </div>
+                {canExport && payments.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={exportToCSV}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      CSV
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={exportToPDF}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      PDF
+                    </Button>
+                  </div>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -147,34 +240,30 @@ export const LoanPaymentsView = ({ selfEmpowermentRecord }: LoanPaymentsViewProp
                   <p className="text-muted-foreground">Loading payment history...</p>
                 </div>
               ) : payments.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount Paid</TableHead>
-                      <TableHead>Payment Method</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead>Balance After</TableHead>
-                      <TableHead>Notes</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{new Date(payment.repayment_date).toLocaleDateString()}</TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          KSH {Number(payment.amount_paid).toLocaleString()}
-                        </TableCell>
-                        <TableCell>{payment.payment_method || '-'}</TableCell>
-                        <TableCell className="font-mono text-sm">{payment.reference_number || '-'}</TableCell>
-                        <TableCell className="font-medium">
-                          KSH {Number(payment.balance_after_payment).toLocaleString()}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">{payment.notes || '-'}</TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Amount Paid</TableHead>
+                        <TableHead>Payment Method</TableHead>
+                        <TableHead>Reference</TableHead>
+                        <TableHead>Notes</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{new Date(payment.repayment_date).toLocaleDateString()}</TableCell>
+                          <TableCell className="font-medium text-green-600">
+                            KSH {Number(payment.amount_paid).toLocaleString()}
+                          </TableCell>
+                          <TableCell>{payment.payment_method || '-'}</TableCell>
+                          <TableCell className="font-mono text-sm">{payment.reference_number || '-'}</TableCell>
+                          <TableCell className="max-w-xs truncate">{payment.notes || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
               ) : (
                 <div className="text-center py-8">
                   <Receipt className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
