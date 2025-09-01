@@ -146,12 +146,19 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
 
         <div>
           <Label htmlFor="reason_for_visit">Reason for Visit</Label>
-          <Textarea
-            id="reason_for_visit"
-            value={formData.reason_for_visit}
-            onChange={(e) => handleInputChange('reason_for_visit', e.target.value)}
-            placeholder="Describe the purpose of this visit..."
-          />
+          <Select value={formData.reason_for_visit} onValueChange={(value) => handleInputChange('reason_for_visit', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select reason for visit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="General Visit">General Visit</SelectItem>
+              <SelectItem value="Follow-Up">Follow-Up</SelectItem>
+              <SelectItem value="Emergency Visit">Emergency Visit</SelectItem>
+              <SelectItem value="New Intake">New Intake</SelectItem>
+              <SelectItem value="Information Required">Information Required</SelectItem>
+              <SelectItem value="Donor Visit">Donor Visit</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
