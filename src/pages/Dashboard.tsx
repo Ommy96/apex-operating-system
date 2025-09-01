@@ -356,8 +356,8 @@ const Dashboard = () => {
       </div>
 
 
-      {/* Role-based Permissions Demo - Shows current user's access level */}
-      {isStaff && (
+      {/* Role-based Permissions Demo - Hidden for staff users */}
+      {!isStaff && (
         <div className="mb-8">
           <StaffPermissionsDemo />
         </div>
@@ -398,35 +398,37 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Quick Actions */}
-        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Quick Actions
-            </CardTitle>
-            <CardDescription>
-              Common tasks and operations
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {quickActions.map((action, index) => (
-              <Button
-                key={action.title}
-                variant={action.variant}
-                className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4 hover-lift button-press"
-                onClick={action.onClick}
-              >
-                <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-center leading-tight">{action.title}</span>
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
+      <div className={`grid gap-6 ${!isStaff ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+        {/* Quick Actions - Navigation Card - Hidden for staff users */}
+        {!isStaff && (
+          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Quick Actions
+              </CardTitle>
+              <CardDescription>
+                Common tasks and operations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {quickActions.map((action, index) => (
+                <Button
+                  key={action.title}
+                  variant={action.variant}
+                  className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4 hover-lift button-press"
+                  onClick={action.onClick}
+                >
+                  <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-center leading-tight">{action.title}</span>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Beneficiaries by Location */}
-        <Card className="lg:col-span-2 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
+        <Card className={`${!isStaff ? 'lg:col-span-2' : ''} shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -543,54 +545,57 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
-          <CardHeader>
-            <CardTitle>Recent Reports</CardTitle>
-            <CardDescription>
-              Latest program reports and visits
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-               {[
-                { name: "Monthly Education Report", path: "/reports/program-reports", icon: BookOpen, color: "text-primary" },
-                { name: "Alumni Success Stories", path: "/alumni", icon: GraduationCap, color: "text-secondary" },
-                { name: "Feeding Program Update", path: "/reports/activity-reports", icon: UtensilsCrossed, color: "text-accent" },
-                { name: "Home Visit Summary", path: "/reports/home-visits", icon: Users, color: "text-warning" }
-              ].map((report, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/20 to-muted/40 hover:from-muted/30 hover:to-muted/60 transition-all duration-200 border border-muted/50 cursor-pointer group hover-lift micro-interaction shadow-elevation-1 hover:shadow-elevation-2"
-                  onClick={() => navigate(report.path)}
-                >
-                  <div className="flex items-center gap-3">
-                    <report.icon className={`h-4 w-4 ${report.color}`} />
-                    <span className="text-sm font-medium">{report.name}</span>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="group-hover:bg-primary/10 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(report.path);
-                    }}
+        {/* Report Actions Card - Hidden for staff users */}
+        {!isStaff && (
+          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
+            <CardHeader>
+              <CardTitle>Recent Reports</CardTitle>
+              <CardDescription>
+                Latest program reports and visits
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                 {[
+                  { name: "Monthly Education Report", path: "/reports/program-reports", icon: BookOpen, color: "text-primary" },
+                  { name: "Alumni Success Stories", path: "/alumni", icon: GraduationCap, color: "text-secondary" },
+                  { name: "Feeding Program Update", path: "/reports/activity-reports", icon: UtensilsCrossed, color: "text-accent" },
+                  { name: "Home Visit Summary", path: "/reports/home-visits", icon: Users, color: "text-warning" }
+                ].map((report, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-muted/20 to-muted/40 hover:from-muted/30 hover:to-muted/60 transition-all duration-200 border border-muted/50 cursor-pointer group hover-lift micro-interaction shadow-elevation-1 hover:shadow-elevation-2"
+                    onClick={() => navigate(report.path)}
                   >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4 bg-gradient-to-r from-accent/10 to-primary/10 hover:from-accent/20 hover:to-primary/20 border-accent/30"
-              onClick={() => navigate('/alumni')}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              View Alumni Directory
-            </Button>
-          </CardContent>
-        </Card>
+                    <div className="flex items-center gap-3">
+                      <report.icon className={`h-4 w-4 ${report.color}`} />
+                      <span className="text-sm font-medium">{report.name}</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="group-hover:bg-primary/10 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(report.path);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full mt-4 bg-gradient-to-r from-accent/10 to-primary/10 hover:from-accent/20 hover:to-primary/20 border-accent/30"
+                onClick={() => navigate('/alumni')}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                View Alumni Directory
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
