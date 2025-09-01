@@ -17,7 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function HomeVisitReports() {
-  const { isManagement } = useAuth();
+  const { isManagement, isStaff, userRole, user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any>(null);
@@ -42,13 +42,20 @@ export default function HomeVisitReports() {
   });
 
   const { data: homeVisitReports, refetch } = useQuery({
-    queryKey: ['home-visit-reports'],
+    queryKey: ['home-visit-reports', userRole, user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('home_visit_reports')
-        .select('*')
-        .order('visit_date', { ascending: false });
+        .select('*');
       
+      // Staff can only see their own reports
+      if (isStaff && user?.id) {
+        query = query.eq('created_by', user.id);
+      }
+      
+      query = query.order('visit_date', { ascending: false });
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -107,6 +114,15 @@ export default function HomeVisitReports() {
   };
 
   const handleEdit = (report: any) => {
+    // Staff can only edit their own reports
+    if (isStaff && report.created_by !== user?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You can only edit your own reports",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingReport(report);
     setIsDialogOpen(true);
   };
@@ -116,7 +132,17 @@ export default function HomeVisitReports() {
     setIsViewDialogOpen(true);
   };
 
-  const handleDelete = async (reportId: string) => {
+  const handleDelete = async (reportId: string, report: any) => {
+    // Staff can only delete their own reports
+    if (isStaff && report.created_by !== user?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You can only delete your own reports",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('home_visit_reports')
@@ -155,7 +181,8 @@ export default function HomeVisitReports() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
-          {isManagement && (
+          {/* Only management/admin can download reports */}
+          {(isManagement || userRole === 'admin') && (
             <Button onClick={handleDownload} variant="outline" className="gap-2">
               <Download className="h-4 w-4" />
               Download Excel
@@ -315,37 +342,43 @@ export default function HomeVisitReports() {
                   <Eye className="h-3 w-3 mr-1" />
                   View
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEdit(report)}
-                  className="flex-1"
-                >
-                  <Edit className="h-3 w-3 mr-1" />
-                  Edit
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Delete
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Report</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this home visit report? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(report.id)}>
+                {/* Staff can only edit their own reports, management/admin can edit all */}
+                {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(report)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                )}
+                {/* Staff can only delete their own reports, management/admin can delete all */}
+                {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                        <Trash2 className="h-3 w-3 mr-1" />
                         Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Report</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this home visit report? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(report.id, report)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -354,7 +387,9 @@ export default function HomeVisitReports() {
 
       {filteredReports?.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No home visit reports found.</p>
+          <p className="text-muted-foreground">
+            {isStaff ? "You have not submitted any home visit reports yet." : "No home visit reports found."}
+          </p>
         </div>
       )}
 

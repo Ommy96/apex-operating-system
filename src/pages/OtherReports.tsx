@@ -14,8 +14,10 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function OtherReports() {
+  const { isManagement, isStaff, userRole, user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,13 +43,20 @@ export default function OtherReports() {
   });
 
   const { data: activityReports, refetch } = useQuery({
-    queryKey: ['other-reports'],
+    queryKey: ['other-reports', userRole, user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('activity_reports')
-        .select('*')
-        .order('reporting_date', { ascending: false });
+        .select('*');
       
+      // Staff can only see their own reports
+      if (isStaff && user?.id) {
+        query = query.eq('created_by', user.id);
+      }
+      
+      query = query.order('reporting_date', { ascending: false });
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -106,6 +115,15 @@ export default function OtherReports() {
   };
 
   const handleEdit = (report: any) => {
+    // Staff can only edit their own reports
+    if (isStaff && report.created_by !== user?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You can only edit your own reports",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingReport(report);
     setIsDialogOpen(true);
   };
@@ -115,7 +133,17 @@ export default function OtherReports() {
     setIsViewDialogOpen(true);
   };
 
-  const handleDelete = async (reportId: string) => {
+  const handleDelete = async (reportId: string, report: any) => {
+    // Staff can only delete their own reports
+    if (isStaff && report.created_by !== user?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You can only delete your own reports",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('activity_reports')
@@ -154,10 +182,13 @@ export default function OtherReports() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={handleDownload} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Download Excel
-          </Button>
+          {/* Only management/admin can download reports */}
+          {(isManagement || userRole === 'admin') && (
+            <Button onClick={handleDownload} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Excel
+            </Button>
+          )}
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -293,36 +324,42 @@ export default function OtherReports() {
                       </Button>
                     </DropdownMenuTrigger>
                      <DropdownMenuContent align="end">
-                       <DropdownMenuItem onClick={() => handleView(report)}>
-                         <Eye className="h-4 w-4 mr-2" />
-                         View
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleEdit(report)}>
-                         <Edit className="h-4 w-4 mr-2" />
-                         Edit
-                       </DropdownMenuItem>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                        <DropdownMenuItem onClick={() => handleView(report)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </DropdownMenuItem>
+                        {/* Staff can only edit their own reports, management/admin can edit all */}
+                        {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
+                          <DropdownMenuItem onClick={() => handleEdit(report)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
                           </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Report</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this report? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(report.id)}>
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        )}
+                        {/* Staff can only delete their own reports, management/admin can delete all */}
+                        {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
+                         <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               <Trash2 className="h-4 w-4 mr-2" />
+                               Delete
+                             </DropdownMenuItem>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent>
+                             <AlertDialogHeader>
+                               <AlertDialogTitle>Delete Report</AlertDialogTitle>
+                               <AlertDialogDescription>
+                                 Are you sure you want to delete this report? This action cannot be undone.
+                               </AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <AlertDialogFooter>
+                               <AlertDialogCancel>Cancel</AlertDialogCancel>
+                               <AlertDialogAction onClick={() => handleDelete(report.id, report)}>
+                                 Delete
+                               </AlertDialogAction>
+                             </AlertDialogFooter>
+                           </AlertDialogContent>
+                         </AlertDialog>
+                        )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -349,7 +386,9 @@ export default function OtherReports() {
 
       {filteredReports?.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No other reports found.</p>
+          <p className="text-muted-foreground">
+            {isStaff ? "You have not submitted any other reports yet." : "No other reports found."}
+          </p>
         </div>
       )}
 
