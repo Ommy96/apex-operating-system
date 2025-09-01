@@ -12,20 +12,21 @@ import { useQuery } from "@tanstack/react-query";
 interface HomeVisitReportFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: any;
 }
 
-export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportFormProps) {
+export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVisitReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    staff: "",
-    visit_date: "",
-    student_id: "",
-    location: "",
-    reason_for_visit: "",
-    observation_findings: "",
-    challenges_identified: "",
-    recommendations: "",
+    staff: initialData?.staff || "",
+    visit_date: initialData?.visit_date || "",
+    student_id: initialData?.student_id || "",
+    location: initialData?.location || "",
+    reason_for_visit: initialData?.reason_for_visit || "",
+    observation_findings: initialData?.observation_findings || "",
+    challenges_identified: initialData?.challenges_identified || "",
+    recommendations: initialData?.recommendations || "",
   });
 
   // Fetch students for the dropdown
@@ -54,25 +55,50 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('home_visit_reports')
-        .insert({
-          staff: formData.staff,
-          visit_date: formData.visit_date,
-          student_id: formData.student_id || null,
-          location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
-          reason_for_visit: formData.reason_for_visit || null,
-          observation_findings: formData.observation_findings,
-          challenges_identified: formData.challenges_identified,
-          recommendations: formData.recommendations,
+      if (initialData) {
+        // Update existing report
+        const { error } = await supabase
+          .from('home_visit_reports')
+          .update({
+            staff: formData.staff,
+            visit_date: formData.visit_date,
+            student_id: formData.student_id || null,
+            location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+            reason_for_visit: formData.reason_for_visit || null,
+            observation_findings: formData.observation_findings,
+            challenges_identified: formData.challenges_identified,
+            recommendations: formData.recommendations,
+          })
+          .eq('id', initialData.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Home visit report updated successfully",
         });
+      } else {
+        // Create new report
+        const { error } = await supabase
+          .from('home_visit_reports')
+          .insert({
+            staff: formData.staff,
+            visit_date: formData.visit_date,
+            student_id: formData.student_id || null,
+            location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+            reason_for_visit: formData.reason_for_visit || null,
+            observation_findings: formData.observation_findings,
+            challenges_identified: formData.challenges_identified,
+            recommendations: formData.recommendations,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Home visit report created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Home visit report created successfully",
+        });
+      }
 
       onSuccess();
     } catch (error) {
@@ -199,7 +225,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel }: HomeVisitReportForm
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Report"}
+            {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Report" : "Create Report")}
           </Button>
         </div>
       </form>

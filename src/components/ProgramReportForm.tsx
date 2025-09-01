@@ -11,19 +11,20 @@ import { useToast } from "@/hooks/use-toast";
 interface ProgramReportFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: any;
 }
 
-export function ProgramReportForm({ onSuccess, onCancel }: ProgramReportFormProps) {
+export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    program: "",
-    staff: "",
-    reporting_date: "",
-    executive_summary: "",
-    beneficiary_impact: "",
-    challenges: "",
-    proposed_recommendations: "",
+    program: initialData?.program || "",
+    staff: initialData?.staff || "",
+    reporting_date: initialData?.reporting_date || "",
+    executive_summary: initialData?.executive_summary || "",
+    beneficiary_impact: initialData?.beneficiary_impact || "",
+    challenges: initialData?.challenges || "",
+    proposed_recommendations: initialData?.proposed_recommendations || "",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -40,25 +41,49 @@ export function ProgramReportForm({ onSuccess, onCancel }: ProgramReportFormProp
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase
-        .from('program_reports')
-        .insert({
-          program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
-          staff: formData.staff,
-          reporting_date: formData.reporting_date,
-          executive_summary: formData.executive_summary,
-          beneficiary_impact: formData.beneficiary_impact,
-          challenges: formData.challenges,
-          proposed_recommendations: formData.proposed_recommendations,
-          created_by: user?.id,
+      if (initialData) {
+        // Update existing report
+        const { error } = await supabase
+          .from('program_reports')
+          .update({
+            program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
+            staff: formData.staff,
+            reporting_date: formData.reporting_date,
+            executive_summary: formData.executive_summary,
+            beneficiary_impact: formData.beneficiary_impact,
+            challenges: formData.challenges,
+            proposed_recommendations: formData.proposed_recommendations,
+          })
+          .eq('id', initialData.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Program report updated successfully",
         });
+      } else {
+        // Create new report
+        const { error } = await supabase
+          .from('program_reports')
+          .insert({
+            program: formData.program as "Education" | "Kibera Early Dinner" | "Kawangware Lunch Hour" | "Kipawa Sato" | "Self-Empowerment" | "Support Groups",
+            staff: formData.staff,
+            reporting_date: formData.reporting_date,
+            executive_summary: formData.executive_summary,
+            beneficiary_impact: formData.beneficiary_impact,
+            challenges: formData.challenges,
+            proposed_recommendations: formData.proposed_recommendations,
+            created_by: user?.id,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Program report created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Program report created successfully",
+        });
+      }
 
       onSuccess();
     } catch (error) {
@@ -165,7 +190,7 @@ export function ProgramReportForm({ onSuccess, onCancel }: ProgramReportFormProp
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Report"}
+            {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Report" : "Create Report")}
           </Button>
         </div>
       </form>

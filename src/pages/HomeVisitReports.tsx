@@ -13,6 +13,7 @@ import { downloadExcel, formatHomeVisitReportsData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function HomeVisitReports() {
@@ -155,6 +156,7 @@ export default function HomeVisitReports() {
                 <DialogTitle>{editingReport ? 'Edit Home Visit Report' : 'Add Home Visit Report'}</DialogTitle>
               </DialogHeader>
               <HomeVisitReportForm 
+                initialData={editingReport}
                 onSuccess={() => {
                   handleDialogClose();
                   refetch();
@@ -326,60 +328,90 @@ export default function HomeVisitReports() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Home Visit Report Details</DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[85vh]">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <FileText className="h-5 w-5" />
+              Home Visit Report Details
+            </DialogTitle>
           </DialogHeader>
           {viewingReport && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Staff Member</h4>
-                  <p className="text-base">{viewingReport.staff}</p>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Staff Member</h3>
+                    <p className="text-lg font-medium">{viewingReport.staff}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Visit Date</h3>
+                    <p className="flex items-center gap-1 font-medium">
+                      <Calendar className="h-4 w-4" />
+                      {new Date(viewingReport.visit_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Location</h3>
+                    <p className="font-medium">{viewingReport.location || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Student ID</h3>
+                    <p className="font-medium">{viewingReport.student_id || 'Not specified'}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Visit Date</h4>
-                  <p className="text-base">{new Date(viewingReport.visit_date).toLocaleDateString()}</p>
+                
+                {viewingReport.reason_for_visit && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-base">Reason for Visit</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm">{viewingReport.reason_for_visit}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Observation Findings</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{viewingReport.observation_findings}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Challenges Identified</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{viewingReport.challenges_identified}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Recommendations</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{viewingReport.recommendations}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Report created on {new Date(viewingReport.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Location</h4>
-                  <p className="text-base">{viewingReport.location || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Student ID</h4>
-                  <p className="text-base">{viewingReport.student_id || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Reason for Visit</h4>
-                <p className="text-base">{viewingReport.reason_for_visit || 'Not specified'}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Observation Findings</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.observation_findings}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Challenges Identified</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.challenges_identified}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Recommendations</h4>
-                <p className="text-base whitespace-pre-wrap">{viewingReport.recommendations}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Report Created</h4>
-                <p className="text-base">{new Date(viewingReport.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
+            </ScrollArea>
           )}
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setIsViewDialogOpen(false);
+              handleEdit(viewingReport);
+            }}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Report
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

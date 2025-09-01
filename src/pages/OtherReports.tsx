@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Calendar, Activity, Download, Edit, Trash2, FileText, TrendingUp, Users } from "lucide-react";
+import { Plus, Search, Calendar, Activity, Download, Edit, Trash2, FileText, TrendingUp, Users, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,12 +13,15 @@ import { downloadExcel, formatActivityReportsData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function OtherReports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("");
+  const [viewingReport, setViewingReport] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: activityReports, refetch } = useQuery({
@@ -87,6 +90,11 @@ export default function OtherReports() {
   const handleEdit = (report: any) => {
     setEditingReport(report);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (report: any) => {
+    setViewingReport(report);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = async (reportId: string) => {
@@ -251,11 +259,15 @@ export default function OtherReports() {
                         </svg>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(report)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
+                     <DropdownMenuContent align="end">
+                       <DropdownMenuItem onClick={() => handleView(report)}>
+                         <Eye className="h-4 w-4 mr-2" />
+                         View
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onClick={() => handleEdit(report)}>
+                         <Edit className="h-4 w-4 mr-2" />
+                         Edit
+                       </DropdownMenuItem>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -307,8 +319,98 @@ export default function OtherReports() {
           <p className="text-muted-foreground">No other reports found.</p>
         </div>
       )}
+
+      {/* View Report Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Activity className="h-5 w-5" />
+              Other Report Details
+            </DialogTitle>
+          </DialogHeader>
+          {viewingReport && (
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Staff Member</h3>
+                    <p className="text-lg font-medium">{viewingReport.staff}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Program</h3>
+                    <Badge variant="secondary" className="text-sm">
+                      <Activity className="h-3 w-3 mr-1" />
+                      {viewingReport.program}
+                    </Badge>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Reporting Date</h3>
+                    <p className="flex items-center gap-1 font-medium">
+                      <Calendar className="h-4 w-4" />
+                      {new Date(viewingReport.reporting_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Executive Summary</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm leading-relaxed">{viewingReport.executive_summary}</p>
+                    </div>
+                  </div>
+                  
+                  {viewingReport.beneficiary_impact && (
+                    <div>
+                      <h3 className="font-semibold text-base mb-2">Beneficiary Impact</h3>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm leading-relaxed">{viewingReport.beneficiary_impact}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {viewingReport.challenges && (
+                    <div>
+                      <h3 className="font-semibold text-base mb-2">Challenges</h3>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm leading-relaxed">{viewingReport.challenges}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {viewingReport.proposed_recommendations && (
+                    <div>
+                      <h3 className="font-semibold text-base mb-2">Proposed Recommendations</h3>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm leading-relaxed">{viewingReport.proposed_recommendations}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Report created on {new Date(viewingReport.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setIsViewDialogOpen(false);
+              handleEdit(viewingReport);
+            }}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Report
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
-// Remove line

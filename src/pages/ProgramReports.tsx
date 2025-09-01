@@ -155,6 +155,7 @@ export default function ProgramReports() {
                 <DialogTitle>{editingReport ? 'Edit Program Report' : 'Add Program Report'}</DialogTitle>
               </DialogHeader>
               <ProgramReportForm 
+                initialData={editingReport}
                 onSuccess={() => {
                   handleDialogClose();
                   refetch();

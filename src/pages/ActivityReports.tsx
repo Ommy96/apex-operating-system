@@ -155,13 +155,14 @@ export default function ActivityReports() {
             <DialogHeader>
               <DialogTitle>{editingReport ? 'Edit Activity Report' : 'Add Activity Report'}</DialogTitle>
             </DialogHeader>
-            <ActivityReportForm 
-              onSuccess={() => {
-                handleDialogClose();
-                refetch();
-              }} 
-              onCancel={handleDialogClose} 
-            />
+              <ActivityReportForm 
+                initialData={editingReport}
+                onSuccess={() => {
+                  handleDialogClose();
+                  refetch();
+                }} 
+                onCancel={handleDialogClose} 
+              />
             </DialogContent>
           </Dialog>
         </div>
