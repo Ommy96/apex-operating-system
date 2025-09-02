@@ -356,8 +356,8 @@ const Dashboard = () => {
       </div>
 
 
-      {/* Role-based Permissions Demo - Hidden for staff users */}
-      {!isStaff && (
+      {/* Role-based Permissions Demo - Hidden for staff and admin users */}
+      {!isStaff && !isAdmin && (
         <div className="mb-8">
           <StaffPermissionsDemo />
         </div>
@@ -398,9 +398,9 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className={`grid gap-6 ${!isStaff ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
-        {/* Quick Actions - Navigation Card - Hidden for staff users */}
-        {!isStaff && (
+      <div className={`grid gap-6 ${!isStaff && !isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+        {/* Quick Actions - Navigation Card - Hidden for staff and admin users */}
+        {!isStaff && !isAdmin && (
           <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -428,7 +428,7 @@ const Dashboard = () => {
         )}
 
         {/* Beneficiaries by Location */}
-        <Card className={`${!isStaff ? 'lg:col-span-2' : ''} shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300`}>
+        <Card className={`${!isStaff && !isAdmin ? 'lg:col-span-2' : ''} shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -545,8 +545,8 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Report Actions Card - Hidden for staff users */}
-        {!isStaff && (
+        {/* Report Actions Card - Hidden for staff and admin users */}
+        {!isStaff && !isAdmin && (
           <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
             <CardHeader>
               <CardTitle>Recent Reports</CardTitle>
