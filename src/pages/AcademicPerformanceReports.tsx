@@ -33,7 +33,7 @@ export default function AcademicPerformanceReports() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
-  const [schoolFilter, setSchoolFilter] = useState('');
+  const [termFilter, setTermFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const { toast } = useToast();
 
@@ -43,7 +43,7 @@ export default function AcademicPerformanceReports() {
 
   useEffect(() => {
     filterRecords();
-  }, [records, searchTerm, gradeFilter, schoolFilter, dateFilter]);
+  }, [records, searchTerm, gradeFilter, termFilter, dateFilter]);
 
   const fetchAcademicRecords = async () => {
     try {
@@ -97,8 +97,11 @@ export default function AcademicPerformanceReports() {
       filtered = filtered.filter(record => record.children.grade === gradeFilter);
     }
 
-    if (schoolFilter && schoolFilter !== 'all') {
-      filtered = filtered.filter(record => record.children.institution_name === schoolFilter);
+    if (termFilter && termFilter !== 'all') {
+      // For now, all records are considered "Term 1" since we don't have term data in the database yet
+      // This filter will be functional once term data is added to the database
+      const recordTerm = 'Term 1'; // Placeholder - this should come from the database
+      filtered = filtered.filter(record => recordTerm === termFilter);
     }
 
     if (dateFilter) {
@@ -152,11 +155,6 @@ export default function AcademicPerformanceReports() {
   const getUniqueGrades = () => {
     const grades = records.map(record => record.children.grade).filter(Boolean);
     return [...new Set(grades)];
-  };
-
-  const getUniqueSchools = () => {
-    const schools = records.map(record => record.children.institution_name).filter(Boolean);
-    return [...new Set(schools)];
   };
 
   const getGradeColor = (grade: string) => {
@@ -281,16 +279,16 @@ export default function AcademicPerformanceReports() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">School</label>
-              <Select value={schoolFilter} onValueChange={setSchoolFilter}>
+              <label className="text-sm font-medium">Term</label>
+              <Select value={termFilter} onValueChange={setTermFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All schools" />
+                  <SelectValue placeholder="All terms" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Schools</SelectItem>
-                  {getUniqueSchools().map(school => (
-                    <SelectItem key={school} value={school}>{school}</SelectItem>
-                  ))}
+                  <SelectItem value="all">All Terms</SelectItem>
+                  <SelectItem value="Term 1">Term 1</SelectItem>
+                  <SelectItem value="Term 2">Term 2</SelectItem>
+                  <SelectItem value="Term 3">Term 3</SelectItem>
                 </SelectContent>
               </Select>
             </div>
