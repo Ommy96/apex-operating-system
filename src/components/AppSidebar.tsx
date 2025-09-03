@@ -35,12 +35,20 @@ import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, Das
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
-  { title: "Children", url: "/children", icon: Users },
-  { title: "Alumni", url: "/alumni", icon: GraduationCap },
-  { title: "Replacements", url: "/replacements", icon: RefreshCw },
-];
+const getMainMenuItems = (isAdmin: boolean) => {
+  const baseItems = [
+    { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
+    { title: "Children", url: "/children", icon: Users },
+    { title: "Alumni", url: "/alumni", icon: GraduationCap },
+  ];
+  
+  // Only show Replacements to admin users
+  if (isAdmin) {
+    baseItems.push({ title: "Replacements", url: "/replacements", icon: RefreshCw });
+  }
+  
+  return baseItems;
+};
 
 const programItems = [
   { title: "Feeding Program", url: "/programs/feeding", icon: FeedingIcon },
@@ -117,7 +125,7 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainMenuItems.map((item) => (
+              {getMainMenuItems(isAdmin).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="ripple">
                     <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>

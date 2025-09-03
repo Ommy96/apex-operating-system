@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,8 @@ import {
   Trash2,
   Edit,
   User,
-  RefreshCw
+  RefreshCw,
+  Shield
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -59,6 +61,7 @@ interface Replacement {
 
 export default function Replacements() {
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [schoolFilter, setSchoolFilter] = useState("all");
@@ -66,6 +69,14 @@ export default function Replacements() {
   const [locationFilter, setLocationFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [editingReplacement, setEditingReplacement] = useState<Replacement | null>(null);
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate("/dashboard");
+      toast.error("Access denied. Only administrators can view replacements.");
+    }
+  }, [isAdmin, navigate]);
 
   // Fetch replacements with original child data
   const { data: replacements = [], isLoading } = useQuery({
