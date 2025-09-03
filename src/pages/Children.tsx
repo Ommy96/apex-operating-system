@@ -45,6 +45,7 @@ interface Child {
   guardian_phone: string;
   enrollment_date: string;
   status: string;
+  replacement_status: string;
   academic_level: string;
   grade: string;
   institution_name: string;
@@ -544,6 +545,14 @@ export default function Children() {
                         {child.status}
                       </Badge>
                     </div>
+                    {child.replacement_status === 'replaced' && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Replacement:</span>
+                        <Badge variant="destructive" className="text-xs">
+                          Replaced
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="mt-4 flex gap-2">

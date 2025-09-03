@@ -28,7 +28,8 @@ import {
   Trophy,
   FileText,
   Settings,
-  LogOut
+  LogOut,
+  RefreshCw
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
   { title: "Children", url: "/children", icon: Users },
   { title: "Alumni", url: "/alumni", icon: GraduationCap },
+  { title: "Replacements", url: "/replacements", icon: RefreshCw },
 ];
 
 const programItems = [

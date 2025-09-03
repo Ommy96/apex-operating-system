@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
 import Alumni from "./pages/Alumni";
+import Replacements from "./pages/Replacements";
 
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
@@ -73,6 +74,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Alumni />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/replacements" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Replacements />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

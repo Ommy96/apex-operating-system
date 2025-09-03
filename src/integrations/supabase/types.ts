@@ -357,6 +357,7 @@ export type Database = {
             | null
           photo_url: string | null
           relation: string | null
+          replacement_status: string | null
           residence: Database["public"]["Enums"]["residence_type"] | null
           special_condition: string | null
           special_needs: string | null
@@ -390,6 +391,7 @@ export type Database = {
             | null
           photo_url?: string | null
           relation?: string | null
+          replacement_status?: string | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
           special_condition?: string | null
           special_needs?: string | null
@@ -423,6 +425,7 @@ export type Database = {
             | null
           photo_url?: string | null
           relation?: string | null
+          replacement_status?: string | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
           special_condition?: string | null
           special_needs?: string | null
@@ -867,6 +870,60 @@ export type Database = {
           updated_at?: string
           user_id?: string
           window_start?: string
+        }
+        Relationships: []
+      }
+      replacements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          new_child_full_name: string
+          new_child_gender: Database["public"]["Enums"]["gender_type"] | null
+          new_child_grade: string | null
+          new_child_location:
+            | Database["public"]["Enums"]["residence_type"]
+            | null
+          new_child_school: string | null
+          notes: string | null
+          original_child_id: string
+          reason: string | null
+          replacement_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_child_full_name: string
+          new_child_gender?: Database["public"]["Enums"]["gender_type"] | null
+          new_child_grade?: string | null
+          new_child_location?:
+            | Database["public"]["Enums"]["residence_type"]
+            | null
+          new_child_school?: string | null
+          notes?: string | null
+          original_child_id: string
+          reason?: string | null
+          replacement_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_child_full_name?: string
+          new_child_gender?: Database["public"]["Enums"]["gender_type"] | null
+          new_child_grade?: string | null
+          new_child_location?:
+            | Database["public"]["Enums"]["residence_type"]
+            | null
+          new_child_school?: string | null
+          notes?: string | null
+          original_child_id?: string
+          reason?: string | null
+          replacement_date?: string
+          updated_at?: string
         }
         Relationships: []
       }
