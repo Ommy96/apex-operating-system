@@ -61,9 +61,9 @@ export default function Replacements() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [schoolFilter, setSchoolFilter] = useState("");
-  const [gradeFilter, setGradeFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
+  const [schoolFilter, setSchoolFilter] = useState("all");
+  const [gradeFilter, setGradeFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [editingReplacement, setEditingReplacement] = useState<Replacement | null>(null);
 
@@ -133,9 +133,9 @@ export default function Replacements() {
       replacement.new_child_full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       `${replacement.original_child?.first_name} ${replacement.original_child?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSchool = !schoolFilter || replacement.new_child_school === schoolFilter;
-    const matchesGrade = !gradeFilter || replacement.new_child_grade === gradeFilter;
-    const matchesLocation = !locationFilter || replacement.new_child_location === locationFilter;
+    const matchesSchool = !schoolFilter || schoolFilter === "all" || replacement.new_child_school === schoolFilter;
+    const matchesGrade = !gradeFilter || gradeFilter === "all" || replacement.new_child_grade === gradeFilter;
+    const matchesLocation = !locationFilter || locationFilter === "all" || replacement.new_child_location === locationFilter;
 
     return matchesSearch && matchesSchool && matchesGrade && matchesLocation;
   });
@@ -296,7 +296,7 @@ export default function Replacements() {
                 <SelectValue placeholder="Filter by School" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Schools</SelectItem>
+                <SelectItem value="all">All Schools</SelectItem>
                 {uniqueSchools.map((school) => (
                   <SelectItem key={school} value={school}>
                     {school}
@@ -309,7 +309,7 @@ export default function Replacements() {
                 <SelectValue placeholder="Filter by Grade" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Grades</SelectItem>
+                <SelectItem value="all">All Grades</SelectItem>
                 {uniqueGrades.map((grade) => (
                   <SelectItem key={grade} value={grade}>
                     {grade}
@@ -322,7 +322,7 @@ export default function Replacements() {
                 <SelectValue placeholder="Filter by Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {uniqueLocations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -444,7 +444,7 @@ export default function Replacements() {
               <User className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-medium">No replacements found</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {searchTerm || schoolFilter || gradeFilter || locationFilter
+                {searchTerm || (schoolFilter !== "all") || (gradeFilter !== "all") || (locationFilter !== "all")
                   ? "Try adjusting your search or filters"
                   : "Get started by creating a new replacement record"}
               </p>
