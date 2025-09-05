@@ -47,6 +47,7 @@ interface Replacement {
   new_child_location: string;
   new_child_school: string;
   new_child_grade: string;
+  new_child_academic_level: string;
   replacement_date: string;
   reason: string;
   notes: string;
@@ -67,6 +68,7 @@ export default function Replacements() {
   const [schoolFilter, setSchoolFilter] = useState("all");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [academicLevelFilter, setAcademicLevelFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [editingReplacement, setEditingReplacement] = useState<Replacement | null>(null);
 
@@ -147,14 +149,16 @@ export default function Replacements() {
     const matchesSchool = !schoolFilter || schoolFilter === "all" || replacement.new_child_school === schoolFilter;
     const matchesGrade = !gradeFilter || gradeFilter === "all" || replacement.new_child_grade === gradeFilter;
     const matchesLocation = !locationFilter || locationFilter === "all" || replacement.new_child_location === locationFilter;
+    const matchesAcademicLevel = !academicLevelFilter || academicLevelFilter === "all" || replacement.new_child_academic_level === academicLevelFilter;
 
-    return matchesSearch && matchesSchool && matchesGrade && matchesLocation;
+    return matchesSearch && matchesSchool && matchesGrade && matchesLocation && matchesAcademicLevel;
   });
 
   // Get unique values for filters
   const uniqueSchools = [...new Set(replacements.map(r => r.new_child_school).filter(Boolean))];
   const uniqueGrades = [...new Set(replacements.map(r => r.new_child_grade).filter(Boolean))];
   const uniqueLocations = [...new Set(replacements.map(r => r.new_child_location).filter(Boolean))];
+  const uniqueAcademicLevels = [...new Set(replacements.map(r => r.new_child_academic_level).filter(Boolean))];
 
   const handleExport = () => {
     const exportData = filteredReplacements.map(replacement => ({
@@ -164,6 +168,7 @@ export default function Replacements() {
       "Location": replacement.new_child_location,
       "School": replacement.new_child_school,
       "Grade": replacement.new_child_grade,
+      "Academic Level": replacement.new_child_academic_level || "N/A",
       "Replacement Date": new Date(replacement.replacement_date).toLocaleDateString(),
       "Reason": replacement.reason || "N/A",
       "Notes": replacement.notes || "N/A"
@@ -341,6 +346,19 @@ export default function Replacements() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={academicLevelFilter} onValueChange={setAcademicLevelFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Academic Level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                {uniqueAcademicLevels.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -364,6 +382,7 @@ export default function Replacements() {
                   <TableHead>Location</TableHead>
                   <TableHead>School</TableHead>
                   <TableHead>Grade</TableHead>
+                  <TableHead>Academic Level</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -395,6 +414,7 @@ export default function Replacements() {
                     <TableCell>{replacement.new_child_location || "N/A"}</TableCell>
                     <TableCell>{replacement.new_child_school || "N/A"}</TableCell>
                     <TableCell>{replacement.new_child_grade || "N/A"}</TableCell>
+                    <TableCell>{replacement.new_child_academic_level || "N/A"}</TableCell>
                     <TableCell>
                       {new Date(replacement.replacement_date).toLocaleDateString()}
                     </TableCell>
@@ -455,7 +475,7 @@ export default function Replacements() {
               <User className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-medium">No replacements found</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {searchTerm || (schoolFilter !== "all") || (gradeFilter !== "all") || (locationFilter !== "all")
+                {searchTerm || (schoolFilter !== "all") || (gradeFilter !== "all") || (locationFilter !== "all") || (academicLevelFilter !== "all")
                   ? "Try adjusting your search or filters"
                   : "Get started by creating a new replacement record"}
               </p>

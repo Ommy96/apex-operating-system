@@ -878,6 +878,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          new_child_academic_level: string | null
           new_child_full_name: string
           new_child_gender: Database["public"]["Enums"]["gender_type"] | null
           new_child_grade: string | null
@@ -895,6 +896,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          new_child_academic_level?: string | null
           new_child_full_name: string
           new_child_gender?: Database["public"]["Enums"]["gender_type"] | null
           new_child_grade?: string | null
@@ -912,6 +914,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          new_child_academic_level?: string | null
           new_child_full_name?: string
           new_child_gender?: Database["public"]["Enums"]["gender_type"] | null
           new_child_grade?: string | null

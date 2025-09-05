@@ -25,6 +25,9 @@ const replacementSchema = z.object({
   ]).optional(),
   new_child_school: z.string().optional(),
   new_child_grade: z.string().optional(),
+  new_child_academic_level: z.enum([
+    "Pre-Primary", "Primary", "Secondary", "Tertiary", "University"
+  ]).optional(),
   replacement_date: z.string().min(1, "Replacement date is required"),
   reason: z.string().optional(),
   notes: z.string().optional(),
@@ -48,6 +51,7 @@ interface Replacement {
   new_child_location: string;
   new_child_school: string;
   new_child_grade: string;
+  new_child_academic_level: string;
   replacement_date: string;
   reason: string;
   notes: string;
@@ -74,6 +78,7 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
       new_child_location: replacement?.new_child_location as any || undefined,
       new_child_school: replacement?.new_child_school || "",
       new_child_grade: replacement?.new_child_grade || "",
+      new_child_academic_level: replacement?.new_child_academic_level as any || undefined,
       replacement_date: replacement?.replacement_date || new Date().toISOString().split('T')[0],
       reason: replacement?.reason || "",
       notes: replacement?.notes || "",
@@ -321,6 +326,31 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="new_child_academic_level"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Academic Level</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select academic level" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Pre-Primary">Pre-Primary</SelectItem>
+                  <SelectItem value="Primary">Primary</SelectItem>
+                  <SelectItem value="Secondary">Secondary</SelectItem>
+                  <SelectItem value="Tertiary">Tertiary</SelectItem>
+                  <SelectItem value="University">University</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
