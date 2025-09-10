@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChildForm } from '@/components/ChildForm';
 import { DocumentLinkForm } from '@/components/DocumentLinkForm';
-import { VisitReportForm } from '@/components/VisitReportForm';
+import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
 import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -393,14 +393,14 @@ export default function ChildProfile() {
                     <DialogTrigger asChild>
                       <Button size="sm" className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
-                        Add Visit Report
+                        Add Report Link
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Add Visit Report</DialogTitle>
+                        <DialogTitle>Add Visit Report Link</DialogTitle>
                       </DialogHeader>
-                      <VisitReportForm childId={id} onSuccess={fetchChildData} />
+                      <VisitReportLinkForm childId={id} onSuccess={fetchChildData} />
                     </DialogContent>
                   </Dialog>
                 )}
@@ -412,24 +412,48 @@ export default function ChildProfile() {
                     <CardTitle className="text-base">Home Visit Report</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {visits.find(visit => visit.visit_type === 'home_visit') ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          const homeVisit = visits.find(visit => visit.visit_type === 'home_visit');
-                          if (homeVisit) {
-                            // Navigate to a detailed view or show modal with visit details
-                            console.log('View home visit:', homeVisit);
-                          }
-                        }}
-                      >
-                        View Report
-                      </Button>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No report added</p>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      {documents.find(doc => doc.category === 'home_visit_report') ? (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(documents.find(doc => doc.category === 'home_visit_report')?.file_url, '_blank')}
+                          >
+                            View Report
+                          </Button>
+                          {isAdmin && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this report link? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'home_visit_report')?.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No report added</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -438,23 +462,48 @@ export default function ChildProfile() {
                     <CardTitle className="text-base">School Visit Report</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {visits.find(visit => visit.visit_type === 'school_visit') ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          const schoolVisit = visits.find(visit => visit.visit_type === 'school_visit');
-                          if (schoolVisit) {
-                            console.log('View school visit:', schoolVisit);
-                          }
-                        }}
-                      >
-                        View Report
-                      </Button>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No report added</p>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      {documents.find(doc => doc.category === 'school_visit_report') ? (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(documents.find(doc => doc.category === 'school_visit_report')?.file_url, '_blank')}
+                          >
+                            View Report
+                          </Button>
+                          {isAdmin && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this report link? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'school_visit_report')?.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No report added</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -463,23 +512,48 @@ export default function ChildProfile() {
                     <CardTitle className="text-base">Medical Visit Report</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {visits.find(visit => visit.visit_type === 'medical_visit') ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          const medicalVisit = visits.find(visit => visit.visit_type === 'medical_visit');
-                          if (medicalVisit) {
-                            console.log('View medical visit:', medicalVisit);
-                          }
-                        }}
-                      >
-                        View Report
-                      </Button>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No report added</p>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      {documents.find(doc => doc.category === 'medical_visit_report') ? (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(documents.find(doc => doc.category === 'medical_visit_report')?.file_url, '_blank')}
+                          >
+                            View Report
+                          </Button>
+                          {isAdmin && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this report link? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'medical_visit_report')?.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No report added</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -488,63 +562,102 @@ export default function ChildProfile() {
                     <CardTitle className="text-base">Follow-up Visit Report</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {visits.find(visit => visit.visit_type === 'follow_up') ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          const followUpVisit = visits.find(visit => visit.visit_type === 'follow_up');
-                          if (followUpVisit) {
-                            console.log('View follow-up visit:', followUpVisit);
-                          }
-                        }}
-                      >
-                        View Report
-                      </Button>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No report added</p>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      {documents.find(doc => doc.category === 'follow_up_visit_report') ? (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => window.open(documents.find(doc => doc.category === 'follow_up_visit_report')?.file_url, '_blank')}
+                          >
+                            View Report
+                          </Button>
+                          {isAdmin && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this report link? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'follow_up_visit_report')?.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No report added</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {visits.filter(visit => !['home_visit', 'school_visit', 'medical_visit', 'follow_up'].includes(visit.visit_type)).length > 0 && (
+              {documents.filter(doc => doc.category === 'other_visit_report').length > 0 && (
                 <div>
-                  <h4 className="text-md font-semibold mb-3">Other Visits</h4>
+                  <h4 className="text-md font-semibold mb-3">Other Visit Reports</h4>
                   <div className="space-y-3">
-                    {visits.filter(visit => !['home_visit', 'school_visit', 'medical_visit', 'follow_up'].includes(visit.visit_type)).map((visit) => (
-                      <Card key={visit.id}>
+                    {documents.filter(doc => doc.category === 'other_visit_report').map((document) => (
+                      <Card key={document.id}>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex justify-between items-start mb-2">
                                 <div>
-                                  <p className="font-medium">{visit.visit_type}</p>
-                                  <p className="text-sm text-muted-foreground">{visit.location}</p>
+                                  <p className="font-medium">{document.title}</p>
+                                  <p className="text-sm text-muted-foreground">{document.description}</p>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                  {new Date(visit.visit_date).toLocaleDateString()}
-                                </span>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => window.open(document.file_url, '_blank')}
+                                  >
+                                    View Report
+                                  </Button>
+                                  {isAdmin && (
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete this report link? This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction 
+                                            onClick={() => handleDeleteDocument(document.id)}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          >
+                                            Delete
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  )}
+                                </div>
                               </div>
-                              {visit.purpose && (
-                                <div className="mb-2">
-                                  <span className="text-muted-foreground text-sm">Purpose:</span>
-                                  <p className="text-sm mt-1">{visit.purpose}</p>
-                                </div>
-                              )}
-                              {visit.findings && (
-                                <div className="mb-2">
-                                  <span className="text-muted-foreground text-sm">Findings:</span>
-                                  <p className="text-sm mt-1">{visit.findings}</p>
-                                </div>
-                              )}
-                              {visit.recommendations && (
-                                <div>
-                                  <span className="text-muted-foreground text-sm">Recommendations:</span>
-                                  <p className="text-sm mt-1">{visit.recommendations}</p>
-                                </div>
-                              )}
                             </div>
                           </div>
                         </CardContent>
