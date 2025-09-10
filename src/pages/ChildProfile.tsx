@@ -218,6 +218,10 @@ export default function ChildProfile() {
                   src={convertGoogleDriveUrl(child.photo_url)} 
                   alt={`${child.first_name} ${child.last_name}`} 
                   className="object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).onerror = null;
+                    (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                  }}
                 />
                 <AvatarFallback className="text-2xl font-semibold">
                   {getInitials(child.first_name, child.last_name)}

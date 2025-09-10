@@ -237,7 +237,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
               {photoUrl && (
                 <div className="flex items-center gap-3 mt-2">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={convertGoogleDriveUrl(photoUrl)} alt="Profile preview" />
+                    <AvatarImage src={convertGoogleDriveUrl(photoUrl)} alt="Profile preview" onError={(e) => { (e.currentTarget as HTMLImageElement).onerror = null; (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
                     <AvatarFallback className="text-sm">
                       {getInitials(form.watch('first_name'), form.watch('last_name'))}
                     </AvatarFallback>
