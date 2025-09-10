@@ -94,6 +94,18 @@ export default function ChildProfile() {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
+  const convertGoogleDriveUrl = (url: string) => {
+    if (!url) return url;
+    
+    // Check if it's a Google Drive sharing link
+    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (match) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    
+    return url;
+  };
+
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return 'N/A';
     const today = new Date();
@@ -203,7 +215,7 @@ export default function ChildProfile() {
             <CardHeader className="text-center">
               <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
                 <AvatarImage 
-                  src={child.photo_url} 
+                  src={convertGoogleDriveUrl(child.photo_url)} 
                   alt={`${child.first_name} ${child.last_name}`} 
                   className="object-cover"
                 />

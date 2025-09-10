@@ -81,6 +81,18 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
+  const convertGoogleDriveUrl = (url: string) => {
+    if (!url) return url;
+    
+    // Check if it's a Google Drive sharing link
+    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (match) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    
+    return url;
+  };
+
   const onSubmit = async (data: ChildFormData) => {
     setIsLoading(true);
     
@@ -225,7 +237,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
               {photoUrl && (
                 <div className="flex items-center gap-3 mt-2">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={photoUrl} alt="Profile preview" />
+                    <AvatarImage src={convertGoogleDriveUrl(photoUrl)} alt="Profile preview" />
                     <AvatarFallback className="text-sm">
                       {getInitials(form.watch('first_name'), form.watch('last_name'))}
                     </AvatarFallback>

@@ -234,6 +234,18 @@ export default function Children() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const convertGoogleDriveUrl = (url: string) => {
+    if (!url) return url;
+    
+    // Check if it's a Google Drive sharing link
+    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (match) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    
+    return url;
+  };
+
   const calculateAge = (birthDate: string) => {
     const today = new Date();
     const birth = new Date(birthDate);
@@ -514,7 +526,7 @@ export default function Children() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-16 w-16 rounded-full border-2 border-border">
                       <AvatarImage 
-                        src={child.photo_url} 
+                        src={convertGoogleDriveUrl(child.photo_url)} 
                         alt={`${child.first_name} ${child.last_name}`} 
                         className="object-cover"
                       />
