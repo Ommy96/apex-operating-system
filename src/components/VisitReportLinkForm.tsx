@@ -14,7 +14,6 @@ interface VisitReportLinkFormProps {
 }
 
 export function VisitReportLinkForm({ childId, onSuccess }: VisitReportLinkFormProps) {
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [fileUrl, setFileUrl] = useState('');
@@ -23,7 +22,7 @@ export function VisitReportLinkForm({ childId, onSuccess }: VisitReportLinkFormP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !fileUrl || !category) {
+    if (!fileUrl || !category) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -35,15 +34,18 @@ export function VisitReportLinkForm({ childId, onSuccess }: VisitReportLinkFormP
     setLoading(true);
 
     try {
+      // Generate title from category
+      const generatedTitle = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
       const { error } = await supabase
         .from('documents')
         .insert({
           child_id: childId,
-          title,
+          title: generatedTitle,
           description,
           category,
           file_url: fileUrl,
-          file_name: title,
+          file_name: generatedTitle,
           file_type: 'link',
           uploaded_by: (await supabase.auth.getUser()).data.user?.id
         });
@@ -58,7 +60,6 @@ export function VisitReportLinkForm({ childId, onSuccess }: VisitReportLinkFormP
       onSuccess();
       
       // Reset form
-      setTitle('');
       setDescription('');
       setCategory('');
       setFileUrl('');
@@ -76,17 +77,6 @@ export function VisitReportLinkForm({ childId, onSuccess }: VisitReportLinkFormP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="title">Report Title *</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter report title"
-          required
-        />
-      </div>
-
       <div>
         <Label htmlFor="category">Visit Type *</Label>
         <Select value={category} onValueChange={setCategory} required>
