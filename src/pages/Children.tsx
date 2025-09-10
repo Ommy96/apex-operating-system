@@ -236,14 +236,28 @@ export default function Children() {
 
   const convertGoogleDriveUrl = (url: string) => {
     if (!url) return url;
-    
-    // Check if it's a Google Drive sharing link
-    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
-    if (match) {
-      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    const trimmed = url.trim();
+
+    if (trimmed.includes('drive.google.com/uc?')) {
+      try {
+        const u = new URL(trimmed);
+        u.searchParams.set('export', 'view');
+        return u.toString();
+      } catch {
+        return trimmed;
+      }
     }
-    
-    return url;
+
+    const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+
+    const idParam = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idParam) return `https://drive.google.com/uc?export=view&id=${idParam[1]}`;
+
+    const thumbMatch = trimmed.match(/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+    if (thumbMatch) return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
+
+    return trimmed;
   };
 
   const calculateAge = (birthDate: string) => {

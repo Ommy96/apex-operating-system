@@ -83,14 +83,30 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
 
   const convertGoogleDriveUrl = (url: string) => {
     if (!url) return url;
-    
-    // Check if it's a Google Drive sharing link
-    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
-    if (match) {
-      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    const trimmed = url.trim();
+
+    // Already a direct UC link — force export=view
+    if (trimmed.includes('drive.google.com/uc?')) {
+      try {
+        const u = new URL(trimmed);
+        u.searchParams.set('export', 'view');
+        return u.toString();
+      } catch {
+        return trimmed;
+      }
     }
-    
-    return url;
+
+    // Formats: /file/d/{id}/..., ?id={id}, thumbnail?id={id}
+    const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+
+    const idParam = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idParam) return `https://drive.google.com/uc?export=view&id=${idParam[1]}`;
+
+    const thumbMatch = trimmed.match(/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+    if (thumbMatch) return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
+
+    return trimmed;
   };
 
   const onSubmit = async (data: ChildFormData) => {
@@ -229,15 +245,16 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
                   placeholder="Enter image URL (e.g., https://example.com/photo.jpg)" 
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e);
-                    setPhotoUrl(e.target.value);
+                    const val = e.target.value;
+                    field.onChange(val);
+                    setPhotoUrl(val);
                   }}
                 />
               </FormControl>
-              {photoUrl && (
+              {(form.watch('photo_url') || photoUrl) && (
                 <div className="flex items-center gap-3 mt-2">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={convertGoogleDriveUrl(photoUrl)} alt="Profile preview" onError={(e) => { (e.currentTarget as HTMLImageElement).onerror = null; (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
+                    <AvatarImage src={convertGoogleDriveUrl(form.watch('photo_url') || photoUrl)} alt="Profile preview" onError={(e) => { (e.currentTarget as HTMLImageElement).onerror = null; (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
                     <AvatarFallback className="text-sm">
                       {getInitials(form.watch('first_name'), form.watch('last_name'))}
                     </AvatarFallback>
