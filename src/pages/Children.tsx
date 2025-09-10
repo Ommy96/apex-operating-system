@@ -512,9 +512,15 @@ export default function Children() {
               <Card key={child.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
-                      <AvatarFallback>{getInitials(child.first_name, child.last_name)}</AvatarFallback>
+                    <Avatar className="h-16 w-16 rounded-full border-2 border-border">
+                      <AvatarImage 
+                        src={child.photo_url} 
+                        alt={`${child.first_name} ${child.last_name}`} 
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="text-lg font-semibold">
+                        {getInitials(child.first_name, child.last_name)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <CardTitle className="text-lg">{child.first_name} {child.last_name}</CardTitle>

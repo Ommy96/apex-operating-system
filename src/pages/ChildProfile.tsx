@@ -201,9 +201,15 @@ export default function ChildProfile() {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader className="text-center">
-              <Avatar className="h-24 w-24 mx-auto mb-4">
-                <AvatarImage src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
-                <AvatarFallback className="text-lg">{getInitials(child.first_name, child.last_name)}</AvatarFallback>
+              <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
+                <AvatarImage 
+                  src={child.photo_url} 
+                  alt={`${child.first_name} ${child.last_name}`} 
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-2xl font-semibold">
+                  {getInitials(child.first_name, child.last_name)}
+                </AvatarFallback>
               </Avatar>
               <CardTitle>{child.first_name} {child.last_name}</CardTitle>
               <CardDescription>

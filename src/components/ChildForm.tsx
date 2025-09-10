@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -16,6 +17,7 @@ const childSchema = z.object({
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   date_of_birth: z.string().optional(),
   gender: z.enum(['Male', 'Female']).optional(),
+  photo_url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
   residence: z.enum(['Kibera', 'Kawangware', 'Diaspora', 'Outside Nairobi']).optional(),
   academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary', 'Secondary School', 'Tertiary', 'Special School', 'Junior School']).optional(),
   institution_name: z.string().optional(),
@@ -45,6 +47,7 @@ interface ChildFormProps {
 
 export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(child?.photo_url || '');
   
   const form = useForm<ChildFormData>({
     resolver: zodResolver(childSchema),
@@ -53,6 +56,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       last_name: child?.last_name || '',
       date_of_birth: child?.date_of_birth || '',
       gender: child?.gender || '',
+      photo_url: child?.photo_url || '',
       residence: child?.residence || '',
       academic_level: child?.academic_level || '',
       institution_name: child?.institution_name || '',
@@ -72,6 +76,10 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       donation_received_ksh: child?.donation_received_ksh || undefined,
     },
   });
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
 
   const onSubmit = async (data: ChildFormData) => {
     setIsLoading(true);
@@ -197,6 +205,38 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="photo_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Picture URL</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter image URL (e.g., https://example.com/photo.jpg)" 
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setPhotoUrl(e.target.value);
+                  }}
+                />
+              </FormControl>
+              {photoUrl && (
+                <div className="flex items-center gap-3 mt-2">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={photoUrl} alt="Profile preview" />
+                    <AvatarFallback className="text-sm">
+                      {getInitials(form.watch('first_name'), form.watch('last_name'))}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-muted-foreground">Preview</span>
+                </div>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
