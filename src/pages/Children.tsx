@@ -50,6 +50,7 @@ interface Child {
   grade: string;
   institution_name: string;
   residence: string;
+  donor: string;
 }
 
 interface EducationStats {
@@ -65,6 +66,7 @@ type AcademicLevelType = 'Pre Primary' | 'Lower Primary' | 'Upper Primary' | 'Ju
 interface Filters {
   location: string;
   academicLevel: string;
+  donor: string;
 }
 
 export default function Children() {
@@ -79,7 +81,8 @@ export default function Children() {
   
   const [filters, setFilters] = useState<Filters>({
     location: '',
-    academicLevel: ''
+    academicLevel: '',
+    donor: ''
   });
 
   const [stats, setStats] = useState<EducationStats>({
@@ -107,12 +110,15 @@ export default function Children() {
     'Outside Nairobi'
   ];
 
+  // Get unique donors from children data
+  const uniqueDonors = [...new Set(children.map(child => child.donor).filter(Boolean))].sort();
+
   useEffect(() => {
     fetchChildren();
   }, []);
 
   useEffect(() => {
-    if (filters.location || filters.academicLevel) {
+    if (filters.location || filters.academicLevel || filters.donor) {
       fetchFilteredData();
     }
   }, [filters]);
@@ -169,6 +175,10 @@ export default function Children() {
         query = query.eq('academic_level', filters.academicLevel as AcademicLevelType);
       }
 
+      if (filters.donor) {
+        query = query.eq('donor', filters.donor);
+      }
+
       const { data, error } = await query.order('first_name');
 
       if (error) throw error;
@@ -212,11 +222,11 @@ export default function Children() {
   };
 
   const clearFilters = () => {
-    setFilters({ location: '', academicLevel: '' });
+    setFilters({ location: '', academicLevel: '', donor: '' });
     fetchChildren();
   };
 
-  const hasActiveFilters = filters.location || filters.academicLevel;
+  const hasActiveFilters = filters.location || filters.academicLevel || filters.donor;
 
   const getFilteredChildren = () => {
     // Only show children with academic_level (education program)
@@ -477,6 +487,25 @@ export default function Children() {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Donor</label>
+                        <Select
+                          value={filters.donor}
+                          onValueChange={(value) => setFilters(prev => ({ ...prev, donor: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select donor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uniqueDonors.map((donor) => (
+                              <SelectItem key={donor} value={donor}>
+                                {donor}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     
                     {hasActiveFilters && (
@@ -523,6 +552,17 @@ export default function Children() {
                   Level: {filters.academicLevel}
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, academicLevel: '' }))}
+                    className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.donor && (
+                <Badge variant="secondary" className="gap-1">
+                  Donor: {filters.donor}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, donor: '' }))}
                     className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
                   >
                     <X className="h-3 w-3" />
@@ -581,6 +621,12 @@ export default function Children() {
                         {child.status}
                       </Badge>
                     </div>
+                    {child.donor && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Donor:</span>
+                        <span className="text-right text-xs">{child.donor}</span>
+                      </div>
+                    )}
                     {child.replacement_status === 'replaced' && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Replacement:</span>
