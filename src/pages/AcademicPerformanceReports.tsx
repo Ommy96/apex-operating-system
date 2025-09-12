@@ -17,6 +17,7 @@ interface AcademicRecord {
   description: string;
   outcome: string;
   activity_date: string;
+  term: string | null;
   child_id: string;
   children: {
     first_name: string;
@@ -56,6 +57,7 @@ export default function AcademicPerformanceReports() {
           description,
           outcome,
           activity_date,
+          term,
           child_id,
           children (
             first_name,
@@ -98,10 +100,7 @@ export default function AcademicPerformanceReports() {
     }
 
     if (termFilter && termFilter !== 'all') {
-      // For now, all records are considered "Term 1" since we don't have term data in the database yet
-      // This filter will be functional once term data is added to the database
-      const recordTerm = 'Term 1'; // Placeholder - this should come from the database
-      filtered = filtered.filter(record => recordTerm === termFilter);
+      filtered = filtered.filter(record => record.term === termFilter);
     }
 
     if (dateFilter) {
@@ -123,7 +122,7 @@ export default function AcademicPerformanceReports() {
       'Course': record.title.replace('Academic Performance - ', ''),
       'Score/Grade': record.outcome,
       'Year': new Date(record.activity_date).getFullYear(),
-      'Term/Semester': 'Term 1', // Default since we don't have this data yet
+      'Term/Semester': record.term || 'Not specified',
       'Notes': record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '',
     }));
 
@@ -346,9 +345,9 @@ export default function AcademicPerformanceReports() {
                           {record.outcome}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date(record.activity_date).getFullYear()}</TableCell>
-                      <TableCell>Term 1</TableCell>
-                      <TableCell className="max-w-xs truncate">
+                       <TableCell>{new Date(record.activity_date).getFullYear()}</TableCell>
+                       <TableCell>{record.term || 'Not specified'}</TableCell>
+                       <TableCell className="max-w-xs truncate">
                         {record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '-'}
                       </TableCell>
                     </TableRow>
