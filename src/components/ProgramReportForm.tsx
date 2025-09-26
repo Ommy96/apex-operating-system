@@ -90,18 +90,7 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
         });
       } else {
         // Create new report
-        console.log('Inserting program report with data:', {
-          program: formData.program,
-          staff: formData.staff,
-          reporting_date: formData.reporting_date,
-          executive_summary: formData.executive_summary,
-          beneficiary_impact: formData.beneficiary_impact,
-          challenges: formData.challenges,
-          proposed_recommendations: formData.proposed_recommendations,
-          created_by: user?.id,
-        });
-        
-        const { error, data } = await supabase
+        const { error } = await supabase
           .from('program_reports')
           .insert({
             program: formData.program,
@@ -114,11 +103,7 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
             created_by: user?.id,
           });
 
-        console.log('Insert result:', { error, data });
-        if (error) {
-          console.error('Database insert error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         toast({
           title: "Success",
