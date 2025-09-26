@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 
 interface ProgramReportFormProps {
   onSuccess: () => void;
@@ -28,20 +27,21 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
     proposed_recommendations: initialData?.proposed_recommendations || "",
   });
 
-  // Fetch programs for the dropdown
-  const { data: programs = [] } = useQuery({
-    queryKey: ['programs'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('programs')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Predefined programs for the dropdown
+  const programs = [
+    "Kibera Early dinner",
+    "Kawangware Lunch Hour", 
+    "Kibera Kipawa Sato",
+    "Kawangware Kipawa Sato",
+    "Self Empowerment",
+    "Support Groups",
+    "Family Adoption",
+    "Medical",
+    "Education",
+    "Rongai Sunday Feeding",
+    "Kawangware Sunday Feeding",
+    "Kibera Sunday Feeding"
+  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -126,8 +126,8 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
               </SelectTrigger>
               <SelectContent>
                 {programs.map((program) => (
-                  <SelectItem key={program.id} value={program.name}>
-                    {program.name}
+                  <SelectItem key={program} value={program}>
+                    {program}
                   </SelectItem>
                 ))}
               </SelectContent>
