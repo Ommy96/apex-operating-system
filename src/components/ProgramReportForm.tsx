@@ -27,20 +27,19 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
     proposed_recommendations: initialData?.proposed_recommendations || "",
   });
 
-  // Predefined programs for the dropdown
+  // Predefined programs for the dropdown (matching database enum)
   const programs = [
-    "Kibera Early dinner",
-    "Kawangware Lunch Hour", 
-    "Kibera Kipawa Sato",
-    "Kawangware Kipawa Sato",
-    "Self Empowerment",
-    "Support Groups",
-    "Family Adoption",
-    "Medical",
     "Education",
-    "Rongai Sunday Feeding",
-    "Kawangware Sunday Feeding",
-    "Kibera Sunday Feeding"
+    "Kibera Early Dinner",
+    "Kawangware Lunch Hour", 
+    "Kipawa Sato",
+    "Self-Empowerment",
+    "Support Groups",
+    "Communication",
+    "Chess",
+    "Fundraising",
+    "Admin",
+    "Content Creation"
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -91,7 +90,18 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
         });
       } else {
         // Create new report
-        const { error } = await supabase
+        console.log('Inserting program report with data:', {
+          program: formData.program,
+          staff: formData.staff,
+          reporting_date: formData.reporting_date,
+          executive_summary: formData.executive_summary,
+          beneficiary_impact: formData.beneficiary_impact,
+          challenges: formData.challenges,
+          proposed_recommendations: formData.proposed_recommendations,
+          created_by: user?.id,
+        });
+        
+        const { error, data } = await supabase
           .from('program_reports')
           .insert({
             program: formData.program,
@@ -104,7 +114,11 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
             created_by: user?.id,
           });
 
-        if (error) throw error;
+        console.log('Insert result:', { error, data });
+        if (error) {
+          console.error('Database insert error:', error);
+          throw error;
+        }
 
         toast({
           title: "Success",
