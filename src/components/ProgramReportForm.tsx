@@ -55,7 +55,18 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
     setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      console.log('Auth check:', { user: user?.id, authError });
+      
+      if (authError) {
+        console.error('Authentication error:', authError);
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      if (!user) {
+        throw new Error('User not authenticated. Please log in again.');
+      }
       
       if (initialData) {
         // Update existing report
