@@ -124,21 +124,13 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="program">Program *</Label>
-            <Select
+            <Input
+              id="program"
               value={formData.program}
-              onValueChange={(value) => handleInputChange('program', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select program" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program} value={program}>
-                    {program}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(e) => handleInputChange('program', e.target.value)}
+              placeholder="Enter program name"
+              required
+            />
           </div>
 
           <div className="space-y-2">
