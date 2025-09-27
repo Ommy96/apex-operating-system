@@ -29,17 +29,18 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
 
   // Predefined programs for the dropdown (matching database enum)
   const programs = [
-    "Education",
-    "Kibera Early Dinner",
-    "Kawangware Lunch Hour", 
-    "Kipawa Sato",
-    "Self-Empowerment",
+    "Kibera Early dinner",
+    "Kawangware Lunch Hour",
+    "Kibera Kipawa Sato",
+    "Kawangware Kipawa Sato",
+    "Self Empowerment",
     "Support Groups",
-    "Communication",
-    "Chess",
-    "Fundraising",
-    "Admin",
-    "Content Creation"
+    "Family Adoption",
+    "Medical",
+    "Education",
+    "Rongai Sunday Feeding",
+    "Kawangware Sunday Feeding",
+    "Kibera Sunday Feeding"
   ];
 
   const handleInputChange = (field: string, value: string) => {
