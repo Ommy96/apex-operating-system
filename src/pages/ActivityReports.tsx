@@ -327,15 +327,15 @@ export default function ActivityReports() {
                          <Eye className="h-4 w-4 mr-2" />
                          View
                        </DropdownMenuItem>
-                       {/* Staff can only edit their own reports, management/admin can edit all */}
-                       {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
-                         <DropdownMenuItem onClick={() => handleEdit(report)}>
-                           <Edit className="h-4 w-4 mr-2" />
-                           Edit
-                         </DropdownMenuItem>
-                       )}
-                       {/* Staff can only delete their own reports, management/admin can delete all */}
-                       {(userRole === 'admin' || isManagement || (isStaff && report.created_by === user?.id)) && (
+                        {/* Only admin and management can edit/delete reports */}
+                        {(userRole === 'admin' || isManagement) && (
+                          <DropdownMenuItem onClick={() => handleEdit(report)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                        )}
+                        {/* Only admin and management can edit/delete reports */}
+                        {(userRole === 'admin' || isManagement) && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
