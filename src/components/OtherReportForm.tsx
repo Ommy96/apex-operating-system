@@ -32,7 +32,14 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const administrativePrograms = [
+  // Predefined programs for the dropdown (matching database enum)
+  const programs = [
+    "Education",
+    "Kibera Early Dinner",
+    "Kawangware Lunch Hour", 
+    "Kipawa Sato",
+    "Self-Empowerment",
+    "Support Groups",
     "Communication",
     "Chess",
     "Fundraising",
@@ -122,10 +129,10 @@ export const OtherReportForm = ({ onSuccess, onCancel, editingReport }: OtherRep
               onValueChange={(value) => handleInputChange('program', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select administrative program" />
+                <SelectValue placeholder="Select program" />
               </SelectTrigger>
               <SelectContent>
-                {administrativePrograms.map((program) => (
+                {programs.map((program) => (
                   <SelectItem key={program} value={program}>
                     {program}
                   </SelectItem>

@@ -55,12 +55,17 @@ const LOCATIONS = [
 ];
 
 const PROGRAMS = [
-  'Education Support',
-  'Nutrition Program',
+  'Education',
+  'Kibera Early Dinner',
+  'Kawangware Lunch Hour',
   'Kipawa Sato',
-  'Business Loans',
-  'Family Support',
-  'Community Groups'
+  'Self-Empowerment',
+  'Support Groups',
+  'Communication',
+  'Chess',
+  'Fundraising',
+  'Admin',
+  'Content Creation'
 ];
 
 export function DashboardFilters({ onFiltersChange, className = '' }: DashboardFiltersProps) {
