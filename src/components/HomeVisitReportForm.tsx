@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 
 interface HomeVisitReportFormProps {
   onSuccess: () => void;
@@ -18,6 +19,8 @@ interface HomeVisitReportFormProps {
 export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVisitReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAddingNewStudent, setIsAddingNewStudent] = useState(false);
+  const [newStudentName, setNewStudentName] = useState("");
   const [formData, setFormData] = useState({
     staff: initialData?.staff || "",
     visit_date: initialData?.visit_date || "",
@@ -55,6 +58,28 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
     setIsSubmitting(true);
 
     try {
+      let studentId = formData.student_id;
+
+      // If adding a new student, create the student first
+      if (isAddingNewStudent && newStudentName.trim()) {
+        const nameParts = newStudentName.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const { data: newStudent, error: studentError } = await supabase
+          .from('children')
+          .insert({
+            first_name: firstName,
+            last_name: lastName,
+            status: 'active'
+          })
+          .select('id')
+          .single();
+
+        if (studentError) throw studentError;
+        studentId = newStudent.id;
+      }
+
       if (initialData) {
         // Update existing report
         const { error } = await supabase
@@ -62,7 +87,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
           .update({
             staff: formData.staff,
             visit_date: formData.visit_date,
-            student_id: formData.student_id || null,
+            student_id: studentId || null,
             location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
             reason_for_visit: formData.reason_for_visit || null,
             observation_findings: formData.observation_findings,
@@ -84,7 +109,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
           .insert({
             staff: formData.staff,
             visit_date: formData.visit_date,
-            student_id: formData.student_id || null,
+            student_id: studentId || null,
             location: formData.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
             reason_for_visit: formData.reason_for_visit || null,
             observation_findings: formData.observation_findings,
@@ -140,18 +165,57 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
 
           <div>
             <Label htmlFor="student_id">Student Name</Label>
-            <Select value={formData.student_id} onValueChange={(value) => handleInputChange('student_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a student (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {students.map((student) => (
-                  <SelectItem key={student.id} value={student.id}>
-                    {student.first_name} {student.last_name}
+            {isAddingNewStudent ? (
+              <div className="space-y-2">
+                <Input
+                  placeholder="Enter student full name"
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setIsAddingNewStudent(false);
+                      setNewStudentName("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Select 
+                value={formData.student_id} 
+                onValueChange={(value) => {
+                  if (value === "add_new") {
+                    setIsAddingNewStudent(true);
+                    handleInputChange('student_id', '');
+                  } else {
+                    handleInputChange('student_id', value);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a student (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="add_new">
+                    <div className="flex items-center">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Student
+                    </div>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  {students.map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      {student.first_name} {student.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div>
