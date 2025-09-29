@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HomeVisitReportFormProps {
   onSuccess: () => void;
@@ -18,6 +19,7 @@ interface HomeVisitReportFormProps {
 
 export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVisitReportFormProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAddingNewStudent, setIsAddingNewStudent] = useState(false);
   const [newStudentName, setNewStudentName] = useState("");
@@ -115,6 +117,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
             observation_findings: formData.observation_findings,
             challenges_identified: formData.challenges_identified,
             recommendations: formData.recommendations,
+            created_by: user?.id,
           });
 
         if (error) throw error;
