@@ -24,6 +24,7 @@ export default function SchoolVisitReports() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
 
   const { data: schoolVisitReports, refetch } = useQuery({
     queryKey: ['school-visit-reports', userRole, user?.id],
@@ -63,7 +64,13 @@ export default function SchoolVisitReports() {
       
       const uniqueStaff = new Set(schoolVisitReports?.map(r => r.staff) || []).size;
       
-      return { totalReports, thisMonth, schoolBreakdown, uniqueStaff };
+      // Get unique months from reports
+      const uniqueMonths = Array.from(new Set(schoolVisitReports?.map(r => {
+        const date = new Date(r.visit_date);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }) || [])).sort().reverse();
+      
+      return { totalReports, thisMonth, schoolBreakdown, uniqueStaff, uniqueMonths };
     },
     enabled: !!schoolVisitReports,
   });
@@ -74,7 +81,13 @@ export default function SchoolVisitReports() {
                          report.reason_for_visit?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = !locationFilter || locationFilter === 'all' || report.location === locationFilter;
     
-    return matchesSearch && matchesLocation;
+    const matchesMonth = !monthFilter || monthFilter === 'all' || (() => {
+      const reportDate = new Date(report.visit_date);
+      const reportMonth = `${reportDate.getFullYear()}-${String(reportDate.getMonth() + 1).padStart(2, '0')}`;
+      return reportMonth === monthFilter;
+    })();
+    
+    return matchesSearch && matchesLocation && matchesMonth;
   });
 
   const handleDownload = () => {
@@ -217,6 +230,25 @@ export default function SchoolVisitReports() {
             <SelectItem value="Kawangware">Kawangware</SelectItem>
             <SelectItem value="Diaspora">Diaspora</SelectItem>
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Months</SelectItem>
+            {reportStats?.uniqueMonths?.map((month) => {
+              const [year, monthNum] = month.split('-');
+              const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+              const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+              return (
+                <SelectItem key={month} value={month}>
+                  {monthName}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

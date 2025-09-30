@@ -24,6 +24,7 @@ export default function ActivityReports() {
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("");
   const [staffFilter, setStaffFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const { toast } = useToast();
 
   // Fetch programs for the filter dropdown
@@ -80,7 +81,13 @@ export default function ActivityReports() {
       const uniqueStaff = new Set(activityReports?.map(r => r.staff) || []).size;
       const staffList = Array.from(new Set(activityReports?.map(r => r.staff) || [])).sort();
       
-      return { totalReports, thisMonth, programBreakdown, uniqueStaff, staffList };
+      // Get unique months from reports
+      const uniqueMonths = Array.from(new Set(activityReports?.map(r => {
+        const date = new Date(r.reporting_date);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }) || [])).sort().reverse();
+      
+      return { totalReports, thisMonth, programBreakdown, uniqueStaff, staffList, uniqueMonths };
     },
     enabled: !!activityReports,
   });
@@ -91,7 +98,13 @@ export default function ActivityReports() {
     const matchesProgram = !programFilter || programFilter === 'all' || report.program === programFilter;
     const matchesStaff = !staffFilter || staffFilter === 'all' || report.staff === staffFilter;
     
-    return matchesSearch && matchesProgram && matchesStaff;
+    const matchesMonth = !monthFilter || monthFilter === 'all' || (() => {
+      const reportDate = new Date(report.reporting_date);
+      const reportMonth = `${reportDate.getFullYear()}-${String(reportDate.getMonth() + 1).padStart(2, '0')}`;
+      return reportMonth === monthFilter;
+    })();
+    
+    return matchesSearch && matchesProgram && matchesStaff && matchesMonth;
   });
 
   const handleDownload = () => {
@@ -250,6 +263,25 @@ export default function ActivityReports() {
                   {staff}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {reportStats?.uniqueMonths?.map((month) => {
+                const [year, monthNum] = month.split('-');
+                const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+                const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                return (
+                  <SelectItem key={month} value={month}>
+                    {monthName}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
