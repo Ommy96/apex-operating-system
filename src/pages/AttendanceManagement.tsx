@@ -56,10 +56,7 @@ export default function AttendanceManagement() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("attendance_records")
-        .select(`
-          *,
-          profiles:recorded_by (full_name)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -374,7 +371,7 @@ export default function AttendanceManagement() {
                       <TableCell className="text-center font-semibold">
                         {record.present_count + record.absent_count}
                       </TableCell>
-                      <TableCell>{record.profiles?.full_name || "Unknown"}</TableCell>
+                      <TableCell>Admin</TableCell>
                       <TableCell>
                         {format(new Date(record.created_at), "MMM dd, yyyy")}
                       </TableCell>
