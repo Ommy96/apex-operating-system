@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Search, Calendar, FileText, Download, Activity, Users, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ProgramReports() {
+  const navigate = useNavigate();
   const { isManagement, isStaff, userRole, user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
@@ -183,10 +185,20 @@ export default function ProgramReports() {
         <div className="flex flex-col sm:flex-row gap-2">
           {/* Only management/admin can download reports */}
           {(isManagement || userRole === 'admin') && (
-            <Button onClick={handleDownload} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Excel
-            </Button>
+            <>
+              <Button onClick={handleDownload} variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Download Excel
+              </Button>
+              <Button 
+                onClick={() => navigate('/reports/attendance')} 
+                variant="outline" 
+                className="gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Attendance
+              </Button>
+            </>
           )}
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

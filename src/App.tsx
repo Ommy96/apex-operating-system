@@ -19,6 +19,7 @@ import SchoolVisitReports from "./pages/SchoolVisitReports";
 import ProgramReports from "./pages/ProgramReports";
 import ActivityReports from "./pages/ActivityReports";
 import OtherReports from "./pages/OtherReports";
+import AttendanceManagement from "./pages/AttendanceManagement";
 import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
@@ -151,6 +152,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ProgramReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/attendance" element={
+              <ProtectedRoute requireRole="admin">
+                <DashboardLayout>
+                  <AttendanceManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

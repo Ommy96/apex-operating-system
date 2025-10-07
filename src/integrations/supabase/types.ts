@@ -236,6 +236,50 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance_records: {
+        Row: {
+          absent_count: number
+          created_at: string
+          id: string
+          month: string
+          present_count: number
+          program_id: string
+          recorded_by: string | null
+          updated_at: string
+          week: number
+        }
+        Insert: {
+          absent_count?: number
+          created_at?: string
+          id?: string
+          month: string
+          present_count?: number
+          program_id: string
+          recorded_by?: string | null
+          updated_at?: string
+          week: number
+        }
+        Update: {
+          absent_count?: number
+          created_at?: string
+          id?: string
+          month?: string
+          present_count?: number
+          program_id?: string
+          recorded_by?: string | null
+          updated_at?: string
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           created_at: string
