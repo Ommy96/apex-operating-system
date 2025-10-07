@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Pencil, Trash2, Users, Calendar, BarChart3 } from "lucide-react";
+import { ArrowLeft, Save, Pencil, Trash2, Users, Calendar, BarChart3, Download } from "lucide-react";
 import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import * as XLSX from "xlsx";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -158,6 +159,37 @@ export default function AttendanceManagement() {
     setWeek("");
     setPresentCount("");
     setAbsentCount("");
+  };
+
+  const handleDownload = () => {
+    if (!attendanceRecords || attendanceRecords.length === 0) {
+      toast.error("No data to download");
+      return;
+    }
+
+    // Prepare data for Excel
+    const exportData = attendanceRecords.map((record) => ({
+      Program: record.program_id || "N/A",
+      Month: record.month,
+      Week: `Week ${record.week}`,
+      Present: record.present_count,
+      Absent: record.absent_count,
+      Total: record.present_count + record.absent_count,
+      "Recorded By": "Admin",
+      Date: format(new Date(record.created_at), "MMM dd, yyyy"),
+    }));
+
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance Records");
+
+    // Generate filename with current date
+    const fileName = `Attendance_Records_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
+
+    // Download file
+    XLSX.writeFile(wb, fileName);
+    toast.success("Attendance records downloaded successfully");
   };
 
   // Prepare chart data
@@ -332,8 +364,16 @@ export default function AttendanceManagement() {
       {/* Attendance Records Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Attendance Records</CardTitle>
-          <CardDescription>View and manage all attendance entries</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Attendance Records</CardTitle>
+              <CardDescription>View and manage all attendance entries</CardDescription>
+            </div>
+            <Button onClick={handleDownload} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Excel
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
