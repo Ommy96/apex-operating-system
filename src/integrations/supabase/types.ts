@@ -270,15 +270,7 @@ export type Database = {
           updated_at?: string
           week?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_records_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "programs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       audit_logs: {
         Row: {
