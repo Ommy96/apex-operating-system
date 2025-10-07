@@ -27,28 +27,30 @@ export default function AttendanceManagement() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  const [programId, setProgramId] = useState("");
+  const [program, setProgram] = useState("");
   const [month, setMonth] = useState("");
   const [week, setWeek] = useState("");
   const [presentCount, setPresentCount] = useState("");
   const [absentCount, setAbsentCount] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Fetch programs
-  const { data: programs } = useQuery({
-    queryKey: ["programs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("programs")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Predefined programs (matching the Add Program Report form)
+  const programs = [
+    "Kibera Early dinner",
+    "Kawangware Lunch Hour",
+    "Kibera Kipawa Sato",
+    "Kawangware Kipawa Sato",
+    "Self Empowerment",
+    "Support Groups",
+    "Family Adoption",
+    "Medical",
+    "Education",
+    "Rongai Sunday Feeding",
+    "Kawangware Sunday Feeding",
+    "Kibera Sunday Feeding"
+  ];
 
-  // Fetch attendance records with program details
+  // Fetch attendance records
   const { data: attendanceRecords, isLoading } = useQuery({
     queryKey: ["attendance-records"],
     queryFn: async () => {
@@ -56,7 +58,6 @@ export default function AttendanceManagement() {
         .from("attendance_records")
         .select(`
           *,
-          programs (name),
           profiles:recorded_by (full_name)
         `)
         .order("created_at", { ascending: false });
@@ -119,7 +120,7 @@ export default function AttendanceManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!programId || !month || !week || !presentCount || !absentCount) {
+    if (!program || !month || !week || !presentCount || !absentCount) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -130,7 +131,7 @@ export default function AttendanceManagement() {
     }
 
     saveMutation.mutate({
-      program_id: programId,
+      program_id: program,
       month,
       week: parseInt(week),
       present_count: parseInt(presentCount),
@@ -141,7 +142,7 @@ export default function AttendanceManagement() {
 
   const handleEdit = (record: any) => {
     setEditingId(record.id);
-    setProgramId(record.program_id);
+    setProgram(record.program_id);
     setMonth(record.month);
     setWeek(record.week.toString());
     setPresentCount(record.present_count.toString());
@@ -155,7 +156,7 @@ export default function AttendanceManagement() {
 
   const resetForm = () => {
     setEditingId(null);
-    setProgramId("");
+    setProgram("");
     setMonth("");
     setWeek("");
     setPresentCount("");
@@ -164,7 +165,7 @@ export default function AttendanceManagement() {
 
   // Prepare chart data
   const chartData = attendanceRecords?.reduce((acc: any[], record: any) => {
-    const programName = record.programs?.name || "Unknown";
+    const programName = record.program_id || "Unknown";
     const existing = acc.find((item) => item.program === programName);
     
     if (existing) {
@@ -221,14 +222,14 @@ export default function AttendanceManagement() {
           <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="program">Program *</Label>
-              <Select value={programId} onValueChange={setProgramId}>
+              <Select value={program} onValueChange={setProgram}>
                 <SelectTrigger id="program">
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
-                  {programs?.map((program) => (
-                    <SelectItem key={program.id} value={program.id}>
-                      {program.name}
+                  {programs.map((prog) => (
+                    <SelectItem key={prog} value={prog}>
+                      {prog}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -360,7 +361,7 @@ export default function AttendanceManagement() {
                   {attendanceRecords.map((record: any) => (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium">
-                        {record.programs?.name || "N/A"}
+                        {record.program_id || "N/A"}
                       </TableCell>
                       <TableCell>{record.month}</TableCell>
                       <TableCell>Week {record.week}</TableCell>
