@@ -244,6 +244,24 @@ export default function Children() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const getPastelColor = (id: string) => {
+    // Generate consistent pastel color based on ID
+    const pastelColors = [
+      'hsl(210, 100%, 92%)', // Light blue
+      'hsl(150, 80%, 90%)',  // Light green
+      'hsl(45, 100%, 90%)',  // Light yellow
+      'hsl(300, 85%, 92%)',  // Light purple
+      'hsl(15, 100%, 90%)',  // Light coral
+      'hsl(180, 85%, 90%)',  // Light cyan
+      'hsl(330, 100%, 92%)', // Light pink
+      'hsl(270, 80%, 92%)',  // Light lavender
+    ];
+    
+    // Use ID to consistently pick same color for same child
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return pastelColors[hash % pastelColors.length];
+  };
+
   const convertGoogleDriveUrl = (url: string) => {
     if (!url) return url;
     const trimmed = url.trim();
@@ -588,14 +606,17 @@ export default function Children() {
                           (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
                         }}
                       />
-                      <AvatarFallback className="text-lg font-semibold">
+                      <AvatarFallback 
+                        className="text-lg font-bold text-white rounded-full"
+                        style={{ backgroundColor: getPastelColor(child.id) }}
+                      >
                         {getInitials(child.first_name, child.last_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <CardTitle className="text-lg">{child.first_name} {child.last_name}</CardTitle>
                       <CardDescription>
-                        {child.date_of_birth && `Age ${calculateAge(child.date_of_birth)}`} • {child.gender}
+                        {child.gender} • {child.residence || 'Location not specified'}
                       </CardDescription>
                     </div>
                   </div>
