@@ -29,7 +29,8 @@ import {
   FileText,
   Settings,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Building2
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
   const baseItems = [
     { title: "Home Visits", url: "/reports/home-visits", icon: Home },
     { title: "School Visits", url: "/reports/school-visits", icon: EducationIcon },
+    { title: "Business Visits", url: "/reports/business-visits", icon: Building2 },
     { title: "Program Reports", url: "/reports/program-reports", icon: AnalyticsIcon },
     { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
     { title: "Academic Performance", url: "/reports/academic-performance", icon: EducationIcon },

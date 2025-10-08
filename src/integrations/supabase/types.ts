@@ -314,6 +314,59 @@ export type Database = {
         }
         Relationships: []
       }
+      business_visit_reports: {
+        Row: {
+          business_id: string | null
+          challenges_identified: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          observation_findings: string
+          reason_for_visit: string | null
+          recommendations: string
+          staff: string
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          business_id?: string | null
+          challenges_identified: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          observation_findings: string
+          reason_for_visit?: string | null
+          recommendations: string
+          staff: string
+          updated_at?: string
+          visit_date: string
+        }
+        Update: {
+          business_id?: string | null
+          challenges_identified?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          observation_findings?: string
+          reason_for_visit?: string | null
+          recommendations?: string
+          staff?: string
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_visit_reports_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "self_empowerment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_programs: {
         Row: {
           child_id: string
