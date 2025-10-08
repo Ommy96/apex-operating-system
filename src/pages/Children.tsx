@@ -597,11 +597,14 @@ export default function Children() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-16 w-16 rounded-full border-2 border-border">
-                      <AvatarImage 
-                        src={child.photo_url && convertGoogleDriveUrl(child.photo_url)} 
-                        alt={`${child.first_name} ${child.last_name}`} 
-                        className="object-cover"
-                      />
+                      {child.photo_url ? (
+                        <AvatarImage 
+                          src={convertGoogleDriveUrl(child.photo_url)} 
+                          alt={`${child.first_name} ${child.last_name}`} 
+                          className="object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : null}
                       <AvatarFallback 
                         className="text-lg font-bold text-gray-700 rounded-full"
                         style={{ backgroundColor: getPastelColor(child.id) }}
