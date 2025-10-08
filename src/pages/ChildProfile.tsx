@@ -15,6 +15,7 @@ import { DocumentLinkForm } from '@/components/DocumentLinkForm';
 import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
 import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { convertGoogleDriveUrl } from '@/lib/imageUtils';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -94,31 +95,7 @@ export default function ChildProfile() {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
-  const convertGoogleDriveUrl = (url: string) => {
-    if (!url) return url;
-    const trimmed = url.trim();
-
-    if (trimmed.includes('drive.google.com/uc?')) {
-      try {
-        const u = new URL(trimmed);
-        u.searchParams.set('export', 'view');
-        return u.toString();
-      } catch {
-        return trimmed;
-      }
-    }
-
-    const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
-
-    const idParam = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (idParam) return `https://drive.google.com/uc?export=view&id=${idParam[1]}`;
-
-    const thumbMatch = trimmed.match(/thumbnail\?id=([a-zA-Z0-9_-]+)/);
-    if (thumbMatch) return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
-
-    return trimmed;
-  };
+  // Google Drive URL conversion moved to src/lib/imageUtils.ts
 
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return 'N/A';
@@ -230,10 +207,11 @@ export default function ChildProfile() {
               <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
                 {child.photo_url ? (
                   <AvatarImage 
-                    src={convertGoogleDriveUrl(child.photo_url)} 
+                    src={convertGoogleDriveUrl(child.photo_url) || undefined} 
                     alt={`${child.first_name} ${child.last_name}`} 
                     className="object-cover"
                     referrerPolicy="no-referrer"
+                    loading="lazy"
                   />
                 ) : null}
                 <AvatarFallback className="text-2xl font-semibold">

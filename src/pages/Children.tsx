@@ -599,14 +599,15 @@ export default function Children() {
                     <Avatar className="h-16 w-16 rounded-full border-2 border-border">
                       {child.photo_url ? (
                         <AvatarImage 
-                          src={convertGoogleDriveUrl(child.photo_url)} 
+                          src={convertGoogleDriveUrl(child.photo_url) || undefined} 
                           alt={`${child.first_name} ${child.last_name}`} 
                           className="object-cover"
                           referrerPolicy="no-referrer"
+                          loading="lazy"
                         />
                       ) : null}
                       <AvatarFallback 
-                        className="text-lg font-bold text-gray-700 rounded-full"
+                        className="text-lg font-bold text-foreground rounded-full"
                         style={{ backgroundColor: getPastelColor(child.id) }}
                       >
                         {getInitials(child.first_name, child.last_name)}
