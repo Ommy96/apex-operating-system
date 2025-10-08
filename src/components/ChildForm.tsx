@@ -23,15 +23,11 @@ const childSchema = z.object({
   institution_name: z.string().optional(),
   grade: z.string().optional(),
   parental_status: z.enum(['Both alive', 'Both deceased', 'Partial']).optional(),
-  address: z.string().optional(),
   guardian_name: z.string().optional(),
   relation: z.string().optional(),
   guardian_phone: z.string().optional(),
-  guardian_email: z.string().email('Invalid email').optional().or(z.literal('')),
-  contact: z.string().optional(),
   medical_notes: z.string().optional(),
   special_needs: z.string().optional(),
-  special_condition: z.string().optional(),
   status: z.string(),
   donor: z.string().optional(),
   donation_received_ksh: z.number().optional(),
@@ -62,15 +58,11 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       institution_name: child?.institution_name || '',
       grade: child?.grade || '',
       parental_status: child?.parental_status || '',
-      address: child?.address || '',
       guardian_name: child?.guardian_name || '',
       relation: child?.relation || '',
       guardian_phone: child?.guardian_phone || '',
-      guardian_email: child?.guardian_email || '',
-      contact: child?.contact || '',
       medical_notes: child?.medical_notes || '',
       special_needs: child?.special_needs || '',
-      special_condition: child?.special_condition || '',
       status: child?.status || 'active',
       donor: child?.donor || '',
       donation_received_ksh: child?.donation_received_ksh || undefined,
@@ -402,19 +394,6 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Address</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Enter address" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Guardian Information</h3>
@@ -433,65 +412,33 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="relation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Relation</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter relation to child" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="relation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Relation</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter relation to child" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="contact"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter contact information" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="guardian_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Guardian Phone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter phone number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="guardian_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Guardian Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="guardian_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Guardian Phone</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter phone number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="space-y-4">
@@ -571,19 +518,6 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="special_condition"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Special Condition</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Enter any special conditions" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           
           <FormField
             control={form.control}
