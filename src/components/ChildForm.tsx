@@ -341,10 +341,38 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             name="grade"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Grade</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter grade/class" {...field} />
-                </FormControl>
+                <FormLabel>Grade/Form/Year</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grade/form/year" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Play Group">Play Group</SelectItem>
+                    <SelectItem value="PP1">PP1</SelectItem>
+                    <SelectItem value="PP2">PP2</SelectItem>
+                    <SelectItem value="Grade 1">Grade 1</SelectItem>
+                    <SelectItem value="Grade 2">Grade 2</SelectItem>
+                    <SelectItem value="Grade 3">Grade 3</SelectItem>
+                    <SelectItem value="Grade 4">Grade 4</SelectItem>
+                    <SelectItem value="Grade 5">Grade 5</SelectItem>
+                    <SelectItem value="Grade 6">Grade 6</SelectItem>
+                    <SelectItem value="Grade 7">Grade 7</SelectItem>
+                    <SelectItem value="Grade 8">Grade 8</SelectItem>
+                    <SelectItem value="Grade 9">Grade 9</SelectItem>
+                    <SelectItem value="Grade 10">Grade 10</SelectItem>
+                    <SelectItem value="Grade 11">Grade 11</SelectItem>
+                    <SelectItem value="Grade 12">Grade 12</SelectItem>
+                    <SelectItem value="Form 2">Form 2</SelectItem>
+                    <SelectItem value="Form 3">Form 3</SelectItem>
+                    <SelectItem value="Form 4">Form 4</SelectItem>
+                    <SelectItem value="1st Year">1st Year</SelectItem>
+                    <SelectItem value="2nd Year">2nd Year</SelectItem>
+                    <SelectItem value="3rd Year">3rd Year</SelectItem>
+                    <SelectItem value="4th Year">4th Year</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
