@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, ChevronDown, ChevronUp, FileText, Calendar, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Download, ChevronDown, ChevronUp, FileText, Calendar, MapPin, User, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +23,13 @@ export default function ChildReport() {
   const [visits, setVisits] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
   const [homeVisits, setHomeVisits] = useState<any[]>([]);
+  const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Collapsible states
   const [profileOpen, setProfileOpen] = useState(true);
   const [educationOpen, setEducationOpen] = useState(true);
+  const [academicOpen, setAcademicOpen] = useState(true);
   const [visitsOpen, setVisitsOpen] = useState(true);
   const [documentsOpen, setDocumentsOpen] = useState(true);
   const [notesOpen, setNotesOpen] = useState(true);
@@ -97,6 +99,17 @@ export default function ChildReport() {
 
       if (documentsError) throw documentsError;
       setDocuments(documentsData || []);
+
+      // Fetch academic performance records
+      const { data: academicData, error: academicError } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('child_id', id)
+        .like('title', 'Academic Performance%')
+        .order('activity_date', { ascending: false });
+
+      if (academicError) throw academicError;
+      setAcademicRecords(academicData || []);
 
     } catch (error) {
       console.error('Error fetching report data:', error);
@@ -225,6 +238,41 @@ export default function ChildReport() {
       });
 
       yPosition = (pdf as any).lastAutoTable.finalY + 15;
+
+      // Academic Performance Records
+      if (academicRecords.length > 0) {
+        if (yPosition > 250) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Academic Performance', 20, yPosition);
+        yPosition += 10;
+
+        const academicData = academicRecords.map(r => {
+          const course = r.title?.replace('Academic Performance - ', '') || 'General';
+          const year = r.description?.match(/Year: (\d{4})/)?.[1] || '';
+          const term = r.description?.match(/Term: (Term [123])/)?.[1] || '';
+          return [
+            course,
+            r.outcome || 'N/A',
+            year,
+            term,
+          ];
+        });
+
+        autoTable(pdf, {
+          startY: yPosition,
+          head: [['Course', 'Grade', 'Year', 'Term']],
+          body: academicData,
+          theme: 'striped',
+          headStyles: { fillColor: [59, 130, 246] },
+        });
+
+        yPosition = (pdf as any).lastAutoTable.finalY + 15;
+      }
 
       // Programs
       if (programs.length > 0) {
@@ -561,6 +609,62 @@ export default function ChildReport() {
                     <p className="text-muted-foreground text-sm">No programs enrolled</p>
                   )}
                 </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        {/* Academic Performance Section */}
+        <Collapsible open={academicOpen} onOpenChange={setAcademicOpen}>
+          <Card className="animate-fade-in">
+            <CollapsibleTrigger className="w-full">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Academic Performance ({academicRecords.length} records)
+                </CardTitle>
+                {academicOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                {academicRecords.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3 font-semibold">Course</th>
+                          <th className="text-left p-3 font-semibold">Grade</th>
+                          <th className="text-left p-3 font-semibold">Year</th>
+                          <th className="text-left p-3 font-semibold">Term</th>
+                          <th className="text-left p-3 font-semibold">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {academicRecords.map((record) => {
+                          const course = record.title?.replace('Academic Performance - ', '') || 'General';
+                          const year = record.description?.match(/Year: (\d{4})/)?.[1] || 'N/A';
+                          const term = record.description?.match(/Term: (Term [123])/)?.[1] || 'N/A';
+                          const notes = record.description?.split('\nNotes: ')[1] || '';
+                          
+                          return (
+                            <tr key={record.id} className="border-b hover:bg-muted/50 transition-colors">
+                              <td className="p-3">{course}</td>
+                              <td className="p-3">
+                                <Badge variant="secondary">{record.outcome || 'N/A'}</Badge>
+                              </td>
+                              <td className="p-3">{year}</td>
+                              <td className="p-3">{term}</td>
+                              <td className="p-3 text-sm text-muted-foreground">{notes || '-'}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No academic performance records found</p>
+                )}
               </CardContent>
             </CollapsibleContent>
           </Card>
