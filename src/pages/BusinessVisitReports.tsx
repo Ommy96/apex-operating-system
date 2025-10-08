@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BusinessVisitReportForm } from '@/components/BusinessVisitReportForm';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Download, Plus, Search, Eye, Edit, Trash2, Building2 } from 'lucide-react';
+import { Download, Plus, Search, Eye, Edit, Trash2, Building2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function BusinessVisitReports() {
@@ -374,52 +374,119 @@ export default function BusinessVisitReports() {
       </Dialog>
 
       <Dialog open={isViewDialogOpen} onOpenChange={() => setIsViewDialogOpen(false)}>
-        <DialogContent className="max-w-3xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Business Visit Report Details</DialogTitle>
+            <DialogTitle className="text-2xl">Business Visit Report</DialogTitle>
+            <DialogDescription>
+              Comprehensive details of the business visit
+            </DialogDescription>
           </DialogHeader>
           {selectedReport && (
-            <ScrollArea className="max-h-[70vh]">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-1">Business/Person</h4>
-                  <p className="text-muted-foreground">
-                    {selectedReport.business?.full_name || 'N/A'}
-                    {selectedReport.business?.business_name && ` - ${selectedReport.business.business_name}`}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Staff</h4>
-                  <p className="text-muted-foreground">{selectedReport.staff}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Visit Date</h4>
-                  <p className="text-muted-foreground">
-                    {new Date(selectedReport.visit_date).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Location</h4>
-                  <p className="text-muted-foreground">{selectedReport.location || 'N/A'}</p>
-                </div>
+            <ScrollArea className="max-h-[70vh] pr-4">
+              <div className="space-y-6">
+                {/* Business & Visit Info Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      Business Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Business/Person</div>
+                      <div className="font-medium">
+                        {selectedReport.business?.full_name || 'N/A'}
+                      </div>
+                      {selectedReport.business?.business_name && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {selectedReport.business.business_name}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Location</div>
+                      <div className="font-medium">{selectedReport.location || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Visit Date</div>
+                      <div className="font-medium">
+                        {new Date(selectedReport.visit_date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Staff Member</div>
+                      <div className="font-medium">{selectedReport.staff}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Reason for Visit */}
                 {selectedReport.reason_for_visit && (
-                  <div>
-                    <h4 className="font-semibold mb-1">Reason for Visit</h4>
-                    <p className="text-muted-foreground">{selectedReport.reason_for_visit}</p>
-                  </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Search className="h-5 w-5 text-primary" />
+                        Reason for Visit
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-foreground leading-relaxed">
+                        {selectedReport.reason_for_visit}
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
-                <div>
-                  <h4 className="font-semibold mb-1">Observation Findings</h4>
-                  <p className="text-muted-foreground">{selectedReport.observation_findings}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Challenges Identified</h4>
-                  <p className="text-muted-foreground">{selectedReport.challenges_identified}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Recommendations</h4>
-                  <p className="text-muted-foreground">{selectedReport.recommendations}</p>
-                </div>
+
+                {/* Observation Findings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Eye className="h-5 w-5 text-primary" />
+                      Observation Findings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                      {selectedReport.observation_findings}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Challenges */}
+                <Card className="border-destructive/20">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+                      <AlertCircle className="h-5 w-5" />
+                      Challenges Identified
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                      {selectedReport.challenges_identified}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Recommendations */}
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2 text-primary">
+                      <CheckCircle2 className="h-5 w-5" />
+                      Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                      {selectedReport.recommendations}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </ScrollArea>
           )}
