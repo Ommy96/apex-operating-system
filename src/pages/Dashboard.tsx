@@ -26,7 +26,6 @@ import { LiveUserPresence } from "@/components/LiveUserPresence";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { useToast } from "@/hooks/use-toast";
-import { DashboardFilters } from "@/components/DashboardFilters";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -37,77 +36,31 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
-  // State for filters
-  const [activeFilters, setActiveFilters] = useState<any>({
-    dateRange: { from: undefined, to: undefined },
-    categories: [],
-    metrics: [],
-    locations: [],
-    programs: []
-  });
-  
   // Extract user name from metadata or email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   
   // Fetch dashboard statistics with real-time updates every 30 seconds
   const { data: dashboardStats, isLoading: statsLoading, refetch } = useQuery({
-    queryKey: ['dashboard-stats', activeFilters],
+    queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      // Build queries with filters
-      let childrenQuery = supabase.from('children').select('*', { count: 'exact' });
-      let feedingQuery = supabase.from('feeding_program').select('*', { count: 'exact' });
-      let kipawaQuery = supabase.from('kipawa_sato').select('*', { count: 'exact' });
-      let selfEmpowermentQuery = supabase.from('self_empowerment').select('*', { count: 'exact' });
-
-      // Apply location filters
-      if (activeFilters.locations && activeFilters.locations.length > 0) {
-        childrenQuery = childrenQuery.in('residence', activeFilters.locations);
-        kipawaQuery = kipawaQuery.in('location', activeFilters.locations);
-        selfEmpowermentQuery = selfEmpowermentQuery.in('residence', activeFilters.locations);
-      }
-
-      // Apply date range filters (enrollment_date for children, created_at for others)
-      if (activeFilters.dateRange?.from) {
-        childrenQuery = childrenQuery.gte('enrollment_date', activeFilters.dateRange.from.toISOString());
-        feedingQuery = feedingQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-        kipawaQuery = kipawaQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-        selfEmpowermentQuery = selfEmpowermentQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-      }
-      if (activeFilters.dateRange?.to) {
-        childrenQuery = childrenQuery.lte('enrollment_date', activeFilters.dateRange.to.toISOString());
-        feedingQuery = feedingQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-        kipawaQuery = kipawaQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-        selfEmpowermentQuery = selfEmpowermentQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-      }
-
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
-        childrenQuery,
-        feedingQuery,
-        kipawaQuery,
-        selfEmpowermentQuery
+        supabase.from('children').select('*', { count: 'exact' }),
+        supabase.from('feeding_program').select('*', { count: 'exact' }),
+        supabase.from('kipawa_sato').select('*', { count: 'exact' }),
+        supabase.from('self_empowerment').select('*', { count: 'exact' })
       ]);
 
-      // Apply program filters to the results
-      let educationCount = childrenRes.count || 0;
-      let feedingCount = feedingRes.count || 0;
-      let kipawaCount = kipawaRes.count || 0;
-      let empowermentCount = selfEmpowermentRes.count || 0;
-
-      if (activeFilters.programs && activeFilters.programs.length > 0) {
-        if (!activeFilters.programs.includes('Education Sponsorship')) educationCount = 0;
-        if (!activeFilters.programs.includes('Feeding Program')) feedingCount = 0;
-        if (!activeFilters.programs.includes('Kipawa Sato')) kipawaCount = 0;
-        if (!activeFilters.programs.includes('Self Empowerment')) empowermentCount = 0;
-      }
-
-      const totalChildrenFromAllPrograms = educationCount + feedingCount + kipawaCount + empowermentCount;
+      const totalChildrenFromAllPrograms = (childrenRes.count || 0) + 
+                                          (feedingRes.count || 0) + 
+                                          (kipawaRes.count || 0) + 
+                                          (selfEmpowermentRes.count || 0);
 
       return {
         totalChildren: totalChildrenFromAllPrograms,
-        educationProgram: educationCount,
-        feedingProgram: feedingCount,
-        kipawaProgram: kipawaCount,
-        empowermentProgram: empowermentCount
+        educationProgram: childrenRes.count || 0,
+        feedingProgram: feedingRes.count || 0,
+        kipawaProgram: kipawaRes.count || 0,
+        empowermentProgram: selfEmpowermentRes.count || 0
       };
     },
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -115,38 +68,15 @@ const Dashboard = () => {
 
   // Fetch beneficiaries distribution by location
   const { data: locationDistribution, isLoading: locationLoading } = useQuery({
-    queryKey: ['location-distribution', activeFilters],
+    queryKey: ['location-distribution'],
     queryFn: async () => {
-      // Build queries with filters
-      let childrenQuery = supabase.from('children').select('residence');
-      let feedingQuery = supabase.from('feeding_program').select('id');
-      let kipawaQuery = supabase.from('kipawa_sato').select('location');
-      let selfEmpowermentQuery = supabase.from('self_empowerment').select('residence');
-      let familyAdoptionQuery = supabase.from('family_adoption').select('residence');
-
-      // Apply date range filters
-      if (activeFilters.dateRange?.from) {
-        childrenQuery = childrenQuery.gte('enrollment_date', activeFilters.dateRange.from.toISOString());
-        feedingQuery = feedingQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-        kipawaQuery = kipawaQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-        selfEmpowermentQuery = selfEmpowermentQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-        familyAdoptionQuery = familyAdoptionQuery.gte('created_at', activeFilters.dateRange.from.toISOString());
-      }
-      if (activeFilters.dateRange?.to) {
-        childrenQuery = childrenQuery.lte('enrollment_date', activeFilters.dateRange.to.toISOString());
-        feedingQuery = feedingQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-        kipawaQuery = kipawaQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-        selfEmpowermentQuery = selfEmpowermentQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-        familyAdoptionQuery = familyAdoptionQuery.lte('created_at', activeFilters.dateRange.to.toISOString());
-      }
-
       // Get data from multiple sources
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, familyAdoptionRes] = await Promise.all([
-        childrenQuery,
-        feedingQuery,
-        kipawaQuery,
-        selfEmpowermentQuery,
-        familyAdoptionQuery
+        supabase.from('children').select('residence'),
+        supabase.from('feeding_program').select('id'), // No location field, will count as "Not Specified"
+        supabase.from('kipawa_sato').select('location'),
+        supabase.from('self_empowerment').select('residence'),
+        supabase.from('family_adoption').select('residence')
       ]);
 
       const locationCounts: { [key: string]: number } = {};
@@ -183,20 +113,14 @@ const Dashboard = () => {
       // Convert to array and sort by count
       const total = Object.values(locationCounts).reduce((sum, count) => sum + count, 0);
       
-      let result = Object.entries(locationCounts)
+      return Object.entries(locationCounts)
         .map(([location, count]) => ({
           location,
           count,
           percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0"
         }))
-        .sort((a, b) => b.count - a.count);
-
-      // Apply location filters
-      if (activeFilters.locations && activeFilters.locations.length > 0) {
-        result = result.filter(item => activeFilters.locations.includes(item.location));
-      }
-
-      return result.slice(0, 8); // Show top 8 locations
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8); // Show top 8 locations
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -400,12 +324,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Dashboard Filters */}
-      <DashboardFilters 
-        onFiltersChange={setActiveFilters}
-        className="mb-6"
-      />
-
       {/* Welcome Section with Real-time Indicators */}
       <div className="mb-8">
         <div className="flex justify-between items-start">
