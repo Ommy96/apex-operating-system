@@ -21,7 +21,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const academicPerformanceSchema = z.object({
   child_id: z.string().min(1, 'Please select a child'),
   academic_grade: z.string().min(1, 'Please enter the academic grade/mark'),
-  course: z.string().optional(),
   year: z.string().min(1, 'Please select a year'),
   term: z.string().min(1, 'Please select a term/semester'),
   notes: z.string().optional(),
@@ -55,7 +54,6 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
     defaultValues: {
       child_id: editingRecord?.child_id || '',
       academic_grade: editingRecord?.outcome || '',
-      course: editingRecord?.title?.replace('Academic Performance - ', '') || '',
       year: editingRecord?.activity_date ? new Date(editingRecord.activity_date).getFullYear().toString() : '',
       term: editingRecord?.description?.match(/Term: (Term [123])/)?.[1] || '',
       notes: editingRecord?.description?.split('\nNotes: ')[1] || '',
@@ -102,10 +100,11 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
       const activityData = {
         child_id: data.child_id,
         program_id: '9fe13aa8-d378-4a29-91e7-4252945acadc', // Education program UUID
-        title: `Academic Performance - ${data.course || 'General'}`,
+        title: 'Academic Performance',
         description: `Grade/Mark: ${data.academic_grade}\nYear: ${data.year}\nTerm: ${data.term}${data.notes ? '\nNotes: ' + data.notes : ''}`,
         activity_date: `${data.year}-01-01`, // Use year as a reference date
         outcome: data.academic_grade,
+        term: data.term,
       };
 
       if (editingRecord) {
@@ -210,35 +209,19 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="course"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Course (Optional)</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="e.g., Mathematics, English" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="academic_grade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Academic Grade/Mark</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="e.g., A, B+, 85%, 3.5 GPA" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="academic_grade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Academic Grade/Mark</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g., A, B+, 85%, 3.5 GPA" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -326,7 +309,6 @@ export default function AcademicPerformance() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [courseFilter, setCourseFilter] = useState("");
 
   // Fetch academic performance records
   const { data: academicRecords, refetch } = useQuery({
@@ -357,29 +339,21 @@ export default function AcademicPerformance() {
         return recordDate.getMonth() === now.getMonth() && recordDate.getFullYear() === now.getFullYear();
       }).length || 0;
       
-      const courseBreakdown = academicRecords?.reduce((acc, record) => {
-        const course = record.title.replace('Academic Performance - ', '');
-        acc[course] = (acc[course] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>) || {};
-      
       const uniqueStudents = new Set(academicRecords?.map(r => r.child_id) || []).size;
+      const uniqueSchools = new Set(academicRecords?.map(r => r.children?.institution_name).filter(Boolean) || []).size;
       
-      return { totalRecords, thisMonth, courseBreakdown, uniqueStudents };
+      return { totalRecords, thisMonth, uniqueStudents, uniqueSchools };
     },
     enabled: !!academicRecords,
   });
 
   const filteredRecords = academicRecords?.filter(record => {
     const childName = record.children ? `${record.children.first_name} ${record.children.last_name}` : '';
-    const course = record.title.replace('Academic Performance - ', '');
     
     const matchesSearch = childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.outcome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCourse = !courseFilter || courseFilter === 'all' || course === courseFilter;
     
-    return matchesSearch && matchesCourse;
+    return matchesSearch;
   });
 
   const handleEdit = (record: any) => {
@@ -416,11 +390,6 @@ export default function AcademicPerformance() {
     setIsDialogOpen(false);
     setEditingRecord(null);
   };
-
-  // Get unique courses for filter
-  const courses = Array.from(new Set(academicRecords?.map(record => 
-    record.title.replace('Academic Performance - ', '')
-  ) || []));
 
   return (
     <div className="space-y-6">
@@ -477,24 +446,12 @@ export default function AcademicPerformance() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by student name, course, or grade..."
+            placeholder="Search by student name or grade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
-        
-        <Select value={courseFilter} onValueChange={setCourseFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Courses</SelectItem>
-            {courses.map((course) => (
-              <SelectItem key={course} value={course}>{course || 'General'}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Stats Cards */}
@@ -523,12 +480,12 @@ export default function AcademicPerformance() {
 
         <Card className="bg-gradient-to-br from-accent to-accent-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-accent-foreground">Courses</CardTitle>
+            <CardTitle className="text-sm font-medium text-accent-foreground">Schools</CardTitle>
             <BarChart3 className="h-4 w-4 text-accent-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent-foreground">{Object.keys(recordStats?.courseBreakdown || {}).length}</div>
-            <p className="text-xs text-accent-foreground/80">Courses tracked</p>
+            <div className="text-2xl font-bold text-accent-foreground">{recordStats?.uniqueSchools || 0}</div>
+            <p className="text-xs text-accent-foreground/80">Schools tracked</p>
           </CardContent>
         </Card>
 
@@ -605,12 +562,6 @@ export default function AcademicPerformance() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Course:</span>
-                <Badge variant="secondary">
-                  {record.title.replace('Academic Performance - ', '') || 'General'}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Grade/Mark:</span>
                 <Badge variant="default" className="font-bold">
                   {record.outcome}
@@ -638,11 +589,14 @@ export default function AcademicPerformance() {
                   <strong>Class:</strong> {record.children.grade}
                 </div>
               )}
-              {record.description?.includes('Notes:') && (
-                <div className="text-sm">
-                  <strong>Notes:</strong> {record.description.split('Notes: ')[1]?.substring(0, 100)}...
-                </div>
-              )}
+              {(() => {
+                const notes = record.description?.split('Notes: ')[1]?.trim();
+                return notes ? (
+                  <div className="text-sm">
+                    <strong>Notes:</strong> {notes.substring(0, 100)}{notes.length > 100 ? '...' : ''}
+                  </div>
+                ) : null;
+              })()}
             </CardContent>
           </Card>
         ))}

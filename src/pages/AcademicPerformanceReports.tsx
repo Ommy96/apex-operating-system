@@ -119,11 +119,10 @@ export default function AcademicPerformanceReports() {
       'Student Name': `${record.children.first_name} ${record.children.last_name}`,
       'School': record.children.institution_name || 'Not specified',
       'Grade/Class': record.children.grade || 'Not specified',
-      'Course': record.title.replace('Academic Performance - ', ''),
       'Score/Grade': record.outcome,
       'Year': new Date(record.activity_date).getFullYear(),
       'Term/Semester': record.term || 'Not specified',
-      'Notes': record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '',
+      'Notes': record.description?.split('Notes: ')[1]?.trim() || '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -135,7 +134,6 @@ export default function AcademicPerformanceReports() {
       { wch: 20 }, // Student Name
       { wch: 25 }, // School
       { wch: 12 }, // Grade/Class
-      { wch: 15 }, // Course
       { wch: 12 }, // Score/Grade
       { wch: 10 }, // Year
       { wch: 15 }, // Term/Semester
@@ -324,7 +322,6 @@ export default function AcademicPerformanceReports() {
                     <TableHead>Student</TableHead>
                     <TableHead>School</TableHead>
                     <TableHead>Grade/Class</TableHead>
-                    <TableHead>Course</TableHead>
                     <TableHead>Score/Grade</TableHead>
                     <TableHead>Year</TableHead>
                     <TableHead>Term/Semester</TableHead>
@@ -339,16 +336,15 @@ export default function AcademicPerformanceReports() {
                       </TableCell>
                       <TableCell>{record.children.institution_name || 'Not specified'}</TableCell>
                       <TableCell>{record.children.grade || 'Not specified'}</TableCell>
-                      <TableCell>{record.title.replace('Academic Performance - ', '')}</TableCell>
                       <TableCell>
                         <Badge className={getGradeColor(record.outcome)}>
                           {record.outcome}
                         </Badge>
                       </TableCell>
-                       <TableCell>{new Date(record.activity_date).getFullYear()}</TableCell>
-                       <TableCell>{record.term || 'Not specified'}</TableCell>
-                       <TableCell className="max-w-xs truncate">
-                        {record.description?.replace(`Grade/Mark: ${record.outcome}`, '').replace('Notes: ', '').trim() || '-'}
+                      <TableCell>{new Date(record.activity_date).getFullYear()}</TableCell>
+                      <TableCell>{record.term || 'Not specified'}</TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {record.description?.split('Notes: ')[1]?.trim() || ''}
                       </TableCell>
                     </TableRow>
                   ))}
