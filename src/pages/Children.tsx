@@ -607,7 +607,7 @@ export default function Children() {
                         }}
                       />
                       <AvatarFallback 
-                        className="text-lg font-bold text-white rounded-full"
+                        className="text-lg font-bold text-gray-700 rounded-full"
                         style={{ backgroundColor: getPastelColor(child.id) }}
                       >
                         {getInitials(child.first_name, child.last_name)}
