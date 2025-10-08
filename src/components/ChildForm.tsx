@@ -22,6 +22,7 @@ const childSchema = z.object({
   academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary', 'Secondary School', 'Tertiary', 'Special School', 'Junior School']).optional(),
   institution_name: z.string().optional(),
   grade: z.string().optional(),
+  course_name: z.string().optional(),
   parental_status: z.enum(['Both alive', 'Both deceased', 'Partial']).optional(),
   guardian_name: z.string().optional(),
   relation: z.string().optional(),
@@ -57,6 +58,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       academic_level: child?.academic_level || '',
       institution_name: child?.institution_name || '',
       grade: child?.grade || '',
+      course_name: child?.course_name || '',
       parental_status: child?.parental_status || '',
       guardian_name: child?.guardian_name || '',
       relation: child?.relation || '',
@@ -370,6 +372,22 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
             )}
           />
         </div>
+
+        {form.watch('academic_level') === 'Tertiary' && (
+          <FormField
+            control={form.control}
+            name="course_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter course name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
