@@ -113,6 +113,23 @@ export default function Children() {
   // Get unique donors from children data
   const uniqueDonors = [...new Set(children.map(child => child.donor).filter(Boolean))].sort();
 
+  // Function to calculate stats from children data
+  const calculateStats = (childrenData: Child[]) => {
+    const educationChildren = childrenData.filter(child => child.academic_level);
+    const totalStudents = educationChildren.length;
+    const maleStudents = educationChildren.filter(child => child.gender === 'Male').length;
+    const uniqueSchools = new Set(educationChildren.map(child => child.institution_name).filter(Boolean)).size;
+    const kiberaStudents = educationChildren.filter(child => child.residence === 'Kibera').length;
+    const kiberaPercentage = totalStudents > 0 ? Math.round((kiberaStudents / totalStudents) * 100) : 0;
+    
+    setStats({
+      totalStudents,
+      numberOfMale: maleStudents,
+      numberOfSchools: uniqueSchools,
+      percentageInKibera: kiberaPercentage
+    });
+  };
+
   useEffect(() => {
     fetchChildren();
   }, []);
@@ -123,6 +140,11 @@ export default function Children() {
     }
   }, [filters]);
 
+  // Recalculate stats whenever children data changes
+  useEffect(() => {
+    calculateStats(children);
+  }, [children]);
+
   const fetchChildren = async () => {
     try {
       const { data, error } = await supabase
@@ -132,21 +154,6 @@ export default function Children() {
 
       if (error) throw error;
       setChildren(data || []);
-      
-      // Calculate education stats
-      const educationChildren = data?.filter(child => child.academic_level) || [];
-      const totalStudents = educationChildren.length;
-      const maleStudents = educationChildren.filter(child => child.gender === 'Male').length;
-      const uniqueSchools = new Set(educationChildren.map(child => child.institution_name).filter(Boolean)).size;
-      const kiberaStudents = educationChildren.filter(child => child.residence === 'Kibera').length;
-      const kiberaPercentage = totalStudents > 0 ? Math.round((kiberaStudents / totalStudents) * 100) : 0;
-      
-      setStats({
-        totalStudents,
-        numberOfMale: maleStudents,
-        numberOfSchools: uniqueSchools,
-        percentageInKibera: kiberaPercentage
-      });
     } catch (error) {
       console.error('Error fetching children:', error);
       toast({
