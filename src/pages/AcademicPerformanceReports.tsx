@@ -174,7 +174,7 @@ export default function AcademicPerformanceReports() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate('/academic-performance')}
+            onClick={() => navigate('/reports/academic-performance')}
             className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
