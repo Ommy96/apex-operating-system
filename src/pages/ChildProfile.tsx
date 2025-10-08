@@ -229,13 +229,10 @@ export default function ChildProfile() {
             <CardHeader className="text-center">
               <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
                 <AvatarImage 
-                  src={convertGoogleDriveUrl(child.photo_url)} 
+                  src={child.photo_url && convertGoogleDriveUrl(child.photo_url)} 
                   alt={`${child.first_name} ${child.last_name}`} 
                   className="object-cover"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).onerror = null;
-                    (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
-                  }}
+                  referrerPolicy="no-referrer"
                 />
                 <AvatarFallback className="text-2xl font-semibold">
                   {getInitials(child.first_name, child.last_name)}
