@@ -193,7 +193,7 @@ export default function ChildProfile() {
               </DialogContent>
             </Dialog>
           )}
-          <Button>
+          <Button onClick={() => navigate(`/children/${id}/report`)}>
             <FileText className="h-4 w-4 mr-2" />
             Generate Report
           </Button>

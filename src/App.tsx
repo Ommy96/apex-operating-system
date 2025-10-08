@@ -9,6 +9,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
+import ChildReport from "./pages/ChildReport";
 import Alumni from "./pages/Alumni";
 import Replacements from "./pages/Replacements";
 
@@ -68,6 +69,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ChildProfile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/children/:id/report" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ChildReport />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
