@@ -608,38 +608,6 @@ export default function AcademicPerformance() {
           <p className="text-muted-foreground">No academic performance records found.</p>
         </div>
       )}
-
-      {/* Info Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Academic Tracking Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <h4 className="font-medium mb-2">Grade Systems Supported:</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Letter grades (A, B, C, D, F)</li>
-                <li>• Percentage scores (0-100%)</li>
-                <li>• GPA scale (0.0-4.0)</li>
-                <li>• Custom grading systems</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Track Progress:</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>• Subject-specific performance</li>
-                <li>• Term/semester progress</li>
-                <li>• Improvement trends</li>
-                <li>• Areas needing support</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
