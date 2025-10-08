@@ -191,52 +191,56 @@ export default function AcademicPerformanceReports() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-primary to-primary-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Records</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-primary-foreground">Total Records</CardTitle>
+            <BookOpen className="h-4 w-4 text-primary-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{filteredRecords.length}</div>
+            <div className="text-2xl font-bold text-primary-foreground">{filteredRecords.length}</div>
+            <p className="text-xs text-primary-foreground/80">Academic records</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-br from-secondary to-secondary-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Students</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-secondary-foreground">Students</CardTitle>
+            <GraduationCap className="h-4 w-4 text-secondary-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
+            <div className="text-2xl font-bold text-secondary-foreground">
               {new Set(filteredRecords.map(r => r.child_id)).size}
             </div>
+            <p className="text-xs text-secondary-foreground/80">Tracked students</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-accent to-accent-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Schools</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-accent-foreground">Schools</CardTitle>
+            <BookOpen className="h-4 w-4 text-accent-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
+            <div className="text-2xl font-bold text-accent-foreground">
               {new Set(filteredRecords.map(r => r.children.institution_name).filter(Boolean)).size}
             </div>
+            <p className="text-xs text-accent-foreground/80">Active schools</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-primary-light to-secondary-light">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Latest Assessment</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Latest Assessment</CardTitle>
+            <Calendar className="h-4 w-4 text-white/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-bold text-primary">
+            <div className="text-sm font-bold text-white">
               {filteredRecords.length > 0 
                 ? new Date(filteredRecords[0].activity_date).toLocaleDateString()
                 : 'No data'
               }
             </div>
+            <p className="text-xs text-white/80">Most recent</p>
           </CardContent>
         </Card>
       </div>
