@@ -375,6 +375,7 @@ export type Database = {
             | null
           address: string | null
           contact: string | null
+          course_name: string | null
           created_at: string
           created_by: string | null
           date_of_birth: string | null
@@ -409,6 +410,7 @@ export type Database = {
             | null
           address?: string | null
           contact?: string | null
+          course_name?: string | null
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
@@ -443,6 +445,7 @@ export type Database = {
             | null
           address?: string | null
           contact?: string | null
+          course_name?: string | null
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
