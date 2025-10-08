@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BusinessVisitReportForm } from '@/components/BusinessVisitReportForm';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Download, Plus, Search, Eye, Edit, Trash2, Building2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Download, Plus, Search, Eye, Edit, Trash2, Building2, AlertCircle, CheckCircle2, Calendar, Users, MapPin } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function BusinessVisitReports() {
@@ -187,12 +188,10 @@ export default function BusinessVisitReports() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-6 border border-primary/10">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Business Visit Reports
-          </h1>
-          <p className="text-muted-foreground mt-1">Track and manage business visit reports</p>
+          <h1 className="text-3xl font-bold">Business Visit Reports</h1>
+          <p className="text-muted-foreground">Track and manage business visit reports</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleDownload} variant="outline">
@@ -245,129 +244,126 @@ export default function BusinessVisitReports() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border-blue-500/20">
+        <Card className="bg-gradient-to-br from-primary to-primary-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-            <Building2 className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-primary-foreground">Total Reports</CardTitle>
+            <Building2 className="h-4 w-4 text-primary-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats?.totalReports || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">All time visits</p>
+            <div className="text-2xl font-bold text-primary-foreground">{stats?.totalReports || 0}</div>
+            <p className="text-xs text-primary-foreground/80">All time</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent border-green-500/20">
+        <Card className="bg-gradient-to-br from-secondary to-secondary-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
-            <Building2 className="h-5 w-5 text-green-500" />
+            <CardTitle className="text-sm font-medium text-secondary-foreground">This Month</CardTitle>
+            <Calendar className="h-4 w-4 text-secondary-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats?.thisMonth || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Recent visits</p>
+            <div className="text-2xl font-bold text-secondary-foreground">{stats?.thisMonth || 0}</div>
+            <p className="text-xs text-secondary-foreground/80">Reports submitted</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border-purple-500/20">
+        <Card className="bg-gradient-to-br from-accent to-accent-dark">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unique Staff</CardTitle>
-            <Building2 className="h-5 w-5 text-purple-500" />
+            <CardTitle className="text-sm font-medium text-accent-foreground">Unique Staff</CardTitle>
+            <Users className="h-4 w-4 text-accent-foreground/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats?.uniqueStaff || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Team members</p>
+            <div className="text-2xl font-bold text-accent-foreground">{stats?.uniqueStaff || 0}</div>
+            <p className="text-xs text-accent-foreground/80">Contributing staff</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent border-orange-500/20">
+        <Card className="bg-gradient-to-br from-primary-light to-secondary-light">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Locations</CardTitle>
-            <Building2 className="h-5 w-5 text-orange-500" />
+            <CardTitle className="text-sm font-medium text-white">Locations</CardTitle>
+            <MapPin className="h-4 w-4 text-white/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+            <div className="text-2xl font-bold text-white">
               {stats?.locationBreakdown ? Object.keys(stats.locationBreakdown).length : 0}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Areas covered</p>
+            <p className="text-xs text-white/80">Areas covered</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredReports.map((report: any, index: any) => {
-          const colors = [
-            'from-pink-500/10 to-pink-500/5 border-pink-500/20',
-            'from-cyan-500/10 to-cyan-500/5 border-cyan-500/20',
-            'from-amber-500/10 to-amber-500/5 border-amber-500/20',
-            'from-emerald-500/10 to-emerald-500/5 border-emerald-500/20',
-            'from-violet-500/10 to-violet-500/5 border-violet-500/20',
-            'from-rose-500/10 to-rose-500/5 border-rose-500/20',
-          ];
-          const colorClass = colors[index % colors.length];
-          
-          return (
-            <Card key={report.id} className={`bg-gradient-to-br ${colorClass} hover:shadow-lg transition-all duration-300`}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-start gap-2">
-                  <Building2 className="h-5 w-5 mt-0.5 text-primary shrink-0" />
-                  <span className="line-clamp-1">{report.business?.full_name || 'N/A'}</span>
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  {report.business?.business_name && (
-                    <span className="font-medium">{report.business.business_name}</span>
-                  )}
-                  {report.business?.business_name && <span>•</span>}
-                  <span>{new Date(report.visit_date).toLocaleDateString()}</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-sm bg-background/50 rounded-lg p-2">
-                  <span className="font-semibold text-primary">Staff:</span> 
-                  <span className="text-foreground">{report.staff}</span>
+        {filteredReports.map((report: any) => (
+          <Card key={report.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex justify-between items-start">
+                <span className="text-lg">{report.business?.full_name || 'N/A'}</span>
+                <Badge variant="outline">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {new Date(report.visit_date).toLocaleDateString()}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {report.business?.business_name && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Building2 className="h-3 w-3 mr-1" />
+                  {report.business.business_name}
                 </div>
-                <div className="flex items-center gap-2 text-sm bg-background/50 rounded-lg p-2">
-                  <span className="font-semibold text-primary">Location:</span> 
-                  <span className="text-foreground">{report.location || 'N/A'}</span>
+              )}
+              <div className="text-sm">
+                <strong>Staff:</strong> {report.staff}
+              </div>
+              {report.location && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  {report.location}
                 </div>
+              )}
+              {report.reason_for_visit && (
                 <div className="text-sm">
-                  <span className="font-semibold text-primary block mb-1">Findings:</span>
-                  <p className="text-muted-foreground line-clamp-2 bg-background/50 rounded-lg p-2">
-                    {report.observation_findings}
-                  </p>
+                  <strong>Reason:</strong> {report.reason_for_visit}
                 </div>
-                <div className="flex flex-wrap gap-2 pt-2">
+              )}
+              <div className="text-sm">
+                <strong>Findings:</strong> {report.observation_findings.substring(0, 100)}...
+              </div>
+              <div className="text-sm">
+                <strong>Challenges:</strong> {report.challenges_identified.substring(0, 100)}...
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleView(report)}
+                  className="flex-1"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                {(isAdmin || isManagement || report.created_by === user?.id) && (
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleView(report)}
-                    className="flex-1 bg-background/80"
+                    onClick={() => handleEdit(report)}
+                    className="flex-1"
                   >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
                   </Button>
-                  {(isAdmin || isManagement || report.created_by === user?.id) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(report)}
-                      className="flex-1 bg-background/80"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  )}
-                  {(isAdmin || isManagement) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(report.id)}
-                      className="bg-background/80"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                )}
+                {(isAdmin || isManagement) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(report.id)}
+                    className="flex-1 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Delete
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {filteredReports.length === 0 && (
