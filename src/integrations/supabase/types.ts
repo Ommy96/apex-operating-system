@@ -839,6 +839,51 @@ export type Database = {
           },
         ]
       }
+      medical_records: {
+        Row: {
+          academic_level: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          doctors_report: string | null
+          full_name: string
+          hospital: string
+          id: string
+          location: string | null
+          medical_condition: string
+          outcome: string | null
+          updated_at: string
+        }
+        Insert: {
+          academic_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          doctors_report?: string | null
+          full_name: string
+          hospital: string
+          id?: string
+          location?: string | null
+          medical_condition: string
+          outcome?: string | null
+          updated_at?: string
+        }
+        Update: {
+          academic_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          doctors_report?: string | null
+          full_name?: string
+          hospital?: string
+          id?: string
+          location?: string | null
+          medical_condition?: string
+          outcome?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

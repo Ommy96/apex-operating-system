@@ -28,6 +28,7 @@ import Settings from "./pages/Settings";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
+import Medical from "./pages/Medical";
 import FamilyAdoption from "./pages/FamilyAdoption";
 import SelfEmpowerment from "./pages/SelfEmpowerment";
 import SupportGroups from "./pages/SupportGroups";
@@ -105,6 +106,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <KipawaSato />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/medical" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Medical />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

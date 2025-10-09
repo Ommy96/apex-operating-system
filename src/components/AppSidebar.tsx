@@ -30,7 +30,8 @@ import {
   Settings,
   LogOut,
   RefreshCw,
-  Building2
+  Building2,
+  Stethoscope
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const getMainMenuItems = (isAdmin: boolean) => {
 const programItems = [
   { title: "Feeding Program", url: "/programs/feeding", icon: FeedingIcon },
   { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: KipawaIcon },
+  { title: "Medical", url: "/programs/medical", icon: Stethoscope },
   { title: "Family Adoption", url: "/programs/family-adoption", icon: HeartIcon },
   { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: EmpowermentIcon },
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
