@@ -8,6 +8,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+const activityReportSchema = z.object({
+  program: z.string().min(1, "Program is required").max(100),
+  staff: z.string().min(1, "Staff member is required").max(255),
+  reporting_date: z.string().min(1, "Reporting date is required"),
+  executive_summary: z.string().min(10, "Executive summary must be at least 10 characters").max(5000),
+  beneficiary_impact: z.string().min(10, "Beneficiary impact must be at least 10 characters").max(5000),
+  challenges: z.string().min(10, "Challenges must be at least 10 characters").max(5000),
+  proposed_recommendations: z.string().min(10, "Recommendations must be at least 10 characters").max(5000),
+});
 
 interface ActivityReportFormProps {
   onSuccess: () => void;
@@ -18,14 +32,18 @@ interface ActivityReportFormProps {
 export function ActivityReportForm({ onSuccess, onCancel, initialData }: ActivityReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    program: initialData?.program || "",
-    staff: initialData?.staff || "",
-    reporting_date: initialData?.reporting_date || "",
-    executive_summary: initialData?.executive_summary || "",
-    beneficiary_impact: initialData?.beneficiary_impact || "",
-    challenges: initialData?.challenges || "",
-    proposed_recommendations: initialData?.proposed_recommendations || "",
+  
+  const form = useForm<z.infer<typeof activityReportSchema>>({
+    resolver: zodResolver(activityReportSchema),
+    defaultValues: {
+      program: initialData?.program || "",
+      staff: initialData?.staff || "",
+      reporting_date: initialData?.reporting_date || "",
+      executive_summary: initialData?.executive_summary || "",
+      beneficiary_impact: initialData?.beneficiary_impact || "",
+      challenges: initialData?.challenges || "",
+      proposed_recommendations: initialData?.proposed_recommendations || "",
+    },
   });
 
   // Fetch programs for the dropdown
@@ -43,30 +61,16 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
     },
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: z.infer<typeof activityReportSchema>) => {
     setIsSubmitting(true);
 
     try {
       if (initialData) {
-        // Update existing report
         const { error } = await supabase
           .from('activity_reports')
           .update({
-            program: formData.program,
-            staff: formData.staff,
-            reporting_date: formData.reporting_date,
-            executive_summary: formData.executive_summary,
-            beneficiary_impact: formData.beneficiary_impact,
-            challenges: formData.challenges,
-            proposed_recommendations: formData.proposed_recommendations,
+            ...values,
+            program: values.program as any,
           })
           .eq('id', initialData.id);
 
@@ -77,17 +81,11 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
           description: "Activity report updated successfully",
         });
       } else {
-        // Create new report
         const { error } = await supabase
           .from('activity_reports')
           .insert({
-            program: formData.program,
-            staff: formData.staff,
-            reporting_date: formData.reporting_date,
-            executive_summary: formData.executive_summary,
-            beneficiary_impact: formData.beneficiary_impact,
-            challenges: formData.challenges,
-            proposed_recommendations: formData.proposed_recommendations,
+            ...values,
+            program: values.program as any,
           });
 
         if (error) throw error;
@@ -100,10 +98,10 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
 
       onSuccess();
     } catch (error) {
-      console.error('Error creating activity report:', error);
+      console.error('Error saving activity report:', error);
       toast({
         title: "Error",
-        description: "Failed to create activity report",
+        description: "Failed to save activity report",
         variant: "destructive",
       });
     } finally {
@@ -113,99 +111,141 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
 
   return (
     <ScrollArea className="h-[80vh]">
-      <form onSubmit={handleSubmit} className="space-y-4 p-1">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="program">Program *</Label>
-            <Select value={formData.program} onValueChange={(value) => handleInputChange('program', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select program" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program.id} value={program.name}>
-                    {program.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 p-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="program"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Program *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select program" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {programs.map((program) => (
+                        <SelectItem key={program.id} value={program.name}>
+                          {program.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <Label htmlFor="staff">Staff Member *</Label>
-            <Input
-              id="staff"
-              value={formData.staff}
-              onChange={(e) => handleInputChange('staff', e.target.value)}
-              required
+            <FormField
+              control={form.control}
+              name="staff"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Staff Member *</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reporting_date"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Reporting Date *</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
-          <div className="md:col-span-2">
-            <Label htmlFor="reporting_date">Reporting Date *</Label>
-            <Input
-              id="reporting_date"
-              type="date"
-              value={formData.reporting_date}
-              onChange={(e) => handleInputChange('reporting_date', e.target.value)}
-              required
-            />
+          <FormField
+            control={form.control}
+            name="executive_summary"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Executive Summary *</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Provide a high-level summary of the activities..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="beneficiary_impact"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Beneficiary Impact *</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Describe the impact on beneficiaries..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="challenges"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Challenges *</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="List challenges encountered during activities..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="proposed_recommendations"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proposed Recommendations *</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Provide recommendations for improvement..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Report" : "Create Report")}
+            </Button>
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="executive_summary">Executive Summary *</Label>
-          <Textarea
-            id="executive_summary"
-            value={formData.executive_summary}
-            onChange={(e) => handleInputChange('executive_summary', e.target.value)}
-            placeholder="Provide a high-level summary of the activities..."
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="beneficiary_impact">Beneficiary Impact *</Label>
-          <Textarea
-            id="beneficiary_impact"
-            value={formData.beneficiary_impact}
-            onChange={(e) => handleInputChange('beneficiary_impact', e.target.value)}
-            placeholder="Describe the impact on beneficiaries..."
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="challenges">Challenges *</Label>
-          <Textarea
-            id="challenges"
-            value={formData.challenges}
-            onChange={(e) => handleInputChange('challenges', e.target.value)}
-            placeholder="List challenges encountered during activities..."
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="proposed_recommendations">Proposed Recommendations *</Label>
-          <Textarea
-            id="proposed_recommendations"
-            value={formData.proposed_recommendations}
-            onChange={(e) => handleInputChange('proposed_recommendations', e.target.value)}
-            placeholder="Provide recommendations for improvement..."
-            required
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update Report" : "Create Report")}
-          </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
     </ScrollArea>
   );
 }

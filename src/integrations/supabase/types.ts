@@ -1303,6 +1303,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       visits: {
         Row: {
           child_id: string
@@ -1364,10 +1391,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      auto_approve_request: {
-        Args: { request_id: string }
-        Returns: boolean
-      }
+      auto_approve_request: { Args: { request_id: string }; Returns: boolean }
       check_rate_limit: {
         Args: {
           action_type_param: string
@@ -1380,6 +1404,13 @@ export type Database = {
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
