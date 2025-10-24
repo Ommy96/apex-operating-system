@@ -164,25 +164,48 @@
 
   body {
     @apply bg-gradient-to-br from-background via-background to-secondary/20 text-foreground antialiased min-h-screen transition-colors duration-300;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
   }
   
-  /* Typography Hierarchy */
+  /* Typography Hierarchy - Roboto Regular (400) and Medium (500) */
   h1 {
-    @apply text-3xl font-bold tracking-tight text-foreground;
+    @apply text-3xl tracking-tight text-foreground;
+    font-weight: 500;
+    line-height: 1.3;
   }
   h2 {
-    @apply text-2xl font-semibold tracking-tight text-foreground;
+    @apply text-2xl tracking-tight text-foreground;
+    font-weight: 500;
+    line-height: 1.4;
   }
   h3 {
-    @apply text-xl font-semibold text-foreground;
+    @apply text-xl text-foreground;
+    font-weight: 500;
+    line-height: 1.4;
   }
   h4 {
-    @apply text-lg font-medium text-foreground;
+    @apply text-lg text-foreground;
+    font-weight: 500;
+    line-height: 1.5;
   }
   p {
-    @apply text-base text-muted-foreground leading-relaxed;
+    @apply text-base text-muted-foreground;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  
+  /* Labels and form inputs use Roboto Regular (400) */
+  label, input, textarea, select {
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  
+  /* Buttons use Roboto Medium (500) */
+  button {
+    font-weight: 500;
+    line-height: 1.5;
   }
   
   /* Enhanced Interactive States */

@@ -182,8 +182,8 @@ export default {
 				'slow': 'var(--transition-slow)'
 			},
 			fontFamily: {
-				'inter': ['Inter', 'sans-serif'],
-				'sans': ['Inter', 'system-ui', 'sans-serif']
+				'roboto': ['Roboto', 'sans-serif'],
+				'sans': ['Roboto', 'system-ui', 'sans-serif']
 			}
 		}
 	},
