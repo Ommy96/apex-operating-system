@@ -35,8 +35,7 @@ export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: Bu
     const fetchBusinesses = async () => {
       const { data, error } = await supabase
         .from('self_empowerment')
-        .select('id, full_name, business_name')
-        .eq('is_active', true)
+        .select('id, full_name, business_name, is_active')
         .order('full_name', { ascending: true });
 
       if (error) {
