@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const activitySchema = z.object({
+  activity_name: z.string().trim().min(1, "Activity name is required").max(255),
+  description: z.string().trim().max(1000).optional().or(z.literal('')),
+  frequency: z.string().optional(),
+  notes: z.string().trim().max(1000).optional().or(z.literal('')),
+});
 
 interface ActivityFormProps {
   supportGroupId: string;
@@ -16,35 +25,28 @@ interface ActivityFormProps {
 
 export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: ActivityFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    activity_name: activity?.activity_name || "",
-    description: activity?.description || "",
-    frequency: activity?.frequency || "",
-    notes: activity?.notes || "",
+  
+  const form = useForm<z.infer<typeof activitySchema>>({
+    resolver: zodResolver(activitySchema),
+    defaultValues: {
+      activity_name: activity?.activity_name || "",
+      description: activity?.description || "",
+      frequency: activity?.frequency || "",
+      notes: activity?.notes || "",
+    },
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSubmit = async (values: z.infer<typeof activitySchema>) => {
     try {
       if (activity) {
         // Update existing activity
         const { error } = await supabase
           .from('support_group_activities')
           .update({
-            activity_name: formData.activity_name,
-            description: formData.description || null,
-            frequency: formData.frequency || null,
-            notes: formData.notes || null,
+            activity_name: values.activity_name,
+            description: values.description || null,
+            frequency: values.frequency || null,
+            notes: values.notes || null,
           })
           .eq('id', activity.id);
 
@@ -60,10 +62,10 @@ export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: 
           .from('support_group_activities')
           .insert([{
             support_group_id: supportGroupId,
-            activity_name: formData.activity_name,
-            description: formData.description || null,
-            frequency: formData.frequency || null,
-            notes: formData.notes || null,
+            activity_name: values.activity_name,
+            description: values.description || null,
+            frequency: values.frequency || null,
+            notes: values.notes || null,
             created_by: (await supabase.auth.getUser()).data.user?.id,
           }]);
 
@@ -83,76 +85,91 @@ export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: 
         description: `Failed to ${activity ? 'update' : 'add'} activity`,
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="activity_name">Activity Name *</Label>
-        <Input
-          id="activity_name"
-          value={formData.activity_name}
-          onChange={(e) => handleInputChange('activity_name', e.target.value)}
-          placeholder="e.g., Weekly Fellowship, Table Banking"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="activity_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Activity Name *</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="e.g., Weekly Fellowship, Table Banking" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
-          placeholder="Describe the activity and its purpose..."
-          rows={3}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder="Describe the activity and its purpose..." rows={3} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div>
-        <Label htmlFor="frequency">Frequency</Label>
-        <Select 
-          value={formData.frequency} 
-          onValueChange={(value) => handleInputChange('frequency', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="How often does this activity occur?" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="daily">Daily</SelectItem>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="quarterly">Quarterly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
-            <SelectItem value="one-time">One-time</SelectItem>
-            <SelectItem value="irregular">Irregular</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => handleInputChange('notes', e.target.value)}
-          placeholder="Additional notes or special instructions..."
-          rows={2}
+        <FormField
+          control={form.control}
+          name="frequency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Frequency</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="How often does this activity occur?" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="one-time">One-time</SelectItem>
+                  <SelectItem value="irregular">Irregular</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (activity ? "Updating..." : "Adding...") : (activity ? "Update Activity" : "Add Activity")}
-        </Button>
-      </div>
-    </form>
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder="Additional notes or special instructions..." rows={2} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? (activity ? "Updating..." : "Adding...") : (activity ? "Update Activity" : "Add Activity")}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

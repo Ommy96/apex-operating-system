@@ -1,12 +1,32 @@
-import { useState } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const selfEmpowermentSchema = z.object({
+  applicant_id: z.string().max(100).optional().or(z.literal('')),
+  full_name: z.string().trim().min(1, "Full name is required").max(255),
+  gender: z.string().optional(),
+  contact: z.string().max(50).optional().or(z.literal('')),
+  residence: z.string().optional(),
+  business_name: z.string().max(255).optional().or(z.literal('')),
+  type_of_business: z.string().max(255).optional().or(z.literal('')),
+  support_status: z.string().max(1000).optional().or(z.literal('')),
+  start_date: z.string().optional().or(z.literal('')),
+  business_location: z.string().max(255).optional().or(z.literal('')),
+  amount_requested: z.string().optional().or(z.literal('')),
+  amount_approved: z.string().optional().or(z.literal('')),
+  amount_status: z.string().optional(),
+  current_status: z.string().max(1000).optional().or(z.literal('')),
+  is_active: z.string(),
+});
 
 interface SelfEmpowermentFormProps {
   record?: any;
@@ -16,65 +36,56 @@ interface SelfEmpowermentFormProps {
 
 export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpowermentFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    applicant_id: record?.applicant_id || "",
-    full_name: record?.full_name || "",
-    gender: record?.gender || "",
-    contact: record?.contact || "",
-    residence: record?.residence || "",
-    business_name: record?.business_name || "",
-    type_of_business: record?.type_of_business || "",
-    support_status: record?.support_status || "",
-    start_date: record?.start_date || "",
-    business_location: record?.business_location || "",
-    amount_requested: record?.amount_requested?.toString() || "",
-    amount_approved: record?.amount_approved?.toString() || "",
-    amount_status: record?.amount_status || "",
-    current_status: record?.current_status || "",
-    is_active: record?.is_active !== undefined ? record.is_active.toString() : "true",
+  
+  const form = useForm<z.infer<typeof selfEmpowermentSchema>>({
+    resolver: zodResolver(selfEmpowermentSchema),
+    defaultValues: {
+      applicant_id: record?.applicant_id || "",
+      full_name: record?.full_name || "",
+      gender: record?.gender || "",
+      contact: record?.contact || "",
+      residence: record?.residence || "",
+      business_name: record?.business_name || "",
+      type_of_business: record?.type_of_business || "",
+      support_status: record?.support_status || "",
+      start_date: record?.start_date || "",
+      business_location: record?.business_location || "",
+      amount_requested: record?.amount_requested?.toString() || "",
+      amount_approved: record?.amount_approved?.toString() || "",
+      amount_status: record?.amount_status || "",
+      current_status: record?.current_status || "",
+      is_active: record?.is_active !== undefined ? record.is_active.toString() : "true",
+    },
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSubmit = async (values: z.infer<typeof selfEmpowermentSchema>) => {
     try {
       const dataToSave = {
-        applicant_id: formData.applicant_id || null,
-        full_name: formData.full_name,
-        gender: formData.gender as "Male" | "Female" | null || null,
-        contact: formData.contact || null,
-        residence: formData.residence as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
-        business_name: formData.business_name || null,
-        type_of_business: formData.type_of_business || null,
-        support_status: formData.support_status || null,
-        start_date: formData.start_date || null,
-        business_location: formData.business_location || null,
-        amount_requested: formData.amount_requested ? parseFloat(formData.amount_requested) : null,
-        amount_approved: formData.amount_approved ? parseFloat(formData.amount_approved) : null,
-        amount_status: formData.amount_status as "Loan" | "Grant" | null || null,
-        current_status: formData.current_status || null,
-        is_active: formData.is_active === "true",
+        applicant_id: values.applicant_id || null,
+        full_name: values.full_name,
+        gender: values.gender as "Male" | "Female" | null || null,
+        contact: values.contact || null,
+        residence: values.residence as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+        business_name: values.business_name || null,
+        type_of_business: values.type_of_business || null,
+        support_status: values.support_status || null,
+        start_date: values.start_date || null,
+        business_location: values.business_location || null,
+        amount_requested: values.amount_requested ? parseFloat(values.amount_requested) : null,
+        amount_approved: values.amount_approved ? parseFloat(values.amount_approved) : null,
+        amount_status: values.amount_status as "Loan" | "Grant" | null || null,
+        current_status: values.current_status || null,
+        is_active: values.is_active === "true",
       };
 
       let error;
       if (record) {
-        // Update existing record
         const result = await supabase
           .from('self_empowerment')
           .update(dataToSave)
           .eq('id', record.id);
         error = result.error;
       } else {
-        // Insert new record
         const result = await supabase
           .from('self_empowerment')
           .insert(dataToSave);
@@ -96,186 +107,269 @@ export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpower
         description: record ? "Failed to update self-empowerment application" : "Failed to create self-empowerment application",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <ScrollArea className="h-[80vh]">
-      <form onSubmit={handleSubmit} className="space-y-4 p-1">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="applicant_id">Applicant ID</Label>
-          <Input
-            id="applicant_id"
-            value={formData.applicant_id}
-            onChange={(e) => handleInputChange('applicant_id', e.target.value)}
-          />
-        </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 p-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="applicant_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Applicant ID</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="full_name">Full Name *</Label>
-          <Input
-            id="full_name"
-            value={formData.full_name}
-            onChange={(e) => handleInputChange('full_name', e.target.value)}
-            required
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="full_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name *</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="gender">Gender</Label>
-          <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select gender" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gender</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="contact">Contact</Label>
-          <Input
-            id="contact"
-            value={formData.contact}
-            onChange={(e) => handleInputChange('contact', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="contact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="residence">Residence</Label>
-          <Select value={formData.residence} onValueChange={(value) => handleInputChange('residence', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select residence" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Kibera">Kibera</SelectItem>
-              <SelectItem value="Kawangware">Kawangware</SelectItem>
-              <SelectItem value="Diaspora">Diaspora</SelectItem>
-              <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <FormField
+              control={form.control}
+              name="residence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Residence</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select residence" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Kibera">Kibera</SelectItem>
+                      <SelectItem value="Kawangware">Kawangware</SelectItem>
+                      <SelectItem value="Diaspora">Diaspora</SelectItem>
+                      <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="business_name">Business Name</Label>
-          <Input
-            id="business_name"
-            value={formData.business_name}
-            onChange={(e) => handleInputChange('business_name', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="business_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="type_of_business">Type of Business</Label>
-          <Input
-            id="type_of_business"
-            value={formData.type_of_business}
-            onChange={(e) => handleInputChange('type_of_business', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="type_of_business"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type of Business</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="business_location">Business Location</Label>
-          <Input
-            id="business_location"
-            value={formData.business_location}
-            onChange={(e) => handleInputChange('business_location', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="business_location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Location</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="amount_requested">Amount Requested</Label>
-          <Input
-            id="amount_requested"
-            type="number"
-            step="0.01"
-            value={formData.amount_requested}
-            onChange={(e) => handleInputChange('amount_requested', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="amount_requested"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount Requested</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="amount_approved">Amount Approved</Label>
-          <Input
-            id="amount_approved"
-            type="number"
-            step="0.01"
-            value={formData.amount_approved}
-            onChange={(e) => handleInputChange('amount_approved', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="amount_approved"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount Approved</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="amount_status">Amount Status</Label>
-          <Select value={formData.amount_status} onValueChange={(value) => handleInputChange('amount_status', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Loan">Loan</SelectItem>
-              <SelectItem value="Grant">Grant</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <FormField
+              control={form.control}
+              name="amount_status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount Status</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Loan">Loan</SelectItem>
+                      <SelectItem value="Grant">Grant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="start_date">Start Date</Label>
-          <Input
-            id="start_date"
-            type="date"
-            value={formData.start_date}
-            onChange={(e) => handleInputChange('start_date', e.target.value)}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="date" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="md:col-span-2">
-          <Label htmlFor="support_status">Support Status</Label>
-          <Textarea
-            id="support_status"
-            value={formData.support_status}
-            onChange={(e) => handleInputChange('support_status', e.target.value)}
-            placeholder="Describe current support status..."
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="support_status"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Support Status</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Describe current support status..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="md:col-span-2">
-          <Label htmlFor="current_status">Current Status</Label>
-          <Textarea
-            id="current_status"
-            value={formData.current_status}
-            onChange={(e) => handleInputChange('current_status', e.target.value)}
-            placeholder="Describe current business status..."
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="current_status"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Current Status</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Describe current business status..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="is_active">Business Status</Label>
-          <Select value={formData.is_active} onValueChange={(value) => handleInputChange('is_active', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select business status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Active</SelectItem>
-              <SelectItem value="false">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Status</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select business status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (record ? "Updating..." : "Creating...") : (record ? "Update Application" : "Create Application")}
-        </Button>
-      </div>
-      </form>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? (record ? "Updating..." : "Creating...") : (record ? "Update Application" : "Create Application")}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </ScrollArea>
   );
 }
