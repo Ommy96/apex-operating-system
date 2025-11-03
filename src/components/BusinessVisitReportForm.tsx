@@ -1,12 +1,27 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+
+const businessVisitSchema = z.object({
+  staff: z.string().trim().min(1, "Staff name is required").max(255),
+  business_id: z.string().min(1, "Please select a business/person"),
+  visit_date: z.string().min(1, "Visit date is required"),
+  location: z.string().optional(),
+  reason_for_visit: z.string().max(1000).optional(),
+  observation_findings: z.string().trim().min(10, "Observation findings must be at least 10 characters").max(5000),
+  challenges_identified: z.string().trim().min(10, "Challenges must be at least 10 characters").max(5000),
+  recommendations: z.string().trim().min(10, "Recommendations must be at least 10 characters").max(5000),
+});
 
 interface BusinessVisitReportFormProps {
   onSuccess: () => void;
@@ -17,18 +32,20 @@ interface BusinessVisitReportFormProps {
 export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: BusinessVisitReportFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [businesses, setBusinesses] = useState<any[]>([]);
   
-  const [formData, setFormData] = useState({
-    staff: initialData?.staff || '',
-    business_id: initialData?.business_id || '',
-    visit_date: initialData?.visit_date || '',
-    location: initialData?.location || '',
-    reason_for_visit: initialData?.reason_for_visit || '',
-    observation_findings: initialData?.observation_findings || '',
-    challenges_identified: initialData?.challenges_identified || '',
-    recommendations: initialData?.recommendations || '',
+  const form = useForm<z.infer<typeof businessVisitSchema>>({
+    resolver: zodResolver(businessVisitSchema),
+    defaultValues: {
+      staff: initialData?.staff || '',
+      business_id: initialData?.business_id || '',
+      visit_date: initialData?.visit_date || '',
+      location: initialData?.location || '',
+      reason_for_visit: initialData?.reason_for_visit || '',
+      observation_findings: initialData?.observation_findings || '',
+      challenges_identified: initialData?.challenges_identified || '',
+      recommendations: initialData?.recommendations || '',
+    },
   });
 
   useEffect(() => {
@@ -53,17 +70,10 @@ export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: Bu
     fetchBusinesses();
   }, [toast]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSubmit = async (values: z.infer<typeof businessVisitSchema>) => {
     try {
       const reportData = {
-        ...formData,
+        ...values,
         created_by: user?.id,
       };
 
@@ -100,124 +110,155 @@ export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: Bu
         description: error.message || "Failed to save business visit report",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="staff">Staff Name *</Label>
-          <Input
-            id="staff"
-            value={formData.staff}
-            onChange={(e) => handleInputChange('staff', e.target.value)}
-            required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="staff"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Staff Name *</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Enter staff name" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="business_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Business/Person *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select business/person" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {businesses.map((business) => (
+                      <SelectItem key={business.id} value={business.id}>
+                        {business.full_name} {business.business_name ? `- ${business.business_name}` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="visit_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Visit Date *</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Kibera">Kibera</SelectItem>
+                    <SelectItem value="Kawangware">Kawangware</SelectItem>
+                    <SelectItem value="Others">Others</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="business_id">Business/Person *</Label>
-          <Select
-            value={formData.business_id}
-            onValueChange={(value) => handleInputChange('business_id', value)}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select business/person" />
-            </SelectTrigger>
-            <SelectContent>
-              {businesses.map((business) => (
-                <SelectItem key={business.id} value={business.id}>
-                  {business.full_name} {business.business_name ? `- ${business.business_name}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <FormField
+          control={form.control}
+          name="reason_for_visit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reason for Visit</FormLabel>
+              <FormControl>
+                <Textarea {...field} rows={3} placeholder="Describe the reason for this visit" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="observation_findings"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observation Findings *</FormLabel>
+              <FormControl>
+                <Textarea {...field} rows={4} placeholder="Document your observations" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="challenges_identified"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Challenges Identified *</FormLabel>
+              <FormControl>
+                <Textarea {...field} rows={4} placeholder="List challenges encountered" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="recommendations"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Recommendations *</FormLabel>
+              <FormControl>
+                <Textarea {...field} rows={4} placeholder="Provide recommendations" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Saving...' : initialData?.id ? 'Update Report' : 'Submit Report'}
+          </Button>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="visit_date">Visit Date *</Label>
-          <Input
-            id="visit_date"
-            type="date"
-            value={formData.visit_date}
-            onChange={(e) => handleInputChange('visit_date', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
-          <Select
-            value={formData.location}
-            onValueChange={(value) => handleInputChange('location', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Kibera">Kibera</SelectItem>
-              <SelectItem value="Kawangware">Kawangware</SelectItem>
-              <SelectItem value="Others">Others</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="reason_for_visit">Reason for Visit</Label>
-        <Textarea
-          id="reason_for_visit"
-          value={formData.reason_for_visit}
-          onChange={(e) => handleInputChange('reason_for_visit', e.target.value)}
-          rows={3}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="observation_findings">Observation Findings *</Label>
-        <Textarea
-          id="observation_findings"
-          value={formData.observation_findings}
-          onChange={(e) => handleInputChange('observation_findings', e.target.value)}
-          rows={4}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="challenges_identified">Challenges Identified *</Label>
-        <Textarea
-          id="challenges_identified"
-          value={formData.challenges_identified}
-          onChange={(e) => handleInputChange('challenges_identified', e.target.value)}
-          rows={4}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="recommendations">Recommendations *</Label>
-        <Textarea
-          id="recommendations"
-          value={formData.recommendations}
-          onChange={(e) => handleInputChange('recommendations', e.target.value)}
-          rows={4}
-          required
-        />
-      </div>
-
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : initialData?.id ? 'Update Report' : 'Submit Report'}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }
