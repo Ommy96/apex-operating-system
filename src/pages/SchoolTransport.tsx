@@ -338,7 +338,7 @@ export default function SchoolTransport() {
                   Select a student to add...
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-full p-0 bg-popover z-50" align="start">
+              <PopoverContent className="w-full p-0 bg-background border z-50" align="start">
                 <Command>
                   <CommandInput placeholder="Search students..." value={searchTerm} onValueChange={setSearchTerm} />
                   <CommandEmpty>No students found.</CommandEmpty>
