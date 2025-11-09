@@ -38,9 +38,6 @@ interface SelectedStudent extends Child {
   receives_shopping: boolean;
 }
 
-const TERMS = ['Term 1', 'Term 2', 'Term 3'];
-const CURRENT_YEAR = new Date().getFullYear();
-
 export default function SchoolTransport() {
   const { isAdmin, isManagement } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
@@ -48,20 +45,13 @@ export default function SchoolTransport() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTerm, setSelectedTerm] = useState(TERMS[0]);
-  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchChildren();
+    fetchTransportRecords();
   }, []);
-
-  useEffect(() => {
-    if (children.length > 0) {
-      fetchTransportRecords();
-    }
-  }, [selectedTerm, selectedYear, children]);
 
   const fetchChildren = async () => {
     try {
@@ -89,9 +79,7 @@ export default function SchoolTransport() {
     try {
       const { data, error } = await supabase
         .from('transport_records')
-        .select('*, children(*)')
-        .eq('term', selectedTerm)
-        .eq('year', selectedYear);
+        .select('*, children(*)');
 
       if (error) throw error;
 
@@ -154,18 +142,17 @@ export default function SchoolTransport() {
   const handleSaveRecords = async () => {
     setSaving(true);
     try {
-      // Delete existing records for this term/year
+      // Delete all existing records
       await supabase
         .from('transport_records')
         .delete()
-        .eq('term', selectedTerm)
-        .eq('year', selectedYear);
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
       // Insert new records
       const records = selectedStudents.map(student => ({
         child_id: student.id,
-        term: selectedTerm,
-        year: selectedYear,
+        term: 'Term 1',
+        year: new Date().getFullYear(),
         receives_transport: student.receives_transport,
         receives_shopping: student.receives_shopping,
       }));
@@ -180,7 +167,7 @@ export default function SchoolTransport() {
 
       toast({
         title: "Success",
-        description: `Transport records saved for ${selectedTerm} ${selectedYear}`,
+        description: "Transport records saved successfully",
       });
       
       setShowSaveDialog(false);
@@ -208,11 +195,9 @@ export default function SchoolTransport() {
       'Residence': student.residence,
       'Receives Transport': student.receives_transport ? 'Yes' : 'No',
       'Receives Shopping': student.receives_shopping ? 'Yes' : 'No',
-      'Term': selectedTerm,
-      'Year': selectedYear,
     }));
 
-    downloadExcel(formattedData, `school_transport_${selectedTerm}_${selectedYear}`, 'School Transport');
+    downloadExcel(formattedData, `school_transport_${new Date().toISOString().split('T')[0]}`, 'School Transport');
     
     toast({
       title: "Download started",
@@ -243,7 +228,7 @@ export default function SchoolTransport() {
             School Transport
           </h1>
           <p className="text-muted-foreground">
-            Select students who receive school transport and shopping per term
+            Manage students who receive school transport and shopping support
           </p>
         </div>
       {(isAdmin || isManagement) && (
@@ -259,42 +244,6 @@ export default function SchoolTransport() {
         )}
       </div>
 
-      {/* Term and Year Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Term & Year</CardTitle>
-          <CardDescription>Choose the term and year for transport allocation</CardDescription>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium">Term</label>
-            <Select value={selectedTerm} onValueChange={setSelectedTerm}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TERMS.map(term => (
-                  <SelectItem key={term} value={term}>{term}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium">Year</label>
-            <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1].map(year => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
@@ -305,7 +254,7 @@ export default function SchoolTransport() {
           <CardContent>
             <div className="text-2xl font-bold">{selectedStudents.length}</div>
             <p className="text-xs text-muted-foreground">
-              For {selectedTerm} {selectedYear}
+              Currently receiving support
             </p>
           </CardContent>
         </Card>
@@ -472,10 +421,9 @@ export default function SchoolTransport() {
             <p>Are you sure you want to save transport records for:</p>
             <ul className="mt-2 space-y-1">
               <li className="font-semibold">• {selectedStudents.length} students</li>
-              <li className="font-semibold">• {selectedTerm} {selectedYear}</li>
             </ul>
             <p className="mt-4 text-sm text-muted-foreground">
-              This will replace any existing records for this term and year.
+              This will replace any existing records.
             </p>
           </div>
           <DialogFooter>
