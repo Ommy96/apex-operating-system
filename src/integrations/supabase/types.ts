@@ -1303,6 +1303,47 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_records: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          receives_shopping: boolean
+          receives_transport: boolean
+          term: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          receives_shopping?: boolean
+          receives_transport?: boolean
+          term: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          receives_shopping?: boolean
+          receives_transport?: boolean
+          term?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_records_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
