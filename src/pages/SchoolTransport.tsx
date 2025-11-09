@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Bus, Plus, Search, Download, X, Loader2 } from 'lucide-react';
+import { Bus, Plus, Search, Download, X, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -32,14 +33,9 @@ interface Child {
   residence: string;
 }
 
-interface TransportRecord {
-  id: string;
-  child_id: string;
-  term: string;
-  year: number;
+interface SelectedStudent extends Child {
   receives_transport: boolean;
   receives_shopping: boolean;
-  created_at: string;
 }
 
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
@@ -48,14 +44,14 @@ const CURRENT_YEAR = new Date().getFullYear();
 export default function SchoolTransport() {
   const { isAdmin, isManagement } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
-  const [selectedChildren, setSelectedChildren] = useState<Set<string>>(new Set());
+  const [selectedStudents, setSelectedStudents] = useState<SelectedStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerm, setSelectedTerm] = useState(TERMS[0]);
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
-  const [transportRecords, setTransportRecords] = useState<Map<string, TransportRecord>>(new Map());
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchChildren();
@@ -93,39 +89,64 @@ export default function SchoolTransport() {
     try {
       const { data, error } = await supabase
         .from('transport_records')
-        .select('*')
+        .select('*, children(*)')
         .eq('term', selectedTerm)
         .eq('year', selectedYear);
 
       if (error) throw error;
 
-      const recordsMap = new Map<string, TransportRecord>();
-      data?.forEach(record => {
-        recordsMap.set(record.child_id, record);
-      });
-      setTransportRecords(recordsMap);
-
-      // Set selected children based on existing records
-      const selected = new Set<string>();
-      data?.forEach(record => {
-        if (record.receives_transport || record.receives_shopping) {
-          selected.add(record.child_id);
-        }
-      });
-      setSelectedChildren(selected);
+      // Map records to selected students with child data
+      const students: SelectedStudent[] = (data || []).map(record => ({
+        id: record.children.id,
+        first_name: record.children.first_name,
+        last_name: record.children.last_name,
+        date_of_birth: record.children.date_of_birth,
+        gender: record.children.gender,
+        photo_url: record.children.photo_url,
+        institution_name: record.children.institution_name,
+        academic_level: record.children.academic_level,
+        grade: record.children.grade,
+        residence: record.children.residence,
+        receives_transport: record.receives_transport,
+        receives_shopping: record.receives_shopping,
+      }));
+      
+      setSelectedStudents(students);
     } catch (error) {
       console.error('Error fetching transport records:', error);
     }
   };
 
-  const toggleChildSelection = (childId: string) => {
-    const newSelected = new Set(selectedChildren);
-    if (newSelected.has(childId)) {
-      newSelected.delete(childId);
-    } else {
-      newSelected.add(childId);
+  const addStudent = (child: Child) => {
+    // Check if student already added
+    if (selectedStudents.some(s => s.id === child.id)) {
+      toast({
+        title: "Already added",
+        description: "This student is already in the list",
+        variant: "destructive",
+      });
+      return;
     }
-    setSelectedChildren(newSelected);
+
+    const newStudent: SelectedStudent = {
+      ...child,
+      receives_transport: true,
+      receives_shopping: true,
+    };
+    
+    setSelectedStudents([...selectedStudents, newStudent]);
+    setOpen(false);
+    setSearchTerm('');
+  };
+
+  const removeStudent = (studentId: string) => {
+    setSelectedStudents(selectedStudents.filter(s => s.id !== studentId));
+  };
+
+  const updateStudent = (studentId: string, field: 'receives_transport' | 'receives_shopping', value: boolean) => {
+    setSelectedStudents(selectedStudents.map(s => 
+      s.id === studentId ? { ...s, [field]: value } : s
+    ));
   };
 
   const handleSaveRecords = async () => {
@@ -139,12 +160,12 @@ export default function SchoolTransport() {
         .eq('year', selectedYear);
 
       // Insert new records
-      const records = Array.from(selectedChildren).map(childId => ({
-        child_id: childId,
+      const records = selectedStudents.map(student => ({
+        child_id: student.id,
         term: selectedTerm,
         year: selectedYear,
-        receives_transport: true,
-        receives_shopping: true,
+        receives_transport: student.receives_transport,
+        receives_shopping: student.receives_shopping,
       }));
 
       if (records.length > 0) {
@@ -175,16 +196,16 @@ export default function SchoolTransport() {
   };
 
   const handleDownload = () => {
-    const selectedChildrenData = children.filter(child => selectedChildren.has(child.id));
-    
-    const formattedData = selectedChildrenData.map(child => ({
-      'First Name': child.first_name,
-      'Last Name': child.last_name,
-      'Gender': child.gender,
-      'Institution': child.institution_name,
-      'Academic Level': child.academic_level,
-      'Grade': child.grade,
-      'Residence': child.residence,
+    const formattedData = selectedStudents.map(student => ({
+      'First Name': student.first_name,
+      'Last Name': student.last_name,
+      'Gender': student.gender,
+      'Institution': student.institution_name,
+      'Academic Level': student.academic_level,
+      'Grade': student.grade,
+      'Residence': student.residence,
+      'Receives Transport': student.receives_transport ? 'Yes' : 'No',
+      'Receives Shopping': student.receives_shopping ? 'Yes' : 'No',
       'Term': selectedTerm,
       'Year': selectedYear,
     }));
@@ -197,26 +218,11 @@ export default function SchoolTransport() {
     });
   };
 
-  const getFilteredChildren = () => {
-    return children.filter(child =>
-      `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      child.institution_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const getAvailableChildren = () => {
+    // Filter out children already in the selected list
+    const selectedIds = new Set(selectedStudents.map(s => s.id));
+    return children.filter(child => !selectedIds.has(child.id));
   };
-
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
-  const convertGoogleDriveUrl = (url: string) => {
-    if (!url) return url;
-    const trimmed = url.trim();
-    const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
-    return trimmed;
-  };
-
-  const filteredChildren = getFilteredChildren();
 
   if (loading) {
     return (
@@ -238,14 +244,14 @@ export default function SchoolTransport() {
             Select students who receive school transport and shopping per term
           </p>
         </div>
-        {(isAdmin || isManagement) && (
+      {(isAdmin || isManagement) && (
           <div className="flex gap-2">
-            <Button onClick={handleDownload} variant="outline" disabled={selectedChildren.size === 0}>
+            <Button onClick={handleDownload} variant="outline" disabled={selectedStudents.length === 0}>
               <Download className="h-4 w-4 mr-2" />
               Download
             </Button>
-            <Button onClick={() => setShowSaveDialog(true)} className="bg-gradient-accent hover:bg-gradient-accent/90">
-              Save Selection
+            <Button onClick={() => setShowSaveDialog(true)} className="bg-gradient-accent hover:bg-gradient-accent/90" disabled={selectedStudents.length === 0}>
+              Save Records
             </Button>
           </div>
         )}
@@ -288,87 +294,169 @@ export default function SchoolTransport() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <CardTitle className="text-sm font-medium">Students Receiving Support</CardTitle>
             <Bus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
+            <div className="text-2xl font-bold">{selectedStudents.length}</div>
+            <p className="text-xs text-muted-foreground">
+              For {selectedTerm} {selectedYear}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Available Students</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="text-2xl font-bold">{children.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Selected</CardTitle>
-            <Checkbox checked={selectedChildren.size > 0} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{selectedChildren.size}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Term/Year</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{selectedTerm} {selectedYear}</div>
+            <p className="text-xs text-muted-foreground">
+              Total in database
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search by name or school..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Add Student Dropdown */}
+      {(isAdmin || isManagement) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Students to Transport List</CardTitle>
+            <CardDescription>Select students who will receive school transport and shopping support</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Select a student to add...
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 bg-popover z-50" align="start">
+                <Command>
+                  <CommandInput placeholder="Search students..." value={searchTerm} onValueChange={setSearchTerm} />
+                  <CommandEmpty>No students found.</CommandEmpty>
+                  <CommandGroup className="max-h-64 overflow-auto">
+                    {getAvailableChildren()
+                      .filter(child =>
+                        searchTerm === '' ||
+                        `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        child.institution_name?.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((child) => (
+                        <CommandItem
+                          key={child.id}
+                          value={`${child.first_name} ${child.last_name}`}
+                          onSelect={() => addStudent(child)}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{child.first_name} {child.last_name}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {child.institution_name} - {child.grade}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Children Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredChildren.map((child) => (
-          <Card 
-            key={child.id} 
-            className={`cursor-pointer transition-all hover:shadow-lg ${
-              selectedChildren.has(child.id) ? 'ring-2 ring-primary' : ''
-            }`}
-            onClick={() => (isAdmin || isManagement) && toggleChildSelection(child.id)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  checked={selectedChildren.has(child.id)}
-                  onCheckedChange={() => (isAdmin || isManagement) && toggleChildSelection(child.id)}
-                  disabled={!isAdmin && !isManagement}
-                  className="mt-1"
-                />
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={convertGoogleDriveUrl(child.photo_url)} alt={`${child.first_name} ${child.last_name}`} />
-                  <AvatarFallback>{getInitials(child.first_name, child.last_name)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">
-                    {child.first_name} {child.last_name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {child.institution_name}
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <Badge variant="outline">{child.academic_level}</Badge>
-                    <Badge variant="secondary">{child.grade}</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Students List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Transport Recipients List</CardTitle>
+          <CardDescription>
+            {selectedStudents.length === 0 
+              ? 'No students added yet. Use the dropdown above to add students.'
+              : `${selectedStudents.length} student${selectedStudents.length > 1 ? 's' : ''} receiving support`
+            }
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {selectedStudents.length > 0 ? (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>School</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Residence</TableHead>
+                    <TableHead className="text-center">Transport</TableHead>
+                    <TableHead className="text-center">Shopping</TableHead>
+                    {(isAdmin || isManagement) && <TableHead className="text-right">Actions</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedStudents.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell className="font-medium">
+                        {student.first_name} {student.last_name}
+                      </TableCell>
+                      <TableCell>{student.institution_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{student.grade}</Badge>
+                      </TableCell>
+                      <TableCell>{student.residence}</TableCell>
+                      <TableCell className="text-center">
+                        {(isAdmin || isManagement) ? (
+                          <input
+                            type="checkbox"
+                            checked={student.receives_transport}
+                            onChange={(e) => updateStudent(student.id, 'receives_transport', e.target.checked)}
+                            className="h-4 w-4 cursor-pointer"
+                          />
+                        ) : (
+                          <Badge variant={student.receives_transport ? "default" : "secondary"}>
+                            {student.receives_transport ? 'Yes' : 'No'}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {(isAdmin || isManagement) ? (
+                          <input
+                            type="checkbox"
+                            checked={student.receives_shopping}
+                            onChange={(e) => updateStudent(student.id, 'receives_shopping', e.target.checked)}
+                            className="h-4 w-4 cursor-pointer"
+                          />
+                        ) : (
+                          <Badge variant={student.receives_shopping ? "default" : "secondary"}>
+                            {student.receives_shopping ? 'Yes' : 'No'}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      {(isAdmin || isManagement) && (
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeStudent(student.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No students in the transport list yet.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Save Confirmation Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
@@ -379,7 +467,7 @@ export default function SchoolTransport() {
           <div className="py-4">
             <p>Are you sure you want to save transport records for:</p>
             <ul className="mt-2 space-y-1">
-              <li className="font-semibold">• {selectedChildren.size} students</li>
+              <li className="font-semibold">• {selectedStudents.length} students</li>
               <li className="font-semibold">• {selectedTerm} {selectedYear}</li>
             </ul>
             <p className="mt-4 text-sm text-muted-foreground">
