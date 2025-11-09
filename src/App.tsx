@@ -12,6 +12,7 @@ import ChildProfile from "./pages/ChildProfile";
 import ChildReport from "./pages/ChildReport";
 import Alumni from "./pages/Alumni";
 import Replacements from "./pages/Replacements";
+import SchoolTransport from "./pages/SchoolTransport";
 
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
@@ -81,17 +82,24 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/alumni" element={
+            <Route path="/children/alumni" element={
               <ProtectedRoute>
                 <DashboardLayout>
                   <Alumni />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/replacements" element={
+            <Route path="/children/replacements" element={
               <ProtectedRoute>
                 <DashboardLayout>
                   <Replacements />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/children/school-transport" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SchoolTransport />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

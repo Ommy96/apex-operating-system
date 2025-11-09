@@ -9,10 +9,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Heart,
@@ -31,25 +35,32 @@ import {
   LogOut,
   RefreshCw,
   Building2,
-  Stethoscope
+  Stethoscope,
+  ChevronRight,
+  Bus
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 const getMainMenuItems = (isAdmin: boolean) => {
-  const baseItems = [
+  return [
     { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
-    { title: "Children", url: "/children", icon: Users },
-    { title: "Alumni", url: "/alumni", icon: GraduationCap },
+  ];
+};
+
+const getChildrenSubItems = (isAdmin: boolean) => {
+  const subItems = [
+    { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
+    { title: "School Transport", url: "/children/school-transport", icon: Bus },
   ];
   
   // Only show Replacements to admin users
   if (isAdmin) {
-    baseItems.push({ title: "Replacements", url: "/replacements", icon: RefreshCw });
+    subItems.push({ title: "Replacements", url: "/children/replacements", icon: RefreshCw });
   }
   
-  return baseItems;
+  return subItems;
 };
 
 const programItems = [
@@ -91,6 +102,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+  const [childrenOpen, setChildrenOpen] = useState(currentPath.startsWith('/children'));
 
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
@@ -139,6 +151,33 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Children with sub-items */}
+              <Collapsible open={childrenOpen} onOpenChange={setChildrenOpen} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className={currentPath.startsWith('/children') ? 'bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground font-semibold shadow-elevation-2 rounded-2xl glow-effect' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-elevation-1 rounded-2xl transition-all duration-300 hover-lift micro-interaction'}>
+                      <Users className="h-4 w-4" />
+                      {!isCollapsed && <span>Children</span>}
+                      {!isCollapsed && <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {getChildrenSubItems(isAdmin).map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink to={subItem.url} className={getNavClasses} onClick={handleNavClick}>
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
