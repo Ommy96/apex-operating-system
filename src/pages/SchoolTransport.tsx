@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
@@ -341,29 +341,31 @@ export default function SchoolTransport() {
               <PopoverContent className="w-full p-0 bg-background border z-50" align="start">
                 <Command>
                   <CommandInput placeholder="Search students..." value={searchTerm} onValueChange={setSearchTerm} />
-                  <CommandEmpty>No students found.</CommandEmpty>
-                  <CommandGroup className="max-h-64 overflow-auto">
-                    {getAvailableChildren()
-                      .filter(child =>
-                        searchTerm === '' ||
-                        `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        child.institution_name?.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .map((child) => (
-                        <CommandItem
-                          key={child.id}
-                          value={`${child.first_name} ${child.last_name}`}
-                          onSelect={() => addStudent(child)}
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">{child.first_name} {child.last_name}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {child.institution_name} - {child.grade}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
+                  <CommandList>
+                    <CommandEmpty>No students found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {getAvailableChildren()
+                        .filter(child =>
+                          searchTerm === '' ||
+                          `${child.first_name} ${child.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          child.institution_name?.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .map((child) => (
+                          <CommandItem
+                            key={child.id}
+                            value={`${child.first_name} ${child.last_name}`}
+                            onSelect={() => addStudent(child)}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">{child.first_name} {child.last_name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {child.institution_name} - {child.grade}
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
