@@ -95,21 +95,23 @@ export default function SchoolTransport() {
 
       if (error) throw error;
 
-      // Map records to selected students with child data
-      const students: SelectedStudent[] = (data || []).map(record => ({
-        id: record.children.id,
-        first_name: record.children.first_name,
-        last_name: record.children.last_name,
-        date_of_birth: record.children.date_of_birth,
-        gender: record.children.gender,
-        photo_url: record.children.photo_url,
-        institution_name: record.children.institution_name,
-        academic_level: record.children.academic_level,
-        grade: record.children.grade,
-        residence: record.children.residence,
-        receives_transport: record.receives_transport,
-        receives_shopping: record.receives_shopping,
-      }));
+      // Map records to selected students with child data, filtering out any with missing children
+      const students: SelectedStudent[] = (data || [])
+        .filter(record => record.children) // Filter out records where child was deleted
+        .map(record => ({
+          id: record.children.id,
+          first_name: record.children.first_name,
+          last_name: record.children.last_name,
+          date_of_birth: record.children.date_of_birth,
+          gender: record.children.gender,
+          photo_url: record.children.photo_url,
+          institution_name: record.children.institution_name,
+          academic_level: record.children.academic_level,
+          grade: record.children.grade,
+          residence: record.children.residence,
+          receives_transport: record.receives_transport,
+          receives_shopping: record.receives_shopping,
+        }));
       
       setSelectedStudents(students);
     } catch (error) {
