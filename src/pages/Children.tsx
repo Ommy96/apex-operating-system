@@ -382,14 +382,10 @@ export default function Children() {
 
       {/* Sub-navigation Tabs */}
       <Tabs value="children" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-4'}`}>
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="children" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Children
-          </TabsTrigger>
-          <TabsTrigger value="education" onClick={() => navigate('/children/academic-performance')} className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4" />
-            Education
+            Children & Education
           </TabsTrigger>
           <TabsTrigger value="alumni" onClick={() => navigate('/children/alumni')} className="flex items-center gap-2">
             <Award className="h-4 w-4" />

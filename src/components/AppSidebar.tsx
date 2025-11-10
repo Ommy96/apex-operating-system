@@ -51,7 +51,6 @@ const getMainMenuItems = (isAdmin: boolean) => {
 
 const getChildrenSubItems = (isAdmin: boolean) => {
   const subItems = [
-    { title: "Education", url: "/children/academic-performance", icon: EducationIcon },
     { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
     { title: "School Transport", url: "/children/school-transport", icon: Bus },
   ];
