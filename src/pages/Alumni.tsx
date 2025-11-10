@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Search, GraduationCap, MapPin, Calendar, Briefcase, Eye, Edit, Trash2, Users, Award, Mail, Phone, Link as LinkIcon, Activity, Clock, UserCheck, RefreshCw, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,15 +178,6 @@ export default function Alumni() {
     };
   }, [user, refetch, toast]);
 
-  // Calculate stats
-  const stats = {
-    total: alumni?.length || 0,
-    working: alumni?.filter(a => a.current_status === 'Working').length || 0,
-    studying: alumni?.filter(a => a.current_status === 'Studying').length || 0,
-    entrepreneurship: alumni?.filter(a => a.current_status === 'Entrepreneurship').length || 0,
-    thisYear: alumni?.filter(a => a.exit_year === new Date().getFullYear()).length || 0,
-  };
-
   // Get unique values for filters
   const uniqueYears = [...new Set(alumni?.map(a => a.exit_year).filter(Boolean))].sort((a, b) => b - a);
   const uniqueLocations = [...new Set(alumni?.map(a => a.location).filter(Boolean))].sort();
@@ -204,6 +195,25 @@ export default function Alumni() {
     
     return matchesSearch && matchesStatus && matchesYear && matchesGender && matchesLocation;
   });
+
+  // Calculate stats dynamically based on filtered alumni
+  const stats = useMemo(() => {
+    if (!filteredAlumni) return {
+      total: 0,
+      working: 0,
+      studying: 0,
+      entrepreneurship: 0,
+      thisYear: 0,
+    };
+
+    return {
+      total: filteredAlumni.length,
+      working: filteredAlumni.filter(a => a.current_status === 'Working').length,
+      studying: filteredAlumni.filter(a => a.current_status === 'Studying').length,
+      entrepreneurship: filteredAlumni.filter(a => a.current_status === 'Entrepreneurship').length,
+      thisYear: filteredAlumni.filter(a => a.exit_year === new Date().getFullYear()).length,
+    };
+  }, [filteredAlumni]);
 
   const handleEdit = (alumnus: any) => {
     setEditingAlumni(alumnus);
