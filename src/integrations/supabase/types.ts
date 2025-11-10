@@ -891,12 +891,12 @@ export type Database = {
       }
       medical_records: {
         Row: {
-          academic_level: string | null
           created_at: string
           created_by: string | null
           date: string
           doctors_report: string | null
           full_name: string
+          gender: string | null
           hospital: string
           id: string
           location: string | null
@@ -905,12 +905,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          academic_level?: string | null
           created_at?: string
           created_by?: string | null
           date: string
           doctors_report?: string | null
           full_name: string
+          gender?: string | null
           hospital: string
           id?: string
           location?: string | null
@@ -919,12 +919,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          academic_level?: string | null
           created_at?: string
           created_by?: string | null
           date?: string
           doctors_report?: string | null
           full_name?: string
+          gender?: string | null
           hospital?: string
           id?: string
           location?: string | null
