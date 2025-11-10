@@ -233,48 +233,83 @@ export default function Medical() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Medical Record Details</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Stethoscope className="h-6 w-6 text-primary" />
+              Medical Record Details
+            </DialogTitle>
           </DialogHeader>
           {selectedRecord && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground">Full Name</h3>
-                <p>{selectedRecord.full_name}</p>
-              </div>
-              {selectedRecord.location && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">Location</h3>
-                  <p>{selectedRecord.location}</p>
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground">Medical Condition</h3>
-                <p>{selectedRecord.medical_condition}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground">Hospital</h3>
-                <p>{selectedRecord.hospital}</p>
-              </div>
-              {selectedRecord.gender && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">Gender</h3>
-                  <p className="capitalize">{selectedRecord.gender}</p>
-                </div>
-              )}
-              {selectedRecord.doctors_report && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">Doctor's Report</h3>
-                  <p>{selectedRecord.doctors_report}</p>
-                </div>
-              )}
-              {selectedRecord.outcome && (
-                <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">Outcome</h3>
-                  <p>{selectedRecord.outcome}</p>
-                </div>
-              )}
+            <div className="space-y-6">
+              {/* Patient Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Patient Information</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <User className="h-4 w-4" />
+                      Full Name
+                    </div>
+                    <p className="text-base font-medium">{selectedRecord.full_name}</p>
+                  </div>
+                  {selectedRecord.gender && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <User className="h-4 w-4" />
+                        Gender
+                      </div>
+                      <p className="text-base capitalize">{selectedRecord.gender}</p>
+                    </div>
+                  )}
+                  {selectedRecord.location && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        Location
+                      </div>
+                      <p className="text-base">{selectedRecord.location}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Medical Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Medical Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <Stethoscope className="h-4 w-4" />
+                      Medical Condition
+                    </div>
+                    <p className="text-base">{selectedRecord.medical_condition}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      Hospital
+                    </div>
+                    <p className="text-base">{selectedRecord.hospital}</p>
+                  </div>
+                  {selectedRecord.doctors_report && (
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-muted-foreground">Doctor's Report</h3>
+                      <p className="text-base bg-muted p-3 rounded-md">{selectedRecord.doctors_report}</p>
+                    </div>
+                  )}
+                  {selectedRecord.outcome && (
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium text-muted-foreground">Outcome</h3>
+                      <p className="text-base bg-muted p-3 rounded-md">{selectedRecord.outcome}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
