@@ -13,9 +13,9 @@ const medicalSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
   date: z.string().min(1, "Date is required"),
   location: z.string().optional(),
+  gender: z.string().optional(),
   medical_condition: z.string().min(1, "Medical condition is required"),
   hospital: z.string().min(1, "Hospital is required"),
-  academic_level: z.string().optional(),
   doctors_report: z.string().optional(),
   outcome: z.string().optional(),
 });
@@ -37,9 +37,9 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
       full_name: record?.full_name || "",
       date: record?.date || "",
       location: record?.location || "",
+      gender: record?.gender || "",
       medical_condition: record?.medical_condition || "",
       hospital: record?.hospital || "",
-      academic_level: record?.academic_level || "",
       doctors_report: record?.doctors_report || "",
       outcome: record?.outcome || "",
     },
@@ -158,20 +158,19 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
 
         <FormField
           control={form.control}
-          name="academic_level"
+          name="gender"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Academic Level</FormLabel>
+              <FormLabel>Gender</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select academic level" />
+                    <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="primary">Primary</SelectItem>
-                  <SelectItem value="secondary">Secondary</SelectItem>
-                  <SelectItem value="tertiary">Tertiary</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

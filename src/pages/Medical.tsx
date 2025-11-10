@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { MedicalForm } from "@/components/MedicalForm";
-import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, Calendar, GraduationCap } from "lucide-react";
+import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, Calendar, User } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 export default function Medical() {
@@ -97,9 +97,9 @@ export default function Medical() {
       'Full Name': record.full_name,
       'Date': new Date(record.date).toLocaleDateString(),
       'Location': record.location || 'N/A',
+      'Gender': record.gender || 'N/A',
       'Medical Condition': record.medical_condition,
       'Hospital': record.hospital,
-      'Academic Level': record.academic_level || 'N/A',
       'Doctor\'s Report': record.doctors_report || 'N/A',
       'Outcome': record.outcome || 'N/A',
     }));
@@ -184,10 +184,10 @@ export default function Medical() {
               <div className="text-sm">
                 <span className="font-semibold">Hospital:</span> {record.hospital}
               </div>
-              {record.academic_level && (
+              {record.gender && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <GraduationCap className="h-4 w-4" />
-                  {record.academic_level}
+                  <User className="h-4 w-4" />
+                  {record.gender}
                 </div>
               )}
               <div className="flex gap-2 pt-2">
@@ -266,10 +266,10 @@ export default function Medical() {
                 <h3 className="font-semibold text-sm text-muted-foreground">Hospital</h3>
                 <p>{selectedRecord.hospital}</p>
               </div>
-              {selectedRecord.academic_level && (
+              {selectedRecord.gender && (
                 <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">Academic Level</h3>
-                  <p>{selectedRecord.academic_level}</p>
+                  <h3 className="font-semibold text-sm text-muted-foreground">Gender</h3>
+                  <p className="capitalize">{selectedRecord.gender}</p>
                 </div>
               )}
               {selectedRecord.doctors_report && (
