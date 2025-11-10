@@ -94,7 +94,7 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Location (Optional)</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
