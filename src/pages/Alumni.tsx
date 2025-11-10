@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, GraduationCap, MapPin, Calendar, Briefcase, Eye, Edit, Trash2, Users, Award, Mail, Phone, Link as LinkIcon, Activity, Clock, UserCheck } from "lucide-react";
+import { Plus, Search, GraduationCap, MapPin, Calendar, Briefcase, Eye, Edit, Trash2, Users, Award, Mail, Phone, Link as LinkIcon, Activity, Clock, UserCheck, RefreshCw, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AlumniForm } from "@/components/AlumniForm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ActivityFeed } from "@/components/ActivityFeed";
@@ -19,6 +21,7 @@ import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { LiveUserPresence } from "@/components/LiveUserPresence";
 
 export default function Alumni() {
+  const navigate = useNavigate();
   const { isManagement, isAdmin, isStaff, user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -303,6 +306,38 @@ export default function Alumni() {
         )}
       </div>
 
+
+      {/* Sub-navigation Tabs */}
+      <Tabs value="alumni" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="children" asChild>
+            <button onClick={() => navigate('/children')} className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              Children & Education
+            </button>
+          </TabsTrigger>
+          <TabsTrigger value="alumni" asChild>
+            <button onClick={() => navigate('/children/alumni')} className="flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              Alumni
+            </button>
+          </TabsTrigger>
+          <TabsTrigger value="transport" asChild>
+            <button onClick={() => navigate('/children/school-transport')} className="flex items-center gap-2">
+              <Bus className="h-4 w-4" />
+              School Transport
+            </button>
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="replacements" asChild>
+              <button onClick={() => navigate('/children/replacements')} className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Replacements
+              </button>
+            </TabsTrigger>
+          )}
+        </TabsList>
+      </Tabs>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
