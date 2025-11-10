@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { MedicalForm } from "@/components/MedicalForm";
-import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User } from "lucide-react";
+import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 export default function Medical() {
@@ -111,6 +111,32 @@ export default function Medical() {
     toast({ title: "Medical records exported successfully" });
   };
 
+  const statistics = useMemo(() => {
+    if (!filteredRecords) return null;
+
+    const totalRecords = filteredRecords.length;
+    const byLocation = filteredRecords.reduce((acc: any, record) => {
+      if (record.location) {
+        acc[record.location] = (acc[record.location] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const byGender = filteredRecords.reduce((acc: any, record) => {
+      if (record.gender) {
+        acc[record.gender] = (acc[record.gender] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const recentRecords = filteredRecords.filter(record => {
+      const recordDate = new Date(record.created_at);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return recordDate >= thirtyDaysAgo;
+    }).length;
+
+    return { totalRecords, byLocation, byGender, recentRecords };
+  }, [filteredRecords]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -155,6 +181,80 @@ export default function Medical() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Statistics Cards */}
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Total Records
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{statistics.totalRecords}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Stethoscope className="h-4 w-4" />
+                Recent Cases (30d)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statistics.recentRecords}</div>
+              <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                By Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byLocation).map(([location, count]: any) => (
+                  <div key={location} className="flex justify-between text-sm">
+                    <span className="capitalize">{location}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byLocation).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                By Gender
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                  <div key={gender} className="flex justify-between text-sm">
+                    <span className="capitalize">{gender}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byGender).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Records Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye, Users, Music, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,6 +120,30 @@ export default function KipawaSato() {
     }
   };
 
+  const statistics = useMemo(() => {
+    if (!filteredMembers) return null;
+
+    const totalMembers = filteredMembers.length;
+    const byTalent = filteredMembers.reduce((acc: any, member) => {
+      acc[member.talent_category] = (acc[member.talent_category] || 0) + 1;
+      return acc;
+    }, {});
+    const byLocation = filteredMembers.reduce((acc: any, member) => {
+      if (member.location) {
+        acc[member.location] = (acc[member.location] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const byGender = filteredMembers.reduce((acc: any, member) => {
+      if (member.gender) {
+        acc[member.gender] = (acc[member.gender] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return { totalMembers, byTalent, byLocation, byGender };
+  }, [filteredMembers]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -198,6 +222,88 @@ export default function KipawaSato() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Statistics Cards */}
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Total Members
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{statistics.totalMembers}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Music className="h-4 w-4" />
+                Top Talent
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {Object.keys(statistics.byTalent).length > 0
+                  ? Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][0]
+                  : 'N/A'}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {Object.keys(statistics.byTalent).length > 0
+                  ? `${Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][1]} members`
+                  : 'No data'}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Locations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byLocation).map(([location, count]: any) => (
+                  <div key={location} className="flex justify-between text-sm">
+                    <span>{location}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byLocation).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Gender Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                  <div key={gender} className="flex justify-between text-sm">
+                    <span className="capitalize">{gender}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byGender).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredMembers?.map((member) => (
