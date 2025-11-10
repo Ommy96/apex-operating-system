@@ -103,6 +103,13 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/children/academic-performance" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AcademicPerformance />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/programs/feeding" element={
               <ProtectedRoute>
                 <DashboardLayout>
