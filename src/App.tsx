@@ -13,6 +13,7 @@ import ChildReport from "./pages/ChildReport";
 import Alumni from "./pages/Alumni";
 import Replacements from "./pages/Replacements";
 import SchoolTransport from "./pages/SchoolTransport";
+import GradeProgression from "./pages/GradeProgression";
 
 import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
@@ -100,6 +101,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <SchoolTransport />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/children/grade-progression" element={
+              <ProtectedRoute requireRole="admin">
+                <DashboardLayout>
+                  <GradeProgression />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

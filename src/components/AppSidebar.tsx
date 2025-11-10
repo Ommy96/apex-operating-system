@@ -141,6 +141,18 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {/* Grade Progression - Admin Only */}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="ripple">
+                    <NavLink to="/children/grade-progression" className={getNavClasses} onClick={handleNavClick}>
+                      <GraduationCap className="h-4 w-4" />
+                      {!isCollapsed && <span className="animate-fade-in">Grade Progression</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

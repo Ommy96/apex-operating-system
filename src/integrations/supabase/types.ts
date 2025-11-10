@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_history: {
+        Row: {
+          academic_year: string
+          child_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          new_academic_level: string | null
+          new_grade: string
+          notes: string | null
+          previous_academic_level: string | null
+          previous_grade: string | null
+          progression_date: string
+        }
+        Insert: {
+          academic_year: string
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_academic_level?: string | null
+          new_grade: string
+          notes?: string | null
+          previous_academic_level?: string | null
+          previous_grade?: string | null
+          progression_date?: string
+        }
+        Update: {
+          academic_year?: string
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_academic_level?: string | null
+          new_grade?: string
+          notes?: string | null
+          previous_academic_level?: string | null
+          previous_grade?: string | null
+          progression_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_history_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
           activity_date: string
