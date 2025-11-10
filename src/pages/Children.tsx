@@ -383,7 +383,7 @@ export default function Children() {
       {/* Sub-navigation Tabs */}
       <Tabs value="children" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="children" className="flex items-center gap-2">
+          <TabsTrigger value="children" onClick={() => navigate('/children')} className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4" />
             Children & Education
           </TabsTrigger>
