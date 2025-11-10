@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Users, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Users, Download, Eye, Edit, Trash2, MapPin, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,6 +88,24 @@ export default function SupportGroups() {
     deleteGroupMutation.mutate(groupId);
   };
 
+  // Calculate statistics from filtered data
+  const statistics = useMemo(() => {
+    if (!filteredGroups) return null;
+
+    const totalGroups = filteredGroups.length;
+    const totalMembers = filteredGroups.reduce((sum, group) => sum + (group.member_count || 0), 0);
+    const avgMembersPerGroup = totalGroups > 0 ? Math.round(totalMembers / totalGroups) : 0;
+    const byLocation = filteredGroups.reduce((acc: any, group) => {
+      if (group.location) {
+        acc[group.location] = (acc[group.location] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const withSchedule = filteredGroups.filter(g => g.meeting_schedule).length;
+
+    return { totalGroups, totalMembers, avgMembersPerGroup, byLocation, withSchedule };
+  }, [filteredGroups]);
+
   const handleDownload = () => {
     if (!supportGroups || supportGroups.length === 0) {
       toast({
@@ -135,6 +153,73 @@ export default function SupportGroups() {
         </Dialog>
         )}
       </div>
+
+      {/* Statistics Cards */}
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Total Groups
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{statistics.totalGroups}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Total Members
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statistics.totalMembers}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Avg {statistics.avgMembersPerGroup} per group
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                By Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byLocation).map(([location, count]: any) => (
+                  <div key={location} className="flex justify-between text-sm">
+                    <span>{location}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byLocation).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                With Schedule
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statistics.withSchedule}</div>
+              <p className="text-xs text-muted-foreground mt-1">Have meeting schedule</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">

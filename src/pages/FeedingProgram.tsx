@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye, Activity, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,12 +92,27 @@ export default function FeedingProgram() {
     setEditingProgram(null);
   };
 
-  // Calculate statistics
-  const totalBeneficiaries = feedingPrograms?.length || 0;
-  const maleCount = feedingPrograms?.filter(p => p.gender === 'Male').length || 0;
-  const femaleCount = feedingPrograms?.filter(p => p.gender === 'Female').length || 0;
-  const kawangwareCount = feedingPrograms?.filter(p => p.type === 'Kawangware Lunch Hour').length || 0;
-  const kiberaCount = feedingPrograms?.filter(p => p.type === 'Kibera Early Dinner').length || 0;
+  // Calculate statistics from filtered data
+  const statistics = useMemo(() => {
+    if (!filteredPrograms) return null;
+
+    const totalBeneficiaries = filteredPrograms.length;
+    const byGender = filteredPrograms.reduce((acc: any, program) => {
+      if (program.gender) {
+        acc[program.gender] = (acc[program.gender] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const byType = filteredPrograms.reduce((acc: any, program) => {
+      if (program.type) {
+        acc[program.type] = (acc[program.type] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const withSponsorship = filteredPrograms.filter(p => p.education_sponsorship).length;
+
+    return { totalBeneficiaries, byGender, byType, withSponsorship };
+  }, [filteredPrograms]);
 
   const handleDownload = () => {
     if (!filteredPrograms || filteredPrograms.length === 0) {
@@ -160,57 +175,78 @@ export default function FeedingProgram() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Beneficiaries</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalBeneficiaries}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Male Students</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{maleCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Female Students</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{femaleCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kawangware Program</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kawangwareCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kibera Program</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kiberaCount}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Total Beneficiaries
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{statistics.totalBeneficiaries}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <User className="h-4 w-4" />
+                By Gender
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                  <div key={gender} className="flex justify-between text-sm">
+                    <span>{gender}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byGender).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                By Program Type
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byType).map(([type, count]: any) => (
+                  <div key={type} className="flex justify-between text-sm">
+                    <span className="text-xs">{type}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byType).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                With Sponsorship
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statistics.withSponsorship}</div>
+              <p className="text-xs text-muted-foreground mt-1">Education sponsorship</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Coins, Download, Receipt, Edit, Trash2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Coins, Download, Receipt, Edit, Trash2, Activity, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -107,6 +107,25 @@ export default function SelfEmpowerment() {
     setEditingRecord(null);
   };
 
+  // Calculate statistics from filtered data
+  const statistics = useMemo(() => {
+    if (!filteredRecords) return null;
+
+    const totalApplications = filteredRecords.length;
+    const activeApplications = filteredRecords.filter(r => r.is_active).length;
+    const totalApproved = filteredRecords.reduce((sum, r) => sum + (Number(r.amount_approved) || 0), 0);
+    const loanRecipients = filteredRecords.filter(r => r.amount_status === 'Loan').length;
+    const grantRecipients = filteredRecords.filter(r => r.amount_status === 'Grant').length;
+    const byResidence = filteredRecords.reduce((acc: any, record) => {
+      if (record.residence) {
+        acc[record.residence] = (acc[record.residence] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return { totalApplications, activeApplications, totalApproved, loanRecipients, grantRecipients, byResidence };
+  }, [filteredRecords]);
+
   const handleDownload = () => {
     if (!selfEmpowermentRecords || selfEmpowermentRecords.length === 0) {
       toast({
@@ -145,57 +164,78 @@ export default function SelfEmpowerment() {
 
         <TabsContent value="applications" className="space-y-6">
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{selfEmpowermentRecords?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">All time</p>
-              </CardContent>
-            </Card>
+          {statistics && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Coins className="h-4 w-4" />
+                    Total Applications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary">{statistics.totalApplications}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{statistics.activeApplications} active</p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Applications</CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {selfEmpowermentRecords?.filter(r => r.is_active).length || 0}
-                </div>
-                <p className="text-xs text-muted-foreground">Currently active</p>
-              </CardContent>
-            </Card>
+              <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Coins className="h-4 w-4" />
+                    Total Approved
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">KSH {statistics.totalApproved.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Total disbursed</p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Approved Amount</CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  KSH {selfEmpowermentRecords?.reduce((sum, r) => sum + (Number(r.amount_approved) || 0), 0).toLocaleString() || 0}
-                </div>
-                <p className="text-xs text-muted-foreground">Total disbursed</p>
-              </CardContent>
-            </Card>
+              <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Activity className="h-4 w-4" />
+                    By Type
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>Loans</span>
+                      <span className="font-semibold">{statistics.loanRecipients}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Grants</span>
+                      <span className="font-semibold">{statistics.grantRecipients}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Loan Recipients</CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {selfEmpowermentRecords?.filter(r => r.amount_status === 'Loan').length || 0}
-                </div>
-                <p className="text-xs text-muted-foreground">Need repayment</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    By Residence
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
+                      <div key={residence} className="flex justify-between text-sm">
+                        <span className="text-xs">{residence}</span>
+                        <span className="font-semibold">{count}</span>
+                      </div>
+                    ))}
+                    {Object.keys(statistics.byResidence).length === 0 && (
+                      <div className="text-sm text-muted-foreground">No data</div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           <div className="flex justify-between items-center">
             <div>

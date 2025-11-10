@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Download, Edit, Trash2, Eye } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,22 +85,34 @@ export default function FamilyAdoption() {
     }
   };
 
-  // Statistics calculations
-  const totalFamilies = familyAdoptions?.length || 0;
-  const maleCount = familyAdoptions?.filter(f => f.gender === 'Male').length || 0;
-  const femaleCount = familyAdoptions?.filter(f => f.gender === 'Female').length || 0;
-  
-  const residenceStats = familyAdoptions?.reduce((acc: any, family) => {
-    const residence = family.residence || 'Unknown';
-    acc[residence] = (acc[residence] || 0) + 1;
-    return acc;
-  }, {}) || {};
+  // Statistics calculations from filtered data
+  const statistics = useMemo(() => {
+    if (!filteredFamilies) return null;
 
-  const categoryStats = familyAdoptions?.reduce((acc: any, family) => {
-    const category = family.category || 'Unknown';
-    acc[category] = (acc[category] || 0) + 1;
-    return acc;
-  }, {}) || {};
+    const totalFamilies = filteredFamilies.length;
+    const byGender = filteredFamilies.reduce((acc: any, family) => {
+      if (family.gender) {
+        acc[family.gender] = (acc[family.gender] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const byResidence = filteredFamilies.reduce((acc: any, family) => {
+      if (family.residence) {
+        acc[family.residence] = (acc[family.residence] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const byCategory = filteredFamilies.reduce((acc: any, family) => {
+      if (family.category) {
+        acc[family.category] = (acc[family.category] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    const totalBeneficiaries = filteredFamilies.reduce((sum, family) => 
+      sum + (family.no_of_beneficiaries || 0), 0);
+
+    return { totalFamilies, byGender, byResidence, byCategory, totalBeneficiaries };
+  }, [filteredFamilies]);
 
   const handleDownload = () => {
     if (!familyAdoptions || familyAdoptions.length === 0) {
@@ -155,47 +167,90 @@ export default function FamilyAdoption() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Families</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalFamilies}</div>
-            <p className="text-xs text-muted-foreground">Registered families</p>
-          </CardContent>
-        </Card>
+      {statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Total Families
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{statistics.totalFamilies}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {statistics.totalBeneficiaries} beneficiaries
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Male Guardians</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{maleCount}</div>
-            <p className="text-xs text-muted-foreground">Male family heads</p>
-          </CardContent>
-        </Card>
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <User className="h-4 w-4" />
+                By Gender
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                  <div key={gender} className="flex justify-between text-sm">
+                    <span>{gender}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byGender).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Female Guardians</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{femaleCount}</div>
-            <p className="text-xs text-muted-foreground">Female family heads</p>
-          </CardContent>
-        </Card>
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                By Residence
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
+                  <div key={residence} className="flex justify-between text-sm">
+                    <span className="text-xs">{residence}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byResidence).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Guardian Rations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categoryStats['Guardian Ration'] || 0}</div>
-            <p className="text-xs text-muted-foreground">Active ration recipients</p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                By Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {Object.entries(statistics.byCategory).map(([category, count]: any) => (
+                  <div key={category} className="flex justify-between text-sm">
+                    <span className="text-xs">{category}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+                {Object.keys(statistics.byCategory).length === 0 && (
+                  <div className="text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
