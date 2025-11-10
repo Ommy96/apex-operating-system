@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { MedicalForm } from "@/components/MedicalForm";
-import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, Calendar, User } from "lucide-react";
+import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 export default function Medical() {
@@ -31,7 +31,7 @@ export default function Medical() {
       const { data, error } = await supabase
         .from("medical_records")
         .select("*")
-        .order("date", { ascending: false });
+        .order("created_at", { ascending: false });
       
       if (error) throw error;
       return data || [];
@@ -95,7 +95,6 @@ export default function Medical() {
   const handleDownload = () => {
     const dataToExport = filteredRecords.map(record => ({
       'Full Name': record.full_name,
-      'Date': new Date(record.date).toLocaleDateString(),
       'Location': record.location || 'N/A',
       'Gender': record.gender || 'N/A',
       'Medical Condition': record.medical_condition,
@@ -168,10 +167,6 @@ export default function Medical() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                {new Date(record.date).toLocaleDateString()}
-              </div>
               {record.location && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" />
@@ -247,10 +242,6 @@ export default function Medical() {
               <div>
                 <h3 className="font-semibold text-sm text-muted-foreground">Full Name</h3>
                 <p>{selectedRecord.full_name}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm text-muted-foreground">Date</h3>
-                <p>{new Date(selectedRecord.date).toLocaleDateString()}</p>
               </div>
               {selectedRecord.location && (
                 <div>

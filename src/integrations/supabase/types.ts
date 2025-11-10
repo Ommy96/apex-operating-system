@@ -893,7 +893,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          date: string
+          date: string | null
           doctors_report: string | null
           full_name: string
           gender: string | null
@@ -907,7 +907,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          date: string
+          date?: string | null
           doctors_report?: string | null
           full_name: string
           gender?: string | null
@@ -921,7 +921,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          date?: string
+          date?: string | null
           doctors_report?: string | null
           full_name?: string
           gender?: string | null

@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const medicalSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
-  date: z.string().min(1, "Date is required"),
   location: z.string().optional(),
   gender: z.string().optional(),
   medical_condition: z.string().min(1, "Medical condition is required"),
@@ -35,7 +34,6 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
     resolver: zodResolver(medicalSchema),
     defaultValues: {
       full_name: record?.full_name || "",
-      date: record?.date || "",
       location: record?.location || "",
       gender: record?.gender || "",
       medical_condition: record?.medical_condition || "",
@@ -85,20 +83,6 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
               <FormLabel>Full Name</FormLabel>
               <FormControl>
                 <Input placeholder="Enter full name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
