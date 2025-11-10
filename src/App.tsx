@@ -69,20 +69,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/children/:id" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ChildProfile />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/children/:id/report" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ChildReport />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/children/alumni" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -108,6 +94,20 @@ const App = () => (
               <ProtectedRoute requireRole="admin">
                 <DashboardLayout>
                   <GradeProgression />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/children/:id" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ChildProfile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/children/:id/report" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ChildReport />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
