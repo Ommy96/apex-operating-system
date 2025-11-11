@@ -91,7 +91,7 @@ export default function SchoolVisitReports() {
   });
 
   const handleDownload = () => {
-    if (!schoolVisitReports || schoolVisitReports.length === 0) {
+    if (!filteredReports || filteredReports.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no school visit reports to export.",
@@ -100,7 +100,7 @@ export default function SchoolVisitReports() {
       return;
     }
 
-    const formattedData = formatSchoolVisitReportsData(schoolVisitReports);
+    const formattedData = formatSchoolVisitReportsData(filteredReports);
     downloadExcel(formattedData, 'school_visit_reports', 'School Visit Reports');
     
     toast({

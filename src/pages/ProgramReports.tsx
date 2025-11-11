@@ -97,7 +97,7 @@ export default function ProgramReports() {
   });
 
   const handleDownload = () => {
-    if (!programReports || programReports.length === 0) {
+    if (!filteredReports || filteredReports.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no program reports to export.",
@@ -106,7 +106,7 @@ export default function ProgramReports() {
       return;
     }
 
-    const formattedData = formatProgramReportsData(programReports);
+    const formattedData = formatProgramReportsData(filteredReports);
     downloadExcel(formattedData, 'program_reports', 'Program Reports');
     
     toast({

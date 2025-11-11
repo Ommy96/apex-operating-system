@@ -115,7 +115,7 @@ export default function FamilyAdoption() {
   }, [filteredFamilies]);
 
   const handleDownload = () => {
-    if (!familyAdoptions || familyAdoptions.length === 0) {
+    if (!filteredFamilies || filteredFamilies.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no family adoption records to export.",
@@ -124,7 +124,7 @@ export default function FamilyAdoption() {
       return;
     }
 
-    const formattedData = formatFamilyAdoptionData(familyAdoptions);
+    const formattedData = formatFamilyAdoptionData(filteredFamilies);
     downloadExcel(formattedData, 'family_adoption_records', 'Family Adoption Records');
     
     toast({

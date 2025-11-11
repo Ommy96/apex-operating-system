@@ -108,7 +108,7 @@ export default function HomeVisitReports() {
   });
 
   const handleDownload = () => {
-    if (!homeVisitReports || homeVisitReports.length === 0) {
+    if (!filteredReports || filteredReports.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no home visit reports to export.",
@@ -117,7 +117,7 @@ export default function HomeVisitReports() {
       return;
     }
 
-    const formattedData = formatHomeVisitReportsData(homeVisitReports);
+    const formattedData = formatHomeVisitReportsData(filteredReports);
     downloadExcel(formattedData, 'home_visit_reports', 'Home Visit Reports');
     
     toast({

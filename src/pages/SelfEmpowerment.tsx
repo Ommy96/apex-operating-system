@@ -127,7 +127,7 @@ export default function SelfEmpowerment() {
   }, [filteredRecords]);
 
   const handleDownload = () => {
-    if (!selfEmpowermentRecords || selfEmpowermentRecords.length === 0) {
+    if (!filteredRecords || filteredRecords.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no self-empowerment records to export.",
@@ -136,7 +136,7 @@ export default function SelfEmpowerment() {
       return;
     }
 
-    const formattedData = formatSelfEmpowermentData(selfEmpowermentRecords);
+    const formattedData = formatSelfEmpowermentData(filteredRecords);
     downloadExcel(formattedData, 'self_empowerment_records', 'Self Empowerment Records');
     
     toast({

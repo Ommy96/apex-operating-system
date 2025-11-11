@@ -311,8 +311,7 @@ export default function Children() {
   };
 
   const handleDownload = () => {
-    const educationChildren = children.filter(child => child.academic_level);
-    if (educationChildren.length === 0) {
+    if (filteredChildren.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no education records to export.",
@@ -321,7 +320,7 @@ export default function Children() {
       return;
     }
 
-    const formattedData = formatEducationData(educationChildren);
+    const formattedData = formatEducationData(filteredChildren);
     downloadExcel(formattedData, 'education_records', 'Education Records');
     
     toast({

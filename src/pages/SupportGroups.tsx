@@ -107,7 +107,7 @@ export default function SupportGroups() {
   }, [filteredGroups]);
 
   const handleDownload = () => {
-    if (!supportGroups || supportGroups.length === 0) {
+    if (!filteredGroups || filteredGroups.length === 0) {
       toast({
         title: "No data to download",
         description: "There are no support groups to export.",
@@ -116,7 +116,7 @@ export default function SupportGroups() {
       return;
     }
 
-    const formattedData = formatSupportGroupsData(supportGroups);
+    const formattedData = formatSupportGroupsData(filteredGroups);
     downloadExcel(formattedData, 'support_groups', 'Support Groups');
     
     toast({
