@@ -416,88 +416,147 @@ export default function KipawaSato() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Member Details</DialogTitle>
           </DialogHeader>
           {viewingMember && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Full Name</h4>
-                  <p className="text-base">{viewingMember.full_name}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Talent Category</h4>
-                  <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+              {/* Header Card */}
+              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-2xl">
                     {getTalentIcon(viewingMember.talent_category)}
+                    {viewingMember.full_name}
+                  </CardTitle>
+                  <Badge variant="secondary" className="w-fit mt-2">
                     {viewingMember.talent_category}
                   </Badge>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Age</h4>
-                  <p className="text-base">{viewingMember.age || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
-                  <p className="text-base">{viewingMember.gender || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Specific Skill</h4>
-                  <p className="text-base">{viewingMember.specific_skill || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Location</h4>
-                  <p className="text-base">{viewingMember.location || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Academic Level</h4>
-                  <p className="text-base">{viewingMember.academic_level || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Year Enrolled</h4>
-                  <p className="text-base">{viewingMember.year_enrolled || 'Not specified'}</p>
-                </div>
-              </div>
-              
+                </CardHeader>
+              </Card>
+
+              {/* Personal Information */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Personal Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Age</p>
+                      <p className="text-base font-medium">{viewingMember.age || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Gender</p>
+                      <p className="text-base font-medium">{viewingMember.gender || 'Not specified'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Location</p>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-base font-medium">{viewingMember.location || 'Not specified'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Talent & Skills */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Star className="h-5 w-5 text-primary" />
+                    Talent & Skills
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Specific Skill</p>
+                    <p className="text-base font-medium">{viewingMember.specific_skill || 'Not specified'}</p>
+                  </div>
+                  {viewingMember.awards_recognition && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Awards & Recognition</p>
+                      <p className="text-base font-medium">{viewingMember.awards_recognition}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Academic & Enrollment */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-primary" />
+                    Academic & Enrollment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Academic Level</p>
+                      <p className="text-base font-medium">{viewingMember.academic_level || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Year Enrolled</p>
+                      <p className="text-base font-medium">{viewingMember.year_enrolled || 'Not specified'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">School Support</p>
+                    {viewingMember.school_support_given ? (
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        School Support Given
+                      </Badge>
+                    ) : (
+                      <p className="text-base text-muted-foreground">No school support provided</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Coaching & Mentorship */}
               {viewingMember.coach_mentor_name && (
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Coach/Mentor</h4>
-                  <p className="text-base">{viewingMember.coach_mentor_name}</p>
-                </div>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Users className="h-5 w-5 text-primary" />
+                      Coaching & Mentorship
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Coach/Mentor Name</p>
+                      <p className="text-base font-medium">{viewingMember.coach_mentor_name}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
-              
-              {viewingMember.awards_recognition && (
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Awards & Recognition</h4>
-                  <p className="text-base">{viewingMember.awards_recognition}</p>
-                </div>
-              )}
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">School Support</h4>
-                {viewingMember.school_support_given ? (
-                  <Badge variant="outline" className="text-green-600 border-green-600">
-                    School Support Given
-                  </Badge>
-                ) : (
-                  <p className="text-base text-muted-foreground">No school support provided</p>
-                )}
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
-                <p className="text-base">{new Date(viewingMember.created_at).toLocaleDateString()}</p>
-              </div>
+
+              {/* Administrative Information */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Music className="h-5 w-5 text-primary" />
+                    Administrative Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Date Added</p>
+                    <p className="text-base font-medium">
+                      {new Date(viewingMember.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
