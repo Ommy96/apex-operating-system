@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FamilyAdoptionForm } from "@/components/FamilyAdoptionForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -257,68 +258,82 @@ export default function FamilyAdoption() {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by known name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by known name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          {isManagement && (
+            <Button onClick={handleDownload} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Download Excel
+            </Button>
+          )}
         </div>
-        
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="Guardian Ration">Guardian Ration</SelectItem>
-            <SelectItem value="Home Based Care">Home Based Care</SelectItem>
-          </SelectContent>
-        </Select>
 
-        <Select value={residenceFilter} onValueChange={setResidenceFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by residence" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Residences</SelectItem>
-            <SelectItem value="Kibera">Kibera</SelectItem>
-            <SelectItem value="Kawangware">Kawangware</SelectItem>
-            <SelectItem value="Diaspora">Diaspora</SelectItem>
-            <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
-          </SelectContent>
-        </Select>
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <Filter className="h-4 w-4 mr-2" />
+              Advanced Filters
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="Guardian Ration">Guardian Ration</SelectItem>
+                  <SelectItem value="Home Based Care">Home Based Care</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <Select value={familyStatusFilter} onValueChange={setFamilyStatusFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by family status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Family Status</SelectItem>
-            <SelectItem value="Single Parent Home">Single Parent Home</SelectItem>
-            <SelectItem value="No Parent">No Parent</SelectItem>
-            <SelectItem value="Dual Parent Home">Dual Parent Home</SelectItem>
-          </SelectContent>
-        </Select>
+              <Select value={residenceFilter} onValueChange={setResidenceFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by residence" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Residences</SelectItem>
+                  <SelectItem value="Kibera">Kibera</SelectItem>
+                  <SelectItem value="Kawangware">Kawangware</SelectItem>
+                  <SelectItem value="Diaspora">Diaspora</SelectItem>
+                  <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <Select value={sourceOfIncomeFilter} onValueChange={setSourceOfIncomeFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by income source" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Income Sources</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        {isManagement && (
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Download Excel
-          </Button>
-        )}
+              <Select value={familyStatusFilter} onValueChange={setFamilyStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by family status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Family Status</SelectItem>
+                  <SelectItem value="Single Parent Home">Single Parent Home</SelectItem>
+                  <SelectItem value="No Parent">No Parent</SelectItem>
+                  <SelectItem value="Dual Parent Home">Dual Parent Home</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sourceOfIncomeFilter} onValueChange={setSourceOfIncomeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by income source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Income Sources</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
