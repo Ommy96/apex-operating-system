@@ -27,18 +27,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleChangeChannel, setRoleChangeChannel] = useState<any>(null);
 
-  // Function to fetch user role from user_roles table
+  // Function to fetch user role
   const fetchUserRole = useCallback(async (userId: string) => {
     try {
-      // Use the get_user_role function to get the highest role
-      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId });
-      
-      if (error) {
-        console.error('Error fetching user role:', error);
-        return 'staff';
-      }
-      
-      return data || 'staff';
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+      return profile?.role || 'staff';
     } catch (error) {
       console.error('Error fetching user role:', error);
       return 'staff';
@@ -98,15 +95,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to role changes for current user from user_roles table
+    // Subscribe to role changes for current user
     const channel = supabase
       .channel('role-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'user_roles',
+          table: 'profiles',
           filter: `user_id=eq.${user.id}`
         },
         async (payload) => {
@@ -130,63 +127,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id, refreshUserRole]);
 
   useEffect(() => {
-    let mounted = true;
-
-    const handleSession = (session: Session | null) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      if (session?.user) {
-        // Defer Supabase calls to avoid deadlocks inside onAuthStateChange
-        setLoading(true);
-        setTimeout(async () => {
-          try {
-            const role = await fetchUserRole(session.user!.id);
-            if (mounted) setUserRole(role);
-          } catch (err) {
-            console.error('Error fetching role (deferred):', err);
-            if (mounted) setUserRole('staff');
-          } finally {
-            if (mounted) setLoading(false);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user profile to get role
+          setTimeout(async () => {
+            const role = await fetchUserRole(session.user.id);
+            setUserRole(role);
+          }, 0);
+        } else {
+          setUserRole(null);
+          // Clean up real-time subscription
+          if (roleChangeChannel) {
+            supabase.removeChannel(roleChangeChannel);
+            setRoleChangeChannel(null);
           }
-        }, 0);
-      } else {
-        setUserRole(null);
-        // Clean up real-time subscription
-        if (roleChangeChannel) {
-          supabase.removeChannel(roleChangeChannel);
-          setRoleChangeChannel(null);
         }
+        
         setLoading(false);
       }
-    };
-    
-    // Set up auth state listener with a synchronous callback only
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      handleSession(session);
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Fetch user profile for existing session
+        setTimeout(async () => {
+          const role = await fetchUserRole(session.user.id);
+          setUserRole(role);
+        }, 0);
+      }
+      
+      setLoading(false);
     });
 
-    // Check for existing session and initialize state
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
-        if (!mounted) return;
-        if (error) {
-          console.error('Error getting session:', error);
-          setLoading(false);
-          return;
-        }
-        handleSession(session);
-      })
-      .catch(error => {
-        console.error('Error in getSession:', error);
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [fetchUserRole]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
