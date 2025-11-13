@@ -137,11 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile to get role
-          setTimeout(async () => {
-            const role = await fetchUserRole(session.user.id);
-            setUserRole(role);
-          }, 0);
+          // Fetch user role before setting loading to false
+          const role = await fetchUserRole(session.user.id);
+          setUserRole(role);
+          setLoading(false);
         } else {
           setUserRole(null);
           // Clean up real-time subscription
@@ -149,26 +148,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             supabase.removeChannel(roleChangeChannel);
             setRoleChangeChannel(null);
           }
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Fetch user profile for existing session
-        setTimeout(async () => {
-          const role = await fetchUserRole(session.user.id);
-          setUserRole(role);
-        }, 0);
+        // Fetch user role for existing session before setting loading to false
+        const role = await fetchUserRole(session.user.id);
+        setUserRole(role);
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
