@@ -392,69 +392,159 @@ export default function FamilyAdoption() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Family Details</DialogTitle>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary" />
+              Family Details
+            </DialogTitle>
           </DialogHeader>
           {viewingFamily && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Known Name</h4>
-                  <p className="text-base">{viewingFamily.known_name}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Category</h4>
-                  <Badge variant={viewingFamily.category === 'Guardian Ration' ? 'default' : 'secondary'}>
-                    {viewingFamily.category}
-                  </Badge>
-                </div>
-              </div>
-              
-              {viewingFamily.actual_name && (
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Actual Name</h4>
-                  <p className="text-base">{viewingFamily.actual_name}</p>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
-                  <p className="text-base">{viewingFamily.gender || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Residence</h4>
-                  <p className="text-base">{viewingFamily.residence || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Number of Beneficiaries</h4>
-                  <p className="text-base">{viewingFamily.no_of_beneficiaries || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Sponsor</h4>
-                  <p className="text-base">{viewingFamily.sponsor || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Family Status</h4>
-                  <p className="text-base">{viewingFamily.family_status || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Source of Income</h4>
-                  <p className="text-base">{viewingFamily.source_of_income || 'Not specified'}</p>
-                </div>
-              </div>
-              
+            <div className="space-y-6 pt-2">
+              {/* Header Section */}
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-bold text-foreground">{viewingFamily.known_name}</h3>
+                      {viewingFamily.actual_name && (
+                        <p className="text-sm text-muted-foreground">Legal Name: {viewingFamily.actual_name}</p>
+                      )}
+                    </div>
+                    <Badge 
+                      variant={viewingFamily.category === 'Guardian Ration' ? 'default' : 'secondary'}
+                      className="text-sm px-3 py-1"
+                    >
+                      {viewingFamily.category}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personal Information */}
               <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
-                <p className="text-base">{new Date(viewingFamily.created_at).toLocaleDateString()}</p>
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Personal Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-secondary/50">
+                          <User className="h-4 w-4 text-secondary-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Gender</p>
+                          <p className="text-base font-medium">{viewingFamily.gender || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-secondary/50">
+                          <MapPin className="h-4 w-4 text-secondary-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Residence</p>
+                          <p className="text-base font-medium">{viewingFamily.residence || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
+
+              {/* Family Information */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Family Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-accent/50">
+                          <Users className="h-4 w-4 text-accent-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Number of Beneficiaries</p>
+                          <p className="text-base font-medium">{viewingFamily.no_of_beneficiaries || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-accent/50">
+                          <Activity className="h-4 w-4 text-accent-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Family Status</p>
+                          <p className="text-base font-medium">{viewingFamily.family_status || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Financial Information */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Financial Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Activity className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Source of Income</p>
+                          <p className="text-base font-medium">{viewingFamily.source_of_income || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Sponsor</p>
+                          <p className="text-base font-medium">{viewingFamily.sponsor || 'Not specified'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <Card className="bg-muted/30">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Activity className="h-3 w-3" />
+                    <span>Added on {new Date(viewingFamily.created_at).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
