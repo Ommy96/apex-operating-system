@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 
 export default function SelfEmpowerment() {
   const { isAdmin, isManagement } = useAuth();
@@ -166,7 +167,7 @@ export default function SelfEmpowerment() {
           {/* Statistics Cards */}
           {statistics && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <Card className={getCardStyles(0)}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Coins className="h-4 w-4" />
@@ -179,7 +180,7 @@ export default function SelfEmpowerment() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+              <Card className={getCardStyles(1)}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Coins className="h-4 w-4" />
@@ -192,7 +193,7 @@ export default function SelfEmpowerment() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+              <Card className={getCardStyles(2)}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Activity className="h-4 w-4" />
@@ -213,7 +214,7 @@ export default function SelfEmpowerment() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/40">
+              <Card className={getCardStyles(3)}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
