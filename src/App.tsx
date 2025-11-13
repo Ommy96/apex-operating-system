@@ -38,6 +38,7 @@ import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SessionManager } from "./components/SessionManager";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -233,7 +234,9 @@ const App = () => (
             <Route path="/reports-analytics" element={
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
-                  <ReportsAnalytics />
+                  <ErrorBoundary>
+                    <ReportsAnalytics />
+                  </ErrorBoundary>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
