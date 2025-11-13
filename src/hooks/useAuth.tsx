@@ -27,15 +27,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleChangeChannel, setRoleChangeChannel] = useState<any>(null);
 
-  // Function to fetch user role
+  // Function to fetch user role from user_roles table
   const fetchUserRole = useCallback(async (userId: string) => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-      return profile?.role || 'staff';
+      // Use the get_user_role function to get the highest role
+      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId });
+      
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return 'staff';
+      }
+      
+      return data || 'staff';
     } catch (error) {
       console.error('Error fetching user role:', error);
       return 'staff';
@@ -95,15 +98,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to role changes for current user
+    // Subscribe to role changes for current user from user_roles table
     const channel = supabase
       .channel('role-changes')
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'profiles',
+          table: 'user_roles',
           filter: `user_id=eq.${user.id}`
         },
         async (payload) => {
