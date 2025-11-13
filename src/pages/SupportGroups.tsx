@@ -158,7 +158,7 @@ export default function SupportGroups() {
       {/* Statistics Cards */}
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className={getCardStyles(0)}>
+          <Card className={`${getCardStyles(0)} hover-scale`}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Activity className="h-4 w-4" />
@@ -170,7 +170,7 @@ export default function SupportGroups() {
             </CardContent>
           </Card>
 
-          <Card className={getCardStyles(1)}>
+          <Card className={`${getCardStyles(1)} hover-scale`}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -185,7 +185,7 @@ export default function SupportGroups() {
             </CardContent>
           </Card>
 
-          <Card className={getCardStyles(2)}>
+          <Card className={`${getCardStyles(2)} hover-scale`}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -207,7 +207,7 @@ export default function SupportGroups() {
             </CardContent>
           </Card>
 
-          <Card className={getCardStyles(3)}>
+          <Card className={`${getCardStyles(3)} hover-scale`}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Activity className="h-4 w-4" />

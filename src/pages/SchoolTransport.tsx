@@ -282,7 +282,7 @@ export default function SchoolTransport() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className={getCardStyles(0)}>
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Students Receiving Support</CardTitle>
             <Bus className="h-4 w-4 text-muted-foreground" />
@@ -295,7 +295,7 @@ export default function SchoolTransport() {
           </CardContent>
         </Card>
         
-        <Card className={getCardStyles(1)}>
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Students</CardTitle>
           </CardHeader>
