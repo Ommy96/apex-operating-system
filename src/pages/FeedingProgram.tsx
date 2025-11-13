@@ -380,67 +380,105 @@ export default function FeedingProgram() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Beneficiary Details</DialogTitle>
           </DialogHeader>
           {viewingProgram && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Name</h4>
-                  <p className="text-base">{viewingProgram.name}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Program Type</h4>
-                  <Badge variant={viewingProgram.type === 'Kawangware Lunch Hour' ? 'default' : 'secondary'}>
-                    {viewingProgram.type}
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Gender</h4>
-                  <p className="text-base">{viewingProgram.gender || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Academic Level</h4>
-                  <p className="text-base">{viewingProgram.academic_level || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">Grade</h4>
-                  <p className="text-base">{viewingProgram.grade || 'Not specified'}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground">School</h4>
-                  <p className="text-base">{viewingProgram.school || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Contact Information</h4>
-                <p className="text-base">{viewingProgram.contact || 'Not provided'}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Education Sponsorship</h4>
-                {viewingProgram.education_sponsorship ? (
-                  <Badge variant="outline" className="text-green-600 border-green-600">
-                    Active Education Sponsorship
-                  </Badge>
-                ) : (
-                  <p className="text-base text-muted-foreground">No education sponsorship</p>
-                )}
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground">Date Added</h4>
-                <p className="text-base">{new Date(viewingProgram.created_at).toLocaleDateString()}</p>
-              </div>
+              {/* Header */}
+              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground">{viewingProgram.name}</h3>
+                      <p className="text-muted-foreground mt-1">Feeding Program Beneficiary</p>
+                    </div>
+                    <Badge variant={viewingProgram.type === 'Kawangware Lunch Hour' ? 'default' : 'secondary'} className="text-sm px-3 py-1">
+                      {viewingProgram.type}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personal Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <User className="h-5 w-5 text-primary" />
+                    Personal Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Gender</p>
+                    <p className="font-medium">{viewingProgram.gender || 'Not specified'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Academic Level</p>
+                    <p className="font-medium">{viewingProgram.academic_level || 'Not specified'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Grade</p>
+                    <p className="font-medium">{viewingProgram.grade || 'Not specified'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Contact</p>
+                    <p className="font-medium">{viewingProgram.contact || 'Not provided'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* School Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    School Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <p className="text-sm text-muted-foreground">School Name</p>
+                  <p className="font-medium">{viewingProgram.school || 'Not specified'}</p>
+                </CardContent>
+              </Card>
+
+              {/* Sponsorship Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-5 w-5 text-primary" />
+                    Sponsorship Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {viewingProgram.education_sponsorship ? (
+                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50">
+                      ✓ Active Education Sponsorship
+                    </Badge>
+                  ) : (
+                    <p className="text-muted-foreground">No active education sponsorship</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Administrative Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Users className="h-5 w-5 text-primary" />
+                    Administrative Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Date Added</p>
+                  <p className="font-medium">{new Date(viewingProgram.created_at).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</p>
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
