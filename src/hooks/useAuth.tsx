@@ -130,45 +130,89 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id, refreshUserRole]);
 
   useEffect(() => {
+    let mounted = true;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user role before setting loading to false
-          const role = await fetchUserRole(session.user.id);
-          setUserRole(role);
-          setLoading(false);
-        } else {
-          setUserRole(null);
-          // Clean up real-time subscription
-          if (roleChangeChannel) {
-            supabase.removeChannel(roleChangeChannel);
-            setRoleChangeChannel(null);
+          try {
+            // Fetch user role before setting loading to false
+            const role = await fetchUserRole(session.user.id);
+            if (mounted) {
+              setUserRole(role);
+              setLoading(false);
+            }
+          } catch (error) {
+            console.error('Error fetching role in auth state change:', error);
+            if (mounted) {
+              setUserRole('staff');
+              setLoading(false);
+            }
           }
-          setLoading(false);
+        } else {
+          if (mounted) {
+            setUserRole(null);
+            // Clean up real-time subscription
+            if (roleChangeChannel) {
+              supabase.removeChannel(roleChangeChannel);
+              setRoleChangeChannel(null);
+            }
+            setLoading(false);
+          }
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (!mounted) return;
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Fetch user role for existing session before setting loading to false
-        const role = await fetchUserRole(session.user.id);
-        setUserRole(role);
-        setLoading(false);
+        try {
+          // Fetch user role for existing session before setting loading to false
+          const role = await fetchUserRole(session.user.id);
+          if (mounted) {
+            setUserRole(role);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Error fetching role on init:', error);
+          if (mounted) {
+            setUserRole('staff');
+            setLoading(false);
+          }
+        }
       } else {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }).catch(error => {
+      console.error('Error in getSession:', error);
+      if (mounted) {
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchUserRole]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
