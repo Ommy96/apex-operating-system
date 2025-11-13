@@ -715,9 +715,9 @@ export default function Children() {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            className="bg-background text-foreground hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
+                            className="bg-background text-foreground hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors group"
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2 className="h-4 w-4 mr-2 group-hover:animate-shake" />
                             Delete
                           </Button>
                         </AlertDialogTrigger>
