@@ -23,6 +23,8 @@ export default function FamilyAdoption() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [residenceFilter, setResidenceFilter] = useState("");
+  const [familyStatusFilter, setFamilyStatusFilter] = useState("");
+  const [sourceOfIncomeFilter, setSourceOfIncomeFilter] = useState("");
 
   const { data: familyAdoptions, refetch } = useQuery({
     queryKey: ['family-adoption'],
@@ -38,11 +40,14 @@ export default function FamilyAdoption() {
   });
 
   const filteredFamilies = familyAdoptions?.filter(family => {
+    const familyWithNewFields = family as any;
     const matchesSearch = family.known_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || categoryFilter === 'all' || family.category === categoryFilter;
     const matchesResidence = !residenceFilter || residenceFilter === 'all' || family.residence === residenceFilter;
+    const matchesFamilyStatus = !familyStatusFilter || familyStatusFilter === 'all' || familyWithNewFields.family_status === familyStatusFilter;
+    const matchesSourceOfIncome = !sourceOfIncomeFilter || sourceOfIncomeFilter === 'all' || familyWithNewFields.source_of_income?.toLowerCase().includes(sourceOfIncomeFilter.toLowerCase());
     
-    return matchesSearch && matchesCategory && matchesResidence;
+    return matchesSearch && matchesCategory && matchesResidence && matchesFamilyStatus && matchesSourceOfIncome;
   });
 
   const handleSuccess = () => {
@@ -286,6 +291,27 @@ export default function FamilyAdoption() {
             <SelectItem value="Outside Nairobi">Outside Nairobi</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={familyStatusFilter} onValueChange={setFamilyStatusFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by family status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Family Status</SelectItem>
+            <SelectItem value="Single Parent Home">Single Parent Home</SelectItem>
+            <SelectItem value="No Parent">No Parent</SelectItem>
+            <SelectItem value="Dual Parent Home">Dual Parent Home</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sourceOfIncomeFilter} onValueChange={setSourceOfIncomeFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by income source" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Income Sources</SelectItem>
+          </SelectContent>
+        </Select>
         
         {isManagement && (
           <Button onClick={handleDownload} variant="outline">
@@ -327,10 +353,10 @@ export default function FamilyAdoption() {
                 <strong>Sponsor:</strong> {family.sponsor || 'Not specified'}
               </div>
               <div className="text-sm text-muted-foreground">
-                <strong>Family Status:</strong> {family.family_status || 'Not specified'}
+                <strong>Family Status:</strong> {(family as any).family_status || 'Not specified'}
               </div>
               <div className="text-sm text-muted-foreground">
-                <strong>Source of Income:</strong> {family.source_of_income || 'Not specified'}
+                <strong>Source of Income:</strong> {(family as any).source_of_income || 'Not specified'}
               </div>
               
               <div className="flex gap-2 pt-2">
@@ -487,7 +513,7 @@ export default function FamilyAdoption() {
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-muted-foreground mb-1">Family Status</p>
-                          <p className="text-base font-medium">{viewingFamily.family_status || 'Not specified'}</p>
+                          <p className="text-base font-medium">{(viewingFamily as any)?.family_status || 'Not specified'}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -510,7 +536,7 @@ export default function FamilyAdoption() {
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-muted-foreground mb-1">Source of Income</p>
-                          <p className="text-base font-medium">{viewingFamily.source_of_income || 'Not specified'}</p>
+                          <p className="text-base font-medium">{(viewingFamily as any)?.source_of_income || 'Not specified'}</p>
                         </div>
                       </div>
                     </CardContent>
