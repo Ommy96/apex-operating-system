@@ -16,6 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChildForm } from '@/components/ChildForm';
 import { downloadExcel, formatEducationData } from '@/lib/downloadUtils';
+import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -632,8 +633,8 @@ export default function Children() {
 
           {/* Students Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredChildren.map((child) => (
-              <Card key={child.id} className="hover:shadow-lg transition-shadow">
+            {filteredChildren.map((child, index) => (
+              <Card key={child.id} className={getCardStyles((index % 6) as CardVariant)}>
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-16 w-16 rounded-full border-2 border-border">
