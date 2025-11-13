@@ -64,213 +64,190 @@ export default function ReportsAnalytics() {
   const [reportTypeFilter, setReportTypeFilter] = useState("all");
 
   // Fetch Dashboard Summary Data
-  const { data: dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useQuery({
+  const { data: dashboardData } = useQuery({
     queryKey: ["dashboard-summary"],
     queryFn: async () => {
-      try {
-        const [childrenRes, programsRes, reportsRes, visitsRes] = await Promise.all([
-          supabase.from("children").select("id, gender, residence, status"),
-          supabase.from("programs").select("id, is_active"),
-          supabase.from("activity_reports").select("id, created_at"),
-          supabase.from("home_visit_reports").select("id, visit_date")
-        ]);
+      const [childrenRes, programsRes, reportsRes, visitsRes] = await Promise.all([
+        supabase.from("children").select("id, gender, residence, status"),
+        supabase.from("programs").select("id, is_active"),
+        supabase.from("activity_reports").select("id, created_at"),
+        supabase.from("home_visit_reports").select("id, visit_date")
+      ]);
 
-        if (childrenRes.error) throw childrenRes.error;
-        if (programsRes.error) throw programsRes.error;
-        if (reportsRes.error) throw reportsRes.error;
-        if (visitsRes.error) throw visitsRes.error;
+      const currentMonth = new Date();
+      const monthStart = startOfMonth(currentMonth);
+      const monthEnd = endOfMonth(currentMonth);
 
-        const currentMonth = new Date();
-        const monthStart = startOfMonth(currentMonth);
-        const monthEnd = endOfMonth(currentMonth);
+      const reportsThisMonth = reportsRes.data?.filter(r => {
+        const date = new Date(r.created_at);
+        return date >= monthStart && date <= monthEnd;
+      }).length || 0;
 
-        const reportsThisMonth = reportsRes.data?.filter(r => {
-          const date = new Date(r.created_at);
-          return date >= monthStart && date <= monthEnd;
-        }).length || 0;
+      const visitsThisMonth = visitsRes.data?.filter(v => {
+        const date = new Date(v.visit_date);
+        return date >= monthStart && date <= monthEnd;
+      }).length || 0;
 
-        const visitsThisMonth = visitsRes.data?.filter(v => {
-          const date = new Date(v.visit_date);
-          return date >= monthStart && date <= monthEnd;
-        }).length || 0;
+      const maleCount = childrenRes.data?.filter(c => c.gender === 'Male').length || 0;
+      const femaleCount = childrenRes.data?.filter(c => c.gender === 'Female').length || 0;
 
-        const maleCount = childrenRes.data?.filter(c => c.gender === 'Male').length || 0;
-        const femaleCount = childrenRes.data?.filter(c => c.gender === 'Female').length || 0;
-
-        return {
-          totalBeneficiaries: childrenRes.data?.length || 0,
-          maleCount,
-          femaleCount,
-          activePrograms: programsRes.data?.filter(p => p.is_active).length || 0,
-          reportsThisMonth,
-          visitsThisMonth
-        };
-      } catch (error) {
-        console.error('Dashboard data fetch error:', error);
-        toast.error('Failed to load dashboard summary');
-        throw error;
-      }
+      return {
+        totalBeneficiaries: childrenRes.data?.length || 0,
+        maleCount,
+        femaleCount,
+        activePrograms: programsRes.data?.filter(p => p.is_active).length || 0,
+        reportsThisMonth,
+        visitsThisMonth
+      };
     }
   });
 
   // Fetch Charts Data
-  const { data: chartsData, isLoading: isChartsLoading, error: chartsError } = useQuery({
+  const { data: chartsData } = useQuery({
     queryKey: ["charts-data"],
     queryFn: async () => {
-      try {
-        // Reports over time (last 6 months)
-        const sixMonthsAgo = subMonths(new Date(), 6);
-        const [activityReports, programReports, homeVisits, schoolVisits] = await Promise.all([
-          supabase.from("activity_reports").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
-          supabase.from("program_reports").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
-          supabase.from("home_visit_reports").select("visit_date").gte("visit_date", sixMonthsAgo.toISOString()),
-          supabase.from("school_visit_reports").select("visit_date").gte("visit_date", sixMonthsAgo.toISOString())
-        ]);
+      // Reports over time (last 6 months)
+      const sixMonthsAgo = subMonths(new Date(), 6);
+      const [activityReports, programReports, homeVisits, schoolVisits] = await Promise.all([
+        supabase.from("activity_reports").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
+        supabase.from("program_reports").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
+        supabase.from("home_visit_reports").select("visit_date").gte("visit_date", sixMonthsAgo.toISOString()),
+        supabase.from("school_visit_reports").select("visit_date").gte("visit_date", sixMonthsAgo.toISOString())
+      ]);
 
-        // Group by month
-        const monthlyData: Record<string, number> = {};
-        const processReports = (reports: any[], dateField: string) => {
-          reports?.forEach(r => {
-            const month = format(new Date(r[dateField]), "MMM yyyy");
-            monthlyData[month] = (monthlyData[month] || 0) + 1;
-          });
-        };
+      // Group by month
+      const monthlyData: Record<string, number> = {};
+      const processReports = (reports: any[], dateField: string) => {
+        reports?.forEach(r => {
+          const month = format(new Date(r[dateField]), "MMM yyyy");
+          monthlyData[month] = (monthlyData[month] || 0) + 1;
+        });
+      };
 
-        processReports(activityReports.data || [], "created_at");
-        processReports(programReports.data || [], "created_at");
-        processReports(homeVisits.data || [], "visit_date");
-        processReports(schoolVisits.data || [], "visit_date");
+      processReports(activityReports.data || [], "created_at");
+      processReports(programReports.data || [], "created_at");
+      processReports(homeVisits.data || [], "visit_date");
+      processReports(schoolVisits.data || [], "visit_date");
 
-        const reportsTimeline = Object.entries(monthlyData)
-          .map(([month, count]) => ({ month, reports: count }))
-          .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+      const reportsTimeline = Object.entries(monthlyData)
+        .map(([month, count]) => ({ month, reports: count }))
+        .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
-        // Program Performance
-        const [children, feeding, family, kipawa] = await Promise.all([
-          supabase.from("children").select("id"),
-          supabase.from("feeding_program").select("id"),
-          supabase.from("family_adoption").select("id"),
-          supabase.from("kipawa_sato").select("id")
-        ]);
+      // Program Performance
+      const [children, feeding, family, kipawa] = await Promise.all([
+        supabase.from("children").select("id"),
+        supabase.from("feeding_program").select("id"),
+        supabase.from("family_adoption").select("id"),
+        supabase.from("kipawa_sato").select("id")
+      ]);
 
-        const programPerformance = [
-          { name: "Education", value: children.data?.length || 0 },
-          { name: "Feeding", value: feeding.data?.length || 0 },
-          { name: "Family Adoption", value: family.data?.length || 0 },
-          { name: "Kipawa Sato", value: kipawa.data?.length || 0 }
-        ];
+      const programPerformance = [
+        { name: "Education", value: children.data?.length || 0 },
+        { name: "Feeding", value: feeding.data?.length || 0 },
+        { name: "Family Adoption", value: family.data?.length || 0 },
+        { name: "Kipawa Sato", value: kipawa.data?.length || 0 }
+      ];
 
-        // Location Distribution
-        const childrenWithLocation = await supabase.from("children").select("residence");
-        const locationDist = childrenWithLocation.data?.reduce((acc, c) => {
-          const loc = c.residence || "Unknown";
-          acc[loc] = (acc[loc] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
+      // Location Distribution
+      const childrenWithLocation = await supabase.from("children").select("residence");
+      const locationDist = childrenWithLocation.data?.reduce((acc, c) => {
+        const loc = c.residence || "Unknown";
+        acc[loc] = (acc[loc] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
-        const locationDistribution = Object.entries(locationDist || {}).map(([location, count]) => ({
-          location,
-          count: count as number
-        }));
+      const locationDistribution = Object.entries(locationDist || {}).map(([location, count]) => ({
+        location,
+        count: count as number
+      }));
 
-        return {
-          reportsTimeline,
-          programPerformance,
-          locationDistribution
-        };
-      } catch (error) {
-        console.error('Charts data fetch error:', error);
-        toast.error('Failed to load charts data');
-        throw error;
-      }
+      return {
+        reportsTimeline,
+        programPerformance,
+        locationDistribution
+      };
     }
   });
 
   // Fetch Reports Table Data
-  const { data: reportsData, isLoading: isReportsLoading, error: reportsError, refetch: refetchReports } = useQuery({
+  const { data: reportsData, refetch: refetchReports } = useQuery({
     queryKey: ["reports-table", dateFilter, programFilter, locationFilter, reportTypeFilter],
     queryFn: async () => {
-      try {
-        let reports: Report[] = [];
+      let reports: Report[] = [];
 
-        // Fetch different report types
-        if (reportTypeFilter === "all" || reportTypeFilter === "activity") {
-          const { data } = await supabase
-            .from("activity_reports")
-            .select("id, staff, program, reporting_date, created_at")
-            .order("reporting_date", { ascending: false });
-          
-          reports.push(...(data?.map(r => ({
-            id: r.id,
-            type: "Activity Report",
-            staff: r.staff,
-            program: r.program,
-            date: r.reporting_date,
-            status: "Submitted"
-          })) || []));
-        }
-
-        if (reportTypeFilter === "all" || reportTypeFilter === "program") {
-          const { data } = await supabase
-            .from("program_reports")
-            .select("id, staff, program, reporting_date, created_at")
-            .order("reporting_date", { ascending: false });
-          
-          reports.push(...(data?.map(r => ({
-            id: r.id,
-            type: "Program Report",
-            staff: r.staff,
-            program: r.program,
-            date: r.reporting_date,
-            status: "Submitted"
-          })) || []));
-        }
-
-        if (reportTypeFilter === "all" || reportTypeFilter === "home") {
-          const { data } = await supabase
-            .from("home_visit_reports")
-            .select("id, staff, location, visit_date, created_at")
-            .order("visit_date", { ascending: false });
-          
-          reports.push(...(data?.map(r => ({
-            id: r.id,
-            type: "Home Visit",
-            staff: r.staff,
-            program: "Home Visit Program",
-            date: r.visit_date,
-            status: "Submitted",
-            location: r.location
-          })) || []));
-        }
-
-        if (reportTypeFilter === "all" || reportTypeFilter === "school") {
-          const { data } = await supabase
-            .from("school_visit_reports")
-            .select("id, staff, location, visit_date, created_at")
-            .order("visit_date", { ascending: false });
-          
-          reports.push(...(data?.map(r => ({
-            id: r.id,
-            type: "School Visit",
-            staff: r.staff,
-            program: "School Visit Program",
-            date: r.visit_date,
-            status: "Submitted",
-            location: r.location
-          })) || []));
-        }
-
-        // Apply filters
-        if (locationFilter !== "all") {
-          reports = reports.filter(r => r.location === locationFilter);
-        }
-
-        return reports.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      } catch (error) {
-        console.error('Reports data fetch error:', error);
-        toast.error('Failed to load reports table');
-        throw error;
+      // Fetch different report types
+      if (reportTypeFilter === "all" || reportTypeFilter === "activity") {
+        const { data } = await supabase
+          .from("activity_reports")
+          .select("id, staff, program, reporting_date, created_at")
+          .order("reporting_date", { ascending: false });
+        
+        reports.push(...(data?.map(r => ({
+          id: r.id,
+          type: "Activity Report",
+          staff: r.staff,
+          program: r.program,
+          date: r.reporting_date,
+          status: "Submitted"
+        })) || []));
       }
+
+      if (reportTypeFilter === "all" || reportTypeFilter === "program") {
+        const { data } = await supabase
+          .from("program_reports")
+          .select("id, staff, program, reporting_date, created_at")
+          .order("reporting_date", { ascending: false });
+        
+        reports.push(...(data?.map(r => ({
+          id: r.id,
+          type: "Program Report",
+          staff: r.staff,
+          program: r.program,
+          date: r.reporting_date,
+          status: "Submitted"
+        })) || []));
+      }
+
+      if (reportTypeFilter === "all" || reportTypeFilter === "home") {
+        const { data } = await supabase
+          .from("home_visit_reports")
+          .select("id, staff, location, visit_date, created_at")
+          .order("visit_date", { ascending: false });
+        
+        reports.push(...(data?.map(r => ({
+          id: r.id,
+          type: "Home Visit",
+          staff: r.staff,
+          program: "Home Visit Program",
+          date: r.visit_date,
+          status: "Submitted",
+          location: r.location
+        })) || []));
+      }
+
+      if (reportTypeFilter === "all" || reportTypeFilter === "school") {
+        const { data } = await supabase
+          .from("school_visit_reports")
+          .select("id, staff, location, visit_date, created_at")
+          .order("visit_date", { ascending: false });
+        
+        reports.push(...(data?.map(r => ({
+          id: r.id,
+          type: "School Visit",
+          staff: r.staff,
+          program: "School Visit Program",
+          date: r.visit_date,
+          status: "Submitted",
+          location: r.location
+        })) || []));
+      }
+
+      // Apply filters
+      if (locationFilter !== "all") {
+        reports = reports.filter(r => r.location === locationFilter);
+      }
+
+      return reports.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
   });
 
@@ -383,53 +360,6 @@ export default function ReportsAnalytics() {
     toast.success("Report exported successfully");
   };
 
-  // Show loading state
-  if (isDashboardLoading || isChartsLoading || isReportsLoading) {
-    return (
-      <div className="container mx-auto p-6 space-y-8">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading analytics data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (dashboardError || chartsError || reportsError) {
-    return (
-      <div className="container mx-auto p-6">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              Failed to Load Analytics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              We encountered an error while loading the analytics data. Please try again.
-            </p>
-            {(dashboardError || chartsError || reportsError) && (
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-xs font-mono break-all">
-                  {(dashboardError as Error)?.message || 
-                   (chartsError as Error)?.message || 
-                   (reportsError as Error)?.message}
-                </p>
-              </div>
-            )}
-            <Button onClick={() => window.location.reload()} className="w-full">
-              Reload Page
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
@@ -438,7 +368,7 @@ export default function ReportsAnalytics() {
           <h1 className="text-4xl font-bold text-foreground">Reports & Analytics</h1>
           <p className="text-muted-foreground mt-2">Comprehensive insights into programs and beneficiaries</p>
         </div>
-        <Button onClick={handleExport} className="gap-2" disabled={!reportsData}>
+        <Button onClick={handleExport} className="gap-2">
           <Download className="h-4 w-4" />
           Export Data
         </Button>
