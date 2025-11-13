@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { downloadExcel } from '@/lib/downloadUtils';
+import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 
 interface Child {
   id: string;
@@ -281,7 +282,7 @@ export default function SchoolTransport() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+        <Card className={getCardStyles(0)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Students Receiving Support</CardTitle>
             <Bus className="h-4 w-4 text-muted-foreground" />
@@ -294,7 +295,7 @@ export default function SchoolTransport() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className={getCardStyles(1)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Students</CardTitle>
           </CardHeader>

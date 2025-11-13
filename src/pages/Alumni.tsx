@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { LiveUserPresence } from "@/components/LiveUserPresence";
+import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 
 export default function Alumni() {
   const navigate = useNavigate();
@@ -351,7 +352,7 @@ export default function Alumni() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className={getCardStyles(0)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Alumni</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -362,7 +363,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={getCardStyles(1)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Working</CardTitle>
             <Briefcase className="h-4 w-4 text-green-600" />
@@ -373,7 +374,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={getCardStyles(2)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Studying</CardTitle>
             <GraduationCap className="h-4 w-4 text-blue-600" />
@@ -384,7 +385,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={getCardStyles(3)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Entrepreneurs</CardTitle>
             <Award className="h-4 w-4 text-purple-600" />
@@ -395,7 +396,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={getCardStyles(4)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Year</CardTitle>
             <Calendar className="h-4 w-4 text-orange-600" />
@@ -477,8 +478,8 @@ export default function Alumni() {
 
       {/* Alumni Cards with Real-time Updates */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAlumni?.map((alumnus) => (
-          <Card key={alumnus.id} className="hover:shadow-lg transition-all duration-300 group animate-scale-in">
+        {filteredAlumni?.map((alumnus, index) => (
+          <Card key={alumnus.id} className={`${getCardStyles((index % 6) as CardVariant)} hover:shadow-lg transition-all duration-300 group animate-scale-in`}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">

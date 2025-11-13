@@ -42,6 +42,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { downloadExcel } from "@/lib/downloadUtils";
+import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 
 interface Replacement {
   id: string;
@@ -280,7 +281,7 @@ export default function Replacements() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className={getCardStyles(0)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Replacements</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -289,7 +290,7 @@ export default function Replacements() {
             <div className="text-2xl font-bold">{replacements.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={getCardStyles(1)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Month</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -303,7 +304,7 @@ export default function Replacements() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={getCardStyles(2)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Schools</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -312,7 +313,7 @@ export default function Replacements() {
             <div className="text-2xl font-bold">{uniqueSchools.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={getCardStyles(3)}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Locations</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
