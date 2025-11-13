@@ -714,7 +714,8 @@ export default function Children() {
                         <AlertDialogTrigger asChild>
                           <Button 
                             size="sm" 
-                            variant="destructive"
+                            variant="outline"
+                            className="bg-background text-foreground hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
