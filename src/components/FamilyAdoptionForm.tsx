@@ -24,6 +24,8 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
     category: family?.category || "",
     no_of_beneficiaries: family?.no_of_beneficiaries?.toString() || "",
     sponsor: family?.sponsor || "",
+    family_status: family?.family_status || "",
+    source_of_income: family?.source_of_income || "",
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -46,6 +48,8 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
         category: formData.category as "Guardian Ration" | "Home Based Care" | null || null,
         no_of_beneficiaries: formData.no_of_beneficiaries ? parseInt(formData.no_of_beneficiaries) : null,
         sponsor: formData.sponsor as "NSP-AID" | "Donation" | null || null,
+        family_status: formData.family_status || null,
+        source_of_income: formData.source_of_income || null,
       };
 
       if (family) {
@@ -170,6 +174,30 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
               <SelectItem value="Donation">Donation</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="family_status">Family Status</Label>
+          <Select value={formData.family_status} onValueChange={(value) => handleInputChange('family_status', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select family status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Single Parent Home">Single Parent Home</SelectItem>
+              <SelectItem value="No Parent">No Parent</SelectItem>
+              <SelectItem value="Dual Parent Home">Dual Parent Home</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="source_of_income">Source of Income</Label>
+          <Input
+            id="source_of_income"
+            value={formData.source_of_income}
+            onChange={(e) => handleInputChange('source_of_income', e.target.value)}
+            placeholder="e.g., Small business, Employment, etc."
+          />
         </div>
       </div>
 

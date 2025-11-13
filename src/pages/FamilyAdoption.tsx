@@ -326,6 +326,12 @@ export default function FamilyAdoption() {
               <div className="text-sm text-muted-foreground">
                 <strong>Sponsor:</strong> {family.sponsor || 'Not specified'}
               </div>
+              <div className="text-sm text-muted-foreground">
+                <strong>Family Status:</strong> {family.family_status || 'Not specified'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <strong>Source of Income:</strong> {family.source_of_income || 'Not specified'}
+              </div>
               
               <div className="flex gap-2 pt-2">
                 <Button
@@ -431,6 +437,17 @@ export default function FamilyAdoption() {
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground">Sponsor</h4>
                   <p className="text-base">{viewingFamily.sponsor || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Family Status</h4>
+                  <p className="text-base">{viewingFamily.family_status || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground">Source of Income</h4>
+                  <p className="text-base">{viewingFamily.source_of_income || 'Not specified'}</p>
                 </div>
               </div>
               
