@@ -352,7 +352,7 @@ export default function Alumni() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className={getCardStyles(0)}>
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Alumni</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -363,7 +363,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card className={getCardStyles(1)}>
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Working</CardTitle>
             <Briefcase className="h-4 w-4 text-green-600" />
@@ -374,7 +374,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card className={getCardStyles(2)}>
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Studying</CardTitle>
             <GraduationCap className="h-4 w-4 text-blue-600" />
@@ -385,7 +385,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card className={getCardStyles(3)}>
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Entrepreneurs</CardTitle>
             <Award className="h-4 w-4 text-purple-600" />
@@ -396,7 +396,7 @@ export default function Alumni() {
           </CardContent>
         </Card>
 
-        <Card className={getCardStyles(4)}>
+        <Card className={`${getCardStyles(4)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Year</CardTitle>
             <Calendar className="h-4 w-4 text-orange-600" />

@@ -281,7 +281,7 @@ export default function Replacements() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className={getCardStyles(0)}>
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Replacements</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -290,7 +290,7 @@ export default function Replacements() {
             <div className="text-2xl font-bold">{replacements.length}</div>
           </CardContent>
         </Card>
-        <Card className={getCardStyles(1)}>
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Month</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -304,7 +304,7 @@ export default function Replacements() {
             </div>
           </CardContent>
         </Card>
-        <Card className={getCardStyles(2)}>
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Schools</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -313,7 +313,7 @@ export default function Replacements() {
             <div className="text-2xl font-bold">{uniqueSchools.length}</div>
           </CardContent>
         </Card>
-        <Card className={getCardStyles(3)}>
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Locations</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
