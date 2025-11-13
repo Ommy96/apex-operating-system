@@ -95,6 +95,8 @@ export const formatFamilyAdoptionData = (families: any[]) => {
     'Gender': family.gender || 'Not specified',
     'Category': family.category || 'Not specified',
     'Residence': family.residence || 'Not specified',
+    'Family Status': family.family_status || 'Not specified',
+    'Source of Income': family.source_of_income || 'Not specified',
     'Sponsor': family.sponsor || 'Not specified',
     'Number of Beneficiaries': family.no_of_beneficiaries || 0,
     'Created Date': new Date(family.created_at).toLocaleDateString(),
