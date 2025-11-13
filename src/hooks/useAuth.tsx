@@ -131,83 +131,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          try {
-            // Fetch user role before setting loading to false
-            const role = await fetchUserRole(session.user.id);
-            if (mounted) {
-              setUserRole(role);
-              setLoading(false);
-            }
-          } catch (error) {
-            console.error('Error fetching role in auth state change:', error);
-            if (mounted) {
-              setUserRole('staff');
-              setLoading(false);
-            }
-          }
-        } else {
-          if (mounted) {
-            setUserRole(null);
-            // Clean up real-time subscription
-            if (roleChangeChannel) {
-              supabase.removeChannel(roleChangeChannel);
-              setRoleChangeChannel(null);
-            }
-            setLoading(false);
-          }
-        }
-      }
-    );
 
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+    const handleSession = (session: Session | null) => {
       if (!mounted) return;
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        setLoading(false);
-        return;
-      }
-      
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
-        try {
-          // Fetch user role for existing session before setting loading to false
-          const role = await fetchUserRole(session.user.id);
-          if (mounted) {
-            setUserRole(role);
-            setLoading(false);
+        // Defer Supabase calls to avoid deadlocks inside onAuthStateChange
+        setLoading(true);
+        setTimeout(async () => {
+          try {
+            const role = await fetchUserRole(session.user!.id);
+            if (mounted) setUserRole(role);
+          } catch (err) {
+            console.error('Error fetching role (deferred):', err);
+            if (mounted) setUserRole('staff');
+          } finally {
+            if (mounted) setLoading(false);
           }
-        } catch (error) {
-          console.error('Error fetching role on init:', error);
-          if (mounted) {
-            setUserRole('staff');
-            setLoading(false);
-          }
-        }
+        }, 0);
       } else {
-        if (mounted) {
-          setLoading(false);
+        setUserRole(null);
+        // Clean up real-time subscription
+        if (roleChangeChannel) {
+          supabase.removeChannel(roleChangeChannel);
+          setRoleChangeChannel(null);
         }
-      }
-    }).catch(error => {
-      console.error('Error in getSession:', error);
-      if (mounted) {
         setLoading(false);
       }
+    };
+    
+    // Set up auth state listener with a synchronous callback only
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      handleSession(session);
     });
+
+    // Check for existing session and initialize state
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (!mounted) return;
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          return;
+        }
+        handleSession(session);
+      })
+      .catch(error => {
+        console.error('Error in getSession:', error);
+        if (mounted) setLoading(false);
+      });
 
     return () => {
       mounted = false;
