@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 
 export default function ActivityReports() {
   const { isManagement, isStaff, userRole, user } = useAuth();
@@ -289,7 +290,7 @@ export default function ActivityReports() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -300,7 +301,7 @@ export default function ActivityReports() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Month</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -311,7 +312,7 @@ export default function ActivityReports() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Programs</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -322,7 +323,7 @@ export default function ActivityReports() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Staff Contributors</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
