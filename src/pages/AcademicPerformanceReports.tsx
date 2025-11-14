@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { useAuth } from '@/hooks/useAuth';
+import { getCardStyles, CardVariant } from '@/lib/cardStyles';
 
 interface AcademicRecord {
   id: string;
@@ -191,56 +192,56 @@ export default function AcademicPerformanceReports() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-primary to-primary-dark">
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">Total Records</CardTitle>
-            <BookOpen className="h-4 w-4 text-primary-foreground/80" />
+            <CardTitle className="text-sm font-medium">Total Records</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">{filteredRecords.length}</div>
-            <p className="text-xs text-primary-foreground/80">Academic records</p>
+            <div className="text-2xl font-bold">{filteredRecords.length}</div>
+            <p className="text-xs text-muted-foreground">Academic records</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-secondary to-secondary-dark">
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-secondary-foreground">Students</CardTitle>
-            <GraduationCap className="h-4 w-4 text-secondary-foreground/80" />
+            <CardTitle className="text-sm font-medium">Students</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-secondary-foreground">
+            <div className="text-2xl font-bold">
               {new Set(filteredRecords.map(r => r.child_id)).size}
             </div>
-            <p className="text-xs text-secondary-foreground/80">Tracked students</p>
+            <p className="text-xs text-muted-foreground">Tracked students</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-accent to-accent-dark">
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-accent-foreground">Schools</CardTitle>
-            <BookOpen className="h-4 w-4 text-accent-foreground/80" />
+            <CardTitle className="text-sm font-medium">Schools</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent-foreground">
+            <div className="text-2xl font-bold">
               {new Set(filteredRecords.map(r => r.children.institution_name).filter(Boolean)).size}
             </div>
-            <p className="text-xs text-accent-foreground/80">Active schools</p>
+            <p className="text-xs text-muted-foreground">Active schools</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary-light to-secondary-light">
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Latest Assessment</CardTitle>
-            <Calendar className="h-4 w-4 text-white/80" />
+            <CardTitle className="text-sm font-medium">Latest Assessment</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-bold">
               {filteredRecords.length > 0 
                 ? new Date(filteredRecords[0].activity_date).toLocaleDateString()
                 : 'No data'
               }
             </div>
-            <p className="text-xs text-white/80">Most recent</p>
+            <p className="text-xs text-muted-foreground">Most recent record</p>
           </CardContent>
         </Card>
       </div>

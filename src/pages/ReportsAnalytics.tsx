@@ -20,6 +20,7 @@ import { Bar, BarChart, Line, LineChart, Pie, PieChart as RechartsPieChart, Cell
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 
 interface StaffReport {
   id: string;
@@ -1021,7 +1022,7 @@ export default function ReportsAnalytics() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -1032,7 +1033,7 @@ export default function ReportsAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Staff</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -1043,7 +1044,7 @@ export default function ReportsAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Programs</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
@@ -1054,7 +1055,7 @@ export default function ReportsAnalytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />

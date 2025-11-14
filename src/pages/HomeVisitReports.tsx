@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
+import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 
 export default function HomeVisitReports() {
   const { isManagement, isStaff, userRole, user } = useAuth();
@@ -286,47 +287,47 @@ export default function HomeVisitReports() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-primary to-primary-dark">
+        <Card className={`${getCardStyles(0)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">Total Reports</CardTitle>
-            <FileText className="h-4 w-4 text-primary-foreground/80" />
+            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">{reportStats?.totalReports || 0}</div>
-            <p className="text-xs text-primary-foreground/80">All time</p>
+            <div className="text-2xl font-bold">{reportStats?.totalReports || 0}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-secondary to-secondary-dark">
+        <Card className={`${getCardStyles(1)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-secondary-foreground">This Month</CardTitle>
-            <Calendar className="h-4 w-4 text-secondary-foreground/80" />
+            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-secondary-foreground">{reportStats?.thisMonth || 0}</div>
-            <p className="text-xs text-secondary-foreground/80">Reports submitted</p>
+            <div className="text-2xl font-bold">{reportStats?.thisMonth || 0}</div>
+            <p className="text-xs text-muted-foreground">Reports submitted</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-accent to-accent-dark">
+        <Card className={`${getCardStyles(2)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-accent-foreground">Active Locations</CardTitle>
-            <MapPin className="h-4 w-4 text-accent-foreground/80" />
+            <CardTitle className="text-sm font-medium">Active Locations</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent-foreground">{Object.keys(reportStats?.locationBreakdown || {}).length}</div>
-            <p className="text-xs text-accent-foreground/80">Locations visited</p>
+            <div className="text-2xl font-bold">{Object.keys(reportStats?.locationBreakdown || {}).length}</div>
+            <p className="text-xs text-muted-foreground">Locations visited</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary-light to-secondary-light">
+        <Card className={`${getCardStyles(3)} hover-scale`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Staff Contributors</CardTitle>
-            <Users className="h-4 w-4 text-white/80" />
+            <CardTitle className="text-sm font-medium">Staff Contributors</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{reportStats?.uniqueStaff || 0}</div>
-            <p className="text-xs text-white/80">Contributing staff</p>
+            <div className="text-2xl font-bold">{reportStats?.uniqueStaff || 0}</div>
+            <p className="text-xs text-muted-foreground">Contributing staff</p>
           </CardContent>
         </Card>
       </div>
