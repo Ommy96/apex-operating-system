@@ -16,6 +16,7 @@ import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
 import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { convertGoogleDriveUrl } from '@/lib/imageUtils';
+import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -202,7 +203,7 @@ export default function ChildProfile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <Card>
+          <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
             <CardHeader className="text-center">
               <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
                 {child.photo_url ? (
@@ -239,10 +240,6 @@ export default function ChildProfile() {
                     <span className="text-muted-foreground">Enrollment Date:</span>
                     <span>{new Date(child.enrollment_date).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Address:</span>
-                    <span className="text-right">{child.address || 'Not specified'}</span>
-                  </div>
                 </div>
               </div>
 
@@ -256,10 +253,6 @@ export default function ChildProfile() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Phone:</span>
                     <span>{child.guardian_phone || 'Not specified'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Email:</span>
-                    <span>{child.guardian_email || 'Not specified'}</span>
                   </div>
                 </div>
               </div>
