@@ -635,11 +635,13 @@ export type Database = {
           category: Database["public"]["Enums"]["family_category_type"] | null
           created_at: string
           created_by: string | null
+          family_status: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           known_name: string
           no_of_beneficiaries: number | null
           residence: Database["public"]["Enums"]["residence_type"] | null
+          source_of_income: string | null
           sponsor: Database["public"]["Enums"]["sponsor_type"] | null
           updated_at: string
         }
@@ -648,11 +650,13 @@ export type Database = {
           category?: Database["public"]["Enums"]["family_category_type"] | null
           created_at?: string
           created_by?: string | null
+          family_status?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           known_name: string
           no_of_beneficiaries?: number | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
+          source_of_income?: string | null
           sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
           updated_at?: string
         }
@@ -661,11 +665,13 @@ export type Database = {
           category?: Database["public"]["Enums"]["family_category_type"] | null
           created_at?: string
           created_by?: string | null
+          family_status?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           known_name?: string
           no_of_beneficiaries?: number | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
+          source_of_income?: string | null
           sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
           updated_at?: string
         }
