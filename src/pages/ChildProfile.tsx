@@ -317,8 +317,8 @@ export default function ChildProfile() {
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {programs.map((program) => (
-                    <Card key={program.id}>
+                  {programs.map((program, index) => (
+                    <Card key={program.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <div>
@@ -377,7 +377,7 @@ export default function ChildProfile() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Card>
+                <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Home Visit Report</CardTitle>
                   </CardHeader>
@@ -427,7 +427,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">School Visit Report</CardTitle>
                   </CardHeader>
@@ -477,7 +477,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Medical Visit Report</CardTitle>
                   </CardHeader>
@@ -527,7 +527,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Follow-up Visit Report</CardTitle>
                   </CardHeader>
@@ -582,8 +582,8 @@ export default function ChildProfile() {
                 <div>
                   <h4 className="text-md font-semibold mb-3">Other Visit Reports</h4>
                   <div className="space-y-3">
-                    {documents.filter(doc => doc.category === 'other_visit_report').map((document) => (
-                      <Card key={document.id}>
+                    {documents.filter(doc => doc.category === 'other_visit_report').map((document, index) => (
+                      <Card key={document.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -660,7 +660,7 @@ export default function ChildProfile() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Card>
+                <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Profile</CardTitle>
                   </CardHeader>
@@ -709,7 +709,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Consent Form</CardTitle>
                   </CardHeader>
@@ -758,7 +758,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Follow-up Form</CardTitle>
                   </CardHeader>
@@ -807,7 +807,7 @@ export default function ChildProfile() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
                   <CardHeader>
                     <CardTitle className="text-base">Intake Form</CardTitle>
                   </CardHeader>
@@ -861,8 +861,8 @@ export default function ChildProfile() {
                 <div>
                   <h4 className="text-md font-semibold mb-3">Other Documents</h4>
                   <div className="space-y-3">
-                    {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).map((document) => (
-                        <Card key={document.id}>
+                    {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).map((document, index) => (
+                        <Card key={document.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
                           <CardContent className="p-4">
                             <div className="flex justify-between items-center">
                               <div>

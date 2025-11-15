@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
+import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 
 export default function ChildReport() {
   const { id } = useParams();
@@ -465,7 +466,7 @@ export default function ChildReport() {
       <div className="space-y-6">
         {/* Profile Section */}
         <Collapsible open={profileOpen} onOpenChange={setProfileOpen}>
-          <Card className="animate-fade-in">
+          <Card className={`${getCardStyles(0 as CardVariant)} hover-scale animate-fade-in`}>
             <CollapsibleTrigger className="w-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -554,7 +555,7 @@ export default function ChildReport() {
 
         {/* Education Section */}
         <Collapsible open={educationOpen} onOpenChange={setEducationOpen}>
-          <Card className="animate-fade-in">
+          <Card className={`${getCardStyles(1 as CardVariant)} hover-scale animate-fade-in`}>
             <CollapsibleTrigger className="w-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -616,7 +617,7 @@ export default function ChildReport() {
 
         {/* Academic Performance Section */}
         <Collapsible open={academicOpen} onOpenChange={setAcademicOpen}>
-          <Card className="animate-fade-in">
+          <Card className={`${getCardStyles(2 as CardVariant)} hover-scale animate-fade-in`}>
             <CollapsibleTrigger className="w-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -672,7 +673,7 @@ export default function ChildReport() {
 
         {/* Visits Section */}
         <Collapsible open={visitsOpen} onOpenChange={setVisitsOpen}>
-          <Card className="animate-fade-in">
+          <Card className={`${getCardStyles(3 as CardVariant)} hover-scale animate-fade-in`}>
             <CollapsibleTrigger className="w-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -758,7 +759,7 @@ export default function ChildReport() {
 
         {/* Documents Section */}
         <Collapsible open={documentsOpen} onOpenChange={setDocumentsOpen}>
-          <Card className="animate-fade-in">
+          <Card className={`${getCardStyles(4 as CardVariant)} hover-scale animate-fade-in`}>
             <CollapsibleTrigger className="w-full">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -816,7 +817,7 @@ export default function ChildReport() {
         {/* Health & Welfare Notes Section */}
         {(child.medical_notes || child.special_condition) && (
           <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
-            <Card className="animate-fade-in">
+            <Card className={`${getCardStyles(5 as CardVariant)} hover-scale animate-fade-in`}>
               <CollapsibleTrigger className="w-full">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Health & Welfare Notes</CardTitle>
