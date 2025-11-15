@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Constants } from '@/integrations/supabase/types';
 
 interface ProgramEnrollmentFormProps {
   childId: string | undefined;
@@ -14,9 +15,9 @@ interface ProgramEnrollmentFormProps {
 }
 
 export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramEnrollmentFormProps) {
-  const [availablePrograms, setAvailablePrograms] = useState<any[]>([]);
+  const [availablePrograms, setAvailablePrograms] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    program_id: '',
+    program_name: '',
     enrollment_date: new Date().toISOString().split('T')[0],
     notes: ''
   });
@@ -28,26 +29,21 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
 
   const fetchAvailablePrograms = async () => {
     try {
-      // Get all programs
-      const { data: allPrograms, error: programsError } = await supabase
-        .from('programs')
-        .select('*')
-        .eq('is_active', true);
-
-      if (programsError) throw programsError;
+      // Get all program types from the enum
+      const allPrograms = Constants.public.Enums.program_type;
 
       // Get programs child is already enrolled in
       const { data: enrolledPrograms, error: enrolledError } = await supabase
         .from('child_programs')
-        .select('program_id')
+        .select('program_id, programs(name)')
         .eq('child_id', childId)
         .eq('status', 'active');
 
       if (enrolledError) throw enrolledError;
 
       // Filter out already enrolled programs
-      const enrolledProgramIds = enrolledPrograms?.map(ep => ep.program_id) || [];
-      const available = allPrograms?.filter(program => !enrolledProgramIds.includes(program.id)) || [];
+      const enrolledProgramNames = enrolledPrograms?.map(ep => (ep.programs as any)?.name) || [];
+      const available = allPrograms.filter(program => !enrolledProgramNames.includes(program));
       
       setAvailablePrograms(available);
     } catch (error) {
@@ -62,15 +58,42 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!childId || !formData.program_id) return;
+    if (!childId || !formData.program_name) return;
 
     setLoading(true);
     try {
+      // First, find or create the program in the programs table
+      const { data: existingProgram, error: searchError } = await supabase
+        .from('programs')
+        .select('id')
+        .eq('name', formData.program_name)
+        .maybeSingle();
+
+      if (searchError) throw searchError;
+
+      let programId = existingProgram?.id;
+
+      // If program doesn't exist, create it
+      if (!programId) {
+        const { data: newProgram, error: createError } = await supabase
+          .from('programs')
+          .insert({
+            name: formData.program_name,
+            is_active: true
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        programId = newProgram.id;
+      }
+
+      // Now enroll the child in the program
       const { error } = await supabase
         .from('child_programs')
         .insert({
           child_id: childId,
-          program_id: formData.program_id,
+          program_id: programId,
           enrollment_date: formData.enrollment_date,
           notes: formData.notes || null,
           status: 'active'
@@ -103,15 +126,15 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="program_id">Program</Label>
-        <Select value={formData.program_id} onValueChange={(value) => handleChange('program_id', value)}>
+        <Label htmlFor="program_name">Program</Label>
+        <Select value={formData.program_name} onValueChange={(value) => handleChange('program_name', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Select a program" />
           </SelectTrigger>
           <SelectContent>
             {availablePrograms.map((program) => (
-              <SelectItem key={program.id} value={program.id}>
-                {program.name}
+              <SelectItem key={program} value={program}>
+                {program}
               </SelectItem>
             ))}
           </SelectContent>
@@ -148,7 +171,7 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={loading || !formData.program_id}>
+        <Button type="submit" disabled={loading || !formData.program_name}>
           {loading ? 'Enrolling...' : 'Enroll in Program'}
         </Button>
       </div>
