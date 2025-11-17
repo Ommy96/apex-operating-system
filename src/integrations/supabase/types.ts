@@ -1520,6 +1520,7 @@ export type Database = {
         | "Tertiary"
         | "Special School"
         | "Junior School"
+        | "Junior Secondary School"
       amount_status_type: "Loan" | "Grant"
       family_category_type: "Guardian Ration" | "Home Based Care"
       feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
@@ -1703,6 +1704,7 @@ export const Constants = {
         "Tertiary",
         "Special School",
         "Junior School",
+        "Junior Secondary School",
       ],
       amount_status_type: ["Loan", "Grant"],
       family_category_type: ["Guardian Ration", "Home Based Care"],
