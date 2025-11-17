@@ -69,6 +69,7 @@ interface Filters {
   location: string;
   academicLevel: string;
   donor: string;
+  grade: string;
 }
 
 export default function Children() {
@@ -85,7 +86,8 @@ export default function Children() {
   const [filters, setFilters] = useState<Filters>({
     location: '',
     academicLevel: '',
-    donor: ''
+    donor: '',
+    grade: ''
   });
 
   const [stats, setStats] = useState<EducationStats>({
@@ -115,6 +117,9 @@ export default function Children() {
 
   // Get unique donors from children data
   const uniqueDonors = [...new Set(children.map(child => child.donor).filter(Boolean))].sort();
+  
+  // Get unique grades from children data
+  const uniqueGrades = [...new Set(children.map(child => child.grade).filter(Boolean))].sort();
 
   // Function to calculate stats from children data
   const calculateStats = (childrenData: Child[]) => {
@@ -138,7 +143,7 @@ export default function Children() {
   }, []);
 
   useEffect(() => {
-    if (filters.location || filters.academicLevel || filters.donor) {
+    if (filters.location || filters.academicLevel || filters.donor || filters.grade) {
       fetchFilteredData();
     }
   }, [filters]);
@@ -189,6 +194,10 @@ export default function Children() {
         query = query.eq('donor', filters.donor);
       }
 
+      if (filters.grade) {
+        query = query.eq('grade', filters.grade);
+      }
+
       const { data, error } = await query.order('first_name');
 
       if (error) throw error;
@@ -232,11 +241,11 @@ export default function Children() {
   };
 
   const clearFilters = () => {
-    setFilters({ location: '', academicLevel: '', donor: '' });
+    setFilters({ location: '', academicLevel: '', donor: '', grade: '' });
     fetchChildren();
   };
 
-  const hasActiveFilters = filters.location || filters.academicLevel || filters.donor;
+  const hasActiveFilters = filters.location || filters.academicLevel || filters.donor || filters.grade;
 
   const getFilteredChildren = () => {
     // Only show children with academic_level (education program)
@@ -565,6 +574,25 @@ export default function Children() {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Year/Grade/Form</label>
+                        <Select
+                          value={filters.grade}
+                          onValueChange={(value) => setFilters(prev => ({ ...prev, grade: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select grade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uniqueGrades.map((grade) => (
+                              <SelectItem key={grade} value={grade}>
+                                {grade}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     
                     {hasActiveFilters && (
@@ -622,6 +650,17 @@ export default function Children() {
                   Donor: {filters.donor}
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, donor: '' }))}
+                    className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {filters.grade && (
+                <Badge variant="secondary" className="gap-1">
+                  Grade: {filters.grade}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, grade: '' }))}
                     className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
                   >
                     <X className="h-3 w-3" />
