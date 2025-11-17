@@ -14,7 +14,7 @@ const feedingProgramSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   gender: z.enum(['Male', 'Female']).optional(),
   type: z.enum(['Kawangware Lunch Hour', 'Kibera Early Dinner']).optional(),
-  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary', 'Secondary School', 'Tertiary', 'Special School', 'Junior School']).optional(),
+  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary School', 'Secondary School', 'Tertiary', 'Special School']).optional(),
   grade: z.string().optional(),
   contact: z.string().optional(),
   school: z.string().optional(),
@@ -168,11 +168,10 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
                     <SelectItem value="Pre Primary">Pre Primary</SelectItem>
                     <SelectItem value="Lower Primary">Lower Primary</SelectItem>
                     <SelectItem value="Upper Primary">Upper Primary</SelectItem>
-                    <SelectItem value="Junior Secondary">Junior Secondary</SelectItem>
+                    <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
                     <SelectItem value="Secondary School">Secondary School</SelectItem>
                     <SelectItem value="Tertiary">Tertiary</SelectItem>
                     <SelectItem value="Special School">Special School</SelectItem>
-                    <SelectItem value="Junior School">Junior School</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

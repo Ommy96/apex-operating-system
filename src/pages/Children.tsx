@@ -63,7 +63,7 @@ interface EducationStats {
 }
 
 type ResidenceType = 'Kibera' | 'Kawangware' | 'Diaspora' | 'Outside Nairobi';
-type AcademicLevelType = 'Pre Primary' | 'Lower Primary' | 'Upper Primary' | 'Junior Secondary' | 'Secondary School' | 'Tertiary' | 'Special School' | 'Junior School';
+type AcademicLevelType = 'Pre Primary' | 'Lower Primary' | 'Upper Primary' | 'Junior Secondary School' | 'Secondary School' | 'Tertiary' | 'Special School';
 
 interface Filters {
   location: string;
@@ -101,11 +101,10 @@ export default function Children() {
     'Pre Primary',
     'Lower Primary',
     'Upper Primary',
-    'Junior Secondary',
+    'Junior Secondary School',
     'Secondary School',
     'Tertiary',
-    'Special School',
-    'Junior School'
+    'Special School'
   ];
 
   const residenceTypes = [
