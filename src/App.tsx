@@ -34,6 +34,7 @@ import Medical from "./pages/Medical";
 import FamilyAdoption from "./pages/FamilyAdoption";
 import SelfEmpowerment from "./pages/SelfEmpowerment";
 import SupportGroups from "./pages/SupportGroups";
+import Documents from "./pages/Documents";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -241,6 +242,13 @@ const App = () => (
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/documents" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Documents />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

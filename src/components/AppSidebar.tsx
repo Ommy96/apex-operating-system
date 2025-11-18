@@ -73,6 +73,7 @@ const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
 };
 
 const systemItems = [
+  { title: "Documents", url: "/documents", icon: FileText },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
