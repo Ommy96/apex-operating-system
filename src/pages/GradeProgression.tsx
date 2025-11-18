@@ -32,45 +32,84 @@ const getNextGrade = (currentGrade: string | null, academicLevel: string | null)
     return { nextGrade: null, nextLevel: null, willGraduate: false };
   }
 
-  // Handle Grades 1-8
-  if (currentGrade) {
-    const gradeNum = parseInt(currentGrade.replace(/\D/g, ''));
-    if (gradeNum >= 1 && gradeNum <= 8) {
-      return { nextGrade: `Grade ${gradeNum + 1}`, nextLevel: academicLevel, willGraduate: false };
-    }
-    // Grade 9 moves to Form 2
-    if (gradeNum === 9) {
-      return { nextGrade: "Form 2", nextLevel: "secondary", willGraduate: false };
-    }
+  // Pre Primary: Play Group → PP1 → PP2 → Grade 1
+  if (currentGrade === "Play Group") {
+    return { nextGrade: "PP1", nextLevel: "Pre Primary", willGraduate: false };
+  }
+  if (currentGrade === "PP1") {
+    return { nextGrade: "PP2", nextLevel: "Pre Primary", willGraduate: false };
+  }
+  if (currentGrade === "PP2") {
+    return { nextGrade: "Grade 1", nextLevel: "Lower Primary", willGraduate: false };
   }
 
-  // Handle Secondary (Form 2, 3, 4)
-  if (academicLevel === "secondary" && currentGrade) {
-    if (currentGrade.includes("2")) {
-      return { nextGrade: "Form 3", nextLevel: "secondary", willGraduate: false };
-    }
-    if (currentGrade.includes("3")) {
-      return { nextGrade: "Form 4", nextLevel: "secondary", willGraduate: false };
-    }
-    if (currentGrade.includes("4")) {
-      return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
-    }
+  // Lower Primary: Grade 1 → 2 → 3 → Grade 4
+  if (currentGrade === "Grade 1") {
+    return { nextGrade: "Grade 2", nextLevel: "Lower Primary", willGraduate: false };
+  }
+  if (currentGrade === "Grade 2") {
+    return { nextGrade: "Grade 3", nextLevel: "Lower Primary", willGraduate: false };
+  }
+  if (currentGrade === "Grade 3") {
+    return { nextGrade: "Grade 4", nextLevel: "Upper Primary", willGraduate: false };
   }
 
-  // Handle Tertiary (1st - 4th Year)
-  if (academicLevel === "tertiary" && currentGrade) {
-    if (currentGrade.includes("1st")) {
-      return { nextGrade: "2nd Year", nextLevel: "tertiary", willGraduate: false };
-    }
-    if (currentGrade.includes("2nd")) {
-      return { nextGrade: "3rd Year", nextLevel: "tertiary", willGraduate: false };
-    }
-    if (currentGrade.includes("3rd")) {
-      return { nextGrade: "4th Year", nextLevel: "tertiary", willGraduate: false };
-    }
-    if (currentGrade.includes("4th")) {
-      return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
-    }
+  // Upper Primary: Grade 4 → 5 → 6 → Grade 7
+  if (currentGrade === "Grade 4") {
+    return { nextGrade: "Grade 5", nextLevel: "Upper Primary", willGraduate: false };
+  }
+  if (currentGrade === "Grade 5") {
+    return { nextGrade: "Grade 6", nextLevel: "Upper Primary", willGraduate: false };
+  }
+  if (currentGrade === "Grade 6") {
+    return { nextGrade: "Grade 7", nextLevel: "Junior Secondary School", willGraduate: false };
+  }
+
+  // Junior Secondary School: Grade 7 → 8 → 9 → Grade 10
+  if (currentGrade === "Grade 7") {
+    return { nextGrade: "Grade 8", nextLevel: "Junior Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Grade 8") {
+    return { nextGrade: "Grade 9", nextLevel: "Junior Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Grade 9") {
+    return { nextGrade: "Grade 10", nextLevel: "Secondary School", willGraduate: false };
+  }
+
+  // Senior School: Grade 10 → 11 → 12 → Graduate/Tertiary
+  if (currentGrade === "Grade 10") {
+    return { nextGrade: "Grade 11", nextLevel: "Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Grade 11") {
+    return { nextGrade: "Grade 12", nextLevel: "Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Grade 12") {
+    return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
+  }
+
+  // Secondary School: Form 2 → 3 → 4 → Graduate
+  if (currentGrade === "Form 2") {
+    return { nextGrade: "Form 3", nextLevel: "Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Form 3") {
+    return { nextGrade: "Form 4", nextLevel: "Secondary School", willGraduate: false };
+  }
+  if (currentGrade === "Form 4") {
+    return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
+  }
+
+  // Tertiary: 1st Year → 2nd → 3rd → 4th → Graduate
+  if (currentGrade === "1st Year") {
+    return { nextGrade: "2nd Year", nextLevel: "Tertiary", willGraduate: false };
+  }
+  if (currentGrade === "2nd Year") {
+    return { nextGrade: "3rd Year", nextLevel: "Tertiary", willGraduate: false };
+  }
+  if (currentGrade === "3rd Year") {
+    return { nextGrade: "4th Year", nextLevel: "Tertiary", willGraduate: false };
+  }
+  if (currentGrade === "4th Year") {
+    return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
   }
 
   return { nextGrade: null, nextLevel: null, willGraduate: false };
