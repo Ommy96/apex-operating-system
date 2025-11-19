@@ -88,6 +88,17 @@ export const formatSupportGroupsData = (groups: any[]) => {
   }));
 };
 
+export const formatDocumentsData = (documents: any[]) => {
+  return documents.map(doc => ({
+    'Document Title': doc.title,
+    'File Name': doc.file_name,
+    'Student': doc.children ? `${doc.children.first_name} ${doc.children.last_name}` : 'N/A',
+    'Category': doc.category || 'Uncategorized',
+    'File Type': doc.file_type || 'Unknown',
+    'Upload Date': new Date(doc.created_at).toLocaleDateString(),
+  }));
+};
+
 export const formatFamilyAdoptionData = (families: any[]) => {
   return families.map(family => ({
     'Known Name': family.known_name,

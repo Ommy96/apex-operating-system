@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Download, Search, Filter, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import { downloadExcel, formatDocumentsData } from "@/lib/downloadUtils";
+import { toast } from "sonner";
 
 interface Document {
   id: string;
@@ -84,13 +86,29 @@ export default function Documents() {
     }
   };
 
+  const handleExportToExcel = () => {
+    if (!filteredDocuments || filteredDocuments.length === 0) {
+      toast.error("No documents to export");
+      return;
+    }
+    const formattedData = formatDocumentsData(filteredDocuments);
+    downloadExcel(formattedData, 'documents_export', 'Documents');
+    toast.success("Documents exported successfully");
+  };
+
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-        <p className="text-muted-foreground">
-          View and manage all documents uploaded for students
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
+          <p className="text-muted-foreground">
+            View and manage all documents uploaded for students
+          </p>
+        </div>
+        <Button onClick={handleExportToExcel} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Export to Excel
+        </Button>
       </div>
 
       <Card>
