@@ -66,8 +66,22 @@ export default function Documents() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleDownload = (url: string, fileName: string) => {
-    window.open(url, '_blank');
+  const handleDownload = async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -181,8 +195,8 @@ export default function Documents() {
                           size="sm"
                           onClick={() => handleDownload(doc.file_url, doc.file_name)}
                         >
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          View
+                          <Download className="h-4 w-4 mr-1" />
+                          Download
                         </Button>
                       </TableCell>
                     </TableRow>
