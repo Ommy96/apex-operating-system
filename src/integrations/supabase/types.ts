@@ -585,6 +585,7 @@ export type Database = {
           child_id: string | null
           created_at: string
           description: string | null
+          family_adoption_id: string | null
           file_name: string
           file_size: number | null
           file_type: string | null
@@ -598,6 +599,7 @@ export type Database = {
           child_id?: string | null
           created_at?: string
           description?: string | null
+          family_adoption_id?: string | null
           file_name: string
           file_size?: number | null
           file_type?: string | null
@@ -611,6 +613,7 @@ export type Database = {
           child_id?: string | null
           created_at?: string
           description?: string | null
+          family_adoption_id?: string | null
           file_name?: string
           file_size?: number | null
           file_type?: string | null
@@ -625,6 +628,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_family_adoption_id_fkey"
+            columns: ["family_adoption_id"]
+            isOneToOne: false
+            referencedRelation: "family_adoption"
             referencedColumns: ["id"]
           },
         ]

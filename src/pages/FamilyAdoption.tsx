@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter, FileText, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FamilyAdoptionForm } from "@/components/FamilyAdoptionForm";
+import { FamilyDocumentLinkForm } from "@/components/FamilyDocumentLinkForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
@@ -22,6 +23,7 @@ export default function FamilyAdoption() {
   const [editingFamily, setEditingFamily] = useState<any>(null);
   const [viewingFamily, setViewingFamily] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [residenceFilter, setResidenceFilter] = useState("");
@@ -34,6 +36,21 @@ export default function FamilyAdoption() {
       const { data, error } = await supabase
         .from('family_adoption')
         .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: familyDocuments, refetch: refetchDocuments } = useQuery({
+    queryKey: ['family-documents', viewingFamily?.id],
+    enabled: !!viewingFamily?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('family_adoption_id', viewingFamily.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -66,6 +83,39 @@ export default function FamilyAdoption() {
   const handleView = (family: any) => {
     setViewingFamily(family);
     setIsViewDialogOpen(true);
+  };
+
+  const handleDocumentSuccess = () => {
+    setIsDocumentDialogOpen(false);
+    refetchDocuments();
+    toast({
+      title: "Success",
+      description: "Document link added successfully",
+    });
+  };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+      refetchDocuments();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (familyId: string) => {
@@ -572,6 +622,107 @@ export default function FamilyAdoption() {
                     </CardContent>
                   </Card>
                 </div>
+              </div>
+
+              {/* Documents Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Documents & Links
+                  </h4>
+                  {isAdmin && (
+                    <Dialog open={isDocumentDialogOpen} onOpenChange={setIsDocumentDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline">
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Link
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add Document Link</DialogTitle>
+                        </DialogHeader>
+                        <FamilyDocumentLinkForm
+                          familyId={viewingFamily.id}
+                          onSuccess={handleDocumentSuccess}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+                
+                {familyDocuments && familyDocuments.length > 0 ? (
+                  <div className="space-y-2">
+                    {familyDocuments.map((doc: any) => (
+                      <Card key={doc.id}>
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className="p-2 rounded-lg bg-primary/10">
+                                <LinkIcon className="h-4 w-4 text-primary" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{doc.title}</p>
+                                {doc.description && (
+                                  <p className="text-xs text-muted-foreground mt-1">{doc.description}</p>
+                                )}
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {doc.category?.replace(/_/g, ' ')}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(doc.created_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                asChild
+                              >
+                                <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
+                              {isAdmin && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this document link? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteDocument(doc.id)}>
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="bg-muted/30">
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-muted-foreground text-center">No documents added yet</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Additional Information */}
