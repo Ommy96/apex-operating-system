@@ -44,7 +44,7 @@ const Dashboard = () => {
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
-        supabase.from('children').select('*', { count: 'exact' }),
+        supabase.from('children').select('*', { count: 'exact' }).not('academic_level', 'is', null),
         supabase.from('feeding_program').select('*', { count: 'exact' }),
         supabase.from('kipawa_sato').select('*', { count: 'exact' }),
         supabase.from('self_empowerment').select('*', { count: 'exact' })
