@@ -38,7 +38,15 @@ interface Child {
   institution_name: string | null;
 }
 
-const REQUIRED_CATEGORIES = ["Profile", "Consent Form", "Follow-Up Form", "Intake Form"];
+const REQUIRED_CATEGORIES = ["profile", "consent_form", "follow_up", "intake_form"];
+
+// Display names for categories
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  profile: "Profile",
+  consent_form: "Consent Form",
+  follow_up: "Follow-Up Form",
+  intake_form: "Intake Form",
+};
 
 export default function Documents() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,6 +150,8 @@ export default function Documents() {
     toast.success("Documents exported successfully");
   };
 
+  const getCategoryDisplayName = (cat: string) => CATEGORY_DISPLAY_NAMES[cat] || cat;
+
   const handleExportMissingToExcel = () => {
     if (!filteredMissingDocs || filteredMissingDocs.length === 0) {
       toast.error("No missing documents data to export");
@@ -151,8 +161,8 @@ export default function Documents() {
       "Student Name": `${child.first_name} ${child.last_name}`,
       "Academic Level": child.academic_level || "N/A",
       "Institution": child.institution_name || "N/A",
-      "Missing Documents": child.missingCategories.join(", "),
-      "Uploaded Documents": child.uploadedCategories.join(", ") || "None",
+      "Missing Documents": child.missingCategories.map(getCategoryDisplayName).join(", "),
+      "Uploaded Documents": child.uploadedCategories.map(getCategoryDisplayName).join(", ") || "None",
     }));
     downloadExcel(formattedData, 'missing_documents_export', 'Missing Documents');
     toast.success("Missing documents exported successfully");
@@ -364,7 +374,7 @@ export default function Documents() {
               <div>
                 <CardTitle>Students Missing Required Documents</CardTitle>
                 <CardDescription>
-                  Required categories: {REQUIRED_CATEGORIES.join(", ")}
+                  Required categories: {REQUIRED_CATEGORIES.map(getCategoryDisplayName).join(", ")}
                 </CardDescription>
               </div>
               <Button onClick={handleExportMissingToExcel} variant="outline">
@@ -415,7 +425,7 @@ export default function Documents() {
                             <div className="flex flex-wrap gap-1">
                               {child.missingCategories.map((cat) => (
                                 <Badge key={cat} variant="destructive" className="text-xs">
-                                  {cat}
+                                  {getCategoryDisplayName(cat)}
                                 </Badge>
                               ))}
                             </div>
@@ -425,7 +435,7 @@ export default function Documents() {
                               {child.uploadedCategories.length > 0 ? (
                                 child.uploadedCategories.map((cat) => (
                                   <Badge key={cat} variant="secondary" className="text-xs">
-                                    {cat}
+                                    {getCategoryDisplayName(cat)}
                                   </Badge>
                                 ))
                               ) : (
