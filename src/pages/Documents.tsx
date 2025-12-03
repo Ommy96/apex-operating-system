@@ -38,7 +38,7 @@ interface Child {
   institution_name: string | null;
 }
 
-const REQUIRED_CATEGORIES = ["School Reports", "National IDs", "Birth Certificates"];
+const REQUIRED_CATEGORIES = ["Profile", "Consent Form", "Follow-Up Form", "Intake Form"];
 
 export default function Documents() {
   const [searchQuery, setSearchQuery] = useState("");
