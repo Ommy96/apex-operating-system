@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Search, Calendar, MapPin, Download, FileText, Users, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,10 +48,7 @@ export default function HomeVisitReports() {
     queryFn: async () => {
       let query = supabase
         .from('home_visit_reports')
-        .select(`
-          *,
-          student:children!home_visit_reports_student_id_fkey(id, first_name, last_name)
-        `);
+        .select('*');
       
       // Staff can only see their own reports
       if (isStaff && user?.id) {
@@ -65,6 +62,27 @@ export default function HomeVisitReports() {
       return data;
     },
   });
+
+  // Fetch children for student name lookup
+  const { data: children } = useQuery({
+    queryKey: ['children-lookup'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('children')
+        .select('id, first_name, last_name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Create a lookup map for children
+  const childrenMap = useMemo(() => {
+    const map = new Map<string, { first_name: string; last_name: string }>();
+    children?.forEach(child => {
+      map.set(child.id, { first_name: child.first_name, last_name: child.last_name });
+    });
+    return map;
+  }, [children]);
 
   // Fetch stats for summary cards
   const { data: reportStats } = useQuery({
@@ -460,8 +478,8 @@ export default function HomeVisitReports() {
                   <div>
                     <h3 className="font-semibold text-sm text-muted-foreground mb-1">Student Name</h3>
                     <p className="font-medium">
-                      {viewingReport.student 
-                        ? `${viewingReport.student.first_name} ${viewingReport.student.last_name}` 
+                      {viewingReport.student_id && childrenMap.get(viewingReport.student_id)
+                        ? `${childrenMap.get(viewingReport.student_id)?.first_name} ${childrenMap.get(viewingReport.student_id)?.last_name}` 
                         : 'Not specified'}
                     </p>
                   </div>
