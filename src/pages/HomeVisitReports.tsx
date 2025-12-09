@@ -48,7 +48,10 @@ export default function HomeVisitReports() {
     queryFn: async () => {
       let query = supabase
         .from('home_visit_reports')
-        .select('*');
+        .select(`
+          *,
+          student:children!home_visit_reports_student_id_fkey(id, first_name, last_name)
+        `);
       
       // Staff can only see their own reports
       if (isStaff && user?.id) {
@@ -455,8 +458,12 @@ export default function HomeVisitReports() {
                     <p className="font-medium">{viewingReport.location || 'Not specified'}</p>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Student ID</h3>
-                    <p className="font-medium">{viewingReport.student_id || 'Not specified'}</p>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-1">Student Name</h3>
+                    <p className="font-medium">
+                      {viewingReport.student 
+                        ? `${viewingReport.student.first_name} ${viewingReport.student.last_name}` 
+                        : 'Not specified'}
+                    </p>
                   </div>
                 </div>
                 
