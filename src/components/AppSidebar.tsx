@@ -47,7 +47,7 @@ const mainMenuItems = [
 ];
 
 const educationItems = [
-  { title: "Children Management", url: "/children", icon: Users },
+  { title: "Education", url: "/children", icon: Users },
   { title: "Replacements", url: "/children/replacements", icon: RefreshCw },
   { title: "School Transport", url: "/children/school-transport", icon: Bus },
   { title: "Grade Progression", url: "/children/grade-progression", icon: GraduationCap, adminOnly: true },
