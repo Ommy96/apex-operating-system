@@ -32,17 +32,26 @@ import {
   RefreshCw,
   Building2,
   Stethoscope,
-  Bus
+  Bus,
+  Layers,
+  HandHeart,
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-const getMainMenuItems = (isAdmin: boolean) => {
-  return [
-    { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
-  ];
-};
+const mainMenuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
+  { title: "Programs", url: "/programs-management", icon: Layers },
+  { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
+];
+
+const educationItems = [
+  { title: "Children Management", url: "/children", icon: Users },
+  { title: "Replacements", url: "/children/replacements", icon: RefreshCw },
+  { title: "School Transport", url: "/children/school-transport", icon: Bus },
+  { title: "Grade Progression", url: "/children/grade-progression", icon: GraduationCap, adminOnly: true },
+];
 
 const programItems = [
   { title: "Feeding Program", url: "/programs/feeding", icon: FeedingIcon },
@@ -122,7 +131,7 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {getMainMenuItems(isAdmin).map((item) => (
+              {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="ripple">
                     <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
@@ -132,28 +141,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              
-              {/* Children Management */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="ripple">
-                  <NavLink to="/children" className={getNavClasses} onClick={handleNavClick}>
-                    <Users className="h-4 w-4" />
-                    {!isCollapsed && <span className="animate-fade-in">Children Management</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              {/* Grade Progression - Admin Only */}
-              {isAdmin && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="ripple">
-                    <NavLink to="/children/grade-progression" className={getNavClasses} onClick={handleNavClick}>
-                      <GraduationCap className="h-4 w-4" />
-                      {!isCollapsed && <span className="animate-fade-in">Grade Progression</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -162,6 +149,26 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Programs</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Education Sub-section */}
+              <SidebarMenuItem>
+                <SidebarGroupLabel className="text-sidebar-foreground/70 font-semibold text-xs uppercase tracking-wider mb-2 ml-2">Education</SidebarGroupLabel>
+              </SidebarMenuItem>
+              {educationItems.map((item) => {
+                // Skip admin-only items for non-admins
+                if (item.adminOnly && !isAdmin) return null;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild className="ripple">
+                      <NavLink to={item.url} className={getNavClasses} onClick={handleNavClick}>
+                        <item.icon className="h-4 w-4" />
+                        {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+              
+              {/* Other Programs */}
               {programItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>

@@ -14,8 +14,9 @@ import Alumni from "./pages/Alumni";
 import Replacements from "./pages/Replacements";
 import SchoolTransport from "./pages/SchoolTransport";
 import GradeProgression from "./pages/GradeProgression";
-
 import Programs from "./pages/Programs";
+import ProgramsManagement from "./pages/ProgramsManagement";
+import SponsorsManagement from "./pages/SponsorsManagement";
 import Reports from "./pages/Reports";
 import HomeVisitReports from "./pages/HomeVisitReports";
 import SchoolVisitReports from "./pages/SchoolVisitReports";
@@ -60,6 +61,20 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs-management" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ProgramsManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsors-management" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SponsorsManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

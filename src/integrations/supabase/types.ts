@@ -1028,6 +1028,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          location: string | null
           name: string
         }
         Insert: {
@@ -1035,6 +1036,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          location?: string | null
           name: string
         }
         Update: {
@@ -1042,6 +1044,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          location?: string | null
           name?: string
         }
         Relationships: []
@@ -1280,6 +1283,45 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      sponsors: {
+        Row: {
+          country: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
