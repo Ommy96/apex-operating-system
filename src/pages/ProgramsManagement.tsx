@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, FileText } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -27,7 +27,7 @@ interface Program {
 interface ProgramFormData {
   program_id: string;
   name: string;
-  location: string;
+  locations: string[];
   description: string;
   is_active: boolean;
 }
@@ -38,10 +38,11 @@ const ProgramsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [locationInput, setLocationInput] = useState("");
   const [formData, setFormData] = useState<ProgramFormData>({
     program_id: "",
     name: "",
-    location: "",
+    locations: [],
     description: "",
     is_active: true,
   });
@@ -63,7 +64,7 @@ const ProgramsManagement = () => {
       const { error } = await supabase.from('programs').insert([{
         program_id: data.program_id || null,
         name: data.name,
-        location: data.location || null,
+        location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
       }]);
@@ -85,7 +86,7 @@ const ProgramsManagement = () => {
       const { error } = await supabase.from('programs').update({
         program_id: data.program_id || null,
         name: data.name,
-        location: data.location || null,
+        location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
       }).eq('id', id);
@@ -118,21 +119,48 @@ const ProgramsManagement = () => {
   });
 
   const resetForm = () => {
-    setFormData({ program_id: "", name: "", location: "", description: "", is_active: true });
+    setFormData({ program_id: "", name: "", locations: [], description: "", is_active: true });
+    setLocationInput("");
     setEditingProgram(null);
     setIsFormOpen(false);
   };
 
   const handleEdit = (program: Program) => {
     setEditingProgram(program);
+    const locations = program.location 
+      ? program.location.split(',').map(loc => loc.trim()).filter(Boolean)
+      : [];
     setFormData({
       program_id: program.program_id || "",
       name: program.name,
-      location: program.location || "",
+      locations,
       description: program.description || "",
       is_active: program.is_active,
     });
+    setLocationInput("");
     setIsFormOpen(true);
+  };
+
+  const handleAddLocation = () => {
+    const trimmedLocation = locationInput.trim();
+    if (trimmedLocation && !formData.locations.includes(trimmedLocation)) {
+      setFormData({ ...formData, locations: [...formData.locations, trimmedLocation] });
+      setLocationInput("");
+    }
+  };
+
+  const handleRemoveLocation = (locationToRemove: string) => {
+    setFormData({
+      ...formData,
+      locations: formData.locations.filter(loc => loc !== locationToRemove)
+    });
+  };
+
+  const handleLocationKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddLocation();
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -157,8 +185,13 @@ const ProgramsManagement = () => {
   const activeCount = programs?.filter(p => p.is_active).length || 0;
   const inactiveCount = programs?.filter(p => !p.is_active).length || 0;
 
+  const parseLocations = (location: string | null): string[] => {
+    if (!location) return [];
+    return location.split(',').map(loc => loc.trim()).filter(Boolean);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Programs Management</h1>
@@ -167,7 +200,7 @@ const ProgramsManagement = () => {
         {isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 bg-gradient-accent hover:bg-gradient-accent/90 shadow-strong">
                 <Plus className="h-4 w-4" />
                 Add Program
               </Button>
@@ -197,13 +230,36 @@ const ProgramsManagement = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Enter location"
-                  />
+                  <Label htmlFor="location">Locations</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="location"
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
+                      onKeyDown={handleLocationKeyDown}
+                      placeholder="Type location and press Enter or Add"
+                    />
+                    <Button type="button" variant="outline" onClick={handleAddLocation}>
+                      Add
+                    </Button>
+                  </div>
+                  {formData.locations.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.locations.map((loc) => (
+                        <Badge key={loc} variant="secondary" className="gap-1 pr-1">
+                          <MapPin className="h-3 w-3" />
+                          {loc}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLocation(loc)}
+                            className="ml-1 rounded-full hover:bg-destructive/20 p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
@@ -235,24 +291,24 @@ const ProgramsManagement = () => {
         )}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Stats Cards - Compact */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Total Programs</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{programs?.length || 0}</CardTitle>
+          <CardHeader className="py-3 px-4">
+            <CardDescription className="text-muted-foreground text-xs">Total Programs</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{programs?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Active Programs</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{activeCount}</CardTitle>
+          <CardHeader className="py-3 px-4">
+            <CardDescription className="text-muted-foreground text-xs">Active Programs</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{activeCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Inactive Programs</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{inactiveCount}</CardTitle>
+          <CardHeader className="py-3 px-4">
+            <CardDescription className="text-muted-foreground text-xs">Inactive Programs</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{inactiveCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -268,7 +324,7 @@ const ProgramsManagement = () => {
         />
       </div>
 
-      {/* Programs Cards Grid */}
+      {/* Programs Cards Grid - Compact */}
       {isLoading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -280,67 +336,76 @@ const ProgramsManagement = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPrograms.map((program, index) => (
-            <Card 
-              key={program.id} 
-              className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    {program.program_id && (
-                      <Badge variant="outline" className="mb-1 text-xs">{program.program_id}</Badge>
-                    )}
-                    <CardTitle className="text-xl text-foreground">{program.name}</CardTitle>
-                    {program.location && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span className="text-sm">{program.location}</span>
-                      </div>
-                    )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredPrograms.map((program, index) => {
+            const locations = parseLocations(program.location);
+            return (
+              <Card 
+                key={program.id} 
+                className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
+              >
+                <CardHeader className="py-3 px-4 pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      {program.program_id && (
+                        <Badge variant="outline" className="text-xs">{program.program_id}</Badge>
+                      )}
+                      <CardTitle className="text-base text-foreground leading-tight">{program.name}</CardTitle>
+                    </div>
+                    <Badge 
+                      variant={program.is_active ? "default" : "secondary"}
+                      className="shrink-0 text-xs"
+                    >
+                      {program.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
                   </div>
-                  <Badge 
-                    variant={program.is_active ? "default" : "secondary"}
-                  >
-                    {program.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {program.description ? (
-                  <p className="text-muted-foreground text-sm line-clamp-3">{program.description}</p>
-                ) : (
-                  <p className="text-muted-foreground/60 text-sm italic">No description</p>
+                </CardHeader>
+                <CardContent className="py-2 px-4">
+                  {locations.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {locations.map((loc) => (
+                        <Badge key={loc} variant="secondary" className="text-xs gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {loc}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  {program.description ? (
+                    <p className="text-muted-foreground text-xs line-clamp-2">{program.description}</p>
+                  ) : (
+                    <p className="text-muted-foreground/60 text-xs italic">No description</p>
+                  )}
+                </CardContent>
+                {isAdmin && (
+                  <CardFooter className="flex justify-end gap-1 border-t border-border py-2 px-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs px-2"
+                      onClick={() => handleEdit(program)}
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs px-2 hover:bg-destructive/80 hover:text-destructive-foreground"
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this program?')) {
+                          deleteMutation.mutate(program.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </CardFooter>
                 )}
-              </CardContent>
-              {isAdmin && (
-                <CardFooter className="flex justify-end gap-2 border-t border-border pt-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(program)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-destructive/80 hover:text-destructive-foreground"
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete this program?')) {
-                        deleteMutation.mutate(program.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
