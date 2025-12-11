@@ -389,13 +389,6 @@ export default function Children() {
         )}
       </div>
 
-      {/* Page Title Badge */}
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="px-4 py-2 text-base font-medium">
-          <GraduationCap className="h-4 w-4 mr-2" />
-          Children & Education
-        </Badge>
-      </div>
 
       {/* Education Program Content */}
       <div className="space-y-6">
