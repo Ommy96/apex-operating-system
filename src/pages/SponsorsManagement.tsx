@@ -16,6 +16,7 @@ import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 
 interface Sponsor {
   id: string;
+  sponsor_id: string | null;
   name: string;
   country: string | null;
   email: string | null;
@@ -26,6 +27,7 @@ interface Sponsor {
 }
 
 interface SponsorFormData {
+  sponsor_id: string;
   name: string;
   country: string;
   email: string;
@@ -41,6 +43,7 @@ const SponsorsManagement = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [formData, setFormData] = useState<SponsorFormData>({
+    sponsor_id: "",
     name: "",
     country: "",
     email: "",
@@ -64,6 +67,7 @@ const SponsorsManagement = () => {
   const createMutation = useMutation({
     mutationFn: async (data: SponsorFormData) => {
       const { error } = await supabase.from('sponsors').insert([{
+        sponsor_id: data.sponsor_id || null,
         name: data.name,
         country: data.country || null,
         email: data.email || null,
@@ -87,6 +91,7 @@ const SponsorsManagement = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: SponsorFormData }) => {
       const { error } = await supabase.from('sponsors').update({
+        sponsor_id: data.sponsor_id || null,
         name: data.name,
         country: data.country || null,
         email: data.email || null,
@@ -123,7 +128,7 @@ const SponsorsManagement = () => {
   });
 
   const resetForm = () => {
-    setFormData({ name: "", country: "", email: "", phone: "", notes: "", is_active: true });
+    setFormData({ sponsor_id: "", name: "", country: "", email: "", phone: "", notes: "", is_active: true });
     setEditingSponsor(null);
     setIsFormOpen(false);
   };
@@ -131,6 +136,7 @@ const SponsorsManagement = () => {
   const handleEdit = (sponsor: Sponsor) => {
     setEditingSponsor(sponsor);
     setFormData({
+      sponsor_id: sponsor.sponsor_id || "",
       name: sponsor.name,
       country: sponsor.country || "",
       email: sponsor.email || "",
@@ -157,6 +163,7 @@ const SponsorsManagement = () => {
 
   const filteredSponsors = sponsors?.filter(sponsor =>
     sponsor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sponsor.sponsor_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sponsor.country?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sponsor.email?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -184,6 +191,15 @@ const SponsorsManagement = () => {
                 <DialogTitle>{editingSponsor ? 'Edit Sponsor' : 'Add New Sponsor'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sponsor_id">Sponsor ID</Label>
+                  <Input
+                    id="sponsor_id"
+                    value={formData.sponsor_id}
+                    onChange={(e) => setFormData({ ...formData, sponsor_id: e.target.value })}
+                    placeholder="Enter unique sponsor ID (e.g., SPO-001)"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Sponsor Name *</Label>
                   <Input
@@ -305,7 +321,12 @@ const SponsorsManagement = () => {
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-xl text-foreground">{sponsor.name}</CardTitle>
+                  <div className="space-y-1">
+                    {sponsor.sponsor_id && (
+                      <Badge variant="outline" className="mb-1 text-xs">{sponsor.sponsor_id}</Badge>
+                    )}
+                    <CardTitle className="text-xl text-foreground">{sponsor.name}</CardTitle>
+                  </div>
                   <Badge 
                     variant={sponsor.is_active ? "default" : "secondary"}
                   >

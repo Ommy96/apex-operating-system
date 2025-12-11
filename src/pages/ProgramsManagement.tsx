@@ -16,6 +16,7 @@ import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 
 interface Program {
   id: string;
+  program_id: string | null;
   name: string;
   location: string | null;
   description: string | null;
@@ -24,6 +25,7 @@ interface Program {
 }
 
 interface ProgramFormData {
+  program_id: string;
   name: string;
   location: string;
   description: string;
@@ -37,6 +39,7 @@ const ProgramsManagement = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [formData, setFormData] = useState<ProgramFormData>({
+    program_id: "",
     name: "",
     location: "",
     description: "",
@@ -58,6 +61,7 @@ const ProgramsManagement = () => {
   const createMutation = useMutation({
     mutationFn: async (data: ProgramFormData) => {
       const { error } = await supabase.from('programs').insert([{
+        program_id: data.program_id || null,
         name: data.name,
         location: data.location || null,
         description: data.description || null,
@@ -79,6 +83,7 @@ const ProgramsManagement = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: ProgramFormData }) => {
       const { error } = await supabase.from('programs').update({
+        program_id: data.program_id || null,
         name: data.name,
         location: data.location || null,
         description: data.description || null,
@@ -113,7 +118,7 @@ const ProgramsManagement = () => {
   });
 
   const resetForm = () => {
-    setFormData({ name: "", location: "", description: "", is_active: true });
+    setFormData({ program_id: "", name: "", location: "", description: "", is_active: true });
     setEditingProgram(null);
     setIsFormOpen(false);
   };
@@ -121,6 +126,7 @@ const ProgramsManagement = () => {
   const handleEdit = (program: Program) => {
     setEditingProgram(program);
     setFormData({
+      program_id: program.program_id || "",
       name: program.name,
       location: program.location || "",
       description: program.description || "",
@@ -171,6 +177,15 @@ const ProgramsManagement = () => {
                 <DialogTitle>{editingProgram ? 'Edit Program' : 'Add New Program'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="program_id">Program ID</Label>
+                  <Input
+                    id="program_id"
+                    value={formData.program_id}
+                    onChange={(e) => setFormData({ ...formData, program_id: e.target.value })}
+                    placeholder="Enter unique program ID (e.g., PRG-001)"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Program Name *</Label>
                   <Input
@@ -274,6 +289,9 @@ const ProgramsManagement = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
+                    {program.program_id && (
+                      <Badge variant="outline" className="mb-1 text-xs">{program.program_id}</Badge>
+                    )}
                     <CardTitle className="text-xl text-foreground">{program.name}</CardTitle>
                     {program.location && (
                       <div className="flex items-center gap-1 text-muted-foreground">
