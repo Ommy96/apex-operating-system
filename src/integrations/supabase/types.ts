@@ -505,6 +505,7 @@ export type Database = {
           special_condition: string | null
           special_needs: string | null
           status: string
+          student_id: string | null
           updated_at: string
         }
         Insert: {
@@ -540,6 +541,7 @@ export type Database = {
           special_condition?: string | null
           special_needs?: string | null
           status?: string
+          student_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -575,6 +577,7 @@ export type Database = {
           special_condition?: string | null
           special_needs?: string | null
           status?: string
+          student_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1030,6 +1033,7 @@ export type Database = {
           is_active: boolean
           location: string | null
           name: string
+          program_id: string | null
         }
         Insert: {
           created_at?: string
@@ -1038,6 +1042,7 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name: string
+          program_id?: string | null
         }
         Update: {
           created_at?: string
@@ -1046,6 +1051,7 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name?: string
+          program_id?: string | null
         }
         Relationships: []
       }
@@ -1297,6 +1303,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          sponsor_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1309,6 +1316,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          sponsor_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1321,6 +1329,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          sponsor_id?: string | null
           updated_at?: string
         }
         Relationships: []

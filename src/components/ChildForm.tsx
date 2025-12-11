@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
 const childSchema = z.object({
+  student_id: z.string().optional(),
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   date_of_birth: z.string().optional(),
@@ -49,6 +50,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
   const form = useForm<ChildFormData>({
     resolver: zodResolver(childSchema),
     defaultValues: {
+      student_id: child?.student_id || '',
       first_name: child?.first_name || '',
       last_name: child?.last_name || '',
       date_of_birth: child?.date_of_birth || '',
@@ -112,6 +114,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
       // Clean up the data - convert empty strings to null for date fields
       const cleanedData = {
         ...data,
+        student_id: data.student_id && data.student_id.trim() !== '' ? data.student_id : null,
         date_of_birth: data.date_of_birth && data.date_of_birth.trim() !== '' ? data.date_of_birth : null,
         created_by: user?.id
       };
@@ -160,6 +163,20 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
     <ScrollArea className="h-[80vh]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
+        <FormField
+          control={form.control}
+          name="student_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Student ID</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter unique student ID (e.g., STU-001)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

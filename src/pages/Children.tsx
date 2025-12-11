@@ -37,6 +37,7 @@ import {
 
 interface Child {
   id: string;
+  student_id: string | null;
   first_name: string;
   last_name: string;
   date_of_birth: string;
