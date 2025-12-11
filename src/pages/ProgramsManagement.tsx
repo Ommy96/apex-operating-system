@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Plus, Search, Edit, Trash2, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -244,102 +243,90 @@ const ProgramsManagement = () => {
       </div>
 
       {/* Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search programs..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search programs..."
+          className="pl-10"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-      {/* Programs Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Programs</CardTitle>
-          <CardDescription>Manage program information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Status</TableHead>
-                    {isAdmin && <TableHead className="text-right">Actions</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPrograms.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={isAdmin ? 5 : 4} className="text-center py-8 text-muted-foreground">
-                        No programs found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredPrograms.map((program) => (
-                      <TableRow key={program.id}>
-                        <TableCell className="font-medium">{program.name}</TableCell>
-                        <TableCell>
-                          {program.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              {program.location}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">{program.description || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={program.is_active ? "default" : "secondary"}>
-                            {program.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        {isAdmin && (
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleEdit(program)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this program?')) {
-                                    deleteMutation.mutate(program.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Programs Cards Grid */}
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : filteredPrograms.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No programs found
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPrograms.map((program, index) => (
+            <Card 
+              key={program.id} 
+              className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl text-white">{program.name}</CardTitle>
+                    {program.location && (
+                      <div className="flex items-center gap-1 text-white/80">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">{program.location}</span>
+                      </div>
+                    )}
+                  </div>
+                  <Badge 
+                    variant={program.is_active ? "default" : "secondary"}
+                    className={program.is_active ? "bg-white/20 text-white border-white/30" : ""}
+                  >
+                    {program.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {program.description ? (
+                  <p className="text-white/80 text-sm line-clamp-3">{program.description}</p>
+                ) : (
+                  <p className="text-white/60 text-sm italic">No description</p>
+                )}
+              </CardContent>
+              {isAdmin && (
+                <CardFooter className="flex justify-end gap-2 border-t border-white/20 pt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                    onClick={() => handleEdit(program)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-destructive/80 hover:text-white"
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete this program?')) {
+                        deleteMutation.mutate(program.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

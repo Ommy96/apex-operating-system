@@ -48,9 +48,6 @@ const mainMenuItems = [
 
 const educationItems = [
   { title: "Education", url: "/children", icon: Users },
-  { title: "Replacements", url: "/children/replacements", icon: RefreshCw },
-  { title: "School Transport", url: "/children/school-transport", icon: Bus },
-  { title: "Grade Progression", url: "/children/grade-progression", icon: GraduationCap, adminOnly: true },
 ];
 
 const programItems = [
@@ -149,26 +146,16 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Programs</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Education Sub-section */}
-              <SidebarMenuItem>
-                <SidebarGroupLabel className="text-sidebar-foreground/70 font-semibold text-xs uppercase tracking-wider mb-2 ml-2">Education</SidebarGroupLabel>
-              </SidebarMenuItem>
-              {educationItems.map((item) => {
-                // Skip admin-only items for non-admins
-                if (item.adminOnly && !isAdmin) return null;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="ripple">
-                      <NavLink to={item.url} className={getNavClasses} onClick={handleNavClick}>
-                        <item.icon className="h-4 w-4" />
-                        {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-              
-              {/* Other Programs */}
+              {educationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild className="ripple">
+                    <NavLink to={item.url} className={getNavClasses} onClick={handleNavClick}>
+                      <item.icon className="h-4 w-4" />
+                      {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               {programItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
