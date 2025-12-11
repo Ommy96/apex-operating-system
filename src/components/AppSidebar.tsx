@@ -56,10 +56,10 @@ const mainMenuItems = [
 
 const educationSubItems = [
   { title: "Children", url: "/children", icon: Users },
-  { title: "Alumni", url: "/alumni", icon: GraduationCap },
-  { title: "School Transport", url: "/school-transport", icon: Bus },
-  { title: "Replacements", url: "/replacements", icon: RefreshCw },
-  { title: "Grade Progression", url: "/grade-progression", icon: TrendingUp },
+  { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
+  { title: "School Transport", url: "/children/school-transport", icon: Bus },
+  { title: "Replacements", url: "/children/replacements", icon: RefreshCw },
+  { title: "Grade Progression", url: "/children/grade-progression", icon: TrendingUp },
 ];
 
 const programItems = [
