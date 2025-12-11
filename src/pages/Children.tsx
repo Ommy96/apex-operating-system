@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, Plus, Search, Filter, FileText, Eye, Edit2, Trash2, BookOpen, Award, Download, Users, Building2, MapPin, X, Loader2, RefreshCw, Bus } from 'lucide-react';
+import { GraduationCap, Plus, Search, Filter, FileText, Eye, Edit2, Trash2, BookOpen, Download, Users, Building2, MapPin, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -389,37 +389,13 @@ export default function Children() {
         )}
       </div>
 
-      {/* Sub-navigation Tabs */}
-      <Tabs value="children" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="children" asChild>
-            <button onClick={() => navigate('/children')} className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Children & Education
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="alumni" asChild>
-            <button onClick={() => navigate('/children/alumni')} className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Alumni
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="transport" asChild>
-            <button onClick={() => navigate('/children/school-transport')} className="flex items-center gap-2">
-              <Bus className="h-4 w-4" />
-              School Transport
-            </button>
-          </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="replacements" asChild>
-              <button onClick={() => navigate('/children/replacements')} className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Replacements
-              </button>
-            </TabsTrigger>
-          )}
-        </TabsList>
-      </Tabs>
+      {/* Page Title Badge */}
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="px-4 py-2 text-base font-medium">
+          <GraduationCap className="h-4 w-4 mr-2" />
+          Children & Education
+        </Badge>
+      </div>
 
       {/* Education Program Content */}
       <div className="space-y-6">
