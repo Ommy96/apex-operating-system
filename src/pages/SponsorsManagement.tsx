@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Plus, Search, Edit, Trash2, Mail, Phone, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -276,118 +275,98 @@ const SponsorsManagement = () => {
       </div>
 
       {/* Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search sponsors..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search sponsors..."
+          className="pl-10"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-      {/* Sponsors Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Sponsors</CardTitle>
-          <CardDescription>Manage sponsor information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Country</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Status</TableHead>
-                    {isAdmin && <TableHead className="text-right">Actions</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSponsors.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={isAdmin ? 6 : 5} className="text-center py-8 text-muted-foreground">
-                        No sponsors found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredSponsors.map((sponsor) => (
-                      <TableRow key={sponsor.id}>
-                        <TableCell className="font-medium">{sponsor.name}</TableCell>
-                        <TableCell>
-                          {sponsor.country && (
-                            <div className="flex items-center gap-1">
-                              <Globe className="h-3 w-3 text-muted-foreground" />
-                              {sponsor.country}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {sponsor.email && (
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-3 w-3 text-muted-foreground" />
-                              {sponsor.email}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {sponsor.phone && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-3 w-3 text-muted-foreground" />
-                              {sponsor.phone}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={sponsor.is_active ? "default" : "secondary"}>
-                            {sponsor.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        {isAdmin && (
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleEdit(sponsor)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this sponsor?')) {
-                                    deleteMutation.mutate(sponsor.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Sponsors Cards Grid */}
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : filteredSponsors.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No sponsors found
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSponsors.map((sponsor, index) => (
+            <Card 
+              key={sponsor.id} 
+              className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-xl text-white">{sponsor.name}</CardTitle>
+                  <Badge 
+                    variant={sponsor.is_active ? "default" : "secondary"}
+                    className={sponsor.is_active ? "bg-white/20 text-white border-white/30" : ""}
+                  >
+                    {sponsor.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sponsor.country && (
+                  <div className="flex items-center gap-2 text-white/80">
+                    <Globe className="h-4 w-4" />
+                    <span className="text-sm">{sponsor.country}</span>
+                  </div>
+                )}
+                {sponsor.email && (
+                  <div className="flex items-center gap-2 text-white/80">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm truncate">{sponsor.email}</span>
+                  </div>
+                )}
+                {sponsor.phone && (
+                  <div className="flex items-center gap-2 text-white/80">
+                    <Phone className="h-4 w-4" />
+                    <span className="text-sm">{sponsor.phone}</span>
+                  </div>
+                )}
+                {sponsor.notes && (
+                  <p className="text-white/70 text-sm mt-2 line-clamp-2">{sponsor.notes}</p>
+                )}
+              </CardContent>
+              {isAdmin && (
+                <CardFooter className="flex justify-end gap-2 border-t border-white/20 pt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                    onClick={() => handleEdit(sponsor)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-destructive/80 hover:text-white"
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete this sponsor?')) {
+                        deleteMutation.mutate(sponsor.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
