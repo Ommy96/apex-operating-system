@@ -9,10 +9,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Heart,
@@ -46,8 +54,12 @@ const mainMenuItems = [
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
 
-const educationItems = [
-  { title: "Education", url: "/children", icon: Users },
+const educationSubItems = [
+  { title: "Children", url: "/children", icon: Users },
+  { title: "Alumni", url: "/alumni", icon: GraduationCap },
+  { title: "School Transport", url: "/school-transport", icon: Bus },
+  { title: "Replacements", url: "/replacements", icon: RefreshCw },
+  { title: "Grade Progression", url: "/grade-progression", icon: TrendingUp },
 ];
 
 const programItems = [
@@ -146,16 +158,31 @@ export function AppSidebar() {
            <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Programs</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {educationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="ripple">
-                    <NavLink to={item.url} className={getNavClasses} onClick={handleNavClick}>
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="ripple text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-2xl transition-all duration-300">
+                      <GraduationCap className="h-4 w-4" />
+                      {!isCollapsed && <span className="animate-fade-in">Education</span>}
+                      {!isCollapsed && <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {educationSubItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuButton asChild size="sm">
+                            <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
+                              <item.icon className="h-4 w-4" />
+                              {!isCollapsed && <span>{item.title}</span>}
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
                 </SidebarMenuItem>
-              ))}
+              </Collapsible>
               {programItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
