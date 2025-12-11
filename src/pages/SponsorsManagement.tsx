@@ -256,20 +256,20 @@ const SponsorsManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Total Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-white">{sponsors?.length || 0}</CardTitle>
+            <CardDescription className="text-muted-foreground">Total Sponsors</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{sponsors?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Active Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-white">{activeCount}</CardTitle>
+            <CardDescription className="text-muted-foreground">Active Sponsors</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{activeCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Inactive Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-white">{inactiveCount}</CardTitle>
+            <CardDescription className="text-muted-foreground">Inactive Sponsors</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{inactiveCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -305,10 +305,9 @@ const SponsorsManagement = () => {
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-xl text-white">{sponsor.name}</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{sponsor.name}</CardTitle>
                   <Badge 
                     variant={sponsor.is_active ? "default" : "secondary"}
-                    className={sponsor.is_active ? "bg-white/20 text-white border-white/30" : ""}
                   >
                     {sponsor.is_active ? 'Active' : 'Inactive'}
                   </Badge>
@@ -316,33 +315,32 @@ const SponsorsManagement = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 {sponsor.country && (
-                  <div className="flex items-center gap-2 text-white/80">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Globe className="h-4 w-4" />
                     <span className="text-sm">{sponsor.country}</span>
                   </div>
                 )}
                 {sponsor.email && (
-                  <div className="flex items-center gap-2 text-white/80">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4" />
                     <span className="text-sm truncate">{sponsor.email}</span>
                   </div>
                 )}
                 {sponsor.phone && (
-                  <div className="flex items-center gap-2 text-white/80">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
                     <span className="text-sm">{sponsor.phone}</span>
                   </div>
                 )}
                 {sponsor.notes && (
-                  <p className="text-white/70 text-sm mt-2 line-clamp-2">{sponsor.notes}</p>
+                  <p className="text-muted-foreground/70 text-sm mt-2 line-clamp-2">{sponsor.notes}</p>
                 )}
               </CardContent>
               {isAdmin && (
-                <CardFooter className="flex justify-end gap-2 border-t border-white/20 pt-4">
+                <CardFooter className="flex justify-end gap-2 border-t border-border pt-4">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20"
                     onClick={() => handleEdit(sponsor)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
@@ -351,7 +349,7 @@ const SponsorsManagement = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-destructive/80 hover:text-white"
+                    className="hover:bg-destructive/80 hover:text-destructive-foreground"
                     onClick={() => {
                       if (confirm('Are you sure you want to delete this sponsor?')) {
                         deleteMutation.mutate(sponsor.id);

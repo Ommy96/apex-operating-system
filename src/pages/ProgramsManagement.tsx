@@ -224,20 +224,20 @@ const ProgramsManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Total Programs</CardDescription>
-            <CardTitle className="text-3xl text-white">{programs?.length || 0}</CardTitle>
+            <CardDescription className="text-muted-foreground">Total Programs</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{programs?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Active Programs</CardDescription>
-            <CardTitle className="text-3xl text-white">{activeCount}</CardTitle>
+            <CardDescription className="text-muted-foreground">Active Programs</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{activeCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/80">Inactive Programs</CardDescription>
-            <CardTitle className="text-3xl text-white">{inactiveCount}</CardTitle>
+            <CardDescription className="text-muted-foreground">Inactive Programs</CardDescription>
+            <CardTitle className="text-3xl text-foreground">{inactiveCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -274,9 +274,9 @@ const ProgramsManagement = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="text-xl text-white">{program.name}</CardTitle>
+                    <CardTitle className="text-xl text-foreground">{program.name}</CardTitle>
                     {program.location && (
-                      <div className="flex items-center gap-1 text-white/80">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <MapPin className="h-4 w-4" />
                         <span className="text-sm">{program.location}</span>
                       </div>
@@ -284,7 +284,6 @@ const ProgramsManagement = () => {
                   </div>
                   <Badge 
                     variant={program.is_active ? "default" : "secondary"}
-                    className={program.is_active ? "bg-white/20 text-white border-white/30" : ""}
                   >
                     {program.is_active ? 'Active' : 'Inactive'}
                   </Badge>
@@ -292,17 +291,16 @@ const ProgramsManagement = () => {
               </CardHeader>
               <CardContent>
                 {program.description ? (
-                  <p className="text-white/80 text-sm line-clamp-3">{program.description}</p>
+                  <p className="text-muted-foreground text-sm line-clamp-3">{program.description}</p>
                 ) : (
-                  <p className="text-white/60 text-sm italic">No description</p>
+                  <p className="text-muted-foreground/60 text-sm italic">No description</p>
                 )}
               </CardContent>
               {isAdmin && (
-                <CardFooter className="flex justify-end gap-2 border-t border-white/20 pt-4">
+                <CardFooter className="flex justify-end gap-2 border-t border-border pt-4">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20"
                     onClick={() => handleEdit(program)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
@@ -311,7 +309,7 @@ const ProgramsManagement = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-destructive/80 hover:text-white"
+                    className="hover:bg-destructive/80 hover:text-destructive-foreground"
                     onClick={() => {
                       if (confirm('Are you sure you want to delete this program?')) {
                         deleteMutation.mutate(program.id);
