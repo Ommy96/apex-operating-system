@@ -181,7 +181,7 @@ const SponsorsManagement = () => {
         {isAdmin && (
           <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 bg-gradient-accent">
                 <Plus className="h-4 w-4" />
                 Add Sponsor
               </Button>
@@ -271,21 +271,21 @@ const SponsorsManagement = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Total Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{sponsors?.length || 0}</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-muted-foreground text-xs">Total Sponsors</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{sponsors?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Active Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{activeCount}</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-muted-foreground text-xs">Active Sponsors</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{activeCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-muted-foreground">Inactive Sponsors</CardDescription>
-            <CardTitle className="text-3xl text-foreground">{inactiveCount}</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-muted-foreground text-xs">Inactive Sponsors</CardDescription>
+            <CardTitle className="text-2xl text-foreground">{inactiveCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -319,22 +319,23 @@ const SponsorsManagement = () => {
               key={sponsor.id} 
               className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
             >
-              <CardHeader>
+              <CardHeader className="p-4 pb-2">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     {sponsor.sponsor_id && (
                       <Badge variant="outline" className="mb-1 text-xs">{sponsor.sponsor_id}</Badge>
                     )}
-                    <CardTitle className="text-xl text-foreground">{sponsor.name}</CardTitle>
+                    <CardTitle className="text-base text-foreground">{sponsor.name}</CardTitle>
                   </div>
                   <Badge 
                     variant={sponsor.is_active ? "default" : "secondary"}
+                    className="text-xs"
                   >
                     {sponsor.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="p-4 pt-0 space-y-1.5">
                 {sponsor.country && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Globe className="h-4 w-4" />
@@ -358,7 +359,7 @@ const SponsorsManagement = () => {
                 )}
               </CardContent>
               {isAdmin && (
-                <CardFooter className="flex justify-end gap-2 border-t border-border pt-4">
+                <CardFooter className="flex justify-end gap-2 border-t border-border p-3">
                   <Button
                     variant="ghost"
                     size="sm"
