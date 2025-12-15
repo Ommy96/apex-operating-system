@@ -41,6 +41,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
+import DynamicProgramPage from "./pages/DynamicProgramPage";
 
 const queryClient = new QueryClient();
 
@@ -173,6 +174,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Programs />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/dynamic/:programId" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <DynamicProgramPage />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

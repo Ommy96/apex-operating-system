@@ -983,6 +983,41 @@ export type Database = {
         }
         Relationships: []
       }
+      program_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: Json
+          id: string
+          program_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          program_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          program_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_entries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_reports: {
         Row: {
           beneficiary_impact: string
@@ -1028,30 +1063,36 @@ export type Database = {
       programs: {
         Row: {
           created_at: string
+          custom_fields: Json | null
           description: string | null
           id: string
           is_active: boolean
           location: string | null
           name: string
           program_id: string | null
+          show_in_navigation: boolean | null
         }
         Insert: {
           created_at?: string
+          custom_fields?: Json | null
           description?: string | null
           id?: string
           is_active?: boolean
           location?: string | null
           name: string
           program_id?: string | null
+          show_in_navigation?: boolean | null
         }
         Update: {
           created_at?: string
+          custom_fields?: Json | null
           description?: string | null
           id?: string
           is_active?: boolean
           location?: string | null
           name?: string
           program_id?: string | null
+          show_in_navigation?: boolean | null
         }
         Relationships: []
       }
