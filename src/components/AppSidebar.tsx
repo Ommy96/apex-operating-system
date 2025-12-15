@@ -20,7 +20,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Heart,
@@ -47,6 +47,8 @@ import {
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
@@ -102,6 +104,21 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+
+  // Fetch dynamic programs that should appear in navigation
+  const { data: dynamicPrograms } = useQuery({
+    queryKey: ['dynamic-programs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('programs')
+        .select('id, name')
+        .eq('show_in_navigation', true)
+        .eq('is_active', true)
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = ({ isActive }: { isActive: boolean }) =>
@@ -189,6 +206,17 @@ export function AppSidebar() {
                     <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       {!isCollapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              {/* Dynamic programs from database */}
+              {dynamicPrograms?.map((program) => (
+                <SidebarMenuItem key={program.id}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={`/programs/dynamic/${program.id}`} end className={getNavClasses} onClick={handleNavClick}>
+                      <Sparkles className="h-4 w-4" />
+                      {!isCollapsed && <span>{program.name}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, X, Eye, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
+import { ProgramFieldBuilder, FieldDefinition } from "@/components/ProgramFieldBuilder";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 
 interface Program {
   id: string;
@@ -22,6 +25,8 @@ interface Program {
   description: string | null;
   is_active: boolean;
   created_at: string;
+  custom_fields: FieldDefinition[] | null;
+  show_in_navigation: boolean;
 }
 
 interface ProgramFormData {
@@ -30,11 +35,14 @@ interface ProgramFormData {
   locations: string[];
   description: string;
   is_active: boolean;
+  custom_fields: FieldDefinition[];
+  show_in_navigation: boolean;
 }
 
 const ProgramsManagement = () => {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
@@ -45,6 +53,8 @@ const ProgramsManagement = () => {
     locations: [],
     description: "",
     is_active: true,
+    custom_fields: [],
+    show_in_navigation: false,
   });
 
   const { data: programs, isLoading } = useQuery({
@@ -55,7 +65,11 @@ const ProgramsManagement = () => {
         .select('*')
         .order('name');
       if (error) throw error;
-      return data as Program[];
+      return data.map(p => ({
+        ...p,
+        custom_fields: (p.custom_fields as unknown as FieldDefinition[]) || [],
+        show_in_navigation: p.show_in_navigation || false,
+      })) as Program[];
     },
   });
 
@@ -67,12 +81,15 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
+        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        show_in_navigation: data.show_in_navigation,
       }]);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs-management'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['dynamic-programs'] });
       toast.success('Program created successfully');
       resetForm();
     },
@@ -89,12 +106,15 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
+        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        show_in_navigation: data.show_in_navigation,
       }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs-management'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['dynamic-programs'] });
       toast.success('Program updated successfully');
       resetForm();
     },
@@ -111,6 +131,7 @@ const ProgramsManagement = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs-management'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['dynamic-programs'] });
       toast.success('Program deleted successfully');
     },
     onError: (error) => {
@@ -119,7 +140,15 @@ const ProgramsManagement = () => {
   });
 
   const resetForm = () => {
-    setFormData({ program_id: "", name: "", locations: [], description: "", is_active: true });
+    setFormData({ 
+      program_id: "", 
+      name: "", 
+      locations: [], 
+      description: "", 
+      is_active: true,
+      custom_fields: [],
+      show_in_navigation: false,
+    });
     setLocationInput("");
     setEditingProgram(null);
     setIsFormOpen(false);
@@ -136,6 +165,8 @@ const ProgramsManagement = () => {
       locations,
       description: program.description || "",
       is_active: program.is_active,
+      custom_fields: program.custom_fields || [],
+      show_in_navigation: program.show_in_navigation,
     });
     setLocationInput("");
     setIsFormOpen(true);
@@ -205,81 +236,109 @@ const ProgramsManagement = () => {
                 Add Program
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingProgram ? 'Edit Program' : 'Add New Program'}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="program_id">Program ID</Label>
-                  <Input
-                    id="program_id"
-                    value={formData.program_id}
-                    onChange={(e) => setFormData({ ...formData, program_id: e.target.value })}
-                    placeholder="Enter unique program ID (e.g., PRG-001)"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Program Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter program name"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Locations</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="location"
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                      onKeyDown={handleLocationKeyDown}
-                      placeholder="Type location and press Enter or Add"
-                    />
-                    <Button type="button" variant="outline" onClick={handleAddLocation}>
-                      Add
-                    </Button>
-                  </div>
-                  {formData.locations.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {formData.locations.map((loc) => (
-                        <Badge key={loc} variant="secondary" className="gap-1 pr-1">
-                          <MapPin className="h-3 w-3" />
-                          {loc}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveLocation(loc)}
-                            className="ml-1 rounded-full hover:bg-destructive/20 p-0.5"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
+              <form onSubmit={handleSubmit}>
+                <Tabs defaultValue="basic" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                    <TabsTrigger value="fields">
+                      <Settings2 className="h-4 w-4 mr-2" />
+                      Custom Fields
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="basic" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="program_id">Program ID</Label>
+                      <Input
+                        id="program_id"
+                        value={formData.program_id}
+                        onChange={(e) => setFormData({ ...formData, program_id: e.target.value })}
+                        placeholder="Enter unique program ID (e.g., PRG-001)"
+                      />
                     </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter program description"
-                    rows={3}
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Program Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Enter program name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Locations</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="location"
+                          value={locationInput}
+                          onChange={(e) => setLocationInput(e.target.value)}
+                          onKeyDown={handleLocationKeyDown}
+                          placeholder="Type location and press Enter or Add"
+                        />
+                        <Button type="button" variant="outline" onClick={handleAddLocation}>
+                          Add
+                        </Button>
+                      </div>
+                      {formData.locations.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {formData.locations.map((loc) => (
+                            <Badge key={loc} variant="secondary" className="gap-1 pr-1">
+                              <MapPin className="h-3 w-3" />
+                              {loc}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLocation(loc)}
+                                className="ml-1 rounded-full hover:bg-destructive/20 p-0.5"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Enter program description"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="is_active"
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                      />
+                      <Label htmlFor="is_active">Active</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="show_in_navigation"
+                        checked={formData.show_in_navigation}
+                        onCheckedChange={(checked) => setFormData({ ...formData, show_in_navigation: checked })}
+                      />
+                      <Label htmlFor="show_in_navigation">Show in Navigation</Label>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="fields" className="mt-4">
+                    <ProgramFieldBuilder
+                      fields={formData.custom_fields}
+                      onChange={(fields) => setFormData({ ...formData, custom_fields: fields })}
+                    />
+                  </TabsContent>
+                </Tabs>
+                
+                <div className="flex justify-end gap-2 pt-4 mt-4 border-t">
                   <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
                   <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                     {editingProgram ? 'Update' : 'Create'}
@@ -361,48 +420,71 @@ const ProgramsManagement = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="py-2 px-4">
-                  {locations.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {locations.map((loc) => (
-                        <Badge key={loc} variant="secondary" className="text-xs gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {loc}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {locations.length > 0 && locations.map((loc) => (
+                      <Badge key={loc} variant="secondary" className="text-xs gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {loc}
+                      </Badge>
+                    ))}
+                    {program.custom_fields && program.custom_fields.length > 0 && (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Settings2 className="h-3 w-3" />
+                        {program.custom_fields.length} fields
+                      </Badge>
+                    )}
+                    {program.show_in_navigation && (
+                      <Badge variant="default" className="text-xs gap-1 bg-primary/80">
+                        <Eye className="h-3 w-3" />
+                        In Nav
+                      </Badge>
+                    )}
+                  </div>
                   {program.description ? (
                     <p className="text-muted-foreground text-xs line-clamp-2">{program.description}</p>
                   ) : (
                     <p className="text-muted-foreground/60 text-xs italic">No description</p>
                   )}
                 </CardContent>
-                {isAdmin && (
-                  <CardFooter className="flex justify-end gap-1 border-t border-border py-2 px-4">
+                <CardFooter className="flex justify-end gap-1 border-t border-border py-2 px-4">
+                  {program.custom_fields && program.custom_fields.length > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-7 text-xs px-2"
-                      onClick={() => handleEdit(program)}
+                      onClick={() => navigate(`/programs/dynamic/${program.id}`)}
                     >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs px-2 hover:bg-destructive/80 hover:text-destructive-foreground"
-                      onClick={() => {
-                        if (confirm('Are you sure you want to delete this program?')) {
-                          deleteMutation.mutate(program.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Delete
-                    </Button>
-                  </CardFooter>
-                )}
+                  )}
+                  {isAdmin && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs px-2"
+                        onClick={() => handleEdit(program)}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs px-2 hover:bg-destructive/80 hover:text-destructive-foreground"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this program?')) {
+                            deleteMutation.mutate(program.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </CardFooter>
               </Card>
             );
           })}
