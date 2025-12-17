@@ -985,6 +985,7 @@ export type Database = {
       }
       program_entries: {
         Row: {
+          child_id: string | null
           created_at: string
           created_by: string | null
           data: Json
@@ -993,6 +994,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          child_id?: string | null
           created_at?: string
           created_by?: string | null
           data?: Json
@@ -1001,6 +1003,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          child_id?: string | null
           created_at?: string
           created_by?: string | null
           data?: Json
@@ -1009,6 +1012,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "program_entries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "program_entries_program_id_fkey"
             columns: ["program_id"]
