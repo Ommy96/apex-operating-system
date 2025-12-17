@@ -18,9 +18,16 @@ import * as XLSX from "xlsx";
 interface ProgramEntry {
   id: string;
   program_id: string;
+  child_id: string | null;
   data: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+interface Child {
+  id: string;
+  first_name: string;
+  last_name: string;
 }
 
 const DynamicProgramPage = () => {
@@ -60,6 +67,24 @@ const DynamicProgramPage = () => {
     },
     enabled: !!programId,
   });
+
+  // Fetch children for display
+  const { data: children } = useQuery({
+    queryKey: ['children-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('children')
+        .select('id, first_name, last_name');
+      if (error) throw error;
+      return data as Child[];
+    },
+  });
+
+  // Create children map for lookup
+  const childrenMap = useMemo(() => {
+    if (!children) return new Map<string, string>();
+    return new Map(children.map(c => [c.id, `${c.first_name} ${c.last_name}`]));
+  }, [children]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -110,6 +135,7 @@ const DynamicProgramPage = () => {
 
     const exportData = filteredEntries.map(entry => {
       const row: Record<string, unknown> = {};
+      row['Child Name'] = entry.child_id ? childrenMap.get(entry.child_id) || '-' : '-';
       customFields.forEach(field => {
         row[field.name] = entry.data[field.name] ?? '';
       });
@@ -237,7 +263,8 @@ const DynamicProgramPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {customFields.slice(0, 5).map((field) => (
+                  <TableHead>Child</TableHead>
+                  {customFields.slice(0, 4).map((field) => (
                     <TableHead key={field.id}>{field.name}</TableHead>
                   ))}
                   <TableHead>Created</TableHead>
@@ -247,7 +274,10 @@ const DynamicProgramPage = () => {
               <TableBody>
                 {filteredEntries.map((entry) => (
                   <TableRow key={entry.id}>
-                    {customFields.slice(0, 5).map((field) => (
+                    <TableCell className="font-medium">
+                      {entry.child_id ? childrenMap.get(entry.child_id) || '-' : '-'}
+                    </TableCell>
+                    {customFields.slice(0, 4).map((field) => (
                       <TableCell key={field.id}>
                         {field.type === 'checkbox' ? (
                           <Badge variant={entry.data[field.name] ? 'default' : 'secondary'}>
@@ -301,7 +331,7 @@ const DynamicProgramPage = () => {
         fields={customFields}
         isOpen={isFormOpen}
         onClose={handleCloseForm}
-        editingEntry={editingEntry ? { id: editingEntry.id, data: editingEntry.data } : null}
+        editingEntry={editingEntry ? { id: editingEntry.id, data: editingEntry.data, child_id: editingEntry.child_id } : null}
       />
     </div>
   );

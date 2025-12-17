@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { FieldDefinition } from "./ProgramFieldBuilder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+
+interface Child {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
 
 interface DynamicProgramFormProps {
   programId: string;
@@ -17,7 +23,7 @@ interface DynamicProgramFormProps {
   fields: FieldDefinition[];
   isOpen: boolean;
   onClose: () => void;
-  editingEntry?: { id: string; data: Record<string, unknown> } | null;
+  editingEntry?: { id: string; data: Record<string, unknown>; child_id?: string | null } | null;
 }
 
 export const DynamicProgramForm = ({
@@ -33,6 +39,29 @@ export const DynamicProgramForm = ({
   const [formData, setFormData] = useState<Record<string, unknown>>(
     editingEntry?.data || {}
   );
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(
+    editingEntry?.child_id || null
+  );
+
+  // Fetch children for selection
+  const { data: children } = useQuery({
+    queryKey: ['children-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('children')
+        .select('id, first_name, last_name')
+        .eq('status', 'active')
+        .order('first_name');
+      if (error) throw error;
+      return data as Child[];
+    },
+  });
+
+  // Reset form when editingEntry changes
+  useEffect(() => {
+    setFormData(editingEntry?.data || {});
+    setSelectedChildId(editingEntry?.child_id || null);
+  }, [editingEntry]);
 
   const handleChange = (fieldName: string, value: unknown) => {
     setFormData({ ...formData, [fieldName]: value });
@@ -57,7 +86,10 @@ export const DynamicProgramForm = ({
       if (editingEntry) {
         const { error } = await supabase
           .from('program_entries')
-          .update({ data: formData as unknown as Record<string, never> })
+          .update({ 
+            data: formData as unknown as Record<string, never>,
+            child_id: selectedChildId,
+          })
           .eq('id', editingEntry.id);
         if (error) throw error;
         toast.success('Entry updated successfully');
@@ -68,6 +100,7 @@ export const DynamicProgramForm = ({
             program_id: programId,
             data: formData as unknown as Record<string, never>,
             created_by: userData?.user?.id,
+            child_id: selectedChildId,
           }]);
         if (error) throw error;
         toast.success('Entry created successfully');
@@ -76,6 +109,7 @@ export const DynamicProgramForm = ({
       queryClient.invalidateQueries({ queryKey: ['program-entries', programId] });
       onClose();
       setFormData({});
+      setSelectedChildId(null);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'An error occurred';
       toast.error('Failed to save entry: ' + message);
@@ -167,6 +201,27 @@ export const DynamicProgramForm = ({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Child Selection */}
+          <div className="space-y-2">
+            <Label>Link to Child</Label>
+            <Select
+              value={selectedChildId || "none"}
+              onValueChange={(v) => setSelectedChildId(v === "none" ? null : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a child (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No child linked</SelectItem>
+                {children?.map((child) => (
+                  <SelectItem key={child.id} value={child.id}>
+                    {child.first_name} {child.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           {fields.map((field) => (
             <div key={field.id} className="space-y-2">
               {field.type !== 'checkbox' && (
