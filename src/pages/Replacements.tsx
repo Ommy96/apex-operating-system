@@ -27,10 +27,7 @@ import {
   Edit,
   User,
   RefreshCw,
-  Shield,
-  GraduationCap,
-  Award,
-  Bus
+  Shield
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -39,7 +36,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { toast } from "sonner";
 import { downloadExcel } from "@/lib/downloadUtils";
 import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
@@ -249,35 +246,6 @@ export default function Replacements() {
         </div>
       </div>
 
-      {/* Sub-navigation Tabs */}
-      <Tabs value="replacements" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="children" asChild>
-            <button onClick={() => navigate('/children')} className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Children & Education
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="alumni" asChild>
-            <button onClick={() => navigate('/children/alumni')} className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Alumni
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="transport" asChild>
-            <button onClick={() => navigate('/children/school-transport')} className="flex items-center gap-2">
-              <Bus className="h-4 w-4" />
-              School Transport
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="replacements" asChild>
-            <button onClick={() => navigate('/children/replacements')} className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Replacements
-            </button>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

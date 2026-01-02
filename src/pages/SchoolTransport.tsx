@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bus, Plus, Search, Download, X, Loader2, Trash2, GraduationCap, Award, RefreshCw } from 'lucide-react';
+import { Bus, Plus, Search, Download, X, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -248,37 +248,6 @@ export default function SchoolTransport() {
         )}
       </div>
 
-      {/* Sub-navigation Tabs */}
-      <Tabs value="transport" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="children" asChild>
-            <button onClick={() => navigate('/children')} className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Children & Education
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="alumni" asChild>
-            <button onClick={() => navigate('/children/alumni')} className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Alumni
-            </button>
-          </TabsTrigger>
-          <TabsTrigger value="transport" asChild>
-            <button onClick={() => navigate('/children/school-transport')} className="flex items-center gap-2">
-              <Bus className="h-4 w-4" />
-              School Transport
-            </button>
-          </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="replacements" asChild>
-              <button onClick={() => navigate('/children/replacements')} className="flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Replacements
-              </button>
-            </TabsTrigger>
-          )}
-        </TabsList>
-      </Tabs>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
