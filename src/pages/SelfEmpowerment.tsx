@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Coins, Download, Receipt, Edit, Trash2, Activity, MapPin } from "lucide-react";
+import { Plus, Search, Coins, Download, Receipt, Edit, Trash2, Activity, MapPin, Briefcase, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 export default function SelfEmpowerment() {
   const { isAdmin, isManagement } = useAuth();
@@ -148,93 +149,83 @@ export default function SelfEmpowerment() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Self-Empowerment</h1>
-          <p className="text-muted-foreground">Business support and empowerment program</p>
-        </div>
-      </div>
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Self-Empowerment"
+        description="Business support and empowerment program"
+        icon={Briefcase}
+        iconColorClass="text-primary-foreground"
+        stats={statistics ? [
+          { label: 'Total Applications', value: statistics.totalApplications, icon: Users },
+          { label: 'Total Approved', value: `KSH ${statistics.totalApproved.toLocaleString()}`, icon: Coins },
+          { label: 'Loans', value: statistics.loanRecipients, icon: Receipt },
+          { label: 'Grants', value: statistics.grantRecipients, icon: Activity },
+        ] : undefined}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="loans-summary" disabled={!isAdmin && !isManagement}>
+        <TabsList className="grid w-full grid-cols-2 bg-card/50">
+          <TabsTrigger value="applications" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            Applications
+          </TabsTrigger>
+          <TabsTrigger value="loans-summary" disabled={!isAdmin && !isManagement} className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
             Loans Summary
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications" className="space-y-6">
-          {/* Statistics Cards */}
+          {/* Stats Cards */}
           {statistics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card className={`${getCardStyles(0)} hover-scale`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Coins className="h-4 w-4" />
-                    Total Applications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-primary">{statistics.totalApplications}</div>
-                  <p className="text-xs text-muted-foreground mt-1">{statistics.activeApplications} active</p>
-                </CardContent>
-              </Card>
-
-              <Card className={`${getCardStyles(1)} hover-scale`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Coins className="h-4 w-4" />
-                    Total Approved
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">KSH {statistics.totalApproved.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Total disbursed</p>
-                </CardContent>
-              </Card>
-
-              <Card className={`${getCardStyles(2)} hover-scale`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    By Type
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Loans</span>
-                      <span className="font-semibold">{statistics.loanRecipients}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Grants</span>
-                      <span className="font-semibold">{statistics.grantRecipients}</span>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatsCard
+                title="Total Applications"
+                value={statistics.totalApplications}
+                subtitle={`${statistics.activeApplications} active`}
+                icon={Users}
+                colorVariant="blue"
+              />
+              <StatsCard
+                title="Total Approved"
+                value={`KSH ${statistics.totalApproved.toLocaleString()}`}
+                subtitle="Total disbursed"
+                icon={Coins}
+                colorVariant="emerald"
+              />
+              <StatsCard
+                title="By Type"
+                value=""
+                icon={Activity}
+                colorVariant="purple"
+              >
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Loans</span>
+                    <span className="font-semibold">{statistics.loanRecipients}</span>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className={`${getCardStyles(3)} hover-scale`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    By Residence
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-1">
-                    {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
-                      <div key={residence} className="flex justify-between text-sm">
-                        <span className="text-xs">{residence}</span>
-                        <span className="font-semibold">{count}</span>
-                      </div>
-                    ))}
-                    {Object.keys(statistics.byResidence).length === 0 && (
-                      <div className="text-sm text-muted-foreground">No data</div>
-                    )}
+                  <div className="flex justify-between text-sm">
+                    <span>Grants</span>
+                    <span className="font-semibold">{statistics.grantRecipients}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </StatsCard>
+              <StatsCard
+                title="By Residence"
+                value=""
+                icon={MapPin}
+                colorVariant="orange"
+              >
+                <div className="space-y-1">
+                  {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
+                    <div key={residence} className="flex justify-between text-sm">
+                      <span className="text-xs">{residence}</span>
+                      <span className="font-semibold">{count}</span>
+                    </div>
+                  ))}
+                  {Object.keys(statistics.byResidence).length === 0 && (
+                    <div className="text-sm text-muted-foreground">No data</div>
+                  )}
+                </div>
+              </StatsCard>
             </div>
           )}
 

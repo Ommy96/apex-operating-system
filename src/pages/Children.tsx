@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChildForm } from '@/components/ChildForm';
 import { downloadExcel, formatEducationData } from '@/lib/downloadUtils';
+import { PageHeroHeader } from '@/components/PageHeroHeader';
+import { StatsCard } from '@/components/StatsCard';
 import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 import {
   AlertDialog,
@@ -351,102 +351,54 @@ export default function Children() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Users className="h-8 w-8" />
-            Children Management
-          </h1>
-          <p className="text-muted-foreground">
-            Monitor academic progress and educational support
-          </p>
-        </div>
-        {isAdmin && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditingChild(null)} className="bg-gradient-accent hover:bg-gradient-accent/90 shadow-strong">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Child
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingChild ? 'Edit Child' : 'Add New Child'}</DialogTitle>
-              </DialogHeader>
-              <ChildForm
-                child={editingChild}
-                onSuccess={() => {
-                  setIsDialogOpen(false);
-                  setEditingChild(null);
-                  fetchChildren();
-                }}
-                onCancel={() => {
-                  setIsDialogOpen(false);
-                  setEditingChild(null);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Children Management"
+        description="Monitor academic progress and educational support"
+        icon={Users}
+        iconColorClass="text-primary-foreground"
+        actions={
+          isAdmin && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => setEditingChild(null)} 
+                  className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Child
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingChild ? 'Edit Child' : 'Add New Child'}</DialogTitle>
+                </DialogHeader>
+                <ChildForm
+                  child={editingChild}
+                  onSuccess={() => {
+                    setIsDialogOpen(false);
+                    setEditingChild(null);
+                    fetchChildren();
+                  }}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    setEditingChild(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          )
+        }
+        stats={[
+          { label: 'Total Students', value: stats.totalStudents, icon: BookOpen },
+          { label: 'Male Students', value: stats.numberOfMale, icon: Users },
+          { label: 'Schools', value: stats.numberOfSchools, icon: Building2 },
+          { label: 'In Kibera', value: `${stats.percentageInKibera}%`, icon: MapPin },
+        ]}
+      />
 
       {/* Education Program Content */}
       <div className="space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className={`${getCardStyles(0)} hover-scale`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalStudents}</div>
-                <p className="text-xs text-muted-foreground">
-                  In education program
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className={`${getCardStyles(1)} hover-scale`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Number of Male</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.numberOfMale}</div>
-                <p className="text-xs text-muted-foreground">
-                  Male students enrolled
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className={`${getCardStyles(2)} hover-scale`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Number of Schools</CardTitle>
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.numberOfSchools}</div>
-                <p className="text-xs text-muted-foreground">
-                  Different institutions
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className={`${getCardStyles(3)} hover-scale`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Percentage in Kibera</CardTitle>
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.percentageInKibera}%</div>
-                <p className="text-xs text-muted-foreground">
-                  Students in Kibera
-                </p>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4">

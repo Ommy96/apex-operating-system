@@ -13,12 +13,13 @@ import { AlumniForm } from "@/components/AlumniForm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { LiveUserPresence } from "@/components/LiveUserPresence";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 
 export default function Alumni() {
@@ -271,110 +272,82 @@ export default function Alumni() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header with Real-time Indicators */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            Alumni
-            <div className="flex items-center gap-2 ml-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-muted-foreground">Live</span>
-            </div>
-          </h1>
-          <div className="flex items-center gap-4 mt-1">
-            <p className="text-muted-foreground">Celebrating our graduates and their achievements</p>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              Updated {lastUpdated.toLocaleTimeString()}
-            </span>
-          </div>
-        </div>
-        
-        {/* Add Alumni Button - Only for Management/Admin */}
-        {(isManagement || isAdmin) && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Alumni
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingAlumni ? 'Edit Alumni' : 'Add New Alumni'}</DialogTitle>
-              </DialogHeader>
-              <AlumniForm 
-                initialData={editingAlumni}
-                onSuccess={() => {
-                  handleDialogClose();
-                  refetch();
-                }} 
-                onCancel={handleDialogClose} 
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-
-
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Alumni"
+        description="Celebrating our graduates and their achievements"
+        icon={GraduationCap}
+        iconColorClass="text-primary-foreground"
+        actions={
+          (isManagement || isAdmin) && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Alumni
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingAlumni ? 'Edit Alumni' : 'Add New Alumni'}</DialogTitle>
+                </DialogHeader>
+                <AlumniForm 
+                  initialData={editingAlumni}
+                  onSuccess={() => {
+                    handleDialogClose();
+                    refetch();
+                  }} 
+                  onCancel={handleDialogClose} 
+                />
+              </DialogContent>
+            </Dialog>
+          )
+        }
+        stats={[
+          { label: 'Total Alumni', value: stats.total, icon: Users },
+          { label: 'Working', value: stats.working, icon: Briefcase },
+          { label: 'Studying', value: stats.studying, icon: GraduationCap },
+          { label: 'This Year', value: stats.thisYear, icon: Calendar },
+        ]}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className={`${getCardStyles(0)} hover-scale`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Alumni</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">All graduates</p>
-          </CardContent>
-        </Card>
-
-        <Card className={`${getCardStyles(1)} hover-scale`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Working</CardTitle>
-            <Briefcase className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.working}</div>
-            <p className="text-xs text-muted-foreground">In employment</p>
-          </CardContent>
-        </Card>
-
-        <Card className={`${getCardStyles(2)} hover-scale`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Studying</CardTitle>
-            <GraduationCap className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.studying}</div>
-            <p className="text-xs text-muted-foreground">Pursuing education</p>
-          </CardContent>
-        </Card>
-
-        <Card className={`${getCardStyles(3)} hover-scale`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entrepreneurs</CardTitle>
-            <Award className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.entrepreneurship}</div>
-            <p className="text-xs text-muted-foreground">Running businesses</p>
-          </CardContent>
-        </Card>
-
-        <Card className={`${getCardStyles(4)} hover-scale`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Year</CardTitle>
-            <Calendar className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.thisYear}</div>
-            <p className="text-xs text-muted-foreground">Recent graduates</p>
-          </CardContent>
-        </Card>
+        <StatsCard
+          title="Total Alumni"
+          value={stats.total}
+          subtitle="All graduates"
+          icon={Users}
+          colorVariant="blue"
+        />
+        <StatsCard
+          title="Working"
+          value={stats.working}
+          subtitle="In employment"
+          icon={Briefcase}
+          colorVariant="emerald"
+        />
+        <StatsCard
+          title="Studying"
+          value={stats.studying}
+          subtitle="Pursuing education"
+          icon={GraduationCap}
+          colorVariant="cyan"
+        />
+        <StatsCard
+          title="Entrepreneurs"
+          value={stats.entrepreneurship}
+          subtitle="Running businesses"
+          icon={Award}
+          colorVariant="purple"
+        />
+        <StatsCard
+          title="This Year"
+          value={stats.thisYear}
+          subtitle="Recent graduates"
+          icon={Calendar}
+          colorVariant="orange"
+        />
       </div>
 
       {/* Search and Filters */}

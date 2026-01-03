@@ -12,7 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { MedicalForm } from "@/components/MedicalForm";
 import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users } from "lucide-react";
 import * as XLSX from 'xlsx';
-import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 export default function Medical() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -139,25 +140,32 @@ export default function Medical() {
   }, [filteredRecords]);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">Medical Program</h1>
-          <p className="text-muted-foreground">Track medical assistance provided to students and guardians</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Download
-          </Button>
-          {isAdmin && (
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Record
+    <div className="space-y-6">
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Medical Program"
+        description="Track medical assistance provided to students and guardians"
+        icon={Stethoscope}
+        iconColorClass="text-primary-foreground"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={handleDownload} variant="outline" className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0">
+              <Download className="h-4 w-4 mr-2" />
+              Download
             </Button>
-          )}
-        </div>
-      </div>
+            {isAdmin && (
+              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Record
+              </Button>
+            )}
+          </div>
+        }
+        stats={statistics ? [
+          { label: 'Total Records', value: statistics.totalRecords, icon: Activity },
+          { label: 'Recent (30d)', value: statistics.recentRecords, icon: Stethoscope },
+        ] : undefined}
+      />
 
       {/* Filters */}
       <div className="flex gap-4">
@@ -186,74 +194,55 @@ export default function Medical() {
       {/* Statistics Cards */}
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className={`${getCardStyles(0)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Total Records
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{statistics.totalRecords}</div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(1)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Stethoscope className="h-4 w-4" />
-                Recent Cases (30d)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{statistics.recentRecords}</div>
-              <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(2)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                By Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byLocation).map(([location, count]: any) => (
-                  <div key={location} className="flex justify-between text-sm">
-                    <span className="capitalize">{location}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byLocation).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(3)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                By Gender
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
-                  <div key={gender} className="flex justify-between text-sm">
-                    <span className="capitalize">{gender}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byGender).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Total Records"
+            value={statistics.totalRecords}
+            icon={Activity}
+            colorVariant="blue"
+          />
+          <StatsCard
+            title="Recent Cases (30d)"
+            value={statistics.recentRecords}
+            subtitle="Last 30 days"
+            icon={Stethoscope}
+            colorVariant="emerald"
+          />
+          <StatsCard
+            title="By Location"
+            value=""
+            icon={MapPin}
+            colorVariant="purple"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byLocation).map(([location, count]: any) => (
+                <div key={location} className="flex justify-between text-sm">
+                  <span className="capitalize">{location}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byLocation).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="By Gender"
+            value=""
+            icon={Users}
+            colorVariant="orange"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                <div key={gender} className="flex justify-between text-sm">
+                  <span className="capitalize">{gender}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byGender).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
         </div>
       )}
 
