@@ -1,6 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, FileText, Camera, Plus, Trash2 } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Edit2, 
+  FileText, 
+  Plus, 
+  Trash2, 
+  Calendar, 
+  MapPin, 
+  Phone, 
+  User, 
+  GraduationCap, 
+  Heart, 
+  BookOpen, 
+  Home,
+  Stethoscope,
+  ClipboardList,
+  FolderOpen,
+  ExternalLink
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +34,6 @@ import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
 import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { convertGoogleDriveUrl } from '@/lib/imageUtils';
-import { getCardStyles, type CardVariant } from '@/lib/cardStyles';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -37,7 +54,6 @@ export default function ChildProfile() {
 
   const fetchChildData = async () => {
     try {
-      // Fetch child details
       const { data: childData, error: childError } = await supabase
         .from('children')
         .select('*')
@@ -47,7 +63,6 @@ export default function ChildProfile() {
       if (childError) throw childError;
       setChild(childData);
 
-      // Fetch child programs
       const { data: programsData, error: programsError } = await supabase
         .from('child_programs')
         .select(`
@@ -59,8 +74,6 @@ export default function ChildProfile() {
       if (programsError) throw programsError;
       setPrograms(programsData || []);
 
-
-      // Fetch visits
       const { data: visitsData, error: visitsError } = await supabase
         .from('visits')
         .select('*')
@@ -70,7 +83,6 @@ export default function ChildProfile() {
       if (visitsError) throw visitsError;
       setVisits(visitsData || []);
 
-      // Fetch documents
       const { data: documentsData, error: documentsError } = await supabase
         .from('documents')
         .select('*')
@@ -95,8 +107,6 @@ export default function ChildProfile() {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
-
-  // Google Drive URL conversion moved to src/lib/imageUtils.ts
 
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return 'N/A';
@@ -140,7 +150,7 @@ export default function ChildProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -156,56 +166,40 @@ export default function ChildProfile() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => navigate('/children')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{child.first_name} {child.last_name}</h1>
-            <p className="text-muted-foreground">Child Profile</p>
-          </div>
-        </div>
-        
-        <div className="flex space-x-2">
-          {isAdmin && (
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Edit Child Profile</DialogTitle>
-                </DialogHeader>
-                <ChildForm
-                  child={child}
-                  onSuccess={() => {
-                    setIsEditDialogOpen(false);
-                    fetchChildData();
-                  }}
-                  onCancel={() => setIsEditDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-          <Button onClick={() => navigate(`/children/${id}/report`)}>
-            <FileText className="h-4 w-4 mr-2" />
-            Generate Report
-          </Button>
-        </div>
+  const InfoItem = ({ icon: Icon, label, value, colorClass = "text-accent" }: { icon: any, label: string, value: string | null | undefined, colorClass?: string }) => (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-secondary/50 hover:bg-secondary/70 transition-colors">
+      <div className={`p-2 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 ${colorClass}`}>
+        <Icon className="h-4 w-4" />
       </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-semibold text-foreground truncate">{value || 'Not specified'}</p>
+      </div>
+    </div>
+  );
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-            <CardHeader className="text-center">
-              <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-border">
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Hero Header with Profile */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-light to-accent p-6 md:p-8">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[size:20px_20px]"></div>
+        
+        <div className="relative z-10">
+          {/* Back Button */}
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/children')}
+            className="mb-4 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Children
+          </Button>
+          
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Large Profile Picture */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-accent via-accent-light to-accent rounded-full blur-md opacity-75 group-hover:opacity-100 transition-opacity"></div>
+              <Avatar className="relative h-36 w-36 md:h-44 md:w-44 border-4 border-primary-foreground/20 shadow-2xl">
                 {child.photo_url ? (
                   <AvatarImage 
                     src={convertGoogleDriveUrl(child.photo_url) || undefined} 
@@ -215,86 +209,300 @@ export default function ChildProfile() {
                     loading="lazy"
                   />
                 ) : null}
-                <AvatarFallback className="text-2xl font-semibold">
+                <AvatarFallback className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-accent to-accent-dark text-primary-foreground">
                   {getInitials(child.first_name, child.last_name)}
                 </AvatarFallback>
               </Avatar>
-              <CardTitle>{child.first_name} {child.last_name}</CardTitle>
-              <CardDescription>
-                Age {calculateAge(child.date_of_birth)} • {child.gender}
-              </CardDescription>
-              <Badge variant={child.status === 'active' ? 'default' : 'secondary'}>
-                {child.status}
-              </Badge>
-            </CardHeader>
+            </div>
             
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Basic Information</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Date of Birth:</span>
-                    <span>{child.date_of_birth ? new Date(child.date_of_birth).toLocaleDateString() : 'Not specified'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Enrollment Date:</span>
-                    <span>{new Date(child.enrollment_date).toLocaleDateString()}</span>
-                  </div>
-                </div>
+            {/* Name and Quick Info */}
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+                {child.first_name} {child.last_name}
+              </h1>
+              
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
+                <Badge 
+                  className={`text-sm px-4 py-1.5 font-semibold ${
+                    child.status === 'active' 
+                      ? 'bg-success/90 hover:bg-success text-success-foreground' 
+                      : 'bg-warning/90 hover:bg-warning text-warning-foreground'
+                  }`}
+                >
+                  {child.status?.charAt(0).toUpperCase() + child.status?.slice(1)}
+                </Badge>
+                {child.gender && (
+                  <Badge variant="outline" className="text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
+                    {child.gender}
+                  </Badge>
+                )}
+                {child.date_of_birth && (
+                  <Badge variant="outline" className="text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
+                    Age {calculateAge(child.date_of_birth)}
+                  </Badge>
+                )}
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Guardian Information</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Name:</span>
-                    <span>{child.guardian_name || 'Not specified'}</span>
+              
+              {/* Quick Stats */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-primary-foreground/80">
+                {child.residence && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    <span className="text-sm">{child.residence}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Phone:</span>
-                    <span>{child.guardian_phone || 'Not specified'}</span>
+                )}
+                {child.academic_level && (
+                  <div className="flex items-center gap-1.5">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="text-sm">{child.academic_level}</span>
                   </div>
-                </div>
+                )}
+                {child.institution_name && (
+                  <div className="flex items-center gap-1.5">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-sm">{child.institution_name}</span>
+                  </div>
+                )}
               </div>
-
-              {(child.medical_notes || child.special_needs) && (
-                <div>
-                  <h4 className="font-semibold mb-2">Medical & Special Needs</h4>
-                  <div className="space-y-2 text-sm">
-                    {child.medical_notes && (
-                      <div>
-                        <span className="text-muted-foreground">Medical Notes:</span>
-                        <p className="mt-1">{child.medical_notes}</p>
-                      </div>
-                    )}
-                    {child.special_needs && (
-                      <div>
-                        <span className="text-muted-foreground">Special Needs:</span>
-                        <p className="mt-1">{child.special_needs}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2">
+              {isAdmin && (
+                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0">
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Edit Child Profile</DialogTitle>
+                    </DialogHeader>
+                    <ChildForm
+                      child={child}
+                      onSuccess={() => {
+                        setIsEditDialogOpen(false);
+                        fetchChildData();
+                      }}
+                      onCancel={() => setIsEditDialogOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
               )}
+              <Button 
+                onClick={() => navigate(`/children/${id}/report`)}
+                className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Generate Report
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Key Information Cards */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Personal Information Card */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
+            <CardHeader className="pb-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <User className="h-5 w-5 text-accent" />
+                Personal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 pt-4">
+              <InfoItem 
+                icon={Calendar} 
+                label="Date of Birth" 
+                value={child.date_of_birth ? new Date(child.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null}
+              />
+              <InfoItem 
+                icon={Calendar} 
+                label="Enrollment Date" 
+                value={new Date(child.enrollment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              />
+              <InfoItem 
+                icon={MapPin} 
+                label="Residence" 
+                value={child.residence}
+              />
+              <InfoItem 
+                icon={Heart} 
+                label="Parental Status" 
+                value={child.parental_status}
+              />
             </CardContent>
           </Card>
+
+          {/* Education Card */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
+            <CardHeader className="pb-3 bg-gradient-to-r from-emerald-500/10 to-green-500/10">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <GraduationCap className="h-5 w-5 text-success" />
+                Education Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 pt-4">
+              <InfoItem 
+                icon={BookOpen} 
+                label="Academic Level" 
+                value={child.academic_level}
+                colorClass="text-success"
+              />
+              <InfoItem 
+                icon={GraduationCap} 
+                label="Grade" 
+                value={child.grade}
+                colorClass="text-success"
+              />
+              <InfoItem 
+                icon={BookOpen} 
+                label="Institution" 
+                value={child.institution_name}
+                colorClass="text-success"
+              />
+              {child.course_name && (
+                <InfoItem 
+                  icon={BookOpen} 
+                  label="Course" 
+                  value={child.course_name}
+                  colorClass="text-success"
+                />
+              )}
+              <InfoItem 
+                icon={User} 
+                label="Student ID" 
+                value={child.student_id}
+                colorClass="text-success"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Guardian Card */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
+            <CardHeader className="pb-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Home className="h-5 w-5 text-purple-500" />
+                Guardian Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 pt-4">
+              <InfoItem 
+                icon={User} 
+                label="Guardian Name" 
+                value={child.guardian_name}
+                colorClass="text-purple-500"
+              />
+              <InfoItem 
+                icon={Phone} 
+                label="Guardian Phone" 
+                value={child.guardian_phone}
+                colorClass="text-purple-500"
+              />
+              <InfoItem 
+                icon={User} 
+                label="Relation" 
+                value={child.relation}
+                colorClass="text-purple-500"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Sponsor Card */}
+          {(child.donor || child.donation_received_ksh) && (
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
+              <CardHeader className="pb-3 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Heart className="h-5 w-5 text-orange-500" />
+                  Sponsorship
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2 pt-4">
+                <InfoItem 
+                  icon={User} 
+                  label="Donor" 
+                  value={child.donor}
+                  colorClass="text-orange-500"
+                />
+                {child.donation_received_ksh && (
+                  <InfoItem 
+                    icon={Heart} 
+                    label="Donation Received" 
+                    value={`KSH ${child.donation_received_ksh.toLocaleString()}`}
+                    colorClass="text-orange-500"
+                  />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Medical & Special Needs Card */}
+          {(child.medical_notes || child.special_needs || child.special_condition) && (
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
+              <CardHeader className="pb-3 bg-gradient-to-r from-rose-500/10 to-red-500/10">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Stethoscope className="h-5 w-5 text-destructive" />
+                  Medical & Special Needs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                {child.medical_notes && (
+                  <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                    <p className="text-xs font-medium text-destructive uppercase tracking-wide mb-1">Medical Notes</p>
+                    <p className="text-sm text-foreground">{child.medical_notes}</p>
+                  </div>
+                )}
+                {child.special_needs && (
+                  <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                    <p className="text-xs font-medium text-destructive uppercase tracking-wide mb-1">Special Needs</p>
+                    <p className="text-sm text-foreground">{child.special_needs}</p>
+                  </div>
+                )}
+                {child.special_condition && (
+                  <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                    <p className="text-xs font-medium text-destructive uppercase tracking-wide mb-1">Special Condition</p>
+                    <p className="text-sm text-foreground">{child.special_condition}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
+        {/* Right Column - Tabs Content */}
         <div className="lg:col-span-2">
           <Tabs defaultValue="programs" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="programs">Programs</TabsTrigger>
-              <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsList className="w-full justify-start bg-card/50 p-1 h-auto flex-wrap">
+              <TabsTrigger value="programs" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <GraduationCap className="h-4 w-4" />
+                Programs
+              </TabsTrigger>
+              <TabsTrigger value="visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <ClipboardList className="h-4 w-4" />
+                Visit Reports
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <FolderOpen className="h-4 w-4" />
+                Documents
+              </TabsTrigger>
             </TabsList>
 
+            {/* Programs Tab */}
             <TabsContent value="programs" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-lg font-semibold">Enrolled Programs</h3>
+                <div>
+                  <h3 className="text-xl font-bold">Enrolled Programs</h3>
+                  <p className="text-muted-foreground text-sm">{programs.length} program{programs.length !== 1 ? 's' : ''} enrolled</p>
+                </div>
                 {isAdmin && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="w-full sm:w-auto">
+                      <Button className="bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-lg hover:shadow-xl transition-shadow">
                         <Plus className="h-4 w-4 mr-2" />
                         Enroll in Program
                       </Button>
@@ -310,58 +518,78 @@ export default function ChildProfile() {
               </div>
               
               {programs.length === 0 ? (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-muted-foreground">No programs enrolled yet.</p>
+                <Card className="border-dashed border-2 bg-secondary/20">
+                  <CardContent className="text-center py-12">
+                    <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                    <p className="text-muted-foreground font-medium">No programs enrolled yet</p>
+                    <p className="text-sm text-muted-foreground/70">Enroll this child in a program to get started</p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {programs.map((program, index) => (
-                    <Card key={program.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{program.programs.name}</CardTitle>
-                            <CardDescription>{program.programs.description}</CardDescription>
+                  {programs.map((program, index) => {
+                    const colors = [
+                      'from-blue-500/10 to-cyan-500/10 border-blue-200',
+                      'from-emerald-500/10 to-green-500/10 border-emerald-200',
+                      'from-purple-500/10 to-pink-500/10 border-purple-200',
+                      'from-orange-500/10 to-amber-500/10 border-orange-200',
+                    ];
+                    const colorClass = colors[index % colors.length];
+                    
+                    return (
+                      <Card key={program.id} className={`border bg-gradient-to-r ${colorClass} shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5`}>
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-lg">{program.programs?.name}</CardTitle>
+                              <CardDescription>{program.programs?.description}</CardDescription>
+                            </div>
+                            <Badge 
+                              className={`${
+                                program.status === 'active' 
+                                  ? 'bg-success text-success-foreground' 
+                                  : 'bg-secondary text-secondary-foreground'
+                              }`}
+                            >
+                              {program.status}
+                            </Badge>
                           </div>
-                          <Badge variant={program.status === 'active' ? 'default' : 'secondary'}>
-                            {program.status}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Enrolled:</span>
-                          <span>{new Date(program.enrollment_date).toLocaleDateString()}</span>
-                        </div>
-                        {program.completion_date && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Completed:</span>
-                            <span>{new Date(program.completion_date).toLocaleDateString()}</span>
+                        </CardHeader>
+                        <CardContent className="pt-2">
+                          <div className="flex flex-wrap gap-4 text-sm">
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Calendar className="h-4 w-4" />
+                              Enrolled: {new Date(program.enrollment_date).toLocaleDateString()}
+                            </div>
+                            {program.completion_date && (
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                Completed: {new Date(program.completion_date).toLocaleDateString()}
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {program.notes && (
-                          <div className="mt-2">
-                            <span className="text-muted-foreground text-sm">Notes:</span>
-                            <p className="text-sm mt-1">{program.notes}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                          {program.notes && (
+                            <p className="mt-3 text-sm text-muted-foreground bg-secondary/50 rounded-lg p-3">{program.notes}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
 
-
+            {/* Visits Tab */}
             <TabsContent value="visits" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-lg font-semibold">Visits</h3>
+                <div>
+                  <h3 className="text-xl font-bold">Visit Reports</h3>
+                  <p className="text-muted-foreground text-sm">Home, school, and medical visits</p>
+                </div>
                 {isAdmin && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="w-full sm:w-auto">
+                      <Button className="bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-lg hover:shadow-xl transition-shadow">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Report Link
                       </Button>
@@ -376,258 +604,103 @@ export default function ChildProfile() {
                 )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Home Visit Report</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'home_visit_report') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'home_visit_report')?.file_url, '_blank')}
-                          >
-                            View Report
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this report link? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'home_visit_report')?.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No report added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">School Visit Report</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'school_visit_report') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'school_visit_report')?.file_url, '_blank')}
-                          >
-                            View Report
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this report link? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'school_visit_report')?.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No report added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Medical Visit Report</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'medical_visit_report') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'medical_visit_report')?.file_url, '_blank')}
-                          >
-                            View Report
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this report link? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'medical_visit_report')?.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No report added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Follow-up Visit Report</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'follow_up_visit_report') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'follow_up_visit_report')?.file_url, '_blank')}
-                          >
-                            View Report
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this report link? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'follow_up_visit_report')?.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No report added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Home Visit Report */}
+                <ReportCard 
+                  title="Home Visit Report"
+                  icon={Home}
+                  colorClass="from-blue-500/10 to-blue-600/10 border-blue-200"
+                  iconColorClass="text-blue-500 bg-blue-500/10"
+                  document={documents.find(doc => doc.category === 'home_visit_report')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* School Visit Report */}
+                <ReportCard 
+                  title="School Visit Report"
+                  icon={GraduationCap}
+                  colorClass="from-emerald-500/10 to-emerald-600/10 border-emerald-200"
+                  iconColorClass="text-emerald-500 bg-emerald-500/10"
+                  document={documents.find(doc => doc.category === 'school_visit_report')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* Medical Visit Report */}
+                <ReportCard 
+                  title="Medical Visit Report"
+                  icon={Stethoscope}
+                  colorClass="from-rose-500/10 to-rose-600/10 border-rose-200"
+                  iconColorClass="text-rose-500 bg-rose-500/10"
+                  document={documents.find(doc => doc.category === 'medical_visit_report')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* Follow-up Visit Report */}
+                <ReportCard 
+                  title="Follow-up Visit Report"
+                  icon={ClipboardList}
+                  colorClass="from-purple-500/10 to-purple-600/10 border-purple-200"
+                  iconColorClass="text-purple-500 bg-purple-500/10"
+                  document={documents.find(doc => doc.category === 'follow_up_visit_report')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
               </div>
 
+              {/* Other Visit Reports */}
               {documents.filter(doc => doc.category === 'other_visit_report').length > 0 && (
-                <div>
-                  <h4 className="text-md font-semibold mb-3">Other Visit Reports</h4>
-                  <div className="space-y-3">
-                    {documents.filter(doc => doc.category === 'other_visit_report').map((document, index) => (
-                      <Card key={document.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-4">Other Visit Reports</h4>
+                  <div className="grid gap-3">
+                    {documents.filter(doc => doc.category === 'other_visit_report').map((document) => (
+                      <Card key={document.id} className="bg-gradient-to-r from-secondary/50 to-secondary/30 border shadow-sm hover:shadow-md transition-all">
                         <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <p className="font-medium">{document.title}</p>
-                                  <p className="text-sm text-muted-foreground">{document.description}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => window.open(document.file_url, '_blank')}
-                                  >
-                                    View Report
-                                  </Button>
-                                  {isAdmin && (
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <Button variant="outline" size="sm">
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            Are you sure you want to delete this report link? This action cannot be undone.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction 
-                                            onClick={() => handleDeleteDocument(document.id)}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  )}
-                                </div>
-                              </div>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{document.title}</p>
+                              {document.description && (
+                                <p className="text-sm text-muted-foreground">{document.description}</p>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(document.file_url, '_blank')}
+                                className="hover:bg-accent hover:text-accent-foreground"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              {isAdmin && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this report link? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => handleDeleteDocument(document.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </div>
                           </div>
                         </CardContent>
@@ -638,13 +711,17 @@ export default function ChildProfile() {
               )}
             </TabsContent>
 
+            {/* Documents Tab */}
             <TabsContent value="documents" className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Documents</h3>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="text-xl font-bold">Documents</h3>
+                  <p className="text-muted-foreground text-sm">Important files and records</p>
+                </div>
                 {isAdmin && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm">
+                      <Button className="bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-lg hover:shadow-xl transition-shadow">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Document Link
                       </Button>
@@ -659,258 +736,107 @@ export default function ChildProfile() {
                 )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Profile</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'profile') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'profile')?.file_url, '_blank')}
-                          >
-                            View Profile
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this document? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'profile')?.id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No link added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Consent Form</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'consent_form') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'consent_form')?.file_url, '_blank')}
-                          >
-                            View Consent Form
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this document? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'consent_form')?.id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No link added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Follow-up Form</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'follow_up') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'follow_up')?.file_url, '_blank')}
-                          >
-                            View Follow-up Form
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this document? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'follow_up')?.id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No link added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
-                  <CardHeader>
-                    <CardTitle className="text-base">Intake Form</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {documents.find(doc => doc.category === 'intake_form') ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => window.open(documents.find(doc => doc.category === 'intake_form')?.file_url, '_blank')}
-                          >
-                            View Intake Form
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this document? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteDocument(documents.find(doc => doc.category === 'intake_form')?.id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No link added</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Profile Document */}
+                <DocumentCard 
+                  title="Profile"
+                  icon={User}
+                  colorClass="from-blue-500/10 to-blue-600/10 border-blue-200"
+                  iconColorClass="text-blue-500 bg-blue-500/10"
+                  document={documents.find(doc => doc.category === 'profile')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* Consent Form */}
+                <DocumentCard 
+                  title="Consent Form"
+                  icon={FileText}
+                  colorClass="from-emerald-500/10 to-emerald-600/10 border-emerald-200"
+                  iconColorClass="text-emerald-500 bg-emerald-500/10"
+                  document={documents.find(doc => doc.category === 'consent_form')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* Follow-up Form */}
+                <DocumentCard 
+                  title="Follow-up Form"
+                  icon={ClipboardList}
+                  colorClass="from-purple-500/10 to-purple-600/10 border-purple-200"
+                  iconColorClass="text-purple-500 bg-purple-500/10"
+                  document={documents.find(doc => doc.category === 'follow_up_form')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
+                
+                {/* Report Cards */}
+                <DocumentCard 
+                  title="Report Cards"
+                  icon={GraduationCap}
+                  colorClass="from-orange-500/10 to-orange-600/10 border-orange-200"
+                  iconColorClass="text-orange-500 bg-orange-500/10"
+                  document={documents.find(doc => doc.category === 'report_cards')}
+                  onDelete={handleDeleteDocument}
+                  isAdmin={isAdmin}
+                />
               </div>
 
-              {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).length > 0 && (
-                <div>
-                  <h4 className="text-md font-semibold mb-3">Other Documents</h4>
-                  <div className="space-y-3">
-                    {documents.filter(doc => !['profile', 'consent_form', 'follow_up', 'intake_form'].includes(doc.category)).map((document, index) => (
-                        <Card key={document.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale`}>
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="font-medium">{document.title}</p>
-                                {document.description && (
-                                  <p className="text-sm text-muted-foreground">{document.description}</p>
-                                )}
-                                {document.category && (
-                                  <Badge variant="outline" className="mt-1">{document.category}</Badge>
-                                )}
-                              </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => window.open(document.file_url, '_blank')}
-                                >
-                                  View
-                                </Button>
-                                {isAdmin && (
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="outline" size="sm">
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Are you sure you want to delete this document? This action cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction 
-                                          onClick={() => handleDeleteDocument(document.id)}
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )}
-                              </div>
+              {/* Other Documents */}
+              {documents.filter(doc => doc.category === 'other').length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-4">Other Documents</h4>
+                  <div className="grid gap-3">
+                    {documents.filter(doc => doc.category === 'other').map((document) => (
+                      <Card key={document.id} className="bg-gradient-to-r from-secondary/50 to-secondary/30 border shadow-sm hover:shadow-md transition-all">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{document.title}</p>
+                              {document.description && (
+                                <p className="text-sm text-muted-foreground">{document.description}</p>
+                              )}
                             </div>
-                          </CardContent>
-                        </Card>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(document.file_url, '_blank')}
+                                className="hover:bg-accent hover:text-accent-foreground"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              {isAdmin && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this document? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => handleDeleteDocument(document.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -920,5 +846,155 @@ export default function ChildProfile() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Reusable Report Card Component
+function ReportCard({ 
+  title, 
+  icon: Icon, 
+  colorClass, 
+  iconColorClass, 
+  document, 
+  onDelete, 
+  isAdmin 
+}: { 
+  title: string;
+  icon: any;
+  colorClass: string;
+  iconColorClass: string;
+  document: any;
+  onDelete: (id: string) => void;
+  isAdmin: boolean;
+}) {
+  return (
+    <Card className={`bg-gradient-to-r ${colorClass} border shadow-md hover:shadow-lg transition-all`}>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <div className={`p-2 rounded-lg ${iconColorClass}`}>
+            <Icon className="h-4 w-4" />
+          </div>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {document ? (
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 hover:bg-accent hover:text-accent-foreground"
+              onClick={() => window.open(document.file_url, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              View Report
+            </Button>
+            {isAdmin && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this report link? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(document.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">No report added</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Reusable Document Card Component
+function DocumentCard({ 
+  title, 
+  icon: Icon, 
+  colorClass, 
+  iconColorClass, 
+  document, 
+  onDelete, 
+  isAdmin 
+}: { 
+  title: string;
+  icon: any;
+  colorClass: string;
+  iconColorClass: string;
+  document: any;
+  onDelete: (id: string) => void;
+  isAdmin: boolean;
+}) {
+  return (
+    <Card className={`bg-gradient-to-r ${colorClass} border shadow-md hover:shadow-lg transition-all`}>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <div className={`p-2 rounded-lg ${iconColorClass}`}>
+            <Icon className="h-4 w-4" />
+          </div>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {document ? (
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 hover:bg-accent hover:text-accent-foreground"
+              onClick={() => window.open(document.file_url, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              View Document
+            </Button>
+            {isAdmin && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this document? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(document.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">No document added</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
