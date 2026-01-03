@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye, Users, Music, MapPin } from "lucide-react";
+import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye, Users, Music, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatKipawaSatoData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 export default function KipawaSato() {
   const { isAdmin, isManagement } = useAuth();
@@ -147,45 +148,50 @@ export default function KipawaSato() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Kipawa Sato</h1>
-          <p className="text-muted-foreground">Talent development and mentorship program</p>
-        </div>
-        
-        <div className="flex gap-2">
-          {isManagement && (
-            <Button onClick={handleDownload} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Excel
-            </Button>
-          )}
-          
-          {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-full sm:w-[90vw]">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingMember ? 'Edit Kipawa Sato Member' : 'Add Kipawa Sato Member'}
-                  </DialogTitle>
-                </DialogHeader>
-                <KipawaSatoForm
-                  member={editingMember}
-                  onSuccess={handleSuccess}
-                  onCancel={handleDialogClose}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Kipawa Sato"
+        description="Talent development and mentorship program"
+        icon={Sparkles}
+        iconColorClass="text-primary-foreground"
+        actions={
+          <div className="flex gap-2">
+            {isManagement && (
+              <Button onClick={handleDownload} variant="outline" className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0">
+                <Download className="h-4 w-4 mr-2" />
+                Download Excel
+              </Button>
+            )}
+            {isAdmin && (
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Member
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-full sm:w-[90vw]">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingMember ? 'Edit Kipawa Sato Member' : 'Add Kipawa Sato Member'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <KipawaSatoForm
+                    member={editingMember}
+                    onSuccess={handleSuccess}
+                    onCancel={handleDialogClose}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        }
+        stats={statistics ? [
+          { label: 'Total Members', value: statistics.totalMembers, icon: Users },
+        ] : undefined}
+      />
 
+      {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -227,82 +233,59 @@ export default function KipawaSato() {
       {/* Statistics Cards */}
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className={`${getCardStyles(0)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Total Members
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{statistics.totalMembers}</div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(1)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Music className="h-4 w-4" />
-                Top Talent
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {Object.keys(statistics.byTalent).length > 0
-                  ? Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][0]
-                  : 'N/A'}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {Object.keys(statistics.byTalent).length > 0
-                  ? `${Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][1]} members`
-                  : 'No data'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(2)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Locations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byLocation).map(([location, count]: any) => (
-                  <div key={location} className="flex justify-between text-sm">
-                    <span>{location}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byLocation).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(3)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Gender Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
-                  <div key={gender} className="flex justify-between text-sm">
-                    <span className="capitalize">{gender}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byGender).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Total Members"
+            value={statistics.totalMembers}
+            icon={Users}
+            colorVariant="blue"
+          />
+          <StatsCard
+            title="Top Talent"
+            value={Object.keys(statistics.byTalent).length > 0
+              ? Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][0]
+              : 'N/A'}
+            subtitle={Object.keys(statistics.byTalent).length > 0
+              ? `${Object.entries(statistics.byTalent).sort((a: any, b: any) => b[1] - a[1])[0][1]} members`
+              : 'No data'}
+            icon={Music}
+            colorVariant="emerald"
+          />
+          <StatsCard
+            title="Locations"
+            value=""
+            icon={MapPin}
+            colorVariant="purple"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byLocation).map(([location, count]: any) => (
+                <div key={location} className="flex justify-between text-sm">
+                  <span>{location}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byLocation).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="Gender Distribution"
+            value=""
+            icon={Users}
+            colorVariant="orange"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                <div key={gender} className="flex justify-between text-sm">
+                  <span className="capitalize">{gender}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byGender).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye, Activity, MapPin } from "lucide-react";
+import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye, Activity, MapPin, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFeedingProgramData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 export default function FeedingProgram() {
   const { isAdmin, isManagement } = useAuth();
@@ -136,116 +137,102 @@ export default function FeedingProgram() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Feeding Program</h1>
-          <p className="text-muted-foreground">Manage feeding program beneficiaries</p>
-        </div>
-        
-        <div className="flex gap-2">
-          {isManagement && (
-            <Button onClick={handleDownload} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Excel
-            </Button>
-          )}
-          
-          {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="default">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Beneficiary
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingProgram ? 'Edit Beneficiary' : 'Add Feeding Program Beneficiary'}
-                  </DialogTitle>
-                </DialogHeader>
-                <FeedingProgramForm
-                  program={editingProgram}
-                  onSuccess={handleSuccess}
-                  onCancel={handleDialogClose}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Feeding Program"
+        description="Manage feeding program beneficiaries"
+        icon={Utensils}
+        iconColorClass="text-primary-foreground"
+        actions={
+          <div className="flex gap-2">
+            {isManagement && (
+              <Button onClick={handleDownload} variant="outline" className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0">
+                <Download className="h-4 w-4 mr-2" />
+                Download Excel
+              </Button>
+            )}
+            {isAdmin && (
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Beneficiary
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingProgram ? 'Edit Beneficiary' : 'Add Feeding Program Beneficiary'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <FeedingProgramForm
+                    program={editingProgram}
+                    onSuccess={handleSuccess}
+                    onCancel={handleDialogClose}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        }
+        stats={statistics ? [
+          { label: 'Total Beneficiaries', value: statistics.totalBeneficiaries, icon: Users },
+          { label: 'With Sponsorship', value: statistics.withSponsorship, icon: Activity },
+        ] : undefined}
+      />
 
       {/* Statistics Cards */}
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className={`${getCardStyles(0)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Total Beneficiaries
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{statistics.totalBeneficiaries}</div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(1)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <User className="h-4 w-4" />
-                By Gender
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
-                  <div key={gender} className="flex justify-between text-sm">
-                    <span>{gender}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byGender).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(2)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                By Program Type
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byType).map(([type, count]: any) => (
-                  <div key={type} className="flex justify-between text-sm">
-                    <span className="text-xs">{type}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byType).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(3)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                With Sponsorship
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{statistics.withSponsorship}</div>
-              <p className="text-xs text-muted-foreground mt-1">Education sponsorship</p>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Total Beneficiaries"
+            value={statistics.totalBeneficiaries}
+            icon={Users}
+            colorVariant="blue"
+          />
+          <StatsCard
+            title="By Gender"
+            value=""
+            icon={User}
+            colorVariant="emerald"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                <div key={gender} className="flex justify-between text-sm">
+                  <span>{gender}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byGender).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="By Program Type"
+            value=""
+            icon={MapPin}
+            colorVariant="purple"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byType).map(([type, count]: any) => (
+                <div key={type} className="flex justify-between text-sm">
+                  <span className="text-xs">{type}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byType).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="With Sponsorship"
+            value={statistics.withSponsorship}
+            subtitle="Education sponsorship"
+            icon={Activity}
+            colorVariant="orange"
+          />
         </div>
       )}
 

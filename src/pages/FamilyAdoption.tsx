@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter, FileText, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter, FileText, Link as LinkIcon, ExternalLink, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { StatsCard } from "@/components/StatsCard";
 
 export default function FamilyAdoption() {
   const { isAdmin, isManagement } = useAuth();
@@ -192,120 +193,107 @@ export default function FamilyAdoption() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Family Adoption</h1>
-          <p className="text-muted-foreground">Support families through adoption programs</p>
-        </div>
-        
-        {isAdmin && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Family
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingFamily ? 'Edit Family Adoption' : 'Add Family Adoption'}</DialogTitle>
-            </DialogHeader>
-            <FamilyAdoptionForm
-              family={editingFamily}
-              onSuccess={handleSuccess}
-              onCancel={() => {
-                setIsDialogOpen(false);
-                setEditingFamily(null);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-        )}
-      </div>
+      {/* Hero Header */}
+      <PageHeroHeader
+        title="Family Adoption"
+        description="Support families through adoption programs"
+        icon={Heart}
+        iconColorClass="text-primary-foreground"
+        actions={
+          isAdmin && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Family
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{editingFamily ? 'Edit Family Adoption' : 'Add Family Adoption'}</DialogTitle>
+                </DialogHeader>
+                <FamilyAdoptionForm
+                  family={editingFamily}
+                  onSuccess={handleSuccess}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    setEditingFamily(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          )
+        }
+        stats={statistics ? [
+          { label: 'Total Families', value: statistics.totalFamilies, icon: Users },
+          { label: 'Beneficiaries', value: statistics.totalBeneficiaries, icon: User },
+        ] : undefined}
+      />
 
       {/* Statistics Cards */}
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className={`${getCardStyles(0)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Total Families
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{statistics.totalFamilies}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {statistics.totalBeneficiaries} beneficiaries
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(1)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <User className="h-4 w-4" />
-                By Gender
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byGender).map(([gender, count]: any) => (
-                  <div key={gender} className="flex justify-between text-sm">
-                    <span>{gender}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byGender).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(2)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                By Residence
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
-                  <div key={residence} className="flex justify-between text-sm">
-                    <span className="text-xs">{residence}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byResidence).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`${getCardStyles(3)} hover-scale`}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                By Category
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {Object.entries(statistics.byCategory).map(([category, count]: any) => (
-                  <div key={category} className="flex justify-between text-sm">
-                    <span className="text-xs">{category}</span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(statistics.byCategory).length === 0 && (
-                  <div className="text-sm text-muted-foreground">No data</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Total Families"
+            value={statistics.totalFamilies}
+            subtitle={`${statistics.totalBeneficiaries} beneficiaries`}
+            icon={Users}
+            colorVariant="blue"
+          />
+          <StatsCard
+            title="By Gender"
+            value=""
+            icon={User}
+            colorVariant="emerald"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                <div key={gender} className="flex justify-between text-sm">
+                  <span>{gender}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byGender).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="By Residence"
+            value=""
+            icon={MapPin}
+            colorVariant="purple"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byResidence).map(([residence, count]: any) => (
+                <div key={residence} className="flex justify-between text-sm">
+                  <span className="text-xs">{residence}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byResidence).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
+          <StatsCard
+            title="By Category"
+            value=""
+            icon={Activity}
+            colorVariant="orange"
+          >
+            <div className="space-y-1">
+              {Object.entries(statistics.byCategory).map(([category, count]: any) => (
+                <div key={category} className="flex justify-between text-sm">
+                  <span className="text-xs">{category}</span>
+                  <span className="font-semibold">{count}</span>
+                </div>
+              ))}
+              {Object.keys(statistics.byCategory).length === 0 && (
+                <div className="text-sm text-muted-foreground">No data</div>
+              )}
+            </div>
+          </StatsCard>
         </div>
       )}
 
