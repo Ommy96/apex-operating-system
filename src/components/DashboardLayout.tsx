@@ -32,29 +32,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen min-h-[100dvh] flex w-full overflow-x-hidden">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0 w-full">
           {/* Top Header */}
-          <header className="h-20 border-b border-border/20 bg-gradient-to-r from-card to-card/95 backdrop-blur-sm flex items-center justify-between px-8 shadow-elevation-1">
-            <div className="flex items-center gap-6">
-              <SidebarTrigger className="p-2 hover:bg-accent/10 rounded-xl transition-colors hover-lift" />
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <header className="h-14 md:h-20 border-b border-border/20 bg-gradient-to-r from-card to-card/95 backdrop-blur-sm flex items-center justify-between px-3 md:px-8 shadow-elevation-1 flex-shrink-0">
+            <div className="flex items-center gap-2 md:gap-6 min-w-0 flex-1">
+              <SidebarTrigger className="p-2 hover:bg-accent/10 rounded-xl transition-colors hover-lift flex-shrink-0" />
+              <div className="min-w-0 hidden sm:block">
+                <h1 className="text-base md:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
                   Heart to Heart Organization
                 </h1>
-                <p className="text-sm text-muted-foreground font-medium">
+                <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">
                   Management System
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               <ThemeToggle />
               
-              <Button variant="ghost" size="sm" className="h-12 w-12 rounded-2xl hover:bg-accent/10 transition-all duration-300 hover-lift relative">
-                <Bell className="h-5 w-5 text-muted-foreground" />
+              <Button variant="ghost" size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl hover:bg-accent/10 transition-all duration-300 hover-lift relative p-0">
+                <Bell className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-accent text-xs text-accent-foreground flex items-center justify-center shadow-elevation-1 animate-pulse">
                   3
                 </span>
@@ -62,12 +62,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-3 px-4 py-2 h-12 bg-gradient-to-r from-secondary to-secondary/80 rounded-2xl hover:from-accent/10 hover:to-accent/5 transition-all duration-300 shadow-soft border border-border/50 hover-lift">
-                    <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center glow-effect">
-                      <User className="h-4 w-4 text-white" />
+                  <Button variant="ghost" className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 h-10 md:h-12 bg-gradient-to-r from-secondary to-secondary/80 rounded-xl md:rounded-2xl hover:from-accent/10 hover:to-accent/5 transition-all duration-300 shadow-soft border border-border/50 hover-lift">
+                    <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg md:rounded-xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center glow-effect flex-shrink-0">
+                      <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
                     </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-semibold text-foreground">{userName}</span>
+                    <div className="hidden md:flex flex-col items-start min-w-0">
+                      <span className="text-sm font-semibold text-foreground truncate max-w-[120px]">{userName}</span>
                       <RoleIndicator />
                     </div>
                   </Button>
@@ -93,15 +93,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background/50 to-secondary/5 transition-all duration-300">
-            <div className="max-w-7xl mx-auto animate-fade-in">
+          <main className="flex-1 p-4 md:p-8 overflow-auto bg-gradient-to-br from-background/50 to-secondary/5 transition-all duration-300">
+            <div className="max-w-7xl mx-auto animate-fade-in w-full">
               {children}
             </div>
           </main>
 
           {/* Footer */}
-          <footer className="h-16 border-t border-border/20 bg-gradient-to-r from-card to-card/95 backdrop-blur-sm flex items-center justify-center shadow-elevation-1">
-            <p className="text-sm text-muted-foreground">
+          <footer className="h-12 md:h-16 border-t border-border/20 bg-gradient-to-r from-card to-card/95 backdrop-blur-sm flex items-center justify-center shadow-elevation-1 flex-shrink-0 px-3">
+            <p className="text-xs md:text-sm text-muted-foreground text-center">
               Powered by{" "}
               <span className="font-bold bg-gradient-to-r from-accent to-accent-dark bg-clip-text text-transparent">
                 Infera Tech Solutions
