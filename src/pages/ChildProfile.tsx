@@ -179,9 +179,9 @@ export default function ChildProfile() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       {/* Hero Header with Profile */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary-light to-accent p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-primary via-primary-light to-accent p-4 md:p-8">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[size:20px_20px]"></div>
         
         <div className="relative z-10">
@@ -189,17 +189,18 @@ export default function ChildProfile() {
           <Button 
             variant="ghost" 
             onClick={() => navigate('/children')}
-            className="mb-4 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            className="mb-3 md:mb-4 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 text-sm"
+            size="sm"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Children
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
+            Back
           </Button>
           
-          <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
             {/* Large Profile Picture */}
-            <div className="relative group">
+            <div className="relative group flex-shrink-0">
               <div className="absolute -inset-1 bg-gradient-to-r from-accent via-accent-light to-accent rounded-full blur-md opacity-75 group-hover:opacity-100 transition-opacity"></div>
-              <Avatar className="relative h-36 w-36 md:h-44 md:w-44 border-4 border-primary-foreground/20 shadow-2xl">
+              <Avatar className="relative h-24 w-24 md:h-44 md:w-44 border-4 border-primary-foreground/20 shadow-2xl">
                 {child.photo_url ? (
                   <AvatarImage 
                     src={convertGoogleDriveUrl(child.photo_url) || undefined} 
@@ -209,21 +210,21 @@ export default function ChildProfile() {
                     loading="lazy"
                   />
                 ) : null}
-                <AvatarFallback className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-accent to-accent-dark text-primary-foreground">
+                <AvatarFallback className="text-2xl md:text-5xl font-bold bg-gradient-to-br from-accent to-accent-dark text-primary-foreground">
                   {getInitials(child.first_name, child.last_name)}
                 </AvatarFallback>
               </Avatar>
             </div>
             
             {/* Name and Quick Info */}
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">
+            <div className="flex-1 text-center md:text-left min-w-0">
+              <h1 className="text-xl md:text-4xl font-bold text-primary-foreground mb-2 truncate">
                 {child.first_name} {child.last_name}
               </h1>
               
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-3 md:mb-4">
                 <Badge 
-                  className={`text-sm px-4 py-1.5 font-semibold ${
+                  className={`text-xs md:text-sm px-2.5 md:px-4 py-1 md:py-1.5 font-semibold ${
                     child.status === 'active' 
                       ? 'bg-success/90 hover:bg-success text-success-foreground' 
                       : 'bg-warning/90 hover:bg-warning text-warning-foreground'
@@ -232,51 +233,51 @@ export default function ChildProfile() {
                   {child.status?.charAt(0).toUpperCase() + child.status?.slice(1)}
                 </Badge>
                 {child.gender && (
-                  <Badge variant="outline" className="text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
+                  <Badge variant="outline" className="text-xs md:text-sm text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
                     {child.gender}
                   </Badge>
                 )}
                 {child.date_of_birth && (
-                  <Badge variant="outline" className="text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
+                  <Badge variant="outline" className="text-xs md:text-sm text-primary-foreground/90 border-primary-foreground/30 bg-primary-foreground/10">
                     Age {calculateAge(child.date_of_birth)}
                   </Badge>
                 )}
               </div>
               
               {/* Quick Stats */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-primary-foreground/80">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 text-primary-foreground/80">
                 {child.residence && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm">{child.residence}</span>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <span className="text-xs md:text-sm">{child.residence}</span>
                   </div>
                 )}
                 {child.academic_level && (
-                  <div className="flex items-center gap-1.5">
-                    <GraduationCap className="h-4 w-4" />
-                    <span className="text-sm">{child.academic_level}</span>
+                  <div className="flex items-center gap-1">
+                    <GraduationCap className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <span className="text-xs md:text-sm truncate max-w-[100px] md:max-w-none">{child.academic_level}</span>
                   </div>
                 )}
                 {child.institution_name && (
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-4 w-4" />
-                    <span className="text-sm">{child.institution_name}</span>
+                  <div className="hidden sm:flex items-center gap-1">
+                    <BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <span className="text-xs md:text-sm truncate max-w-[150px]">{child.institution_name}</span>
                   </div>
                 )}
               </div>
             </div>
             
             {/* Action Buttons */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto flex-shrink-0">
               {isAdmin && (
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0">
-                      <Edit2 className="h-4 w-4 mr-2" />
-                      Edit Profile
+                    <Button size="sm" className="flex-1 md:flex-none bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0 text-xs md:text-sm">
+                      <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5" />
+                      Edit
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto mx-4">
                     <DialogHeader>
                       <DialogTitle>Edit Child Profile</DialogTitle>
                     </DialogHeader>
@@ -293,10 +294,11 @@ export default function ChildProfile() {
               )}
               <Button 
                 onClick={() => navigate(`/children/${id}/report`)}
-                className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg"
+                size="sm"
+                className="flex-1 md:flex-none bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg text-xs md:text-sm"
               >
-                <FileText className="h-4 w-4 mr-2" />
-                Generate Report
+                <FileText className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5" />
+                Report
               </Button>
             </div>
           </div>
