@@ -21,6 +21,7 @@ import { SecurityDashboard } from '@/components/SecurityDashboard';
 import { ApprovalWorkflow } from '@/components/ApprovalWorkflow';
 import { AdvancedAuditTrail } from '@/components/AdvancedAuditTrail';
 import { RoleIndicator, PermissionMatrix, RoleComparison } from '@/components/RoleIndicatorSystem';
+import { PageHeroHeader } from '@/components/PageHeroHeader';
 
 export default function Settings() {
   const { userRole } = useAuth();
@@ -436,20 +437,11 @@ export default function Settings() {
       {userRole === 'admin' && (
         <RealtimeStatusDemo />
       )}
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-primary rounded-lg">
-            <SettingsIcon className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Settings
-            </h1>
-            <p className="text-muted-foreground">Manage system settings and configurations</p>
-          </div>
-        </div>
-      </div>
+      <PageHeroHeader
+        title="Settings"
+        description="Manage system settings and configurations"
+        icon={SettingsIcon}
+      />
 
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList className="grid grid-cols-7 bg-gradient-to-r from-muted/50 to-muted/80">

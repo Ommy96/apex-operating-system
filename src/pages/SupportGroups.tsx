@@ -15,6 +15,7 @@ import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function SupportGroups() {
   const { toast } = useToast();
@@ -128,32 +129,32 @@ export default function SupportGroups() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Support Groups</h1>
-          <p className="text-muted-foreground">Community support and group activities</p>
-        </div>
-        
-        {isAdmin && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Group
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add Support Group</DialogTitle>
-            </DialogHeader>
-            <SupportGroupForm
-              onSuccess={handleSuccess}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-        )}
-      </div>
+      <PageHeroHeader
+        title="Support Groups"
+        description="Community support and group activities"
+        icon={Users}
+        actions={
+          isAdmin ? (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Group
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Add Support Group</DialogTitle>
+                </DialogHeader>
+                <SupportGroupForm
+                  onSuccess={handleSuccess}
+                  onCancel={() => setIsDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          ) : undefined
+        }
+      />
 
       {/* Statistics Cards */}
       {statistics && (

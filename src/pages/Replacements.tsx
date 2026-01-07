@@ -40,6 +40,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { downloadExcel } from "@/lib/downloadUtils";
 import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 interface Replacement {
   id: string;
@@ -203,48 +204,47 @@ export default function Replacements() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold gradient-text">Child Replacements</h1>
-          <p className="text-muted-foreground mt-2">
-            Track and manage child sponsorship replacements
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleExport} variant="outline" className="gap-2">
-            <FileDown className="h-4 w-4" />
-            Export
-          </Button>
-          {isAdmin && (
-            <Dialog open={showForm} onOpenChange={setShowForm}>
-              <DialogTrigger asChild>
-                <Button onClick={() => setShowForm(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Replacement
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingReplacement ? "Edit Replacement" : "Add New Replacement"}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingReplacement 
-                      ? "Update the replacement record details." 
-                      : "Create a new child replacement record."
-                    }
-                  </DialogDescription>
-                </DialogHeader>
-                <ReplacementForm 
-                  replacement={editingReplacement}
-                  onSuccess={() => handleFormClose()}
-                  onCancel={() => handleFormClose()}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+      <PageHeroHeader
+        title="Child Replacements"
+        description="Track and manage child sponsorship replacements"
+        icon={RefreshCw}
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={handleExport} variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2">
+              <FileDown className="h-4 w-4" />
+              Export
+            </Button>
+            {isAdmin && (
+              <Dialog open={showForm} onOpenChange={setShowForm}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => setShowForm(true)} className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Replacement
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingReplacement ? "Edit Replacement" : "Add New Replacement"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {editingReplacement 
+                        ? "Update the replacement record details." 
+                        : "Create a new child replacement record."
+                      }
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ReplacementForm 
+                    replacement={editingReplacement}
+                    onSuccess={() => handleFormClose()}
+                    onCancel={() => handleFormClose()}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        }
+      />
 
 
       {/* Stats Cards */}

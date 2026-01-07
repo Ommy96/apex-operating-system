@@ -16,6 +16,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { Home } from "lucide-react";
 
 export default function HomeVisitReports() {
   const { isManagement, isStaff, userRole, user } = useAuth();
@@ -209,44 +211,43 @@ export default function HomeVisitReports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Home Visit Reports</h1>
-          <p className="text-muted-foreground">Track and manage home visit reports</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* Only management/admin can download reports */}
-          {(isManagement || userRole === 'admin') && (
-            <Button onClick={handleDownload} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Excel
-            </Button>
-          )}
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto" onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Report
+      <PageHeroHeader
+        title="Home Visit Reports"
+        description="Track and manage home visit reports"
+        icon={Home}
+        actions={
+          <div className="flex flex-col sm:flex-row gap-2">
+            {(isManagement || userRole === 'admin') && (
+              <Button onClick={handleDownload} variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2">
+                <Download className="h-4 w-4" />
+                Download Excel
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>{editingReport ? 'Edit Home Visit Report' : 'Add Home Visit Report'}</DialogTitle>
-              </DialogHeader>
-              <HomeVisitReportForm 
-                initialData={editingReport}
-                onSuccess={() => {
-                  handleDialogClose();
-                  refetch();
-                }} 
-                onCancel={handleDialogClose} 
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+            )}
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white border-white/30" onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>{editingReport ? 'Edit Home Visit Report' : 'Add Home Visit Report'}</DialogTitle>
+                </DialogHeader>
+                <HomeVisitReportForm 
+                  initialData={editingReport}
+                  onSuccess={() => {
+                    handleDialogClose();
+                    refetch();
+                  }} 
+                  onCancel={handleDialogClose} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        }
+      />
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">

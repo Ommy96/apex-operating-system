@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { Heart } from "lucide-react";
 
 interface Sponsor {
   id: string;
@@ -173,19 +175,19 @@ const SponsorsManagement = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Sponsors Management</h1>
-          <p className="text-muted-foreground mt-1">Manage all sponsor details</p>
-        </div>
-        {isAdmin && (
-          <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-gradient-accent">
-                <Plus className="h-4 w-4" />
-                Add Sponsor
-              </Button>
-            </DialogTrigger>
+      <PageHeroHeader
+        title="Sponsors Management"
+        description="Manage all sponsor details"
+        icon={Heart}
+        actions={
+          isAdmin ? (
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Sponsor
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingSponsor ? 'Edit Sponsor' : 'Add New Sponsor'}</DialogTitle>
@@ -265,8 +267,9 @@ const SponsorsManagement = () => {
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+          ) : undefined
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

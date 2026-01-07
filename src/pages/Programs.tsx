@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PageHeroHeader } from '@/components/PageHeroHeader';
+import { BookOpen } from 'lucide-react';
 
 export default function Programs() {
   const { programName } = useParams();
@@ -122,24 +124,25 @@ export default function Programs() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{program.name}</h1>
-          <p className="text-muted-foreground">{program.description}</p>
-        </div>
-        {isAdmin && (
-          <div className="flex space-x-2">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Activity
-            </Button>
-            <Button variant="outline">
-              <Users className="h-4 w-4 mr-2" />
-              Manage Enrollments
-            </Button>
-          </div>
-        )}
-      </div>
+      <PageHeroHeader
+        title={program.name}
+        description={program.description || 'Program details and activities'}
+        icon={BookOpen}
+        actions={
+          isAdmin ? (
+            <div className="flex space-x-2">
+              <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Activity
+              </Button>
+              <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                <Users className="h-4 w-4 mr-2" />
+                Manage Enrollments
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
