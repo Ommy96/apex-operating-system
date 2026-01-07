@@ -12,6 +12,7 @@ import { FileText, Download, Search, Filter, AlertTriangle, CheckCircle } from "
 import { format } from "date-fns";
 import { downloadExcel, formatDocumentsData } from "@/lib/downloadUtils";
 import { toast } from "sonner";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 interface Document {
   id: string;
@@ -173,15 +174,12 @@ export default function Documents() {
   const childrenComplete = totalChildrenWithDocs - childrenMissingDocs;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-          <p className="text-muted-foreground">
-            View and manage all documents uploaded for students
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeroHeader
+        title="Documents"
+        description="View and manage all documents uploaded for students"
+        icon={FileText}
+      />
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>

@@ -16,6 +16,8 @@ import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { ProgramFieldBuilder, FieldDefinition } from "@/components/ProgramFieldBuilder";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { BookOpen } from "lucide-react";
 
 interface Program {
   id: string;
@@ -223,19 +225,19 @@ const ProgramsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Programs Management</h1>
-          <p className="text-muted-foreground mt-1">Manage all program details</p>
-        </div>
-        {isAdmin && (
-          <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-gradient-accent hover:bg-gradient-accent/90 shadow-strong">
-                <Plus className="h-4 w-4" />
-                Add Program
-              </Button>
-            </DialogTrigger>
+      <PageHeroHeader
+        title="Programs Management"
+        description="Manage all program details"
+        icon={BookOpen}
+        actions={
+          isAdmin ? (
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2 shadow-strong">
+                  <Plus className="h-4 w-4" />
+                  Add Program
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingProgram ? 'Edit Program' : 'Add New Program'}</DialogTitle>
@@ -347,8 +349,9 @@ const ProgramsManagement = () => {
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+          ) : undefined
+        }
+      />
 
       {/* Stats Cards - Compact */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

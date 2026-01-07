@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Download, Plus, Search, Eye, Edit, Trash2, Building2, AlertCircle, CheckCircle2, Calendar, Users, MapPin } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getCardStyles, CardVariant } from '@/lib/cardStyles';
+import { PageHeroHeader } from '@/components/PageHeroHeader';
 
 export default function BusinessVisitReports() {
   const { toast } = useToast();
@@ -188,23 +189,24 @@ export default function BusinessVisitReports() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Business Visit Reports</h1>
-          <p className="text-muted-foreground">Track and manage business visit reports</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Download
-          </Button>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Report
-          </Button>
-        </div>
-      </div>
+    <div className="container mx-auto space-y-6">
+      <PageHeroHeader
+        title="Business Visit Reports"
+        description="Track and manage business visit reports"
+        icon={Building2}
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={handleDownload} variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+            <Button onClick={() => setIsAddDialogOpen(true)} className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Report
+            </Button>
+          </div>
+        }
+      />
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">

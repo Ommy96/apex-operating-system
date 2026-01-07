@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { PageHeroHeader } from '@/components/PageHeroHeader';
 
 export default function Reports() {
   const { userRole } = useAuth();
@@ -207,22 +208,23 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Reports & Analytics</h1>
-          <p className="text-muted-foreground">Generate and view program reports</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button onClick={exportToPDF} disabled={!reportData}>
-            <Download className="h-4 w-4 mr-2" />
-            Export PDF
-          </Button>
-          <Button variant="outline" onClick={generateReport} disabled={loading}>
-            <BarChart3 className="h-4 w-4 mr-2" />
-            {loading ? 'Generating...' : 'Refresh'}
-          </Button>
-        </div>
-      </div>
+      <PageHeroHeader
+        title="Reports & Analytics"
+        description="Generate and view program reports"
+        icon={BarChart3}
+        actions={
+          <div className="flex space-x-2">
+            <Button onClick={exportToPDF} disabled={!reportData} className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+            <Button variant="outline" onClick={generateReport} disabled={loading} className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {loading ? 'Generating...' : 'Refresh'}
+            </Button>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Select value={selectedProgram} onValueChange={setSelectedProgram}>

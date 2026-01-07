@@ -16,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function ProgramReports() {
   const navigate = useNavigate();
@@ -177,54 +178,53 @@ export default function ProgramReports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Program Reports</h1>
-          <p className="text-muted-foreground">Track and manage program reports</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* Only management/admin can download reports */}
-          {(isManagement || userRole === 'admin') && (
-            <>
-              <Button onClick={handleDownload} variant="outline" className="gap-2">
-                <Download className="h-4 w-4" />
-                Download Excel
-              </Button>
-              <Button 
-                onClick={() => navigate('/reports/attendance')} 
-                variant="outline" 
-                className="gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Attendance
-              </Button>
-            </>
-          )}
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto" onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Report
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>{editingReport ? 'Edit Program Report' : 'Add Program Report'}</DialogTitle>
-              </DialogHeader>
-              <ProgramReportForm 
-                initialData={editingReport}
-                onSuccess={() => {
-                  handleDialogClose();
-                  refetch();
-                }} 
-                onCancel={handleDialogClose} 
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+      <PageHeroHeader
+        title="Program Reports"
+        description="Track and manage program reports"
+        icon={FileText}
+        actions={
+          <div className="flex flex-col sm:flex-row gap-2">
+            {(isManagement || userRole === 'admin') && (
+              <>
+                <Button onClick={handleDownload} variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2">
+                  <Download className="h-4 w-4" />
+                  Download Excel
+                </Button>
+                <Button 
+                  onClick={() => navigate('/reports/attendance')} 
+                  variant="outline" 
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Attendance
+                </Button>
+              </>
+            )}
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white border-white/30" onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>{editingReport ? 'Edit Program Report' : 'Add Program Report'}</DialogTitle>
+                </DialogHeader>
+                <ProgramReportForm 
+                  initialData={editingReport}
+                  onSuccess={() => {
+                    handleDialogClose();
+                    refetch();
+                  }} 
+                  onCancel={handleDialogClose} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        }
+      />
 
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
