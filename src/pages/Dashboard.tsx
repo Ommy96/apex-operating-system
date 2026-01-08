@@ -9,13 +9,13 @@ import {
   FileText,
   Plus,
   Eye,
-  Calendar,
   BookOpen,
   Sparkles,
   Target,
   Clock,
-  Activity
+  LayoutDashboard
 } from "lucide-react";
+import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -324,36 +324,36 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Welcome Section with Real-time Indicators */}
-      <div className="mb-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
-              Welcome back, {userName}
-              <div className="flex items-center gap-2 ml-4">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs text-muted-foreground">Live</span>
-              </div>
-            </h1>
-            <div className="flex items-center gap-4 mt-1">
-              <p className="text-muted-foreground">
-                Here's what's happening with Heart to Heart Organization today.
-              </p>
+      {/* Modern Hero Header */}
+      <PageHeroHeader
+        title={`Welcome back, ${userName}`}
+        description="Here's what's happening with Heart to Heart Organization today."
+        icon={LayoutDashboard}
+        iconColorClass="bg-gradient-to-br from-primary to-accent text-white"
+        stats={[
+          { label: "Total Beneficiaries", value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0" },
+          { label: "Education", value: statsLoading ? "..." : dashboardStats?.educationProgram.toString() || "0" },
+          { label: "Feeding", value: statsLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0" },
+          { label: "Kipawa", value: statsLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0" },
+        ]}
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="hidden lg:flex">
+              <RealTimeIndicator 
+                isConnected={true} 
+                lastUpdate={lastUpdated}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Updated {lastUpdated.toLocaleTimeString()}
               </span>
             </div>
           </div>
-          
-          <div className="hidden lg:flex">
-            <RealTimeIndicator 
-              isConnected={true} 
-              lastUpdate={lastUpdated}
-            />
-          </div>
-        </div>
-      </div>
+        }
+      />
 
 
       {/* Role-based Permissions Demo - Hidden for staff and admin users */}
@@ -363,38 +363,35 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
+      {/* Program Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => {
-          const cardGradients = ["bg-gradient-card-blue", "bg-gradient-card-emerald", "bg-gradient-card-orange", "bg-gradient-card-purple"];
-          const cardBorders = ["border-card-blue", "border-card-emerald", "border-card-orange", "border-card-purple"];
-          return (
-            <Card key={stat.title} className={`${cardGradients[index % cardGradients.length]} ${cardBorders[index % cardBorders.length]} shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-300 animate-scale-in backdrop-blur-sm card-hover`} style={{animationDelay: `${index * 100}ms`}}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-3 rounded-xl ${stat.gradient} shadow-elevation-2 hover-lift glow-effect`}>
-                  <stat.icon className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-1">
-                  {stat.value}
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {stat.description}
-                </p>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-gradient-accent rounded-full animate-pulse glow-effect"></div>
-                  <p className="text-xs text-success font-medium">
-                    {stat.change}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {[
+          { title: "Education Program", value: dashboardStats?.educationProgram || 0, icon: GraduationCap, gradient: "bg-gradient-to-br from-blue-500 to-blue-600" },
+          { title: "Feeding Program", value: dashboardStats?.feedingProgram || 0, icon: UtensilsCrossed, gradient: "bg-gradient-to-br from-emerald-500 to-emerald-600" },
+          { title: "Kipawa Program", value: dashboardStats?.kipawaProgram || 0, icon: Heart, gradient: "bg-gradient-to-br from-orange-500 to-orange-600" },
+          { title: "Empowerment", value: dashboardStats?.empowermentProgram || 0, icon: Sparkles, gradient: "bg-gradient-to-br from-purple-500 to-purple-600" },
+        ].map((stat, index) => (
+          <Card key={stat.title} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className={`absolute inset-0 ${stat.gradient} opacity-10 group-hover:opacity-15 transition-opacity`} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {stat.title}
+              </CardTitle>
+              <div className={`p-3 rounded-xl ${stat.gradient} shadow-lg`}>
+                <stat.icon className="h-5 w-5 text-white" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground mb-1">
+                {statsLoading ? "..." : stat.value}
+              </div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                Real-time data
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Main Content Grid */}
