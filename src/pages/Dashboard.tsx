@@ -26,6 +26,7 @@ import { LiveUserPresence } from "@/components/LiveUserPresence";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardTrendCharts } from "@/components/DashboardTrendCharts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -499,6 +500,23 @@ const Dashboard = () => {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Animated Trend Charts Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-primary" />
+          Program Analytics & Trends
+        </h2>
+        <DashboardTrendCharts 
+          stats={{
+            educationProgram: dashboardStats?.educationProgram || 0,
+            feedingProgram: dashboardStats?.feedingProgram || 0,
+            kipawaProgram: dashboardStats?.kipawaProgram || 0,
+            empowermentProgram: dashboardStats?.empowermentProgram || 0
+          }}
+          isLoading={statsLoading}
+        />
       </div>
 
       {/* Program Overview */}
