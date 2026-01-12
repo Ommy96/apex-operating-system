@@ -158,43 +158,6 @@ const Dashboard = () => {
     };
   }, [user, refetch, toast]);
 
-  // Calculate program distribution percentages
-  const totalPrograms = (dashboardStats?.educationProgram || 0) + 
-                       (dashboardStats?.feedingProgram || 0) + 
-                       (dashboardStats?.kipawaProgram || 0) + 
-                       (dashboardStats?.empowermentProgram || 0);
-
-  const programDistribution = [
-    {
-      name: "Education Program",
-      count: dashboardStats?.educationProgram || 0,
-      percentage: totalPrograms > 0 ? ((dashboardStats?.educationProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
-      color: "bg-gradient-primary",
-      textColor: "text-primary"
-    },
-    {
-      name: "Feeding Program", 
-      count: dashboardStats?.feedingProgram || 0,
-      percentage: totalPrograms > 0 ? ((dashboardStats?.feedingProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
-      color: "bg-gradient-secondary",
-      textColor: "text-secondary"
-    },
-    {
-      name: "Kipawa Program",
-      count: dashboardStats?.kipawaProgram || 0,
-      percentage: totalPrograms > 0 ? ((dashboardStats?.kipawaProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
-      color: "bg-gradient-warm",
-      textColor: "text-accent"
-    },
-    {
-      name: "Empowerment",
-      count: dashboardStats?.empowermentProgram || 0,
-      percentage: totalPrograms > 0 ? ((dashboardStats?.empowermentProgram || 0) / totalPrograms * 100).toFixed(1) : "0",
-      color: "bg-warning",
-      textColor: "text-warning"
-    }
-  ];
-
   const stats = [
     {
       title: "Total Beneficiaries",
@@ -350,48 +313,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Program Overview */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
-          <CardHeader>
-            <CardTitle>Program Distribution</CardTitle>
-            <CardDescription>
-              Children enrolled by program type
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {statsLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-muted rounded-full animate-pulse"></div>
-                        <div className="h-4 bg-muted rounded w-24 animate-pulse"></div>
-                      </div>
-                      <div className="h-4 bg-muted rounded w-16 animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                programDistribution.map((program, index) => (
-                  <div key={program.name} className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-background to-muted/30 hover:from-muted/20 hover:to-muted/40 transition-all duration-200 hover-lift micro-interaction">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full shadow-elevation-1 ${program.color} glow-effect`}></div>
-                      <span className={`text-sm font-medium ${program.textColor}`}>{program.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-bold text-foreground">{program.count}</span>
-                      <span className="text-xs text-muted-foreground ml-1">({program.percentage}%)</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Report Actions Card - Hidden for staff and admin users */}
+      {/* Report Actions Card - Hidden for staff and admin users */}
         {!isStaff && !isAdmin && (
           <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
             <CardHeader>
@@ -442,7 +364,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         )}
-      </div>
     </div>
   );
 };
