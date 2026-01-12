@@ -11,7 +11,6 @@ import {
   Eye,
   BookOpen,
   Sparkles,
-  Target,
   Clock,
   LayoutDashboard
 } from "lucide-react";
@@ -67,64 +66,6 @@ const Dashboard = () => {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Fetch beneficiaries distribution by location
-  const { data: locationDistribution, isLoading: locationLoading } = useQuery({
-    queryKey: ['location-distribution'],
-    queryFn: async () => {
-      // Get data from multiple sources
-      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, familyAdoptionRes] = await Promise.all([
-        supabase.from('children').select('residence'),
-        supabase.from('feeding_program').select('id'), // No location field, will count as "Not Specified"
-        supabase.from('kipawa_sato').select('location'),
-        supabase.from('self_empowerment').select('residence'),
-        supabase.from('family_adoption').select('residence')
-      ]);
-
-      const locationCounts: { [key: string]: number } = {};
-
-      // Count children by residence
-      childrenRes.data?.forEach(child => {
-        const location = child.residence || 'Not Specified';
-        locationCounts[location] = (locationCounts[location] || 0) + 1;
-      });
-
-      // Count feeding program participants (no location data)
-      if (feedingRes.data?.length) {
-        locationCounts['Not Specified'] = (locationCounts['Not Specified'] || 0) + feedingRes.data.length;
-      }
-
-      // Count Kipawa participants by location
-      kipawaRes.data?.forEach(participant => {
-        const location = participant.location || 'Not Specified';
-        locationCounts[location] = (locationCounts[location] || 0) + 1;
-      });
-
-      // Count self-empowerment participants by residence
-      selfEmpowermentRes.data?.forEach(participant => {
-        const location = participant.residence || 'Not Specified';
-        locationCounts[location] = (locationCounts[location] || 0) + 1;
-      });
-
-      // Count family adoption participants by residence
-      familyAdoptionRes.data?.forEach(participant => {
-        const location = participant.residence || 'Not Specified';
-        locationCounts[location] = (locationCounts[location] || 0) + 1;
-      });
-
-      // Convert to array and sort by count
-      const total = Object.values(locationCounts).reduce((sum, count) => sum + count, 0);
-      
-      return Object.entries(locationCounts)
-        .map(([location, count]) => ({
-          location,
-          count,
-          percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0"
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8); // Show top 8 locations
-    },
-    refetchInterval: 30000, // Refresh every 30 seconds
-  });
 
   // Set up real-time subscriptions for dashboard activity
   useEffect(() => {
@@ -364,143 +305,33 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Program Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Education Program", value: dashboardStats?.educationProgram || 0, icon: GraduationCap, gradient: "bg-gradient-to-br from-blue-500 to-blue-600" },
-          { title: "Feeding Program", value: dashboardStats?.feedingProgram || 0, icon: UtensilsCrossed, gradient: "bg-gradient-to-br from-emerald-500 to-emerald-600" },
-          { title: "Kipawa Program", value: dashboardStats?.kipawaProgram || 0, icon: Heart, gradient: "bg-gradient-to-br from-orange-500 to-orange-600" },
-          { title: "Empowerment", value: dashboardStats?.empowermentProgram || 0, icon: Sparkles, gradient: "bg-gradient-to-br from-purple-500 to-purple-600" },
-        ].map((stat, index) => (
-          <Card key={stat.title} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className={`absolute inset-0 ${stat.gradient} opacity-10 group-hover:opacity-15 transition-opacity`} />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <div className={`p-3 rounded-xl ${stat.gradient} shadow-lg`}>
-                <stat.icon className="h-5 w-5 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground mb-1">
-                {statsLoading ? "..." : stat.value}
-              </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                Real-time data
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className={`grid gap-6 ${!isStaff && !isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
-        {/* Quick Actions - Navigation Card - Hidden for staff and admin users */}
-        {!isStaff && !isAdmin && (
-          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Quick Actions
-              </CardTitle>
-              <CardDescription>
-                Common tasks and operations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {quickActions.map((action, index) => (
-                <Button
-                  key={action.title}
-                  variant={action.variant}
-                  className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4 hover-lift button-press"
-                  onClick={action.onClick}
-                >
-                  <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-center leading-tight">{action.title}</span>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Beneficiaries by Location */}
-        <Card className={`${!isStaff && !isAdmin ? 'lg:col-span-2' : ''} shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300`}>
+      {/* Quick Actions - Navigation Card - Hidden for staff and admin users */}
+      {!isStaff && !isAdmin && (
+        <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Beneficiaries by Location
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Quick Actions
             </CardTitle>
             <CardDescription>
-              Geographic distribution of all program participants
+              Common tasks and operations
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {locationLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded-full bg-muted animate-pulse" />
-                        <div className="h-4 bg-muted rounded w-24 animate-pulse" />
-                      </div>
-                      <div className="h-4 bg-muted rounded w-16 animate-pulse" />
-                    </div>
-                  ))}
-                </div>
-              ) : locationDistribution && locationDistribution.length > 0 ? (
-                locationDistribution.map((location, index) => {
-                  const colors = [
-                    'bg-gradient-to-r from-primary to-primary/80',
-                    'bg-gradient-to-r from-accent to-accent/80', 
-                    'bg-gradient-to-r from-secondary to-secondary/80',
-                    'bg-gradient-to-r from-warning to-warning/80',
-                    'bg-gradient-to-r from-success to-success/80',
-                    'bg-gradient-to-r from-destructive to-destructive/80',
-                    'bg-gradient-to-r from-muted to-muted/80',
-                    'bg-gradient-to-r from-primary/60 to-accent/60'
-                  ];
-                  
-                  return (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-background to-secondary/10 hover:from-secondary/20 hover:to-secondary/30 transition-all duration-300 border border-border/50 shadow-elevation-1 hover:shadow-elevation-2 hover-lift micro-interaction">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-5 h-5 rounded-xl shadow-medium ${colors[index % colors.length]}`}></div>
-                        <div>
-                          <p className="font-semibold text-foreground text-sm">
-                            {location.location}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {location.percentage}% of total beneficiaries
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-xl text-foreground">{location.count}</span>
-                        <p className="text-xs text-muted-foreground">beneficiaries</p>
-                      </div>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Target className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                  <p>No location data available</p>
-                </div>
-              )}
-            </div>
-            <Button 
-              variant="outline" 
-              className="w-full mt-6 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 border-primary/20 hover-lift button-press"
-              onClick={() => navigate('/children')}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              View All Beneficiaries
-            </Button>
+          <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {quickActions.map((action) => (
+              <Button
+                key={action.title}
+                variant={action.variant}
+                className="h-16 sm:h-20 flex-col gap-1 sm:gap-2 text-xs p-2 sm:p-4 hover-lift button-press"
+                onClick={action.onClick}
+              >
+                <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-center leading-tight">{action.title}</span>
+              </Button>
+            ))}
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Animated Trend Charts Section */}
       <div className="mt-8">
