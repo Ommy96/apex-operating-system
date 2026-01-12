@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Save, Users, Shield, Building2, User, Mail, Phone, MapPin, Settings as SettingsIcon, Globe, Bell } from 'lucide-react';
+import { Save, Users, Shield, Building2, User, Mail, Phone, MapPin, Settings as SettingsIcon, Globe, Bell, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ import { PageHeroHeader } from '@/components/PageHeroHeader';
 
 export default function Settings() {
   const { userRole, user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [users, setUsers] = useState<any[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -312,6 +314,46 @@ export default function Settings() {
                 <Badge variant={getRoleBadgeVariant(userRole || 'staff')} className="capitalize text-sm px-3 py-1">
                   {userRole}
                 </Badge>
+              </div>
+
+              {/* Theme Toggle Section */}
+              <div className="p-4 rounded-xl bg-muted/30 border space-y-4">
+                <div className="flex items-center gap-3">
+                  <Sun className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Appearance</p>
+                    <p className="text-xs text-muted-foreground">Choose your preferred theme</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={theme === 'light' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('light')}
+                    className="flex-1 gap-2"
+                  >
+                    <Sun className="h-4 w-4" />
+                    Light
+                  </Button>
+                  <Button
+                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('dark')}
+                    className="flex-1 gap-2"
+                  >
+                    <Moon className="h-4 w-4" />
+                    Dark
+                  </Button>
+                  <Button
+                    variant={theme === 'system' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('system')}
+                    className="flex-1 gap-2"
+                  >
+                    <Monitor className="h-4 w-4" />
+                    System
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
