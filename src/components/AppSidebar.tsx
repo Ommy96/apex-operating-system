@@ -20,7 +20,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronRight, Sparkles } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ChevronRight, Sparkles, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Heart,
@@ -49,9 +55,10 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Programs", url: "/programs-management", icon: Layers },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
@@ -65,26 +72,25 @@ const educationSubItems = [
 ];
 
 const programItems = [
-  { title: "Feeding Program", url: "/programs/feeding", icon: FeedingIcon },
-  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: KipawaIcon },
+  { title: "Feeding Program", url: "/programs/feeding", icon: UtensilsCrossed },
+  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: Trophy },
   { title: "Medical", url: "/programs/medical", icon: Stethoscope },
-  { title: "Family Adoption", url: "/programs/family-adoption", icon: HeartIcon },
-  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: EmpowermentIcon },
+  { title: "Family Adoption", url: "/programs/family-adoption", icon: Heart },
+  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: Lightbulb },
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
 const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
   const baseItems = [
     { title: "Home Visits", url: "/reports/home-visits", icon: Home },
-    { title: "School Visits", url: "/reports/school-visits", icon: EducationIcon },
+    { title: "School Visits", url: "/reports/school-visits", icon: School },
     { title: "Business Visits", url: "/reports/business-visits", icon: Building2 },
-    { title: "Program Reports", url: "/reports/program-reports", icon: AnalyticsIcon },
+    { title: "Program Reports", url: "/reports/program-reports", icon: FileText },
     { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
-    { title: "Academic Performance", url: "/reports/academic-performance", icon: EducationIcon },
-    { title: "Other Reports", url: "/other-reports", icon: ReportsIcon },
+    { title: "Academic Performance", url: "/reports/academic-performance", icon: GraduationCap },
+    { title: "Other Reports", url: "/other-reports", icon: FileText },
   ];
   
-  // Only show Reports & Analytics to management and admin (not staff)
   if (isManagement || (!isStaff)) {
     baseItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp });
   }
@@ -97,6 +103,51 @@ const systemItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
+interface MenuItemProps {
+  item: { title: string; url: string; icon: any };
+  isCollapsed: boolean;
+  isActive: (path: string) => boolean;
+  onClick: () => void;
+}
+
+function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
+  const active = isActive(item.url);
+  
+  const content = (
+    <NavLink
+      to={item.url}
+      end
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+        active
+          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/25"
+          : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+      )}
+    >
+      <item.icon className={cn("h-[18px] w-[18px] flex-shrink-0", active && "text-sidebar-primary-foreground")} />
+      {!isCollapsed && (
+        <span className="truncate">{item.title}</span>
+      )}
+    </NavLink>
+  );
+
+  if (isCollapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          {content}
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          {item.title}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return content;
+}
+
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, isAdmin, isManagement, isStaff } = useAuth();
@@ -104,8 +155,10 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+  const [educationOpen, setEducationOpen] = useState(
+    educationSubItems.some(item => currentPath === item.url)
+  );
 
-  // Fetch dynamic programs that should appear in navigation
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
     queryFn: async () => {
@@ -121,10 +174,6 @@ export function AppSidebar() {
   });
 
   const isActive = (path: string) => currentPath === path;
-  const getNavClasses = ({ isActive }: { isActive: boolean }) =>
-    isActive 
-      ? "bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90 text-sidebar-primary-foreground font-semibold shadow-elevation-2 rounded-2xl glow-effect" 
-      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-elevation-1 rounded-2xl transition-all duration-300 hover-lift micro-interaction";
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -137,144 +186,209 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={`${isCollapsed ? "w-20" : "w-72"} bg-sidebar-background border-r border-sidebar-border/50 shadow-elevation-3`} collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border/30 p-6">
-        <div className="flex items-center gap-4 hover-lift">
-          <div className="p-3 bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 rounded-2xl shadow-elevation-2 glow-effect">
-            <HeartIcon className="w-7 h-7 text-white" />
+    <TooltipProvider>
+      <Sidebar 
+        className={cn(
+          "border-r-0 bg-sidebar",
+          isCollapsed ? "w-[70px]" : "w-[260px]"
+        )} 
+        collapsible="icon"
+      >
+        {/* Header */}
+        <SidebarHeader className="p-4 pb-6">
+          <div className={cn(
+            "flex items-center gap-3 transition-all duration-200",
+            isCollapsed && "justify-center"
+          )}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 shadow-lg shadow-sidebar-primary/20">
+              <Heart className="h-5 w-5 text-white" fill="currentColor" />
+            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col animate-fade-in">
+                <span className="font-bold text-sidebar-foreground tracking-tight">Heart to Heart</span>
+                <span className="text-xs text-sidebar-foreground/60">Organization</span>
+              </div>
+            )}
           </div>
-           {!isCollapsed && (
-             <div className="animate-fade-in">
-               <h2 className="font-bold text-lg text-sidebar-foreground bg-gradient-accent bg-clip-text">Heart to Heart</h2>
-               <p className="text-sm text-sidebar-foreground/70 font-medium">Organization</p>
-             </div>
-           )}
-        </div>
-      </SidebarHeader>
+        </SidebarHeader>
 
-      <SidebarContent className="px-4 py-6 space-y-6">
-         <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Main Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="ripple">
-                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span className="animate-fade-in">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-         <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Programs</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="ripple text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-2xl transition-all duration-300">
-                      <GraduationCap className="h-4 w-4" />
-                      {!isCollapsed && <span className="animate-fade-in">Education</span>}
-                      {!isCollapsed && <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {educationSubItems.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuButton asChild size="sm">
-                            <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
-                              <item.icon className="h-4 w-4" />
-                              {!isCollapsed && <span>{item.title}</span>}
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-              {programItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              {/* Dynamic programs from database */}
-              {dynamicPrograms?.map((program) => (
-                <SidebarMenuItem key={program.id}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={`/programs/dynamic/${program.id}`} end className={getNavClasses} onClick={handleNavClick}>
-                      <Sparkles className="h-4 w-4" />
-                      {!isCollapsed && <span>{program.name}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-         <SidebarGroup>
-           <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">Reports</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {getReportsItems(isManagement, isStaff).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Hide Settings from staff - only show to admin and management */}
-        {(isAdmin || isManagement) && (
-           <SidebarGroup>
-             <SidebarGroupLabel className="text-sidebar-foreground/90 font-bold text-sm uppercase tracking-wider mb-3">System</SidebarGroupLabel>
+        <SidebarContent className="px-3 pb-4">
+          {/* Main Menu */}
+          <SidebarGroup>
+            {!isCollapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                Main
+              </SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
-              <SidebarMenu>
-                {systemItems.map((item) => (
+              <SidebarMenu className="space-y-1">
+                {mainMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} end className={getNavClasses} onClick={handleNavClick}>
-                        <item.icon className="h-4 w-4" />
-                        {!isCollapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
+                    <MenuItem 
+                      item={item} 
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
-      </SidebarContent>
 
-       <SidebarFooter className="border-t border-sidebar-border/30 p-4">
-         <Button
-           variant="ghost"
-           onClick={handleLogout}
-           className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive rounded-2xl p-3 transition-all duration-300 hover-lift button-press"
-         >
-          <LogOut className="h-5 w-5" />
-          {!isCollapsed && <span className="font-medium animate-fade-in">Logout</span>}
-        </Button>
-      </SidebarFooter>
-    </Sidebar>
+          {/* Programs */}
+          <SidebarGroup className="mt-6">
+            {!isCollapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                Programs
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {/* Education Collapsible */}
+                <Collapsible open={educationOpen} onOpenChange={setEducationOpen}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <button
+                        className={cn(
+                          "flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                          "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                        )}
+                      >
+                        <GraduationCap className="h-[18px] w-[18px] flex-shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 text-left">Education</span>
+                            <ChevronDown className={cn(
+                              "h-4 w-4 text-sidebar-foreground/50 transition-transform duration-200",
+                              educationOpen && "rotate-180"
+                            )} />
+                          </>
+                        )}
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="animate-accordion-down">
+                      <div className={cn("mt-1 space-y-1", !isCollapsed && "ml-4 pl-3 border-l border-sidebar-border/50")}>
+                        {educationSubItems.map((item) => (
+                          <MenuItem
+                            key={item.title}
+                            item={item}
+                            isCollapsed={isCollapsed}
+                            isActive={isActive}
+                            onClick={handleNavClick}
+                          />
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
+                {/* Other Programs */}
+                {programItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <MenuItem 
+                      item={item} 
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
+                  </SidebarMenuItem>
+                ))}
+
+                {/* Dynamic Programs */}
+                {dynamicPrograms?.map((program) => (
+                  <SidebarMenuItem key={program.id}>
+                    <MenuItem
+                      item={{ title: program.name, url: `/programs/dynamic/${program.id}`, icon: Sparkles }}
+                      isCollapsed={isCollapsed}
+                      isActive={isActive}
+                      onClick={handleNavClick}
+                    />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Reports */}
+          <SidebarGroup className="mt-6">
+            {!isCollapsed && (
+              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                Reports
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {getReportsItems(isManagement, isStaff).map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <MenuItem 
+                      item={item} 
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* System - Only for Admin/Management */}
+          {(isAdmin || isManagement) && (
+            <SidebarGroup className="mt-6">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                  System
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {systemItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <MenuItem 
+                        item={item} 
+                        isCollapsed={isCollapsed} 
+                        isActive={isActive} 
+                        onClick={handleNavClick} 
+                      />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+        </SidebarContent>
+
+        {/* Footer */}
+        <SidebarFooter className="p-3 mt-auto border-t border-sidebar-border/30">
+          {isCollapsed ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="w-full h-10 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 rounded-xl"
+                >
+                  <LogOut className="h-[18px] w-[18px]" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="font-medium">
+                Logout
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full justify-start gap-3 px-3 py-2.5 h-auto text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
+            >
+              <LogOut className="h-[18px] w-[18px]" />
+              <span>Logout</span>
+            </Button>
+          )}
+        </SidebarFooter>
+      </Sidebar>
+    </TooltipProvider>
   );
 }
