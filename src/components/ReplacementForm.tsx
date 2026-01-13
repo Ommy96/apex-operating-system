@@ -26,7 +26,7 @@ const replacementSchema = z.object({
   new_child_school: z.string().optional(),
   new_child_grade: z.string().optional(),
   new_child_academic_level: z.enum([
-    "Pre Primary", "Lower Primary", "Upper Primary", "Junior Secondary School", "Secondary School", "Tertiary", "Special School"
+    "Pre Primary", "Lower Primary", "Upper Primary", "Junior Secondary School", "Secondary School", "Senior School", "Tertiary", "Special School"
   ]).optional(),
   replacement_date: z.string().min(1, "Replacement date is required"),
   reason: z.string().optional(),
@@ -345,6 +345,7 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
                   <SelectItem value="Upper Primary">Upper Primary</SelectItem>
                   <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
                   <SelectItem value="Secondary School">Secondary School</SelectItem>
+                  <SelectItem value="Senior School">Senior School</SelectItem>
                   <SelectItem value="Tertiary">Tertiary</SelectItem>
                   <SelectItem value="Special School">Special School</SelectItem>
                 </SelectContent>

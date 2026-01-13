@@ -73,15 +73,15 @@ const getNextGrade = (currentGrade: string | null, academicLevel: string | null)
     return { nextGrade: "Grade 9", nextLevel: "Junior Secondary School", willGraduate: false };
   }
   if (currentGrade === "Grade 9") {
-    return { nextGrade: "Grade 10", nextLevel: "Secondary School", willGraduate: false };
+    return { nextGrade: "Grade 10", nextLevel: "Senior School", willGraduate: false };
   }
 
   // Senior School: Grade 10 → 11 → 12 → Graduate/Tertiary
   if (currentGrade === "Grade 10") {
-    return { nextGrade: "Grade 11", nextLevel: "Secondary School", willGraduate: false };
+    return { nextGrade: "Grade 11", nextLevel: "Senior School", willGraduate: false };
   }
   if (currentGrade === "Grade 11") {
-    return { nextGrade: "Grade 12", nextLevel: "Secondary School", willGraduate: false };
+    return { nextGrade: "Grade 12", nextLevel: "Senior School", willGraduate: false };
   }
   if (currentGrade === "Grade 12") {
     return { nextGrade: null, nextLevel: null, willGraduate: true }; // Graduate to Alumni
@@ -385,7 +385,7 @@ export default function GradeProgression() {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                This action will promote {children?.length || 0} students. Form 4 and 4th Year Tertiary students will be
+                This action will promote {children?.length || 0} students. Grade 12, Form 4, and 4th Year Tertiary students will be
                 moved to Alumni. This cannot be undone easily.
               </AlertDescription>
             </Alert>
