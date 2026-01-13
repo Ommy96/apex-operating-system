@@ -15,7 +15,7 @@ const kipawaSatoSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
   gender: z.enum(['Male', 'Female']).optional(),
   age: z.number().min(1).max(100).optional(),
-  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary School', 'Secondary School', 'Tertiary', 'Special School']).optional(),
+  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary School', 'Secondary School', 'Senior School', 'Tertiary', 'Special School']).optional(),
   location: z.enum(['Kibera', 'Kawangware']).optional(),
   talent_category: z.enum(['Music', 'Dance', 'Poetry', 'Art & Craft', 'Sport', 'Boardgames']).optional(),
   specific_skill: z.enum(['Singing', 'Spoken Word', 'Drawing', 'Instruments', 'Football', 'Basketball', 'Chess', 'Fashion', 'Modern', 'Traditional']).optional(),
@@ -195,6 +195,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
                   <SelectItem value="Upper Primary">Upper Primary</SelectItem>
                   <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
                   <SelectItem value="Secondary School">Secondary School</SelectItem>
+                  <SelectItem value="Senior School">Senior School</SelectItem>
                   <SelectItem value="Tertiary">Tertiary</SelectItem>
                   <SelectItem value="Special School">Special School</SelectItem>
                 </SelectContent>

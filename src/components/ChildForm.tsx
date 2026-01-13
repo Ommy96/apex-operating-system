@@ -20,7 +20,7 @@ const childSchema = z.object({
   gender: z.enum(['Male', 'Female']).optional(),
   photo_url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
   residence: z.enum(['Kibera', 'Kawangware', 'Diaspora', 'Outside Nairobi']).optional(),
-  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary School', 'Secondary School', 'Tertiary', 'Special School']).optional(),
+  academic_level: z.enum(['Pre Primary', 'Lower Primary', 'Upper Primary', 'Junior Secondary School', 'Secondary School', 'Senior School', 'Tertiary', 'Special School']).optional(),
   institution_name: z.string().optional(),
   grade: z.string().optional(),
   course_name: z.string().optional(),
@@ -321,6 +321,7 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
                     <SelectItem value="Upper Primary">Upper Primary</SelectItem>
                     <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
                     <SelectItem value="Secondary School">Secondary School</SelectItem>
+                    <SelectItem value="Senior School">Senior School</SelectItem>
                     <SelectItem value="Tertiary">Tertiary</SelectItem>
                     <SelectItem value="Special School">Special School</SelectItem>
                   </SelectContent>
