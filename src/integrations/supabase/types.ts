@@ -132,6 +132,7 @@ export type Database = {
           created_by: string | null
           executive_summary: string
           id: string
+          organization_id: string
           program: Database["public"]["Enums"]["program_type"]
           proposed_recommendations: string
           reporting_date: string
@@ -145,6 +146,7 @@ export type Database = {
           created_by?: string | null
           executive_summary: string
           id?: string
+          organization_id?: string
           program: Database["public"]["Enums"]["program_type"]
           proposed_recommendations: string
           reporting_date: string
@@ -158,13 +160,22 @@ export type Database = {
           created_by?: string | null
           executive_summary?: string
           id?: string
+          organization_id?: string
           program?: Database["public"]["Enums"]["program_type"]
           proposed_recommendations?: string
           reporting_date?: string
           staff?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activity_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       alumni: {
         Row: {
@@ -181,6 +192,7 @@ export type Database = {
           graduation_year: number | null
           id: string
           location: string | null
+          organization_id: string
           profile_photo_url: string | null
           short_bio: string | null
           social_link: string | null
@@ -200,6 +212,7 @@ export type Database = {
           graduation_year?: number | null
           id?: string
           location?: string | null
+          organization_id?: string
           profile_photo_url?: string | null
           short_bio?: string | null
           social_link?: string | null
@@ -219,12 +232,21 @@ export type Database = {
           graduation_year?: number | null
           id?: string
           location?: string | null
+          organization_id?: string
           profile_photo_url?: string | null
           short_bio?: string | null
           social_link?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "alumni_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       approval_requests: {
         Row: {
@@ -373,6 +395,7 @@ export type Database = {
           id: string
           location: string | null
           observation_findings: string
+          organization_id: string
           reason_for_visit: string | null
           recommendations: string
           staff: string
@@ -387,6 +410,7 @@ export type Database = {
           id?: string
           location?: string | null
           observation_findings: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations: string
           staff: string
@@ -401,6 +425,7 @@ export type Database = {
           id?: string
           location?: string | null
           observation_findings?: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations?: string
           staff?: string
@@ -413,6 +438,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "self_empowerment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_visit_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -495,6 +527,7 @@ export type Database = {
           institution_name: string | null
           last_name: string
           medical_notes: string | null
+          organization_id: string
           parental_status:
             | Database["public"]["Enums"]["parental_status_type"]
             | null
@@ -531,6 +564,7 @@ export type Database = {
           institution_name?: string | null
           last_name: string
           medical_notes?: string | null
+          organization_id?: string
           parental_status?:
             | Database["public"]["Enums"]["parental_status_type"]
             | null
@@ -567,6 +601,7 @@ export type Database = {
           institution_name?: string | null
           last_name?: string
           medical_notes?: string | null
+          organization_id?: string
           parental_status?:
             | Database["public"]["Enums"]["parental_status_type"]
             | null
@@ -580,7 +615,15 @@ export type Database = {
           student_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "children_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -653,6 +696,7 @@ export type Database = {
           id: string
           known_name: string
           no_of_beneficiaries: number | null
+          organization_id: string
           residence: Database["public"]["Enums"]["residence_type"] | null
           source_of_income: string | null
           sponsor: Database["public"]["Enums"]["sponsor_type"] | null
@@ -668,6 +712,7 @@ export type Database = {
           id?: string
           known_name: string
           no_of_beneficiaries?: number | null
+          organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           source_of_income?: string | null
           sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
@@ -683,12 +728,21 @@ export type Database = {
           id?: string
           known_name?: string
           no_of_beneficiaries?: number | null
+          organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           source_of_income?: string | null
           sponsor?: Database["public"]["Enums"]["sponsor_type"] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "family_adoption_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feeding_program: {
         Row: {
@@ -703,6 +757,7 @@ export type Database = {
           grade: string | null
           id: string
           name: string
+          organization_id: string
           school: string | null
           type: Database["public"]["Enums"]["feeding_type"] | null
           updated_at: string
@@ -719,6 +774,7 @@ export type Database = {
           grade?: string | null
           id?: string
           name: string
+          organization_id?: string
           school?: string | null
           type?: Database["public"]["Enums"]["feeding_type"] | null
           updated_at?: string
@@ -735,11 +791,20 @@ export type Database = {
           grade?: string | null
           id?: string
           name?: string
+          organization_id?: string
           school?: string | null
           type?: Database["public"]["Enums"]["feeding_type"] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "feeding_program_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       home_visit_reports: {
         Row: {
@@ -749,6 +814,7 @@ export type Database = {
           id: string
           location: Database["public"]["Enums"]["residence_type"] | null
           observation_findings: string
+          organization_id: string
           reason_for_visit: string | null
           recommendations: string
           staff: string
@@ -763,6 +829,7 @@ export type Database = {
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
           observation_findings: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations: string
           staff: string
@@ -777,6 +844,7 @@ export type Database = {
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
           observation_findings?: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations?: string
           staff?: string
@@ -784,7 +852,15 @@ export type Database = {
           updated_at?: string
           visit_date?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "home_visit_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kipawa_sato: {
         Row: {
@@ -800,6 +876,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           location: Database["public"]["Enums"]["residence_type"] | null
+          organization_id: string
           school_support_given: boolean | null
           specific_skill:
             | Database["public"]["Enums"]["specific_skill_type"]
@@ -823,6 +900,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
+          organization_id?: string
           school_support_given?: boolean | null
           specific_skill?:
             | Database["public"]["Enums"]["specific_skill_type"]
@@ -846,6 +924,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
+          organization_id?: string
           school_support_given?: boolean | null
           specific_skill?:
             | Database["public"]["Enums"]["specific_skill_type"]
@@ -856,7 +935,15 @@ export type Database = {
           updated_at?: string
           year_enrolled?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "kipawa_sato_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loan_repayments: {
         Row: {
@@ -920,6 +1007,7 @@ export type Database = {
           id: string
           location: string | null
           medical_condition: string
+          organization_id: string
           outcome: string | null
           updated_at: string
         }
@@ -934,6 +1022,7 @@ export type Database = {
           id?: string
           location?: string | null
           medical_condition: string
+          organization_id?: string
           outcome?: string | null
           updated_at?: string
         }
@@ -948,10 +1037,19 @@ export type Database = {
           id?: string
           location?: string | null
           medical_condition?: string
+          organization_id?: string
           outcome?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "medical_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       organization_members: {
         Row: {
@@ -1054,6 +1152,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          organization_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
@@ -1063,6 +1162,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
@@ -1072,11 +1172,20 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       program_entries: {
         Row: {
@@ -1131,6 +1240,7 @@ export type Database = {
           created_by: string | null
           executive_summary: string
           id: string
+          organization_id: string
           program: Database["public"]["Enums"]["program_type"]
           proposed_recommendations: string
           reporting_date: string
@@ -1144,6 +1254,7 @@ export type Database = {
           created_by?: string | null
           executive_summary: string
           id?: string
+          organization_id?: string
           program: Database["public"]["Enums"]["program_type"]
           proposed_recommendations: string
           reporting_date: string
@@ -1157,13 +1268,22 @@ export type Database = {
           created_by?: string | null
           executive_summary?: string
           id?: string
+          organization_id?: string
           program?: Database["public"]["Enums"]["program_type"]
           proposed_recommendations?: string
           reporting_date?: string
           staff?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "program_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       programs: {
         Row: {
@@ -1174,6 +1294,7 @@ export type Database = {
           is_active: boolean
           location: string | null
           name: string
+          organization_id: string
           program_id: string | null
           show_in_navigation: boolean | null
         }
@@ -1185,6 +1306,7 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name: string
+          organization_id?: string
           program_id?: string | null
           show_in_navigation?: boolean | null
         }
@@ -1196,10 +1318,19 @@ export type Database = {
           is_active?: boolean
           location?: string | null
           name?: string
+          organization_id?: string
           program_id?: string | null
           show_in_navigation?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "programs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rate_limits: {
         Row: {
@@ -1299,6 +1430,7 @@ export type Database = {
           id: string
           location: Database["public"]["Enums"]["residence_type"] | null
           observation_findings: string
+          organization_id: string
           reason_for_visit: string | null
           recommendations: string
           school: string
@@ -1313,6 +1445,7 @@ export type Database = {
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
           observation_findings: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations: string
           school: string
@@ -1327,6 +1460,7 @@ export type Database = {
           id?: string
           location?: Database["public"]["Enums"]["residence_type"] | null
           observation_findings?: string
+          organization_id?: string
           reason_for_visit?: string | null
           recommendations?: string
           school?: string
@@ -1334,7 +1468,15 @@ export type Database = {
           updated_at?: string
           visit_date?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_visit_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       self_empowerment: {
         Row: {
@@ -1354,6 +1496,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           is_active: boolean | null
+          organization_id: string
           residence: Database["public"]["Enums"]["residence_type"] | null
           start_date: string | null
           support_status: string | null
@@ -1377,6 +1520,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean | null
+          organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
           support_status?: string | null
@@ -1400,13 +1544,22 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean | null
+          organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
           support_status?: string | null
           type_of_business?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "self_empowerment_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -1415,6 +1568,7 @@ export type Database = {
           description: string | null
           id: string
           key: string
+          organization_id: string
           updated_at: string
           value: Json
         }
@@ -1424,6 +1578,7 @@ export type Database = {
           description?: string | null
           id?: string
           key: string
+          organization_id?: string
           updated_at?: string
           value: Json
         }
@@ -1433,10 +1588,19 @@ export type Database = {
           description?: string | null
           id?: string
           key?: string
+          organization_id?: string
           updated_at?: string
           value?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sponsors: {
         Row: {
@@ -1448,6 +1612,7 @@ export type Database = {
           is_active: boolean
           name: string
           notes: string | null
+          organization_id: string
           phone: string | null
           sponsor_id: string | null
           updated_at: string
@@ -1461,6 +1626,7 @@ export type Database = {
           is_active?: boolean
           name: string
           notes?: string | null
+          organization_id?: string
           phone?: string | null
           sponsor_id?: string | null
           updated_at?: string
@@ -1474,11 +1640,20 @@ export type Database = {
           is_active?: boolean
           name?: string
           notes?: string | null
+          organization_id?: string
           phone?: string | null
           sponsor_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sponsors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_group_activities: {
         Row: {
@@ -1535,6 +1710,7 @@ export type Database = {
           meeting_schedule: string | null
           member_count: number | null
           name: string
+          organization_id: string
           team_leader_contact: string | null
           updated_at: string
         }
@@ -1548,6 +1724,7 @@ export type Database = {
           meeting_schedule?: string | null
           member_count?: number | null
           name: string
+          organization_id?: string
           team_leader_contact?: string | null
           updated_at?: string
         }
@@ -1561,10 +1738,19 @@ export type Database = {
           meeting_schedule?: string | null
           member_count?: number | null
           name?: string
+          organization_id?: string
           team_leader_contact?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transport_records: {
         Row: {
