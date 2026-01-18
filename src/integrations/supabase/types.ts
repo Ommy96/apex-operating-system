@@ -1895,6 +1895,15 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: string
       }
+      get_user_current_organization: {
+        Args: { _user_id: string }
+        Returns: {
+          organization_id: string
+          organization_name: string
+          organization_slug: string
+          user_role: string
+        }[]
+      }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { user_id: string }
@@ -1905,6 +1914,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      switch_user_organization: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       user_belongs_to_org: {
