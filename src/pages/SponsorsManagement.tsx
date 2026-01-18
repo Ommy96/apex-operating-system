@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
@@ -40,6 +41,7 @@ interface SponsorFormData {
 
 const SponsorsManagement = () => {
   const { isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -55,15 +57,22 @@ const SponsorsManagement = () => {
   });
 
   const { data: sponsors, isLoading } = useQuery({
-    queryKey: ['sponsors-management'],
+    queryKey: ['sponsors-management', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('sponsors')
         .select('*')
         .order('name');
+      
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as Sponsor[];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const createMutation = useMutation({

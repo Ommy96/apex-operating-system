@@ -13,11 +13,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFeedingProgramData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StatsCard } from "@/components/StatsCard";
 
 export default function FeedingProgram() {
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [viewingProgram, setViewingProgram] = useState(null);
@@ -28,16 +30,22 @@ export default function FeedingProgram() {
   const { toast } = useToast();
 
   const { data: feedingPrograms, refetch } = useQuery({
-    queryKey: ['feeding-programs'],
+    queryKey: ['feeding-programs', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('feeding_program')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const filteredPrograms = feedingPrograms?.filter(program => {

@@ -14,12 +14,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function SupportGroups() {
   const { toast } = useToast();
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,16 +29,22 @@ export default function SupportGroups() {
   const [editingGroup, setEditingGroup] = useState<any>(null);
 
   const { data: supportGroups, refetch } = useQuery({
-    queryKey: ['support-groups'],
+    queryKey: ['support-groups', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('support_groups')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const filteredGroups = supportGroups?.filter(group => {

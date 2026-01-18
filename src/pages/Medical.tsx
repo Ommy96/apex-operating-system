@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { MedicalForm } from "@/components/MedicalForm";
 import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users } from "lucide-react";
 import * as XLSX from 'xlsx';
@@ -26,18 +27,25 @@ export default function Medical() {
   
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
 
   const { data: medicalRecords = [], refetch } = useQuery({
-    queryKey: ["medical-records"],
+    queryKey: ["medical-records", currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("medical_records")
         .select("*")
         .order("created_at", { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const filteredRecords = medicalRecords.filter((record) => {

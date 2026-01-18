@@ -15,11 +15,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StatsCard } from "@/components/StatsCard";
 
 export default function FamilyAdoption() {
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFamily, setEditingFamily] = useState<any>(null);
   const [viewingFamily, setViewingFamily] = useState<any>(null);
@@ -32,16 +34,22 @@ export default function FamilyAdoption() {
   const [sourceOfIncomeFilter, setSourceOfIncomeFilter] = useState("");
 
   const { data: familyAdoptions, refetch } = useQuery({
-    queryKey: ['family-adoption'],
+    queryKey: ['family-adoption', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('family_adoption')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const { data: familyDocuments, refetch: refetchDocuments } = useQuery({
