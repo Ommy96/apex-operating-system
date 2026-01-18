@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -77,6 +78,8 @@ export default function Children() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
+  const organizationId = currentOrganization?.organization_id;
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
@@ -140,14 +143,16 @@ export default function Children() {
   };
 
   useEffect(() => {
-    fetchChildren();
-  }, []);
+    if (organizationId) {
+      fetchChildren();
+    }
+  }, [organizationId]);
 
   useEffect(() => {
-    if (filters.location || filters.academicLevel || filters.donor || filters.grade) {
+    if (organizationId && (filters.location || filters.academicLevel || filters.donor || filters.grade)) {
       fetchFilteredData();
     }
-  }, [filters]);
+  }, [filters, organizationId]);
 
   // Recalculate stats whenever children data changes
   useEffect(() => {
@@ -155,10 +160,12 @@ export default function Children() {
   }, [children]);
 
   const fetchChildren = async () => {
+    if (!organizationId) return;
     try {
       const { data, error } = await supabase
         .from('children')
         .select('*')
+        .eq('organization_id', organizationId)
         .order('first_name');
 
       if (error) throw error;
@@ -176,11 +183,13 @@ export default function Children() {
   };
 
   const fetchFilteredData = async () => {
+    if (!organizationId) return;
     setFilterLoading(true);
     try {
       let query = supabase
         .from('children')
         .select('*')
+        .eq('organization_id', organizationId)
         .not('academic_level', 'is', null);
 
       if (filters.location) {

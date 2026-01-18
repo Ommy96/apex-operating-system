@@ -12,6 +12,7 @@ interface Organization {
 
 interface OrganizationContextType {
   currentOrganization: Organization | null;
+  userOrganizations: Organization[];
   isLoading: boolean;
   error: string | null;
   switchOrganization: (orgId: string) => Promise<boolean>;
@@ -23,8 +24,48 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
+  const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchUserOrganizations = useCallback(async () => {
+    if (!user?.id) {
+      setUserOrganizations([]);
+      return;
+    }
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('organization_members')
+        .select(`
+          organization_id,
+          role,
+          organizations!inner (
+            id,
+            name,
+            slug
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (fetchError) {
+        console.error('Error fetching user organizations:', fetchError);
+        return;
+      }
+
+      if (data) {
+        const orgs: Organization[] = data.map((item: any) => ({
+          organization_id: item.organization_id,
+          organization_name: item.organizations.name,
+          organization_slug: item.organizations.slug,
+          user_role: item.role,
+        }));
+        setUserOrganizations(orgs);
+      }
+    } catch (err) {
+      console.error('Error in fetchUserOrganizations:', err);
+    }
+  }, [user?.id]);
 
   const fetchCurrentOrganization = useCallback(async () => {
     if (!user?.id) {
@@ -81,6 +122,8 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
       if (data) {
         await fetchCurrentOrganization();
         toast.success('Organization switched successfully');
+        // Force page reload to refresh all data with new org context
+        window.location.reload();
         return true;
       } else {
         toast.error('You do not have access to this organization');
@@ -94,17 +137,19 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   }, [user?.id, fetchCurrentOrganization]);
 
   const refreshOrganization = useCallback(async () => {
-    await fetchCurrentOrganization();
-  }, [fetchCurrentOrganization]);
+    await Promise.all([fetchCurrentOrganization(), fetchUserOrganizations()]);
+  }, [fetchCurrentOrganization, fetchUserOrganizations]);
 
   useEffect(() => {
     fetchCurrentOrganization();
-  }, [fetchCurrentOrganization]);
+    fetchUserOrganizations();
+  }, [fetchCurrentOrganization, fetchUserOrganizations]);
 
   return (
     <OrganizationContext.Provider
       value={{
         currentOrganization,
+        userOrganizations,
         isLoading,
         error,
         switchOrganization,

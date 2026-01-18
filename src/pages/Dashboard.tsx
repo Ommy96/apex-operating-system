@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { StaffPermissionsDemo } from "@/components/StaffPermissionsDemo";
 import { LiveUserPresence } from "@/components/LiveUserPresence";
 import { ActivityFeed } from "@/components/ActivityFeed";
@@ -30,6 +31,7 @@ import { DashboardTrendCharts } from "@/components/DashboardTrendCharts";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { isAdmin, isStaff, user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { toast } = useToast();
   
   // State for real-time features
@@ -38,16 +40,19 @@ const Dashboard = () => {
   
   // Extract user name from metadata or email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const organizationId = currentOrganization?.organization_id;
   
   // Fetch dashboard statistics with real-time updates every 30 seconds
   const { data: dashboardStats, isLoading: statsLoading, refetch } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', organizationId],
     queryFn: async () => {
+      if (!organizationId) return null;
+      
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
-        supabase.from('children').select('*', { count: 'exact' }).not('academic_level', 'is', null),
-        supabase.from('feeding_program').select('*', { count: 'exact' }),
-        supabase.from('kipawa_sato').select('*', { count: 'exact' }),
-        supabase.from('self_empowerment').select('*', { count: 'exact' })
+        supabase.from('children').select('*', { count: 'exact' }).eq('organization_id', organizationId).not('academic_level', 'is', null),
+        supabase.from('feeding_program').select('*', { count: 'exact' }).eq('organization_id', organizationId),
+        supabase.from('kipawa_sato').select('*', { count: 'exact' }).eq('organization_id', organizationId),
+        supabase.from('self_empowerment').select('*', { count: 'exact' }).eq('organization_id', organizationId)
       ]);
 
       const totalChildrenFromAllPrograms = (childrenRes.count || 0) + 
@@ -63,6 +68,7 @@ const Dashboard = () => {
         empowermentProgram: selfEmpowermentRes.count || 0
       };
     },
+    enabled: !!organizationId,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 

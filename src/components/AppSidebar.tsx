@@ -49,6 +49,7 @@ import {
   Bus,
   Layers,
   HandHeart,
+  Target,
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -195,21 +198,23 @@ export function AppSidebar() {
         collapsible="icon"
       >
         {/* Header */}
-        <SidebarHeader className="p-4 pb-6">
+        <SidebarHeader className="p-4 pb-2">
           <div className={cn(
-            "flex items-center gap-3 transition-all duration-200",
+            "flex items-center gap-3 transition-all duration-200 mb-3",
             isCollapsed && "justify-center"
           )}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 shadow-lg shadow-sidebar-primary/20">
-              <Heart className="h-5 w-5 text-white" fill="currentColor" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
+              <Target className="h-5 w-5 text-white" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col animate-fade-in">
-                <span className="font-bold text-sidebar-foreground tracking-tight">Heart to Heart</span>
-                <span className="text-xs text-sidebar-foreground/60">Organization</span>
+                <span className="font-bold text-sidebar-foreground tracking-tight">Ufanisi</span>
+                <span className="text-xs text-sidebar-foreground/60">Data Platform</span>
               </div>
             )}
           </div>
+          {/* Organization Switcher */}
+          <OrganizationSwitcher collapsed={isCollapsed} />
         </SidebarHeader>
 
         <SidebarContent className="px-3 pb-4">
