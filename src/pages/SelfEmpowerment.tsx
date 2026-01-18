@@ -17,11 +17,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StatsCard } from "@/components/StatsCard";
 
 export default function SelfEmpowerment() {
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isRepaymentDialogOpen, setIsRepaymentDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
@@ -32,16 +34,22 @@ export default function SelfEmpowerment() {
   const [activeTab, setActiveTab] = useState("applications");
 
   const { data: selfEmpowermentRecords, refetch } = useQuery({
-    queryKey: ['self-empowerment'],
+    queryKey: ['self-empowerment', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('self_empowerment')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const filteredRecords = selfEmpowermentRecords?.filter(record => {

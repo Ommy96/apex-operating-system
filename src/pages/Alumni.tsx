@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlumniForm } from "@/components/AlumniForm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,6 +26,7 @@ import { getCardStyles, type CardVariant } from "@/lib/cardStyles";
 export default function Alumni() {
   const navigate = useNavigate();
   const { isManagement, isAdmin, isStaff, user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingAlumni, setEditingAlumni] = useState<any>(null);
@@ -41,18 +43,24 @@ export default function Alumni() {
 
   // Fetch alumni data with real-time updates
   const { data: alumni, refetch } = useQuery({
-    queryKey: ['alumni'],
+    queryKey: ['alumni', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('alumni')
         .select('*')
         .order('exit_year', { ascending: false });
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       setLastUpdated(new Date());
       return data;
     },
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 30000,
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Set up real-time subscriptions and presence tracking

@@ -14,11 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function ActivityReports() {
   const { isManagement, isStaff, userRole, user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any>(null);
@@ -31,25 +33,35 @@ export default function ActivityReports() {
 
   // Fetch programs for the filter dropdown
   const { data: programs = [] } = useQuery({
-    queryKey: ['programs'],
+    queryKey: ['programs', currentOrganization?.organization_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('programs')
         .select('id, name')
         .eq('is_active', true)
         .order('name');
       
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const { data: activityReports, refetch } = useQuery({
-    queryKey: ['activity-reports', userRole, user?.id],
+    queryKey: ['activity-reports', userRole, user?.id, currentOrganization?.organization_id],
     queryFn: async () => {
       let query = supabase
         .from('activity_reports')
         .select('*');
+      
+      if (currentOrganization?.organization_id) {
+        query = query.eq('organization_id', currentOrganization.organization_id);
+      }
       
       // Staff can only see their own reports
       if (isStaff && user?.id) {
@@ -62,6 +74,7 @@ export default function ActivityReports() {
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Fetch stats for summary cards
