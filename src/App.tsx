@@ -29,6 +29,7 @@ import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
 import OrganizationSettings from "./pages/OrganizationSettings";
+import AdminCrossOrgDashboard from "./pages/AdminCrossOrgDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
@@ -282,6 +283,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Documents />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/cross-org" element={
+              <ProtectedRoute requireRole="admin">
+                <DashboardLayout>
+                  <AdminCrossOrgDashboard />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
