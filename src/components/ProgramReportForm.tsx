@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const programReportSchema = z.object({
   program: z.string().min(1, "Program is required").max(100),
@@ -30,6 +31,7 @@ interface ProgramReportFormProps {
 
 export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramReportFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof programReportSchema>>({
@@ -92,6 +94,7 @@ export function ProgramReportForm({ onSuccess, onCancel, initialData }: ProgramR
             ...values,
             program: values.program as any,
             created_by: user.id,
+            organization_id: currentOrganization?.organization_id,
           });
 
         if (error) throw error;

@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const activityReportSchema = z.object({
   program: z.string().min(1, "Program is required").max(100),
@@ -31,6 +32,7 @@ interface ActivityReportFormProps {
 
 export function ActivityReportForm({ onSuccess, onCancel, initialData }: ActivityReportFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof activityReportSchema>>({
@@ -48,17 +50,20 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
 
   // Fetch programs for the dropdown
   const { data: programs = [] } = useQuery({
-    queryKey: ['programs'],
+    queryKey: ['programs', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from('programs')
         .select('id, name')
         .eq('is_active', true)
+        .eq('organization_id', currentOrganization.organization_id)
         .order('name');
       
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const handleSubmit = async (values: z.infer<typeof activityReportSchema>) => {
@@ -86,6 +91,7 @@ export function ActivityReportForm({ onSuccess, onCancel, initialData }: Activit
           .insert({
             ...values,
             program: values.program as any,
+            organization_id: currentOrganization?.organization_id,
           });
 
         if (error) throw error;

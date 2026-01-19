@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const schoolVisitSchema = z.object({
   staff: z.string().trim().min(1, "Staff name is required").max(255),
@@ -29,6 +30,7 @@ interface SchoolVisitReportFormProps {
 
 export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: SchoolVisitReportFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof schoolVisitSchema>>({
     resolver: zodResolver(schoolVisitSchema),
@@ -69,6 +71,7 @@ export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: Scho
           .insert({
             ...values,
             location: values.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
+            organization_id: currentOrganization?.organization_id,
           });
 
         if (error) throw error;

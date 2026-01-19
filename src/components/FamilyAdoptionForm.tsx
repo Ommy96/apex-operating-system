@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface FamilyAdoptionFormProps {
   family?: any;
@@ -15,6 +16,7 @@ interface FamilyAdoptionFormProps {
 
 export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdoptionFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     known_name: family?.known_name || "",
@@ -67,7 +69,7 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
       } else {
         const { error } = await supabase
           .from('family_adoption')
-          .insert(familyData);
+          .insert({ ...familyData, organization_id: currentOrganization?.organization_id });
 
         if (error) throw error;
 

@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 
 const businessVisitSchema = z.object({
   staff: z.string().trim().min(1, "Staff name is required").max(255),
@@ -32,6 +33,7 @@ interface BusinessVisitReportFormProps {
 export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: BusinessVisitReportFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [businesses, setBusinesses] = useState<any[]>([]);
   
   const form = useForm<z.infer<typeof businessVisitSchema>>({
@@ -50,9 +52,11 @@ export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: Bu
 
   useEffect(() => {
     const fetchBusinesses = async () => {
+      if (!currentOrganization?.organization_id) return;
       const { data, error } = await supabase
         .from('self_empowerment')
         .select('id, full_name, business_name, is_active')
+        .eq('organization_id', currentOrganization.organization_id)
         .order('full_name', { ascending: true });
 
       if (error) {
@@ -68,13 +72,14 @@ export function BusinessVisitReportForm({ onSuccess, onCancel, initialData }: Bu
     };
 
     fetchBusinesses();
-  }, [toast]);
+  }, [toast, currentOrganization?.organization_id]);
 
   const handleSubmit = async (values: z.infer<typeof businessVisitSchema>) => {
     try {
       const reportData = {
         ...values,
         created_by: user?.id,
+        organization_id: currentOrganization?.organization_id,
       };
 
       let error;
