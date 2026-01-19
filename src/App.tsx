@@ -28,6 +28,7 @@ import AttendanceManagement from "./pages/AttendanceManagement";
 import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 import Settings from "./pages/Settings";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
@@ -267,6 +268,13 @@ const App = () => (
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/organization-settings" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <OrganizationSettings />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
