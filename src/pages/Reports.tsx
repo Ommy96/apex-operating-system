@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { PageHeroHeader } from '@/components/PageHeroHeader';
 
 export default function Reports() {
   const { userRole } = useAuth();
+  const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
   const [programs, setPrograms] = useState<any[]>([]);
   const [selectedProgram, setSelectedProgram] = useState<string>('all');
@@ -22,10 +24,11 @@ export default function Reports() {
 
   // Fetch real-time statistics
   const { data: realtimeStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['reports-stats'],
+    queryKey: ['reports-stats', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return null;
       const [childrenRes, activitiesRes, enrollmentsRes, visitsRes] = await Promise.all([
-        supabase.from('children').select('*', { count: 'exact' }).eq('status', 'active'),
+        supabase.from('children').select('*', { count: 'exact' }).eq('organization_id', currentOrganization.organization_id).eq('status', 'active'),
         supabase.from('activities').select('*', { count: 'exact' }),
         supabase.from('child_programs').select('*', { count: 'exact' }),
         supabase.from('visits').select('*', { count: 'exact' })
@@ -38,6 +41,7 @@ export default function Reports() {
         totalVisits: visitsRes.count || 0,
       };
     },
+    enabled: !!currentOrganization?.organization_id,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 

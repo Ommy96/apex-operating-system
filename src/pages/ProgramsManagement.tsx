@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { ProgramFieldBuilder, FieldDefinition } from "@/components/ProgramFieldBuilder";
@@ -43,6 +44,7 @@ interface ProgramFormData {
 
 const ProgramsManagement = () => {
   const { isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,11 +62,13 @@ const ProgramsManagement = () => {
   });
 
   const { data: programs, isLoading } = useQuery({
-    queryKey: ['programs-management'],
+    queryKey: ['programs-management', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from('programs')
         .select('*')
+        .eq('organization_id', currentOrganization.organization_id)
         .order('name');
       if (error) throw error;
       return data.map(p => ({
@@ -73,6 +77,7 @@ const ProgramsManagement = () => {
         show_in_navigation: p.show_in_navigation || false,
       })) as Program[];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const createMutation = useMutation({

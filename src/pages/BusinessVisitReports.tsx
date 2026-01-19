@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BusinessVisitReportForm } from '@/components/BusinessVisitReportForm';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Download, Plus, Search, Eye, Edit, Trash2, Building2, AlertCircle, CheckCircle2, Calendar, Users, MapPin } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getCardStyles, CardVariant } from '@/lib/cardStyles';
@@ -19,6 +20,7 @@ import { PageHeroHeader } from '@/components/PageHeroHeader';
 export default function BusinessVisitReports() {
   const { toast } = useToast();
   const { user, isAdmin, isManagement, isStaff } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -29,14 +31,16 @@ export default function BusinessVisitReports() {
 
   // Fetch business visit reports
   const { data: businessVisitReports = [], isLoading } = useQuery({
-    queryKey: ['business-visit-reports'],
+    queryKey: ['business-visit-reports', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       let query = supabase
         .from('business_visit_reports')
         .select(`
           *,
           business:self_empowerment(full_name, business_name)
         `)
+        .eq('organization_id', currentOrganization.organization_id)
         .order('visit_date', { ascending: false });
 
       if (isStaff && !isAdmin && !isManagement) {
@@ -47,6 +51,7 @@ export default function BusinessVisitReports() {
       if (error) throw error;
       return data || [];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Calculate statistics

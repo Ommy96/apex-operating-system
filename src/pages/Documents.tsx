@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,13 +51,15 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export default function Documents() {
+  const { currentOrganization } = useOrganization();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [missingSearchQuery, setMissingSearchQuery] = useState("");
 
   const { data: documents, isLoading } = useQuery({
-    queryKey: ["all-documents"],
+    queryKey: ["all-documents", currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from("documents")
         .select(`
@@ -70,22 +73,29 @@ export default function Documents() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Document[];
+      // Filter by children belonging to the organization
+      return (data as Document[]).filter(doc => 
+        !doc.child_id || doc.children !== null
+      );
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const { data: children, isLoading: isLoadingChildren } = useQuery({
-    queryKey: ["all-children-for-documents"],
+    queryKey: ["all-children-for-documents", currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from("children")
         .select("id, first_name, last_name, academic_level, institution_name")
+        .eq("organization_id", currentOrganization.organization_id)
         .eq("status", "active")
         .order("first_name");
 
       if (error) throw error;
       return data as Child[];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const categories = documents
