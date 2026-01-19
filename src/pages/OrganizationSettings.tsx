@@ -19,7 +19,10 @@ import {
   Bell,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  Clock,
+  Send,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +46,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,6 +87,15 @@ interface OrganizationDetails {
   settings: Record<string, any> | null;
 }
 
+interface PendingInvitation {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  created_at: string;
+  expires_at: string;
+}
+
 export default function OrganizationSettings() {
   const { user, userRole } = useAuth();
   const { currentOrganization, refreshOrganization } = useOrganization();
@@ -92,6 +113,9 @@ export default function OrganizationSettings() {
     activityAlerts: true,
     weeklyDigest: false,
   });
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('member');
 
   const isOrgAdmin = currentOrganization?.user_role === 'owner' || 
                      currentOrganization?.user_role === 'admin' ||
@@ -141,6 +165,24 @@ export default function OrganizationSettings() {
       })) as OrganizationMember[];
     },
     enabled: !!currentOrganization?.organization_id,
+  });
+
+  // Fetch pending invitations
+  const { data: invitations, isLoading: invitationsLoading } = useQuery({
+    queryKey: ['organization-invitations', currentOrganization?.organization_id],
+    queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
+      const { data, error } = await supabase
+        .from('organization_invitations')
+        .select('*')
+        .eq('organization_id', currentOrganization.organization_id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as PendingInvitation[];
+    },
+    enabled: !!currentOrganization?.organization_id && isOrgAdmin,
   });
 
   // Update org details when data loads
@@ -237,6 +279,63 @@ export default function OrganizationSettings() {
       toast({ 
         title: 'Error', 
         description: error.message || 'Failed to remove member',
+        variant: 'destructive'
+      });
+    },
+  });
+
+  // Send invitation mutation
+  const sendInviteMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrganization?.organization_id) throw new Error('No organization');
+      if (!inviteEmail) throw new Error('Email is required');
+
+      const { data, error } = await supabase.functions.invoke('send-invitation', {
+        body: {
+          email: inviteEmail,
+          role: inviteRole,
+          organization_id: currentOrganization.organization_id,
+          organization_name: currentOrganization.organization_name,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Invitation sent successfully' });
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
+      setInviteDialogOpen(false);
+      setInviteEmail('');
+      setInviteRole('member');
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to send invitation',
+        variant: 'destructive'
+      });
+    },
+  });
+
+  // Cancel invitation mutation
+  const cancelInviteMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      const { error } = await supabase
+        .from('organization_invitations')
+        .update({ status: 'cancelled' })
+        .eq('id', invitationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Invitation cancelled' });
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to cancel invitation',
         variant: 'destructive'
       });
     },
@@ -622,10 +721,64 @@ export default function OrganizationSettings() {
                   </div>
                 </div>
                 {isOrgAdmin && (
-                  <Button variant="outline" className="gap-2" disabled>
-                    <UserPlus className="h-4 w-4" />
-                    Invite Member
-                  </Button>
+                  <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        Invite Member
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Invite a New Member</DialogTitle>
+                        <DialogDescription>
+                          Send an invitation to join {currentOrganization?.organization_name}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="invite-email">Email Address</Label>
+                          <Input
+                            id="invite-email"
+                            type="email"
+                            placeholder="colleague@example.com"
+                            value={inviteEmail}
+                            onChange={(e) => setInviteEmail(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="invite-role">Role</Label>
+                          <Select value={inviteRole} onValueChange={setInviteRole}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={() => sendInviteMutation.mutate()}
+                          disabled={sendInviteMutation.isPending || !inviteEmail}
+                          className="gap-2"
+                        >
+                          {sendInviteMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="h-4 w-4" />
+                          )}
+                          Send Invitation
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </CardHeader>
@@ -721,6 +874,61 @@ export default function OrganizationSettings() {
                 <div className="text-center py-8 text-muted-foreground">
                   No members found
                 </div>
+              )}
+
+              {/* Pending Invitations */}
+              {isOrgAdmin && invitations && invitations.length > 0 && (
+                <>
+                  <Separator className="my-6" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
+                      <h3 className="font-medium">Pending Invitations</h3>
+                      <Badge variant="secondary">{invitations.length}</Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {invitations.map((invitation) => (
+                        <div 
+                          key={invitation.id} 
+                          className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border"
+                        >
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-accent text-accent-foreground font-medium">
+                                <Mail className="h-4 w-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{invitation.email}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Invited as <span className="capitalize">{invitation.role}</span> • 
+                                Expires {new Date(invitation.expires_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge variant="secondary">
+                              Pending
+                            </Badge>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={() => cancelInviteMutation.mutate(invitation.id)}
+                              disabled={cancelInviteMutation.isPending}
+                            >
+                              {cancelInviteMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <X className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
