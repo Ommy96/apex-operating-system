@@ -15,11 +15,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function OtherReports() {
   const { isManagement, isStaff, userRole, user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,25 +34,30 @@ export default function OtherReports() {
 
   // Fetch programs for the filter dropdown
   const { data: programs = [] } = useQuery({
-    queryKey: ['programs'],
+    queryKey: ['programs', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from('programs')
         .select('id, name')
+        .eq('organization_id', currentOrganization.organization_id)
         .eq('is_active', true)
         .order('name');
       
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const { data: activityReports, refetch } = useQuery({
-    queryKey: ['other-reports', userRole, user?.id],
+    queryKey: ['other-reports', userRole, user?.id, currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       let query = supabase
         .from('activity_reports')
-        .select('*');
+        .select('*')
+        .eq('organization_id', currentOrganization.organization_id);
       
       // Staff can only see their own reports
       if (isStaff && user?.id) {
@@ -63,6 +70,7 @@ export default function OtherReports() {
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Fetch stats for summary cards

@@ -15,12 +15,14 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 
 export default function ProgramReports() {
   const navigate = useNavigate();
   const { isManagement, isStaff, userRole, user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any>(null);
@@ -31,11 +33,13 @@ export default function ProgramReports() {
   const [monthFilter, setMonthFilter] = useState("");
 
   const { data: programReports, refetch } = useQuery({
-    queryKey: ['program-reports', userRole, user?.id],
+    queryKey: ['program-reports', userRole, user?.id, currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       let query = supabase
         .from('program_reports')
-        .select('*');
+        .select('*')
+        .eq('organization_id', currentOrganization.organization_id);
       
       // Staff can only see their own reports
       if (isStaff && user?.id) {
@@ -48,6 +52,7 @@ export default function ProgramReports() {
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Fetch stats for summary cards
