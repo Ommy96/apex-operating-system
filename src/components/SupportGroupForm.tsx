@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const supportGroupSchema = z.object({
   name: z.string().trim().min(1, "Group name is required").max(255),
@@ -25,6 +26,7 @@ interface SupportGroupFormProps {
 
 export function SupportGroupForm({ onSuccess, onCancel }: SupportGroupFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof supportGroupSchema>>({
     resolver: zodResolver(supportGroupSchema),
@@ -51,6 +53,7 @@ export function SupportGroupForm({ onSuccess, onCancel }: SupportGroupFormProps)
           location: values.location || null,
           meeting_schedule: values.meeting_schedule || null,
           member_count: values.member_count ? parseInt(values.member_count) : null,
+          organization_id: currentOrganization?.organization_id,
         }]);
 
       if (error) throw error;

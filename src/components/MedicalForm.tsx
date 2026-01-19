@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const medicalSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
@@ -29,6 +30,7 @@ interface MedicalFormProps {
 
 export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<MedicalFormData>({
     resolver: zodResolver(medicalSchema),
@@ -56,7 +58,7 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
       } else {
         const { error } = await supabase
           .from("medical_records")
-          .insert([data]);
+          .insert([{ ...data, organization_id: currentOrganization?.organization_id }]);
 
         if (error) throw error;
         toast({ title: "Medical record added successfully" });

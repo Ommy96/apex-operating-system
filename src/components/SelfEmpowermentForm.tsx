@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const selfEmpowermentSchema = z.object({
   applicant_id: z.string().max(100).optional().or(z.literal('')),
@@ -36,6 +37,7 @@ interface SelfEmpowermentFormProps {
 
 export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpowermentFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof selfEmpowermentSchema>>({
     resolver: zodResolver(selfEmpowermentSchema),
@@ -88,7 +90,7 @@ export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpower
       } else {
         const result = await supabase
           .from('self_empowerment')
-          .insert(dataToSave);
+          .insert({ ...dataToSave, organization_id: currentOrganization?.organization_id });
         error = result.error;
       }
 

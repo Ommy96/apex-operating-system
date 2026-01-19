@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { useOrganization } from '@/hooks/useOrganization';
 
 const kipawaSatoSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -35,6 +36,7 @@ interface KipawaSatoFormProps {
 
 export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<KipawaSatoFormData>({
     resolver: zodResolver(kipawaSatoSchema),
@@ -72,7 +74,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
       } else {
         const { error } = await supabase
           .from('kipawa_sato')
-          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id }]);
+          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id, organization_id: currentOrganization?.organization_id }]);
           
         if (error) throw error;
         
