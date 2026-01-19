@@ -50,6 +50,8 @@ import {
   Layers,
   HandHeart,
   Target,
+  Globe,
+  Shield,
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { Button } from "@/components/ui/button";
@@ -359,6 +361,30 @@ export function AppSidebar() {
                       />
                     </SidebarMenuItem>
                   ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* Super Admin - Only for Admin */}
+          {isAdmin && (
+            <SidebarGroup className="mt-6">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2 flex items-center gap-1">
+                  <Shield className="h-3 w-3" />
+                  Super Admin
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  <SidebarMenuItem>
+                    <MenuItem 
+                      item={{ title: "Cross-Org Dashboard", url: "/admin/cross-org", icon: Globe }}
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
