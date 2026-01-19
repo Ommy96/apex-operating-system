@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { supabase } from "@/integrations/supabase/client";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface StaffReport {
   id: string;
@@ -89,6 +90,7 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accen
 
 export default function ReportsAnalytics() {
   const navigate = useNavigate();
+  const { currentOrganization } = useOrganization();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
@@ -196,15 +198,26 @@ export default function ReportsAnalytics() {
 
   // Fetch comprehensive analytics data
   const { data: programAnalyticsData, isLoading: isLoadingAnalytics } = useQuery({
-    queryKey: ['program-analytics-data'],
+    queryKey: ['program-analytics-data', currentOrganization?.organization_id],
     queryFn: async (): Promise<ProgramAnalyticsData> => {
+      if (!currentOrganization?.organization_id) return {
+        totalBeneficiaries: 0,
+        children: [],
+        feeding: [],
+        kipawa: [],
+        selfEmpowerment: [],
+        familyAdoption: [],
+        supportGroups: []
+      };
+      
+      const orgId = currentOrganization.organization_id;
       const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, familyAdoptionRes, supportGroupsRes] = await Promise.all([
-        supabase.from('children').select('gender, residence, academic_level, status'),
-        supabase.from('feeding_program').select('gender, type, school'),
-        supabase.from('kipawa_sato').select('gender, location, academic_level'),
-        supabase.from('self_empowerment').select('gender, residence, is_active'),
-        supabase.from('family_adoption').select('gender, residence, category'),
-        supabase.from('support_groups').select('location, member_count, name')
+        supabase.from('children').select('gender, residence, academic_level, status').eq('organization_id', orgId),
+        supabase.from('feeding_program').select('gender, type, school').eq('organization_id', orgId),
+        supabase.from('kipawa_sato').select('gender, location, academic_level').eq('organization_id', orgId),
+        supabase.from('self_empowerment').select('gender, residence, is_active').eq('organization_id', orgId),
+        supabase.from('family_adoption').select('gender, residence, category').eq('organization_id', orgId),
+        supabase.from('support_groups').select('location, member_count, name').eq('organization_id', orgId)
       ]);
       
       return {
@@ -217,6 +230,7 @@ export default function ReportsAnalytics() {
         supportGroups: supportGroupsRes.data || []
       };
     },
+    enabled: !!currentOrganization?.organization_id,
     refetchInterval: 60000,
   });
 

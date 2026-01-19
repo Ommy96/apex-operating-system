@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { useOrganization } from '@/hooks/useOrganization';
 
 const feedingProgramSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -31,6 +32,7 @@ interface FeedingProgramFormProps {
 
 export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProgramFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<FeedingProgramFormData>({
     resolver: zodResolver(feedingProgramSchema),
@@ -65,7 +67,7 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
       } else {
         const { error } = await supabase
           .from('feeding_program')
-          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id }]);
+          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id, organization_id: currentOrganization?.organization_id }]);
           
         if (error) throw error;
         

@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { useOrganization } from '@/hooks/useOrganization';
 
 const childSchema = z.object({
   student_id: z.string().optional(),
@@ -46,6 +47,7 @@ interface ChildFormProps {
 export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(child?.photo_url || '');
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<ChildFormData>({
     resolver: zodResolver(childSchema),
@@ -116,7 +118,8 @@ export function ChildForm({ child, onSuccess, onCancel }: ChildFormProps) {
         ...data,
         student_id: data.student_id && data.student_id.trim() !== '' ? data.student_id : null,
         date_of_birth: data.date_of_birth && data.date_of_birth.trim() !== '' ? data.date_of_birth : null,
-        created_by: user?.id
+        created_by: user?.id,
+        organization_id: currentOrganization?.organization_id
       };
       
       if (child) {

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, MapPin, Calendar, Briefcase, Phone, Mail, Link, Award } from "lucide-react";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const alumniSchema = z.object({
   full_name: z.string().trim().min(1, "Full name is required").max(255),
@@ -37,6 +38,7 @@ interface AlumniFormProps {
 export function AlumniForm({ initialData, onSuccess, onCancel }: AlumniFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof alumniSchema>>({
     resolver: zodResolver(alumniSchema),
@@ -62,6 +64,7 @@ export function AlumniForm({ initialData, onSuccess, onCancel }: AlumniFormProps
       const dataToSubmit = {
         ...values,
         created_by: user?.id,
+        organization_id: currentOrganization?.organization_id,
       };
 
       let query;
