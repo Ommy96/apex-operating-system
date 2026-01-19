@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const homeVisitSchema = z.object({
   staff: z.string().trim().min(1, "Staff name is required").max(255),
@@ -34,6 +35,7 @@ interface HomeVisitReportFormProps {
 export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVisitReportFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [isAddingNewStudent, setIsAddingNewStudent] = useState(false);
   const [newStudentName, setNewStudentName] = useState("");
   
@@ -53,16 +55,19 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
 
   // Fetch students for the dropdown
   const { data: students = [] } = useQuery({
-    queryKey: ['students'],
+    queryKey: ['students', currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from('children')
         .select('id, first_name, last_name')
+        .eq('organization_id', currentOrganization.organization_id)
         .order('first_name');
       
       if (error) throw error;
       return data;
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const handleSubmit = async (values: z.infer<typeof homeVisitSchema>) => {
@@ -80,7 +85,8 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
           .insert({
             first_name: firstName,
             last_name: lastName,
-            status: 'active'
+            status: 'active',
+            organization_id: currentOrganization?.organization_id
           })
           .select('id')
           .single();
@@ -115,6 +121,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
             student_id: studentId || null,
             location: values.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
             created_by: user?.id,
+            organization_id: currentOrganization?.organization_id,
           });
 
         if (error) throw error;
