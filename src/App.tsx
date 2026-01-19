@@ -27,7 +27,7 @@ import OtherReports from "./pages/OtherReports";
 import AttendanceManagement from "./pages/AttendanceManagement";
 import AcademicPerformance from "./pages/AcademicPerformance";
 import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
-import Settings from "./pages/Settings";
+
 import OrganizationSettings from "./pages/OrganizationSettings";
 import AdminCrossOrgDashboard from "./pages/AdminCrossOrgDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
@@ -262,13 +262,6 @@ const App = () => (
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <ReportsAnalytics />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute requireRole="management">
-                <DashboardLayout>
-                  <Settings />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

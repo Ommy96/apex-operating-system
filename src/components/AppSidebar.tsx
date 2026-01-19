@@ -105,8 +105,7 @@ const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
 
 const systemItems = [
   { title: "Documents", url: "/documents", icon: FileText },
-  { title: "Organization", url: "/organization-settings", icon: Building2 },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "/organization-settings", icon: Settings },
 ];
 
 interface MenuItemProps {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTheme } from 'next-themes';
 import { 
   Building2, 
   Users, 
@@ -13,7 +14,12 @@ import {
   Shield,
   Trash2,
   Crown,
-  Loader2
+  Loader2,
+  User,
+  Bell,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,6 +78,7 @@ interface OrganizationDetails {
 export default function OrganizationSettings() {
   const { user, userRole } = useAuth();
   const { currentOrganization, refreshOrganization } = useOrganization();
+  const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
   
   const [orgDetails, setOrgDetails] = useState<Partial<OrganizationDetails>>({});
@@ -79,6 +86,11 @@ export default function OrganizationSettings() {
     allowMemberInvites: false,
     requireApprovalForChanges: true,
     enableAuditLog: true,
+  });
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    activityAlerts: true,
+    weeklyDigest: false,
   });
 
   const isOrgAdmin = currentOrganization?.user_role === 'owner' || 
@@ -271,18 +283,32 @@ export default function OrganizationSettings() {
         icon={Building2}
       />
 
-      <Tabs defaultValue="details" className="space-y-6">
-        <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-muted/60 p-1.5 backdrop-blur-sm">
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-muted/60 p-1.5 backdrop-blur-sm flex-wrap gap-1">
+          <TabsTrigger 
+            value="profile" 
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger 
+            value="notifications"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Notifications
+          </TabsTrigger>
           <TabsTrigger 
             value="details" 
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <Building2 className="h-4 w-4 mr-2" />
-            Details
+            Organization
           </TabsTrigger>
           <TabsTrigger 
             value="members"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <Users className="h-4 w-4 mr-2" />
             Members
@@ -290,12 +316,155 @@ export default function OrganizationSettings() {
           </TabsTrigger>
           <TabsTrigger 
             value="settings"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-6 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <SettingsIcon className="h-4 w-4 mr-2" />
             Configuration
           </TabsTrigger>
         </TabsList>
+
+        {/* Profile Tab */}
+        <TabsContent value="profile" className="space-y-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+                  <User className="h-8 w-8 text-primary-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">{user?.email?.split('@')[0] || 'Your Profile'}</CardTitle>
+                  <CardDescription className="flex items-center gap-2 mt-1">
+                    <Mail className="h-4 w-4" />
+                    {user?.email}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                  <Input
+                    id="email"
+                    value={user?.email || ''}
+                    disabled
+                    className="bg-muted/50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Organization</Label>
+                  <Input
+                    value={currentOrganization?.organization_name || ''}
+                    disabled
+                    className="bg-muted/50"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/30 border">
+                <Shield className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Current Role</p>
+                  <p className="text-xs text-muted-foreground">Your access level in the system</p>
+                </div>
+                <Badge variant={getRoleBadgeVariant(userRole || 'staff')} className="capitalize text-sm px-3 py-1">
+                  {userRole}
+                </Badge>
+              </div>
+
+              {/* Theme Toggle Section */}
+              <div className="p-4 rounded-xl bg-muted/30 border space-y-4">
+                <div className="flex items-center gap-3">
+                  <Sun className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Appearance</p>
+                    <p className="text-xs text-muted-foreground">Choose your preferred theme</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={theme === 'light' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('light')}
+                    className="flex-1 gap-2"
+                  >
+                    <Sun className="h-4 w-4" />
+                    Light
+                  </Button>
+                  <Button
+                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('dark')}
+                    className="flex-1 gap-2"
+                  >
+                    <Moon className="h-4 w-4" />
+                    Dark
+                  </Button>
+                  <Button
+                    variant={theme === 'system' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTheme('system')}
+                    className="flex-1 gap-2"
+                  >
+                    <Monitor className="h-4 w-4" />
+                    System
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="space-y-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
+                  <Bell className="h-7 w-7 text-accent-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Notification Preferences</CardTitle>
+                  <CardDescription>Choose what updates you want to receive</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/20 hover:bg-muted/30 transition-colors">
+                <div className="space-y-0.5">
+                  <Label className="text-base font-medium">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive important updates via email</p>
+                </div>
+                <Switch
+                  checked={notificationSettings.emailNotifications}
+                  onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, emailNotifications: checked})}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/20 hover:bg-muted/30 transition-colors">
+                <div className="space-y-0.5">
+                  <Label className="text-base font-medium">Activity Alerts</Label>
+                  <p className="text-sm text-muted-foreground">Get notified about new activities and events</p>
+                </div>
+                <Switch
+                  checked={notificationSettings.activityAlerts}
+                  onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, activityAlerts: checked})}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/20 hover:bg-muted/30 transition-colors">
+                <div className="space-y-0.5">
+                  <Label className="text-base font-medium">Weekly Digest</Label>
+                  <p className="text-sm text-muted-foreground">Receive a weekly summary of activities</p>
+                </div>
+                <Switch
+                  checked={notificationSettings.weeklyDigest}
+                  onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, weeklyDigest: checked})}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Organization Details Tab */}
         <TabsContent value="details" className="space-y-6">
