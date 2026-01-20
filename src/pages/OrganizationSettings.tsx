@@ -22,7 +22,14 @@ import {
   Monitor,
   Clock,
   Send,
-  X
+  X,
+  Home,
+  School,
+  Briefcase,
+  FileText,
+  Trophy,
+  GraduationCap,
+  ClipboardList
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,6 +114,16 @@ export default function OrganizationSettings() {
     allowMemberInvites: false,
     requireApprovalForChanges: true,
     enableAuditLog: true,
+    enabledReportTypes: {
+      homeVisits: true,
+      schoolVisits: true,
+      businessVisits: true,
+      programReports: true,
+      activityReports: true,
+      academicPerformance: true,
+      customReports: true,
+      otherReports: true,
+    },
   });
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -996,6 +1013,181 @@ export default function OrganizationSettings() {
                     }
                     disabled={!isOrgAdmin}
                   />
+                </div>
+              </div>
+
+              {/* Report Types Section */}
+              <Separator className="my-6" />
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <ClipboardList className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Enabled Report Types</p>
+                    <p className="text-xs text-muted-foreground">Choose which report types are available for your organization</p>
+                  </div>
+                </div>
+                
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <Home className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Home Visits</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.homeVisits ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            homeVisits: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <School className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">School Visits</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.schoolVisits ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            schoolVisits: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Business Visits</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.businessVisits ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            businessVisits: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Program Reports</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.programReports ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            programReports: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Activity Reports</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.activityReports ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            activityReports: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Academic Performance</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.academicPerformance ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            academicPerformance: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Custom Reports</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.customReports ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            customReports: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-sm">Other Reports</Label>
+                    </div>
+                    <Switch
+                      checked={orgSettings.enabledReportTypes?.otherReports ?? true}
+                      onCheckedChange={(checked) => 
+                        setOrgSettings({ 
+                          ...orgSettings, 
+                          enabledReportTypes: { 
+                            ...orgSettings.enabledReportTypes, 
+                            otherReports: checked 
+                          } 
+                        })
+                      }
+                      disabled={!isOrgAdmin}
+                    />
+                  </div>
                 </div>
               </div>
 
