@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
 
 const visitReportSchema = z.object({
   visit_type: z.string().min(1, "Please select a visit type"),
@@ -28,6 +29,7 @@ interface VisitReportFormProps {
 
 export function VisitReportForm({ childId, onSuccess, onCancel }: VisitReportFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof visitReportSchema>>({
     resolver: zodResolver(visitReportSchema),
@@ -46,6 +48,15 @@ export function VisitReportForm({ childId, onSuccess, onCancel }: VisitReportFor
   const handleSubmit = async (values: z.infer<typeof visitReportSchema>) => {
     if (!childId) return;
 
+    if (!currentOrganization?.organization_id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('visits')
@@ -53,7 +64,8 @@ export function VisitReportForm({ childId, onSuccess, onCancel }: VisitReportFor
           child_id: childId,
           ...values,
           duration_minutes: values.duration_minutes ? parseInt(values.duration_minutes) : null,
-          next_visit_date: values.next_visit_date || null
+          next_visit_date: values.next_visit_date || null,
+          organization_id: currentOrganization.organization_id,
         });
 
       if (error) throw error;

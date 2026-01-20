@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Constants } from '@/integrations/supabase/types';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface ProgramEnrollmentFormProps {
   childId: string | undefined;
@@ -15,6 +16,7 @@ interface ProgramEnrollmentFormProps {
 }
 
 export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramEnrollmentFormProps) {
+  const { currentOrganization } = useOrganization();
   const [availablePrograms, setAvailablePrograms] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     program_name: '',
@@ -60,6 +62,15 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
     e.preventDefault();
     if (!childId || !formData.program_name) return;
 
+    if (!currentOrganization?.organization_id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // First, find or create the program in the programs table
@@ -79,7 +90,8 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
           .from('programs')
           .insert({
             name: formData.program_name,
-            is_active: true
+            is_active: true,
+            organization_id: currentOrganization.organization_id,
           })
           .select('id')
           .single();
@@ -96,7 +108,8 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
           program_id: programId,
           enrollment_date: formData.enrollment_date,
           notes: formData.notes || null,
-          status: 'active'
+          status: 'active',
+          organization_id: currentOrganization.organization_id,
         });
 
       if (error) throw error;

@@ -10,6 +10,7 @@ import { CheckCircle, XCircle, Clock, AlertTriangle, User, Calendar, MessageSqua
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface ApprovalRequest {
   id: string;
@@ -37,6 +38,7 @@ interface ApprovalWorkflowProps {
 
 export function ApprovalWorkflow({ userRole }: ApprovalWorkflowProps) {
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -103,6 +105,15 @@ export function ApprovalWorkflow({ userRole }: ApprovalWorkflowProps) {
   const createApprovalRequest = async () => {
     if (!user) return;
 
+    if (!currentOrganization?.organization_id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -115,7 +126,8 @@ export function ApprovalWorkflow({ userRole }: ApprovalWorkflowProps) {
           requested_changes: JSON.parse(newRequest.requested_changes || '{}'),
           current_values: {},
           priority: newRequest.priority,
-          reason: newRequest.reason
+          reason: newRequest.reason,
+          organization_id: currentOrganization.organization_id,
         });
 
       if (error) throw error;

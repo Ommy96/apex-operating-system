@@ -55,7 +55,21 @@ export default function AttendanceManagement() {
 
   // Fetch attendance records
   const orgId = currentOrganization?.organization_id;
-  const { data: attendanceRecords, isLoading } = useQuery({
+  
+  type AttendanceRecord = {
+    id: string;
+    program_id: string;
+    month: string;
+    week: number;
+    present_count: number;
+    absent_count: number;
+    recorded_by: string;
+    organization_id: string;
+    created_at: string;
+    updated_at: string;
+  };
+  
+  const { data: attendanceRecords, isLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ["attendance-records", orgId],
     queryFn: async () => {
       if (!orgId) return [];
@@ -64,9 +78,9 @@ export default function AttendanceManagement() {
         .select("*")
         .order("created_at", { ascending: false });
       
-      const { data, error } = await query.eq("organization_id", orgId);
+      const { data, error } = await (query as any).eq("organization_id", orgId);
       if (error) throw error;
-      return data;
+      return (data ?? []) as AttendanceRecord[];
     },
     enabled: !!orgId,
   });
