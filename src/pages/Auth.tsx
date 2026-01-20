@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, CheckCircle2, Mail, Heart, Lock, User, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Mail, Lock, User, Sparkles } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -75,7 +75,7 @@ export default function Auth() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="relative">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary"></div>
-          <Heart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-pulse" />
+          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-emerald-500 animate-pulse" />
         </div>
       </div>
     );
@@ -153,18 +153,18 @@ export default function Auth() {
             {/* Logo */}
             <div className="flex justify-center mb-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative p-4 bg-gradient-to-br from-primary to-accent rounded-2xl shadow-lg">
-                  <Heart className="h-8 w-8 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Heart to Heart
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+              Ufanisi
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Child Management System
+              NGO Management Platform
             </CardDescription>
           </CardHeader>
 
