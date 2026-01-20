@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -118,30 +119,28 @@ const getNextGrade = (currentGrade: string | null, academicLevel: string | null)
 export default function GradeProgression() {
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const [academicYear, setAcademicYear] = useState(new Date().getFullYear().toString());
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressionComplete, setProgressionComplete] = useState(false);
 
-  // Redirect non-admin users
-  if (userRole !== "admin") {
-    navigate("/dashboard");
-    return null;
-  }
-
   // Fetch all active children
   const { data: children, isLoading } = useQuery({
-    queryKey: ["children-for-progression"],
+    queryKey: ["children-for-progression", currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from("children")
         .select("id, first_name, last_name, grade, academic_level")
+        .eq("organization_id", currentOrganization.organization_id)
         .eq("status", "active")
         .order("grade");
 
       if (error) throw error;
       return data as Child[];
     },
+    enabled: !!currentOrganization?.organization_id && userRole === "admin",
   });
 
   // Group children by progression outcome
@@ -194,6 +193,7 @@ export default function GradeProgression() {
             graduation_year: parseInt(academicYear),
             exit_year: parseInt(academicYear),
             created_by: user?.id,
+            organization_id: currentOrganization?.organization_id,
           });
 
           // Update child status to inactive
@@ -278,6 +278,12 @@ export default function GradeProgression() {
     await progressMutation.mutateAsync();
     setIsProcessing(false);
   };
+
+  // Redirect non-admin users
+  if (userRole !== "admin") {
+    navigate("/dashboard");
+    return null;
+  }
 
   if (isLoading) {
     return (

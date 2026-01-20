@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { GraduationCap, BookOpen, TrendingUp, Eye, Plus, Search, Calendar, Download, User, BarChart3, Edit, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useQuery } from '@tanstack/react-query';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -304,6 +305,7 @@ function AcademicPerformanceForm({ onSuccess, onCancel, editingRecord }: Academi
 
 export default function AcademicPerformance() {
   const { isAdmin, isStaff } = useAuth();
+  const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -44,6 +45,7 @@ interface SelectedStudent extends Child {
 export default function SchoolTransport() {
   const navigate = useNavigate();
   const { isAdmin, isManagement } = useAuth();
+  const { currentOrganization } = useOrganization();
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<SelectedStudent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,15 +55,17 @@ export default function SchoolTransport() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    fetchChildren();
-    fetchTransportRecords();
-  }, []);
+    if (!currentOrganization?.organization_id) return;
+    fetchChildren(currentOrganization.organization_id);
+    fetchTransportRecords(currentOrganization.organization_id);
+  }, [currentOrganization?.organization_id]);
 
-  const fetchChildren = async () => {
+  const fetchChildren = async (organizationId: string) => {
     try {
       const { data, error } = await supabase
         .from('children')
         .select('*')
+        .eq('organization_id', organizationId)
         .not('academic_level', 'is', null)
         .order('first_name');
 
@@ -79,11 +83,12 @@ export default function SchoolTransport() {
     }
   };
 
-  const fetchTransportRecords = async () => {
+  const fetchTransportRecords = async (organizationId: string) => {
     try {
       const { data, error } = await supabase
         .from('transport_records')
-        .select('*, children(*)');
+        .select('*, children!inner(*)')
+        .eq('children.organization_id', organizationId);
 
       if (error) throw error;
 
@@ -175,7 +180,9 @@ export default function SchoolTransport() {
       });
       
       setShowSaveDialog(false);
-      fetchTransportRecords();
+      if (currentOrganization?.organization_id) {
+        fetchTransportRecords(currentOrganization.organization_id);
+      }
     } catch (error) {
       console.error('Error saving transport records:', error);
       toast({
