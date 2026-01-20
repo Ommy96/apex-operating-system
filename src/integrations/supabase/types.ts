@@ -1051,6 +1051,54 @@ export type Database = {
           },
         ]
       }
+      module_entries: {
+        Row: {
+          child_id: string | null
+          created_at: string
+          created_by: string | null
+          data: Json
+          id: string
+          module_id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          module_id: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          id?: string
+          module_id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_entries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_entries_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "program_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invitations: {
         Row: {
           accepted_at: string | null
@@ -1279,6 +1327,98 @@ export type Database = {
           },
         ]
       }
+      program_modules: {
+        Row: {
+          created_at: string
+          custom_fields: Json | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          program_id: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_fields?: Json | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          program_id: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_fields?: Json | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          program_id?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_modules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_report_types: {
+        Row: {
+          created_at: string
+          frequency: string | null
+          id: string
+          is_required: boolean | null
+          program_id: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          frequency?: string | null
+          id?: string
+          is_required?: boolean | null
+          program_id: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          frequency?: string | null
+          id?: string
+          is_required?: boolean | null
+          program_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_report_types_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_report_types_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_reports: {
         Row: {
           beneficiary_impact: string
@@ -1465,6 +1605,98 @@ export type Database = {
           original_child_id?: string
           reason?: string | null
           replacement_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      report_entries: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          organization_id: string
+          report_date: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_by: string | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          organization_id: string
+          report_date?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          organization_id?: string
+          report_date?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_entries_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          fields: Json
+          header_config: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fields?: Json
+          header_config?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fields?: Json
+          header_config?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
           updated_at?: string
         }
         Relationships: []

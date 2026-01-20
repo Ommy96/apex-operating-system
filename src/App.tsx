@@ -45,6 +45,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
+import CustomReports from "./pages/CustomReports";
 
 const queryClient = new QueryClient();
 
@@ -241,6 +242,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <OtherReports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/custom-reports" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CustomReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
