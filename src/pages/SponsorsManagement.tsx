@@ -77,6 +77,9 @@ const SponsorsManagement = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: SponsorFormData) => {
+      if (!currentOrganization?.organization_id) {
+        throw new Error('No organization selected');
+      }
       const { error } = await supabase.from('sponsors').insert([{
         sponsor_id: data.sponsor_id || null,
         name: data.name,
@@ -85,6 +88,7 @@ const SponsorsManagement = () => {
         phone: data.phone || null,
         notes: data.notes || null,
         is_active: data.is_active,
+        organization_id: currentOrganization.organization_id,
       }]);
       if (error) throw error;
     },
