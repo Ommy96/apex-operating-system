@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DialogClose } from '@/components/ui/dialog';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface FamilyDocumentLinkFormProps {
   familyId: string;
@@ -14,6 +15,7 @@ interface FamilyDocumentLinkFormProps {
 }
 
 export function FamilyDocumentLinkForm({ familyId, onSuccess }: FamilyDocumentLinkFormProps) {
+  const { currentOrganization } = useOrganization();
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [fileUrl, setFileUrl] = useState('');
@@ -26,6 +28,15 @@ export function FamilyDocumentLinkForm({ familyId, onSuccess }: FamilyDocumentLi
       toast({
         title: "Error",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!currentOrganization?.organization_id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
         variant: "destructive",
       });
       return;
@@ -47,7 +58,8 @@ export function FamilyDocumentLinkForm({ familyId, onSuccess }: FamilyDocumentLi
           file_url: fileUrl,
           file_name: generatedTitle,
           file_type: 'link',
-          uploaded_by: (await supabase.auth.getUser()).data.user?.id
+          uploaded_by: (await supabase.auth.getUser()).data.user?.id,
+          organization_id: currentOrganization.organization_id,
         });
 
       if (error) throw error;

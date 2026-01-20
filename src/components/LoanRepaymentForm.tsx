@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface LoanRepaymentFormProps {
   selfEmpowermentId: string;
@@ -17,6 +18,7 @@ interface LoanRepaymentFormProps {
 
 export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess, onCancel }: LoanRepaymentFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     repayment_date: new Date().toISOString().split('T')[0],
@@ -35,6 +37,16 @@ export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!currentOrganization?.organization_id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -47,6 +59,7 @@ export function LoanRepaymentForm({ selfEmpowermentId, applicantName, onSuccess,
           payment_method: formData.payment_method || null,
           reference_number: formData.reference_number || null,
           notes: formData.notes || null,
+          organization_id: currentOrganization.organization_id,
         });
 
       if (error) throw error;

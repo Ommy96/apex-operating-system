@@ -10,6 +10,7 @@ import { FieldDefinition } from "./ProgramFieldBuilder";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface Child {
   id: string;
@@ -35,6 +36,7 @@ export const DynamicProgramForm = ({
   editingEntry,
 }: DynamicProgramFormProps) => {
   const queryClient = useQueryClient();
+  const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, unknown>>(
     editingEntry?.data || {}
@@ -94,6 +96,11 @@ export const DynamicProgramForm = ({
         if (error) throw error;
         toast.success('Entry updated successfully');
       } else {
+        if (!currentOrganization?.organization_id) {
+          toast.error('No organization selected');
+          setIsSubmitting(false);
+          return;
+        }
         const { error } = await supabase
           .from('program_entries')
           .insert([{
@@ -101,6 +108,7 @@ export const DynamicProgramForm = ({
             data: formData as unknown as Record<string, never>,
             created_by: userData?.user?.id,
             child_id: selectedChildId,
+            organization_id: currentOrganization.organization_id,
           }]);
         if (error) throw error;
         toast.success('Entry created successfully');

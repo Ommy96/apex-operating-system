@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const activitySchema = z.object({
   activity_name: z.string().trim().min(1, "Activity name is required").max(255),
@@ -25,6 +26,7 @@ interface ActivityFormProps {
 
 export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: ActivityFormProps) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   
   const form = useForm<z.infer<typeof activitySchema>>({
     resolver: zodResolver(activitySchema),
@@ -58,6 +60,14 @@ export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: 
         });
       } else {
         // Create new activity
+        if (!currentOrganization?.organization_id) {
+          toast({
+            title: "Error",
+            description: "No organization selected",
+            variant: "destructive",
+          });
+          return;
+        }
         const { error } = await supabase
           .from('support_group_activities')
           .insert([{
@@ -67,6 +77,7 @@ export function ActivityForm({ supportGroupId, activity, onSuccess, onCancel }: 
             frequency: values.frequency || null,
             notes: values.notes || null,
             created_by: (await supabase.auth.getUser()).data.user?.id,
+            organization_id: currentOrganization.organization_id,
           }]);
 
         if (error) throw error;
