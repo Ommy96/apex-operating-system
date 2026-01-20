@@ -85,23 +85,44 @@ const programItems = [
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
-const getReportsItems = (isManagement: boolean, isStaff: boolean) => {
-  const baseItems = [
-    { title: "Home Visits", url: "/reports/home-visits", icon: Home },
-    { title: "School Visits", url: "/reports/school-visits", icon: School },
-    { title: "Business Visits", url: "/reports/business-visits", icon: Building2 },
-    { title: "Program Reports", url: "/reports/program-reports", icon: FileText },
-    { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy },
-    { title: "Academic Performance", url: "/reports/academic-performance", icon: GraduationCap },
-    { title: "Custom Reports", url: "/custom-reports", icon: FileText },
-    { title: "Other Reports", url: "/other-reports", icon: FileText },
+interface EnabledReportTypes {
+  homeVisits?: boolean;
+  schoolVisits?: boolean;
+  businessVisits?: boolean;
+  programReports?: boolean;
+  activityReports?: boolean;
+  academicPerformance?: boolean;
+  customReports?: boolean;
+  otherReports?: boolean;
+}
+
+const getReportsItems = (
+  isManagement: boolean, 
+  isStaff: boolean,
+  enabledReportTypes?: EnabledReportTypes
+) => {
+  const allItems = [
+    { title: "Home Visits", url: "/reports/home-visits", icon: Home, key: "homeVisits" },
+    { title: "School Visits", url: "/reports/school-visits", icon: School, key: "schoolVisits" },
+    { title: "Business Visits", url: "/reports/business-visits", icon: Building2, key: "businessVisits" },
+    { title: "Program Reports", url: "/reports/program-reports", icon: FileText, key: "programReports" },
+    { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy, key: "activityReports" },
+    { title: "Academic Performance", url: "/reports/academic-performance", icon: GraduationCap, key: "academicPerformance" },
+    { title: "Custom Reports", url: "/custom-reports", icon: FileText, key: "customReports" },
+    { title: "Other Reports", url: "/other-reports", icon: FileText, key: "otherReports" },
   ];
   
+  // Filter based on enabled report types (default to true if not set)
+  const filteredItems = allItems.filter(item => {
+    const isEnabled = enabledReportTypes?.[item.key as keyof EnabledReportTypes];
+    return isEnabled === undefined ? true : isEnabled;
+  });
+  
   if (isManagement || (!isStaff)) {
-    baseItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp });
+    filteredItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp, key: "analytics" });
   }
   
-  return baseItems;
+  return filteredItems;
 };
 
 const systemItems = [
@@ -157,6 +178,7 @@ function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, isAdmin, isManagement, isStaff } = useAuth();
+  const { currentOrganization } = useOrganization();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -177,6 +199,22 @@ export function AppSidebar() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch organization settings for enabled report types
+  const { data: orgSettings } = useQuery({
+    queryKey: ['org-settings', currentOrganization?.organization_id],
+    queryFn: async () => {
+      if (!currentOrganization?.organization_id) return null;
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('settings')
+        .eq('id', currentOrganization.organization_id)
+        .single();
+      if (error) throw error;
+      return data?.settings as { enabledReportTypes?: EnabledReportTypes } | null;
+    },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   const isActive = (path: string) => currentPath === path;
@@ -327,7 +365,7 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
-                {getReportsItems(isManagement, isStaff).map((item) => (
+                {getReportsItems(isManagement, isStaff, orgSettings?.enabledReportTypes).map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <MenuItem 
                       item={item} 
