@@ -99,25 +99,36 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send invitation email
     const emailResponse = await resend.emails.send({
-      from: "Heart 2 Heart <onboarding@resend.dev>",
+      from: "Ufanisi <onboarding@resend.dev>",
       to: [email],
-      subject: `You've been invited to join ${organization_name}`,
+      subject: `You've been invited to join ${organization_name} on Ufanisi`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #333; margin-bottom: 20px;">You've Been Invited!</h1>
-          <p style="color: #666; font-size: 16px; line-height: 1.5;">
-            You've been invited to join <strong>${organization_name}</strong> as a <strong>${role}</strong>.
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #10b981, #0d9488); padding: 16px; border-radius: 16px;">
+              <span style="font-size: 24px; color: white;">✨</span>
+            </div>
+          </div>
+          <h1 style="color: #333; margin-bottom: 20px; text-align: center;">You've Been Invited!</h1>
+          <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
+            You've been invited to join <strong>${organization_name}</strong> as a <strong>${role}</strong> on Ufanisi.
           </p>
-          <p style="color: #666; font-size: 16px; line-height: 1.5;">
+          <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
             Click the button below to accept your invitation and create your account.
           </p>
-          <a href="${inviteUrl}" 
-             style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; 
-                    text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600;">
-            Accept Invitation
-          </a>
-          <p style="color: #999; font-size: 14px; margin-top: 30px;">
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${inviteUrl}" 
+               style="display: inline-block; background: linear-gradient(135deg, #10b981, #0d9488); color: white; padding: 14px 28px; 
+                      text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #999; font-size: 14px; margin-top: 30px; text-align: center;">
             This invitation will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+          </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            Ufanisi - NGO Management Platform
           </p>
         </div>
       `,
