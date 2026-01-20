@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ const WEEKS = [1, 2, 3, 4, 5];
 export default function AttendanceManagement() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   
   const [program, setProgram] = useState("");
@@ -52,16 +54,21 @@ export default function AttendanceManagement() {
   ];
 
   // Fetch attendance records
+  const orgId = currentOrganization?.organization_id;
   const { data: attendanceRecords, isLoading } = useQuery({
-    queryKey: ["attendance-records"],
+    queryKey: ["attendance-records", orgId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!orgId) return [];
+      const query = supabase
         .from("attendance_records")
         .select("*")
         .order("created_at", { ascending: false });
+      
+      const { data, error } = await query.eq("organization_id", orgId);
       if (error) throw error;
       return data;
     },
+    enabled: !!orgId,
   });
 
   // Save attendance mutation
@@ -73,6 +80,7 @@ export default function AttendanceManagement() {
       present_count: number;
       absent_count: number;
       recorded_by: string;
+      organization_id?: string;
     }) => {
       if (editingId) {
         const { error } = await supabase
@@ -81,9 +89,12 @@ export default function AttendanceManagement() {
           .eq("id", editingId);
         if (error) throw error;
       } else {
+        if (!currentOrganization?.organization_id) {
+          throw new Error('No organization selected');
+        }
         const { error } = await supabase
           .from("attendance_records")
-          .insert([data]);
+          .insert([{ ...data, organization_id: currentOrganization.organization_id }]);
         if (error) throw error;
       }
     },

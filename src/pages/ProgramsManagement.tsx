@@ -82,6 +82,9 @@ const ProgramsManagement = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProgramFormData) => {
+      if (!currentOrganization?.organization_id) {
+        throw new Error('No organization selected');
+      }
       const { error } = await supabase.from('programs').insert([{
         program_id: data.program_id || null,
         name: data.name,
@@ -90,6 +93,7 @@ const ProgramsManagement = () => {
         is_active: data.is_active,
         custom_fields: data.custom_fields as unknown as Record<string, never>[],
         show_in_navigation: data.show_in_navigation,
+        organization_id: currentOrganization.organization_id,
       }]);
       if (error) throw error;
     },

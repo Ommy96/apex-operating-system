@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,6 +66,7 @@ interface ReplacementFormProps {
 
 export function ReplacementForm({ replacement, onSuccess, onCancel }: ReplacementFormProps) {
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const [originalChildOpen, setOriginalChildOpen] = useState(false);
   const [originalChildSearch, setOriginalChildSearch] = useState("");
@@ -85,13 +87,15 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
     },
   });
 
-  // Fetch active children for selection
+  // Fetch active children for selection (filtered by organization)
   const { data: children = [] } = useQuery({
-    queryKey: ["children-for-replacement"],
+    queryKey: ["children-for-replacement", currentOrganization?.organization_id],
     queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
       const { data, error } = await supabase
         .from("children")
         .select("id, first_name, last_name, status, replacement_status")
+        .eq("organization_id", currentOrganization.organization_id)
         .eq("status", "active")
         .eq("replacement_status", "active")
         .order("first_name");
@@ -99,11 +103,16 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
       if (error) throw error;
       return data as Child[];
     },
+    enabled: !!currentOrganization?.organization_id,
   });
 
   // Create/Update replacement mutation
   const saveMutation = useMutation({
     mutationFn: async (data: ReplacementFormData) => {
+      if (!currentOrganization?.organization_id) {
+        throw new Error('No organization selected');
+      }
+      
       const replacementData = {
         ...data,
         created_by: user?.id,
@@ -118,10 +127,10 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
         
         if (error) throw error;
       } else {
-        // Create new replacement
+        // Create new replacement with organization_id
         const { error } = await supabase
           .from("replacements")
-          .insert([replacementData]);
+          .insert([{ ...replacementData, organization_id: currentOrganization.organization_id }]);
         
         if (error) throw error;
 
