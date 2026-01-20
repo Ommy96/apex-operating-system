@@ -469,7 +469,7 @@ export default function Auth() {
                 <div className="mt-4 p-4 bg-muted/30 rounded-xl text-center">
                   <p className="text-sm text-muted-foreground">
                     Want to register a new organization?{' '}
-                    <Link to="/register-organization" className="text-primary hover:underline font-medium">
+                    <Link to="/register-organization" className="text-emerald-600 hover:text-emerald-700 hover:underline font-medium">
                       Create Organization
                     </Link>
                   </p>
@@ -480,7 +480,7 @@ export default function Auth() {
         </CardContent>
         
         {/* Bottom decorative gradient */}
-        <div className="h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
       </Card>
     </div>
   );
