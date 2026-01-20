@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -465,6 +465,15 @@ export default function Auth() {
                     </div>
                   )}
                 </Button>
+
+                <div className="mt-4 p-4 bg-muted/30 rounded-xl text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Want to register a new organization?{' '}
+                    <Link to="/register-organization" className="text-primary hover:underline font-medium">
+                      Create Organization
+                    </Link>
+                  </p>
+                </div>
               </form>
             </Form>
           </div>
