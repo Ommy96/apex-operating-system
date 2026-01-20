@@ -287,59 +287,81 @@ const CustomReports = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
-                <Card key={template.id} className="hover-scale">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-base">{template.name}</CardTitle>
-                        <Badge className={getCategoryBadgeColor(template.category)}>
-                          {template.category}
-                        </Badge>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredTemplates.map((template, index) => (
+                <Card 
+                  key={template.id} 
+                  className={`${getCardStyles((index % 6) as CardVariant)} hover-scale overflow-hidden`}
+                >
+                  <CardHeader className="pb-2 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+                          <FileText className="h-5 w-5 text-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base font-semibold truncate text-foreground">
+                            {template.name}
+                          </CardTitle>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {template.fields.length} field{template.fields.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
                       </div>
-                      <Badge variant={template.is_active ? 'default' : 'secondary'}>
+                      <Badge 
+                        variant={template.is_active ? 'default' : 'secondary'}
+                        className="shrink-0 text-xs"
+                      >
                         {template.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
+                    
+                    <Badge className={`${getCategoryBadgeColor(template.category)} w-fit text-xs`}>
+                      {template.category}
+                    </Badge>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {template.description || 'No description'}
+                  
+                  <CardContent className="pt-0 space-y-4">
+                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+                      {template.description || 'No description provided'}
                     </p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      {template.fields.length} fields
-                    </p>
-                    <div className="flex gap-2">
+                    
+                    {/* Primary Action */}
+                    <Button
+                      size="sm"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium gap-2"
+                      onClick={() => handleNewReport(template)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Submit New Report
+                    </Button>
+                    
+                    {/* Secondary Actions */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
                       <Button
                         size="sm"
-                        variant="default"
-                        className="flex-1"
-                        onClick={() => handleNewReport(template)}
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        New Report
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
+                        variant="ghost"
+                        className="text-xs gap-1.5 h-8 px-2 text-muted-foreground hover:text-foreground"
                         onClick={() => handleExport(template)}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-3.5 w-3.5" />
+                        Export
                       </Button>
+                      
                       {canManageTemplates && (
-                        <>
+                        <div className="flex items-center gap-1">
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
                             onClick={() => handleEditTemplate(template)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
-                            className="text-destructive hover:bg-destructive/10"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             onClick={() => {
                               if (confirm('Delete this template? All associated reports will be deleted.')) {
                                 deleteTemplateMutation.mutate(template.id);
@@ -348,7 +370,7 @@ const CustomReports = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </>
+                        </div>
                       )}
                     </div>
                   </CardContent>
