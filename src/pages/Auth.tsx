@@ -117,11 +117,7 @@ export default function Auth() {
   };
 
   const handleGoBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/dashboard');
-    }
+    navigate('/');
   };
 
   return (
@@ -466,12 +462,19 @@ export default function Auth() {
                   )}
                 </Button>
 
-                <div className="mt-4 p-4 bg-muted/30 rounded-xl text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Want to register a new organization?{' '}
-                    <Link to="/register-organization" className="text-emerald-600 hover:text-emerald-700 hover:underline font-medium">
-                      Create Organization
-                    </Link>
+                <div className="mt-4 space-y-3">
+                  <Link to="/register-organization" className="block">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full h-12 rounded-xl border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 dark:hover:bg-emerald-950"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Register New Organization
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Want to create your own organization workspace?
                   </p>
                 </div>
               </form>
