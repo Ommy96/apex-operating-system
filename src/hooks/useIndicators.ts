@@ -39,6 +39,24 @@ export interface Indicator {
   category?: IndicatorCategory;
 }
 
+export type CreateIndicatorInput = {
+  name: string;
+  code: string;
+  description?: string | null;
+  unit: string;
+  formula_type: 'count' | 'sum' | 'average' | 'ratio' | 'percentage' | 'custom';
+  formula_config: Record<string, any>;
+  aggregation_period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  decimal_places?: number;
+  show_trend?: boolean;
+  trend_direction?: 'up_is_good' | 'down_is_good' | 'neutral';
+  category_id?: string | null;
+  is_template?: boolean;
+  template_source_id?: string | null;
+  is_active?: boolean;
+  sort_order?: number;
+};
+
 export interface IndicatorTarget {
   id: string;
   indicator_id: string;
@@ -206,12 +224,12 @@ export function useCreateIndicatorCategory() {
   const { currentOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (category: Partial<IndicatorCategory>) => {
+    mutationFn: async (category: Omit<IndicatorCategory, 'id' | 'created_at' | 'updated_at' | 'organization_id'>) => {
       const { data, error } = await supabase
         .from('indicator_categories')
         .insert([{
           ...category,
-          organization_id: currentOrganization?.organization_id,
+          organization_id: currentOrganization?.organization_id!,
         }])
         .select()
         .single();
@@ -233,12 +251,26 @@ export function useCreateIndicator() {
   const { currentOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (indicator: Partial<Indicator>) => {
+    mutationFn: async (indicator: CreateIndicatorInput) => {
       const { data, error } = await supabase
         .from('indicators')
         .insert([{
-          ...indicator,
-          organization_id: currentOrganization?.organization_id,
+          name: indicator.name,
+          code: indicator.code,
+          description: indicator.description ?? null,
+          unit: indicator.unit,
+          formula_type: indicator.formula_type,
+          formula_config: indicator.formula_config,
+          aggregation_period: indicator.aggregation_period,
+          decimal_places: indicator.decimal_places ?? 0,
+          show_trend: indicator.show_trend ?? true,
+          trend_direction: indicator.trend_direction ?? 'up_is_good',
+          category_id: indicator.category_id ?? null,
+          is_template: indicator.is_template ?? false,
+          template_source_id: indicator.template_source_id ?? null,
+          is_active: indicator.is_active ?? true,
+          sort_order: indicator.sort_order ?? 0,
+          organization_id: currentOrganization?.organization_id!,
         }])
         .select()
         .single();
