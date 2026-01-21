@@ -1030,6 +1030,307 @@ export type Database = {
           },
         ]
       }
+      indicator_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicator_targets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          indicator_id: string
+          minimum_value: number | null
+          notes: string | null
+          period_type: string
+          period_value: number
+          period_year: number
+          stretch_value: number | null
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          indicator_id: string
+          minimum_value?: number | null
+          notes?: string | null
+          period_type: string
+          period_value: number
+          period_year: number
+          stretch_value?: number | null
+          target_value: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          indicator_id?: string
+          minimum_value?: number | null
+          notes?: string | null
+          period_type?: string
+          period_value?: number
+          period_year?: number
+          stretch_value?: number | null
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_targets_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicator_templates: {
+        Row: {
+          aggregation_period: string | null
+          category: string
+          code: string
+          created_at: string
+          decimal_places: number | null
+          default_target: number | null
+          description: string | null
+          formula_config: Json
+          formula_type: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trend_direction: string | null
+          unit: string | null
+        }
+        Insert: {
+          aggregation_period?: string | null
+          category: string
+          code: string
+          created_at?: string
+          decimal_places?: number | null
+          default_target?: number | null
+          description?: string | null
+          formula_config?: Json
+          formula_type: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trend_direction?: string | null
+          unit?: string | null
+        }
+        Update: {
+          aggregation_period?: string | null
+          category?: string
+          code?: string
+          created_at?: string
+          decimal_places?: number | null
+          default_target?: number | null
+          description?: string | null
+          formula_config?: Json
+          formula_type?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trend_direction?: string | null
+          unit?: string | null
+        }
+        Relationships: []
+      }
+      indicator_values: {
+        Row: {
+          actual_value: number
+          computed_at: string | null
+          created_at: string
+          created_by: string | null
+          dimension_key: string | null
+          dimension_value: string | null
+          id: string
+          indicator_id: string
+          is_manual_override: boolean | null
+          period_end: string
+          period_start: string
+          updated_at: string
+        }
+        Insert: {
+          actual_value: number
+          computed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dimension_key?: string | null
+          dimension_value?: string | null
+          id?: string
+          indicator_id: string
+          is_manual_override?: boolean | null
+          period_end: string
+          period_start: string
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: number
+          computed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dimension_key?: string | null
+          dimension_value?: string | null
+          id?: string
+          indicator_id?: string
+          is_manual_override?: boolean | null
+          period_end?: string
+          period_start?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_values_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicators: {
+        Row: {
+          aggregation_period: string | null
+          category_id: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          decimal_places: number | null
+          description: string | null
+          formula_config: Json
+          formula_type: string
+          id: string
+          is_active: boolean | null
+          is_template: boolean | null
+          name: string
+          organization_id: string
+          show_trend: boolean | null
+          sort_order: number | null
+          template_source_id: string | null
+          trend_direction: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          aggregation_period?: string | null
+          category_id?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          decimal_places?: number | null
+          description?: string | null
+          formula_config?: Json
+          formula_type: string
+          id?: string
+          is_active?: boolean | null
+          is_template?: boolean | null
+          name: string
+          organization_id: string
+          show_trend?: boolean | null
+          sort_order?: number | null
+          template_source_id?: string | null
+          trend_direction?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aggregation_period?: string | null
+          category_id?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          decimal_places?: number | null
+          description?: string | null
+          formula_config?: Json
+          formula_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_template?: boolean | null
+          name?: string
+          organization_id?: string
+          show_trend?: boolean | null
+          sort_order?: number | null
+          template_source_id?: string | null
+          trend_direction?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicators_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "indicator_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicators_template_source_id_fkey"
+            columns: ["template_source_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kipawa_sato: {
         Row: {
           academic_level:
