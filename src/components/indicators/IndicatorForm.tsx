@@ -24,7 +24,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCreateIndicator, useUpdateIndicator, Indicator, IndicatorCategory } from '@/hooks/useIndicators';
+import { useCreateIndicator, useUpdateIndicator, Indicator, IndicatorCategory, CreateIndicatorInput } from '@/hooks/useIndicators';
 import { FormulaBuilder } from './FormulaBuilder';
 
 const indicatorSchema = z.object({
@@ -88,9 +88,22 @@ export function IndicatorForm({ open, onOpenChange, indicator, categories }: Ind
 
   const onSubmit = async (data: IndicatorFormValues) => {
     try {
-      const payload = {
-        ...data,
+      const payload: CreateIndicatorInput = {
+        name: data.name,
+        code: data.code,
+        description: data.description,
+        unit: data.unit,
+        formula_type: data.formula_type,
         formula_config: formulaConfig,
+        aggregation_period: data.aggregation_period,
+        decimal_places: data.decimal_places,
+        show_trend: data.show_trend,
+        trend_direction: data.trend_direction,
+        category_id: data.category_id,
+        is_active: true,
+        is_template: false,
+        template_source_id: null,
+        sort_order: 0,
       };
 
       if (indicator) {

@@ -54,6 +54,7 @@ import {
   Shield,
 } from "lucide-react";
 import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
+import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -64,6 +65,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Indicators", url: "/indicators", icon: BarChart3 },
   { title: "Entity Types", url: "/entity-types", icon: Layers },
   { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },

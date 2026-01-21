@@ -49,6 +49,7 @@ import DynamicProgramPage from "./pages/DynamicProgramPage";
 import CustomReports from "./pages/CustomReports";
 import EntityTypesManagement from "./pages/EntityTypesManagement";
 import EntityDataPage from "./pages/EntityDataPage";
+import Indicators from "./pages/Indicators";
 
 const queryClient = new QueryClient();
 
@@ -288,6 +289,13 @@ const App = () => (
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <ReportsAnalytics />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/indicators" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Indicators />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
