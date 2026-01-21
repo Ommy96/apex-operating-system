@@ -64,7 +64,8 @@ import { useOrganization } from "@/hooks/useOrganization";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Programs", url: "/programs-management", icon: Layers },
+  { title: "Entity Types", url: "/entity-types", icon: Layers },
+  { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
 
