@@ -314,6 +314,7 @@ export type Database = {
           created_at: string
           id: string
           month: string
+          organization_id: string | null
           present_count: number
           program_id: string
           recorded_by: string | null
@@ -325,6 +326,7 @@ export type Database = {
           created_at?: string
           id?: string
           month: string
+          organization_id?: string | null
           present_count?: number
           program_id: string
           recorded_by?: string | null
@@ -336,6 +338,7 @@ export type Database = {
           created_at?: string
           id?: string
           month?: string
+          organization_id?: string | null
           present_count?: number
           program_id?: string
           recorded_by?: string | null
@@ -1731,6 +1734,7 @@ export type Database = {
             | null
           new_child_school: string | null
           notes: string | null
+          organization_id: string | null
           original_child_id: string
           reason: string | null
           replacement_date: string
@@ -1749,6 +1753,7 @@ export type Database = {
             | null
           new_child_school?: string | null
           notes?: string | null
+          organization_id?: string | null
           original_child_id: string
           reason?: string | null
           replacement_date?: string
@@ -1767,6 +1772,7 @@ export type Database = {
             | null
           new_child_school?: string | null
           notes?: string | null
+          organization_id?: string | null
           original_child_id?: string
           reason?: string | null
           replacement_date?: string
