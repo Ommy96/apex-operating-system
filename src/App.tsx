@@ -47,6 +47,8 @@ import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
 import CustomReports from "./pages/CustomReports";
+import EntityTypesManagement from "./pages/EntityTypesManagement";
+import EntityDataPage from "./pages/EntityDataPage";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +85,20 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <SponsorsManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/entity-types" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <EntityTypesManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/entities/:slug" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <EntityDataPage />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
