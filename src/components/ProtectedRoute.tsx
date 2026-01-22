@@ -26,6 +26,16 @@ export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
     return <Navigate to="/auth" replace />;
   }
 
+  // Super admin is a platform-level actor and may not belong to any org.
+  // If no org context is selected, keep them on the system admin area rather
+  // than rendering org-scoped pages that expect an organization_id.
+  if (superAdmin && !currentOrganization) {
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/admin/infera') {
+      return <Navigate to="/admin/infera" replace />;
+    }
+  }
+
   // If we removed the default org assignment, users may not have an org yet.
   // Super admin can still proceed (they can switch into orgs), others must onboard.
   if (!superAdmin && !currentOrganization) {
