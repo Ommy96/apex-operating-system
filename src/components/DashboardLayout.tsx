@@ -81,12 +81,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="my-2" />
                   {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate('/settings')} className="p-3 rounded-xl hover:bg-accent/10 transition-colors hover-lift">
+                    <DropdownMenuItem
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        navigate('/settings');
+                      }}
+                      className="p-3 rounded-xl hover:bg-accent/10 transition-colors hover-lift"
+                    >
                       <Settings className="h-4 w-4 mr-3 text-accent" />
                       <span className="font-medium">Settings</span>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl hover:bg-destructive/10 transition-colors text-destructive hover-lift">
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      void handleLogout();
+                    }}
+                    className="p-3 rounded-xl hover:bg-destructive/10 transition-colors text-destructive hover-lift"
+                  >
                     <LogOut className="h-4 w-4 mr-3" />
                     <span className="font-medium">Logout</span>
                   </DropdownMenuItem>
