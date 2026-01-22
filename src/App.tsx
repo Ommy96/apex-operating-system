@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import RegisterOrganization from "./pages/RegisterOrganization";
 import ResetPassword from "./pages/ResetPassword";
+import SuperAdminLogin from "./pages/SuperAdminLogin";
 import Dashboard from "./pages/Dashboard";
 import Children from "./pages/Children";
 import ChildProfile from "./pages/ChildProfile";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/register-organization" element={<RegisterOrganization />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/super-admin" element={<SuperAdminLogin />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout>
