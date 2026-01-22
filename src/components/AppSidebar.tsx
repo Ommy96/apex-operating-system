@@ -426,14 +426,6 @@ export function AppSidebar() {
                       onClick={handleNavClick} 
                     />
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <MenuItem 
-                      item={{ title: "Cross-Org Dashboard", url: "/admin/cross-org", icon: Globe }}
-                      isCollapsed={isCollapsed} 
-                      isActive={isActive} 
-                      onClick={handleNavClick} 
-                    />
-                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
