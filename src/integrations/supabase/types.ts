@@ -248,6 +248,59 @@ export type Database = {
           },
         ]
       }
+      api_usage_logs: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          organization_id: string | null
+          request_size_bytes: number | null
+          response_size_bytes: number | null
+          response_time_ms: number | null
+          status_code: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          organization_id?: string | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          organization_id?: string | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_requests: {
         Row: {
           approved_at: string | null
@@ -911,6 +964,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          flag_key: string
+          flag_name: string
+          id: string
+          is_enabled: boolean | null
+          rollout_percentage: number | null
+          target_organizations: string[] | null
+          target_tiers: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          flag_key: string
+          flag_name: string
+          id?: string
+          is_enabled?: boolean | null
+          rollout_percentage?: number | null
+          target_organizations?: string[] | null
+          target_tiers?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          flag_key?: string
+          flag_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          rollout_percentage?: number | null
+          target_organizations?: string[] | null
+          target_tiers?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       feeding_program: {
         Row: {
@@ -1666,6 +1758,7 @@ export type Database = {
           created_at: string
           description: string | null
           email: string | null
+          features_enabled: Json | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -1673,7 +1766,17 @@ export type Database = {
           phone: string | null
           settings: Json | null
           slug: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          suspended_at: string | null
+          suspended_reason: string | null
+          trial_ends_at: string | null
           updated_at: string
+          usage_stats: Json | null
           website: string | null
         }
         Insert: {
@@ -1682,6 +1785,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          features_enabled?: Json | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -1689,7 +1793,17 @@ export type Database = {
           phone?: string | null
           settings?: Json | null
           slug: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
+          usage_stats?: Json | null
           website?: string | null
         }
         Update: {
@@ -1698,6 +1812,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          features_enabled?: Json | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -1705,8 +1820,60 @@ export type Database = {
           phone?: string | null
           settings?: Json | null
           slug?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
+          usage_stats?: Json | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      platform_announcements: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          starts_at: string
+          target_audience: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          starts_at?: string
+          target_audience?: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          starts_at?: string
+          target_audience?: string
+          title?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2503,6 +2670,141 @@ export type Database = {
           },
         ]
       }
+      support_ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          is_internal: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_internal?: boolean | null
+          message: string
+          ticket_id: string
+          user_id?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          is_internal?: boolean | null
+          message?: string
+          ticket_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          organization_id: string | null
+          priority: string
+          resolution: string | null
+          resolved_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_health_logs: {
+        Row: {
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          organization_id: string | null
+          recorded_at: string
+          unit: string | null
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value: number
+          organization_id?: string | null
+          recorded_at?: string
+          unit?: string | null
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          organization_id?: string | null
+          recorded_at?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_health_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_records: {
         Row: {
           child_id: string
@@ -2633,6 +2935,10 @@ export type Database = {
     }
     Functions: {
       auto_approve_request: { Args: { request_id: string }; Returns: boolean }
+      check_org_usage_limit: {
+        Args: { _limit_type: string; _org_id: string }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           action_type_param: string
@@ -2646,6 +2952,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: string
       }
+      get_org_subscription: { Args: { _org_id: string }; Returns: Json }
       get_user_current_organization: {
         Args: { _user_id: string }
         Returns: {
@@ -2667,6 +2974,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean

@@ -420,6 +420,14 @@ export function AppSidebar() {
                 <SidebarMenu className="space-y-1">
                   <SidebarMenuItem>
                     <MenuItem 
+                      item={{ title: "Infera Admin", url: "/admin/infera", icon: Shield }}
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <MenuItem 
                       item={{ title: "Cross-Org Dashboard", url: "/admin/cross-org", icon: Globe }}
                       isCollapsed={isCollapsed} 
                       isActive={isActive} 
