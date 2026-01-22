@@ -44,6 +44,7 @@ import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { SuperAdminRoute } from "./components/SuperAdminRoute";
 import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
@@ -316,11 +317,11 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/admin/infera" element={
-              <ProtectedRoute requireRole="admin">
+              <SuperAdminRoute>
                 <DashboardLayout>
                   <InferaAdminDashboard />
                 </DashboardLayout>
-              </ProtectedRoute>
+              </SuperAdminRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
