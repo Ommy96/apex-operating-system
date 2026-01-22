@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSystemStats } from '@/hooks/useSystemAdmin';
 import { PageHeroHeader } from '@/components/PageHeroHeader';
 import { StatsCard } from '@/components/StatsCard';
+import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, 
   Users, 
@@ -39,17 +40,19 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function InferaAdminDashboard() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
   const { data: stats, isLoading } = useSystemStats();
   const [activeTab, setActiveTab] = useState('overview');
 
-  if (!isAdmin) {
+  const isSuperAdminUser = isSuperAdmin(user?.email);
+
+  if (!isSuperAdminUser) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center space-y-4">
           <Shield className="h-16 w-16 text-muted-foreground mx-auto" />
           <h2 className="text-xl font-semibold">Access Restricted</h2>
-          <p className="text-muted-foreground">This dashboard is only available to Infera administrators.</p>
+          <p className="text-muted-foreground">This dashboard is only available to the Infera super administrator.</p>
         </div>
       </div>
     );
