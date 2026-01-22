@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, User, LogOut, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut, isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -29,6 +31,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Extract user name from metadata or email
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const orgName = currentOrganization?.organization_name || 'No organization selected';
 
   return (
     <SidebarProvider>
@@ -42,7 +45,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <SidebarTrigger className="p-2 hover:bg-accent/10 rounded-xl transition-colors hover-lift flex-shrink-0" />
               <div className="min-w-0 hidden sm:block">
                 <h1 className="text-base md:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                  Heart to Heart Organization
+                  {orgName}
                 </h1>
                 <p className="text-xs md:text-sm text-muted-foreground font-medium truncate">
                   Management System
