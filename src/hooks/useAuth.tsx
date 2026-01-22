@@ -129,15 +129,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           // Fetch user profile to get role
-          setTimeout(async () => {
-            const role = await fetchUserRole(session.user.id);
-            setUserRole(role);
+          setTimeout(() => {
+            fetchUserRole(session.user!.id)
+              .then((role) => setUserRole(role))
+              .catch(() => setUserRole('staff'));
           }, 0);
         } else {
           setUserRole(null);
@@ -224,13 +225,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(roleChangeChannel);
       setRoleChangeChannel(null);
     }
-    
-    await supabase.auth.signOut();
-    setUserRole(null);
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out.",
-    });
+
+    try {
+      // Use local scope to ensure sign-out works even if the network request fails.
+      await supabase.auth.signOut({ scope: 'local' });
+    } finally {
+      // Force local UI state reset immediately (onAuthStateChange should also fire).
+      setSession(null);
+      setUser(null);
+      setUserRole(null);
+      setLoading(false);
+
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    }
   };
 
   const isAdmin = userRole === 'admin';
