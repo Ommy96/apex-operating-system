@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
+import { isSuperAdmin } from '@/lib/superAdmin';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,8 +11,10 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
   const { user, loading, userRole } = useAuth();
+  const { currentOrganization, isLoading: orgLoading } = useOrganization();
+  const superAdmin = isSuperAdmin(user?.email);
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -20,6 +24,17 @@ export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // If we removed the default org assignment, users may not have an org yet.
+  // Super admin can still proceed (they can switch into orgs), others must onboard.
+  if (!superAdmin && !currentOrganization) {
+    return <Navigate to="/register-organization" replace />;
+  }
+
+  // Super admin bypasses org-role checks (their platform access is based on email).
+  if (superAdmin) {
+    return <>{children}</>;
   }
 
   if (requireRole === 'admin' && userRole !== 'admin') {

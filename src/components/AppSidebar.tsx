@@ -233,6 +233,8 @@ export function AppSidebar() {
     await signOut();
   };
 
+  const superAdmin = isSuperAdmin(user?.email);
+
   return (
     <TooltipProvider>
       <Sidebar 
@@ -384,7 +386,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           {/* System - Only for Admin/Management */}
-          {(isAdmin || isManagement) && (
+          {(isAdmin || isManagement || superAdmin) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
