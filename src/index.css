@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    /* Core Colors - Ufanisi Theme (Emerald/Teal) */
+    /* Core Colors - Modern Material Design with Deep Blue & Cyan */
     --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 215 25% 15%;
 
-    /* Primary: Emerald (matches landing page primary CTAs) */
-    --primary: 160 84% 39%;
+    /* Primary: Deep Blue/Navy - Bold and Professional */
+    --primary: 215 28% 17%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 160 84% 46%;
-    --primary-dark: 160 84% 32%;
+    --primary-light: 215 28% 27%;
+    --primary-dark: 215 28% 12%;
 
-    /* Secondary: Cool neutral surface */
+    /* Secondary: Clean Neutral Gray */
     --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary-foreground: 215 25% 15%;
     --secondary-light: 220 14% 98%;
     --secondary-dark: 220 14% 94%;
 
-    /* Accent: Teal (pairs with emerald gradients on landing) */
-    --accent: 172 66% 50%;
-    --accent-foreground: 222 47% 11%;
-    --accent-light: 172 66% 58%;
-    --accent-dark: 172 66% 42%;
+    /* Accent: Vibrant Cyan - Bold and Energetic */
+    --accent: 188 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 188 95% 63%;
+    --accent-dark: 188 95% 43%;
 
     /* Neutral grays */
     --muted: 220 13% 91%;
@@ -51,17 +51,17 @@
     /* UI Elements */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 160 84% 39%;
+    --ring: 188 95% 53%;
 
     --radius: 1rem;
 
     /* Bold Modern Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(172 66% 50%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(215 28% 17%) 0%, hsl(215 28% 12%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(220 14% 96%) 0%, hsl(220 14% 94%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(172 66% 50%) 0%, hsl(172 66% 58%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(160 84% 39%) 55%, hsl(172 66% 50%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(188 95% 53%) 0%, hsl(188 85% 66%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(215 28% 17%) 0%, hsl(188 95% 53%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(172 66% 50%) 0%, hsl(172 66% 42%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(188 95% 53%) 0%, hsl(188 95% 43%) 100%);
     
     /* Card Gradient Variants */
     --gradient-card-blue: linear-gradient(135deg, hsl(215 85% 97%) 0%, hsl(215 85% 95%) 100%);
@@ -95,43 +95,43 @@
     --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Sidebar - Deep Blue Theme */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 160 84% 39%;
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 188 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 40% 16%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 222 40% 14%;
-    --sidebar-ring: 160 84% 39%;
+    --sidebar-accent: 215 28% 22%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 215 28% 20%;
+    --sidebar-ring: 188 95% 53%;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 20% 98%;
+    --background: 215 28% 17%;
+    --foreground: 220 14% 96%;
 
-    --card: 222 40% 14%;
-    --card-foreground: 210 20% 98%;
+    --card: 215 28% 20%;
+    --card-foreground: 220 14% 96%;
 
-    --popover: 222 40% 14%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 215 28% 20%;
+    --popover-foreground: 220 14% 96%;
 
-    --primary: 160 84% 39%;
+    --primary: 188 95% 53%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 160 84% 46%;
-    --primary-dark: 160 84% 32%;
+    --primary-light: 188 95% 63%;
+    --primary-dark: 188 95% 43%;
 
-    --secondary: 222 40% 16%;
-    --secondary-foreground: 210 20% 98%;
-    --secondary-light: 222 40% 20%;
-    --secondary-dark: 222 47% 11%;
+    --secondary: 215 28% 22%;
+    --secondary-foreground: 220 14% 96%;
+    --secondary-light: 215 28% 27%;
+    --secondary-dark: 215 28% 17%;
 
-    --accent: 172 66% 50%;
-    --accent-foreground: 222 47% 11%;
-    --accent-light: 172 66% 58%;
-    --accent-dark: 172 66% 42%;
+    --accent: 188 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 188 95% 63%;
+    --accent-dark: 188 95% 43%;
 
-    --muted: 222 40% 16%;
-    --muted-foreground: 220 9% 70%;
+    --muted: 215 28% 22%;
+    --muted-foreground: 220 9% 65%;
 
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
@@ -142,18 +142,18 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 40% 20%;
-    --input: 222 40% 20%;
-    --ring: 160 84% 39%;
+    --border: 215 28% 25%;
+    --input: 215 28% 25%;
+    --ring: 188 95% 53%;
 
-    --sidebar-background: 222 47% 9%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 160 84% 39%;
+    --sidebar-background: 215 28% 15%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 188 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 40% 14%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 222 40% 12%;
-    --sidebar-ring: 160 84% 39%;
+    --sidebar-accent: 215 28% 20%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 215 28% 18%;
+    --sidebar-ring: 188 95% 53%;
   }
 }
 
