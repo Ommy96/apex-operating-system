@@ -26,7 +26,7 @@ import {
   Activity
 } from 'lucide-react';
 
-interface TrendData {
+export interface TrendData {
   month: string;
   education: number;
   feeding: number;
@@ -41,32 +41,11 @@ interface DashboardTrendChartsProps {
     kipawaProgram: number;
     empowermentProgram: number;
   };
+  trendData?: TrendData[];
   isLoading?: boolean;
 }
 
-// Generate realistic trend data based on current stats
-const generateTrendData = (currentStats?: DashboardTrendChartsProps['stats']): TrendData[] => {
-  const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const baseValues = {
-    education: currentStats?.educationProgram || 150,
-    feeding: currentStats?.feedingProgram || 80,
-    kipawa: currentStats?.kipawaProgram || 60,
-    empowerment: currentStats?.empowermentProgram || 40
-  };
-
-  return months.map((month, index) => {
-    const growthFactor = 0.85 + (index * 0.03); // Gradual growth over time
-    const variance = () => 0.9 + Math.random() * 0.2; // 10% variance
-    
-    return {
-      month,
-      education: Math.round(baseValues.education * growthFactor * variance()),
-      feeding: Math.round(baseValues.feeding * growthFactor * variance()),
-      kipawa: Math.round(baseValues.kipawa * growthFactor * variance()),
-      empowerment: Math.round(baseValues.empowerment * growthFactor * variance())
-    };
-  });
-};
+const emptyTrendData: TrendData[] = [];
 
 // Custom animated tooltip
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -495,16 +474,31 @@ const ProgramDistributionChart = ({ stats, isLoading }: DashboardTrendChartsProp
   );
 };
 
-export function DashboardTrendCharts({ stats, isLoading }: DashboardTrendChartsProps) {
-  const trendData = useMemo(() => generateTrendData(stats), [stats]);
+export function DashboardTrendCharts({ stats, trendData: trendDataProp, isLoading }: DashboardTrendChartsProps) {
+  const trendData = useMemo(() => trendDataProp ?? emptyTrendData, [trendDataProp]);
   
   // Generate sparkline data for each program
-  const sparklineData = useMemo(() => ({
-    education: trendData.map(d => ({ value: d.education })),
-    feeding: trendData.map(d => ({ value: d.feeding })),
-    kipawa: trendData.map(d => ({ value: d.kipawa })),
-    empowerment: trendData.map(d => ({ value: d.empowerment })),
-  }), [trendData]);
+  const sparklineData = useMemo(() => {
+    // If we don't have time series yet, fall back to a flat line using current totals
+    const fallback = [
+      {
+        month: 'Now',
+        education: stats?.educationProgram ?? 0,
+        feeding: stats?.feedingProgram ?? 0,
+        kipawa: stats?.kipawaProgram ?? 0,
+        empowerment: stats?.empowermentProgram ?? 0,
+      },
+    ] satisfies TrendData[];
+
+    const source = trendData.length > 0 ? trendData : fallback;
+    return {
+      education: source.map(d => ({ value: d.education })),
+      feeding: source.map(d => ({ value: d.feeding })),
+      kipawa: source.map(d => ({ value: d.kipawa })),
+      empowerment: source.map(d => ({ value: d.empowerment })),
+      source,
+    };
+  }, [trendData, stats]);
 
   // Calculate month-over-month change
   const calculateChange = (data: { value: number }[]) => {
@@ -553,11 +547,11 @@ export function DashboardTrendCharts({ stats, isLoading }: DashboardTrendChartsP
       </div>
 
       {/* Main Trend Chart */}
-      <ProgramTrendChart data={trendData} isLoading={isLoading} />
+      <ProgramTrendChart data={sparklineData.source} isLoading={isLoading} />
 
       {/* Bottom Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ProgramComparisonChart data={trendData} isLoading={isLoading} />
+        <ProgramComparisonChart data={sparklineData.source} isLoading={isLoading} />
         <ProgramDistributionChart stats={stats} isLoading={isLoading} />
       </div>
     </div>

@@ -26,7 +26,8 @@ import { LiveUserPresence } from "@/components/LiveUserPresence";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { RealTimeIndicator } from "@/components/RealTimeIndicator";
 import { useToast } from "@/hooks/use-toast";
-import { DashboardTrendCharts } from "@/components/DashboardTrendCharts";
+import { DashboardTrendCharts, type TrendData } from "@/components/DashboardTrendCharts";
+import { format, startOfMonth, subMonths } from "date-fns";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -70,6 +71,71 @@ const Dashboard = () => {
     },
     enabled: !!organizationId,
     refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const { data: dashboardTrendData, isLoading: trendsLoading } = useQuery({
+    queryKey: ['dashboard-trends', organizationId],
+    queryFn: async (): Promise<TrendData[]> => {
+      if (!organizationId) return [];
+
+      const months = Array.from({ length: 6 }, (_, i) => startOfMonth(subMonths(new Date(), 5 - i)));
+      const monthLabels = months.map(d => format(d, 'MMM'));
+      const monthIndex = new Map(monthLabels.map((m, idx) => [m, idx] as const));
+
+      const startDateIso = months[0].toISOString();
+
+      const [educationRes, feedingRes, kipawaRes, empowermentRes] = await Promise.all([
+        supabase
+          .from('children')
+          .select('enrollment_date')
+          .eq('organization_id', organizationId)
+          .gte('enrollment_date', startDateIso),
+        supabase
+          .from('feeding_program')
+          .select('created_at')
+          .eq('organization_id', organizationId)
+          .gte('created_at', startDateIso),
+        supabase
+          .from('kipawa_sato')
+          .select('created_at')
+          .eq('organization_id', organizationId)
+          .gte('created_at', startDateIso),
+        supabase
+          .from('self_empowerment')
+          .select('created_at')
+          .eq('organization_id', organizationId)
+          .gte('created_at', startDateIso),
+      ]);
+
+      const safeRows = <T,>(res: { data: T[] | null; error: any }) => (res.error ? [] : (res.data ?? []));
+      const countByMonth = (rows: any[], dateKey: string) => {
+        const counts = new Array(6).fill(0);
+        for (const r of rows) {
+          const raw = r?.[dateKey];
+          if (!raw) continue;
+          const label = format(new Date(raw), 'MMM');
+          const idx = monthIndex.get(label);
+          if (idx === undefined) continue;
+          counts[idx] += 1;
+        }
+        return counts;
+      };
+
+      const educationCounts = countByMonth(safeRows(educationRes), 'enrollment_date');
+      const feedingCounts = countByMonth(safeRows(feedingRes), 'created_at');
+      const kipawaCounts = countByMonth(safeRows(kipawaRes), 'created_at');
+      const empowermentCounts = countByMonth(safeRows(empowermentRes), 'created_at');
+
+      return monthLabels.map((month, i) => ({
+        month,
+        education: educationCounts[i] ?? 0,
+        feeding: feedingCounts[i] ?? 0,
+        kipawa: kipawaCounts[i] ?? 0,
+        empowerment: empowermentCounts[i] ?? 0,
+      }));
+    },
+    enabled: !!organizationId,
+    refetchInterval: 30000,
   });
 
 
@@ -315,7 +381,8 @@ const Dashboard = () => {
             kipawaProgram: dashboardStats?.kipawaProgram || 0,
             empowermentProgram: dashboardStats?.empowermentProgram || 0
           }}
-          isLoading={statsLoading}
+          trendData={dashboardTrendData}
+          isLoading={statsLoading || trendsLoading}
         />
       </div>
 
