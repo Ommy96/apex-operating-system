@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { isSuperAdmin } from '@/lib/superAdmin';
 
 // Types
 export interface OrganizationWithSubscription {
@@ -89,7 +90,8 @@ export interface SystemStats {
 
 // Hook for fetching all organizations with subscription details
 export function useAllOrganizations() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-all-organizations'],
@@ -128,7 +130,7 @@ export function useAllOrganizations() {
 
       return orgsWithCounts;
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
     refetchInterval: 60000,
   });
 }
@@ -219,7 +221,8 @@ export function useOrganizationManagement() {
 
 // Hook for fetching all users
 export function useAllUsers() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-all-users'],
@@ -259,14 +262,15 @@ export function useAllUsers() {
 
       return usersWithOrgs;
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
     refetchInterval: 60000,
   });
 }
 
 // Hook for support tickets
 export function useSupportTickets() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-support-tickets'],
@@ -304,7 +308,7 @@ export function useSupportTickets() {
 
       return ticketsWithUsers as SupportTicket[];
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
   });
 }
 
@@ -337,7 +341,8 @@ export function useTicketManagement() {
 
 // Hook for feature flags
 export function useFeatureFlags() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-feature-flags'],
@@ -350,7 +355,7 @@ export function useFeatureFlags() {
       if (error) throw error;
       return data as FeatureFlag[];
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
   });
 }
 
@@ -392,7 +397,8 @@ export function useFeatureFlagManagement() {
 
 // Hook for platform announcements
 export function usePlatformAnnouncements() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-announcements'],
@@ -405,7 +411,7 @@ export function usePlatformAnnouncements() {
       if (error) throw error;
       return data as PlatformAnnouncement[];
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
   });
 }
 
@@ -446,7 +452,8 @@ export function useAnnouncementManagement() {
 
 // Hook for system statistics
 export function useSystemStats() {
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const isSuperAdminUser = isSuperAdmin(user?.email);
 
   return useQuery({
     queryKey: ['admin-system-stats'],
@@ -493,7 +500,7 @@ export function useSystemStats() {
         revenueByTier: Object.entries(tierCounts).map(([tier, count]) => ({ tier, count })),
       } as SystemStats;
     },
-    enabled: isAdmin,
+    enabled: isSuperAdminUser,
     refetchInterval: 30000,
   });
 }

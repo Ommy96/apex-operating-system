@@ -62,6 +62,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
+import { isSuperAdmin } from "@/lib/superAdmin";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -180,7 +181,7 @@ function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const { signOut, isAdmin, isManagement, isStaff } = useAuth();
+  const { signOut, isAdmin, isManagement, isStaff, user } = useAuth();
   const { currentOrganization } = useOrganization();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -407,8 +408,8 @@ export function AppSidebar() {
             </SidebarGroup>
           )}
 
-          {/* Super Admin - Only for Admin */}
-          {isAdmin && (
+          {/* Super Admin - Only for specific super admin user */}
+          {isSuperAdmin(user?.email) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2 flex items-center gap-1">
