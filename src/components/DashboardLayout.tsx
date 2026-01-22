@@ -27,6 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = async () => {
     await signOut();
+    navigate('/auth', { replace: true });
   };
 
   // Extract user name from metadata or email
@@ -82,10 +83,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <DropdownMenuSeparator className="my-2" />
                   {isAdmin && (
                     <DropdownMenuItem
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        navigate('/settings');
-                      }}
+                      onClick={() => navigate('/settings')}
                       className="p-3 rounded-xl hover:bg-accent/10 transition-colors hover-lift"
                     >
                       <Settings className="h-4 w-4 mr-3 text-accent" />
@@ -93,10 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      void handleLogout();
-                    }}
+                    onClick={() => void handleLogout()}
                     className="p-3 rounded-xl hover:bg-destructive/10 transition-colors text-destructive hover-lift"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
