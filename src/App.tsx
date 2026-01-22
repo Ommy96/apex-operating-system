@@ -31,6 +31,7 @@ import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 
 import OrganizationSettings from "./pages/OrganizationSettings";
 import AdminCrossOrgDashboard from "./pages/AdminCrossOrgDashboard";
+import InferaAdminDashboard from "./pages/InferaAdminDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
 import FeedingProgram from "./pages/FeedingProgram";
 import KipawaSato from "./pages/KipawaSato";
@@ -317,6 +318,13 @@ const App = () => (
               <ProtectedRoute requireRole="admin">
                 <DashboardLayout>
                   <AdminCrossOrgDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/infera" element={
+              <ProtectedRoute requireRole="admin">
+                <DashboardLayout>
+                  <InferaAdminDashboard />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
