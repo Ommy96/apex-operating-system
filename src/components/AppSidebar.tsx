@@ -187,6 +187,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+  const isHeartToHeart = currentOrganization?.organization_slug === 'heart-to-heart';
   const [educationOpen, setEducationOpen] = useState(
     educationSubItems.some(item => currentPath === item.url)
   );
@@ -234,6 +235,9 @@ export function AppSidebar() {
   };
 
   const superAdmin = isSuperAdmin(user?.email);
+  const visibleMainMenuItems = isHeartToHeart
+    ? mainMenuItems.filter((i) => i.url === '/dashboard')
+    : mainMenuItems;
 
   return (
     <TooltipProvider>
@@ -274,7 +278,7 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
-                {mainMenuItems.map((item) => (
+                {visibleMainMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <MenuItem 
                       item={item} 
@@ -289,6 +293,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           {/* Programs */}
+          {!isHeartToHeart && (
           <SidebarGroup className="mt-6">
             {!isCollapsed && (
               <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -361,8 +366,10 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          )}
 
           {/* Reports */}
+          {!isHeartToHeart && (
           <SidebarGroup className="mt-6">
             {!isCollapsed && (
               <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -384,9 +391,10 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          )}
 
           {/* System - Only for Admin/Management */}
-          {(isAdmin || isManagement || superAdmin) && (
+          {!isHeartToHeart && (isAdmin || isManagement || superAdmin) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -411,7 +419,7 @@ export function AppSidebar() {
           )}
 
           {/* Super Admin - Only for specific super admin user */}
-          {isSuperAdmin(user?.email) && (
+          {!isHeartToHeart && isSuperAdmin(user?.email) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2 flex items-center gap-1">
