@@ -30,9 +30,10 @@ interface HomeVisitReportFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   initialData?: any;
+  preselectedChildId?: string;
 }
 
-export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVisitReportFormProps) {
+export function HomeVisitReportForm({ onSuccess, onCancel, initialData, preselectedChildId }: HomeVisitReportFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
@@ -44,7 +45,7 @@ export function HomeVisitReportForm({ onSuccess, onCancel, initialData }: HomeVi
     defaultValues: {
       staff: initialData?.staff || "",
       visit_date: initialData?.visit_date || "",
-      student_id: initialData?.student_id || "",
+      student_id: initialData?.student_id || preselectedChildId || "",
       location: initialData?.location || "",
       reason_for_visit: initialData?.reason_for_visit || "",
       observation_findings: initialData?.observation_findings || "",
