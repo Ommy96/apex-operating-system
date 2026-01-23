@@ -580,6 +580,8 @@ export type Database = {
           guardian_name: string | null
           guardian_phone: string | null
           id: string
+          inactive_date: string | null
+          inactive_reason: string | null
           institution_name: string | null
           last_name: string
           medical_notes: string | null
@@ -588,6 +590,9 @@ export type Database = {
             | Database["public"]["Enums"]["parental_status_type"]
             | null
           photo_url: string | null
+          receives_hbc: boolean | null
+          receives_shopping: boolean | null
+          receives_transport: boolean | null
           relation: string | null
           replacement_status: string | null
           residence: Database["public"]["Enums"]["residence_type"] | null
@@ -617,6 +622,8 @@ export type Database = {
           guardian_name?: string | null
           guardian_phone?: string | null
           id?: string
+          inactive_date?: string | null
+          inactive_reason?: string | null
           institution_name?: string | null
           last_name: string
           medical_notes?: string | null
@@ -625,6 +632,9 @@ export type Database = {
             | Database["public"]["Enums"]["parental_status_type"]
             | null
           photo_url?: string | null
+          receives_hbc?: boolean | null
+          receives_shopping?: boolean | null
+          receives_transport?: boolean | null
           relation?: string | null
           replacement_status?: string | null
           residence?: Database["public"]["Enums"]["residence_type"] | null
@@ -654,6 +664,8 @@ export type Database = {
           guardian_name?: string | null
           guardian_phone?: string | null
           id?: string
+          inactive_date?: string | null
+          inactive_reason?: string | null
           institution_name?: string | null
           last_name?: string
           medical_notes?: string | null
@@ -662,6 +674,9 @@ export type Database = {
             | Database["public"]["Enums"]["parental_status_type"]
             | null
           photo_url?: string | null
+          receives_hbc?: boolean | null
+          receives_shopping?: boolean | null
+          receives_transport?: boolean | null
           relation?: string | null
           replacement_status?: string | null
           residence?: Database["public"]["Enums"]["residence_type"] | null

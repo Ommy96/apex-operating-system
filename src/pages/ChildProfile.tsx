@@ -17,7 +17,10 @@ import {
   Stethoscope,
   ClipboardList,
   FolderOpen,
-  ExternalLink
+  ExternalLink,
+  Bus,
+  ShoppingCart,
+  HeartHandshake
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +37,9 @@ import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
 import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { convertGoogleDriveUrl } from '@/lib/imageUtils';
+import { StatusReplacementCard } from '@/components/child-profile/StatusReplacementCard';
+import { ServicesTab } from '@/components/child-profile/ServicesTab';
+import { HomeVisitsTab } from '@/components/child-profile/HomeVisitsTab';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -43,6 +49,7 @@ export default function ChildProfile() {
   const [programs, setPrograms] = useState<any[]>([]);
   const [visits, setVisits] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [replacement, setReplacement] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -91,6 +98,15 @@ export default function ChildProfile() {
 
       if (documentsError) throw documentsError;
       setDocuments(documentsData || []);
+
+      // Fetch replacement data if this child has been replaced
+      const { data: replacementData } = await supabase
+        .from('replacements')
+        .select('*')
+        .eq('original_child_id', id)
+        .maybeSingle();
+      
+      setReplacement(replacementData);
 
     } catch (error) {
       console.error('Error fetching child data:', error);
@@ -474,6 +490,14 @@ export default function ChildProfile() {
               </CardContent>
             </Card>
           )}
+
+          {/* Status & Replacement Card */}
+          <StatusReplacementCard 
+            child={child} 
+            replacement={replacement} 
+            isAdmin={isAdmin} 
+            onRefresh={fetchChildData} 
+          />
         </div>
 
         {/* Right Column - Tabs Content */}
@@ -484,9 +508,17 @@ export default function ChildProfile() {
                 <GraduationCap className="h-4 w-4" />
                 Programs
               </TabsTrigger>
+              <TabsTrigger value="services" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <HeartHandshake className="h-4 w-4" />
+                Services
+              </TabsTrigger>
+              <TabsTrigger value="home-visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <Home className="h-4 w-4" />
+                Home Visits
+              </TabsTrigger>
               <TabsTrigger value="visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <ClipboardList className="h-4 w-4" />
-                Visit Reports
+                Other Reports
               </TabsTrigger>
               <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <FolderOpen className="h-4 w-4" />
@@ -581,12 +613,22 @@ export default function ChildProfile() {
               )}
             </TabsContent>
 
-            {/* Visits Tab */}
+            {/* Services Tab */}
+            <TabsContent value="services" className="space-y-4">
+              <ServicesTab child={child} isAdmin={isAdmin} onRefresh={fetchChildData} />
+            </TabsContent>
+
+            {/* Home Visits Tab */}
+            <TabsContent value="home-visits" className="space-y-4">
+              <HomeVisitsTab childId={id!} isAdmin={isAdmin} />
+            </TabsContent>
+
+            {/* Other Visits Tab */}
             <TabsContent value="visits" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h3 className="text-xl font-bold">Visit Reports</h3>
-                  <p className="text-muted-foreground text-sm">Home, school, and medical visits</p>
+                  <h3 className="text-xl font-bold">Other Visit Reports</h3>
+                  <p className="text-muted-foreground text-sm">School and medical visit report links</p>
                 </div>
                 {isAdmin && (
                   <Dialog>
@@ -607,17 +649,6 @@ export default function ChildProfile() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Home Visit Report */}
-                <ReportCard 
-                  title="Home Visit Report"
-                  icon={Home}
-                  colorClass="from-blue-500/10 to-blue-600/10 border-blue-200"
-                  iconColorClass="text-blue-500 bg-blue-500/10"
-                  document={documents.find(doc => doc.category === 'home_visit_report')}
-                  onDelete={handleDeleteDocument}
-                  isAdmin={isAdmin}
-                />
-                
                 {/* School Visit Report */}
                 <ReportCard 
                   title="School Visit Report"
