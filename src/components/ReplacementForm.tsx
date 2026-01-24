@@ -60,11 +60,12 @@ interface Replacement {
 
 interface ReplacementFormProps {
   replacement?: Replacement | null;
+  preselectedChildId?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function ReplacementForm({ replacement, onSuccess, onCancel }: ReplacementFormProps) {
+export function ReplacementForm({ replacement, preselectedChildId, onSuccess, onCancel }: ReplacementFormProps) {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
@@ -74,7 +75,7 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
   const form = useForm<ReplacementFormData>({
     resolver: zodResolver(replacementSchema),
     defaultValues: {
-      original_child_id: replacement?.original_child_id || "",
+      original_child_id: replacement?.original_child_id || preselectedChildId || "",
       new_child_full_name: replacement?.new_child_full_name || "",
       new_child_gender: replacement?.new_child_gender as any || undefined,
       new_child_location: replacement?.new_child_location as any || undefined,
@@ -87,11 +88,27 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
     },
   });
 
+  // If preselectedChildId is provided, hide the child selector
+  const isChildPreselected = !!preselectedChildId && !replacement;
+
   // Fetch active children for selection (filtered by organization)
   const { data: children = [] } = useQuery({
-    queryKey: ["children-for-replacement", currentOrganization?.organization_id],
+    queryKey: ["children-for-replacement", currentOrganization?.organization_id, preselectedChildId],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
+      
+      // If preselected, fetch that specific child
+      if (preselectedChildId) {
+        const { data, error } = await supabase
+          .from("children")
+          .select("id, first_name, last_name, status, replacement_status")
+          .eq("id", preselectedChildId)
+          .single();
+        
+        if (error) throw error;
+        return data ? [data as Child] : [];
+      }
+      
       const { data, error } = await supabase
         .from("children")
         .select("id, first_name, last_name, status, replacement_status")
@@ -170,62 +187,69 @@ export function ReplacementForm({ replacement, onSuccess, onCancel }: Replacemen
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Original Child Selection */}
-        <FormField
-          control={form.control}
-          name="original_child_id"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Original Child (to be replaced)</FormLabel>
-              <Popover open={originalChildOpen} onOpenChange={setOriginalChildOpen}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {selectedChild
-                        ? `${selectedChild.first_name} ${selectedChild.last_name}`
-                        : "Select original child..."}
-                      <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput 
-                      placeholder="Search children..." 
-                      value={originalChildSearch}
-                      onValueChange={setOriginalChildSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty>No children found.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredChildren.map((child) => (
-                          <CommandItem
-                            key={child.id}
-                            value={`${child.first_name} ${child.last_name}`}
-                            onSelect={() => {
-                              form.setValue("original_child_id", child.id);
-                              setOriginalChildOpen(false);
-                            }}
-                          >
-                            {child.first_name} {child.last_name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Original Child Selection - Hidden if preselected */}
+        {isChildPreselected ? (
+          <div className="p-3 rounded-lg bg-muted">
+            <p className="text-sm text-muted-foreground">Child to be replaced:</p>
+            <p className="font-semibold">{selectedChild?.first_name} {selectedChild?.last_name}</p>
+          </div>
+        ) : (
+          <FormField
+            control={form.control}
+            name="original_child_id"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Original Child (to be replaced)</FormLabel>
+                <Popover open={originalChildOpen} onOpenChange={setOriginalChildOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "justify-between",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {selectedChild
+                          ? `${selectedChild.first_name} ${selectedChild.last_name}`
+                          : "Select original child..."}
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search children..." 
+                        value={originalChildSearch}
+                        onValueChange={setOriginalChildSearch}
+                      />
+                      <CommandList>
+                        <CommandEmpty>No children found.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredChildren.map((child) => (
+                            <CommandItem
+                              key={child.id}
+                              value={`${child.first_name} ${child.last_name}`}
+                              onSelect={() => {
+                                form.setValue("original_child_id", child.id);
+                                setOriginalChildOpen(false);
+                              }}
+                            >
+                              {child.first_name} {child.last_name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* New Child Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

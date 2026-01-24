@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, CheckCircle, RefreshCw, Calendar, User } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw, Calendar, User, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { ReplacementForm } from '@/components/ReplacementForm';
 
 interface StatusReplacementCardProps {
   child: any;
@@ -18,7 +19,8 @@ interface StatusReplacementCardProps {
 }
 
 export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }: StatusReplacementCardProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [isReplacementDialogOpen, setIsReplacementDialogOpen] = useState(false);
   const [status, setStatus] = useState(child.status || 'active');
   const [inactiveReason, setInactiveReason] = useState(child.inactive_reason || '');
   const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
         title: "Success",
         description: "Child status updated successfully",
       });
-      setIsDialogOpen(false);
+      setIsStatusDialogOpen(false);
       onRefresh();
     } catch (error) {
       console.error('Error updating status:', error);
@@ -57,6 +59,14 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
     }
   };
 
+  const handleReplacementSuccess = () => {
+    setIsReplacementDialogOpen(false);
+    onRefresh();
+  };
+
+  // Check if child can be replaced (active and not already replaced)
+  const canBeReplaced = child.status === 'active' && child.replacement_status !== 'replaced' && !replacement;
+
   return (
     <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-secondary/20">
       <CardHeader className="pb-3 bg-gradient-to-r from-amber-500/10 to-yellow-500/10">
@@ -66,52 +76,80 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
             Status & Replacement
           </div>
           {isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-xs">
-                  Update Status
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Update Child Status</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {status === 'inactive' && (
-                    <div className="space-y-2">
-                      <Label>Reason for Inactivity</Label>
-                      <Textarea
-                        value={inactiveReason}
-                        onChange={(e) => setInactiveReason(e.target.value)}
-                        placeholder="Enter reason for marking as inactive..."
-                        rows={3}
-                      />
-                    </div>
-                  )}
-
-                  <Button 
-                    onClick={handleStatusUpdate} 
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading ? 'Updating...' : 'Save Changes'}
+            <div className="flex items-center gap-2">
+              {/* Add Replacement Button */}
+              {canBeReplaced && (
+                <Dialog open={isReplacementDialogOpen} onOpenChange={setIsReplacementDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs gap-1">
+                      <Plus className="h-3 w-3" />
+                      Add Replacement
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Create Replacement</DialogTitle>
+                      <DialogDescription>
+                        Replace {child.first_name} {child.last_name} with a new child
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ReplacementForm
+                      preselectedChildId={child.id}
+                      onSuccess={handleReplacementSuccess}
+                      onCancel={() => setIsReplacementDialogOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
+              
+              {/* Update Status Button */}
+              <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Update Status
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Update Child Status</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {status === 'inactive' && (
+                      <div className="space-y-2">
+                        <Label>Reason for Inactivity</Label>
+                        <Textarea
+                          value={inactiveReason}
+                          onChange={(e) => setInactiveReason(e.target.value)}
+                          placeholder="Enter reason for marking as inactive..."
+                          rows={3}
+                        />
+                      </div>
+                    )}
+
+                    <Button 
+                      onClick={handleStatusUpdate} 
+                      disabled={loading}
+                      className="w-full"
+                    >
+                      {loading ? 'Updating...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </CardTitle>
       </CardHeader>
@@ -136,6 +174,21 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
             {child.status?.charAt(0).toUpperCase() + child.status?.slice(1)}
           </Badge>
         </div>
+
+        {/* Replacement Status */}
+        {child.replacement_status && (
+          <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-muted-foreground" />
+              <span className="font-medium">Replacement Status</span>
+            </div>
+            <Badge 
+              variant={child.replacement_status === 'replaced' ? 'destructive' : 'secondary'}
+            >
+              {child.replacement_status?.charAt(0).toUpperCase() + child.replacement_status?.slice(1)}
+            </Badge>
+          </div>
+        )}
 
         {/* Inactive Details */}
         {child.status === 'inactive' && (
@@ -189,10 +242,34 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
           </div>
         )}
 
+        {/* No Replacement Recorded */}
         {!replacement && child.status === 'inactive' && (
-          <p className="text-sm text-muted-foreground text-center py-2">
-            No replacement recorded
-          </p>
+          <div className="p-3 rounded-xl bg-muted/50 text-center">
+            <p className="text-sm text-muted-foreground">No replacement recorded</p>
+            {isAdmin && (
+              <Dialog open={isReplacementDialogOpen} onOpenChange={setIsReplacementDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="link" size="sm" className="mt-1 text-xs">
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Replacement Now
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create Replacement</DialogTitle>
+                    <DialogDescription>
+                      Replace {child.first_name} {child.last_name} with a new child
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ReplacementForm
+                    preselectedChildId={child.id}
+                    onSuccess={handleReplacementSuccess}
+                    onCancel={() => setIsReplacementDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
