@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, CheckCircle, RefreshCw, Calendar, User, Plus } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw, Calendar, User, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ReplacementForm } from '@/components/ReplacementForm';
@@ -24,6 +25,7 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
   const [status, setStatus] = useState(child.status || 'active');
   const [inactiveReason, setInactiveReason] = useState(child.inactive_reason || '');
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleStatusUpdate = async () => {
     setLoading(true);
@@ -56,6 +58,44 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteReplacement = async () => {
+    if (!replacement) return;
+    
+    setDeleteLoading(true);
+    try {
+      // Delete the replacement record
+      const { error: deleteError } = await supabase
+        .from('replacements')
+        .delete()
+        .eq('id', replacement.id);
+
+      if (deleteError) throw deleteError;
+
+      // Reset the child's replacement_status back to 'active'
+      const { error: updateError } = await supabase
+        .from('children')
+        .update({ replacement_status: 'active' })
+        .eq('id', child.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Replacement record deleted successfully",
+      });
+      onRefresh();
+    } catch (error) {
+      console.error('Error deleting replacement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete replacement",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -213,10 +253,39 @@ export function StatusReplacementCard({ child, replacement, isAdmin, onRefresh }
 
         {/* Replacement Info */}
         {replacement && (
-          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <div className="flex items-center gap-2 mb-2">
-              <RefreshCw className="h-4 w-4 text-blue-500" />
-              <span className="text-xs font-medium text-muted-foreground uppercase">Replacement Info</span>
+          <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Replacement Info</span>
+              </div>
+              {isAdmin && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Replacement?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove the replacement record for {child.first_name} {child.last_name} and reset their replacement status. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteReplacement}
+                        disabled={deleteLoading}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteLoading ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
