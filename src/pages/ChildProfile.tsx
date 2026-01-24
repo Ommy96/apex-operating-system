@@ -40,6 +40,7 @@ import { convertGoogleDriveUrl } from '@/lib/imageUtils';
 import { StatusReplacementCard } from '@/components/child-profile/StatusReplacementCard';
 import { ServicesTab } from '@/components/child-profile/ServicesTab';
 import { HomeVisitsTab } from '@/components/child-profile/HomeVisitsTab';
+import { AcademicTab } from '@/components/child-profile/AcademicTab';
 
 export default function ChildProfile() {
   const { id } = useParams();
@@ -516,6 +517,10 @@ export default function ChildProfile() {
                 <Home className="h-4 w-4" />
                 Home Visits
               </TabsTrigger>
+              <TabsTrigger value="academic" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <BookOpen className="h-4 w-4" />
+                Academic
+              </TabsTrigger>
               <TabsTrigger value="visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <ClipboardList className="h-4 w-4" />
                 Other Reports
@@ -621,6 +626,11 @@ export default function ChildProfile() {
             {/* Home Visits Tab */}
             <TabsContent value="home-visits" className="space-y-4">
               <HomeVisitsTab childId={id!} isAdmin={isAdmin} />
+            </TabsContent>
+
+            {/* Academic Performance Tab */}
+            <TabsContent value="academic" className="space-y-4">
+              <AcademicTab childId={id!} />
             </TabsContent>
 
             {/* Other Visits Tab */}
