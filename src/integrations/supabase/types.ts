@@ -64,6 +64,66 @@ export type Database = {
           },
         ]
       }
+      academic_performance: {
+        Row: {
+          academic_year: string
+          child_id: string
+          created_at: string
+          grade: string | null
+          id: string
+          organization_id: string
+          recorded_by: string | null
+          remarks: string | null
+          score: number | null
+          subject: string | null
+          term: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year: string
+          child_id: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          organization_id: string
+          recorded_by?: string | null
+          remarks?: string | null
+          score?: number | null
+          subject?: string | null
+          term: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: string
+          child_id?: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          organization_id?: string
+          recorded_by?: string | null
+          remarks?: string | null
+          score?: number | null
+          subject?: string | null
+          term?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_performance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
           activity_date: string
