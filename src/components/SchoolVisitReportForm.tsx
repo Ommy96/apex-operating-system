@@ -26,9 +26,11 @@ interface SchoolVisitReportFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   initialData?: any;
+  preselectedChildId?: string;
+  preselectedSchool?: string | null;
 }
 
-export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: SchoolVisitReportFormProps) {
+export function SchoolVisitReportForm({ onSuccess, onCancel, initialData, preselectedChildId, preselectedSchool }: SchoolVisitReportFormProps) {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
   
@@ -36,7 +38,7 @@ export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: Scho
     resolver: zodResolver(schoolVisitSchema),
     defaultValues: {
       staff: initialData?.staff || "",
-      school: initialData?.school || "",
+      school: initialData?.school || preselectedSchool || "",
       visit_date: initialData?.visit_date || "",
       location: initialData?.location || "",
       reason_for_visit: initialData?.reason_for_visit || "",
@@ -72,8 +74,8 @@ export function SchoolVisitReportForm({ onSuccess, onCancel, initialData }: Scho
             ...values,
             location: values.location as "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi" | null || null,
             organization_id: currentOrganization?.organization_id,
+            student_id: preselectedChildId || null,
           });
-
         if (error) throw error;
 
         toast({

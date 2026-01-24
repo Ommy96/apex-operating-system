@@ -41,7 +41,7 @@ import { StatusReplacementCard } from '@/components/child-profile/StatusReplacem
 import { ServicesTab } from '@/components/child-profile/ServicesTab';
 import { HomeVisitsTab } from '@/components/child-profile/HomeVisitsTab';
 import { AcademicTab } from '@/components/child-profile/AcademicTab';
-
+import { SchoolVisitsTab } from '@/components/child-profile/SchoolVisitsTab';
 export default function ChildProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -521,6 +521,10 @@ export default function ChildProfile() {
                 <BookOpen className="h-4 w-4" />
                 Academic
               </TabsTrigger>
+              <TabsTrigger value="school-visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                <GraduationCap className="h-4 w-4" />
+                School Visits
+              </TabsTrigger>
               <TabsTrigger value="visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <ClipboardList className="h-4 w-4" />
                 Other Reports
@@ -631,6 +635,11 @@ export default function ChildProfile() {
             {/* Academic Performance Tab */}
             <TabsContent value="academic" className="space-y-4">
               <AcademicTab childId={id!} />
+            </TabsContent>
+
+            {/* School Visits Tab */}
+            <TabsContent value="school-visits" className="space-y-4">
+              <SchoolVisitsTab childId={id!} childSchool={child.institution_name} isAdmin={isAdmin} />
             </TabsContent>
 
             {/* Other Visits Tab */}
