@@ -23,7 +23,7 @@ import {
   HeartHandshake
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,8 +33,6 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ChildForm } from '@/components/ChildForm';
 import { DocumentLinkForm } from '@/components/DocumentLinkForm';
-import { VisitReportLinkForm } from '@/components/VisitReportLinkForm';
-import { ProgramEnrollmentForm } from '@/components/ProgramEnrollmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { convertGoogleDriveUrl } from '@/lib/imageUtils';
 import { StatusReplacementCard } from '@/components/child-profile/StatusReplacementCard';
@@ -42,13 +40,12 @@ import { ServicesTab } from '@/components/child-profile/ServicesTab';
 import { HomeVisitsTab } from '@/components/child-profile/HomeVisitsTab';
 import { AcademicTab } from '@/components/child-profile/AcademicTab';
 import { SchoolVisitsTab } from '@/components/child-profile/SchoolVisitsTab';
+
 export default function ChildProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [child, setChild] = useState<any>(null);
-  const [programs, setPrograms] = useState<any[]>([]);
-  const [visits, setVisits] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
   const [replacement, setReplacement] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -71,26 +68,6 @@ export default function ChildProfile() {
       if (childError) throw childError;
       setChild(childData);
 
-      const { data: programsData, error: programsError } = await supabase
-        .from('child_programs')
-        .select(`
-          *,
-          programs:program_id (name, description)
-        `)
-        .eq('child_id', id);
-
-      if (programsError) throw programsError;
-      setPrograms(programsData || []);
-
-      const { data: visitsData, error: visitsError } = await supabase
-        .from('visits')
-        .select('*')
-        .eq('child_id', id)
-        .order('visit_date', { ascending: false });
-
-      if (visitsError) throw visitsError;
-      setVisits(visitsData || []);
-
       const { data: documentsData, error: documentsError } = await supabase
         .from('documents')
         .select('*')
@@ -108,7 +85,6 @@ export default function ChildProfile() {
         .maybeSingle();
       
       setReplacement(replacementData);
-
     } catch (error) {
       console.error('Error fetching child data:', error);
       toast({
@@ -503,12 +479,8 @@ export default function ChildProfile() {
 
         {/* Right Column - Tabs Content */}
         <div className="lg:col-span-2">
-          <Tabs defaultValue="programs" className="space-y-4">
+          <Tabs defaultValue="services" className="space-y-4">
             <TabsList className="w-full justify-start bg-card/50 p-1 h-auto flex-wrap">
-              <TabsTrigger value="programs" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                <GraduationCap className="h-4 w-4" />
-                Programs
-              </TabsTrigger>
               <TabsTrigger value="services" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <HeartHandshake className="h-4 w-4" />
                 Services
@@ -525,102 +497,11 @@ export default function ChildProfile() {
                 <GraduationCap className="h-4 w-4" />
                 School Visits
               </TabsTrigger>
-              <TabsTrigger value="visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                <ClipboardList className="h-4 w-4" />
-                Other Reports
-              </TabsTrigger>
               <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                 <FolderOpen className="h-4 w-4" />
                 Documents
               </TabsTrigger>
             </TabsList>
-
-            {/* Programs Tab */}
-            <TabsContent value="programs" className="space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h3 className="text-xl font-bold">Enrolled Programs</h3>
-                  <p className="text-muted-foreground text-sm">{programs.length} program{programs.length !== 1 ? 's' : ''} enrolled</p>
-                </div>
-                {isAdmin && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-lg hover:shadow-xl transition-shadow">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Enroll in Program
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Enroll in Program</DialogTitle>
-                      </DialogHeader>
-                      <ProgramEnrollmentForm childId={id} onSuccess={fetchChildData} />
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-              
-              {programs.length === 0 ? (
-                <Card className="border-dashed border-2 bg-secondary/20">
-                  <CardContent className="text-center py-12">
-                    <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground font-medium">No programs enrolled yet</p>
-                    <p className="text-sm text-muted-foreground/70">Enroll this child in a program to get started</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4">
-                  {programs.map((program, index) => {
-                    const colors = [
-                      'from-blue-500/10 to-cyan-500/10 border-blue-200',
-                      'from-emerald-500/10 to-green-500/10 border-emerald-200',
-                      'from-purple-500/10 to-pink-500/10 border-purple-200',
-                      'from-orange-500/10 to-amber-500/10 border-orange-200',
-                    ];
-                    const colorClass = colors[index % colors.length];
-                    
-                    return (
-                      <Card key={program.id} className={`border bg-gradient-to-r ${colorClass} shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5`}>
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <CardTitle className="text-lg">{program.programs?.name}</CardTitle>
-                              <CardDescription>{program.programs?.description}</CardDescription>
-                            </div>
-                            <Badge 
-                              className={`${
-                                program.status === 'active' 
-                                  ? 'bg-success text-success-foreground' 
-                                  : 'bg-secondary text-secondary-foreground'
-                              }`}
-                            >
-                              {program.status}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                          <div className="flex flex-wrap gap-4 text-sm">
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              Enrolled: {new Date(program.enrollment_date).toLocaleDateString()}
-                            </div>
-                            {program.completion_date && (
-                              <div className="flex items-center gap-1.5 text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
-                                Completed: {new Date(program.completion_date).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
-                          {program.notes && (
-                            <p className="mt-3 text-sm text-muted-foreground bg-secondary/50 rounded-lg p-3">{program.notes}</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </TabsContent>
 
             {/* Services Tab */}
             <TabsContent value="services" className="space-y-4">
@@ -640,127 +521,6 @@ export default function ChildProfile() {
             {/* School Visits Tab */}
             <TabsContent value="school-visits" className="space-y-4">
               <SchoolVisitsTab childId={id!} childSchool={child.institution_name} isAdmin={isAdmin} />
-            </TabsContent>
-
-            {/* Other Visits Tab */}
-            <TabsContent value="visits" className="space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h3 className="text-xl font-bold">Other Visit Reports</h3>
-                  <p className="text-muted-foreground text-sm">School and medical visit report links</p>
-                </div>
-                {isAdmin && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="bg-gradient-to-r from-accent to-accent-dark text-accent-foreground shadow-lg hover:shadow-xl transition-shadow">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Report Link
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add Visit Report Link</DialogTitle>
-                      </DialogHeader>
-                      <VisitReportLinkForm childId={id} onSuccess={fetchChildData} />
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* School Visit Report */}
-                <ReportCard 
-                  title="School Visit Report"
-                  icon={GraduationCap}
-                  colorClass="from-emerald-500/10 to-emerald-600/10 border-emerald-200"
-                  iconColorClass="text-emerald-500 bg-emerald-500/10"
-                  document={documents.find(doc => doc.category === 'school_visit_report')}
-                  onDelete={handleDeleteDocument}
-                  isAdmin={isAdmin}
-                />
-                
-                {/* Medical Visit Report */}
-                <ReportCard 
-                  title="Medical Visit Report"
-                  icon={Stethoscope}
-                  colorClass="from-rose-500/10 to-rose-600/10 border-rose-200"
-                  iconColorClass="text-rose-500 bg-rose-500/10"
-                  document={documents.find(doc => doc.category === 'medical_visit_report')}
-                  onDelete={handleDeleteDocument}
-                  isAdmin={isAdmin}
-                />
-                
-                {/* Follow-up Visit Report */}
-                <ReportCard 
-                  title="Follow-up Visit Report"
-                  icon={ClipboardList}
-                  colorClass="from-purple-500/10 to-purple-600/10 border-purple-200"
-                  iconColorClass="text-purple-500 bg-purple-500/10"
-                  document={documents.find(doc => doc.category === 'follow_up_visit_report')}
-                  onDelete={handleDeleteDocument}
-                  isAdmin={isAdmin}
-                />
-              </div>
-
-              {/* Other Visit Reports */}
-              {documents.filter(doc => doc.category === 'other_visit_report').length > 0 && (
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold mb-4">Other Visit Reports</h4>
-                  <div className="grid gap-3">
-                    {documents.filter(doc => doc.category === 'other_visit_report').map((document) => (
-                      <Card key={document.id} className="bg-gradient-to-r from-secondary/50 to-secondary/30 border shadow-sm hover:shadow-md transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">{document.title}</p>
-                              {document.description && (
-                                <p className="text-sm text-muted-foreground">{document.description}</p>
-                              )}
-                            </div>
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => window.open(document.file_url, '_blank')}
-                                className="hover:bg-accent hover:text-accent-foreground"
-                              >
-                                <ExternalLink className="h-4 w-4 mr-1" />
-                                View
-                              </Button>
-                              {isAdmin && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Report Link</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete this report link? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        onClick={() => handleDeleteDocument(document.id)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
             </TabsContent>
 
             {/* Documents Tab */}
