@@ -2428,6 +2428,7 @@ export type Database = {
           recommendations: string
           school: string
           staff: string
+          student_id: string | null
           updated_at: string
           visit_date: string
         }
@@ -2443,6 +2444,7 @@ export type Database = {
           recommendations: string
           school: string
           staff: string
+          student_id?: string | null
           updated_at?: string
           visit_date: string
         }
@@ -2458,6 +2460,7 @@ export type Database = {
           recommendations?: string
           school?: string
           staff?: string
+          student_id?: string | null
           updated_at?: string
           visit_date?: string
         }
@@ -2467,6 +2470,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_visit_reports_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "children"
             referencedColumns: ["id"]
           },
         ]
