@@ -93,7 +93,7 @@ const ACADEMIC_YEARS = [
 
 const TERMS = ["Term 1", "Term 2", "Term 3"];
 
-const GRADES = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "E"];
+const GRADES = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "E", "ME1", "ME2", "BE1", "BE2", "AE1", "AE2", "EE1", "EE2"];
 
 const getGradeColor = (grade: string | null) => {
   if (!grade) return "bg-muted text-muted-foreground";
