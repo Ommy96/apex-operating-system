@@ -53,8 +53,17 @@ export default function RegisterOrganization() {
     }
     // If user is logged in (but has no org), sign them out first
     if (user) {
-      await signOut();
-      navigate('/auth');
+      try {
+        await signOut();
+        // Small delay to ensure auth state is fully cleared before navigation
+        setTimeout(() => {
+          navigate('/auth');
+        }, 100);
+      } catch (error) {
+        console.error('Sign out error:', error);
+        // Navigate anyway even if signOut fails
+        navigate('/auth');
+      }
     } else {
       navigate('/auth');
     }
