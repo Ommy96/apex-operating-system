@@ -116,14 +116,11 @@ const getReportsItems = (
     return isEnabled === undefined ? true : isEnabled;
   });
   
-  if (isManagement || (!isStaff)) {
-    filteredItems.push({ title: "Reports & Analytics", url: "/reports-analytics", icon: TrendingUp, key: "analytics" });
-  }
-  
   return filteredItems;
 };
 
 const systemItems = [
+  { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
   { title: "Documents", url: "/documents", icon: FileText },
   { title: "Settings", url: "/organization-settings", icon: Settings },
 ];
