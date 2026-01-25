@@ -38,7 +38,8 @@ export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
 
   // If we removed the default org assignment, users may not have an org yet.
   // Super admin can still proceed (they can switch into orgs), others must onboard.
-  if (!superAdmin && !currentOrganization) {
+  // IMPORTANT: Only redirect after org loading is complete to avoid race conditions on page reload.
+  if (!superAdmin && !currentOrganization && !orgLoading) {
     return <Navigate to="/register-organization" replace />;
   }
 
