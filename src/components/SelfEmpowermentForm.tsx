@@ -10,6 +10,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useState, useEffect } from 'react';
+import { BeneficiarySelector } from '@/components/BeneficiarySelector';
+import { ChildForLinking } from '@/hooks/useBeneficiaryLinking';
 
 const selfEmpowermentSchema = z.object({
   applicant_id: z.string().max(100).optional().or(z.literal('')),
@@ -38,6 +41,8 @@ interface SelfEmpowermentFormProps {
 export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpowermentFormProps) {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   
   const form = useForm<z.infer<typeof selfEmpowermentSchema>>({
     resolver: zodResolver(selfEmpowermentSchema),
@@ -60,6 +65,19 @@ export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpower
     },
   });
 
+  // When a child is selected, auto-fill the form fields
+  useEffect(() => {
+    if (selectedChild) {
+      form.setValue('full_name', selectedChild.full_name);
+      if (selectedChild.gender) {
+        form.setValue('gender', selectedChild.gender);
+      }
+      if (selectedChild.student_id) {
+        form.setValue('applicant_id', selectedChild.student_id);
+      }
+    }
+  }, [selectedChild, form]);
+
   const handleSubmit = async (values: z.infer<typeof selfEmpowermentSchema>) => {
     try {
       const dataToSave = {
@@ -78,6 +96,7 @@ export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpower
         amount_status: values.amount_status as "Loan" | "Grant" | null || null,
         current_status: values.current_status || null,
         is_active: values.is_active === "true",
+        linked_child_id: selectedChild?.id || record?.linked_child_id || null,
       };
 
       let error;
@@ -116,6 +135,21 @@ export function SelfEmpowermentForm({ record, onSuccess, onCancel }: SelfEmpower
     <ScrollArea className="h-[80vh]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 p-1">
+          {/* Beneficiary Selector - Only show for new records */}
+          {!record && (
+            <div className="pb-4 border-b">
+              <BeneficiarySelector
+                selectedChild={selectedChild}
+                onSelectChild={setSelectedChild}
+                onCreateNew={() => {
+                  setSelectedChild(null);
+                  setIsCreatingNew(true);
+                }}
+                isCreatingNew={isCreatingNew}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}

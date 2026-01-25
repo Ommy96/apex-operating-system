@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useState, useEffect } from 'react';
+import { BeneficiarySelector } from '@/components/BeneficiarySelector';
+import { ChildForLinking } from '@/hooks/useBeneficiaryLinking';
 
 const medicalSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
@@ -31,6 +34,8 @@ interface MedicalFormProps {
 export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   
   const form = useForm<MedicalFormData>({
     resolver: zodResolver(medicalSchema),
@@ -45,12 +50,25 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
     },
   });
 
+  // When a child is selected, auto-fill the form fields
+  useEffect(() => {
+    if (selectedChild) {
+      form.setValue('full_name', selectedChild.full_name);
+      if (selectedChild.gender) {
+        form.setValue('gender', selectedChild.gender.toLowerCase());
+      }
+    }
+  }, [selectedChild, form]);
+
   const onSubmit = async (data: MedicalFormData) => {
     try {
       if (record) {
         const { error } = await supabase
           .from("medical_records")
-          .update(data)
+          .update({
+            ...data,
+            linked_child_id: selectedChild?.id || record.linked_child_id || null,
+          })
           .eq("id", record.id);
 
         if (error) throw error;
@@ -58,7 +76,11 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
       } else {
         const { error } = await supabase
           .from("medical_records")
-          .insert([{ ...data, organization_id: currentOrganization?.organization_id }]);
+          .insert([{ 
+            ...data, 
+            organization_id: currentOrganization?.organization_id,
+            linked_child_id: selectedChild?.id || null,
+          }]);
 
         if (error) throw error;
         toast({ title: "Medical record added successfully" });
@@ -77,6 +99,21 @@ export function MedicalForm({ record, onSuccess, onCancel }: MedicalFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Beneficiary Selector - Only show for new records */}
+        {!record && (
+          <div className="pb-4 border-b">
+            <BeneficiarySelector
+              selectedChild={selectedChild}
+              onSelectChild={setSelectedChild}
+              onCreateNew={() => {
+                setSelectedChild(null);
+                setIsCreatingNew(true);
+              }}
+              isCreatingNew={isCreatingNew}
+            />
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="full_name"
