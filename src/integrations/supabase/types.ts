@@ -824,6 +824,7 @@ export type Database = {
           display_name: string
           entity_type_id: string
           id: string
+          linked_child_id: string | null
           organization_id: string
           status: string | null
           tags: string[] | null
@@ -836,6 +837,7 @@ export type Database = {
           display_name: string
           entity_type_id: string
           id?: string
+          linked_child_id?: string | null
           organization_id: string
           status?: string | null
           tags?: string[] | null
@@ -848,6 +850,7 @@ export type Database = {
           display_name?: string
           entity_type_id?: string
           id?: string
+          linked_child_id?: string | null
           organization_id?: string
           status?: string | null
           tags?: string[] | null
@@ -859,6 +862,13 @@ export type Database = {
             columns: ["entity_type_id"]
             isOneToOne: false
             referencedRelation: "entity_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entities_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
             referencedColumns: ["id"]
           },
           {
@@ -3038,6 +3048,10 @@ export type Database = {
         Returns: string
       }
       get_org_subscription: { Args: { _org_id: string }; Returns: Json }
+      get_unique_beneficiary_count: {
+        Args: { _org_id: string }
+        Returns: number
+      }
       get_user_current_organization: {
         Args: { _user_id: string }
         Returns: {
@@ -3060,6 +3074,19 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      search_children_for_linking: {
+        Args: { _org_id: string; _search_term: string }
+        Returns: {
+          academic_level: string
+          first_name: string
+          full_name: string
+          gender: string
+          id: string
+          institution_name: string
+          last_name: string
+          student_id: string
+        }[]
+      }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean

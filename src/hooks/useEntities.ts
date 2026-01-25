@@ -11,6 +11,7 @@ export interface Entity {
   data: Record<string, unknown>;
   status: string;
   tags: string[];
+  linked_child_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -21,6 +22,7 @@ export interface EntityFormData {
   data: Record<string, unknown>;
   status: string;
   tags: string[];
+  linked_child_id?: string | null;
 }
 
 export function useEntities(entityTypeId?: string) {
@@ -45,6 +47,7 @@ export function useEntities(entityTypeId?: string) {
         ...e,
         data: (e.data as Record<string, unknown>) || {},
         tags: e.tags || [],
+        linked_child_id: e.linked_child_id || null,
       })) as Entity[];
     },
     enabled: !!orgId && !!entityTypeId,
@@ -61,6 +64,7 @@ export function useEntities(entityTypeId?: string) {
         data: JSON.parse(JSON.stringify(formData.data)),
         status: formData.status,
         tags: formData.tags,
+        linked_child_id: formData.linked_child_id || null,
       }]).select().single();
       
       if (error) throw error;
@@ -82,6 +86,7 @@ export function useEntities(entityTypeId?: string) {
         data: JSON.parse(JSON.stringify(formData.data)),
         status: formData.status,
         tags: formData.tags,
+        linked_child_id: formData.linked_child_id || null,
       }).eq('id', id);
       
       if (error) throw error;

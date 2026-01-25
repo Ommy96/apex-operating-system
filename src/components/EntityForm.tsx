@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Entity, EntityFormData } from "@/hooks/useEntities";
 import { FieldDefinition } from "@/components/ProgramFieldBuilder";
+import { BeneficiarySelector } from "@/components/BeneficiarySelector";
+import { ChildForLinking } from "@/hooks/useBeneficiaryLinking";
 
 interface EntityFormProps {
   entity?: Entity | null;
@@ -32,6 +34,8 @@ export function EntityForm({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [fieldData, setFieldData] = useState<Record<string, unknown>>({});
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   useEffect(() => {
     if (entity) {
@@ -39,6 +43,21 @@ export function EntityForm({
       setStatus(entity.status);
       setTags(entity.tags || []);
       setFieldData(entity.data || {});
+      // If editing and has a linked child, we'd need to fetch it
+      // For now, if there's a linked_child_id, assume it's linked
+      if (entity.linked_child_id) {
+        // Set a placeholder - the actual child data would need to be fetched
+        setSelectedChild({
+          id: entity.linked_child_id,
+          student_id: null,
+          first_name: entity.display_name.split(' ')[0] || '',
+          last_name: entity.display_name.split(' ').slice(1).join(' ') || '',
+          full_name: entity.display_name,
+          gender: null,
+          academic_level: null,
+          institution_name: null,
+        });
+      }
     } else {
       // Initialize with empty values for each field
       const initialData: Record<string, unknown> = {};
@@ -69,6 +88,20 @@ export function EntityForm({
     setTags(tags.filter(t => t !== tag));
   };
 
+  const handleSelectChild = (child: ChildForLinking | null) => {
+    setSelectedChild(child);
+    setIsCreatingNew(false);
+    if (child) {
+      // Auto-fill display name from selected child
+      setDisplayName(child.full_name);
+    }
+  };
+
+  const handleCreateNew = () => {
+    setSelectedChild(null);
+    setIsCreatingNew(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) return;
@@ -78,6 +111,7 @@ export function EntityForm({
       data: fieldData,
       status,
       tags,
+      linked_child_id: selectedChild?.id || null,
     });
   };
 
@@ -160,6 +194,18 @@ export function EntityForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Beneficiary Selector - Only show for new entities */}
+      {!entity && (
+        <div className="pb-4 border-b">
+          <BeneficiarySelector
+            selectedChild={selectedChild}
+            onSelectChild={handleSelectChild}
+            onCreateNew={handleCreateNew}
+            isCreatingNew={isCreatingNew}
+          />
+        </div>
+      )}
+
       {/* Display Name - Always Required */}
       <div className="space-y-2">
         <Label htmlFor="display_name">Name / Title *</Label>
