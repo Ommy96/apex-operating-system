@@ -72,21 +72,27 @@ const mainMenuItems = [
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
 
+// Entity-based programs (migrated from hardcoded tables)
+const entityPrograms = [
+  { title: "Education", url: "/entities/education", icon: GraduationCap },
+  { title: "Feeding Program", url: "/entities/feeding-program", icon: UtensilsCrossed },
+  { title: "Kipawa Sato", url: "/entities/kipawa-sato", icon: Trophy },
+  { title: "Self Empowerment", url: "/entities/self-empowerment", icon: Lightbulb },
+  { title: "Support Groups", url: "/entities/support-groups", icon: Users },
+];
+
+// Legacy education sub-items (kept for backward compatibility until fully migrated)
 const educationSubItems = [
-  { title: "Children", url: "/children", icon: Users },
   { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
   { title: "School Transport", url: "/children/school-transport", icon: Bus },
   { title: "Replacements", url: "/children/replacements", icon: RefreshCw },
   { title: "Grade Progression", url: "/children/grade-progression", icon: TrendingUp },
 ];
 
+// Other hardcoded programs not yet migrated
 const programItems = [
-  { title: "Feeding Program", url: "/programs/feeding", icon: UtensilsCrossed },
-  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: Trophy },
   { title: "Medical", url: "/programs/medical", icon: Stethoscope },
   { title: "Family Adoption", url: "/programs/family-adoption", icon: Heart },
-  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: Lightbulb },
-  { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
 interface EnabledReportTypes {
@@ -288,7 +294,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Programs */}
+          {/* Programs - Entity-based */}
           <SidebarGroup className="mt-6">
             {!isCollapsed && (
               <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -297,7 +303,19 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
-                {/* Education Collapsible */}
+                {/* Entity-based Programs */}
+                {entityPrograms.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <MenuItem 
+                      item={item} 
+                      isCollapsed={isCollapsed} 
+                      isActive={isActive} 
+                      onClick={handleNavClick} 
+                    />
+                  </SidebarMenuItem>
+                ))}
+
+                {/* Education Sub-items (Legacy) */}
                 <Collapsible open={educationOpen} onOpenChange={setEducationOpen}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -307,10 +325,10 @@ export function AppSidebar() {
                           "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                         )}
                       >
-                        <GraduationCap className="h-[18px] w-[18px] flex-shrink-0" />
+                        <Users className="h-[18px] w-[18px] flex-shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span className="flex-1 text-left">Education</span>
+                            <span className="flex-1 text-left">Education Tools</span>
                             <ChevronDown className={cn(
                               "h-4 w-4 text-sidebar-foreground/50 transition-transform duration-200",
                               educationOpen && "rotate-180"
@@ -335,7 +353,7 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 </Collapsible>
 
-                {/* Other Programs */}
+                {/* Other Hardcoded Programs */}
                 {programItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <MenuItem 
