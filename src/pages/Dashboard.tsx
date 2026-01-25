@@ -49,20 +49,20 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!organizationId) return null;
       
-      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes] = await Promise.all([
+      // Fetch program counts and unique beneficiary count in parallel
+      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, uniqueCountRes] = await Promise.all([
         supabase.from('children').select('*', { count: 'exact' }).eq('organization_id', organizationId).not('academic_level', 'is', null),
         supabase.from('feeding_program').select('*', { count: 'exact' }).eq('organization_id', organizationId),
         supabase.from('kipawa_sato').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.from('self_empowerment').select('*', { count: 'exact' }).eq('organization_id', organizationId)
+        supabase.from('self_empowerment').select('*', { count: 'exact' }).eq('organization_id', organizationId),
+        supabase.rpc('get_unique_beneficiary_count', { _org_id: organizationId }),
       ]);
 
-      const totalChildrenFromAllPrograms = (childrenRes.count || 0) + 
-                                          (feedingRes.count || 0) + 
-                                          (kipawaRes.count || 0) + 
-                                          (selfEmpowermentRes.count || 0);
+      // Use the unique count from the database function
+      const uniqueBeneficiaryCount = uniqueCountRes.data as number || 0;
 
       return {
-        totalChildren: totalChildrenFromAllPrograms,
+        totalChildren: uniqueBeneficiaryCount,
         educationProgram: childrenRes.count || 0,
         feedingProgram: feedingRes.count || 0,
         kipawaProgram: kipawaRes.count || 0,
@@ -232,12 +232,12 @@ const Dashboard = () => {
 
   const stats = [
     {
-      title: "Total Beneficiaries",
+      title: "Unique Beneficiaries",
       value: statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0",
-      description: "Active beneficiaries",
+      description: "Distinct individuals served",
       icon: Users,
       gradient: "bg-gradient-primary",
-      change: "Real-time data"
+      change: "Deduplicated count"
     },
     {
       title: "Education Program",
