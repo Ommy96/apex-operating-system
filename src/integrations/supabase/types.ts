@@ -1001,6 +1001,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           known_name: string
+          linked_child_id: string | null
           no_of_beneficiaries: number | null
           organization_id: string
           residence: Database["public"]["Enums"]["residence_type"] | null
@@ -1017,6 +1018,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           known_name: string
+          linked_child_id?: string | null
           no_of_beneficiaries?: number | null
           organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
@@ -1033,6 +1035,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           known_name?: string
+          linked_child_id?: string | null
           no_of_beneficiaries?: number | null
           organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
@@ -1041,6 +1044,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "family_adoption_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "family_adoption_organization_id_fkey"
             columns: ["organization_id"]
@@ -1101,6 +1111,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           grade: string | null
           id: string
+          linked_child_id: string | null
           name: string
           organization_id: string
           school: string | null
@@ -1118,6 +1129,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           grade?: string | null
           id?: string
+          linked_child_id?: string | null
           name: string
           organization_id?: string
           school?: string | null
@@ -1135,6 +1147,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           grade?: string | null
           id?: string
+          linked_child_id?: string | null
           name?: string
           organization_id?: string
           school?: string | null
@@ -1142,6 +1155,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "feeding_program_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feeding_program_organization_id_fkey"
             columns: ["organization_id"]
@@ -1521,6 +1541,7 @@ export type Database = {
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
+          linked_child_id: string | null
           location: Database["public"]["Enums"]["residence_type"] | null
           organization_id: string
           school_support_given: boolean | null
@@ -1545,6 +1566,7 @@ export type Database = {
           full_name: string
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
+          linked_child_id?: string | null
           location?: Database["public"]["Enums"]["residence_type"] | null
           organization_id?: string
           school_support_given?: boolean | null
@@ -1569,6 +1591,7 @@ export type Database = {
           full_name?: string
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
+          linked_child_id?: string | null
           location?: Database["public"]["Enums"]["residence_type"] | null
           organization_id?: string
           school_support_given?: boolean | null
@@ -1582,6 +1605,13 @@ export type Database = {
           year_enrolled?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "kipawa_sato_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "kipawa_sato_organization_id_fkey"
             columns: ["organization_id"]
@@ -1651,6 +1681,7 @@ export type Database = {
           gender: string | null
           hospital: string
           id: string
+          linked_child_id: string | null
           location: string | null
           medical_condition: string
           organization_id: string
@@ -1666,6 +1697,7 @@ export type Database = {
           gender?: string | null
           hospital: string
           id?: string
+          linked_child_id?: string | null
           location?: string | null
           medical_condition: string
           organization_id?: string
@@ -1681,6 +1713,7 @@ export type Database = {
           gender?: string | null
           hospital?: string
           id?: string
+          linked_child_id?: string | null
           location?: string | null
           medical_condition?: string
           organization_id?: string
@@ -1688,6 +1721,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "medical_records_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "medical_records_organization_id_fkey"
             columns: ["organization_id"]
@@ -2509,6 +2549,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           is_active: boolean | null
+          linked_child_id: string | null
           organization_id: string
           residence: Database["public"]["Enums"]["residence_type"] | null
           start_date: string | null
@@ -2533,6 +2574,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean | null
+          linked_child_id?: string | null
           organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
@@ -2557,6 +2599,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean | null
+          linked_child_id?: string | null
           organization_id?: string
           residence?: Database["public"]["Enums"]["residence_type"] | null
           start_date?: string | null
@@ -2565,6 +2608,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "self_empowerment_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "self_empowerment_organization_id_fkey"
             columns: ["organization_id"]
@@ -2719,6 +2769,7 @@ export type Database = {
           description: string | null
           facilitator: string | null
           id: string
+          linked_child_id: string | null
           location: string | null
           meeting_schedule: string | null
           member_count: number | null
@@ -2733,6 +2784,7 @@ export type Database = {
           description?: string | null
           facilitator?: string | null
           id?: string
+          linked_child_id?: string | null
           location?: string | null
           meeting_schedule?: string | null
           member_count?: number | null
@@ -2747,6 +2799,7 @@ export type Database = {
           description?: string | null
           facilitator?: string | null
           id?: string
+          linked_child_id?: string | null
           location?: string | null
           meeting_schedule?: string | null
           member_count?: number | null
@@ -2756,6 +2809,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "support_groups_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "support_groups_organization_id_fkey"
             columns: ["organization_id"]

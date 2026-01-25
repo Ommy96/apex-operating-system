@@ -9,8 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
+import { BeneficiarySelector } from '@/components/BeneficiarySelector';
+import { ChildForLinking } from '@/hooks/useBeneficiaryLinking';
 
 const kipawaSatoSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -37,6 +39,8 @@ interface KipawaSatoFormProps {
 export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { currentOrganization } = useOrganization();
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   
   const form = useForm<KipawaSatoFormData>({
     resolver: zodResolver(kipawaSatoSchema),
@@ -55,6 +59,19 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
     },
   });
 
+  // When a child is selected, auto-fill the form fields
+  useEffect(() => {
+    if (selectedChild) {
+      form.setValue('full_name', selectedChild.full_name);
+      if (selectedChild.gender) {
+        form.setValue('gender', selectedChild.gender as 'Male' | 'Female');
+      }
+      if (selectedChild.academic_level) {
+        form.setValue('academic_level', selectedChild.academic_level as any);
+      }
+    }
+  }, [selectedChild, form]);
+
   const onSubmit = async (data: KipawaSatoFormData) => {
     setIsLoading(true);
     
@@ -62,7 +79,10 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
       if (member) {
         const { error } = await supabase
           .from('kipawa_sato')
-          .update(data)
+          .update({
+            ...data,
+            linked_child_id: selectedChild?.id || member.linked_child_id || null,
+          })
           .eq('id', member.id);
           
         if (error) throw error;
@@ -74,7 +94,12 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
       } else {
         const { error } = await supabase
           .from('kipawa_sato')
-          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id, organization_id: currentOrganization?.organization_id }]);
+          .insert([{ 
+            ...data, 
+            created_by: (await supabase.auth.getUser()).data.user?.id, 
+            organization_id: currentOrganization?.organization_id,
+            linked_child_id: selectedChild?.id || null,
+          }]);
           
         if (error) throw error;
         
@@ -100,6 +125,21 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Beneficiary Selector - Only show for new records */}
+        {!member && (
+          <div className="pb-4 border-b">
+            <BeneficiarySelector
+              selectedChild={selectedChild}
+              onSelectChild={setSelectedChild}
+              onCreateNew={() => {
+                setSelectedChild(null);
+                setIsCreatingNew(true);
+              }}
+              isCreatingNew={isCreatingNew}
+            />
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="full_name"
@@ -121,7 +161,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gender</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
@@ -162,7 +202,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Location</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
@@ -185,7 +225,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
           render={({ field }) => (
             <FormItem>
               <FormLabel>Academic Level</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select academic level" />
@@ -214,7 +254,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Talent Category</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select talent category" />
@@ -240,7 +280,7 @@ export function KipawaSatoForm({ member, onSuccess, onCancel }: KipawaSatoFormPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Specific Skill</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select specific skill" />

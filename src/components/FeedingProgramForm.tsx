@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOrganization } from '@/hooks/useOrganization';
+import { BeneficiarySelector } from '@/components/BeneficiarySelector';
+import { ChildForLinking } from '@/hooks/useBeneficiaryLinking';
 
 const feedingProgramSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -33,6 +35,8 @@ interface FeedingProgramFormProps {
 export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProgramFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { currentOrganization } = useOrganization();
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   
   const form = useForm<FeedingProgramFormData>({
     resolver: zodResolver(feedingProgramSchema),
@@ -48,6 +52,22 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
     },
   });
 
+  // When a child is selected, auto-fill the name
+  useEffect(() => {
+    if (selectedChild) {
+      form.setValue('name', selectedChild.full_name);
+      if (selectedChild.gender) {
+        form.setValue('gender', selectedChild.gender as 'Male' | 'Female');
+      }
+      if (selectedChild.academic_level) {
+        form.setValue('academic_level', selectedChild.academic_level as any);
+      }
+      if (selectedChild.institution_name) {
+        form.setValue('school', selectedChild.institution_name);
+      }
+    }
+  }, [selectedChild, form]);
+
   const onSubmit = async (data: FeedingProgramFormData) => {
     setIsLoading(true);
     
@@ -55,7 +75,10 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
       if (program) {
         const { error } = await supabase
           .from('feeding_program')
-          .update(data)
+          .update({
+            ...data,
+            linked_child_id: selectedChild?.id || program.linked_child_id || null,
+          })
           .eq('id', program.id);
           
         if (error) throw error;
@@ -67,7 +90,12 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
       } else {
         const { error } = await supabase
           .from('feeding_program')
-          .insert([{ ...data, created_by: (await supabase.auth.getUser()).data.user?.id, organization_id: currentOrganization?.organization_id }]);
+          .insert([{ 
+            ...data, 
+            created_by: (await supabase.auth.getUser()).data.user?.id, 
+            organization_id: currentOrganization?.organization_id,
+            linked_child_id: selectedChild?.id || null,
+          }]);
           
         if (error) throw error;
         
@@ -93,6 +121,21 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Beneficiary Selector - Only show for new records */}
+        {!program && (
+          <div className="pb-4 border-b">
+            <BeneficiarySelector
+              selectedChild={selectedChild}
+              onSelectChild={setSelectedChild}
+              onCreateNew={() => {
+                setSelectedChild(null);
+                setIsCreatingNew(true);
+              }}
+              isCreatingNew={isCreatingNew}
+            />
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="name"
@@ -114,7 +157,7 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gender</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
@@ -136,7 +179,7 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Program Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select program type" />
@@ -160,7 +203,7 @@ export function FeedingProgramForm({ program, onSuccess, onCancel }: FeedingProg
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Academic Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select academic level" />

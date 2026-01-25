@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
+import { BeneficiarySelector } from '@/components/BeneficiarySelector';
+import { ChildForLinking } from '@/hooks/useBeneficiaryLinking';
 
 interface FamilyAdoptionFormProps {
   family?: any;
@@ -18,6 +19,8 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedChild, setSelectedChild] = useState<ChildForLinking | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [formData, setFormData] = useState({
     known_name: family?.known_name || "",
     actual_name: family?.actual_name || "",
@@ -29,6 +32,17 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
     family_status: family?.family_status || "",
     source_of_income: family?.source_of_income || "",
   });
+
+  // When a child is selected, auto-fill the form fields
+  useEffect(() => {
+    if (selectedChild) {
+      setFormData(prev => ({
+        ...prev,
+        known_name: selectedChild.full_name,
+        gender: selectedChild.gender || prev.gender,
+      }));
+    }
+  }, [selectedChild]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -52,6 +66,7 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
         sponsor: formData.sponsor as "NSP-AID" | "Donation" | null || null,
         family_status: formData.family_status || null,
         source_of_income: formData.source_of_income || null,
+        linked_child_id: selectedChild?.id || family?.linked_child_id || null,
       };
 
       if (family) {
@@ -94,6 +109,21 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Beneficiary Selector - Only show for new records */}
+      {!family && (
+        <div className="pb-4 border-b">
+          <BeneficiarySelector
+            selectedChild={selectedChild}
+            onSelectChild={setSelectedChild}
+            onCreateNew={() => {
+              setSelectedChild(null);
+              setIsCreatingNew(true);
+            }}
+            isCreatingNew={isCreatingNew}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="known_name">Known Name *</Label>
