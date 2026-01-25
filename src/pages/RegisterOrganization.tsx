@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowLeft, Building2, User, Mail, Lock, Phone, Globe, MapPin, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Building2, User, Mail, Lock, Phone, Globe, MapPin, Sparkles, CheckCircle2, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const organizationSchema = z.object({
   // Organization details
@@ -40,9 +41,24 @@ type OrganizationFormData = z.infer<typeof organizationSchema>;
 
 export default function RegisterOrganization() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+
+  const handleBackOrSignOut = async () => {
+    if (step === 2) {
+      setStep(1);
+      return;
+    }
+    // If user is logged in (but has no org), sign them out first
+    if (user) {
+      await signOut();
+      navigate('/auth');
+    } else {
+      navigate('/auth');
+    }
+  };
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -245,10 +261,19 @@ export default function RegisterOrganization() {
             variant="ghost"
             size="sm"
             className="absolute left-4 top-6 text-muted-foreground hover:text-foreground"
-            onClick={() => step === 1 ? navigate('/auth') : setStep(1)}
+            onClick={handleBackOrSignOut}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {step === 1 ? 'Back to Sign In' : 'Back'}
+            {step === 1 && user ? (
+              <>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out & Back
+              </>
+            ) : (
+              <>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {step === 1 ? 'Back to Sign In' : 'Back'}
+              </>
+            )}
           </Button>
           
           <div className="flex justify-center mb-4">
