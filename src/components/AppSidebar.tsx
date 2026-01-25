@@ -66,8 +66,6 @@ import { isSuperAdmin } from "@/lib/superAdmin";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Indicators", url: "/indicators", icon: BarChart3 },
-  { title: "Entity Types", url: "/entity-types", icon: Layers },
   { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
@@ -109,9 +107,7 @@ const getReportsItems = (
     { title: "Business Visits", url: "/reports/business-visits", icon: Building2, key: "businessVisits" },
     { title: "Program Reports", url: "/reports/program-reports", icon: FileText, key: "programReports" },
     { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy, key: "activityReports" },
-    { title: "Academic Performance", url: "/reports/academic-performance", icon: GraduationCap, key: "academicPerformance" },
     { title: "Custom Reports", url: "/custom-reports", icon: FileText, key: "customReports" },
-    { title: "Other Reports", url: "/other-reports", icon: FileText, key: "otherReports" },
   ];
   
   // Filter based on enabled report types (default to true if not set)
