@@ -22,9 +22,10 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
+  // Start as loading only if auth is still loading OR user exists (will fetch org data)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,9 +142,23 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchCurrentOrganization, fetchUserOrganizations]);
 
   useEffect(() => {
+    // Don't fetch until auth has finished loading
+    if (authLoading) {
+      return;
+    }
+    
+    // If no user, clear org state and stop loading
+    if (!user?.id) {
+      setCurrentOrganization(null);
+      setUserOrganizations([]);
+      setIsLoading(false);
+      return;
+    }
+    
+    // User exists, fetch organization data
     fetchCurrentOrganization();
     fetchUserOrganizations();
-  }, [fetchCurrentOrganization, fetchUserOrganizations]);
+  }, [authLoading, user?.id, fetchCurrentOrganization, fetchUserOrganizations]);
 
   return (
     <OrganizationContext.Provider
