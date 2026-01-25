@@ -23,10 +23,7 @@ import SchoolVisitReports from "./pages/SchoolVisitReports";
 import BusinessVisitReports from "./pages/BusinessVisitReports";
 import ProgramReports from "./pages/ProgramReports";
 import ActivityReports from "./pages/ActivityReports";
-import OtherReports from "./pages/OtherReports";
 import AttendanceManagement from "./pages/AttendanceManagement";
-import AcademicPerformance from "./pages/AcademicPerformance";
-import AcademicPerformanceReports from "./pages/AcademicPerformanceReports";
 
 import OrganizationSettings from "./pages/OrganizationSettings";
 import InferaAdminDashboard from "./pages/InferaAdminDashboard";
@@ -47,9 +44,7 @@ import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
 import CustomReports from "./pages/CustomReports";
-import EntityTypesManagement from "./pages/EntityTypesManagement";
 import EntityDataPage from "./pages/EntityDataPage";
-import Indicators from "./pages/Indicators";
 
 const queryClient = new QueryClient();
 
@@ -87,13 +82,6 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <SponsorsManagement />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/entity-types" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <EntityTypesManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
@@ -244,13 +232,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/other-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <OtherReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/custom-reports" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -258,31 +239,10 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/reports/academic-performance" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <AcademicPerformance />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports/academic-performance-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <AcademicPerformanceReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
                   <ReportsAnalytics />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/indicators" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Indicators />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
