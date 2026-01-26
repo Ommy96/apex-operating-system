@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye, Activity, MapPin, Utensils } from "lucide-react";
+import { Plus, Search, Filter, Download, Edit, Trash2, Users, User, Eye, Activity, MapPin, Utensils, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeedingProgramForm } from "@/components/FeedingProgramForm";
+import { ProgramReportsSection } from "@/components/program-reports";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFeedingProgramData } from "@/lib/downloadUtils";
@@ -27,6 +29,7 @@ export default function FeedingProgram() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("beneficiaries");
   const { toast } = useToast();
 
   const { data: feedingPrograms, refetch } = useQuery({
@@ -189,60 +192,74 @@ export default function FeedingProgram() {
         ] : undefined}
       />
 
-      {/* Statistics Cards */}
-      {statistics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard
-            title="Total Beneficiaries"
-            value={statistics.totalBeneficiaries}
-            icon={Users}
-            colorVariant="blue"
-          />
-          <StatsCard
-            title="By Gender"
-            value=""
-            icon={User}
-            colorVariant="emerald"
-          >
-            <div className="space-y-1">
-              {Object.entries(statistics.byGender).map(([gender, count]: any) => (
-                <div key={gender} className="flex justify-between text-sm">
-                  <span>{gender}</span>
-                  <span className="font-semibold">{count}</span>
+      {/* Main Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-card/50">
+          <TabsTrigger value="beneficiaries" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Users className="h-4 w-4" />
+            Beneficiaries
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <FileText className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="beneficiaries" className="space-y-6 mt-6">
+          {/* Statistics Cards */}
+          {statistics && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatsCard
+                title="Total Beneficiaries"
+                value={statistics.totalBeneficiaries}
+                icon={Users}
+                colorVariant="blue"
+              />
+              <StatsCard
+                title="By Gender"
+                value=""
+                icon={User}
+                colorVariant="emerald"
+              >
+                <div className="space-y-1">
+                  {Object.entries(statistics.byGender).map(([gender, count]: any) => (
+                    <div key={gender} className="flex justify-between text-sm">
+                      <span>{gender}</span>
+                      <span className="font-semibold">{count}</span>
+                    </div>
+                  ))}
+                  {Object.keys(statistics.byGender).length === 0 && (
+                    <div className="text-sm text-muted-foreground">No data</div>
+                  )}
                 </div>
-              ))}
-              {Object.keys(statistics.byGender).length === 0 && (
-                <div className="text-sm text-muted-foreground">No data</div>
-              )}
-            </div>
-          </StatsCard>
-          <StatsCard
-            title="By Program Type"
-            value=""
-            icon={MapPin}
-            colorVariant="purple"
-          >
-            <div className="space-y-1">
-              {Object.entries(statistics.byType).map(([type, count]: any) => (
-                <div key={type} className="flex justify-between text-sm">
-                  <span className="text-xs">{type}</span>
-                  <span className="font-semibold">{count}</span>
+              </StatsCard>
+              <StatsCard
+                title="By Program Type"
+                value=""
+                icon={MapPin}
+                colorVariant="purple"
+              >
+                <div className="space-y-1">
+                  {Object.entries(statistics.byType).map(([type, count]: any) => (
+                    <div key={type} className="flex justify-between text-sm">
+                      <span className="text-xs">{type}</span>
+                      <span className="font-semibold">{count}</span>
+                    </div>
+                  ))}
+                  {Object.keys(statistics.byType).length === 0 && (
+                    <div className="text-sm text-muted-foreground">No data</div>
+                  )}
                 </div>
-              ))}
-              {Object.keys(statistics.byType).length === 0 && (
-                <div className="text-sm text-muted-foreground">No data</div>
-              )}
+              </StatsCard>
+              <StatsCard
+                title="With Sponsorship"
+                value={statistics.withSponsorship}
+                subtitle="Education sponsorship"
+                icon={Activity}
+                colorVariant="orange"
+              />
             </div>
-          </StatsCard>
-          <StatsCard
-            title="With Sponsorship"
-            value={statistics.withSponsorship}
-            subtitle="Education sponsorship"
-            icon={Activity}
-            colorVariant="orange"
-          />
-        </div>
-      )}
+          )}
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
@@ -372,6 +389,15 @@ export default function FeedingProgram() {
           <p className="text-muted-foreground">No feeding program beneficiaries found.</p>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-6">
+          <ProgramReportsSection 
+            programName="Feeding Program" 
+            programType="Kawangware Lunch Hour" 
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -448,7 +474,7 @@ export default function FeedingProgram() {
                 </CardHeader>
                 <CardContent>
                   {viewingProgram.education_sponsorship ? (
-                    <Badge variant="outline" className="text-green-600 border-green-600 bg-green-50">
+                    <Badge variant="outline" className="text-primary border-primary bg-primary/10">
                       ✓ Active Education Sponsorship
                     </Badge>
                   ) : (

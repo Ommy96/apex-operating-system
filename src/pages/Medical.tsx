@@ -7,11 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { MedicalForm } from "@/components/MedicalForm";
-import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users } from "lucide-react";
+import { ProgramReportsSection } from "@/components/program-reports";
+import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users, FileText } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -24,6 +26,7 @@ export default function Medical() {
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("records");
   
   const { toast } = useToast();
   const { isAdmin } = useAuth();

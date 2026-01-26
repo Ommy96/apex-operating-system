@@ -18,11 +18,6 @@ import Programs from "./pages/Programs";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import SponsorsManagement from "./pages/SponsorsManagement";
 import Reports from "./pages/Reports";
-import HomeVisitReports from "./pages/HomeVisitReports";
-import SchoolVisitReports from "./pages/SchoolVisitReports";
-import BusinessVisitReports from "./pages/BusinessVisitReports";
-import ProgramReports from "./pages/ProgramReports";
-import ActivityReports from "./pages/ActivityReports";
 import AttendanceManagement from "./pages/AttendanceManagement";
 
 import OrganizationSettings from "./pages/OrganizationSettings";
@@ -190,34 +185,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/reports/home-visits" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <HomeVisitReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports/school-visits" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SchoolVisitReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports/business-visits" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <BusinessVisitReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports/program-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ProgramReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/reports/attendance" element={
               <ProtectedRoute requireRole="admin">
                 <DashboardLayout>
@@ -225,10 +192,10 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/reports/activity-reports" element={
+            <Route path="/custom-reports" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ActivityReports />
+                  <CustomReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
