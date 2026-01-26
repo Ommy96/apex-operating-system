@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye, Users, Music, MapPin, Sparkles } from "lucide-react";
+import { Plus, Search, Trophy, Star, Download, Edit, Trash2, Eye, Users, Music, MapPin, Sparkles, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KipawaSatoForm } from "@/components/KipawaSatoForm";
+import { ProgramReportsSection } from "@/components/program-reports";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatKipawaSatoData } from "@/lib/downloadUtils";
@@ -27,6 +29,7 @@ export default function KipawaSato() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("members");
   const { toast } = useToast();
 
   const { data: kipawaSatoMembers, refetch } = useQuery({
@@ -199,12 +202,26 @@ export default function KipawaSato() {
         ] : undefined}
       />
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name..."
+      {/* Main Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-card/50">
+          <TabsTrigger value="members" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Users className="h-4 w-4" />
+            Members
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <FileText className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members" className="space-y-6 mt-6">
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -405,6 +422,15 @@ export default function KipawaSato() {
           <p className="text-muted-foreground">No Kipawa Sato members found.</p>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-6">
+          <ProgramReportsSection 
+            programName="Kipawa Sato" 
+            programType="Kawangware Kipawa Sato" 
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

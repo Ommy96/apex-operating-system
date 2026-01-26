@@ -85,40 +85,6 @@ const programItems = [
   { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
-interface EnabledReportTypes {
-  homeVisits?: boolean;
-  schoolVisits?: boolean;
-  businessVisits?: boolean;
-  programReports?: boolean;
-  activityReports?: boolean;
-  academicPerformance?: boolean;
-  customReports?: boolean;
-  otherReports?: boolean;
-}
-
-const getReportsItems = (
-  isManagement: boolean, 
-  isStaff: boolean,
-  enabledReportTypes?: EnabledReportTypes
-) => {
-  const allItems = [
-    { title: "Home Visits", url: "/reports/home-visits", icon: Home, key: "homeVisits" },
-    { title: "School Visits", url: "/reports/school-visits", icon: School, key: "schoolVisits" },
-    { title: "Business Visits", url: "/reports/business-visits", icon: Building2, key: "businessVisits" },
-    { title: "Program Reports", url: "/reports/program-reports", icon: FileText, key: "programReports" },
-    { title: "Activity Reports", url: "/reports/activity-reports", icon: Trophy, key: "activityReports" },
-    { title: "Custom Reports", url: "/custom-reports", icon: FileText, key: "customReports" },
-  ];
-  
-  // Filter based on enabled report types (default to true if not set)
-  const filteredItems = allItems.filter(item => {
-    const isEnabled = enabledReportTypes?.[item.key as keyof EnabledReportTypes];
-    return isEnabled === undefined ? true : isEnabled;
-  });
-  
-  return filteredItems;
-};
-
 const systemItems = [
   { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
   { title: "Documents", url: "/documents", icon: FileText },
@@ -194,22 +160,6 @@ export function AppSidebar() {
       if (error) throw error;
       return data;
     },
-  });
-
-  // Fetch organization settings for enabled report types
-  const { data: orgSettings } = useQuery({
-    queryKey: ['org-settings', currentOrganization?.organization_id],
-    queryFn: async () => {
-      if (!currentOrganization?.organization_id) return null;
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('settings')
-        .eq('id', currentOrganization.organization_id)
-        .single();
-      if (error) throw error;
-      return data?.settings as { enabledReportTypes?: EnabledReportTypes } | null;
-    },
-    enabled: !!currentOrganization?.organization_id,
   });
 
   const isActive = (path: string) => currentPath === path;
@@ -353,30 +303,30 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Reports */}
-          <SidebarGroup className="mt-6">
-            {!isCollapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
-                Reports
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {getReportsItems(isManagement, isStaff, orgSettings?.enabledReportTypes).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <MenuItem 
-                      item={item} 
-                      isCollapsed={isCollapsed} 
-                      isActive={isActive} 
-                      onClick={handleNavClick} 
-                    />
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
           {/* System - Only for Admin/Management */}
+          {(isAdmin || isManagement || superAdmin) && (
+            <SidebarGroup className="mt-6">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                  System
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {systemItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <MenuItem 
+                        item={item} 
+                        isCollapsed={isCollapsed} 
+                        isActive={isActive} 
+                        onClick={handleNavClick} 
+                      />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
           {(isAdmin || isManagement || superAdmin) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
