@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Coins, Download, Receipt, Edit, Trash2, Activity, MapPin, Briefcase, Users } from "lucide-react";
+import { Plus, Search, Coins, Download, Receipt, Edit, Trash2, Activity, MapPin, Briefcase, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { SelfEmpowermentForm } from "@/components/SelfEmpowermentForm";
 import { LoanRepaymentForm } from "@/components/LoanRepaymentForm";
 import { LoanPaymentsView } from "@/components/LoanPaymentsView";
 import { LoansSummary } from "@/components/LoansSummary";
+import { BusinessVisitsTab } from "@/components/self-empowerment";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSelfEmpowermentData } from "@/lib/downloadUtils";
@@ -172,9 +173,13 @@ export default function SelfEmpowerment() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-card/50">
+        <TabsList className="grid w-full grid-cols-3 bg-card/50">
           <TabsTrigger value="applications" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
             Applications
+          </TabsTrigger>
+          <TabsTrigger value="business-visits" className="flex items-center gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            <Building2 className="h-4 w-4" />
+            Business Visits
           </TabsTrigger>
           <TabsTrigger value="loans-summary" disabled={!isAdmin && !isManagement} className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
             Loans Summary
@@ -442,6 +447,10 @@ export default function SelfEmpowerment() {
               <p className="text-muted-foreground">No self-empowerment applications found.</p>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="business-visits">
+          <BusinessVisitsTab />
         </TabsContent>
 
         <TabsContent value="loans-summary">

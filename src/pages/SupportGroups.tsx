@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Users, Download, Eye, Edit, Trash2, MapPin, Activity } from "lucide-react";
+import { Plus, Search, Users, Download, Eye, Edit, Trash2, MapPin, Activity, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SupportGroupForm } from "@/components/SupportGroupForm";
 import { SupportGroupDetails } from "@/components/SupportGroupDetails";
 import { SupportGroupEdit } from "@/components/SupportGroupEdit";
+import { GroupVisitsTab } from "@/components/visits";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatSupportGroupsData } from "@/lib/downloadUtils";
@@ -27,6 +29,8 @@ export default function SupportGroups() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingGroup, setViewingGroup] = useState<string | null>(null);
   const [editingGroup, setEditingGroup] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("groups");
+  const [selectedGroupForVisits, setSelectedGroupForVisits] = useState<{ id: string; name: string } | null>(null);
 
   const { data: supportGroups, refetch } = useQuery({
     queryKey: ['support-groups', currentOrganization?.organization_id],
@@ -231,6 +235,20 @@ export default function SupportGroups() {
         </div>
       )}
 
+      {/* Tabs for Groups and Group Visits */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-card/50">
+          <TabsTrigger value="groups" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Users className="h-4 w-4" />
+            Groups
+          </TabsTrigger>
+          <TabsTrigger value="group-visits" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <ClipboardList className="h-4 w-4" />
+            Group Visits
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="groups" className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -349,6 +367,19 @@ export default function SupportGroups() {
           <p className="text-muted-foreground">No support groups found.</p>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="group-visits">
+          {selectedGroupForVisits ? (
+            <GroupVisitsTab groupId={selectedGroupForVisits.id} groupName={selectedGroupForVisits.name} />
+          ) : (
+            <div className="text-center py-12">
+              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">Select a group from the Groups tab to view its visits.</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* View Group Details Dialog */}
       <Dialog open={!!viewingGroup} onOpenChange={() => setViewingGroup(null)}>
