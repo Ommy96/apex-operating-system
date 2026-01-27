@@ -327,29 +327,6 @@ export function AppSidebar() {
               </SidebarGroupContent>
             </SidebarGroup>
           )}
-          {(isAdmin || isManagement || superAdmin) && (
-            <SidebarGroup className="mt-6">
-              {!isCollapsed && (
-                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
-                  System
-                </SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu className="space-y-1">
-                  {systemItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <MenuItem 
-                        item={item} 
-                        isCollapsed={isCollapsed} 
-                        isActive={isActive} 
-                        onClick={handleNavClick} 
-                      />
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
 
           {/* Super Admin - Only for specific super admin user */}
           {isSuperAdmin(user?.email) && (
