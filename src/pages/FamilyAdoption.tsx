@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter, FileText, Link as LinkIcon, ExternalLink, Heart } from "lucide-react";
+import { Plus, Search, Download, Edit, Trash2, Eye, Users, User, MapPin, Activity, Filter, FileText, Link as LinkIcon, ExternalLink, Heart, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FamilyAdoptionForm } from "@/components/FamilyAdoptionForm";
 import { FamilyDocumentLinkForm } from "@/components/FamilyDocumentLinkForm";
+import { HomeVisitsTab } from "@/components/visits";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadExcel, formatFamilyAdoptionData } from "@/lib/downloadUtils";
@@ -32,6 +34,7 @@ export default function FamilyAdoption() {
   const [residenceFilter, setResidenceFilter] = useState("");
   const [familyStatusFilter, setFamilyStatusFilter] = useState("");
   const [sourceOfIncomeFilter, setSourceOfIncomeFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("families");
 
   const { data: familyAdoptions, refetch } = useQuery({
     queryKey: ['family-adoption', currentOrganization?.organization_id],
@@ -305,6 +308,20 @@ export default function FamilyAdoption() {
         </div>
       )}
 
+      {/* Tabs for Families and Home Visits */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-card/50">
+          <TabsTrigger value="families" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Users className="h-4 w-4" />
+            Families
+          </TabsTrigger>
+          <TabsTrigger value="home-visits" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Home className="h-4 w-4" />
+            Home Visits
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="families" className="space-y-4">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
@@ -477,6 +494,12 @@ export default function FamilyAdoption() {
           <p className="text-muted-foreground">No family adoption records found.</p>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="home-visits">
+          <HomeVisitsTab programContext="Family Adoption" />
+        </TabsContent>
+      </Tabs>
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

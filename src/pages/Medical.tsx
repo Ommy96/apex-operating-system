@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { MedicalForm } from "@/components/MedicalForm";
-import { ProgramReportsSection } from "@/components/program-reports";
-import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users, FileText } from "lucide-react";
+import { HospitalVisitsTab, HomeVisitsTab } from "@/components/visits";
+import { Download, Plus, Search, Eye, Edit, Trash2, Stethoscope, MapPin, User, Activity, Users, FileText, Hospital, Home } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -178,6 +178,25 @@ export default function Medical() {
         ] : undefined}
       />
 
+      {/* Tabs for Records and Visits */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-card/50">
+          <TabsTrigger value="records" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Stethoscope className="h-4 w-4" />
+            Records
+          </TabsTrigger>
+          <TabsTrigger value="hospital-visits" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Hospital className="h-4 w-4" />
+            Hospital Visits
+          </TabsTrigger>
+          <TabsTrigger value="home-visits" className="flex items-center gap-2 data-[state=active]:bg-accent">
+            <Home className="h-4 w-4" />
+            Home Visits
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="records" className="space-y-6">
+
       {/* Filters */}
       <div className="flex gap-4">
         <div className="flex-1 relative">
@@ -315,6 +334,16 @@ export default function Medical() {
           </Card>
         ))}
       </div>
+        </TabsContent>
+
+        <TabsContent value="hospital-visits">
+          <HospitalVisitsTab />
+        </TabsContent>
+
+        <TabsContent value="home-visits">
+          <HomeVisitsTab programContext="Medical Program" />
+        </TabsContent>
+      </Tabs>
 
       {/* Add/Edit Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={handleDialogClose}>
