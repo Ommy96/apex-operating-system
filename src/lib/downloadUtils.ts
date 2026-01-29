@@ -157,6 +157,7 @@ export const formatSchoolVisitReportsData = (reports: any[]) => {
 
 export const formatEducationData = (children: any[]) => {
   return children.map(child => ({
+    'Student ID': child.student_id || 'Not specified',
     'First Name': child.first_name,
     'Last Name': child.last_name,
     'Gender': child.gender || 'Not specified',
