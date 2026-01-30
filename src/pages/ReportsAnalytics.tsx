@@ -139,12 +139,36 @@ export default function ReportsAnalytics() {
     queryKey: ['analytics-replacements', currentOrganization?.organization_id],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
-      const { data, error } = await supabase
+      
+      // First fetch replacements
+      const { data: replacementsData, error: replacementsError } = await supabase
         .from('replacements')
         .select('*')
         .eq('organization_id', currentOrganization.organization_id);
-      if (error) throw error;
-      return data || [];
+      
+      if (replacementsError) throw replacementsError;
+      if (!replacementsData || replacementsData.length === 0) return [];
+      
+      // Get unique child IDs
+      const childIds = replacementsData
+        .map(r => r.original_child_id)
+        .filter((id): id is string => !!id);
+      
+      // Fetch children names
+      const { data: childrenData } = await supabase
+        .from('children')
+        .select('id, first_name, last_name')
+        .in('id', childIds);
+      
+      // Create lookup map
+      const childMap = new Map(
+        (childrenData || []).map(c => [c.id, `${c.first_name} ${c.last_name}`])
+      );
+      
+      return replacementsData.map(r => ({
+        ...r,
+        original_name: childMap.get(r.original_child_id) || 'N/A'
+      }));
     },
     enabled: !!currentOrganization?.organization_id,
   });
