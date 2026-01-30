@@ -138,9 +138,13 @@ export default function ReportsAnalytics() {
   const { data: replacements = [], isLoading: isLoadingReplacements } = useQuery({
     queryKey: ['analytics-replacements', currentOrganization?.organization_id],
     queryFn: async () => {
-      // Since we don't have a dedicated replacements table, return empty for now
-      // This can be extended to use audit_logs or a dedicated table
-      return [];
+      if (!currentOrganization?.organization_id) return [];
+      const { data, error } = await supabase
+        .from('replacements')
+        .select('*')
+        .eq('organization_id', currentOrganization.organization_id);
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!currentOrganization?.organization_id,
   });
