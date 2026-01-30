@@ -1,25 +1,35 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Users, 
-  UserPlus, 
-  UserMinus,
   RefreshCw,
   TrendingUp,
-  TrendingDown,
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Activity
+  Activity,
+  Eye,
+  Search,
+  Download
 } from "lucide-react";
 import { Pie, PieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart, BarChart, Bar } from "recharts";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { format, isWithinInterval, startOfMonth, subMonths, eachMonthOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
+import * as XLSX from 'xlsx';
 
 interface ChildLifecycleSectionProps {
   children: any[];
@@ -36,6 +46,9 @@ const CHART_COLORS = {
 };
 
 export function ChildLifecycleSection({ children, replacements, dateRange, isLoading }: ChildLifecycleSectionProps) {
+  const [showAllReplacements, setShowAllReplacements] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Status distribution
   const statusDistribution = useMemo(() => {
     if (!children.length) return { active: 0, inactive: 0, total: 0 };
@@ -104,7 +117,7 @@ export function ChildLifecycleSection({ children, replacements, dateRange, isLoa
     });
   }, [children]);
 
-  // Replacements in period
+  // Replacements in period (limited to 20 for preview)
   const replacementsInPeriod = useMemo(() => {
     if (!replacements.length) return [];
     
@@ -121,20 +134,46 @@ export function ChildLifecycleSection({ children, replacements, dateRange, isLoa
       .slice(0, 20);
   }, [replacements, dateRange]);
 
-  // Program coverage per child
-  const programCoverage = useMemo(() => {
-    if (!children.length) return [];
+  // All replacements (for dialog view)
+  const allReplacements = useMemo(() => {
+    if (!replacements.length) return [];
     
-    // This would need program enrollment data - using placeholder
-    const coverage = [
-      { programs: '1 Program', count: Math.floor(children.length * 0.4) },
-      { programs: '2 Programs', count: Math.floor(children.length * 0.35) },
-      { programs: '3+ Programs', count: Math.floor(children.length * 0.2) },
-      { programs: 'No Program', count: Math.floor(children.length * 0.05) }
-    ];
+    return replacements
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [replacements]);
 
-    return coverage;
-  }, [children]);
+  // Filtered replacements for search
+  const filteredReplacements = useMemo(() => {
+    if (!searchQuery.trim()) return allReplacements;
+    
+    const query = searchQuery.toLowerCase();
+    return allReplacements.filter(r => 
+      (r.original_name && r.original_name.toLowerCase().includes(query)) ||
+      (r.new_child_full_name && r.new_child_full_name.toLowerCase().includes(query)) ||
+      (r.reason && r.reason.toLowerCase().includes(query))
+    );
+  }, [allReplacements, searchQuery]);
+
+  // Export replacements to Excel
+  const handleExportReplacements = () => {
+    const exportData = filteredReplacements.map(r => ({
+      'Original Student': r.original_name || 'N/A',
+      'Replacement Student': r.new_child_full_name || 'Pending',
+      'Gender': r.new_child_gender || 'N/A',
+      'Grade': r.new_child_grade || 'N/A',
+      'Academic Level': r.new_child_academic_level || 'N/A',
+      'School': r.new_child_school || 'N/A',
+      'Location': r.new_child_location || 'N/A',
+      'Reason': r.reason || 'N/A',
+      'Notes': r.notes || '',
+      'Replacement Date': r.created_at ? format(new Date(r.created_at), 'MMM d, yyyy') : 'N/A'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Replaced Students');
+    XLSX.writeFile(workbook, `replaced_students_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+  };
 
   if (isLoading) {
     return (
@@ -323,12 +362,25 @@ export function ChildLifecycleSection({ children, replacements, dateRange, isLoa
 
         {/* Recent Replacements */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <RefreshCw className="h-5 w-5 text-primary" />
-              Recent Replacements
-            </CardTitle>
-            <CardDescription>Children who have been replaced in the program</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5 text-primary" />
+                Recent Replacements
+              </CardTitle>
+              <CardDescription>Children who have been replaced in the program</CardDescription>
+            </div>
+            {allReplacements.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowAllReplacements(true)}
+                className="gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                View All ({allReplacements.length})
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {replacementsInPeriod.length > 0 ? (
@@ -346,7 +398,7 @@ export function ChildLifecycleSection({ children, replacements, dateRange, isLoa
                     {replacementsInPeriod.map((replacement, index) => (
                       <TableRow key={replacement.id || index}>
                         <TableCell className="font-medium">{replacement.original_name || 'N/A'}</TableCell>
-                        <TableCell>{replacement.replacement_name || 'Pending'}</TableCell>
+                        <TableCell>{replacement.new_child_full_name || 'Pending'}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">{replacement.reason || 'N/A'}</Badge>
                         </TableCell>
@@ -367,6 +419,84 @@ export function ChildLifecycleSection({ children, replacements, dateRange, isLoa
           </CardContent>
         </Card>
       </div>
+
+      {/* View All Replacements Dialog */}
+      <Dialog open={showAllReplacements} onOpenChange={setShowAllReplacements}>
+        <DialogContent className="max-w-4xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-primary" />
+              All Replaced Students
+            </DialogTitle>
+            <DialogDescription>
+              Complete list of all students who have been replaced ({allReplacements.length} total)
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex items-center gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by student name or reason..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportReplacements}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
+
+          <ScrollArea className="h-[500px] rounded-md border">
+            {filteredReplacements.length > 0 ? (
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead>Original Student</TableHead>
+                    <TableHead>Replacement Student</TableHead>
+                    <TableHead>Gender</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredReplacements.map((replacement, index) => (
+                    <TableRow key={replacement.id || index}>
+                      <TableCell className="font-medium">{replacement.original_name || 'N/A'}</TableCell>
+                      <TableCell>{replacement.new_child_full_name || 'Pending'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{replacement.new_child_gender || 'N/A'}</Badge>
+                      </TableCell>
+                      <TableCell>{replacement.new_child_grade || 'N/A'}</TableCell>
+                      <TableCell>{replacement.new_child_location || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{replacement.reason || 'N/A'}</Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(replacement.created_at), 'MMM d, yyyy')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No replacements found matching your search</p>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
