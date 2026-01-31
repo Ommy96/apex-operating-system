@@ -437,6 +437,13 @@ export default function FamilyAdoption() {
               <div className="text-sm text-muted-foreground">
                 <strong>Source of Income:</strong> {(family as any).source_of_income || 'Not specified'}
               </div>
+              {(family as any).family_profile && (
+                <div className="text-sm text-muted-foreground">
+                  <strong>Family Profile:</strong> {(family as any).family_profile.length > 50 
+                    ? `${(family as any).family_profile.substring(0, 50)}...` 
+                    : (family as any).family_profile}
+                </div>
+              )}
               
               <div className="flex gap-2 pt-2">
                 <Button
@@ -642,6 +649,23 @@ export default function FamilyAdoption() {
                   </Card>
                 </div>
               </div>
+
+              {/* Family Profile Section */}
+              {(viewingFamily as any)?.family_profile && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Family Profile
+                  </h4>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-foreground whitespace-pre-wrap">
+                        {(viewingFamily as any).family_profile}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               {/* Documents Section */}
               <div>

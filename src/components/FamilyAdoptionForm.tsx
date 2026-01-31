@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,7 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
     sponsor: family?.sponsor || "",
     family_status: family?.family_status || "",
     source_of_income: family?.source_of_income || "",
+    family_profile: family?.family_profile || "",
   });
 
   // When a child is selected, auto-fill the form fields
@@ -66,6 +68,7 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
         sponsor: formData.sponsor as "NSP-AID" | "Donation" | null || null,
         family_status: formData.family_status || null,
         source_of_income: formData.source_of_income || null,
+        family_profile: formData.family_profile || null,
         linked_child_id: selectedChild?.id || family?.linked_child_id || null,
       };
 
@@ -229,6 +232,17 @@ export function FamilyAdoptionForm({ family, onSuccess, onCancel }: FamilyAdopti
             value={formData.source_of_income}
             onChange={(e) => handleInputChange('source_of_income', e.target.value)}
             placeholder="e.g., Small business, Employment, etc."
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <Label htmlFor="family_profile">Family Profile</Label>
+          <Textarea
+            id="family_profile"
+            value={formData.family_profile}
+            onChange={(e) => handleInputChange('family_profile', e.target.value)}
+            placeholder="Describe the family background, living conditions, challenges, and any other relevant information..."
+            rows={4}
           />
         </div>
       </div>

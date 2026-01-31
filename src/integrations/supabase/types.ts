@@ -997,6 +997,7 @@ export type Database = {
           category: Database["public"]["Enums"]["family_category_type"] | null
           created_at: string
           created_by: string | null
+          family_profile: string | null
           family_status: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
@@ -1014,6 +1015,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["family_category_type"] | null
           created_at?: string
           created_by?: string | null
+          family_profile?: string | null
           family_status?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
@@ -1031,6 +1033,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["family_category_type"] | null
           created_at?: string
           created_by?: string | null
+          family_profile?: string | null
           family_status?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string

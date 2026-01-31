@@ -108,6 +108,7 @@ export const formatFamilyAdoptionData = (families: any[]) => {
     'Residence': family.residence || 'Not specified',
     'Family Status': family.family_status || 'Not specified',
     'Source of Income': family.source_of_income || 'Not specified',
+    'Family Profile': family.family_profile || 'Not specified',
     'Sponsor': family.sponsor || 'Not specified',
     'Number of Beneficiaries': family.no_of_beneficiaries || 0,
     'Created Date': new Date(family.created_at).toLocaleDateString(),
