@@ -1686,6 +1686,7 @@ export type Database = {
           medical_condition: string
           organization_id: string
           outcome: string | null
+          staff: string | null
           updated_at: string
         }
         Insert: {
@@ -1702,6 +1703,7 @@ export type Database = {
           medical_condition: string
           organization_id?: string
           outcome?: string | null
+          staff?: string | null
           updated_at?: string
         }
         Update: {
@@ -1718,6 +1720,7 @@ export type Database = {
           medical_condition?: string
           organization_id?: string
           outcome?: string | null
+          staff?: string | null
           updated_at?: string
         }
         Relationships: [
