@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Hospital, Calendar, User, Eye, Edit, Trash2, MapPin, AlertCircle, CheckCircle2, Clock, Download, Stethoscope } from "lucide-react";
+import { Plus, Hospital, Calendar, User, Eye, Edit, Trash2, Clock, Download, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,14 +28,11 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
   const [viewingVisit, setViewingVisit] = useState<any>(null);
   const [editingVisit, setEditingVisit] = useState<any>(null);
 
-  // We'll use a new table for hospital visits or repurpose medical records
-  // For now, we'll create a query structure that can work with a hospital_visits table
   const { data: hospitalVisits = [], refetch } = useQuery({
     queryKey: ['hospital-visits', beneficiaryId, currentOrganization?.organization_id],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
       
-      // Use medical_records as hospital visit data since it contains hospital info
       let query = supabase
         .from('medical_records')
         .select('*')
@@ -74,13 +71,10 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
     }
 
     const formattedData = hospitalVisits.map((visit: any) => ({
-      'Patient': visit.full_name,
-      'Hospital': visit.hospital,
-      'Date': visit.date ? format(new Date(visit.date), 'MMM d, yyyy') : 'N/A',
-      'Medical Condition': visit.medical_condition,
-      'Doctor\'s Report': visit.doctors_report || 'N/A',
-      'Outcome': visit.outcome || 'N/A',
-      'Location': visit.location || 'N/A',
+      'Date of Visit': visit.date ? format(new Date(visit.date), 'MMM d, yyyy') : 'N/A',
+      'Medical Facility': visit.hospital,
+      'Staff': visit.staff || 'N/A',
+      'Notes': visit.doctors_report || 'N/A',
     }));
 
     const ws = XLSX.utils.json_to_sheet(formattedData);
@@ -145,27 +139,26 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-base font-semibold flex items-center gap-2">
-                      <Stethoscope className="h-4 w-4 text-primary" />
-                      {visit.full_name}
+                      <Hospital className="h-4 w-4 text-primary" />
+                      {visit.hospital}
                     </CardTitle>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       {visit.date ? format(new Date(visit.date), 'MMMM d, yyyy') : 'No date'}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    <Hospital className="h-3 w-3 mr-1" />
-                    {visit.hospital}
-                  </Badge>
+                  {visit.staff && (
+                    <Badge variant="outline" className="text-xs">
+                      <User className="h-3 w-3 mr-1" />
+                      {visit.staff}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm">
-                  <span className="font-medium">Condition:</span> {visit.medical_condition}
-                </p>
-                {visit.outcome && (
+                {visit.doctors_report && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    <span className="font-medium">Outcome:</span> {visit.outcome}
+                    <span className="font-medium">Notes:</span> {visit.doctors_report}
                   </p>
                 )}
                 <div className="flex gap-2 pt-2">
@@ -227,7 +220,7 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
         setIsAddDialogOpen(open);
         if (!open) setEditingVisit(null);
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingVisit ? 'Edit Hospital Visit' : 'Record Hospital Visit'}
@@ -250,7 +243,7 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
       </Dialog>
 
       <Dialog open={!!viewingVisit} onOpenChange={(open) => !open && setViewingVisit(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Hospital className="h-5 w-5 text-primary" />
@@ -264,68 +257,43 @@ export function HospitalVisitsTab({ beneficiaryId, beneficiaryName }: HospitalVi
                   <CardContent className="pt-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Patient</p>
-                          <p className="font-medium">{viewingVisit.full_name}</p>
+                          <p className="text-xs text-muted-foreground">Date of Visit</p>
+                          <p className="font-medium">{viewingVisit.date ? format(new Date(viewingVisit.date), 'MMMM d, yyyy') : 'N/A'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Hospital className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Hospital</p>
+                          <p className="text-xs text-muted-foreground">Medical Facility</p>
                           <p className="font-medium">{viewingVisit.hospital}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <User className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Date</p>
-                          <p className="font-medium">{viewingVisit.date ? format(new Date(viewingVisit.date), 'MMMM d, yyyy') : 'N/A'}</p>
+                          <p className="text-xs text-muted-foreground">Staff</p>
+                          <p className="font-medium">{viewingVisit.staff || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <div className="space-y-4">
+                {viewingVisit.doctors_report && (
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4 text-primary" />
-                        Medical Condition
+                        <FileText className="h-4 w-4 text-primary" />
+                        Notes
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="whitespace-pre-wrap">{viewingVisit.medical_condition}</p>
+                      <p className="whitespace-pre-wrap">{viewingVisit.doctors_report}</p>
                     </CardContent>
                   </Card>
-
-                  {viewingVisit.doctors_report && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Doctor's Report</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="whitespace-pre-wrap">{viewingVisit.doctors_report}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {viewingVisit.outcome && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
-                          Outcome
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="whitespace-pre-wrap">{viewingVisit.outcome}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                )}
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t">
                   <Clock className="h-3 w-3" />
