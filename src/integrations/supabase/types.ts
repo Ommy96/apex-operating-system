@@ -237,6 +237,42 @@ export type Database = {
           },
         ]
       }
+      adult_dependants: {
+        Row: {
+          adult_id: string
+          created_at: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          adult_id: string
+          created_at?: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          adult_id?: string
+          created_at?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adult_dependants_adult_id_fkey"
+            columns: ["adult_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adult_dependants_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alumni: {
         Row: {
           achievements: string | null
@@ -501,6 +537,562 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      beneficiaries: {
+        Row: {
+          academic_level:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          amount_given: number | null
+          background_image_url: string | null
+          background_narrative: string | null
+          beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          county: string | null
+          course_name: string | null
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          display_name: string
+          estate_village: string | null
+          first_name: string | null
+          future_ambition: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          grade: string | null
+          group_activities: string[] | null
+          group_name: string | null
+          group_schedule: string | null
+          has_special_needs: boolean | null
+          hiv_positive_since: number | null
+          hiv_status: Database["public"]["Enums"]["hiv_status_type"] | null
+          hobbies: string | null
+          home_county: string | null
+          id: string
+          inactive_date: string | null
+          inactive_reason: string | null
+          institution_name: string | null
+          last_name: string | null
+          leader_name: string | null
+          leader_phone: string | null
+          legacy_child_id: string | null
+          location: string | null
+          member_count: number | null
+          middle_name: string | null
+          organization_id: string
+          other_medical_conditions: string | null
+          photo_url: string | null
+          religion: string | null
+          source_of_income: string | null
+          special_needs_details: string | null
+          status: string
+          student_id_number: string | null
+          sub_county: string | null
+          updated_at: string
+          year_enrolled: number | null
+        }
+        Insert: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          amount_given?: number | null
+          background_image_url?: string | null
+          background_narrative?: string | null
+          beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          county?: string | null
+          course_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          display_name: string
+          estate_village?: string | null
+          first_name?: string | null
+          future_ambition?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          group_activities?: string[] | null
+          group_name?: string | null
+          group_schedule?: string | null
+          has_special_needs?: boolean | null
+          hiv_positive_since?: number | null
+          hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
+          hobbies?: string | null
+          home_county?: string | null
+          id?: string
+          inactive_date?: string | null
+          inactive_reason?: string | null
+          institution_name?: string | null
+          last_name?: string | null
+          leader_name?: string | null
+          leader_phone?: string | null
+          legacy_child_id?: string | null
+          location?: string | null
+          member_count?: number | null
+          middle_name?: string | null
+          organization_id: string
+          other_medical_conditions?: string | null
+          photo_url?: string | null
+          religion?: string | null
+          source_of_income?: string | null
+          special_needs_details?: string | null
+          status?: string
+          student_id_number?: string | null
+          sub_county?: string | null
+          updated_at?: string
+          year_enrolled?: number | null
+        }
+        Update: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          amount_given?: number | null
+          background_image_url?: string | null
+          background_narrative?: string | null
+          beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
+          county?: string | null
+          course_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          display_name?: string
+          estate_village?: string | null
+          first_name?: string | null
+          future_ambition?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          group_activities?: string[] | null
+          group_name?: string | null
+          group_schedule?: string | null
+          has_special_needs?: boolean | null
+          hiv_positive_since?: number | null
+          hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
+          hobbies?: string | null
+          home_county?: string | null
+          id?: string
+          inactive_date?: string | null
+          inactive_reason?: string | null
+          institution_name?: string | null
+          last_name?: string | null
+          leader_name?: string | null
+          leader_phone?: string | null
+          legacy_child_id?: string | null
+          location?: string | null
+          member_count?: number | null
+          middle_name?: string | null
+          organization_id?: string
+          other_medical_conditions?: string | null
+          photo_url?: string | null
+          religion?: string | null
+          source_of_income?: string | null
+          special_needs_details?: string | null
+          status?: string
+          student_id_number?: string | null
+          sub_county?: string | null
+          updated_at?: string
+          year_enrolled?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiaries_legacy_child_id_fkey"
+            columns: ["legacy_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_academics: {
+        Row: {
+          academic_year: number
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          out_of: number | null
+          overall_grade: string | null
+          position: number | null
+          remarks: string | null
+          term: string
+          total_marks: number | null
+          updated_at: string
+        }
+        Insert: {
+          academic_year: number
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          out_of?: number | null
+          overall_grade?: string | null
+          position?: number | null
+          remarks?: string | null
+          term: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: number
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          out_of?: number | null
+          overall_grade?: string | null
+          position?: number | null
+          remarks?: string | null
+          term?: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_academics_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_academics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_donors: {
+        Row: {
+          amount_received: number | null
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          donation_date: string | null
+          donor_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_received?: number | null
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          donation_date?: string | null
+          donor_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_received?: number | null
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          donation_date?: string | null
+          donor_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_donors_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_donors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_guardians: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          guardian_id: string
+          id: string
+          is_primary: boolean | null
+          relationship: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          guardian_id: string
+          id?: string
+          is_primary?: boolean | null
+          relationship: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          guardian_id?: string
+          id?: string
+          is_primary?: boolean | null
+          relationship?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_guardians_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_guardians_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_services: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          enrolled_date: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          program_id: string | null
+          project_name: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolled_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolled_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_services_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_services_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_siblings: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          id: string
+          relationship: string
+          sibling_id: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          id?: string
+          relationship: string
+          sibling_id: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          id?: string
+          relationship?: string
+          sibling_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_siblings_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_siblings_sibling_id_fkey"
+            columns: ["sibling_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_uploads: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          description: string | null
+          document_name: string
+          document_type: string | null
+          file_size: number | null
+          file_url: string
+          id: string
+          organization_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          description?: string | null
+          document_name: string
+          document_type?: string | null
+          file_size?: number | null
+          file_url: string
+          id?: string
+          organization_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          description?: string | null
+          document_name?: string
+          document_type?: string | null
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          organization_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_uploads_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_uploads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_visitations: {
+        Row: {
+          beneficiary_id: string
+          challenges_identified: string | null
+          created_at: string
+          created_by: string | null
+          follow_up_date: string | null
+          follow_up_required: boolean | null
+          id: string
+          location: string | null
+          observation_findings: string | null
+          organization_id: string
+          reason_for_visit: string | null
+          recommendations: string | null
+          staff_name: string | null
+          updated_at: string
+          visit_date: string
+          visit_type: string
+        }
+        Insert: {
+          beneficiary_id: string
+          challenges_identified?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          location?: string | null
+          observation_findings?: string | null
+          organization_id: string
+          reason_for_visit?: string | null
+          recommendations?: string | null
+          staff_name?: string | null
+          updated_at?: string
+          visit_date: string
+          visit_type: string
+        }
+        Update: {
+          beneficiary_id?: string
+          challenges_identified?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          location?: string | null
+          observation_findings?: string | null
+          organization_id?: string
+          reason_for_visit?: string | null
+          recommendations?: string | null
+          staff_name?: string | null
+          updated_at?: string
+          visit_date?: string
+          visit_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_visitations_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_visitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_visit_reports: {
         Row: {
@@ -1167,6 +1759,74 @@ export type Database = {
           },
           {
             foreignKeyName: "feeding_program_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardians: {
+        Row: {
+          address: string | null
+          age: number | null
+          created_at: string
+          created_by: string | null
+          date_of_death: string | null
+          email: string | null
+          employment_details: string | null
+          employment_type: string | null
+          full_name: string
+          guardian_type: Database["public"]["Enums"]["guardian_type"]
+          id: string
+          is_alive: boolean | null
+          national_id: string | null
+          organization_id: string
+          phone: string | null
+          source_of_income: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_of_death?: string | null
+          email?: string | null
+          employment_details?: string | null
+          employment_type?: string | null
+          full_name: string
+          guardian_type: Database["public"]["Enums"]["guardian_type"]
+          id?: string
+          is_alive?: boolean | null
+          national_id?: string | null
+          organization_id: string
+          phone?: string | null
+          source_of_income?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_of_death?: string | null
+          email?: string | null
+          employment_details?: string | null
+          employment_type?: string | null
+          full_name?: string
+          guardian_type?: Database["public"]["Enums"]["guardian_type"]
+          id?: string
+          is_alive?: boolean | null
+          national_id?: string | null
+          organization_id?: string
+          phone?: string | null
+          source_of_income?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardians_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2493,6 +3153,69 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          budget: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          organization_id: string
+          program_id: string | null
+          slug: string
+          start_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          program_id?: string | null
+          slug: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          program_id?: string | null
+          slug?: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           action_type: string
@@ -3382,9 +4105,12 @@ export type Database = {
         | "Junior Secondary School"
         | "Senior School"
       amount_status_type: "Loan" | "Grant"
+      beneficiary_type: "student" | "adult" | "group"
       family_category_type: "Guardian Ration" | "Home Based Care"
       feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
       gender_type: "Male" | "Female"
+      guardian_type: "father" | "mother" | "other"
+      hiv_status_type: "positive" | "negative" | "unknown"
       parental_status_type: "Both alive" | "Both deceased" | "Partial"
       program_type:
         | "Education"
@@ -3568,9 +4294,12 @@ export const Constants = {
         "Senior School",
       ],
       amount_status_type: ["Loan", "Grant"],
+      beneficiary_type: ["student", "adult", "group"],
       family_category_type: ["Guardian Ration", "Home Based Care"],
       feeding_type: ["Kawangware Lunch Hour", "Kibera Early Dinner"],
       gender_type: ["Male", "Female"],
+      guardian_type: ["father", "mother", "other"],
+      hiv_status_type: ["positive", "negative", "unknown"],
       parental_status_type: ["Both alive", "Both deceased", "Partial"],
       program_type: [
         "Education",
