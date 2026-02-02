@@ -2049,6 +2049,70 @@ export type Database = {
           },
         ]
       }
+      program_beneficiaries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: Json | null
+          display_name: string
+          enrolled_at: string
+          id: string
+          linked_child_id: string | null
+          organization_id: string
+          program_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json | null
+          display_name: string
+          enrolled_at?: string
+          id?: string
+          linked_child_id?: string | null
+          organization_id: string
+          program_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json | null
+          display_name?: string
+          enrolled_at?: string
+          id?: string
+          linked_child_id?: string | null
+          organization_id?: string
+          program_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_beneficiaries_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_beneficiaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_beneficiaries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_entries: {
         Row: {
           child_id: string | null
@@ -2239,42 +2303,185 @@ export type Database = {
           },
         ]
       }
-      programs: {
+      program_visit_types: {
         Row: {
           created_at: string
-          custom_fields: Json | null
           description: string | null
+          field_schema: Json | null
           id: string
-          is_active: boolean
-          location: string | null
+          is_active: boolean | null
           name: string
-          organization_id: string
-          program_id: string | null
-          show_in_navigation: boolean | null
+          program_id: string
+          slug: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          custom_fields?: Json | null
           description?: string | null
+          field_schema?: Json | null
           id?: string
-          is_active?: boolean
-          location?: string | null
+          is_active?: boolean | null
           name: string
-          organization_id?: string
-          program_id?: string | null
-          show_in_navigation?: boolean | null
+          program_id: string
+          slug: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          field_schema?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          program_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_visit_types_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_visits: {
+        Row: {
+          beneficiary_id: string | null
+          created_at: string
+          created_by: string | null
+          data: Json | null
+          id: string
+          linked_child_id: string | null
+          organization_id: string
+          program_id: string
+          staff: string | null
+          updated_at: string
+          visit_date: string
+          visit_type_id: string
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json | null
+          id?: string
+          linked_child_id?: string | null
+          organization_id: string
+          program_id: string
+          staff?: string | null
+          updated_at?: string
+          visit_date: string
+          visit_type_id: string
+        }
+        Update: {
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json | null
+          id?: string
+          linked_child_id?: string | null
+          organization_id?: string
+          program_id?: string
+          staff?: string | null
+          updated_at?: string
+          visit_date?: string
+          visit_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_visits_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "program_beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visits_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visits_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visits_visit_type_id_fkey"
+            columns: ["visit_type_id"]
+            isOneToOne: false
+            referencedRelation: "program_visit_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programs: {
+        Row: {
+          color: string | null
+          created_at: string
+          custom_fields: Json | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          module_config: Json | null
+          name: string
+          organization_id: string
+          program_id: string | null
+          settings: Json | null
+          show_in_navigation: boolean | null
+          slug: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
           custom_fields?: Json | null
           description?: string | null
+          icon?: string | null
           id?: string
           is_active?: boolean
           location?: string | null
+          module_config?: Json | null
+          name: string
+          organization_id?: string
+          program_id?: string | null
+          settings?: Json | null
+          show_in_navigation?: boolean | null
+          slug?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          module_config?: Json | null
           name?: string
           organization_id?: string
           program_id?: string | null
+          settings?: Json | null
           show_in_navigation?: boolean | null
+          slug?: string | null
+          sort_order?: number | null
         }
         Relationships: [
           {
