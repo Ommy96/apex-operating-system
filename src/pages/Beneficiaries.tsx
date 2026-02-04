@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Plus, Search, Filter, Eye, Edit2, Trash2, Download, GraduationCap, UserCheck, UsersRound, X, Loader2 } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, X, Loader2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +30,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Beneficiary {
   id: string;
@@ -103,7 +109,6 @@ export default function Beneficiaries() {
       const beneficiaryData = (data || []) as Beneficiary[];
       setBeneficiaries(beneficiaryData);
       
-      // Calculate stats
       setStats({
         total: beneficiaryData.length,
         students: beneficiaryData.filter(b => b.beneficiary_type === 'student').length,
@@ -171,21 +176,21 @@ export default function Beneficiaries() {
     }
   };
 
-  const getTypeBadgeVariant = (type: string) => {
+  const getTypeBadgeClass = (type: string) => {
     switch (type) {
-      case 'student': return 'default';
-      case 'adult': return 'secondary';
-      case 'group': return 'outline';
-      default: return 'default';
+      case 'student': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'adult': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'group': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case 'active': return 'default';
-      case 'inactive': return 'secondary';
-      case 'graduated': return 'outline';
-      default: return 'default';
+      case 'active': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+      case 'inactive': return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+      case 'graduated': return 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -218,6 +223,14 @@ export default function Beneficiaries() {
       age--;
     }
     return age;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   const filteredBeneficiaries = getFilteredBeneficiaries();
@@ -363,38 +376,103 @@ export default function Beneficiaries() {
         Showing {filteredBeneficiaries.length} of {beneficiaries.length} beneficiaries
       </div>
 
-      {/* Beneficiaries Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredBeneficiaries.map((beneficiary) => {
-          const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
-          const age = calculateAge(beneficiary.date_of_birth);
-          
-          return (
-            <Card 
-              key={beneficiary.id} 
-              className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
-              onClick={() => navigate(`/beneficiaries/${beneficiary.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                    {beneficiary.photo_url ? (
-                      <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-                    ) : null}
-                    <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }}>
-                      {getInitials(beneficiary.display_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
-                        {beneficiary.display_name}
-                      </h3>
+      {/* Modern Table View */}
+      <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="w-[300px]">Beneficiary</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Details</TableHead>
+              <TableHead className="hidden lg:table-cell">Location</TableHead>
+              <TableHead className="hidden xl:table-cell">Created</TableHead>
+              <TableHead className="text-right w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredBeneficiaries.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-32 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <Users className="h-10 w-10 mb-2 opacity-40" />
+                    <p className="font-medium">No beneficiaries found</p>
+                    <p className="text-sm">Try adjusting your search or filters</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredBeneficiaries.map((beneficiary) => {
+                const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
+                const age = calculateAge(beneficiary.date_of_birth);
+                
+                return (
+                  <TableRow 
+                    key={beneficiary.id} 
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => navigate(`/beneficiaries/${beneficiary.id}`)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+                          {beneficiary.photo_url ? (
+                            <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
+                          ) : null}
+                          <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }}>
+                            {getInitials(beneficiary.display_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-foreground">{beneficiary.display_name}</p>
+                          {beneficiary.gender && (
+                            <p className="text-xs text-muted-foreground capitalize">{beneficiary.gender}</p>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${getTypeBadgeClass(beneficiary.beneficiary_type)} border-0 font-medium`}>
+                        <TypeIcon className="h-3 w-3 mr-1" />
+                        <span className="capitalize">{beneficiary.beneficiary_type}</span>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${getStatusBadgeClass(beneficiary.status)} border-0 font-medium capitalize`}>
+                        {beneficiary.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="text-sm text-muted-foreground">
+                        {beneficiary.beneficiary_type === 'student' && (
+                          <>
+                            {age && <span>{age} yrs</span>}
+                            {age && beneficiary.academic_level && <span> • </span>}
+                            {beneficiary.academic_level && <span>{beneficiary.academic_level}</span>}
+                          </>
+                        )}
+                        {beneficiary.beneficiary_type === 'adult' && (
+                          <span>{beneficiary.county || '—'}</span>
+                        )}
+                        {beneficiary.beneficiary_type === 'group' && (
+                          <span>{beneficiary.member_count ? `${beneficiary.member_count} members` : '—'}</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-sm text-muted-foreground">
+                        {beneficiary.location || beneficiary.institution_name || '—'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      <span className="text-sm text-muted-foreground">
+                        {formatDate(beneficiary.created_at)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Edit2 className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -405,13 +483,20 @@ export default function Beneficiaries() {
                             <Eye className="h-4 w-4 mr-2" />
                             View Profile
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/beneficiaries/${beneficiary.id}?edit=true`);
+                          }}>
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
                           {isAdmin && (
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setDeleteId(beneficiary.id);
                               }}
-                              className="text-destructive"
+                              className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
@@ -419,71 +504,27 @@ export default function Beneficiaries() {
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={getTypeBadgeVariant(beneficiary.beneficiary_type) as any} className="text-xs">
-                        <TypeIcon className="h-3 w-3 mr-1" />
-                        {beneficiary.beneficiary_type}
-                      </Badge>
-                      <Badge variant={getStatusBadgeVariant(beneficiary.status) as any} className="text-xs">
-                        {beneficiary.status}
-                      </Badge>
-                    </div>
-                    
-                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      {beneficiary.beneficiary_type === 'student' && (
-                        <>
-                          {age && <p>Age: {age} years</p>}
-                          {beneficiary.academic_level && <p>{beneficiary.academic_level}</p>}
-                          {beneficiary.institution_name && <p className="truncate">{beneficiary.institution_name}</p>}
-                        </>
-                      )}
-                      {beneficiary.beneficiary_type === 'adult' && (
-                        <>
-                          {beneficiary.location && <p>{beneficiary.location}</p>}
-                          {beneficiary.county && <p>{beneficiary.county}</p>}
-                        </>
-                      )}
-                      {beneficiary.beneficiary_type === 'group' && (
-                        <>
-                          {beneficiary.member_count && <p>{beneficiary.member_count} members</p>}
-                          {beneficiary.location && <p>{beneficiary.location}</p>}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
 
-      {filteredBeneficiaries.length === 0 && (
-        <div className="text-center py-12">
-          <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">No beneficiaries found</h3>
-          <p className="text-muted-foreground">
-            {searchTerm || hasActiveFilters
-              ? "Try adjusting your search or filters"
-              : "Add your first beneficiary to get started"}
-          </p>
-        </div>
-      )}
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this beneficiary? This action cannot be undone.
+              Are you sure you want to delete this beneficiary? This action cannot be undone and will remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
