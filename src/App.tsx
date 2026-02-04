@@ -19,6 +19,8 @@ import ProgramsManagement from "./pages/ProgramsManagement";
 import SponsorsManagement from "./pages/SponsorsManagement";
 import Reports from "./pages/Reports";
 import AttendanceManagement from "./pages/AttendanceManagement";
+import Beneficiaries from "./pages/Beneficiaries";
+import BeneficiaryProfile from "./pages/BeneficiaryProfile";
 
 import OrganizationSettings from "./pages/OrganizationSettings";
 import InferaAdminDashboard from "./pages/InferaAdminDashboard";
@@ -84,6 +86,20 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <EntityDataPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/beneficiaries" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Beneficiaries />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/beneficiaries/:id" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <BeneficiaryProfile />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
