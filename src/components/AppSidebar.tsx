@@ -66,6 +66,7 @@ import { isSuperAdmin } from "@/lib/superAdmin";
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
   { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
