@@ -71,7 +71,7 @@ export default function Beneficiaries() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<BeneficiaryTypeFilter>('all');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -156,7 +156,7 @@ export default function Beneficiaries() {
         b.institution_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesType = typeFilter === 'all' || b.beneficiary_type === typeFilter;
-      const matchesStatus = !statusFilter || b.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
       
       return matchesSearch && matchesType && matchesStatus;
     });
@@ -221,7 +221,7 @@ export default function Beneficiaries() {
   };
 
   const filteredBeneficiaries = getFilteredBeneficiaries();
-  const hasActiveFilters = typeFilter !== 'all' || !!statusFilter;
+  const hasActiveFilters = typeFilter !== 'all' || statusFilter !== 'all';
 
   if (loading) {
     return (
@@ -336,7 +336,7 @@ export default function Beneficiaries() {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
               <SelectItem value="graduated">Graduated</SelectItem>
@@ -349,7 +349,7 @@ export default function Beneficiaries() {
               size="icon"
               onClick={() => {
                 setTypeFilter('all');
-                setStatusFilter('');
+                setStatusFilter('all');
               }}
             >
               <X className="h-4 w-4" />
