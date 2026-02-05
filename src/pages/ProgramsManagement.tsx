@@ -498,6 +498,13 @@ const ProgramsManagement = () => {
                     </>
                   )}
                 </CardFooter>
+                
+                {/* Nested Projects */}
+                <ProgramProjects
+                  programId={program.id}
+                  programName={program.name}
+                  isAdmin={isAdmin}
+                />
               </Card>
             );
           })}
