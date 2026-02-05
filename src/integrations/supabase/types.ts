@@ -3158,16 +3158,12 @@ export type Database = {
           budget: number | null
           created_at: string
           created_by: string | null
-          custom_data: Json | null
-          custom_fields: Json | null
           description: string | null
           end_date: string | null
           id: string
-          location: string | null
           name: string
           organization_id: string
           program_id: string | null
-          project_code: string | null
           slug: string
           start_date: string | null
           status: string | null
@@ -3177,16 +3173,12 @@ export type Database = {
           budget?: number | null
           created_at?: string
           created_by?: string | null
-          custom_data?: Json | null
-          custom_fields?: Json | null
           description?: string | null
           end_date?: string | null
           id?: string
-          location?: string | null
           name: string
           organization_id: string
           program_id?: string | null
-          project_code?: string | null
           slug: string
           start_date?: string | null
           status?: string | null
@@ -3196,16 +3188,12 @@ export type Database = {
           budget?: number | null
           created_at?: string
           created_by?: string | null
-          custom_data?: Json | null
-          custom_fields?: Json | null
           description?: string | null
           end_date?: string | null
           id?: string
-          location?: string | null
           name?: string
           organization_id?: string
           program_id?: string | null
-          project_code?: string | null
           slug?: string
           start_date?: string | null
           status?: string | null
