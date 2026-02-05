@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, X, Eye, Settings2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, X, Eye, Settings2, FolderKanban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { BookOpen } from "lucide-react";
+import { ProgramProjects } from "@/components/ProgramProjects";
 
 interface Program {
   id: string;
@@ -497,6 +498,13 @@ const ProgramsManagement = () => {
                     </>
                   )}
                 </CardFooter>
+                
+                {/* Nested Projects */}
+                <ProgramProjects
+                  programId={program.id}
+                  programName={program.name}
+                  isAdmin={isAdmin}
+                />
               </Card>
             );
           })}
