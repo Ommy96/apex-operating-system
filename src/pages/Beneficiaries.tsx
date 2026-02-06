@@ -90,6 +90,7 @@ const viewOptions = [
 
 export default function Beneficiaries() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin } = useAuth();
   const { currentOrganization } = useOrganization();
   const organizationId = currentOrganization?.organization_id;
@@ -101,6 +102,7 @@ export default function Beneficiaries() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
+  const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
