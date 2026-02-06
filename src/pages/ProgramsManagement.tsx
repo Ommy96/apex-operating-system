@@ -277,7 +277,7 @@ const ProgramsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeroHeader
+      <PageHeader
         title="Programs Management"
         description="Create and manage organizational programs with custom data fields"
         icon={BookOpen}
@@ -285,7 +285,7 @@ const ProgramsManagement = () => {
           isAdmin ? (
             <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
               <DialogTrigger asChild>
-                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2 shadow-strong">
+                <Button className="h-9 gap-1.5">
                   <Plus className="h-4 w-4" />
                   Add Program
                 </Button>
@@ -320,57 +320,38 @@ const ProgramsManagement = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Total Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{programs?.length || 0}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Active Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{activeCount}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <Target className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Inactive Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{inactiveCount}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-muted-foreground" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+        <StatCard
+          title="Total Programs"
+          value={programs?.length || 0}
+          icon={BookOpen}
+          variant="primary"
+        />
+        <StatCard
+          title="Active Programs"
+          value={activeCount}
+          icon={Target}
+          variant="success"
+        />
+        <StatCard
+          title="Inactive Programs"
+          value={inactiveCount}
+          icon={Calendar}
+          variant="default"
+        />
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search programs by name, location, or category..."
-          className="pl-10 h-11"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <WorkspacePanel padding="sm" className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search programs by name, location, or category..."
+            className="pl-9 h-9 bg-muted/30 border-transparent focus:border-border"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </WorkspacePanel>
 
       {/* Programs Table */}
       {isLoading ? (
