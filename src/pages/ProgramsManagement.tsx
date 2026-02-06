@@ -367,7 +367,7 @@ const ProgramsManagement = () => {
         />
       </div>
 
-      {/* Programs Cards Grid */}
+      {/* Programs Table */}
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="flex flex-col items-center gap-3">
@@ -392,123 +392,142 @@ const ProgramsManagement = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredPrograms.map((program, index) => {
-            const locations = parseLocations(program.location);
-            const statusBadge = getStatusBadge(program.status);
-            const categoryLabel = getCategoryLabel(program.category);
-            
-            return (
-              <Card 
-                key={program.id} 
-                className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300 group overflow-hidden`}
-              >
-                <CardHeader className="py-4 px-5 pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-2 min-w-0 flex-1">
-                      <div className="flex flex-wrap gap-1.5">
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Program</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Target Population</TableHead>
+                <TableHead>Fields</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPrograms.map((program) => {
+                const locations = parseLocations(program.location);
+                const statusBadge = getStatusBadge(program.status);
+                const categoryLabel = getCategoryLabel(program.category);
+                
+                return (
+                  <TableRow key={program.id}>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{program.name}</span>
+                          {program.show_in_navigation && (
+                            <Badge className="text-xs gap-1 bg-primary/80 text-primary-foreground">
+                              <Eye className="h-3 w-3" />
+                              Nav
+                            </Badge>
+                          )}
+                        </div>
                         {program.program_id && (
-                          <Badge variant="outline" className="text-xs font-mono">{program.program_id}</Badge>
+                          <span className="text-xs text-muted-foreground font-mono">{program.program_id}</span>
                         )}
-                        {categoryLabel && (
-                          <Badge variant="secondary" className="text-xs">{categoryLabel}</Badge>
+                        {program.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">{program.description}</p>
                         )}
                       </div>
-                      <CardTitle className="text-base font-semibold text-foreground leading-tight line-clamp-2">
-                        {program.name}
-                      </CardTitle>
-                    </div>
-                    <Badge 
-                      variant="outline"
-                      className={`shrink-0 text-xs ${statusBadge.className}`}
-                    >
-                      {statusBadge.label}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="py-3 px-5">
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {locations.length > 0 && locations.slice(0, 2).map((loc) => (
-                      <Badge key={loc} variant="secondary" className="text-xs gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {loc}
-                      </Badge>
-                    ))}
-                    {locations.length > 2 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{locations.length - 2} more
-                      </Badge>
-                    )}
-                    {program.custom_fields && program.custom_fields.length > 0 && (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Settings2 className="h-3 w-3" />
-                        {program.custom_fields.length} fields
-                      </Badge>
-                    )}
-                    {program.show_in_navigation && (
-                      <Badge className="text-xs gap-1 bg-primary/80 text-primary-foreground">
-                        <Eye className="h-3 w-3" />
-                        In Nav
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {program.target_population && program.target_population.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                      <Users className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{program.target_population.join(', ')}</span>
-                    </div>
-                  )}
-                  
-                  {program.description ? (
-                    <p className="text-muted-foreground text-xs line-clamp-2">{program.description}</p>
-                  ) : (
-                    <p className="text-muted-foreground/50 text-xs italic">No description provided</p>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="flex justify-end gap-1.5 border-t border-border/50 py-3 px-5 bg-muted/30">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-xs px-3"
-                    onClick={() => navigate(`/programs/dashboard/${program.id}`)}
-                  >
-                    <Eye className="h-3.5 w-3.5 mr-1.5" />
-                    Dashboard
-                  </Button>
-                  {isAdmin && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-xs px-3"
-                        onClick={() => handleEdit(program)}
+                    </TableCell>
+                    <TableCell>
+                      {categoryLabel ? (
+                        <Badge variant="secondary" className="text-xs">{categoryLabel}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant="outline"
+                        className={`text-xs ${statusBadge.className}`}
                       >
-                        <Edit className="h-3.5 w-3.5 mr-1.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-xs px-3 hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this program?')) {
-                            deleteMutation.mutate(program.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
+                        {statusBadge.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {locations.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {locations.slice(0, 2).map((loc) => (
+                            <Badge key={loc} variant="secondary" className="text-xs gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {loc}
+                            </Badge>
+                          ))}
+                          {locations.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{locations.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {program.target_population && program.target_population.length > 0 ? (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[150px]">
+                          <Users className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{program.target_population.join(', ')}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {program.custom_fields && program.custom_fields.length > 0 ? (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Settings2 className="h-3 w-3" />
+                          {program.custom_fields.length}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs px-2"
+                          onClick={() => navigate(`/programs/dashboard/${program.id}`)}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        {isAdmin && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-xs px-2"
+                              onClick={() => handleEdit(program)}
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-xs px-2 hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this program?')) {
+                                  deleteMutation.mutate(program.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );
