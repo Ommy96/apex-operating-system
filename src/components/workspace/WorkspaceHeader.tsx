@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RoleIndicator } from "@/components/RoleIndicator";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,23 +32,82 @@ const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   beneficiaries: "Beneficiaries",
   "programs-management": "Programs",
-  "sponsors-management": "Sponsors",
-  children: "Children",
-  alumni: "Alumni",
-  "grade-progression": "Grade Progression",
   programs: "Programs",
-  feeding: "Feeding Program",
-  "kipawa-sato": "Kipawa Sato",
-  medical: "Medical",
-  "family-adoption": "Family Adoption",
-  "self-empowerment": "Self Empowerment",
-  "support-groups": "Support Groups",
+  dynamic: "Programs",
   "reports-analytics": "Analytics",
   documents: "Documents",
   "organization-settings": "Settings",
   admin: "Admin",
   infera: "Platform Admin",
+  "custom-reports": "Custom Reports",
+  entities: "Entities",
 };
+
+// UUID pattern
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
+  const segmentIndex = segments.indexOf(segment);
+  const previousSegment = segmentIndex > 0 ? segments[segmentIndex - 1] : null;
+
+  // Determine if this UUID is a program or beneficiary
+  const isProgram = previousSegment === "dynamic" || previousSegment === "dashboard";
+  const isBeneficiary = previousSegment === "beneficiaries";
+
+  const { data: programName } = useQuery({
+    queryKey: ['breadcrumb-program', segment],
+    queryFn: async () => {
+      const { data } = await supabase.from('programs').select('name').eq('id', segment).single();
+      return data?.name || segment;
+    },
+    enabled: UUID_REGEX.test(segment) && isProgram,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: beneficiaryName } = useQuery({
+    queryKey: ['breadcrumb-beneficiary', segment],
+    queryFn: async () => {
+      const { data } = await supabase.from('beneficiaries').select('display_name').eq('id', segment).single();
+      return data?.display_name || segment;
+    },
+    enabled: UUID_REGEX.test(segment) && isBeneficiary,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!UUID_REGEX.test(segment)) {
+    return routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  }
+
+  if (isProgram) return programName || "Loading...";
+  if (isBeneficiary) return beneficiaryName || "Loading...";
+  return segment.slice(0, 8) + "...";
+}
+
+function BreadcrumbEntry({ segment, segments, path, isLast }: { segment: string; segments: string[]; path: string; isLast: boolean }) {
+  const label = useDynamicBreadcrumbLabel(segment, segments);
+
+  return (
+    <BreadcrumbItem>
+      {!isLast ? (
+        <>
+          <BreadcrumbLink
+            href={path}
+            className="text-muted-foreground hover:text-foreground text-sm"
+          >
+            {label}
+          </BreadcrumbLink>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </BreadcrumbSeparator>
+        </>
+      ) : (
+        <BreadcrumbPage className="text-foreground font-medium text-sm">
+          {label}
+        </BreadcrumbPage>
+      )}
+    </BreadcrumbItem>
+  );
+}
 
 export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
   const { user, signOut, isAdmin } = useAuth();
@@ -63,11 +124,6 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
 
   // Generate breadcrumbs from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
-  const breadcrumbs = pathSegments.map((segment, index) => {
-    const path = '/' + pathSegments.slice(0, index + 1).join('/');
-    const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-    return { path, label };
-  });
 
   return (
     <header className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
@@ -78,27 +134,21 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
         {/* Breadcrumb Navigation */}
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
-            {breadcrumbs.map((crumb, index) => (
-              <BreadcrumbItem key={crumb.path}>
-                {index < breadcrumbs.length - 1 ? (
-                  <>
-                    <BreadcrumbLink 
-                      href={crumb.path}
-                      className="text-muted-foreground hover:text-foreground text-sm"
-                    >
-                      {crumb.label}
-                    </BreadcrumbLink>
-                    <BreadcrumbSeparator>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </BreadcrumbSeparator>
-                  </>
-                ) : (
-                  <BreadcrumbPage className="text-foreground font-medium text-sm">
-                    {crumb.label}
-                  </BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            ))}
+            {pathSegments.map((segment, index) => {
+              const path = '/' + pathSegments.slice(0, index + 1).join('/');
+              const isLast = index === pathSegments.length - 1;
+              // Skip "dynamic" segment as it's just a route prefix
+              if (segment === "dynamic") return null;
+              return (
+                <BreadcrumbEntry
+                  key={path}
+                  segment={segment}
+                  segments={pathSegments}
+                  path={path}
+                  isLast={isLast}
+                />
+              );
+            })}
           </BreadcrumbList>
         </Breadcrumb>
       </div>
