@@ -108,6 +108,20 @@ function BreadcrumbEntry({ segment, segments, path, isLast }: { segment: string;
     </BreadcrumbItem>
   );
 }
+
+export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
+  const { user, signOut, isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth', { replace: true });
+  };
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+
   // Generate breadcrumbs from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
