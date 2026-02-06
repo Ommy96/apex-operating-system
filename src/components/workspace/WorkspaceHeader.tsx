@@ -1,7 +1,7 @@
-import { Bell, Search, User, LogOut, Settings, ChevronRight, Plus, Command } from "lucide-react";
+import { Search, User, LogOut, Settings, ChevronRight, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useNavigate, useLocation } from "react-router-dom";
