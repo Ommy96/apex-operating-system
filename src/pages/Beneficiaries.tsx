@@ -592,7 +592,7 @@ export default function Beneficiaries() {
                           {beneficiary.location || beneficiary.institution_name || '—'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right sticky right-0 bg-card z-10">
                         <div className="flex items-center justify-end gap-0.5">
                           <Button
                             variant="ghost"
