@@ -69,6 +69,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
   const [activeTab, setActiveTab] = useState('personal');
   const [dependants, setDependants] = useState<Dependant[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
 
   const form = useForm<AdultFormData>({

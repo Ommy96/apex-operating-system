@@ -61,6 +61,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
   const [donors, setDonors] = useState<Donor[]>([]);
   const [activities, setActivities] = useState<string[]>([]);
   const [newActivity, setNewActivity] = useState("");
+  const [enrollments, setEnrollments] = useState<any[]>([]);
 
   const form = useForm<GroupFormData>({
     resolver: zodResolver(groupFormSchema),
