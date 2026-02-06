@@ -140,23 +140,39 @@ export default function Beneficiaries() {
     if (!organizationId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('beneficiaries')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+      // Fetch all rows in batches to avoid Supabase 1000-row default limit
+      const batchSize = 1000;
+      let allData: Beneficiary[] = [];
+      let offset = 0;
+      let hasMore = true;
 
-      if (error) throw error;
-      
-      const beneficiaryData = (data || []) as Beneficiary[];
-      setBeneficiaries(beneficiaryData);
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('beneficiaries')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + batchSize - 1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...(data as Beneficiary[])];
+          offset += batchSize;
+          hasMore = data.length === batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setBeneficiaries(allData);
       
       setStats({
-        total: beneficiaryData.length,
-        students: beneficiaryData.filter(b => b.beneficiary_type === 'student').length,
-        adults: beneficiaryData.filter(b => b.beneficiary_type === 'adult').length,
-        groups: beneficiaryData.filter(b => b.beneficiary_type === 'group').length,
-        active: beneficiaryData.filter(b => b.status === 'active').length,
+        total: allData.length,
+        students: allData.filter(b => b.beneficiary_type === 'student').length,
+        adults: allData.filter(b => b.beneficiary_type === 'adult').length,
+        groups: allData.filter(b => b.beneficiary_type === 'group').length,
+        active: allData.filter(b => b.status === 'active').length,
       });
     } catch (error) {
       console.error('Error fetching beneficiaries:', error);
@@ -488,17 +504,18 @@ export default function Beneficiaries() {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <WorkspacePanel padding="none" className="overflow-x-auto">
-          <Table>
+        <WorkspacePanel padding="none" className="overflow-hidden">
+          <div className="overflow-x-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="w-[280px]">Beneficiary</TableHead>
-                <TableHead className="w-[100px]">Type</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Details</TableHead>
-                <TableHead className="hidden lg:table-cell">Location</TableHead>
-                <TableHead className="hidden xl:table-cell">Created</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+                <TableHead className="min-w-[200px]">Beneficiary</TableHead>
+                <TableHead className="min-w-[90px]">Type</TableHead>
+                <TableHead className="min-w-[90px]">Status</TableHead>
+                <TableHead className="min-w-[140px] hidden md:table-cell">Details</TableHead>
+                <TableHead className="min-w-[120px] hidden lg:table-cell">Location</TableHead>
+                <TableHead className="min-w-[100px] hidden xl:table-cell">Created</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -627,6 +644,7 @@ export default function Beneficiaries() {
               )}
             </TableBody>
           </Table>
+          </div>
         </WorkspacePanel>
       )}
 
