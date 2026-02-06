@@ -246,6 +246,10 @@ const ProgramDashboard = () => {
           <ProgramIndicators programId={programId} showAddButton={false} />
         </TabsContent>
 
+        <TabsContent value="projects" className="mt-6">
+          <ProgramProjects programId={programId} />
+        </TabsContent>
+
         <TabsContent value="indicators" className="mt-6">
           <ProgramIndicators programId={programId} />
         </TabsContent>
