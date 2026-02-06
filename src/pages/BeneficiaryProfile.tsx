@@ -344,11 +344,15 @@ export default function BeneficiaryProfile() {
 
       {/* Tabbed Content */}
       <Tabs defaultValue="details" className="w-full">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="services">
             <FolderKanban className="h-4 w-4 mr-1" />
             Services
+          </TabsTrigger>
+          <TabsTrigger value="observations">
+            <MessageSquare className="h-4 w-4 mr-1" />
+            Observations
           </TabsTrigger>
           {beneficiary.beneficiary_type !== 'group' && (
             <TabsTrigger value="guardians">Guardians ({guardians.length})</TabsTrigger>
