@@ -11,11 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
-import { X, Users, MapPin, Calendar, UserPlus } from "lucide-react";
+import { X, Users, MapPin, Calendar, UserPlus, FolderKanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { DonorManager } from "./DonorManager";
+import { ProgramEnrollmentSection } from "./ProgramEnrollmentSection";
 
 const RESIDENCE_OPTIONS = [
   "Kayole", "Dandora", "Mathare", "Korogocho", "Mukuru", 
