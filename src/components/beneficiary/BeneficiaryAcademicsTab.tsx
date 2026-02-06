@@ -5,6 +5,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -23,14 +24,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,10 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { 
   Plus, 
   GraduationCap, 
@@ -52,23 +43,10 @@ import {
   BookOpen,
   Calendar
 } from "lucide-react";
-import { format } from "date-fns";
 
 interface BeneficiaryAcademicsTabProps {
   beneficiaryId: string;
 }
-
-const formSchema = z.object({
-  academic_year: z.coerce.number().min(2000, "Invalid year").max(2100, "Invalid year"),
-  term: z.string().min(1, "Term is required"),
-  overall_grade: z.string().optional(),
-  total_marks: z.coerce.number().optional(),
-  out_of: z.coerce.number().optional(),
-  position: z.coerce.number().optional(),
-  remarks: z.string().optional(),
-});
-
-type FormData = z.infer<typeof formSchema>;
 
 interface AcademicRecord {
   id: string;
@@ -86,21 +64,39 @@ interface AcademicRecord {
   updated_at: string;
 }
 
+interface FormState {
+  academic_year: string;
+  term: string;
+  overall_grade: string;
+  total_marks: string;
+  out_of: string;
+  position: string;
+  remarks: string;
+}
+
 const currentYear = new Date().getFullYear();
 const ACADEMIC_YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i);
-
 const TERMS = ["Term 1", "Term 2", "Term 3"];
-
 const GRADES = ["ME1", "ME2", "BE1", "BE2", "AE1", "AE2", "EE1", "EE2", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "E"];
 
 const getGradeColor = (grade: string | null) => {
   if (!grade) return "bg-muted text-muted-foreground";
   const gradeUpper = grade.toUpperCase();
-  if (gradeUpper.startsWith("ME") || gradeUpper.startsWith("A")) return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
-  if (gradeUpper.startsWith("BE") || gradeUpper.startsWith("B")) return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
-  if (gradeUpper.startsWith("AE") || gradeUpper.startsWith("C")) return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
-  if (gradeUpper.startsWith("EE") || gradeUpper.startsWith("D")) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
-  return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+  if (gradeUpper.startsWith("ME") || gradeUpper.startsWith("A")) return "bg-success/20 text-success border-success/30";
+  if (gradeUpper.startsWith("BE") || gradeUpper.startsWith("B")) return "bg-primary/20 text-primary border-primary/30";
+  if (gradeUpper.startsWith("AE") || gradeUpper.startsWith("C")) return "bg-warning/20 text-warning border-warning/30";
+  if (gradeUpper.startsWith("EE") || gradeUpper.startsWith("D")) return "bg-accent/20 text-accent-foreground border-accent/30";
+  return "bg-destructive/20 text-destructive border-destructive/30";
+};
+
+const initialFormState: FormState = {
+  academic_year: currentYear.toString(),
+  term: "",
+  overall_grade: "",
+  total_marks: "",
+  out_of: "",
+  position: "",
+  remarks: "",
 };
 
 export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsTabProps) {
@@ -109,19 +105,7 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AcademicRecord | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      academic_year: currentYear,
-      term: "",
-      overall_grade: "",
-      total_marks: undefined,
-      out_of: undefined,
-      position: undefined,
-      remarks: "",
-    },
-  });
+  const [formData, setFormData] = useState<FormState>(initialFormState);
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ["beneficiary-academics", beneficiaryId],
@@ -140,16 +124,16 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (data: FormState) => {
       const { error } = await supabase.from("beneficiary_academics").insert({
         beneficiary_id: beneficiaryId,
         organization_id: currentOrganization?.organization_id,
-        academic_year: data.academic_year,
+        academic_year: parseInt(data.academic_year),
         term: data.term,
         overall_grade: data.overall_grade || null,
-        total_marks: data.total_marks || null,
-        out_of: data.out_of || null,
-        position: data.position || null,
+        total_marks: data.total_marks ? parseInt(data.total_marks) : null,
+        out_of: data.out_of ? parseInt(data.out_of) : null,
+        position: data.position ? parseInt(data.position) : null,
         remarks: data.remarks || null,
       });
       if (error) throw error;
@@ -158,7 +142,7 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
       queryClient.invalidateQueries({ queryKey: ["beneficiary-academics", beneficiaryId] });
       toast.success("Academic record added successfully");
       setIsDialogOpen(false);
-      form.reset();
+      setFormData(initialFormState);
     },
     onError: (error) => {
       toast.error("Failed to add record: " + error.message);
@@ -166,16 +150,16 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: FormData & { id: string }) => {
+    mutationFn: async (data: FormState & { id: string }) => {
       const { error } = await supabase
         .from("beneficiary_academics")
         .update({
-          academic_year: data.academic_year,
+          academic_year: parseInt(data.academic_year),
           term: data.term,
           overall_grade: data.overall_grade || null,
-          total_marks: data.total_marks || null,
-          out_of: data.out_of || null,
-          position: data.position || null,
+          total_marks: data.total_marks ? parseInt(data.total_marks) : null,
+          out_of: data.out_of ? parseInt(data.out_of) : null,
+          position: data.position ? parseInt(data.position) : null,
           remarks: data.remarks || null,
         })
         .eq("id", data.id);
@@ -186,7 +170,7 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
       toast.success("Academic record updated successfully");
       setIsDialogOpen(false);
       setEditingRecord(null);
-      form.reset();
+      setFormData(initialFormState);
     },
     onError: (error) => {
       toast.error("Failed to update record: " + error.message);
@@ -214,27 +198,32 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
   const handleOpenDialog = (record?: AcademicRecord) => {
     if (record) {
       setEditingRecord(record);
-      form.reset({
-        academic_year: record.academic_year,
+      setFormData({
+        academic_year: record.academic_year.toString(),
         term: record.term,
         overall_grade: record.overall_grade || "",
-        total_marks: record.total_marks || undefined,
-        out_of: record.out_of || undefined,
-        position: record.position || undefined,
+        total_marks: record.total_marks?.toString() || "",
+        out_of: record.out_of?.toString() || "",
+        position: record.position?.toString() || "",
         remarks: record.remarks || "",
       });
     } else {
       setEditingRecord(null);
-      form.reset();
+      setFormData(initialFormState);
     }
     setIsDialogOpen(true);
   };
 
-  const onSubmit = (data: FormData) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.term) {
+      toast.error("Please select a term");
+      return;
+    }
     if (editingRecord) {
-      updateMutation.mutate({ ...data, id: editingRecord.id });
+      updateMutation.mutate({ ...formData, id: editingRecord.id });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formData);
     }
   };
 
@@ -273,15 +262,15 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-sky-500/10 to-sky-500/5 border-sky-500/20">
+        <Card className="bg-gradient-to-br from-info/10 to-info/5 border-info/20">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-sky-500/20">
-                <TrendingUp className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+              <div className="p-2 rounded-full bg-info/20">
+                <TrendingUp className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Latest Grade</p>
-                <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+                <p className="text-2xl font-bold text-info">
                   {records[0]?.overall_grade || 'N/A'}
                 </p>
               </div>
@@ -289,15 +278,15 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-emerald-500/20">
-                <Award className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 rounded-full bg-success/20">
+                <Award className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Academic Years</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{Object.keys(groupedRecords).length}</p>
+                <p className="text-2xl font-bold text-success">{Object.keys(groupedRecords).length}</p>
               </div>
             </div>
           </CardContent>
@@ -324,182 +313,124 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
                   {editingRecord ? "Edit Academic Record" : "Add Academic Record"}
                 </DialogTitle>
               </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="academic_year"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Year *</FormLabel>
-                          <Select onValueChange={(val) => field.onChange(parseInt(val))} value={field.value?.toString()}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select year" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {ACADEMIC_YEARS.map((year) => (
-                                <SelectItem key={year} value={year.toString()}>
-                                  {year}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="term"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Term *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select term" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {TERMS.map((term) => (
-                                <SelectItem key={term} value={term}>
-                                  {term}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="overall_grade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Overall Grade</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select grade" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {GRADES.map((grade) => (
-                              <SelectItem key={grade} value={grade}>
-                                {grade}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="total_marks"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Total Marks</FormLabel>
-                          <FormControl>
-                            <input 
-                              type="number" 
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                              placeholder="e.g., 350"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="out_of"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Out Of</FormLabel>
-                          <FormControl>
-                            <input 
-                              type="number" 
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                              placeholder="e.g., 500"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Position</FormLabel>
-                          <FormControl>
-                            <input 
-                              type="number" 
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                              placeholder="e.g., 5"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="remarks"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Remarks</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Additional notes or teacher comments" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Year *</Label>
+                    <Select 
+                      value={formData.academic_year} 
+                      onValueChange={(val) => setFormData(prev => ({ ...prev, academic_year: val }))}
                     >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit"
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      {editingRecord ? "Update" : "Add"} Record
-                    </Button>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACADEMIC_YEARS.map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                </form>
-              </Form>
+
+                  <div className="space-y-2">
+                    <Label>Term *</Label>
+                    <Select 
+                      value={formData.term} 
+                      onValueChange={(val) => setFormData(prev => ({ ...prev, term: val }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select term" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TERMS.map((term) => (
+                          <SelectItem key={term} value={term}>
+                            {term}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Overall Grade</Label>
+                  <Select 
+                    value={formData.overall_grade} 
+                    onValueChange={(val) => setFormData(prev => ({ ...prev, overall_grade: val }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADES.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Total Marks</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="e.g., 350"
+                      value={formData.total_marks}
+                      onChange={(e) => setFormData(prev => ({ ...prev, total_marks: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Out Of</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="e.g., 500"
+                      value={formData.out_of}
+                      onChange={(e) => setFormData(prev => ({ ...prev, out_of: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Position</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="e.g., 5"
+                      value={formData.position}
+                      onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Remarks</Label>
+                  <Textarea 
+                    placeholder="Additional notes or teacher comments" 
+                    value={formData.remarks}
+                    onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {editingRecord ? "Update" : "Add"} Record
+                  </Button>
+                </div>
+              </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
