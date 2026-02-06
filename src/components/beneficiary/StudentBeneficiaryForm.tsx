@@ -307,6 +307,36 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         }
       }
 
+      // Save program enrollments
+      if (enrollments.length > 0) {
+        // Delete existing enrollments
+        if (beneficiary?.id) {
+          await supabase
+            .from('beneficiary_services')
+            .delete()
+            .eq('beneficiary_id', beneficiaryId);
+        }
+
+        for (const enrollment of enrollments) {
+          if (enrollment.program_id) {
+            await supabase
+              .from('beneficiary_services')
+              .insert([{
+                beneficiary_id: beneficiaryId,
+                organization_id: currentOrganization.organization_id,
+                program_id: enrollment.program_id,
+                project_id: enrollment.project_id || null,
+                activity_id: enrollment.activity_id || null,
+                enrolled_date: enrollment.enrolled_date || null,
+                exit_date: enrollment.exit_date || null,
+                status: enrollment.status,
+                notes: enrollment.notes || null,
+                created_by: user?.id,
+              }]);
+          }
+        }
+      }
+
       toast({
         title: "Success",
         description: beneficiary ? "Student beneficiary updated successfully" : "Student beneficiary created successfully",
