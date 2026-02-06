@@ -331,7 +331,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
                 <TabsTrigger value="personal" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Personal</span>
@@ -347,6 +347,10 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 <TabsTrigger value="background" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Background</span>
+                </TabsTrigger>
+                <TabsTrigger value="programs" className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  <span className="hidden sm:inline">Programs</span>
                 </TabsTrigger>
                 <TabsTrigger value="donors" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
