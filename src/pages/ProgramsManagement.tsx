@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,12 +11,18 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
-import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { FieldDefinition } from "@/components/ProgramFieldBuilder";
 import { useNavigate } from "react-router-dom";
-import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
 import { Json } from "@/integrations/supabase/types";
+import { PageHeader, StatCard, WorkspacePanel, StatusBadge, getStatusVariant } from "@/components/workspace";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface Program {
   id: string;
@@ -272,7 +278,7 @@ const ProgramsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeroHeader
+      <PageHeader
         title="Programs Management"
         description="Create and manage organizational programs with custom data fields"
         icon={BookOpen}
@@ -280,7 +286,7 @@ const ProgramsManagement = () => {
           isAdmin ? (
             <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsFormOpen(open); }}>
               <DialogTrigger asChild>
-                <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 gap-2 shadow-strong">
+                <Button className="h-9 gap-1.5">
                   <Plus className="h-4 w-4" />
                   Add Program
                 </Button>
@@ -315,57 +321,38 @@ const ProgramsManagement = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Total Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{programs?.length || 0}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Active Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{activeCount}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <Target className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-        <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-4 px-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardDescription className="text-muted-foreground text-xs font-medium">Inactive Programs</CardDescription>
-                <CardTitle className="text-3xl font-bold text-foreground mt-1">{inactiveCount}</CardTitle>
-              </div>
-              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-muted-foreground" />
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+        <StatCard
+          title="Total Programs"
+          value={programs?.length || 0}
+          icon={BookOpen}
+          variant="primary"
+        />
+        <StatCard
+          title="Active Programs"
+          value={activeCount}
+          icon={Target}
+          variant="success"
+        />
+        <StatCard
+          title="Inactive Programs"
+          value={inactiveCount}
+          icon={Calendar}
+          variant="default"
+        />
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search programs by name, location, or category..."
-          className="pl-10 h-11"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <WorkspacePanel padding="sm" className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search programs by name, location, or category..."
+            className="pl-9 h-9 bg-muted/30 border-transparent focus:border-border"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </WorkspacePanel>
 
       {/* Programs Table */}
       {isLoading ? (
