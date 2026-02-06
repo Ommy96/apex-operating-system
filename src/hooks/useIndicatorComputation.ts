@@ -50,7 +50,7 @@ export function useIndicatorComputation(programId?: string, projectId?: string) 
       });
 
       // 2. Count beneficiaries by type
-      const beneficiaryTypes = ['student', 'adult', 'group'];
+      const beneficiaryTypes = ['student', 'adult', 'group'] as const;
       for (const type of beneficiaryTypes) {
         const { count } = await supabase
           .from('beneficiaries')
