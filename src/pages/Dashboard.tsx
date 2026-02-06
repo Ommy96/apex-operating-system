@@ -8,19 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { 
   Users, 
-  GraduationCap, 
-  UtensilsCrossed, 
-  Heart,
   TrendingUp,
   FileText,
-  Plus,
   Eye,
   BookOpen,
   Clock,
-  LayoutDashboard,
   Target,
-  Activity,
-  Calendar,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -51,22 +44,18 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!organizationId) return null;
       
-      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, uniqueCountRes] = await Promise.all([
-        supabase.from('children').select('*', { count: 'exact' }).eq('organization_id', organizationId).not('academic_level', 'is', null),
-        supabase.from('feeding_program').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.from('kipawa_sato').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.from('self_empowerment').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.rpc('get_unique_beneficiary_count', { _org_id: organizationId }),
+      const [beneficiariesRes, studentsRes, adultsRes, groupsRes] = await Promise.all([
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'student').eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'adult').eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'group').eq('status', 'active'),
       ]);
 
-      const uniqueBeneficiaryCount = uniqueCountRes.data as number || 0;
-
       return {
-        totalChildren: uniqueBeneficiaryCount,
-        educationProgram: childrenRes.count || 0,
-        feedingProgram: feedingRes.count || 0,
-        kipawaProgram: kipawaRes.count || 0,
-        empowermentProgram: selfEmpowermentRes.count || 0
+        totalBeneficiaries: beneficiariesRes.count || 0,
+        students: studentsRes.count || 0,
+        adults: adultsRes.count || 0,
+        groups: groupsRes.count || 0,
       };
     },
     enabled: !!organizationId,
@@ -81,30 +70,12 @@ const Dashboard = () => {
       const months = Array.from({ length: 6 }, (_, i) => startOfMonth(subMonths(new Date(), 5 - i)));
       const monthLabels = months.map(d => format(d, 'MMM'));
       const monthIndex = new Map(monthLabels.map((m, idx) => [m, idx] as const));
-
       const startDateIso = months[0].toISOString();
 
-      const [educationRes, feedingRes, kipawaRes, empowermentRes] = await Promise.all([
-        supabase
-          .from('children')
-          .select('enrollment_date')
-          .eq('organization_id', organizationId)
-          .gte('enrollment_date', startDateIso),
-        supabase
-          .from('feeding_program')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
-        supabase
-          .from('kipawa_sato')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
-        supabase
-          .from('self_empowerment')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
+      const [studentsRes, adultsRes, groupsRes] = await Promise.all([
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'student').gte('created_at', startDateIso),
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'adult').gte('created_at', startDateIso),
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'group').gte('created_at', startDateIso),
       ]);
 
       const safeRows = <T,>(res: { data: T[] | null; error: any }) => (res.error ? [] : (res.data ?? []));
@@ -121,17 +92,16 @@ const Dashboard = () => {
         return counts;
       };
 
-      const educationCounts = countByMonth(safeRows(educationRes), 'enrollment_date');
-      const feedingCounts = countByMonth(safeRows(feedingRes), 'created_at');
-      const kipawaCounts = countByMonth(safeRows(kipawaRes), 'created_at');
-      const empowermentCounts = countByMonth(safeRows(empowermentRes), 'created_at');
+      const studentCounts = countByMonth(safeRows(studentsRes), 'created_at');
+      const adultCounts = countByMonth(safeRows(adultsRes), 'created_at');
+      const groupCounts = countByMonth(safeRows(groupsRes), 'created_at');
 
       return monthLabels.map((month, i) => ({
         month,
-        education: educationCounts[i] ?? 0,
-        feeding: feedingCounts[i] ?? 0,
-        kipawa: kipawaCounts[i] ?? 0,
-        empowerment: empowermentCounts[i] ?? 0,
+        education: studentCounts[i] ?? 0,
+        feeding: adultCounts[i] ?? 0,
+        kipawa: groupCounts[i] ?? 0,
+        empowerment: 0,
       }));
     },
     enabled: !!organizationId,
@@ -142,58 +112,42 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    const tables = [
-      { name: 'children', displayName: 'Child' },
-      { name: 'alumni', displayName: 'Alumni' },
-      { name: 'feeding_program', displayName: 'Feeding Program' },
-      { name: 'kipawa_sato', displayName: 'Kipawa Program' },
-      { name: 'self_empowerment', displayName: 'Self Empowerment' },
-    ];
-
-    const channels = tables.map(table => {
-      const channel = supabase
-        .channel(`dashboard_${table.name}_changes`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: table.name
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              toast({
-                title: `New ${table.displayName} Added`,
-                description: `A new ${table.displayName.toLowerCase()} record has been created`,
-                duration: 3000,
-              });
-            }
-            refetch();
-            setLastUpdated(new Date());
+    const channel = supabase
+      .channel('dashboard_beneficiaries_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'beneficiaries' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'New Beneficiary Added',
+              description: 'A new beneficiary record has been created',
+              duration: 3000,
+            });
           }
-        )
-        .subscribe();
-
-      return channel;
-    });
+          refetch();
+          setLastUpdated(new Date());
+        }
+      )
+      .subscribe();
 
     return () => {
-      channels.forEach(channel => supabase.removeChannel(channel));
+      supabase.removeChannel(channel);
     };
   }, [user, refetch, toast]);
 
   const quickActions = [
     { title: "Beneficiaries", path: "/beneficiaries", icon: Users, color: "bg-primary/10 text-primary" },
     { title: "Programs", path: "/programs-management", icon: Target, color: "bg-accent/10 text-accent" },
-    { title: "Children", path: "/children", icon: GraduationCap, color: "bg-info/10 text-info" },
+    { title: "Documents", path: "/documents", icon: FileText, color: "bg-info/10 text-info" },
     { title: "Analytics", path: "/reports-analytics", icon: TrendingUp, color: "bg-warning/10 text-warning" },
   ];
 
   const recentReports = [
-    { name: "Monthly Education Report", path: "/reports-analytics", icon: BookOpen },
-    { name: "Alumni Success Stories", path: "/children/alumni", icon: GraduationCap },
-    { name: "Feeding Program Update", path: "/programs/feeding", icon: UtensilsCrossed },
-    { name: "Home Visit Summary", path: "/reports-analytics", icon: Users },
+    { name: "Monthly Program Report", path: "/reports-analytics", icon: BookOpen },
+    { name: "Beneficiary Overview", path: "/beneficiaries", icon: Users },
+    { name: "Program Analytics", path: "/reports-analytics", icon: TrendingUp },
+    { name: "Document Compliance", path: "/documents", icon: FileText },
   ];
 
   return (
@@ -218,31 +172,31 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          title="Unique Beneficiaries"
-          value={statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0"}
-          description="Distinct individuals served"
+          title="Total Beneficiaries"
+          value={statsLoading ? "..." : dashboardStats?.totalBeneficiaries.toString() || "0"}
+          description="Active individuals served"
           icon={Users}
           variant="primary"
         />
         <StatCard
-          title="Education Program"
-          value={statsLoading ? "..." : dashboardStats?.educationProgram.toString() || "0"}
-          description="Children in school"
-          icon={GraduationCap}
+          title="Students"
+          value={statsLoading ? "..." : dashboardStats?.students.toString() || "0"}
+          description="Student beneficiaries"
+          icon={Target}
           variant="info"
         />
         <StatCard
-          title="Feeding Program"
-          value={statsLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0"}
-          description="Children enrolled"
-          icon={UtensilsCrossed}
+          title="Adults"
+          value={statsLoading ? "..." : dashboardStats?.adults.toString() || "0"}
+          description="Adult beneficiaries"
+          icon={Users}
           variant="success"
         />
         <StatCard
-          title="Kipawa Program"
-          value={statsLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0"}
-          description="Talent development"
-          icon={Heart}
+          title="Groups"
+          value={statsLoading ? "..." : dashboardStats?.groups.toString() || "0"}
+          description="Group beneficiaries"
+          icon={Users}
           variant="warning"
         />
       </div>
@@ -285,10 +239,10 @@ const Dashboard = () => {
         <div className="mt-4">
           <DashboardTrendCharts 
             stats={{
-              educationProgram: dashboardStats?.educationProgram || 0,
-              feedingProgram: dashboardStats?.feedingProgram || 0,
-              kipawaProgram: dashboardStats?.kipawaProgram || 0,
-              empowermentProgram: dashboardStats?.empowermentProgram || 0
+              educationProgram: dashboardStats?.students || 0,
+              feedingProgram: dashboardStats?.adults || 0,
+              kipawaProgram: dashboardStats?.groups || 0,
+              empowermentProgram: 0
             }}
             trendData={dashboardTrendData}
             isLoading={statsLoading || trendsLoading}

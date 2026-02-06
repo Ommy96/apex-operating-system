@@ -12,8 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
 
-import Reports from "./pages/Reports";
-import AttendanceManagement from "./pages/AttendanceManagement";
+
+
 import Beneficiaries from "./pages/Beneficiaries";
 import BeneficiaryProfile from "./pages/BeneficiaryProfile";
 import OrganizationSettings from "./pages/OrganizationSettings";
@@ -98,20 +98,8 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Reports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports/attendance" element={
-              <ProtectedRoute requireRole="admin">
-                <DashboardLayout>
-                  <AttendanceManagement />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
+
+
             <Route path="/custom-reports" element={
               <ProtectedRoute>
                 <DashboardLayout>
