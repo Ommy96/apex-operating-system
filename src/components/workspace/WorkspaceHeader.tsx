@@ -1,7 +1,6 @@
-import { Bell, Search, User, LogOut, Settings, ChevronRight, Plus, Command } from "lucide-react";
+import { Search, User, LogOut, Settings, ChevronRight, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -119,48 +118,6 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
 
       {/* Right Section */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* Quick Create */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              size="sm" 
-              className="h-9 px-3 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg gap-1.5"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Create</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate('/beneficiaries')}>
-              New Beneficiary
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/programs-management')}>
-              New Program
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/children')}>
-              New Child Record
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/reports-analytics')}>
-              New Report
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <ThemeToggle />
-        
-        {/* Notifications */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-9 w-9 rounded-lg hover:bg-muted relative"
-        >
-          <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center font-medium">
-            3
-          </span>
-        </Button>
-        
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
