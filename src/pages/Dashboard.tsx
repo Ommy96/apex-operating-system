@@ -8,19 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { 
   Users, 
-  GraduationCap, 
-  UtensilsCrossed, 
-  Heart,
   TrendingUp,
   FileText,
-  Plus,
   Eye,
   BookOpen,
   Clock,
-  LayoutDashboard,
   Target,
-  Activity,
-  Calendar,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
