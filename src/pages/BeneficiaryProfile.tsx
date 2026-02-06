@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { ProgramServicesDisplay } from '@/components/beneficiary/ProgramServicesDisplay';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -344,6 +345,10 @@ export default function BeneficiaryProfile() {
       <Tabs defaultValue="details" className="w-full">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="services">
+            <FolderKanban className="h-4 w-4 mr-1" />
+            Services
+          </TabsTrigger>
           {beneficiary.beneficiary_type !== 'group' && (
             <TabsTrigger value="guardians">Guardians ({guardians.length})</TabsTrigger>
           )}
@@ -487,6 +492,11 @@ export default function BeneficiaryProfile() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Services/Programs Tab */}
+        <TabsContent value="services" className="space-y-4">
+          <ProgramServicesDisplay beneficiaryId={beneficiary.id} />
         </TabsContent>
 
         {beneficiary.beneficiary_type !== 'group' && (

@@ -11,11 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
-import { X, Users, MapPin, Calendar, UserPlus } from "lucide-react";
+import { X, Users, MapPin, Calendar, UserPlus, FolderKanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { DonorManager } from "./DonorManager";
+import { ProgramEnrollmentSection } from "./ProgramEnrollmentSection";
 
 const RESIDENCE_OPTIONS = [
   "Kayole", "Dandora", "Mathare", "Korogocho", "Mukuru", 
@@ -60,6 +61,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
   const [donors, setDonors] = useState<Donor[]>([]);
   const [activities, setActivities] = useState<string[]>([]);
   const [newActivity, setNewActivity] = useState("");
+  const [enrollments, setEnrollments] = useState<any[]>([]);
 
   const form = useForm<GroupFormData>({
     resolver: zodResolver(groupFormSchema),
@@ -136,6 +138,29 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
         if (donorError) throw donorError;
       }
 
+      // Insert program enrollments if any
+      if (enrollments.length > 0) {
+        const enrollmentRecords = enrollments.filter(e => e.program_id).map(enrollment => ({
+          beneficiary_id: beneficiary.id,
+          organization_id: currentOrganization.organization_id,
+          program_id: enrollment.program_id,
+          project_id: enrollment.project_id || null,
+          activity_id: enrollment.activity_id || null,
+          enrolled_date: enrollment.enrolled_date || null,
+          exit_date: enrollment.exit_date || null,
+          status: enrollment.status,
+          notes: enrollment.notes || null,
+        }));
+
+        if (enrollmentRecords.length > 0) {
+          const { error: enrollmentError } = await supabase
+            .from('beneficiary_services')
+            .insert(enrollmentRecords);
+
+          if (enrollmentError) throw enrollmentError;
+        }
+      }
+
       toast.success("Group beneficiary registered successfully!");
       onSuccess?.();
     } catch (error: any) {
@@ -158,9 +183,13 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="details">Group Details</TabsTrigger>
                 <TabsTrigger value="activities">Activities</TabsTrigger>
+                <TabsTrigger value="programs" className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  Programs
+                </TabsTrigger>
                 <TabsTrigger value="donors">Donors</TabsTrigger>
               </TabsList>
 
@@ -359,6 +388,14 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
                     </div>
                   )}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="programs" className="pt-4">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="group"
+                />
               </TabsContent>
 
               <TabsContent value="donors" className="pt-4">

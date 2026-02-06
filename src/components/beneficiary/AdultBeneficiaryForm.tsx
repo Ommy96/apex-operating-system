@@ -14,7 +14,8 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { DonorManager } from './DonorManager';
 import { DependantSelector } from './DependantSelector';
-import { User, Briefcase, Heart, DollarSign, Users, Loader2 } from 'lucide-react';
+import { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
+import { User, Briefcase, Heart, DollarSign, Users, Loader2, FolderKanban } from 'lucide-react';
 
 interface AdultFormData {
   first_name: string;
@@ -68,6 +69,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
   const [activeTab, setActiveTab] = useState('personal');
   const [dependants, setDependants] = useState<Dependant[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
 
   const form = useForm<AdultFormData>({
@@ -199,6 +201,33 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
         }
       }
 
+      // Save program enrollments
+      if (beneficiary?.id) {
+        await supabase
+          .from('beneficiary_services')
+          .delete()
+          .eq('beneficiary_id', beneficiaryId);
+      }
+
+      for (const enrollment of enrollments) {
+        if (enrollment.program_id) {
+          await supabase
+            .from('beneficiary_services')
+            .insert([{
+              beneficiary_id: beneficiaryId,
+              organization_id: currentOrganization.organization_id,
+              program_id: enrollment.program_id,
+              project_id: enrollment.project_id || null,
+              activity_id: enrollment.activity_id || null,
+              enrolled_date: enrollment.enrolled_date || null,
+              exit_date: enrollment.exit_date || null,
+              status: enrollment.status,
+              notes: enrollment.notes || null,
+              created_by: user?.id,
+            }]);
+        }
+      }
+
       toast({
         title: "Success",
         description: beneficiary ? "Adult beneficiary updated successfully" : "Adult beneficiary created successfully",
@@ -223,7 +252,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="personal" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Personal</span>
@@ -239,6 +268,10 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                 <TabsTrigger value="dependants" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span className="hidden sm:inline">Dependants</span>
+                </TabsTrigger>
+                <TabsTrigger value="programs" className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  <span className="hidden sm:inline">Programs</span>
                 </TabsTrigger>
                 <TabsTrigger value="donors" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
@@ -535,6 +568,15 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                   dependants={dependants}
                   onDependantsChange={setDependants}
                   excludeId={beneficiary?.id}
+                />
+              </TabsContent>
+
+              {/* Programs Tab */}
+              <TabsContent value="programs" className="space-y-6 mt-6">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="adult"
                 />
               </TabsContent>
 

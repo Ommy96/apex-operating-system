@@ -16,7 +16,8 @@ import { SiblingSelector } from './SiblingSelector';
 import { DonorManager } from './DonorManager';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
-import { User, Users, Heart, FileText, DollarSign, Loader2 } from 'lucide-react';
+import { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
+import { User, Users, Heart, FileText, DollarSign, Loader2, FolderKanban } from 'lucide-react';
 
 // Guardian data structure
 interface GuardianData {
@@ -91,6 +92,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
 
   const form = useForm<StudentFormData>({
@@ -305,6 +307,36 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         }
       }
 
+      // Save program enrollments
+      if (enrollments.length > 0) {
+        // Delete existing enrollments
+        if (beneficiary?.id) {
+          await supabase
+            .from('beneficiary_services')
+            .delete()
+            .eq('beneficiary_id', beneficiaryId);
+        }
+
+        for (const enrollment of enrollments) {
+          if (enrollment.program_id) {
+            await supabase
+              .from('beneficiary_services')
+              .insert([{
+                beneficiary_id: beneficiaryId,
+                organization_id: currentOrganization.organization_id,
+                program_id: enrollment.program_id,
+                project_id: enrollment.project_id || null,
+                activity_id: enrollment.activity_id || null,
+                enrolled_date: enrollment.enrolled_date || null,
+                exit_date: enrollment.exit_date || null,
+                status: enrollment.status,
+                notes: enrollment.notes || null,
+                created_by: user?.id,
+              }]);
+          }
+        }
+      }
+
       toast({
         title: "Success",
         description: beneficiary ? "Student beneficiary updated successfully" : "Student beneficiary created successfully",
@@ -329,7 +361,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
                 <TabsTrigger value="personal" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Personal</span>
@@ -345,6 +377,10 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 <TabsTrigger value="background" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Background</span>
+                </TabsTrigger>
+                <TabsTrigger value="programs" className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  <span className="hidden sm:inline">Programs</span>
                 </TabsTrigger>
                 <TabsTrigger value="donors" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
@@ -746,6 +782,15 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                     <BackgroundSection />
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Programs Tab */}
+              <TabsContent value="programs" className="mt-6">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="student"
+                />
               </TabsContent>
 
               {/* Donors Tab */}
