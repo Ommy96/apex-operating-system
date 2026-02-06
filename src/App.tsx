@@ -126,13 +126,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/custom-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <CustomReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requireRole="management">
                 <DashboardLayout>
