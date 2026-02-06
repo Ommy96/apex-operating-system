@@ -2,7 +2,6 @@ import { Search, User, LogOut, Settings, ChevronRight, Command } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RoleIndicator } from "@/components/RoleIndicator";
