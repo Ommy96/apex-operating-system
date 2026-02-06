@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ProgramServicesDisplay } from '@/components/beneficiary/ProgramServicesDisplay';
 import { BeneficiaryEnrollmentForm } from '@/components/beneficiary/BeneficiaryEnrollmentForm';
+import { BeneficiaryAcademicsTab } from '@/components/beneficiary/BeneficiaryAcademicsTab';
+import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploadsTab';
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
+import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +93,17 @@ interface Donor {
   notes: string | null;
 }
 
+interface AcademicRecord {
+  id: string;
+  academic_year: number;
+  term: string;
+  overall_grade: string | null;
+  total_marks: number | null;
+  out_of: number | null;
+  position: number | null;
+  remarks: string | null;
+}
+
 export default function BeneficiaryProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -99,8 +113,10 @@ export default function BeneficiaryProfile() {
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [academics, setAcademics] = useState<AcademicRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   useEffect(() => {
     if (id && currentOrganization?.organization_id) {
@@ -158,6 +174,20 @@ export default function BeneficiaryProfile() {
       if (donorsData) {
         setDonors(donorsData);
       }
+
+      // Fetch academic records (for students)
+      if (beneficiaryData.beneficiary_type === 'student') {
+        const { data: academicsData } = await supabase
+          .from('beneficiary_academics')
+          .select('*')
+          .eq('beneficiary_id', id)
+          .order('academic_year', { ascending: false })
+          .order('term', { ascending: false });
+
+        if (academicsData) {
+          setAcademics(academicsData);
+        }
+      }
     } catch (error) {
       console.error('Error fetching beneficiary:', error);
       toast({
@@ -195,6 +225,39 @@ export default function BeneficiaryProfile() {
     }
   };
 
+  const handleEdit = () => {
+    if (!beneficiary) return;
+    navigate(`/beneficiaries?edit=${beneficiary.id}&type=${beneficiary.beneficiary_type}`);
+  };
+
+  const handleDownloadReport = async () => {
+    if (!beneficiary) return;
+    
+    setGeneratingReport(true);
+    try {
+      await generateBeneficiaryReport({
+        beneficiary,
+        guardians,
+        donors,
+        academics,
+        organizationName: currentOrganization?.organization_name || 'Organization',
+      });
+      toast({
+        title: "Success",
+        description: "Report downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
   const calculateAge = (birthDate: string | null) => {
     if (!birthDate) return null;
     const today = new Date();
@@ -216,19 +279,26 @@ export default function BeneficiaryProfile() {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'student': return 'bg-primary/20 text-primary border-primary/30';
+      case 'adult': return 'bg-info/20 text-info border-info/30';
+      case 'group': return 'bg-warning/20 text-warning border-warning/30';
+      default: return 'bg-muted text-muted-foreground';
+    }
   };
 
-  const getPastelColor = (id: string) => {
-    const pastelColors = [
-      'hsl(210, 100%, 92%)',
-      'hsl(150, 80%, 90%)',
-      'hsl(45, 100%, 90%)',
-      'hsl(300, 85%, 92%)',
-    ];
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return pastelColors[hash % pastelColors.length];
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active': return 'bg-success/20 text-success border-success/30';
+      case 'inactive': return 'bg-destructive/20 text-destructive border-destructive/30';
+      case 'pending': return 'bg-warning/20 text-warning border-warning/30';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
   };
 
   if (loading) {
@@ -259,32 +329,49 @@ export default function BeneficiaryProfile() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/beneficiaries')}>
+        <Button variant="ghost" onClick={() => navigate('/beneficiaries')} className="hover:bg-primary/10">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Beneficiaries
         </Button>
         
-        {isAdmin && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleDownloadReport}
+            disabled={generatingReport}
+            className="border-primary/30 text-primary hover:bg-primary/10"
+          >
+            {generatingReport ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            Download Report
+          </Button>
+          <Button variant="outline" onClick={handleEdit} className="border-info/30 text-info hover:bg-info/10">
+            <Edit2 className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+          {isAdmin && (
             <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Profile Card */}
-      <Card>
+      <Card className="overflow-hidden border-primary/20">
+        <div className="h-2 bg-gradient-to-r from-primary via-info to-primary" />
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
-            <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+            <Avatar className="h-24 w-24 border-4 border-primary/20 shadow-lg">
               {beneficiary.photo_url ? (
                 <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
               ) : null}
               <AvatarFallback 
-                className="text-2xl font-bold"
-                style={{ backgroundColor: getPastelColor(beneficiary.id) }}
+                className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-info/20 text-primary"
               >
                 {getInitials(beneficiary.display_name)}
               </AvatarFallback>
@@ -293,13 +380,13 @@ export default function BeneficiaryProfile() {
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">{beneficiary.display_name}</h1>
+                  <h1 className="text-2xl font-bold text-foreground">{beneficiary.display_name}</h1>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="default" className="capitalize">
+                    <Badge className={`capitalize ${getTypeBadgeColor(beneficiary.beneficiary_type)}`}>
                       <TypeIcon className="h-3 w-3 mr-1" />
                       {beneficiary.beneficiary_type}
                     </Badge>
-                    <Badge variant={beneficiary.status === 'active' ? 'default' : 'secondary'}>
+                    <Badge className={getStatusBadgeColor(beneficiary.status)}>
                       {beneficiary.status}
                     </Badge>
                   </div>
@@ -309,31 +396,31 @@ export default function BeneficiaryProfile() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 {beneficiary.beneficiary_type !== 'group' && age && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 text-primary" />
                     <span>{age} years old</span>
                   </div>
                 )}
                 {beneficiary.gender && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4 text-info" />
                     <span>{beneficiary.gender}</span>
                   </div>
                 )}
                 {beneficiary.location && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="h-4 w-4 text-success" />
                     <span>{beneficiary.location}</span>
                   </div>
                 )}
                 {beneficiary.institution_name && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 className="h-4 w-4" />
+                    <Building2 className="h-4 w-4 text-warning" />
                     <span>{beneficiary.institution_name}</span>
                   </div>
                 )}
                 {beneficiary.member_count && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4 text-primary" />
                     <span>{beneficiary.member_count} members</span>
                   </div>
                 )}
@@ -345,31 +432,54 @@ export default function BeneficiaryProfile() {
 
       {/* Tabbed Content */}
       <Tabs defaultValue="details" className="w-full">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="services">
+        <TabsList className="flex-wrap bg-muted/50 p-1">
+          <TabsTrigger value="details" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            Details
+          </TabsTrigger>
+          <TabsTrigger value="services" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <FolderKanban className="h-4 w-4 mr-1" />
             Services
           </TabsTrigger>
-          <TabsTrigger value="observations">
+          <TabsTrigger value="observations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <MessageSquare className="h-4 w-4 mr-1" />
             Observations
           </TabsTrigger>
-          {beneficiary.beneficiary_type !== 'group' && (
-            <TabsTrigger value="guardians">Guardians ({guardians.length})</TabsTrigger>
+          {beneficiary.beneficiary_type === 'student' && (
+            <TabsTrigger value="academics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <GraduationCap className="h-4 w-4 mr-1" />
+              Academics
+            </TabsTrigger>
           )}
-          <TabsTrigger value="donors">Donors ({donors.length})</TabsTrigger>
+          {beneficiary.beneficiary_type === 'student' && (
+            <TabsTrigger value="uploads" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Upload className="h-4 w-4 mr-1" />
+              Uploads
+            </TabsTrigger>
+          )}
           {beneficiary.beneficiary_type !== 'group' && (
-            <TabsTrigger value="medical">Medical</TabsTrigger>
+            <TabsTrigger value="guardians" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Guardians ({guardians.length})
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="donors" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            Donors ({donors.length})
+          </TabsTrigger>
+          {beneficiary.beneficiary_type !== 'group' && (
+            <TabsTrigger value="medical" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Medical
+            </TabsTrigger>
           )}
         </TabsList>
 
         <TabsContent value="details" className="space-y-4">
           {/* Student Details */}
           {beneficiary.beneficiary_type === 'student' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Academic Information</CardTitle>
+            <Card className="border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="text-lg text-primary flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Academic Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
@@ -402,9 +512,12 @@ export default function BeneficiaryProfile() {
 
           {/* Adult Details */}
           {beneficiary.beneficiary_type === 'adult' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Self-Empowerment Details</CardTitle>
+            <Card className="border-info/20">
+              <CardHeader className="bg-gradient-to-r from-info/5 to-transparent">
+                <CardTitle className="text-lg text-info flex items-center gap-2">
+                  <UserCheck className="h-5 w-5" />
+                  Self-Empowerment Details
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
@@ -425,9 +538,12 @@ export default function BeneficiaryProfile() {
 
           {/* Group Details */}
           {beneficiary.beneficiary_type === 'group' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Group Information</CardTitle>
+            <Card className="border-warning/20">
+              <CardHeader className="bg-gradient-to-r from-warning/5 to-transparent">
+                <CardTitle className="text-lg text-warning flex items-center gap-2">
+                  <UsersRound className="h-5 w-5" />
+                  Group Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
@@ -459,9 +575,12 @@ export default function BeneficiaryProfile() {
           )}
 
           {/* Location Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Location</CardTitle>
+          <Card className="border-success/20">
+            <CardHeader className="bg-gradient-to-r from-success/5 to-transparent">
+              <CardTitle className="text-lg text-success flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Location
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
@@ -489,7 +608,7 @@ export default function BeneficiaryProfile() {
 
           {/* Background */}
           {beneficiary.background_narrative && (
-            <Card>
+            <Card className="border-muted">
               <CardHeader>
                 <CardTitle className="text-lg">Background</CardTitle>
               </CardHeader>
@@ -510,26 +629,40 @@ export default function BeneficiaryProfile() {
           <ProgramObservations beneficiaryId={beneficiary.id} />
         </TabsContent>
 
+        {/* Academics Tab (Students Only) */}
+        {beneficiary.beneficiary_type === 'student' && (
+          <TabsContent value="academics" className="space-y-4">
+            <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
+          </TabsContent>
+        )}
+
+        {/* Uploads Tab (Students Only) */}
+        {beneficiary.beneficiary_type === 'student' && (
+          <TabsContent value="uploads" className="space-y-4">
+            <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
+          </TabsContent>
+        )}
+
         {beneficiary.beneficiary_type !== 'group' && (
           <TabsContent value="guardians" className="space-y-4">
             {guardians.length === 0 ? (
-              <Card>
+              <Card className="border-muted">
                 <CardContent className="py-8 text-center text-muted-foreground">
                   No guardians linked to this beneficiary
                 </CardContent>
               </Card>
             ) : (
               guardians.map((guardian) => (
-                <Card key={guardian.id}>
+                <Card key={guardian.id} className="border-primary/10 hover:border-primary/30 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="font-medium">{guardian.full_name}</h4>
-                        <Badge variant="secondary" className="mt-1 capitalize">
+                        <h4 className="font-medium text-foreground">{guardian.full_name}</h4>
+                        <Badge variant="secondary" className="mt-1 capitalize bg-primary/10 text-primary">
                           {guardian.guardian_type} ({guardian.relationship})
                         </Badge>
                       </div>
-                      <Badge variant={guardian.is_alive ? 'default' : 'secondary'}>
+                      <Badge className={guardian.is_alive ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'}>
                         {guardian.is_alive ? 'Alive' : 'Deceased'}
                       </Badge>
                     </div>
@@ -537,13 +670,13 @@ export default function BeneficiaryProfile() {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       {guardian.phone && (
                         <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <Phone className="h-4 w-4 text-primary" />
                           {guardian.phone}
                         </div>
                       )}
                       {guardian.email && (
                         <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <Mail className="h-4 w-4 text-info" />
                           {guardian.email}
                         </div>
                       )}
@@ -567,19 +700,19 @@ export default function BeneficiaryProfile() {
 
         <TabsContent value="donors" className="space-y-4">
           {donors.length === 0 ? (
-            <Card>
+            <Card className="border-muted">
               <CardContent className="py-8 text-center text-muted-foreground">
                 No donors linked to this beneficiary
               </CardContent>
             </Card>
           ) : (
             donors.map((donor) => (
-              <Card key={donor.id}>
+              <Card key={donor.id} className="border-success/10 hover:border-success/30 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="font-medium flex items-center gap-2">
-                        <Heart className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium flex items-center gap-2 text-foreground">
+                        <Heart className="h-4 w-4 text-success" />
                         {donor.donor_name}
                       </h4>
                       {donor.donation_date && (
@@ -589,7 +722,7 @@ export default function BeneficiaryProfile() {
                       )}
                     </div>
                     {donor.amount_received && (
-                      <Badge variant="default">
+                      <Badge className="bg-success/20 text-success border-success/30">
                         KSH {donor.amount_received.toLocaleString()}
                       </Badge>
                     )}
@@ -605,9 +738,9 @@ export default function BeneficiaryProfile() {
 
         {beneficiary.beneficiary_type !== 'group' && (
           <TabsContent value="medical" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Medical Information</CardTitle>
+            <Card className="border-destructive/20">
+              <CardHeader className="bg-gradient-to-r from-destructive/5 to-transparent">
+                <CardTitle className="text-lg text-destructive">Medical Information</CardTitle>
                 <CardDescription>Confidential health records</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
