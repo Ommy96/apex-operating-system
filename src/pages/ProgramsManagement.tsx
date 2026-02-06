@@ -469,17 +469,15 @@ const ProgramsManagement = () => {
                 </CardContent>
                 
                 <CardFooter className="flex justify-end gap-1.5 border-t border-border/50 py-3 px-5 bg-muted/30">
-                  {program.custom_fields && program.custom_fields.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-xs px-3"
-                      onClick={() => navigate(`/programs/dynamic/${program.id}`)}
-                    >
-                      <Eye className="h-3.5 w-3.5 mr-1.5" />
-                      View
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs px-3"
+                    onClick={() => navigate(`/programs/dashboard/${program.id}`)}
+                  >
+                    <Eye className="h-3.5 w-3.5 mr-1.5" />
+                    Dashboard
+                  </Button>
                   {isAdmin && (
                     <>
                       <Button
