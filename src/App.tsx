@@ -91,13 +91,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/programs/:programName" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Programs />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/programs/dynamic/:programId" element={
               <ProtectedRoute>
                 <DashboardLayout>
