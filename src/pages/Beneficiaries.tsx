@@ -120,6 +120,22 @@ export default function Beneficiaries() {
     }
   }, [organizationId]);
 
+  // Handle edit query params
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    const editType = searchParams.get('type') as 'student' | 'adult' | 'group' | null;
+    if (editId && editType && beneficiaries.length > 0) {
+      const found = beneficiaries.find(b => b.id === editId);
+      if (found) {
+        setEditingBeneficiary(found);
+        setSelectedType(editType);
+        setIsDialogOpen(true);
+        // Clear the query params
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, beneficiaries]);
+
   const fetchBeneficiaries = async () => {
     if (!organizationId) return;
     setLoading(true);
