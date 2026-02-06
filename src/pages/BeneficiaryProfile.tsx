@@ -494,6 +494,11 @@ export default function BeneficiaryProfile() {
           )}
         </TabsContent>
 
+        {/* Services/Programs Tab */}
+        <TabsContent value="services" className="space-y-4">
+          <ProgramServicesDisplay beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
         {beneficiary.beneficiary_type !== 'group' && (
           <TabsContent value="guardians" className="space-y-4">
             {guardians.length === 0 ? (
