@@ -14,7 +14,8 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { DonorManager } from './DonorManager';
 import { DependantSelector } from './DependantSelector';
-import { User, Briefcase, Heart, DollarSign, Users, Loader2 } from 'lucide-react';
+import { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
+import { User, Briefcase, Heart, DollarSign, Users, Loader2, FolderKanban } from 'lucide-react';
 
 interface AdultFormData {
   first_name: string;
