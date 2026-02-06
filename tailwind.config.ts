@@ -163,9 +163,9 @@ export default {
 				'gradient-card-rose': 'var(--gradient-card-rose)'
 			},
 			borderColor: {
-				'card-emerald': 'var(--border-card-emerald)',
-				'card-teal': 'var(--border-card-teal)',
+				'card-navy': 'var(--border-card-navy)',
 				'card-blue': 'var(--border-card-blue)',
+				'card-sky': 'var(--border-card-sky)',
 				'card-purple': 'var(--border-card-purple)',
 				'card-amber': 'var(--border-card-amber)',
 				'card-rose': 'var(--border-card-rose)'
