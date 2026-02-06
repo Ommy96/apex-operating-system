@@ -212,79 +212,30 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Programs */}
-          <SidebarGroup className="mt-6">
-            {!isCollapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
-                Programs
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {/* Education Collapsible */}
-                <Collapsible open={educationOpen} onOpenChange={setEducationOpen}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                          "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                        )}
-                      >
-                        <GraduationCap className="h-[18px] w-[18px] flex-shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1 text-left">Education</span>
-                            <ChevronDown className={cn(
-                              "h-4 w-4 text-sidebar-foreground/50 transition-transform duration-200",
-                              educationOpen && "rotate-180"
-                            )} />
-                          </>
-                        )}
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="animate-accordion-down">
-                      <div className={cn("mt-1 space-y-1", !isCollapsed && "ml-4 pl-3 border-l border-sidebar-border/50")}>
-                        {educationSubItems.map((item) => (
-                          <MenuItem
-                            key={item.title}
-                            item={item}
-                            isCollapsed={isCollapsed}
-                            isActive={isActive}
-                            onClick={handleNavClick}
-                          />
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-
-                {/* Other Programs */}
-                {programItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <MenuItem 
-                      item={item} 
-                      isCollapsed={isCollapsed} 
-                      isActive={isActive} 
-                      onClick={handleNavClick} 
-                    />
-                  </SidebarMenuItem>
-                ))}
-
-                {/* Dynamic Programs */}
-                {dynamicPrograms?.map((program) => (
-                  <SidebarMenuItem key={program.id}>
-                    <MenuItem
-                      item={{ title: program.name, url: `/programs/dynamic/${program.id}`, icon: Sparkles }}
-                      isCollapsed={isCollapsed}
-                      isActive={isActive}
-                      onClick={handleNavClick}
-                    />
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Dynamic Programs */}
+          {dynamicPrograms && dynamicPrograms.length > 0 && (
+            <SidebarGroup className="mt-6">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                  Programs
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {dynamicPrograms.map((program) => (
+                    <SidebarMenuItem key={program.id}>
+                      <MenuItem
+                        item={{ title: program.name, url: `/programs/dynamic/${program.id}`, icon: Sparkles }}
+                        isCollapsed={isCollapsed}
+                        isActive={isActive}
+                        onClick={handleNavClick}
+                      />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
           {/* System - Only for Admin/Management */}
           {(isAdmin || isManagement || superAdmin) && (
