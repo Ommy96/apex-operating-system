@@ -611,7 +611,9 @@ export default function Beneficiaries() {
                             className="h-8 w-8 text-muted-foreground hover:text-primary"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/beneficiaries/${beneficiary.id}?edit=true`);
+                              setEditingBeneficiary(beneficiary);
+                              setSelectedType(beneficiary.beneficiary_type);
+                              setIsDialogOpen(true);
                             }}
                           >
                             <Edit2 className="h-4 w-4" />
@@ -712,7 +714,10 @@ export default function Beneficiaries() {
               className="flex-1"
               onClick={() => {
                 if (selectedBeneficiary) {
-                  navigate(`/beneficiaries/${selectedBeneficiary.id}?edit=true`);
+                  setEditingBeneficiary(selectedBeneficiary);
+                  setSelectedType(selectedBeneficiary.beneficiary_type);
+                  setIsDialogOpen(true);
+                  setSelectedBeneficiary(null);
                 }
               }}
             >
