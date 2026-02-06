@@ -9,3 +9,4 @@ export { MedicalInfoSection } from './MedicalInfoSection';
 export { BackgroundSection } from './BackgroundSection';
 export { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
 export { ProgramServicesDisplay } from './ProgramServicesDisplay';
+export { BeneficiaryEnrollmentForm } from './BeneficiaryEnrollmentForm';

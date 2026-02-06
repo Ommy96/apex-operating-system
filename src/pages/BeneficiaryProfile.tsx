@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ProgramServicesDisplay } from '@/components/beneficiary/ProgramServicesDisplay';
+import { BeneficiaryEnrollmentForm } from '@/components/beneficiary/BeneficiaryEnrollmentForm';
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import {
   AlertDialog,
@@ -501,7 +502,7 @@ export default function BeneficiaryProfile() {
 
         {/* Services/Programs Tab */}
         <TabsContent value="services" className="space-y-4">
-          <ProgramServicesDisplay beneficiaryId={beneficiary.id} />
+          <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
         </TabsContent>
 
         {/* Observations Tab */}
