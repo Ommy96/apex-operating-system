@@ -644,6 +644,7 @@ export default function Beneficiaries() {
               )}
             </TableBody>
           </Table>
+          </div>
         </WorkspacePanel>
       )}
 
