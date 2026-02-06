@@ -28,7 +28,6 @@ import {
   FileText,
   Settings,
   LogOut,
-  HandHeart,
   Target,
   Shield,
 } from "lucide-react";
