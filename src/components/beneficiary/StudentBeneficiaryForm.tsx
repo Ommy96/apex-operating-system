@@ -16,7 +16,8 @@ import { SiblingSelector } from './SiblingSelector';
 import { DonorManager } from './DonorManager';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
-import { User, Users, Heart, FileText, DollarSign, Loader2 } from 'lucide-react';
+import { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
+import { User, Users, Heart, FileText, DollarSign, Loader2, FolderKanban } from 'lucide-react';
 
 // Guardian data structure
 interface GuardianData {
