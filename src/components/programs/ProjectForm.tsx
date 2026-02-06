@@ -17,7 +17,7 @@ const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   project_code: z.string().optional(),
   description: z.string().optional(),
-  status: z.string().default("planning"),
+  status: z.string().optional().default("planning"),
   budget: z.coerce.number().optional(),
   location: z.string().optional(),
   start_date: z.string().optional(),
