@@ -195,6 +195,13 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/programs/dashboard/:programId" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ProgramDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/reports" element={
               <ProtectedRoute>
                 <DashboardLayout>
