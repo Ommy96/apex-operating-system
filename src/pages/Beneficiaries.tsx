@@ -488,7 +488,7 @@ export default function Beneficiaries() {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <WorkspacePanel padding="none" className="overflow-hidden">
+        <WorkspacePanel padding="none" className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
