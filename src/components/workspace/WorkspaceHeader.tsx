@@ -108,6 +108,8 @@ function BreadcrumbEntry({ segment, segments, path, isLast }: { segment: string;
     </BreadcrumbItem>
   );
 }
+  // Generate breadcrumbs from current path
+  const pathSegments = location.pathname.split('/').filter(Boolean);
 
   return (
     <header className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
@@ -118,27 +120,21 @@ function BreadcrumbEntry({ segment, segments, path, isLast }: { segment: string;
         {/* Breadcrumb Navigation */}
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
-            {breadcrumbs.map((crumb, index) => (
-              <BreadcrumbItem key={crumb.path}>
-                {index < breadcrumbs.length - 1 ? (
-                  <>
-                    <BreadcrumbLink 
-                      href={crumb.path}
-                      className="text-muted-foreground hover:text-foreground text-sm"
-                    >
-                      {crumb.label}
-                    </BreadcrumbLink>
-                    <BreadcrumbSeparator>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </BreadcrumbSeparator>
-                  </>
-                ) : (
-                  <BreadcrumbPage className="text-foreground font-medium text-sm">
-                    {crumb.label}
-                  </BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            ))}
+            {pathSegments.map((segment, index) => {
+              const path = '/' + pathSegments.slice(0, index + 1).join('/');
+              const isLast = index === pathSegments.length - 1;
+              // Skip "dynamic" segment as it's just a route prefix
+              if (segment === "dynamic") return null;
+              return (
+                <BreadcrumbEntry
+                  key={path}
+                  segment={segment}
+                  segments={pathSegments}
+                  path={path}
+                  isLast={isLast}
+                />
+              );
+            })}
           </BreadcrumbList>
         </Breadcrumb>
       </div>
