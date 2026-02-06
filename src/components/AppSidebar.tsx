@@ -130,9 +130,6 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
-  const [educationOpen, setEducationOpen] = useState(
-    educationSubItems.some(item => currentPath === item.url)
-  );
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
