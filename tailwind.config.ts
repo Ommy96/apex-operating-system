@@ -155,9 +155,9 @@ export default {
 				'gradient-warning': 'var(--gradient-warning)',
 				'gradient-info': 'var(--gradient-info)',
 				'gradient-danger': 'var(--gradient-danger)',
-				'gradient-card-emerald': 'var(--gradient-card-emerald)',
-				'gradient-card-teal': 'var(--gradient-card-teal)',
+				'gradient-card-navy': 'var(--gradient-card-navy)',
 				'gradient-card-blue': 'var(--gradient-card-blue)',
+				'gradient-card-sky': 'var(--gradient-card-sky)',
 				'gradient-card-purple': 'var(--gradient-card-purple)',
 				'gradient-card-amber': 'var(--gradient-card-amber)',
 				'gradient-card-rose': 'var(--gradient-card-rose)'
