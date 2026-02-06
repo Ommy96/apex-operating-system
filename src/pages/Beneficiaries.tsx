@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
   UserCheck, UsersRound, X, Loader2, MoreHorizontal,
@@ -90,6 +90,7 @@ const viewOptions = [
 
 export default function Beneficiaries() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin } = useAuth();
   const { currentOrganization } = useOrganization();
   const organizationId = currentOrganization?.organization_id;
@@ -101,6 +102,7 @@ export default function Beneficiaries() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
+  const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
@@ -117,6 +119,22 @@ export default function Beneficiaries() {
       fetchBeneficiaries();
     }
   }, [organizationId]);
+
+  // Handle edit query params
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    const editType = searchParams.get('type') as 'student' | 'adult' | 'group' | null;
+    if (editId && editType && beneficiaries.length > 0) {
+      const found = beneficiaries.find(b => b.id === editId);
+      if (found) {
+        setEditingBeneficiary(found);
+        setSelectedType(editType);
+        setIsDialogOpen(true);
+        // Clear the query params
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, beneficiaries]);
 
   const fetchBeneficiaries = async () => {
     if (!organizationId) return;
@@ -267,7 +285,7 @@ export default function Beneficiaries() {
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add New Beneficiary</DialogTitle>
+                  <DialogTitle>{editingBeneficiary ? 'Edit Beneficiary' : 'Add New Beneficiary'}</DialogTitle>
                 </DialogHeader>
                 <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as any)} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -286,29 +304,34 @@ export default function Beneficiaries() {
                   </TabsList>
                   <TabsContent value="student">
                     <StudentBeneficiaryForm
+                      beneficiary={editingBeneficiary?.beneficiary_type === 'student' ? editingBeneficiary : undefined}
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                   <TabsContent value="adult">
                     <AdultBeneficiaryForm
+                      beneficiary={editingBeneficiary?.beneficiary_type === 'adult' ? editingBeneficiary : undefined}
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                   <TabsContent value="group">
                     <GroupBeneficiaryForm
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                 </Tabs>
@@ -465,7 +488,7 @@ export default function Beneficiaries() {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <WorkspacePanel padding="none" className="overflow-hidden">
+        <WorkspacePanel padding="none" className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
