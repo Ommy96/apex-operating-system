@@ -92,6 +92,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
 
   const form = useForm<StudentFormData>({
