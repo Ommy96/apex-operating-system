@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Target, MessageSquare, FileText, Settings, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Target, MessageSquare, FileText, FolderKanban, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { EnhancedProgramReporting } from "@/components/programs/EnhancedProgramReporting";
+import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { format } from "date-fns";
 
 const ProgramDashboard = () => {
