@@ -83,16 +83,20 @@ function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
   return segment.slice(0, 8) + "...";
 }
 
-function BreadcrumbEntry({ segment, segments, path, isLast }: { segment: string; segments: string[]; path: string; isLast: boolean }) {
+function BreadcrumbEntry({ segment, segments, navigateTo, isLast }: { segment: string; segments: string[]; navigateTo: string; isLast: boolean }) {
   const label = useDynamicBreadcrumbLabel(segment, segments);
+  const navigate = useNavigate();
 
   return (
     <BreadcrumbItem>
       {!isLast ? (
         <>
           <BreadcrumbLink
-            href={path}
-            className="text-muted-foreground hover:text-foreground text-sm"
+            className="text-muted-foreground hover:text-foreground text-sm cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(navigateTo);
+            }}
           >
             {label}
           </BreadcrumbLink>
