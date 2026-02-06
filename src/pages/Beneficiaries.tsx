@@ -151,7 +151,7 @@ export default function Beneficiaries() {
           .from('beneficiaries')
           .select('*')
           .eq('organization_id', organizationId)
-          .order('created_at', { ascending: false })
+          .order('display_name', { ascending: true })
           .range(offset, offset + batchSize - 1);
 
         if (error) throw error;
