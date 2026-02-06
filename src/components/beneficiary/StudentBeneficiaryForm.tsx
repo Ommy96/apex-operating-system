@@ -754,6 +754,15 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 </Card>
               </TabsContent>
 
+              {/* Programs Tab */}
+              <TabsContent value="programs" className="mt-6">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="student"
+                />
+              </TabsContent>
+
               {/* Donors Tab */}
               <TabsContent value="donors" className="mt-6">
                 <Card>
