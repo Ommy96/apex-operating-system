@@ -134,7 +134,7 @@ export function useIndicatorComputation(programId?: string, projectId?: string) 
       });
 
       // 6. Count by gender (for beneficiaries)
-      const genders = ['Male', 'Female'];
+      const genders = ['Male', 'Female'] as const;
       for (const gender of genders) {
         const { count } = await supabase
           .from('beneficiaries')
