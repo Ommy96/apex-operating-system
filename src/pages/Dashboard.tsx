@@ -44,22 +44,18 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!organizationId) return null;
       
-      const [childrenRes, feedingRes, kipawaRes, selfEmpowermentRes, uniqueCountRes] = await Promise.all([
-        supabase.from('children').select('*', { count: 'exact' }).eq('organization_id', organizationId).not('academic_level', 'is', null),
-        supabase.from('feeding_program').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.from('kipawa_sato').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.from('self_empowerment').select('*', { count: 'exact' }).eq('organization_id', organizationId),
-        supabase.rpc('get_unique_beneficiary_count', { _org_id: organizationId }),
+      const [beneficiariesRes, studentsRes, adultsRes, groupsRes] = await Promise.all([
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'student').eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'adult').eq('status', 'active'),
+        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'group').eq('status', 'active'),
       ]);
 
-      const uniqueBeneficiaryCount = uniqueCountRes.data as number || 0;
-
       return {
-        totalChildren: uniqueBeneficiaryCount,
-        educationProgram: childrenRes.count || 0,
-        feedingProgram: feedingRes.count || 0,
-        kipawaProgram: kipawaRes.count || 0,
-        empowermentProgram: selfEmpowermentRes.count || 0
+        totalBeneficiaries: beneficiariesRes.count || 0,
+        students: studentsRes.count || 0,
+        adults: adultsRes.count || 0,
+        groups: groupsRes.count || 0,
       };
     },
     enabled: !!organizationId,
