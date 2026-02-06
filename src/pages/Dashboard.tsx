@@ -112,43 +112,27 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    const tables = [
-      { name: 'children', displayName: 'Child' },
-      { name: 'alumni', displayName: 'Alumni' },
-      { name: 'feeding_program', displayName: 'Feeding Program' },
-      { name: 'kipawa_sato', displayName: 'Kipawa Program' },
-      { name: 'self_empowerment', displayName: 'Self Empowerment' },
-    ];
-
-    const channels = tables.map(table => {
-      const channel = supabase
-        .channel(`dashboard_${table.name}_changes`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: table.name
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              toast({
-                title: `New ${table.displayName} Added`,
-                description: `A new ${table.displayName.toLowerCase()} record has been created`,
-                duration: 3000,
-              });
-            }
-            refetch();
-            setLastUpdated(new Date());
+    const channel = supabase
+      .channel('dashboard_beneficiaries_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'beneficiaries' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'New Beneficiary Added',
+              description: 'A new beneficiary record has been created',
+              duration: 3000,
+            });
           }
-        )
-        .subscribe();
-
-      return channel;
-    });
+          refetch();
+          setLastUpdated(new Date());
+        }
+      )
+      .subscribe();
 
     return () => {
-      channels.forEach(channel => supabase.removeChannel(channel));
+      supabase.removeChannel(channel);
     };
   }, [user, refetch, toast]);
 
