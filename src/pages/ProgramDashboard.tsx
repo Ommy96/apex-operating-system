@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Target, MessageSquare, FileText, Settings, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Target, MessageSquare, FileText, FolderKanban, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { EnhancedProgramReporting } from "@/components/programs/EnhancedProgramReporting";
+import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { format } from "date-fns";
 
 const ProgramDashboard = () => {
@@ -156,10 +157,14 @@ const ProgramDashboard = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="overview" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="gap-2">
+            <FolderKanban className="h-4 w-4" />
+            <span className="hidden sm:inline">Projects</span>
           </TabsTrigger>
           <TabsTrigger value="indicators" className="gap-2">
             <Target className="h-4 w-4" />
@@ -239,6 +244,10 @@ const ProgramDashboard = () => {
 
           {/* Quick view of indicators */}
           <ProgramIndicators programId={programId} showAddButton={false} />
+        </TabsContent>
+
+        <TabsContent value="projects" className="mt-6">
+          <ProgramProjects programId={programId} />
         </TabsContent>
 
         <TabsContent value="indicators" className="mt-6">
