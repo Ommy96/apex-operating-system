@@ -27,6 +27,7 @@ export function WorkspacePanel({
         paddingClasses[padding],
         className
       )}
+      {...props}
     >
       {children}
     </div>
