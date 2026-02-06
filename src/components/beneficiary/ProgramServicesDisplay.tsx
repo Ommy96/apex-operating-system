@@ -69,13 +69,13 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-primary" />;
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-secondary-foreground" />;
       case 'dropped':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       case 'transferred':
-        return <ArrowUpRight className="h-4 w-4 text-amber-500" />;
+        return <ArrowUpRight className="h-4 w-4 text-accent-foreground" />;
       default:
         return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
