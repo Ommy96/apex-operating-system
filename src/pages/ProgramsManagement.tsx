@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, X, Eye, Settings2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,11 +11,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
-import { ProgramFieldBuilder, FieldDefinition } from "@/components/ProgramFieldBuilder";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FieldDefinition } from "@/components/ProgramFieldBuilder";
 import { useNavigate } from "react-router-dom";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { BookOpen } from "lucide-react";
+import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
+import { Json } from "@/integrations/supabase/types";
 
 interface Program {
   id: string;
@@ -30,17 +28,31 @@ interface Program {
   created_at: string;
   custom_fields: FieldDefinition[] | null;
   show_in_navigation: boolean;
+  category: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  status: string | null;
+  target_population: string[] | null;
+  geographic_coverage: Json | null;
+  objectives: string | null;
 }
 
-interface ProgramFormData {
-  program_id: string;
-  name: string;
-  locations: string[];
-  description: string;
-  is_active: boolean;
-  custom_fields: FieldDefinition[];
-  show_in_navigation: boolean;
-}
+const emptyFormData: ProgramFormData = {
+  program_id: "",
+  name: "",
+  locations: [],
+  description: "",
+  is_active: true,
+  custom_fields: [],
+  show_in_navigation: false,
+  category: "",
+  start_date: "",
+  end_date: "",
+  status: "planning",
+  target_population: [],
+  geographic_coverage: "",
+  objectives: "",
+};
 
 const ProgramsManagement = () => {
   const { isAdmin } = useAuth();
@@ -50,16 +62,7 @@ const ProgramsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
-  const [locationInput, setLocationInput] = useState("");
-  const [formData, setFormData] = useState<ProgramFormData>({
-    program_id: "",
-    name: "",
-    locations: [],
-    description: "",
-    is_active: true,
-    custom_fields: [],
-    show_in_navigation: false,
-  });
+  const [formData, setFormData] = useState<ProgramFormData>(emptyFormData);
 
   const { data: programs, isLoading } = useQuery({
     queryKey: ['programs-management', currentOrganization?.organization_id],
@@ -91,9 +94,16 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
-        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        custom_fields: data.custom_fields as unknown as Json[],
         show_in_navigation: data.show_in_navigation,
         organization_id: currentOrganization.organization_id,
+        category: data.category || null,
+        start_date: data.start_date || null,
+        end_date: data.end_date || null,
+        status: data.status || 'planning',
+        target_population: data.target_population.length > 0 ? data.target_population : null,
+        geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
+        objectives: data.objectives || null,
       }]);
       if (error) throw error;
     },
@@ -117,8 +127,15 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
-        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        custom_fields: data.custom_fields as unknown as Json[],
         show_in_navigation: data.show_in_navigation,
+        category: data.category || null,
+        start_date: data.start_date || null,
+        end_date: data.end_date || null,
+        status: data.status || 'planning',
+        target_population: data.target_population.length > 0 ? data.target_population : null,
+        geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
+        objectives: data.objectives || null,
       }).eq('id', id);
       if (error) throw error;
     },
@@ -151,18 +168,18 @@ const ProgramsManagement = () => {
   });
 
   const resetForm = () => {
-    setFormData({ 
-      program_id: "", 
-      name: "", 
-      locations: [], 
-      description: "", 
-      is_active: true,
-      custom_fields: [],
-      show_in_navigation: false,
-    });
-    setLocationInput("");
+    setFormData(emptyFormData);
     setEditingProgram(null);
     setIsFormOpen(false);
+  };
+
+  const extractGeographicCoverage = (geo: Json | null): string => {
+    if (!geo) return "";
+    if (typeof geo === 'object' && geo !== null && 'region' in geo) {
+      return String((geo as { region: unknown }).region);
+    }
+    if (typeof geo === 'string') return geo;
+    return "";
   };
 
   const handleEdit = (program: Program) => {
@@ -178,31 +195,15 @@ const ProgramsManagement = () => {
       is_active: program.is_active,
       custom_fields: program.custom_fields || [],
       show_in_navigation: program.show_in_navigation,
+      category: program.category || "",
+      start_date: program.start_date || "",
+      end_date: program.end_date || "",
+      status: program.status || "planning",
+      target_population: program.target_population || [],
+      geographic_coverage: extractGeographicCoverage(program.geographic_coverage),
+      objectives: program.objectives || "",
     });
-    setLocationInput("");
     setIsFormOpen(true);
-  };
-
-  const handleAddLocation = () => {
-    const trimmedLocation = locationInput.trim();
-    if (trimmedLocation && !formData.locations.includes(trimmedLocation)) {
-      setFormData({ ...formData, locations: [...formData.locations, trimmedLocation] });
-      setLocationInput("");
-    }
-  };
-
-  const handleRemoveLocation = (locationToRemove: string) => {
-    setFormData({
-      ...formData,
-      locations: formData.locations.filter(loc => loc !== locationToRemove)
-    });
-  };
-
-  const handleLocationKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddLocation();
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -221,7 +222,8 @@ const ProgramsManagement = () => {
 
   const filteredPrograms = programs?.filter(program =>
     program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    program.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    program.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    program.category?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const activeCount = programs?.filter(p => p.is_active).length || 0;
@@ -232,11 +234,47 @@ const ProgramsManagement = () => {
     return location.split(',').map(loc => loc.trim()).filter(Boolean);
   };
 
+  const getCategoryLabel = (category: string | null) => {
+    const categories: Record<string, string> = {
+      education: "Education",
+      health: "Health & Wellness",
+      nutrition: "Nutrition & Feeding",
+      economic: "Economic Empowerment",
+      social: "Social Support",
+      shelter: "Shelter & Housing",
+      protection: "Child Protection",
+      community: "Community Development",
+      other: "Other",
+    };
+    return category ? categories[category] || category : null;
+  };
+
+  const getStatusBadge = (status: string | null) => {
+    const statusStyles: Record<string, string> = {
+      planning: "bg-muted text-muted-foreground",
+      active: "bg-success/10 text-success border-success/20",
+      on_hold: "bg-warning/10 text-warning border-warning/20",
+      completed: "bg-primary/10 text-primary border-primary/20",
+      archived: "bg-muted text-muted-foreground",
+    };
+    const statusLabels: Record<string, string> = {
+      planning: "Planning",
+      active: "Active",
+      on_hold: "On Hold",
+      completed: "Completed",
+      archived: "Archived",
+    };
+    return {
+      className: statusStyles[status || "planning"] || statusStyles.planning,
+      label: statusLabels[status || "planning"] || "Planning",
+    };
+  };
+
   return (
     <div className="space-y-6">
       <PageHeroHeader
         title="Programs Management"
-        description="Manage all program details"
+        description="Create and manage organizational programs with custom data fields"
         icon={BookOpen}
         actions={
           isAdmin ? (
@@ -247,139 +285,73 @@ const ProgramsManagement = () => {
                   Add Program
                 </Button>
               </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingProgram ? 'Edit Program' : 'Add New Program'}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit}>
-                <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                    <TabsTrigger value="fields">
-                      <Settings2 className="h-4 w-4 mr-2" />
-                      Custom Fields
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="basic" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="program_id">Program ID</Label>
-                      <Input
-                        id="program_id"
-                        value={formData.program_id}
-                        onChange={(e) => setFormData({ ...formData, program_id: e.target.value })}
-                        placeholder="Enter unique program ID (e.g., PRG-001)"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Program Name *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Enter program name"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Locations</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="location"
-                          value={locationInput}
-                          onChange={(e) => setLocationInput(e.target.value)}
-                          onKeyDown={handleLocationKeyDown}
-                          placeholder="Type location and press Enter or Add"
-                        />
-                        <Button type="button" variant="outline" onClick={handleAddLocation}>
-                          Add
-                        </Button>
-                      </div>
-                      {formData.locations.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {formData.locations.map((loc) => (
-                            <Badge key={loc} variant="secondary" className="gap-1 pr-1">
-                              <MapPin className="h-3 w-3" />
-                              {loc}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveLocation(loc)}
-                                className="ml-1 rounded-full hover:bg-destructive/20 p-0.5"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Enter program description"
-                        rows={3}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="is_active"
-                        checked={formData.is_active}
-                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                      />
-                      <Label htmlFor="is_active">Active</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="show_in_navigation"
-                        checked={formData.show_in_navigation}
-                        onCheckedChange={(checked) => setFormData({ ...formData, show_in_navigation: checked })}
-                      />
-                      <Label htmlFor="show_in_navigation">Show in Navigation</Label>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="fields" className="mt-4">
-                    <ProgramFieldBuilder
-                      fields={formData.custom_fields}
-                      onChange={(fields) => setFormData({ ...formData, custom_fields: fields })}
-                    />
-                  </TabsContent>
-                </Tabs>
-                
-                <div className="flex justify-end gap-2 pt-4 mt-4 border-t">
-                  <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
-                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                    {editingProgram ? 'Update' : 'Create'}
-                  </Button>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="pb-4 border-b">
+                  <DialogTitle className="text-xl font-semibold">
+                    {editingProgram ? 'Edit Program' : 'Create New Program'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingProgram 
+                      ? 'Update program details and configuration'
+                      : 'Set up a new program with custom data collection fields'
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="pt-4">
+                  <ProgramForm
+                    formData={formData}
+                    onChange={setFormData}
+                    onSubmit={handleSubmit}
+                    onCancel={resetForm}
+                    isEditing={!!editingProgram}
+                    isLoading={createMutation.isPending || updateMutation.isPending}
+                  />
                 </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
           ) : undefined
         }
       />
 
-      {/* Stats Cards - Compact */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-muted-foreground text-xs">Total Programs</CardDescription>
-            <CardTitle className="text-2xl text-foreground">{programs?.length || 0}</CardTitle>
+          <CardHeader className="py-4 px-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription className="text-muted-foreground text-xs font-medium">Total Programs</CardDescription>
+                <CardTitle className="text-3xl font-bold text-foreground mt-1">{programs?.length || 0}</CardTitle>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-primary" />
+              </div>
+            </div>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-muted-foreground text-xs">Active Programs</CardDescription>
-            <CardTitle className="text-2xl text-foreground">{activeCount}</CardTitle>
+          <CardHeader className="py-4 px-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription className="text-muted-foreground text-xs font-medium">Active Programs</CardDescription>
+                <CardTitle className="text-3xl font-bold text-foreground mt-1">{activeCount}</CardTitle>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
+                <Target className="h-6 w-6 text-success" />
+              </div>
+            </div>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-muted-foreground text-xs">Inactive Programs</CardDescription>
-            <CardTitle className="text-2xl text-foreground">{inactiveCount}</CardTitle>
+          <CardHeader className="py-4 px-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription className="text-muted-foreground text-xs font-medium">Inactive Programs</CardDescription>
+                <CardTitle className="text-3xl font-bold text-foreground mt-1">{inactiveCount}</CardTitle>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-muted-foreground" />
+              </div>
+            </div>
           </CardHeader>
         </Card>
       </div>
@@ -388,57 +360,86 @@ const ProgramsManagement = () => {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
-          placeholder="Search programs..."
-          className="pl-10"
+          placeholder="Search programs by name, location, or category..."
+          className="pl-10 h-11"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Programs Cards Grid - Compact */}
+      {/* Programs Cards Grid */}
       {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            <p className="text-sm text-muted-foreground">Loading programs...</p>
+          </div>
         </div>
       ) : filteredPrograms.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            No programs found
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No programs found</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {searchTerm ? 'Try adjusting your search terms' : 'Get started by creating your first program'}
+            </p>
+            {isAdmin && !searchTerm && (
+              <Button onClick={() => setIsFormOpen(true)} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create Program
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredPrograms.map((program, index) => {
             const locations = parseLocations(program.location);
+            const statusBadge = getStatusBadge(program.status);
+            const categoryLabel = getCategoryLabel(program.category);
+            
             return (
               <Card 
                 key={program.id} 
-                className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300`}
+                className={`${getCardStyles((index % 6) as CardVariant)} hover-scale transition-all duration-300 group overflow-hidden`}
               >
-                <CardHeader className="py-3 px-4 pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      {program.program_id && (
-                        <Badge variant="outline" className="text-xs">{program.program_id}</Badge>
-                      )}
-                      <CardTitle className="text-base text-foreground leading-tight">{program.name}</CardTitle>
+                <CardHeader className="py-4 px-5 pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <div className="flex flex-wrap gap-1.5">
+                        {program.program_id && (
+                          <Badge variant="outline" className="text-xs font-mono">{program.program_id}</Badge>
+                        )}
+                        {categoryLabel && (
+                          <Badge variant="secondary" className="text-xs">{categoryLabel}</Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-base font-semibold text-foreground leading-tight line-clamp-2">
+                        {program.name}
+                      </CardTitle>
                     </div>
                     <Badge 
-                      variant={program.is_active ? "default" : "secondary"}
-                      className="shrink-0 text-xs"
+                      variant="outline"
+                      className={`shrink-0 text-xs ${statusBadge.className}`}
                     >
-                      {program.is_active ? 'Active' : 'Inactive'}
+                      {statusBadge.label}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="py-2 px-4">
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {locations.length > 0 && locations.map((loc) => (
+                
+                <CardContent className="py-3 px-5">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {locations.length > 0 && locations.slice(0, 2).map((loc) => (
                       <Badge key={loc} variant="secondary" className="text-xs gap-1">
                         <MapPin className="h-3 w-3" />
                         {loc}
                       </Badge>
                     ))}
+                    {locations.length > 2 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{locations.length - 2} more
+                      </Badge>
+                    )}
                     {program.custom_fields && program.custom_fields.length > 0 && (
                       <Badge variant="outline" className="text-xs gap-1">
                         <Settings2 className="h-3 w-3" />
@@ -446,27 +447,36 @@ const ProgramsManagement = () => {
                       </Badge>
                     )}
                     {program.show_in_navigation && (
-                      <Badge variant="default" className="text-xs gap-1 bg-primary/80">
+                      <Badge className="text-xs gap-1 bg-primary/80 text-primary-foreground">
                         <Eye className="h-3 w-3" />
                         In Nav
                       </Badge>
                     )}
                   </div>
+                  
+                  {program.target_population && program.target_population.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+                      <Users className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{program.target_population.join(', ')}</span>
+                    </div>
+                  )}
+                  
                   {program.description ? (
                     <p className="text-muted-foreground text-xs line-clamp-2">{program.description}</p>
                   ) : (
-                    <p className="text-muted-foreground/60 text-xs italic">No description</p>
+                    <p className="text-muted-foreground/50 text-xs italic">No description provided</p>
                   )}
                 </CardContent>
-                <CardFooter className="flex justify-end gap-1 border-t border-border py-2 px-4">
+                
+                <CardFooter className="flex justify-end gap-1.5 border-t border-border/50 py-3 px-5 bg-muted/30">
                   {program.custom_fields && program.custom_fields.length > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs px-2"
+                      className="h-8 text-xs px-3"
                       onClick={() => navigate(`/programs/dynamic/${program.id}`)}
                     >
-                      <Eye className="h-3 w-3 mr-1" />
+                      <Eye className="h-3.5 w-3.5 mr-1.5" />
                       View
                     </Button>
                   )}
@@ -475,23 +485,23 @@ const ProgramsManagement = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs px-2"
+                        className="h-8 text-xs px-3"
                         onClick={() => handleEdit(program)}
                       >
-                        <Edit className="h-3 w-3 mr-1" />
+                        <Edit className="h-3.5 w-3.5 mr-1.5" />
                         Edit
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs px-2 hover:bg-destructive/80 hover:text-destructive-foreground"
+                        className="h-8 text-xs px-3 hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => {
                           if (confirm('Are you sure you want to delete this program?')) {
                             deleteMutation.mutate(program.id);
                           }
                         }}
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                         Delete
                       </Button>
                     </>
