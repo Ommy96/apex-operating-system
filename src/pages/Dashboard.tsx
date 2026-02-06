@@ -172,31 +172,31 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          title="Unique Beneficiaries"
-          value={statsLoading ? "..." : dashboardStats?.totalChildren.toString() || "0"}
-          description="Distinct individuals served"
+          title="Total Beneficiaries"
+          value={statsLoading ? "..." : dashboardStats?.totalBeneficiaries.toString() || "0"}
+          description="Active individuals served"
           icon={Users}
           variant="primary"
         />
         <StatCard
-          title="Education Program"
-          value={statsLoading ? "..." : dashboardStats?.educationProgram.toString() || "0"}
-          description="Children in school"
-          icon={GraduationCap}
+          title="Students"
+          value={statsLoading ? "..." : dashboardStats?.students.toString() || "0"}
+          description="Student beneficiaries"
+          icon={Target}
           variant="info"
         />
         <StatCard
-          title="Feeding Program"
-          value={statsLoading ? "..." : dashboardStats?.feedingProgram.toString() || "0"}
-          description="Children enrolled"
-          icon={UtensilsCrossed}
+          title="Adults"
+          value={statsLoading ? "..." : dashboardStats?.adults.toString() || "0"}
+          description="Adult beneficiaries"
+          icon={Users}
           variant="success"
         />
         <StatCard
-          title="Kipawa Program"
-          value={statsLoading ? "..." : dashboardStats?.kipawaProgram.toString() || "0"}
-          description="Talent development"
-          icon={Heart}
+          title="Groups"
+          value={statsLoading ? "..." : dashboardStats?.groups.toString() || "0"}
+          description="Group beneficiaries"
+          icon={Users}
           variant="warning"
         />
       </div>
