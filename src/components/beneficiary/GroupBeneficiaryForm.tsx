@@ -160,9 +160,13 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="details">Group Details</TabsTrigger>
                 <TabsTrigger value="activities">Activities</TabsTrigger>
+                <TabsTrigger value="programs" className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4" />
+                  Programs
+                </TabsTrigger>
                 <TabsTrigger value="donors">Donors</TabsTrigger>
               </TabsList>
 
