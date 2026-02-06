@@ -693,8 +693,6 @@ export default function Beneficiaries() {
       <DetailPanel
         open={!!selectedBeneficiary}
         onClose={() => setSelectedBeneficiary(null)}
-        title={selectedBeneficiary?.display_name}
-        subtitle={selectedBeneficiary?.beneficiary_type ? `${selectedBeneficiary.beneficiary_type.charAt(0).toUpperCase()}${selectedBeneficiary.beneficiary_type.slice(1)} Beneficiary` : ''}
         width="lg"
         footer={
           <div className="flex gap-2">
@@ -724,73 +722,135 @@ export default function Beneficiaries() {
           </div>
         }
       >
-        {selectedBeneficiary && (
-          <div className="space-y-6">
-            {/* Quick Info */}
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-border/50">
-                {selectedBeneficiary.photo_url ? (
-                  <AvatarImage src={selectedBeneficiary.photo_url} alt={selectedBeneficiary.display_name} />
-                ) : null}
-                <AvatarFallback style={{ backgroundColor: getPastelColor(selectedBeneficiary.id) }} className="text-lg font-medium">
-                  {getInitials(selectedBeneficiary.display_name)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <StatusBadge variant={getStatusVariant(selectedBeneficiary.status)} dot className="mb-2">
-                  {selectedBeneficiary.status}
-                </StatusBadge>
-                <p className="text-sm text-muted-foreground">
-                  Created {formatDate(selectedBeneficiary.created_at)}
-                </p>
-              </div>
-            </div>
+        {selectedBeneficiary && (() => {
+          const TypeIcon = getTypeIcon(selectedBeneficiary.beneficiary_type);
+          const age = calculateAge(selectedBeneficiary.date_of_birth);
+          const typeColors: Record<string, string> = {
+            student: 'from-blue-600/90 to-indigo-700/90',
+            adult: 'from-emerald-600/90 to-teal-700/90',
+            group: 'from-amber-600/90 to-orange-700/90',
+          };
+          const gradientClass = typeColors[selectedBeneficiary.beneficiary_type] || typeColors.student;
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Type</p>
-                <p className="text-sm font-medium capitalize">{selectedBeneficiary.beneficiary_type}</p>
+          return (
+            <div className="space-y-5 -mt-6 -mx-6">
+              {/* Hero Header */}
+              <div className={`bg-gradient-to-br ${gradientClass} px-6 py-6`}>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-18 w-18 border-[3px] border-white/30 shadow-lg" style={{ height: '4.5rem', width: '4.5rem' }}>
+                    {selectedBeneficiary.photo_url ? (
+                      <AvatarImage src={selectedBeneficiary.photo_url} alt={selectedBeneficiary.display_name} />
+                    ) : null}
+                    <AvatarFallback
+                      style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                      className="text-lg font-bold text-white"
+                    >
+                      {getInitials(selectedBeneficiary.display_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-bold text-white truncate">
+                      {selectedBeneficiary.display_name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-white/80 bg-white/15 rounded-full px-2.5 py-0.5">
+                        <TypeIcon className="h-3 w-3" />
+                        <span className="capitalize">{selectedBeneficiary.beneficiary_type}</span>
+                      </span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-0.5 ${
+                        selectedBeneficiary.status === 'active'
+                          ? 'bg-green-400/20 text-green-100'
+                          : 'bg-white/15 text-white/70'
+                      }`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${
+                          selectedBeneficiary.status === 'active' ? 'bg-green-300' : 'bg-white/50'
+                        }`} />
+                        <span className="capitalize">{selectedBeneficiary.status}</span>
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/60 mt-1.5">
+                      Registered {formatDate(selectedBeneficiary.created_at)}
+                    </p>
+                  </div>
+                </div>
               </div>
-              {selectedBeneficiary.gender && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Gender</p>
-                  <p className="text-sm font-medium capitalize">{selectedBeneficiary.gender}</p>
+
+              {/* Content */}
+              <div className="px-6 space-y-5">
+                {/* Quick Stats Row */}
+                <div className="grid grid-cols-3 gap-3">
+                  {age !== null && (
+                    <div className="bg-muted/40 rounded-xl p-3 text-center">
+                      <p className="text-lg font-bold text-foreground">{age}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Years Old</p>
+                    </div>
+                  )}
+                  {selectedBeneficiary.gender && (
+                    <div className="bg-muted/40 rounded-xl p-3 text-center">
+                      <p className="text-lg font-bold text-foreground capitalize">{selectedBeneficiary.gender.charAt(0)}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Gender</p>
+                    </div>
+                  )}
+                  {selectedBeneficiary.member_count && (
+                    <div className="bg-muted/40 rounded-xl p-3 text-center">
+                      <p className="text-lg font-bold text-foreground">{selectedBeneficiary.member_count}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Members</p>
+                    </div>
+                  )}
+                  {selectedBeneficiary.academic_level && (
+                    <div className="bg-muted/40 rounded-xl p-3 text-center">
+                      <p className="text-sm font-bold text-foreground">{selectedBeneficiary.academic_level}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Level</p>
+                    </div>
+                  )}
                 </div>
-              )}
-              {calculateAge(selectedBeneficiary.date_of_birth) && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Age</p>
-                  <p className="text-sm font-medium">{calculateAge(selectedBeneficiary.date_of_birth)} years</p>
+
+                {/* Details Section */}
+                <div className="space-y-1">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Details</h4>
+                  <div className="divide-y divide-border/50">
+                    {selectedBeneficiary.gender && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">Gender</span>
+                        <span className="text-sm font-medium text-foreground capitalize">{selectedBeneficiary.gender}</span>
+                      </div>
+                    )}
+                    {selectedBeneficiary.date_of_birth && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">Date of Birth</span>
+                        <span className="text-sm font-medium text-foreground">{formatDate(selectedBeneficiary.date_of_birth)}</span>
+                      </div>
+                    )}
+                    {selectedBeneficiary.location && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">Location</span>
+                        <span className="text-sm font-medium text-foreground">{selectedBeneficiary.location}</span>
+                      </div>
+                    )}
+                    {selectedBeneficiary.county && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">County</span>
+                        <span className="text-sm font-medium text-foreground">{selectedBeneficiary.county}</span>
+                      </div>
+                    )}
+                    {selectedBeneficiary.institution_name && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">Institution</span>
+                        <span className="text-sm font-medium text-foreground">{selectedBeneficiary.institution_name}</span>
+                      </div>
+                    )}
+                    {selectedBeneficiary.academic_level && (
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-sm text-muted-foreground">Academic Level</span>
+                        <span className="text-sm font-medium text-foreground">{selectedBeneficiary.academic_level}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-              {selectedBeneficiary.academic_level && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Academic Level</p>
-                  <p className="text-sm font-medium">{selectedBeneficiary.academic_level}</p>
-                </div>
-              )}
-              {selectedBeneficiary.location && (
-                <div className="col-span-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Location</p>
-                  <p className="text-sm font-medium">{selectedBeneficiary.location}</p>
-                </div>
-              )}
-              {selectedBeneficiary.institution_name && (
-                <div className="col-span-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Institution</p>
-                  <p className="text-sm font-medium">{selectedBeneficiary.institution_name}</p>
-                </div>
-              )}
-              {selectedBeneficiary.member_count && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Members</p>
-                  <p className="text-sm font-medium">{selectedBeneficiary.member_count}</p>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </DetailPanel>
 
       {/* Delete Confirmation Dialog */}
