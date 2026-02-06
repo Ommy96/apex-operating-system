@@ -16,6 +16,7 @@ import Alumni from "./pages/Alumni";
 import GradeProgression from "./pages/GradeProgression";
 import Programs from "./pages/Programs";
 import ProgramsManagement from "./pages/ProgramsManagement";
+import ProgramDashboard from "./pages/ProgramDashboard";
 import SponsorsManagement from "./pages/SponsorsManagement";
 import Reports from "./pages/Reports";
 import AttendanceManagement from "./pages/AttendanceManagement";
