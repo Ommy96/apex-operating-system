@@ -28,7 +28,7 @@ export interface ProgramFormData {
   end_date: string;
   status: string;
   target_population: string;
-  geographic_coverage: string;
+  geographic_coverage: Record<string, unknown> | null;
   objectives: string;
 }
 
