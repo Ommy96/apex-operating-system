@@ -162,35 +162,35 @@ const EnhancedDashboard = () => {
 
   const quickActions = isAdmin ? [
     { 
-      title: "Add New Child", 
+      title: "Add Beneficiary", 
       icon: Plus, 
       variant: "default" as const,
-      onClick: () => navigate('/children')
+      onClick: () => navigate('/beneficiaries')
     },
     { 
-      title: "Submit Report", 
+      title: "View Analytics", 
       icon: FileText, 
       variant: "secondary" as const,
-      onClick: () => navigate('/reports')
+      onClick: () => navigate('/reports-analytics')
     },
     { 
-      title: "Schedule Visit", 
-      icon: Users, 
+      title: "Manage Programs", 
+      icon: Target, 
       variant: "accent" as const,
-      onClick: () => navigate('/children')
+      onClick: () => navigate('/programs-management')
     }
   ] : [
     { 
-      title: "View Reports", 
+      title: "View Analytics", 
       icon: Eye, 
       variant: "outline" as const,
-      onClick: () => navigate('/reports')
+      onClick: () => navigate('/reports-analytics')
     },
     { 
-      title: "View Children", 
+      title: "View Beneficiaries", 
       icon: Users, 
       variant: "accent" as const,
-      onClick: () => navigate('/children')
+      onClick: () => navigate('/beneficiaries')
     }
   ];
 

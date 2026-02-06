@@ -185,15 +185,15 @@ const Dashboard = () => {
   const quickActions = [
     { title: "Beneficiaries", path: "/beneficiaries", icon: Users, color: "bg-primary/10 text-primary" },
     { title: "Programs", path: "/programs-management", icon: Target, color: "bg-accent/10 text-accent" },
-    { title: "Children", path: "/children", icon: GraduationCap, color: "bg-info/10 text-info" },
+    { title: "Documents", path: "/documents", icon: FileText, color: "bg-info/10 text-info" },
     { title: "Analytics", path: "/reports-analytics", icon: TrendingUp, color: "bg-warning/10 text-warning" },
   ];
 
   const recentReports = [
-    { name: "Monthly Education Report", path: "/reports-analytics", icon: BookOpen },
-    { name: "Alumni Success Stories", path: "/children/alumni", icon: GraduationCap },
-    { name: "Feeding Program Update", path: "/programs/feeding", icon: UtensilsCrossed },
-    { name: "Home Visit Summary", path: "/reports-analytics", icon: Users },
+    { name: "Monthly Program Report", path: "/reports-analytics", icon: BookOpen },
+    { name: "Beneficiary Overview", path: "/beneficiaries", icon: Users },
+    { name: "Program Analytics", path: "/reports-analytics", icon: TrendingUp },
+    { name: "Document Compliance", path: "/documents", icon: FileText },
   ];
 
   return (
