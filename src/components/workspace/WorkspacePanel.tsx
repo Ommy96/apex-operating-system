@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-interface WorkspacePanelProps {
+interface WorkspacePanelProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   className?: string;
   padding?: "none" | "sm" | "md" | "lg";
@@ -18,6 +18,7 @@ export function WorkspacePanel({
   children,
   className,
   padding = "md",
+  ...props
 }: WorkspacePanelProps) {
   return (
     <div
