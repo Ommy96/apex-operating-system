@@ -11,7 +11,7 @@ import SuperAdminLogin from "./pages/SuperAdminLogin";
 import Dashboard from "./pages/Dashboard";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
-import SponsorsManagement from "./pages/SponsorsManagement";
+
 import Reports from "./pages/Reports";
 import AttendanceManagement from "./pages/AttendanceManagement";
 import Beneficiaries from "./pages/Beneficiaries";
@@ -60,13 +60,6 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ProgramsManagement />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/sponsors-management" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SponsorsManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
