@@ -367,6 +367,14 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
                 </div>
               </TabsContent>
 
+              <TabsContent value="programs" className="pt-4">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="group"
+                />
+              </TabsContent>
+
               <TabsContent value="donors" className="pt-4">
                 <DonorManager donors={donors} onChange={setDonors} />
               </TabsContent>

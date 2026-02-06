@@ -544,6 +544,15 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                 />
               </TabsContent>
 
+              {/* Programs Tab */}
+              <TabsContent value="programs" className="space-y-6 mt-6">
+                <ProgramEnrollmentSection
+                  enrollments={enrollments}
+                  onChange={setEnrollments}
+                  beneficiaryType="adult"
+                />
+              </TabsContent>
+
               {/* Donors Tab */}
               <TabsContent value="donors" className="space-y-6 mt-6">
                 <DonorManager donors={donors} onChange={setDonors} />
