@@ -514,7 +514,7 @@ export default function Beneficiaries() {
                 <TableHead className="min-w-[90px]">Status</TableHead>
                 <TableHead className="min-w-[140px] hidden md:table-cell">Details</TableHead>
                 <TableHead className="min-w-[120px] hidden lg:table-cell">Location</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[120px] text-right sticky right-0 bg-muted/30 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
