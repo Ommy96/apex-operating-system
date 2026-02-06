@@ -714,7 +714,10 @@ export default function Beneficiaries() {
               className="flex-1"
               onClick={() => {
                 if (selectedBeneficiary) {
-                  navigate(`/beneficiaries/${selectedBeneficiary.id}?edit=true`);
+                  setEditingBeneficiary(selectedBeneficiary);
+                  setSelectedType(selectedBeneficiary.beneficiary_type);
+                  setIsDialogOpen(true);
+                  setSelectedBeneficiary(null);
                 }
               }}
             >
