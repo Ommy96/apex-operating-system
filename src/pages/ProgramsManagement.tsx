@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,7 +15,6 @@ import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { FieldDefinition } from "@/components/ProgramFieldBuilder";
 import { useNavigate } from "react-router-dom";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
-import { BookOpen } from "lucide-react";
 import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
 import { Json } from "@/integrations/supabase/types";
 
