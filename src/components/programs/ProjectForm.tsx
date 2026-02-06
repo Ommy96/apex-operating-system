@@ -1,31 +1,27 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-const projectSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  project_code: z.string().optional(),
-  description: z.string().optional(),
-  status: z.string().optional().default("planning"),
-  budget: z.coerce.number().optional(),
-  location: z.string().optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-  expected_outputs: z.string().optional(),
-});
-
-type ProjectFormData = z.infer<typeof projectSchema>;
+interface ProjectFormData {
+  name: string;
+  project_code: string;
+  description: string;
+  status: string;
+  budget: string;
+  location: string;
+  start_date: string;
+  end_date: string;
+  expected_outputs: string;
+}
 
 interface Project {
   id: string;
@@ -55,14 +51,13 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
   const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<ProjectFormData>({
-    resolver: zodResolver(projectSchema),
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ProjectFormData>({
     defaultValues: {
       name: "",
       project_code: "",
       description: "",
       status: "planning",
-      budget: undefined,
+      budget: "",
       location: "",
       start_date: "",
       end_date: "",
@@ -70,34 +65,36 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
     },
   });
 
+  const status = watch("status");
+
   // Populate form when editing
   useEffect(() => {
     if (project) {
-      form.reset({
+      reset({
         name: project.name || "",
         project_code: project.project_code || "",
         description: project.description || "",
         status: project.status || "planning",
-        budget: project.budget || undefined,
+        budget: project.budget?.toString() || "",
         location: project.location || "",
         start_date: project.start_date || "",
         end_date: project.end_date || "",
         expected_outputs: project.expected_outputs || "",
       });
     } else {
-      form.reset({
+      reset({
         name: "",
         project_code: "",
         description: "",
         status: "planning",
-        budget: undefined,
+        budget: "",
         location: "",
         start_date: "",
         end_date: "",
         expected_outputs: "",
       });
     }
-  }, [project, form]);
+  }, [project, reset]);
 
   const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -109,6 +106,11 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       return;
     }
 
+    if (!data.name.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -116,8 +118,8 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         name: data.name,
         project_code: data.project_code || null,
         description: data.description || null,
-        status: data.status,
-        budget: data.budget || null,
+        status: data.status || "planning",
+        budget: data.budget ? parseFloat(data.budget) : null,
         location: data.location || null,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
@@ -166,175 +168,115 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., School Fees Support 2024" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Project Name *</Label>
+              <Input
+                id="name"
+                placeholder="e.g., School Fees Support 2024"
+                {...register("name", { required: "Project name is required" })}
               />
-
-              <FormField
-                control={form.control}
-                name="project_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Code</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., SFS-2024-001" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
             </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Brief description of the project..." 
-                      className="min-h-[80px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <div className="space-y-2">
+              <Label htmlFor="project_code">Project Code</Label>
+              <Input
+                id="project_code"
+                placeholder="e.g., SFS-2024-001"
+                {...register("project_code")}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Brief description of the project..."
+              className="min-h-[80px]"
+              {...register("description")}
             />
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="planning">Planning</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="on_hold">On Hold</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={status} onValueChange={(value) => setValue("status", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="planning">Planning</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="on_hold">On Hold</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Budget (KES)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="e.g., 500000" 
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Nairobi County" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div className="space-y-2">
+              <Label htmlFor="budget">Budget (KES)</Label>
+              <Input
+                id="budget"
+                type="number"
+                placeholder="e.g., 500000"
+                {...register("budget")}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                placeholder="e.g., Nairobi County"
+                {...register("location")}
               />
+            </div>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="end_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Start Date</Label>
+              <Input
+                id="start_date"
+                type="date"
+                {...register("start_date")}
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="expected_outputs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Expected Outputs</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="List the expected deliverables and outcomes..." 
-                      className="min-h-[80px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <div className="space-y-2">
+              <Label htmlFor="end_date">End Date</Label>
+              <Input
+                id="end_date"
+                type="date"
+                {...register("end_date")}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="expected_outputs">Expected Outputs</Label>
+            <Textarea
+              id="expected_outputs"
+              placeholder="List the expected deliverables and outcomes..."
+              className="min-h-[80px]"
+              {...register("expected_outputs")}
             />
+          </div>
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {project ? "Update Project" : "Create Project"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {project ? "Update Project" : "Create Project"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
