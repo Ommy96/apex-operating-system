@@ -138,6 +138,29 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
         if (donorError) throw donorError;
       }
 
+      // Insert program enrollments if any
+      if (enrollments.length > 0) {
+        const enrollmentRecords = enrollments.filter(e => e.program_id).map(enrollment => ({
+          beneficiary_id: beneficiary.id,
+          organization_id: currentOrganization.organization_id,
+          program_id: enrollment.program_id,
+          project_id: enrollment.project_id || null,
+          activity_id: enrollment.activity_id || null,
+          enrolled_date: enrollment.enrolled_date || null,
+          exit_date: enrollment.exit_date || null,
+          status: enrollment.status,
+          notes: enrollment.notes || null,
+        }));
+
+        if (enrollmentRecords.length > 0) {
+          const { error: enrollmentError } = await supabase
+            .from('beneficiary_services')
+            .insert(enrollmentRecords);
+
+          if (enrollmentError) throw enrollmentError;
+        }
+      }
+
       toast.success("Group beneficiary registered successfully!");
       onSuccess?.();
     } catch (error: any) {
