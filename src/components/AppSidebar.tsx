@@ -71,21 +71,6 @@ const mainMenuItems = [
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
 ];
 
-const educationSubItems = [
-  { title: "Children", url: "/children", icon: Users },
-  { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
-  { title: "Grade Progression", url: "/children/grade-progression", icon: TrendingUp },
-];
-
-const programItems = [
-  { title: "Feeding Program", url: "/programs/feeding", icon: UtensilsCrossed },
-  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: Trophy },
-  { title: "Medical", url: "/programs/medical", icon: Stethoscope },
-  { title: "Family Adoption", url: "/programs/family-adoption", icon: Heart },
-  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: Lightbulb },
-  { title: "Support Groups", url: "/programs/support-groups", icon: Users },
-];
-
 const systemItems = [
   { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
   { title: "Documents", url: "/documents", icon: FileText },
