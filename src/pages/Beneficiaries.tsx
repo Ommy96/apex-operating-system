@@ -592,12 +592,13 @@ export default function Beneficiaries() {
                           {beneficiary.location || beneficiary.institution_name || '—'}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-1">
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-0.5">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            className="h-8 w-8 text-foreground/70 hover:text-primary hover:bg-primary/10"
+                            title="View profile"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/beneficiaries/${beneficiary.id}`);
@@ -608,7 +609,8 @@ export default function Beneficiaries() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            className="h-8 w-8 text-foreground/70 hover:text-primary hover:bg-primary/10"
+                            title="Edit"
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingBeneficiary(beneficiary);
@@ -622,7 +624,8 @@ export default function Beneficiaries() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              className="h-8 w-8 text-foreground/70 hover:text-destructive hover:bg-destructive/10"
+                              title="Delete"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setDeleteId(beneficiary.id);
