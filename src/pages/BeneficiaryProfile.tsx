@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ProgramServicesDisplay } from '@/components/beneficiary/ProgramServicesDisplay';
+import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -343,11 +344,15 @@ export default function BeneficiaryProfile() {
 
       {/* Tabbed Content */}
       <Tabs defaultValue="details" className="w-full">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="services">
             <FolderKanban className="h-4 w-4 mr-1" />
             Services
+          </TabsTrigger>
+          <TabsTrigger value="observations">
+            <MessageSquare className="h-4 w-4 mr-1" />
+            Observations
           </TabsTrigger>
           {beneficiary.beneficiary_type !== 'group' && (
             <TabsTrigger value="guardians">Guardians ({guardians.length})</TabsTrigger>
@@ -497,6 +502,11 @@ export default function BeneficiaryProfile() {
         {/* Services/Programs Tab */}
         <TabsContent value="services" className="space-y-4">
           <ProgramServicesDisplay beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
+        {/* Observations Tab */}
+        <TabsContent value="observations" className="space-y-4">
+          <ProgramObservations beneficiaryId={beneficiary.id} />
         </TabsContent>
 
         {beneficiary.beneficiary_type !== 'group' && (
