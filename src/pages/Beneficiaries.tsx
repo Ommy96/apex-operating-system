@@ -287,16 +287,13 @@ export default function Beneficiaries() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Beneficiaries"
-        description="Manage all beneficiary types - students, adults, and groups"
         icon={Users}
         actions={
           isAdmin && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="h-9 gap-1.5">
+                <Button size="icon" className="h-9 w-9">
                   <Plus className="h-4 w-4" />
-                  Add Beneficiary
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
