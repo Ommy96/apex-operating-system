@@ -23,31 +23,15 @@ import {
 import { Sparkles, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  Heart,
   LayoutDashboard,
   Users,
-  GraduationCap,
-  UtensilsCrossed,
-  UserCheck,
-  Lightbulb,
-  TrendingUp,
-  Home,
-  School,
-  Trophy,
   FileText,
   Settings,
   LogOut,
-  RefreshCw,
-  Building2,
-  Stethoscope,
-  Bus,
-  Layers,
   HandHeart,
   Target,
-  Globe,
   Shield,
 } from "lucide-react";
-import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
