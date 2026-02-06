@@ -1,22 +1,22 @@
 import { cn } from "@/lib/utils";
 
-// Card gradient color system utilities
+// Card gradient color system utilities - Navy Blue Theme
 export const cardGradients = [
-  "bg-gradient-card-blue",
-  "bg-gradient-card-emerald", 
-  "bg-gradient-card-orange",
+  "bg-gradient-card-navy",
+  "bg-gradient-card-blue", 
+  "bg-gradient-card-sky",
   "bg-gradient-card-purple",
-  "bg-gradient-card-pink",
-  "bg-gradient-card-indigo"
+  "bg-gradient-card-amber",
+  "bg-gradient-card-rose"
 ] as const;
 
 export const cardBorders = [
+  "border-card-navy",
   "border-card-blue",
-  "border-card-emerald",
-  "border-card-orange", 
+  "border-card-sky", 
   "border-card-purple",
-  "border-card-pink",
-  "border-card-indigo"
+  "border-card-amber",
+  "border-card-rose"
 ] as const;
 
 export type CardVariant = 0 | 1 | 2 | 3 | 4 | 5;

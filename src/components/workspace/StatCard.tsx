@@ -17,8 +17,8 @@ interface StatCardProps {
 
 const variantStyles = {
   default: "bg-card border-border/50",
-  primary: "bg-gradient-card-emerald border-card-emerald",
-  success: "bg-gradient-card-teal border-card-teal",
+  primary: "bg-gradient-card-navy border-card-navy",
+  success: "bg-gradient-card-sky border-card-sky",
   warning: "bg-gradient-card-amber border-card-amber",
   info: "bg-gradient-card-blue border-card-blue",
 };
