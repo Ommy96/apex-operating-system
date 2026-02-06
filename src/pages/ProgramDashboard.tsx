@@ -157,10 +157,14 @@ const ProgramDashboard = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="overview" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="gap-2">
+            <FolderKanban className="h-4 w-4" />
+            <span className="hidden sm:inline">Projects</span>
           </TabsTrigger>
           <TabsTrigger value="indicators" className="gap-2">
             <Target className="h-4 w-4" />
