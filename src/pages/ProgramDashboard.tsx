@@ -9,7 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
-import { ProgramObservations, ProgramIndicators, ProgramReporting } from "@/components/programs";
+import { ProgramObservations, ProgramIndicators } from "@/components/programs";
+import { EnhancedProgramReporting } from "@/components/programs/EnhancedProgramReporting";
 import { format } from "date-fns";
 
 const ProgramDashboard = () => {
