@@ -239,10 +239,10 @@ const Dashboard = () => {
         <div className="mt-4">
           <DashboardTrendCharts 
             stats={{
-              educationProgram: dashboardStats?.educationProgram || 0,
-              feedingProgram: dashboardStats?.feedingProgram || 0,
-              kipawaProgram: dashboardStats?.kipawaProgram || 0,
-              empowermentProgram: dashboardStats?.empowermentProgram || 0
+              educationProgram: dashboardStats?.students || 0,
+              feedingProgram: dashboardStats?.adults || 0,
+              kipawaProgram: dashboardStats?.groups || 0,
+              empowermentProgram: 0
             }}
             trendData={dashboardTrendData}
             isLoading={statsLoading || trendsLoading}
