@@ -502,7 +502,7 @@ export default function BeneficiaryProfile() {
 
         {/* Services/Programs Tab */}
         <TabsContent value="services" className="space-y-4">
-          <ProgramServicesDisplay beneficiaryId={beneficiary.id} />
+          <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
         </TabsContent>
 
         {/* Observations Tab */}
