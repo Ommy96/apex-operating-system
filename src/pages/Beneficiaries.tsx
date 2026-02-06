@@ -520,7 +520,7 @@ export default function Beneficiaries() {
             <TableBody>
               {filteredBeneficiaries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center">
+                  <TableCell colSpan={6} className="h-32 text-center">
                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                       <Users className="h-10 w-10 mb-2 opacity-40" />
                       <p className="font-medium">No beneficiaries found</p>
