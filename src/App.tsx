@@ -9,12 +9,6 @@ import RegisterOrganization from "./pages/RegisterOrganization";
 import ResetPassword from "./pages/ResetPassword";
 import SuperAdminLogin from "./pages/SuperAdminLogin";
 import Dashboard from "./pages/Dashboard";
-import Children from "./pages/Children";
-import ChildProfile from "./pages/ChildProfile";
-import ChildReport from "./pages/ChildReport";
-import Alumni from "./pages/Alumni";
-import GradeProgression from "./pages/GradeProgression";
-import Programs from "./pages/Programs";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
 import SponsorsManagement from "./pages/SponsorsManagement";
@@ -22,16 +16,9 @@ import Reports from "./pages/Reports";
 import AttendanceManagement from "./pages/AttendanceManagement";
 import Beneficiaries from "./pages/Beneficiaries";
 import BeneficiaryProfile from "./pages/BeneficiaryProfile";
-
 import OrganizationSettings from "./pages/OrganizationSettings";
 import InferaAdminDashboard from "./pages/InferaAdminDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
-import FeedingProgram from "./pages/FeedingProgram";
-import KipawaSato from "./pages/KipawaSato";
-import Medical from "./pages/Medical";
-import FamilyAdoption from "./pages/FamilyAdoption";
-import SelfEmpowerment from "./pages/SelfEmpowerment";
-import SupportGroups from "./pages/SupportGroups";
 import Documents from "./pages/Documents";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
@@ -104,90 +91,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/children" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Children />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/children/alumni" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Alumni />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/children/grade-progression" element={
-              <ProtectedRoute requireRole="admin">
-                <DashboardLayout>
-                  <GradeProgression />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/children/:id" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ChildProfile />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/children/:id/report" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ChildReport />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/feeding" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <FeedingProgram />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/kipawa-sato" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <KipawaSato />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/medical" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Medical />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/family-adoption" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <FamilyAdoption />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/self-empowerment" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SelfEmpowerment />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/support-groups" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SupportGroups />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/programs/:programName" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Programs />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/programs/dynamic/:programId" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -213,13 +116,6 @@ const App = () => (
               <ProtectedRoute requireRole="admin">
                 <DashboardLayout>
                   <AttendanceManagement />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/custom-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <CustomReports />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

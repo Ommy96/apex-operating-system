@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -16,44 +15,23 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronRight, Sparkles, ChevronDown } from "lucide-react";
+import { Sparkles, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  Heart,
   LayoutDashboard,
   Users,
-  GraduationCap,
-  UtensilsCrossed,
-  UserCheck,
-  Lightbulb,
-  TrendingUp,
-  Home,
-  School,
-  Trophy,
   FileText,
   Settings,
   LogOut,
-  RefreshCw,
-  Building2,
-  Stethoscope,
-  Bus,
-  Layers,
   HandHeart,
   Target,
-  Globe,
   Shield,
 } from "lucide-react";
-import { HeartIcon, EducationIcon, FeedingIcon, KipawaIcon, EmpowermentIcon, DashboardIcon, ReportsIcon, AnalyticsIcon } from "@/components/ui/custom-icons";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -69,21 +47,6 @@ const mainMenuItems = [
   { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
   { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Sponsors", url: "/sponsors-management", icon: HandHeart },
-];
-
-const educationSubItems = [
-  { title: "Children", url: "/children", icon: Users },
-  { title: "Alumni", url: "/children/alumni", icon: GraduationCap },
-  { title: "Grade Progression", url: "/children/grade-progression", icon: TrendingUp },
-];
-
-const programItems = [
-  { title: "Feeding Program", url: "/programs/feeding", icon: UtensilsCrossed },
-  { title: "Kipawa Sato", url: "/programs/kipawa-sato", icon: Trophy },
-  { title: "Medical", url: "/programs/medical", icon: Stethoscope },
-  { title: "Family Adoption", url: "/programs/family-adoption", icon: Heart },
-  { title: "Self-Empowerment", url: "/programs/self-empowerment", icon: Lightbulb },
-  { title: "Support Groups", url: "/programs/support-groups", icon: Users },
 ];
 
 const systemItems = [
@@ -145,9 +108,6 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
-  const [educationOpen, setEducationOpen] = useState(
-    educationSubItems.some(item => currentPath === item.url)
-  );
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
@@ -230,79 +190,30 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Programs */}
-          <SidebarGroup className="mt-6">
-            {!isCollapsed && (
-              <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
-                Programs
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {/* Education Collapsible */}
-                <Collapsible open={educationOpen} onOpenChange={setEducationOpen}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                          "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                        )}
-                      >
-                        <GraduationCap className="h-[18px] w-[18px] flex-shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1 text-left">Education</span>
-                            <ChevronDown className={cn(
-                              "h-4 w-4 text-sidebar-foreground/50 transition-transform duration-200",
-                              educationOpen && "rotate-180"
-                            )} />
-                          </>
-                        )}
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="animate-accordion-down">
-                      <div className={cn("mt-1 space-y-1", !isCollapsed && "ml-4 pl-3 border-l border-sidebar-border/50")}>
-                        {educationSubItems.map((item) => (
-                          <MenuItem
-                            key={item.title}
-                            item={item}
-                            isCollapsed={isCollapsed}
-                            isActive={isActive}
-                            onClick={handleNavClick}
-                          />
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-
-                {/* Other Programs */}
-                {programItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <MenuItem 
-                      item={item} 
-                      isCollapsed={isCollapsed} 
-                      isActive={isActive} 
-                      onClick={handleNavClick} 
-                    />
-                  </SidebarMenuItem>
-                ))}
-
-                {/* Dynamic Programs */}
-                {dynamicPrograms?.map((program) => (
-                  <SidebarMenuItem key={program.id}>
-                    <MenuItem
-                      item={{ title: program.name, url: `/programs/dynamic/${program.id}`, icon: Sparkles }}
-                      isCollapsed={isCollapsed}
-                      isActive={isActive}
-                      onClick={handleNavClick}
-                    />
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Dynamic Programs */}
+          {dynamicPrograms && dynamicPrograms.length > 0 && (
+            <SidebarGroup className="mt-6">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
+                  Programs
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {dynamicPrograms.map((program) => (
+                    <SidebarMenuItem key={program.id}>
+                      <MenuItem
+                        item={{ title: program.name, url: `/programs/dynamic/${program.id}`, icon: Sparkles }}
+                        isCollapsed={isCollapsed}
+                        isActive={isActive}
+                        onClick={handleNavClick}
+                      />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
           {/* System - Only for Admin/Management */}
           {(isAdmin || isManagement || superAdmin) && (
