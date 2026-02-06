@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
-  UserCheck, UsersRound, X, Loader2, MoreHorizontal,
+  UserCheck, UsersRound, X, Loader2,
   List, LayoutGrid, Filter, Download, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
