@@ -3,3 +3,4 @@ export type { ProgramFormData } from './ProgramForm';
 export { ProgramObservations } from './ProgramObservations';
 export { ProgramIndicators } from './ProgramIndicators';
 export { ProgramReporting } from './ProgramReporting';
+export { EnhancedProgramReporting } from './EnhancedProgramReporting';

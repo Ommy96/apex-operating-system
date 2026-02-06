@@ -250,7 +250,7 @@ const ProgramDashboard = () => {
         </TabsContent>
 
         <TabsContent value="reports" className="mt-6">
-          <ProgramReporting programId={programId} />
+          <EnhancedProgramReporting programId={programId} />
         </TabsContent>
       </Tabs>
     </div>
