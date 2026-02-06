@@ -285,7 +285,7 @@ export default function Beneficiaries() {
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add New Beneficiary</DialogTitle>
+                  <DialogTitle>{editingBeneficiary ? 'Edit Beneficiary' : 'Add New Beneficiary'}</DialogTitle>
                 </DialogHeader>
                 <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as any)} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 mb-4">
