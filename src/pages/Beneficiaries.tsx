@@ -504,17 +504,18 @@ export default function Beneficiaries() {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <WorkspacePanel padding="none" className="overflow-x-auto">
-          <Table>
+        <WorkspacePanel padding="none" className="overflow-hidden">
+          <div className="overflow-x-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="w-[280px]">Beneficiary</TableHead>
-                <TableHead className="w-[100px]">Type</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Details</TableHead>
-                <TableHead className="hidden lg:table-cell">Location</TableHead>
-                <TableHead className="hidden xl:table-cell">Created</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+                <TableHead className="min-w-[200px]">Beneficiary</TableHead>
+                <TableHead className="min-w-[90px]">Type</TableHead>
+                <TableHead className="min-w-[90px]">Status</TableHead>
+                <TableHead className="min-w-[140px] hidden md:table-cell">Details</TableHead>
+                <TableHead className="min-w-[120px] hidden lg:table-cell">Location</TableHead>
+                <TableHead className="min-w-[100px] hidden xl:table-cell">Created</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
