@@ -140,23 +140,39 @@ export default function Beneficiaries() {
     if (!organizationId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('beneficiaries')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+      // Fetch all rows in batches to avoid Supabase 1000-row default limit
+      const batchSize = 1000;
+      let allData: Beneficiary[] = [];
+      let offset = 0;
+      let hasMore = true;
 
-      if (error) throw error;
-      
-      const beneficiaryData = (data || []) as Beneficiary[];
-      setBeneficiaries(beneficiaryData);
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('beneficiaries')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + batchSize - 1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...(data as Beneficiary[])];
+          offset += batchSize;
+          hasMore = data.length === batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setBeneficiaries(allData);
       
       setStats({
-        total: beneficiaryData.length,
-        students: beneficiaryData.filter(b => b.beneficiary_type === 'student').length,
-        adults: beneficiaryData.filter(b => b.beneficiary_type === 'adult').length,
-        groups: beneficiaryData.filter(b => b.beneficiary_type === 'group').length,
-        active: beneficiaryData.filter(b => b.status === 'active').length,
+        total: allData.length,
+        students: allData.filter(b => b.beneficiary_type === 'student').length,
+        adults: allData.filter(b => b.beneficiary_type === 'adult').length,
+        groups: allData.filter(b => b.beneficiary_type === 'group').length,
+        active: allData.filter(b => b.status === 'active').length,
       });
     } catch (error) {
       console.error('Error fetching beneficiaries:', error);
