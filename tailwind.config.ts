@@ -155,17 +155,17 @@ export default {
 				'gradient-warning': 'var(--gradient-warning)',
 				'gradient-info': 'var(--gradient-info)',
 				'gradient-danger': 'var(--gradient-danger)',
-				'gradient-card-emerald': 'var(--gradient-card-emerald)',
-				'gradient-card-teal': 'var(--gradient-card-teal)',
+				'gradient-card-navy': 'var(--gradient-card-navy)',
 				'gradient-card-blue': 'var(--gradient-card-blue)',
+				'gradient-card-sky': 'var(--gradient-card-sky)',
 				'gradient-card-purple': 'var(--gradient-card-purple)',
 				'gradient-card-amber': 'var(--gradient-card-amber)',
 				'gradient-card-rose': 'var(--gradient-card-rose)'
 			},
 			borderColor: {
-				'card-emerald': 'var(--border-card-emerald)',
-				'card-teal': 'var(--border-card-teal)',
+				'card-navy': 'var(--border-card-navy)',
 				'card-blue': 'var(--border-card-blue)',
+				'card-sky': 'var(--border-card-sky)',
 				'card-purple': 'var(--border-card-purple)',
 				'card-amber': 'var(--border-card-amber)',
 				'card-rose': 'var(--border-card-rose)'
