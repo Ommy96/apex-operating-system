@@ -70,30 +70,12 @@ const Dashboard = () => {
       const months = Array.from({ length: 6 }, (_, i) => startOfMonth(subMonths(new Date(), 5 - i)));
       const monthLabels = months.map(d => format(d, 'MMM'));
       const monthIndex = new Map(monthLabels.map((m, idx) => [m, idx] as const));
-
       const startDateIso = months[0].toISOString();
 
-      const [educationRes, feedingRes, kipawaRes, empowermentRes] = await Promise.all([
-        supabase
-          .from('children')
-          .select('enrollment_date')
-          .eq('organization_id', organizationId)
-          .gte('enrollment_date', startDateIso),
-        supabase
-          .from('feeding_program')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
-        supabase
-          .from('kipawa_sato')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
-        supabase
-          .from('self_empowerment')
-          .select('created_at')
-          .eq('organization_id', organizationId)
-          .gte('created_at', startDateIso),
+      const [studentsRes, adultsRes, groupsRes] = await Promise.all([
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'student').gte('created_at', startDateIso),
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'adult').gte('created_at', startDateIso),
+        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'group').gte('created_at', startDateIso),
       ]);
 
       const safeRows = <T,>(res: { data: T[] | null; error: any }) => (res.error ? [] : (res.data ?? []));
@@ -110,17 +92,16 @@ const Dashboard = () => {
         return counts;
       };
 
-      const educationCounts = countByMonth(safeRows(educationRes), 'enrollment_date');
-      const feedingCounts = countByMonth(safeRows(feedingRes), 'created_at');
-      const kipawaCounts = countByMonth(safeRows(kipawaRes), 'created_at');
-      const empowermentCounts = countByMonth(safeRows(empowermentRes), 'created_at');
+      const studentCounts = countByMonth(safeRows(studentsRes), 'created_at');
+      const adultCounts = countByMonth(safeRows(adultsRes), 'created_at');
+      const groupCounts = countByMonth(safeRows(groupsRes), 'created_at');
 
       return monthLabels.map((month, i) => ({
         month,
-        education: educationCounts[i] ?? 0,
-        feeding: feedingCounts[i] ?? 0,
-        kipawa: kipawaCounts[i] ?? 0,
-        empowerment: empowermentCounts[i] ?? 0,
+        education: studentCounts[i] ?? 0,
+        feeding: adultCounts[i] ?? 0,
+        kipawa: groupCounts[i] ?? 0,
+        empowerment: 0,
       }));
     },
     enabled: !!organizationId,
