@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   Plus, MapPin, X, Settings2, Calendar, Users, Target, 
-  FileText, Globe, UserCircle, Sparkles 
+  FileText, Globe, Sparkles 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +27,8 @@ export interface ProgramFormData {
   start_date: string;
   end_date: string;
   status: string;
-  target_population: string;
-  geographic_coverage: Record<string, unknown> | null;
+  target_population: string[];
+  geographic_coverage: string;
   objectives: string;
 }
 
@@ -70,6 +70,7 @@ export const ProgramForm = ({
   isLoading,
 }: ProgramFormProps) => {
   const [locationInput, setLocationInput] = useState("");
+  const [populationInput, setPopulationInput] = useState("");
 
   const handleAddLocation = () => {
     const trimmedLocation = locationInput.trim();
@@ -90,6 +91,28 @@ export const ProgramForm = ({
     if (e.key === "Enter") {
       e.preventDefault();
       handleAddLocation();
+    }
+  };
+
+  const handleAddPopulation = () => {
+    const trimmed = populationInput.trim();
+    if (trimmed && !formData.target_population.includes(trimmed)) {
+      onChange({ ...formData, target_population: [...formData.target_population, trimmed] });
+      setPopulationInput("");
+    }
+  };
+
+  const handleRemovePopulation = (item: string) => {
+    onChange({
+      ...formData,
+      target_population: formData.target_population.filter((p) => p !== item),
+    });
+  };
+
+  const handlePopulationKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddPopulation();
     }
   };
 
@@ -301,16 +324,38 @@ export const ProgramForm = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="target_population" className="text-sm font-medium">
-                  Target Population
+                <Label className="text-sm font-medium">
+                  Target Populations
                 </Label>
-                <Input
-                  id="target_population"
-                  value={formData.target_population}
-                  onChange={(e) => onChange({ ...formData, target_population: e.target.value })}
-                  placeholder="e.g., Orphaned children aged 6-18"
-                  className="h-10"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={populationInput}
+                    onChange={(e) => setPopulationInput(e.target.value)}
+                    onKeyDown={handlePopulationKeyDown}
+                    placeholder="e.g., Orphaned children, Single mothers"
+                    className="h-10"
+                  />
+                  <Button type="button" variant="outline" onClick={handleAddPopulation} className="h-10 px-4">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {formData.target_population.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3 p-3 rounded-lg bg-muted/30">
+                    {formData.target_population.map((pop) => (
+                      <Badge key={pop} variant="secondary" className="gap-1.5 pr-1.5 py-1">
+                        <Users className="h-3 w-3" />
+                        {pop}
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePopulation(pop)}
+                          className="ml-1 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -416,7 +461,7 @@ export const ProgramForm = ({
         <Button 
           type="submit" 
           disabled={isLoading} 
-          className="min-w-[120px] bg-primary hover:bg-primary/90"
+          className="min-w-[120px]"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">

@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { BookOpen } from "lucide-react";
 import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
+import { Json } from "@/integrations/supabase/types";
 
 interface Program {
   id: string;
@@ -31,8 +32,8 @@ interface Program {
   start_date: string | null;
   end_date: string | null;
   status: string | null;
-  target_population: string | null;
-  geographic_coverage: string | null;
+  target_population: string[] | null;
+  geographic_coverage: Json | null;
   objectives: string | null;
 }
 
@@ -48,7 +49,7 @@ const emptyFormData: ProgramFormData = {
   start_date: "",
   end_date: "",
   status: "planning",
-  target_population: "",
+  target_population: [],
   geographic_coverage: "",
   objectives: "",
 };
@@ -93,15 +94,15 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
-        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        custom_fields: data.custom_fields as unknown as Json[],
         show_in_navigation: data.show_in_navigation,
         organization_id: currentOrganization.organization_id,
         category: data.category || null,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         status: data.status || 'planning',
-        target_population: data.target_population || null,
-        geographic_coverage: data.geographic_coverage || null,
+        target_population: data.target_population.length > 0 ? data.target_population : null,
+        geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
         objectives: data.objectives || null,
       }]);
       if (error) throw error;
@@ -126,14 +127,14 @@ const ProgramsManagement = () => {
         location: data.locations.length > 0 ? data.locations.join(', ') : null,
         description: data.description || null,
         is_active: data.is_active,
-        custom_fields: data.custom_fields as unknown as Record<string, never>[],
+        custom_fields: data.custom_fields as unknown as Json[],
         show_in_navigation: data.show_in_navigation,
         category: data.category || null,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         status: data.status || 'planning',
-        target_population: data.target_population || null,
-        geographic_coverage: data.geographic_coverage || null,
+        target_population: data.target_population.length > 0 ? data.target_population : null,
+        geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
         objectives: data.objectives || null,
       }).eq('id', id);
       if (error) throw error;
@@ -172,6 +173,15 @@ const ProgramsManagement = () => {
     setIsFormOpen(false);
   };
 
+  const extractGeographicCoverage = (geo: Json | null): string => {
+    if (!geo) return "";
+    if (typeof geo === 'object' && geo !== null && 'region' in geo) {
+      return String((geo as { region: unknown }).region);
+    }
+    if (typeof geo === 'string') return geo;
+    return "";
+  };
+
   const handleEdit = (program: Program) => {
     setEditingProgram(program);
     const locations = program.location 
@@ -189,8 +199,8 @@ const ProgramsManagement = () => {
       start_date: program.start_date || "",
       end_date: program.end_date || "",
       status: program.status || "planning",
-      target_population: program.target_population || "",
-      geographic_coverage: program.geographic_coverage || "",
+      target_population: program.target_population || [],
+      geographic_coverage: extractGeographicCoverage(program.geographic_coverage),
       objectives: program.objectives || "",
     });
     setIsFormOpen(true);
@@ -444,10 +454,10 @@ const ProgramsManagement = () => {
                     )}
                   </div>
                   
-                  {program.target_population && (
+                  {program.target_population && program.target_population.length > 0 && (
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                      <Users className="h-3 w-3" />
-                      <span className="truncate">{program.target_population}</span>
+                      <Users className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{program.target_population.join(', ')}</span>
                     </div>
                   )}
                   
