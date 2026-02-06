@@ -63,13 +63,6 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/sponsors-management" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <SponsorsManagement />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/entities/:slug" element={
               <ProtectedRoute>
                 <DashboardLayout>
