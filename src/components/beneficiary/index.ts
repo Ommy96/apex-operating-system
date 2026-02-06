@@ -8,3 +8,4 @@ export { DependantSelector } from './DependantSelector';
 export { MedicalInfoSection } from './MedicalInfoSection';
 export { BackgroundSection } from './BackgroundSection';
 export { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
+export { ProgramServicesDisplay } from './ProgramServicesDisplay';
