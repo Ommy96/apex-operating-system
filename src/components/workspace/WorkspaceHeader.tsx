@@ -139,17 +139,31 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
             {pathSegments.map((segment, index) => {
-              const path = '/' + pathSegments.slice(0, index + 1).join('/');
+              const fullPath = '/' + pathSegments.slice(0, index + 1).join('/');
               const isLast = index === pathSegments.length - 1;
-              // Skip "dynamic" segment as it's just a route prefix
-              if (segment === "dynamic") return null;
+              // Skip "dynamic" and "dashboard" route prefixes under /programs/
+              if ((segment === "dynamic" || segment === "dashboard") && pathSegments[index - 1] === "programs") return null;
+
+              // Build correct navigateTo path
+              let navigateTo = fullPath;
+              // If this is "programs" and the next segment is "dynamic" or "dashboard", link to /programs-management
+              if (segment === "programs") {
+                navigateTo = "/programs-management";
+              }
+
+              // Recalculate isLast: if next visible segments are all skipped
+              const remainingVisible = pathSegments.slice(index + 1).filter(
+                (s, i) => !((s === "dynamic" || s === "dashboard") && pathSegments[index + 1 + i - 1] === "programs")
+              );
+              const effectiveIsLast = isLast || remainingVisible.length === 0;
+
               return (
                 <BreadcrumbEntry
-                  key={path}
+                  key={fullPath}
                   segment={segment}
                   segments={pathSegments}
-                  path={path}
-                  isLast={isLast}
+                  navigateTo={navigateTo}
+                  isLast={effectiveIsLast && index === pathSegments.length - 1 || (index === pathSegments.length - 1)}
                 />
               );
             })}
