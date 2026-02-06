@@ -304,29 +304,34 @@ export default function Beneficiaries() {
                   </TabsList>
                   <TabsContent value="student">
                     <StudentBeneficiaryForm
+                      beneficiary={editingBeneficiary?.beneficiary_type === 'student' ? editingBeneficiary : undefined}
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                   <TabsContent value="adult">
                     <AdultBeneficiaryForm
+                      beneficiary={editingBeneficiary?.beneficiary_type === 'adult' ? editingBeneficiary : undefined}
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                   <TabsContent value="group">
                     <GroupBeneficiaryForm
                       onSuccess={() => {
                         setIsDialogOpen(false);
+                        setEditingBeneficiary(null);
                         fetchBeneficiaries();
                       }}
-                      onCancel={() => setIsDialogOpen(false)}
+                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
                     />
                   </TabsContent>
                 </Tabs>
