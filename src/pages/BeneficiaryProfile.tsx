@@ -436,9 +436,9 @@ export default function BeneficiaryProfile() {
           <TabsTrigger value="details" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             Details
           </TabsTrigger>
-          <TabsTrigger value="services" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="programs" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <FolderKanban className="h-4 w-4 mr-1" />
-            Services
+            Programs
           </TabsTrigger>
           <TabsTrigger value="observations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <MessageSquare className="h-4 w-4 mr-1" />
@@ -619,8 +619,8 @@ export default function BeneficiaryProfile() {
           )}
         </TabsContent>
 
-        {/* Services/Programs Tab */}
-        <TabsContent value="services" className="space-y-4">
+        {/* Programs Tab */}
+        <TabsContent value="programs" className="space-y-4">
           <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
         </TabsContent>
 
