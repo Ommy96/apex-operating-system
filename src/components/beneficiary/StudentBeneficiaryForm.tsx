@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,6 +94,32 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [donors, setDonors] = useState<Donor[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
+
+  // Load existing enrollments when editing
+  useEffect(() => {
+    if (beneficiary?.id && currentOrganization?.organization_id) {
+      supabase
+        .from('beneficiary_services')
+        .select('id, program_id, project_id, activity_id, enrolled_date, exit_date, status, notes, programs:program_id(name), projects:project_id(name)')
+        .eq('beneficiary_id', beneficiary.id)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            setEnrollments(data.map((e: any) => ({
+              id: e.id,
+              program_id: e.program_id,
+              program_name: e.programs?.name || '',
+              project_id: e.project_id,
+              project_name: e.projects?.name || '',
+              activity_id: e.activity_id,
+              enrolled_date: e.enrolled_date || '',
+              exit_date: e.exit_date || '',
+              status: e.status || 'active',
+              notes: e.notes || '',
+            })));
+          }
+        });
+    }
+  }, [beneficiary?.id, currentOrganization?.organization_id]);
 
   const form = useForm<StudentFormData>({
     defaultValues: {
