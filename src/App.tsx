@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import RegisterOrganization from "./pages/RegisterOrganization";
 import ResetPassword from "./pages/ResetPassword";
 import SuperAdminLogin from "./pages/SuperAdminLogin";
+import RoleManagement from "./pages/RoleManagement";
 import Dashboard from "./pages/Dashboard";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
@@ -108,9 +109,16 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/reports-analytics" element={
-              <ProtectedRoute requireRole="management">
+              <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>
                   <ReportsAnalytics />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/role-management" element={
+              <ProtectedRoute requirePermission={{ module: 'users', action: 'manage', resource: 'roles' }}>
+                <DashboardLayout>
+                  <RoleManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

@@ -6,10 +6,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
@@ -20,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sparkles, ChevronDown } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LayoutDashboard,
@@ -30,28 +27,18 @@ import {
   LogOut,
   Target,
   Shield,
+  Lock,
 } from "lucide-react";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
-
-const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
-  { title: "Programs", url: "/programs-management", icon: Target },
-];
-
-const systemItems = [
-  { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
-  { title: "Documents", url: "/documents", icon: FileText },
-  { title: "Settings", url: "/organization-settings", icon: Settings },
-];
 
 interface MenuItemProps {
   item: { title: string; url: string; icon: any };
@@ -100,7 +87,8 @@ function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const { signOut, isAdmin, isManagement, isStaff, user } = useAuth();
+  const { signOut, user } = useAuth();
+  const { can, isSuperAdmin: superAdmin } = usePermissions();
   const { currentOrganization } = useOrganization();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -133,7 +121,19 @@ export function AppSidebar() {
     await signOut();
   };
 
-  const superAdmin = isSuperAdmin(user?.email);
+  // Build menu items based on permissions
+  const mainMenuItems = [
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
+    { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+    { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+  ].filter(item => item.show);
+
+  const systemItems = [
+    { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+    { title: "Documents", url: "/documents", icon: FileText, show: can.viewBeneficiaries },
+    { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
+    { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
+  ].filter(item => item.show);
 
   return (
     <TooltipProvider>
@@ -160,7 +160,6 @@ export function AppSidebar() {
               </div>
             )}
           </div>
-          {/* Organization Switcher */}
           <OrganizationSwitcher collapsed={isCollapsed} />
         </SidebarHeader>
 
@@ -189,7 +188,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           {/* Dynamic Programs */}
-          {dynamicPrograms && dynamicPrograms.length > 0 && (
+          {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -213,8 +212,8 @@ export function AppSidebar() {
             </SidebarGroup>
           )}
 
-          {/* System - Only for Admin/Management */}
-          {(isAdmin || isManagement || superAdmin) && (
+          {/* System */}
+          {systemItems.length > 0 && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-2">
@@ -238,7 +237,7 @@ export function AppSidebar() {
             </SidebarGroup>
           )}
 
-          {/* Super Admin - Only for specific super admin user */}
+          {/* Super Admin */}
           {isSuperAdmin(user?.email) && (
             <SidebarGroup className="mt-6">
               {!isCollapsed && (

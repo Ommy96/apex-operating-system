@@ -3651,6 +3651,186 @@ export type Database = {
         }
         Relationships: []
       }
+      rbac_permissions: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          display_name: string
+          id: string
+          module: string
+          module_display_name: string
+          resource: string
+          sort_order: number | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          module: string
+          module_display_name: string
+          resource: string
+          sort_order?: number | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          module?: string
+          module_display_name?: string
+          resource?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      rbac_role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rbac_role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rbac_roles: {
+        Row: {
+          cloned_from: string | null
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_system_role: boolean | null
+          name: string
+          organization_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cloned_from?: string | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_role?: boolean | null
+          name: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cloned_from?: string | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_role?: boolean | null
+          name?: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_roles_cloned_from_fkey"
+            columns: ["cloned_from"]
+            isOneToOne: false
+            referencedRelation: "rbac_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rbac_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rbac_user_role_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_user_role_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rbac_user_role_assignments_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       replacements: {
         Row: {
           created_at: string
@@ -4460,6 +4640,21 @@ export type Database = {
         }[]
       }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
+      get_user_permissions: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: string[]
+      }
+      get_user_rbac_roles: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: {
+          color: string
+          display_name: string
+          icon: string
+          is_system_role: boolean
+          role_id: string
+          role_name: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -4491,6 +4686,16 @@ export type Database = {
       }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_permission: {
+        Args: {
+          _action: string
+          _module: string
+          _org_id: string
+          _resource: string
+          _user_id: string
+        }
         Returns: boolean
       }
     }
