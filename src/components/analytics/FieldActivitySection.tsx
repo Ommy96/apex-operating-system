@@ -8,65 +8,75 @@ import {
   Home, 
   MapPin,
   Users,
-  Calendar,
   AlertTriangle,
   CheckCircle2,
   Clock,
-  TrendingUp
+  TrendingUp,
+  School,
+  Building2,
+  UsersRound
 } from "lucide-react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, Pie, PieChart } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Pie, PieChart } from "recharts";
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { format, differenceInDays, isWithinInterval, startOfMonth, subMonths, eachMonthOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 interface FieldActivitySectionProps {
-  homeVisits: any[];
-  children: any[];
+  visitations: any[];
+  beneficiaries: any[];
   dateRange: DateRange | undefined;
   isLoading: boolean;
 }
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444'];
 
-export function FieldActivitySection({ homeVisits, children, dateRange, isLoading }: FieldActivitySectionProps) {
+const VISIT_TYPE_CONFIG: Record<string, { label: string; icon: typeof Home; color: string }> = {
+  home: { label: 'Home Visits', icon: Home, color: '#3b82f6' },
+  school: { label: 'School Visits', icon: School, color: '#10b981' },
+  hospital: { label: 'Hospital Visits', icon: Building2, color: '#f59e0b' },
+  group: { label: 'Group Visits', icon: UsersRound, color: '#8b5cf6' },
+};
+
+export function FieldActivitySection({ visitations, beneficiaries, dateRange, isLoading }: FieldActivitySectionProps) {
   // Filter visits by date range
   const filteredVisits = useMemo(() => {
-    if (!dateRange?.from) return homeVisits;
-    return homeVisits.filter(v => {
+    if (!dateRange?.from) return visitations;
+    return visitations.filter(v => {
       const date = new Date(v.visit_date || v.created_at);
       return isWithinInterval(date, { 
         start: dateRange.from!, 
         end: dateRange.to || dateRange.from! 
       });
     });
-  }, [homeVisits, dateRange]);
+  }, [visitations, dateRange]);
 
-  // Total visits
+  // Visits by type
+  const visitsByType = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredVisits.forEach(v => {
+      const type = v.visit_type || 'home';
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return Object.entries(counts).map(([type, count]) => ({
+      type,
+      label: VISIT_TYPE_CONFIG[type]?.label || type,
+      count,
+      color: VISIT_TYPE_CONFIG[type]?.color || '#6b7280',
+    })).sort((a, b) => b.count - a.count);
+  }, [filteredVisits]);
+
   const totalVisits = filteredVisits.length;
 
   // Visits per staff
   const visitsPerStaff = useMemo(() => {
     const staffCounts: Record<string, number> = {};
     filteredVisits.forEach(v => {
-      const staff = v.staff || 'Unknown';
+      const staff = v.staff_name || 'Unknown';
       staffCounts[staff] = (staffCounts[staff] || 0) + 1;
     });
     return Object.entries(staffCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-  }, [filteredVisits]);
-
-  // Visits by location
-  const visitsByLocation = useMemo(() => {
-    const locationCounts: Record<string, number> = {};
-    filteredVisits.forEach(v => {
-      const location = v.location || 'Unspecified';
-      locationCounts[location] = (locationCounts[location] || 0) + 1;
-    });
-    return Object.entries(locationCounts)
-      .map(([location, count]) => ({ location, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 8);
   }, [filteredVisits]);
 
   // Monthly visit trends
@@ -80,64 +90,57 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
       const monthStart = startOfMonth(month);
       const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       
-      const count = homeVisits.filter(v => {
+      const monthVisits = visitations.filter(v => {
         const date = new Date(v.visit_date || v.created_at);
         return isWithinInterval(date, { start: monthStart, end: monthEnd });
-      }).length;
+      });
 
-      return {
-        month: format(month, 'MMM yyyy'),
-        visits: count
-      };
+      const result: any = { month: format(month, 'MMM yyyy'), total: monthVisits.length };
+      // Break down by type
+      Object.keys(VISIT_TYPE_CONFIG).forEach(type => {
+        result[VISIT_TYPE_CONFIG[type].label] = monthVisits.filter(v => v.visit_type === type).length;
+      });
+      return result;
     });
-  }, [homeVisits]);
+  }, [visitations]);
 
-  // Children overdue for visits (no visit in last 90 days)
-  const overdueChildren = useMemo(() => {
+  // Beneficiaries overdue for visits (no visit in last 90 days)
+  const overdueBeneficiaries = useMemo(() => {
     const now = new Date();
-    const visitedChildIds = new Set<string>();
+    const activeBeneficiaries = beneficiaries.filter(b => b.status === 'active');
     
-    // Get last visit date per child
-    const lastVisitPerChild: Record<string, Date> = {};
-    homeVisits.forEach(v => {
-      if (v.student_id) {
+    const lastVisitPerBeneficiary: Record<string, Date> = {};
+    visitations.forEach(v => {
+      if (v.beneficiary_id) {
         const visitDate = new Date(v.visit_date || v.created_at);
-        if (!lastVisitPerChild[v.student_id] || visitDate > lastVisitPerChild[v.student_id]) {
-          lastVisitPerChild[v.student_id] = visitDate;
-          visitedChildIds.add(v.student_id);
+        if (!lastVisitPerBeneficiary[v.beneficiary_id] || visitDate > lastVisitPerBeneficiary[v.beneficiary_id]) {
+          lastVisitPerBeneficiary[v.beneficiary_id] = visitDate;
         }
       }
     });
 
-    // Find children with no recent visit or never visited
-    return children
-      .map(child => {
-        const lastVisit = lastVisitPerChild[child.id];
+    return activeBeneficiaries
+      .map(b => {
+        const lastVisit = lastVisitPerBeneficiary[b.id];
         const daysSinceVisit = lastVisit ? differenceInDays(now, lastVisit) : 999;
-        return {
-          ...child,
-          lastVisit,
-          daysSinceVisit,
-          isOverdue: daysSinceVisit > 90
-        };
+        return { ...b, lastVisit, daysSinceVisit, isOverdue: daysSinceVisit > 90 };
       })
-      .filter(c => c.isOverdue && c.status === 'active')
+      .filter(b => b.isOverdue)
       .sort((a, b) => b.daysSinceVisit - a.daysSinceVisit)
       .slice(0, 15);
-  }, [homeVisits, children]);
+  }, [visitations, beneficiaries]);
 
   // Visit coverage rate
   const visitCoverageRate = useMemo(() => {
-    const activeChildren = children.filter(c => c.status === 'active').length;
-    const visitedInPeriod = new Set(filteredVisits.map(v => v.student_id)).size;
-    return activeChildren > 0 ? Math.round((visitedInPeriod / activeChildren) * 100) : 0;
-  }, [children, filteredVisits]);
+    const activeCount = beneficiaries.filter(b => b.status === 'active').length;
+    const visitedInPeriod = new Set(filteredVisits.map(v => v.beneficiary_id)).size;
+    return activeCount > 0 ? Math.round((visitedInPeriod / activeCount) * 100) : 0;
+  }, [beneficiaries, filteredVisits]);
 
-  // Average visits per child
-  const avgVisitsPerChild = useMemo(() => {
-    const activeChildren = children.filter(c => c.status === 'active').length;
-    return activeChildren > 0 ? (totalVisits / activeChildren).toFixed(1) : '0';
-  }, [children, totalVisits]);
+  // Follow-ups pending
+  const pendingFollowUps = useMemo(() => {
+    return visitations.filter(v => v.follow_up_required && (!v.follow_up_date || new Date(v.follow_up_date) <= new Date())).length;
+  }, [visitations]);
 
   if (isLoading) {
     return (
@@ -150,7 +153,7 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} border-l-4 border-l-blue-500`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -184,11 +187,11 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Avg per Child</p>
-                <p className="text-2xl font-bold mt-1">{avgVisitsPerChild}</p>
+                <p className="text-xs font-medium text-muted-foreground">Pending Follow-ups</p>
+                <p className="text-2xl font-bold mt-1">{pendingFollowUps}</p>
               </div>
               <div className="p-2 rounded-lg bg-amber-500/10">
-                <Users className="h-5 w-5 text-amber-500" />
+                <Clock className="h-5 w-5 text-amber-500" />
               </div>
             </div>
           </CardContent>
@@ -199,7 +202,7 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Overdue (90+ days)</p>
-                <p className="text-2xl font-bold mt-1">{overdueChildren.length}</p>
+                <p className="text-2xl font-bold mt-1">{overdueBeneficiaries.length}</p>
               </div>
               <div className="p-2 rounded-lg bg-red-500/10">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -209,15 +212,36 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
         </Card>
       </div>
 
+      {/* Visit Type Breakdown */}
+      {visitsByType.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {visitsByType.map(vt => {
+            const config = VISIT_TYPE_CONFIG[vt.type];
+            const Icon = config?.icon || Home;
+            return (
+              <Card key={vt.type} className="border-l-4" style={{ borderLeftColor: vt.color }}>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" style={{ color: vt.color }} />
+                    <span className="text-xs text-muted-foreground">{vt.label}</span>
+                  </div>
+                  <p className="text-xl font-bold mt-1">{vt.count}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Visit Trends */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Visit Trends
+              Visitation Trends
             </CardTitle>
-            <CardDescription>Home visits conducted over the last 6 months</CardDescription>
+            <CardDescription>All visitations conducted over the last 6 months</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -226,7 +250,7 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
                 <XAxis dataKey="month" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Bar dataKey="visits" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -239,7 +263,6 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
               <Users className="h-5 w-5 text-primary" />
               Visits by Staff
             </CardTitle>
-            <CardDescription>Distribution of visits across staff members</CardDescription>
           </CardHeader>
           <CardContent>
             {visitsPerStaff.length > 0 ? (
@@ -259,38 +282,37 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No visit data available</p>
+                <p>No visitation data available</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Visits by Location */}
+        {/* Visit Type Distribution */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-primary" />
-              Visits by Location
+              Visit Type Distribution
             </CardTitle>
-            <CardDescription>Geographic distribution of home visits</CardDescription>
           </CardHeader>
           <CardContent>
-            {visitsByLocation.length > 0 ? (
+            {visitsByType.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={visitsByLocation}
+                    data={visitsByType}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="count"
-                    nameKey="location"
-                    label={({ location, count }) => `${location}: ${count}`}
+                    nameKey="label"
+                    label={({ label, count }) => `${label}: ${count}`}
                   >
-                    {visitsByLocation.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    {visitsByType.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -299,58 +321,49 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No location data available</p>
+                <p>No visitation data available</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Children Overdue for Visits */}
+        {/* Overdue Beneficiaries */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
-              Children Overdue for Home Visits
+              Beneficiaries Overdue for Visits
             </CardTitle>
-            <CardDescription>Active children who haven't been visited in over 90 days</CardDescription>
+            <CardDescription>Active beneficiaries not visited in over 90 days</CardDescription>
           </CardHeader>
           <CardContent>
-            {overdueChildren.length > 0 ? (
+            {overdueBeneficiaries.length > 0 ? (
               <ScrollArea className="h-[350px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Student Name</TableHead>
-                      <TableHead>Institution</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Type</TableHead>
                       <TableHead>Location</TableHead>
                       <TableHead>Last Visit</TableHead>
                       <TableHead>Days Overdue</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {overdueChildren.map((child) => (
-                      <TableRow key={child.id}>
-                        <TableCell className="font-medium">
-                          {child.first_name} {child.last_name}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {child.institution_name || 'N/A'}
-                        </TableCell>
+                    {overdueBeneficiaries.map((b) => (
+                      <TableRow key={b.id}>
+                        <TableCell className="font-medium">{b.display_name}</TableCell>
+                        <TableCell><Badge variant="outline">{b.beneficiary_type}</Badge></TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{b.location || b.county || 'N/A'}</TableCell>
                         <TableCell className="text-sm">
-                          {child.residence || 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {child.lastVisit ? format(child.lastVisit, 'MMM d, yyyy') : (
+                          {b.lastVisit ? format(b.lastVisit, 'MMM d, yyyy') : (
                             <Badge variant="destructive">Never</Badge>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge 
-                            variant={child.daysSinceVisit > 180 ? "destructive" : "secondary"}
-                            className="flex items-center gap-1 w-fit"
-                          >
-                            <Clock className="h-3 w-3" />
-                            {child.daysSinceVisit > 900 ? 'Never visited' : `${child.daysSinceVisit} days`}
+                          <Badge variant={b.daysSinceVisit > 180 ? "destructive" : "secondary"}>
+                            <Clock className="h-3 w-3 mr-1" />
+                            {b.daysSinceVisit > 900 ? 'Never visited' : `${b.daysSinceVisit} days`}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -361,8 +374,7 @@ export function FieldActivitySection({ homeVisits, children, dateRange, isLoadin
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-emerald-500" />
-                <p className="font-medium">All children have been visited recently!</p>
-                <p className="text-sm">No active children are overdue for home visits.</p>
+                <p className="font-medium">All beneficiaries have been visited recently!</p>
               </div>
             )}
           </CardContent>
