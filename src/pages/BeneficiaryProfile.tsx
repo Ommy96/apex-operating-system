@@ -327,33 +327,34 @@ export default function BeneficiaryProfile() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/beneficiaries')} className="hover:bg-primary/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <Button variant="ghost" onClick={() => navigate('/beneficiaries')} className="hover:bg-primary/10 self-start">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Beneficiaries
+          Back
         </Button>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="outline" 
+            size="sm"
             onClick={handleDownloadReport}
             disabled={generatingReport}
             className="border-primary/30 text-primary hover:bg-primary/10"
           >
             {generatingReport ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
             ) : (
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="h-4 w-4 mr-1" />
             )}
-            Download Report
+            <span className="hidden sm:inline">Download</span> Report
           </Button>
-          <Button variant="outline" onClick={handleEdit} className="border-info/30 text-info hover:bg-info/10">
-            <Edit2 className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={handleEdit} className="border-info/30 text-info hover:bg-info/10">
+            <Edit2 className="h-4 w-4 mr-1" />
             Edit
           </Button>
           {isAdmin && (
-            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-              <Trash2 className="h-4 w-4 mr-2" />
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+              <Trash2 className="h-4 w-4 mr-1" />
               Delete
             </Button>
           )}
@@ -431,44 +432,46 @@ export default function BeneficiaryProfile() {
 
       {/* Tabbed Content */}
       <Tabs defaultValue="details" className="w-full">
-        <TabsList className="flex-wrap bg-muted/50 p-1">
-          <TabsTrigger value="details" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            Details
-          </TabsTrigger>
-          <TabsTrigger value="programs" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <FolderKanban className="h-4 w-4 mr-1" />
-            Programs
-          </TabsTrigger>
-          <TabsTrigger value="observations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Observations
-          </TabsTrigger>
-          {beneficiary.beneficiary_type === 'student' && (
-            <TabsTrigger value="academics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <GraduationCap className="h-4 w-4 mr-1" />
-              Academics
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto md:flex-wrap bg-muted/50 p-1 min-w-full md:min-w-0">
+            <TabsTrigger value="details" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              Details
             </TabsTrigger>
-          )}
-          {beneficiary.beneficiary_type === 'student' && (
-            <TabsTrigger value="uploads" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Upload className="h-4 w-4 mr-1" />
-              Uploads
+            <TabsTrigger value="programs" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <FolderKanban className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+              Programs
             </TabsTrigger>
-          )}
-          {beneficiary.beneficiary_type !== 'group' && (
-            <TabsTrigger value="guardians" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Guardians ({guardians.length})
+            <TabsTrigger value="observations" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+              Observations
             </TabsTrigger>
-          )}
-          <TabsTrigger value="donors" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            Donors ({donors.length})
-          </TabsTrigger>
-          {beneficiary.beneficiary_type !== 'group' && (
-            <TabsTrigger value="medical" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Medical
+            {beneficiary.beneficiary_type === 'student' && (
+              <TabsTrigger value="academics" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Academics
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type === 'student' && (
+              <TabsTrigger value="uploads" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Uploads
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type !== 'group' && (
+              <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                Guardians ({guardians.length})
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="donors" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              Donors ({donors.length})
             </TabsTrigger>
-          )}
-        </TabsList>
+            {beneficiary.beneficiary_type !== 'group' && (
+              <TabsTrigger value="medical" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                Medical
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         <TabsContent value="details" className="space-y-4">
           {/* Student Details */}

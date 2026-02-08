@@ -191,7 +191,7 @@ export function DashboardTrendCharts({ programStats, trendData = [], isLoading }
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <div className="h-[250px] sm:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
@@ -274,11 +274,11 @@ export function DashboardTrendCharts({ programStats, trendData = [], isLoading }
             <CardDescription className="mt-1">Current beneficiary distribution by program</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-6">
-              <div className="h-[200px] w-[200px]">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <div className="h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80}
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={70}
                       paddingAngle={3} dataKey="value" isAnimationActive={true}
                       animationDuration={1500} animationEasing="ease-out">
                       {pieData.map((entry, index) => (
@@ -289,14 +289,14 @@ export function DashboardTrendCharts({ programStats, trendData = [], isLoading }
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 w-full space-y-3">
                 {pieData.map((item) => (
                   <div key={item.name} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <div className="flex-1">
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground truncate">{item.name}</span>
-                        <span className="text-sm text-muted-foreground">{item.percentage}%</span>
+                        <span className="text-sm text-muted-foreground ml-2">{item.percentage}%</span>
                       </div>
                       <div className="mt-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-1000 ease-out"
