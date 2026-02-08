@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
-import { format, startOfMonth, subMonths } from "date-fns";
+import { useProgramEnrollmentStats } from "@/hooks/useProgramEnrollmentStats";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Users, 
   TrendingUp,
@@ -25,7 +24,7 @@ import {
   WorkspacePanelHeader,
   StatusBadge,
 } from "@/components/workspace";
-import { DashboardTrendCharts, type TrendData } from "@/components/DashboardTrendCharts";
+import { DashboardTrendCharts } from "@/components/DashboardTrendCharts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -36,77 +35,15 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-  const organizationId = currentOrganization?.organization_id;
-  
-  // Fetch dashboard statistics
-  const { data: dashboardStats, isLoading: statsLoading, refetch } = useQuery({
-    queryKey: ['dashboard-stats', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return null;
-      
-      const [beneficiariesRes, studentsRes, adultsRes, groupsRes] = await Promise.all([
-        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('status', 'active'),
-        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'student').eq('status', 'active'),
-        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'adult').eq('status', 'active'),
-        supabase.from('beneficiaries').select('*', { count: 'exact' }).eq('organization_id', organizationId).eq('beneficiary_type', 'group').eq('status', 'active'),
-      ]);
 
-      return {
-        totalBeneficiaries: beneficiariesRes.count || 0,
-        students: studentsRes.count || 0,
-        adults: adultsRes.count || 0,
-        groups: groupsRes.count || 0,
-      };
-    },
-    enabled: !!organizationId,
-    refetchInterval: 30000,
-  });
-
-  const { data: dashboardTrendData, isLoading: trendsLoading } = useQuery({
-    queryKey: ['dashboard-trends', organizationId],
-    queryFn: async (): Promise<TrendData[]> => {
-      if (!organizationId) return [];
-
-      const months = Array.from({ length: 6 }, (_, i) => startOfMonth(subMonths(new Date(), 5 - i)));
-      const monthLabels = months.map(d => format(d, 'MMM'));
-      const monthIndex = new Map(monthLabels.map((m, idx) => [m, idx] as const));
-      const startDateIso = months[0].toISOString();
-
-      const [studentsRes, adultsRes, groupsRes] = await Promise.all([
-        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'student').gte('created_at', startDateIso),
-        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'adult').gte('created_at', startDateIso),
-        supabase.from('beneficiaries').select('created_at').eq('organization_id', organizationId).eq('beneficiary_type', 'group').gte('created_at', startDateIso),
-      ]);
-
-      const safeRows = <T,>(res: { data: T[] | null; error: any }) => (res.error ? [] : (res.data ?? []));
-      const countByMonth = (rows: any[], dateKey: string) => {
-        const counts = new Array(6).fill(0);
-        for (const r of rows) {
-          const raw = r?.[dateKey];
-          if (!raw) continue;
-          const label = format(new Date(raw), 'MMM');
-          const idx = monthIndex.get(label);
-          if (idx === undefined) continue;
-          counts[idx] += 1;
-        }
-        return counts;
-      };
-
-      const studentCounts = countByMonth(safeRows(studentsRes), 'created_at');
-      const adultCounts = countByMonth(safeRows(adultsRes), 'created_at');
-      const groupCounts = countByMonth(safeRows(groupsRes), 'created_at');
-
-      return monthLabels.map((month, i) => ({
-        month,
-        education: studentCounts[i] ?? 0,
-        feeding: adultCounts[i] ?? 0,
-        kipawa: groupCounts[i] ?? 0,
-        empowerment: 0,
-      }));
-    },
-    enabled: !!organizationId,
-    refetchInterval: 30000,
-  });
+  const {
+    programStats,
+    totalBeneficiaries,
+    trendData,
+    statsLoading,
+    trendsLoading,
+    refetch,
+  } = useProgramEnrollmentStats();
 
   // Real-time subscriptions
   useEffect(() => {
@@ -125,6 +62,14 @@ const Dashboard = () => {
               duration: 3000,
             });
           }
+          refetch();
+          setLastUpdated(new Date());
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'beneficiary_services' },
+        () => {
           refetch();
           setLastUpdated(new Date());
         }
@@ -150,6 +95,9 @@ const Dashboard = () => {
     { name: "Document Compliance", path: "/documents", icon: FileText },
   ];
 
+  // Variant cycling for stat cards
+  const variants: Array<"primary" | "info" | "success" | "warning"> = ["primary", "info", "success", "warning"];
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -169,37 +117,42 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Total + dynamic programs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="Total Beneficiaries"
-          value={statsLoading ? "..." : dashboardStats?.totalBeneficiaries.toString() || "0"}
+          value={statsLoading ? "..." : totalBeneficiaries.toString()}
           description="Active individuals served"
           icon={Users}
           variant="primary"
         />
-        <StatCard
-          title="Students"
-          value={statsLoading ? "..." : dashboardStats?.students.toString() || "0"}
-          description="Student beneficiaries"
-          icon={Target}
-          variant="info"
-        />
-        <StatCard
-          title="Adults"
-          value={statsLoading ? "..." : dashboardStats?.adults.toString() || "0"}
-          description="Adult beneficiaries"
-          icon={Users}
-          variant="success"
-        />
-        <StatCard
-          title="Groups"
-          value={statsLoading ? "..." : dashboardStats?.groups.toString() || "0"}
-          description="Group beneficiaries"
-          icon={Users}
-          variant="warning"
-        />
+        {programStats.slice(0, 3).map((ps, idx) => (
+          <StatCard
+            key={ps.programId}
+            title={ps.programName}
+            value={statsLoading ? "..." : ps.count.toString()}
+            description={`Enrolled beneficiaries`}
+            icon={Target}
+            variant={variants[(idx + 1) % variants.length]}
+          />
+        ))}
       </div>
+
+      {/* Show more programs if > 3 */}
+      {programStats.length > 3 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {programStats.slice(3).map((ps, idx) => (
+            <StatCard
+              key={ps.programId}
+              title={ps.programName}
+              value={statsLoading ? "..." : ps.count.toString()}
+              description="Enrolled beneficiaries"
+              icon={Target}
+              variant={variants[idx % variants.length]}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Quick Navigation */}
       <WorkspacePanel padding="md">
@@ -238,13 +191,8 @@ const Dashboard = () => {
         />
         <div className="mt-4">
           <DashboardTrendCharts 
-            stats={{
-              educationProgram: dashboardStats?.students || 0,
-              feedingProgram: dashboardStats?.adults || 0,
-              kipawaProgram: dashboardStats?.groups || 0,
-              empowermentProgram: 0
-            }}
-            trendData={dashboardTrendData}
+            programStats={programStats}
+            trendData={trendData}
             isLoading={statsLoading || trendsLoading}
           />
         </div>
