@@ -16,8 +16,7 @@ import { SiblingSelector } from './SiblingSelector';
 import { DonorManager } from './DonorManager';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
-import { ProgramEnrollmentSection } from './ProgramEnrollmentSection';
-import { User, Users, Heart, FileText, DollarSign, Loader2, FolderKanban } from 'lucide-react';
+import { User, Users, Heart, FileText, DollarSign, Loader2 } from 'lucide-react';
 
 // Guardian data structure
 interface GuardianData {
@@ -27,8 +26,7 @@ interface GuardianData {
   age?: number;
   national_id?: string;
   phone?: string;
-  email?: string;
-  address?: string;
+  relation?: string;
   employment_type?: string;
   source_of_income?: string;
   employment_details?: string;
@@ -92,34 +90,26 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
-  const [enrollments, setEnrollments] = useState<any[]>([]);
   const { currentOrganization } = useOrganization();
 
-  // Load existing enrollments when editing
+  // Load existing siblings when editing
   useEffect(() => {
-    if (beneficiary?.id && currentOrganization?.organization_id) {
+    if (beneficiary?.id) {
       supabase
-        .from('beneficiary_services')
-        .select('id, program_id, project_id, activity_id, enrolled_date, exit_date, status, notes, programs:program_id(name), projects:project_id(name)')
+        .from('beneficiary_siblings')
+        .select('sibling_id, relationship, sibling:sibling_id(id, display_name)')
         .eq('beneficiary_id', beneficiary.id)
         .then(({ data }) => {
           if (data && data.length > 0) {
-            setEnrollments(data.map((e: any) => ({
-              id: e.id,
-              program_id: e.program_id,
-              program_name: e.programs?.name || '',
-              project_id: e.project_id,
-              project_name: e.projects?.name || '',
-              activity_id: e.activity_id,
-              enrolled_date: e.enrolled_date || '',
-              exit_date: e.exit_date || '',
-              status: e.status || 'active',
-              notes: e.notes || '',
+            setSiblings(data.map((s: any) => ({
+              id: s.sibling_id,
+              display_name: (s.sibling as any)?.display_name || 'Unknown',
+              relationship: s.relationship,
             })));
           }
         });
     }
-  }, [beneficiary?.id, currentOrganization?.organization_id]);
+  }, [beneficiary?.id]);
 
   const form = useForm<StudentFormData>({
     defaultValues: {
@@ -247,8 +237,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
             age: guardian.age || null,
             national_id: guardian.national_id || null,
             phone: guardian.phone || null,
-            email: guardian.email || null,
-            address: guardian.address || null,
             employment_type: guardian.employment_type || null,
             source_of_income: guardian.source_of_income || null,
             employment_details: guardian.employment_details || null,
@@ -274,36 +262,39 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
 
         if (guardianError) throw guardianError;
 
+        // For caregiver, store the relation from the form
+        const relationship = guardianData.guardian_type === 'caregiver' 
+          ? (data.caregiver?.relation || 'caregiver')
+          : guardianData.guardian_type;
+
         // Link guardian to beneficiary
         await supabase
           .from('beneficiary_guardians')
           .insert([{
             beneficiary_id: beneficiaryId,
             guardian_id: savedGuardian.id,
-            relationship: guardianData.guardian_type,
+            relationship: relationship,
             is_primary: guardianData.guardian_type === 'caregiver',
           }]);
       }
 
       // Save siblings
-      if (siblings.length > 0) {
-        // Delete existing sibling links
-        if (beneficiary?.id) {
-          await supabase
-            .from('beneficiary_siblings')
-            .delete()
-            .eq('beneficiary_id', beneficiaryId);
-        }
+      // Always delete existing and re-insert
+      if (beneficiary?.id) {
+        await supabase
+          .from('beneficiary_siblings')
+          .delete()
+          .eq('beneficiary_id', beneficiaryId);
+      }
 
-        for (const sibling of siblings) {
-          await supabase
-            .from('beneficiary_siblings')
-            .insert([{
-              beneficiary_id: beneficiaryId,
-              sibling_id: sibling.id,
-              relationship: sibling.relationship,
-            }]);
-        }
+      for (const sibling of siblings) {
+        await supabase
+          .from('beneficiary_siblings')
+          .insert([{
+            beneficiary_id: beneficiaryId,
+            sibling_id: sibling.id,
+            relationship: sibling.relationship,
+          }]);
       }
 
       // Save donors
@@ -327,36 +318,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 amount_received: donor.amount_received,
                 donation_date: donor.donation_date || null,
                 notes: donor.notes || null,
-                created_by: user?.id,
-              }]);
-          }
-        }
-      }
-
-      // Save program enrollments
-      if (enrollments.length > 0) {
-        // Delete existing enrollments
-        if (beneficiary?.id) {
-          await supabase
-            .from('beneficiary_services')
-            .delete()
-            .eq('beneficiary_id', beneficiaryId);
-        }
-
-        for (const enrollment of enrollments) {
-          if (enrollment.program_id) {
-            await supabase
-              .from('beneficiary_services')
-              .insert([{
-                beneficiary_id: beneficiaryId,
-                organization_id: currentOrganization.organization_id,
-                program_id: enrollment.program_id,
-                project_id: enrollment.project_id || null,
-                activity_id: enrollment.activity_id || null,
-                enrolled_date: enrollment.enrolled_date || null,
-                exit_date: enrollment.exit_date || null,
-                status: enrollment.status,
-                notes: enrollment.notes || null,
                 created_by: user?.id,
               }]);
           }
@@ -387,7 +348,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6">
+              <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5">
                 <TabsTrigger value="personal" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Personal</span>
@@ -403,10 +364,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 <TabsTrigger value="background" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Background</span>
-                </TabsTrigger>
-                <TabsTrigger value="programs" className="flex items-center gap-2">
-                  <FolderKanban className="h-4 w-4" />
-                  <span className="hidden sm:inline">Programs</span>
                 </TabsTrigger>
                 <TabsTrigger value="donors" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
@@ -808,15 +765,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                     <BackgroundSection />
                   </CardContent>
                 </Card>
-              </TabsContent>
-
-              {/* Programs Tab */}
-              <TabsContent value="programs" className="mt-6">
-                <ProgramEnrollmentSection
-                  enrollments={enrollments}
-                  onChange={setEnrollments}
-                  beneficiaryType="student"
-                />
               </TabsContent>
 
               {/* Donors Tab */}
