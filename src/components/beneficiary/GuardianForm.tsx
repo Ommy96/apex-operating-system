@@ -119,33 +119,38 @@ export function GuardianForm({ guardianType, prefix }: GuardianFormProps) {
             />
           </div>
 
-          <FormField
-            control={form.control}
-            name={`${prefix}.email`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="Enter email address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name={`${prefix}.address`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Relation field - only for caregiver */}
+          {guardianType === 'caregiver' && (
+            <FormField
+              control={form.control}
+              name={`${prefix}.relation`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Relation to Student</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select relation" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="grandmother">Grandmother</SelectItem>
+                      <SelectItem value="grandfather">Grandfather</SelectItem>
+                      <SelectItem value="aunt">Aunt</SelectItem>
+                      <SelectItem value="uncle">Uncle</SelectItem>
+                      <SelectItem value="sibling">Sibling</SelectItem>
+                      <SelectItem value="step_parent">Step Parent</SelectItem>
+                      <SelectItem value="foster_parent">Foster Parent</SelectItem>
+                      <SelectItem value="guardian">Guardian</SelectItem>
+                      <SelectItem value="neighbor">Neighbor</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
