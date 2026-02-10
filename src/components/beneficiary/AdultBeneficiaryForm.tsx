@@ -56,6 +56,7 @@ interface Donor {
   amount_received: number | null;
   donation_date: string;
   notes: string;
+  program_id: string | null;
 }
 
 interface AdultBeneficiaryFormProps {

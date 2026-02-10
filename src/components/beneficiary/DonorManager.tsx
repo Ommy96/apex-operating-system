@@ -116,6 +116,27 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
                   </div>
 
                   <div>
+                    <label className="text-sm font-medium">Program Sponsored</label>
+                    <Select
+                      value={donor.program_id || ''}
+                      onValueChange={(value) =>
+                        updateDonor(index, 'program_id', value || null)
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select program" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {programs.map((program) => (
+                          <SelectItem key={program.id} value={program.id}>
+                            {program.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <label className="text-sm font-medium">Amount (KSH)</label>
                     <Input
                       type="number"
