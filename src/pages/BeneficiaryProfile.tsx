@@ -115,6 +115,8 @@ export default function BeneficiaryProfile() {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [academics, setAcademics] = useState<AcademicRecord[]>([]);
+  const [dependants, setDependants] = useState<any[]>([]);
+  const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
