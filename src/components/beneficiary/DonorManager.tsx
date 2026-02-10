@@ -1,13 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, DollarSign } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface Donor {
   donor_name: string;
   amount_received: number | null;
   donation_date: string;
   notes: string;
+  program_id: string | null;
+}
+
+interface Program {
+  id: string;
+  name: string;
 }
 
 interface DonorManagerProps {
