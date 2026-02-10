@@ -26,6 +26,22 @@ interface DonorManagerProps {
 }
 
 export function DonorManager({ donors, onChange }: DonorManagerProps) {
+  const { currentOrganization } = useOrganization();
+  const [programs, setPrograms] = useState<Program[]>([]);
+
+  useEffect(() => {
+    if (!currentOrganization?.organization_id) return;
+    supabase
+      .from('programs')
+      .select('id, name')
+      .eq('organization_id', currentOrganization.organization_id)
+      .eq('is_active', true)
+      .order('name')
+      .then(({ data }) => {
+        if (data) setPrograms(data);
+      });
+  }, [currentOrganization?.organization_id]);
+
   const addDonor = () => {
     onChange([
       ...donors,
@@ -34,6 +50,7 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
         amount_received: null,
         donation_date: new Date().toISOString().split('T')[0],
         notes: '',
+        program_id: null,
       },
     ]);
   };
