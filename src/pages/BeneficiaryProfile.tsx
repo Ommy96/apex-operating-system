@@ -178,7 +178,7 @@ export default function BeneficiaryProfile() {
         setDonors(donorsData);
       }
 
-      // Fetch academic records (for students)
+      // Fetch academic records and siblings (for students)
       if (beneficiaryData.beneficiary_type === 'student') {
         const { data: academicsData } = await supabase
           .from('beneficiary_academics')
@@ -189,6 +189,28 @@ export default function BeneficiaryProfile() {
 
         if (academicsData) {
           setAcademics(academicsData);
+        }
+
+        // Fetch siblings
+        const { data: siblingsData } = await supabase
+          .from('beneficiary_siblings')
+          .select('*, sibling:sibling_id(id, display_name, beneficiary_type, gender, status, photo_url, institution_name, grade)')
+          .eq('beneficiary_id', id);
+
+        if (siblingsData) {
+          setSiblings(siblingsData.map((s: any) => ({ ...s.sibling, relationship: s.relationship })));
+        }
+      }
+
+      // Fetch dependants (for adults)
+      if (beneficiaryData.beneficiary_type === 'adult') {
+        const { data: dependantsData } = await supabase
+          .from('adult_dependants')
+          .select('*, student:student_id(id, display_name, beneficiary_type, gender, status, photo_url, institution_name, grade)')
+          .eq('adult_id', id);
+
+        if (dependantsData) {
+          setDependants(dependantsData.map((d: any) => d.student).filter(Boolean));
         }
       }
     } catch (error) {
