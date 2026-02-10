@@ -719,6 +719,11 @@ export default function BeneficiaryProfile() {
                         <Heart className="h-4 w-4 text-success" />
                         {donor.donor_name}
                       </h4>
+                      {donor.program?.name && (
+                        <Badge variant="outline" className="text-xs mt-1">
+                          {donor.program.name}
+                        </Badge>
+                      )}
                       {donor.donation_date && (
                         <p className="text-sm text-muted-foreground mt-1">
                           Donated on {new Date(donor.donation_date).toLocaleDateString()}
