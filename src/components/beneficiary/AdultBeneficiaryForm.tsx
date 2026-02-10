@@ -216,6 +216,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
               amount_received: donor.amount_received,
               donation_date: donor.donation_date || null,
               notes: donor.notes || null,
+              program_id: donor.program_id || null,
               created_by: user?.id,
             }]);
         }

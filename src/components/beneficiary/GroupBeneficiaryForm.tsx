@@ -130,6 +130,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
           amount_received: donor.amount_received || null,
           donation_date: donor.donation_date || null,
           notes: donor.notes || null,
+          program_id: donor.program_id || null,
         }));
 
         const { error: donorError } = await supabase
