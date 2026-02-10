@@ -90,6 +90,8 @@ interface Donor {
   amount_received: number | null;
   donation_date: string | null;
   notes: string | null;
+  program_id: string | null;
+  program?: { name: string } | null;
 }
 
 interface AcademicRecord {
