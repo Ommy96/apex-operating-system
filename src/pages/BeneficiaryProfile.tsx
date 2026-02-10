@@ -483,9 +483,21 @@ export default function BeneficiaryProfile() {
                 Uploads
               </TabsTrigger>
             )}
-            {beneficiary.beneficiary_type !== 'group' && (
+            {beneficiary.beneficiary_type === 'student' && (
+              <TabsTrigger value="siblings" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Siblings ({siblings.length})
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type === 'student' && (
               <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
                 Guardians ({guardians.length})
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type === 'adult' && (
+              <TabsTrigger value="dependants" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Dependants ({dependants.length})
               </TabsTrigger>
             )}
             <TabsTrigger value="donors" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
