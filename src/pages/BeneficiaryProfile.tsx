@@ -115,6 +115,8 @@ export default function BeneficiaryProfile() {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [academics, setAcademics] = useState<AcademicRecord[]>([]);
+  const [dependants, setDependants] = useState<any[]>([]);
+  const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
@@ -176,7 +178,7 @@ export default function BeneficiaryProfile() {
         setDonors(donorsData);
       }
 
-      // Fetch academic records (for students)
+      // Fetch academic records and siblings (for students)
       if (beneficiaryData.beneficiary_type === 'student') {
         const { data: academicsData } = await supabase
           .from('beneficiary_academics')
@@ -187,6 +189,28 @@ export default function BeneficiaryProfile() {
 
         if (academicsData) {
           setAcademics(academicsData);
+        }
+
+        // Fetch siblings
+        const { data: siblingsData } = await supabase
+          .from('beneficiary_siblings')
+          .select('*, sibling:sibling_id(id, display_name, beneficiary_type, gender, status, photo_url, institution_name, grade)')
+          .eq('beneficiary_id', id);
+
+        if (siblingsData) {
+          setSiblings(siblingsData.map((s: any) => ({ ...s.sibling, relationship: s.relationship })));
+        }
+      }
+
+      // Fetch dependants (for adults)
+      if (beneficiaryData.beneficiary_type === 'adult') {
+        const { data: dependantsData } = await supabase
+          .from('adult_dependants')
+          .select('*, student:student_id(id, display_name, beneficiary_type, gender, status, photo_url, institution_name, grade)')
+          .eq('adult_id', id);
+
+        if (dependantsData) {
+          setDependants(dependantsData.map((d: any) => d.student).filter(Boolean));
         }
       }
     } catch (error) {
@@ -459,9 +483,21 @@ export default function BeneficiaryProfile() {
                 Uploads
               </TabsTrigger>
             )}
-            {beneficiary.beneficiary_type !== 'group' && (
+            {beneficiary.beneficiary_type === 'student' && (
+              <TabsTrigger value="siblings" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Siblings ({siblings.length})
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type === 'student' && (
               <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
                 Guardians ({guardians.length})
+              </TabsTrigger>
+            )}
+            {beneficiary.beneficiary_type === 'adult' && (
+              <TabsTrigger value="dependants" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                Dependants ({dependants.length})
               </TabsTrigger>
             )}
             <TabsTrigger value="donors" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
@@ -647,7 +683,49 @@ export default function BeneficiaryProfile() {
           </TabsContent>
         )}
 
-        {beneficiary.beneficiary_type !== 'group' && (
+        {/* Siblings Tab (Students Only) */}
+        {beneficiary.beneficiary_type === 'student' && (
+          <TabsContent value="siblings" className="space-y-4">
+            {siblings.length === 0 ? (
+              <Card className="border-muted">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No siblings linked to this beneficiary
+                </CardContent>
+              </Card>
+            ) : (
+              siblings.map((sibling) => (
+                <Card key={sibling.id} className="border-primary/10 hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${sibling.id}`)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                        {sibling.photo_url ? <AvatarImage src={sibling.photo_url} /> : null}
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                          {getInitials(sibling.display_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-foreground">{sibling.display_name}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary" className="text-xs capitalize">{sibling.relationship}</Badge>
+                          {sibling.institution_name && (
+                            <span className="text-xs text-muted-foreground">{sibling.institution_name}</span>
+                          )}
+                          {sibling.grade && (
+                            <span className="text-xs text-muted-foreground">Grade {sibling.grade}</span>
+                          )}
+                        </div>
+                      </div>
+                      <Badge className={getStatusBadgeColor(sibling.status || 'active')}>{sibling.status}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+        )}
+
+        {/* Guardians Tab (Students Only) */}
+        {beneficiary.beneficiary_type === 'student' && (
           <TabsContent value="guardians" className="space-y-4">
             {guardians.length === 0 ? (
               <Card className="border-muted">
@@ -678,12 +756,6 @@ export default function BeneficiaryProfile() {
                           {guardian.phone}
                         </div>
                       )}
-                      {guardian.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-info" />
-                          {guardian.email}
-                        </div>
-                      )}
                       {guardian.employment_type && (
                         <div>
                           <span className="text-muted-foreground">Employment:</span> {guardian.employment_type}
@@ -694,6 +766,46 @@ export default function BeneficiaryProfile() {
                           <span className="text-muted-foreground">Income:</span> {guardian.source_of_income}
                         </div>
                       )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+        )}
+
+        {/* Dependants Tab (Adults Only) */}
+        {beneficiary.beneficiary_type === 'adult' && (
+          <TabsContent value="dependants" className="space-y-4">
+            {dependants.length === 0 ? (
+              <Card className="border-muted">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No dependants linked to this beneficiary
+                </CardContent>
+              </Card>
+            ) : (
+              dependants.map((dep) => (
+                <Card key={dep.id} className="border-info/10 hover:border-info/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${dep.id}`)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-10 w-10 border-2 border-info/20">
+                        {dep.photo_url ? <AvatarImage src={dep.photo_url} /> : null}
+                        <AvatarFallback className="bg-info/10 text-info text-sm">
+                          {getInitials(dep.display_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-foreground">{dep.display_name}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          {dep.institution_name && (
+                            <span className="text-xs text-muted-foreground">{dep.institution_name}</span>
+                          )}
+                          {dep.grade && (
+                            <span className="text-xs text-muted-foreground">Grade {dep.grade}</span>
+                          )}
+                        </div>
+                      </div>
+                      <Badge className={getStatusBadgeColor(dep.status || 'active')}>{dep.status}</Badge>
                     </div>
                   </CardContent>
                 </Card>
