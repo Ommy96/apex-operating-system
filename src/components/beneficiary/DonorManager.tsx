@@ -1,13 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, DollarSign } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface Donor {
   donor_name: string;
   amount_received: number | null;
   donation_date: string;
   notes: string;
+  program_id: string | null;
+}
+
+interface Program {
+  id: string;
+  name: string;
 }
 
 interface DonorManagerProps {
@@ -16,6 +26,22 @@ interface DonorManagerProps {
 }
 
 export function DonorManager({ donors, onChange }: DonorManagerProps) {
+  const { currentOrganization } = useOrganization();
+  const [programs, setPrograms] = useState<Program[]>([]);
+
+  useEffect(() => {
+    if (!currentOrganization?.organization_id) return;
+    supabase
+      .from('programs')
+      .select('id, name')
+      .eq('organization_id', currentOrganization.organization_id)
+      .eq('is_active', true)
+      .order('name')
+      .then(({ data }) => {
+        if (data) setPrograms(data);
+      });
+  }, [currentOrganization?.organization_id]);
+
   const addDonor = () => {
     onChange([
       ...donors,
@@ -24,6 +50,7 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
         amount_received: null,
         donation_date: new Date().toISOString().split('T')[0],
         notes: '',
+        program_id: null,
       },
     ]);
   };
@@ -86,6 +113,27 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
                       }
                       className="mt-1"
                     />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Program Sponsored</label>
+                    <Select
+                      value={donor.program_id || ''}
+                      onValueChange={(value) =>
+                        updateDonor(index, 'program_id', value || null)
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select program" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {programs.map((program) => (
+                          <SelectItem key={program.id} value={program.id}>
+                            {program.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>

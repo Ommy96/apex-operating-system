@@ -90,6 +90,8 @@ interface Donor {
   amount_received: number | null;
   donation_date: string | null;
   notes: string | null;
+  program_id: string | null;
+  program?: { name: string } | null;
 }
 
 interface AcademicRecord {
@@ -167,7 +169,7 @@ export default function BeneficiaryProfile() {
       // Fetch donors
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
-        .select('*')
+        .select('*, program:programs(name)')
         .eq('beneficiary_id', id);
 
       if (donorsData) {
@@ -717,6 +719,11 @@ export default function BeneficiaryProfile() {
                         <Heart className="h-4 w-4 text-success" />
                         {donor.donor_name}
                       </h4>
+                      {donor.program?.name && (
+                        <Badge variant="outline" className="text-xs mt-1">
+                          {donor.program.name}
+                        </Badge>
+                      )}
                       {donor.donation_date && (
                         <p className="text-sm text-muted-foreground mt-1">
                           Donated on {new Date(donor.donation_date).toLocaleDateString()}
