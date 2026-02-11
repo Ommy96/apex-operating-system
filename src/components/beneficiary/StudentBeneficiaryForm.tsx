@@ -231,7 +231,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         if (guardian && (guardian.full_name || !guardian.is_alive)) {
           guardiansToSave.push({
             organization_id: currentOrganization.organization_id,
-            guardian_type: type as 'father' | 'mother' | 'caregiver',
+            guardian_type: (type === 'caregiver' ? 'other' : type) as 'father' | 'mother' | 'other',
             full_name: guardian.full_name || `Unknown ${type}`,
             is_alive: guardian.is_alive,
             date_of_death: guardian.date_of_death || null,
