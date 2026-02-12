@@ -17,9 +17,10 @@ import { ProgramPerformanceSection } from "@/components/analytics/ProgramPerform
 import { FieldActivitySection } from "@/components/analytics/FieldActivitySection";
 import { SystemIntelligenceSection } from "@/components/analytics/SystemIntelligenceSection";
 
-// Executive components (new)
+// Executive components
 import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPanel";
 import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerformanceIntelligence";
+import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {

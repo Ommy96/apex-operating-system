@@ -572,6 +572,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     executiveSummary,
     monthlyStaffTrends,
     hrAlerts,
+    programIntelligence,
     isLoading,
   };
 }
