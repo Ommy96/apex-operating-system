@@ -106,10 +106,8 @@ export default function ReportsAnalytics() {
         </TabsContent>
 
         <TabsContent value="programs">
-          <ProgramPerformanceSection 
-            programs={programs}
-            programData={null}
-            reportsData={reportsData}
+          <ProgramProjectIntelligence
+            data={programIntelligence}
             isLoading={isLoading}
           />
         </TabsContent>
