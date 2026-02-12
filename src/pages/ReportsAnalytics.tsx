@@ -36,7 +36,7 @@ export default function ReportsAnalytics() {
     beneficiaries, programs, enrollments, visitations,
     reportsData, academicRecords, uploads,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
-    programIntelligence,
+    programIntelligence, beneficiaryImpact,
     isLoading,
   } = useExecutiveAnalytics(dateRange, programFilter);
 
