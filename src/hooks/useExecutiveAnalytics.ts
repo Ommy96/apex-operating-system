@@ -535,6 +535,136 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     };
   }, [beneficiaries, programs, projects, enrollments, visitations, activities, dateRange]);
 
+  // Beneficiary Impact Intelligence
+  const beneficiaryImpact = useMemo(() => {
+    const activeBenefs = beneficiaries.filter(b => b.status === 'active');
+
+    // Academic performance by term (using academicRecords)
+    const gradeOrder = ['EE2', 'EE1', 'AE2', 'AE1', 'BE2', 'BE1', 'ME2', 'ME1'];
+    const gradeToScore = (g: string | null) => {
+      if (!g) return null;
+      const idx = gradeOrder.indexOf(g.toUpperCase());
+      return idx >= 0 ? gradeOrder.length - idx : null;
+    };
+
+    // Term performance aggregation
+    const termPerformance: Record<string, { count: number; totalMarks: number; totalOutOf: number; gradeScores: number[]; gradeCounts: number }> = {};
+    academicRecords.forEach(r => {
+      const key = `${r.academic_year}-${r.term}`;
+      if (!termPerformance[key]) termPerformance[key] = { count: 0, totalMarks: 0, totalOutOf: 0, gradeScores: [], gradeCounts: 0 };
+      const tp = termPerformance[key];
+      tp.count++;
+      if (r.total_marks != null) tp.totalMarks += r.total_marks;
+      if (r.out_of != null) tp.totalOutOf += r.out_of;
+      const gs = gradeToScore(r.overall_grade);
+      if (gs != null) { tp.gradeScores.push(gs); tp.gradeCounts++; }
+    });
+
+    const academicTrends = Object.entries(termPerformance)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-8)
+      .map(([key, tp]) => ({
+        term: key,
+        students: tp.count,
+        avgScore: tp.totalOutOf > 0 ? Math.round((tp.totalMarks / tp.totalOutOf) * 100) : 0,
+        avgGradeScore: tp.gradeCounts > 0 ? Math.round((tp.gradeScores.reduce((s, v) => s + v, 0) / tp.gradeCounts) * 10) / 10 : 0,
+      }));
+
+    // Grade distribution across all records
+    const gradeDistribution: Record<string, number> = {};
+    academicRecords.forEach(r => {
+      if (r.overall_grade) {
+        const g = r.overall_grade.toUpperCase();
+        gradeDistribution[g] = (gradeDistribution[g] || 0) + 1;
+      }
+    });
+
+    // Service history per beneficiary
+    const serviceCountMap: Record<string, number> = {};
+    enrollments.forEach(e => {
+      serviceCountMap[e.beneficiary_id] = (serviceCountMap[e.beneficiary_id] || 0) + 1;
+    });
+    const serviceCounts = Object.values(serviceCountMap);
+    const avgServicesPerBenef = serviceCounts.length > 0
+      ? Math.round((serviceCounts.reduce((s, v) => s + v, 0) / serviceCounts.length) * 10) / 10
+      : 0;
+    const multiServiceBenefs = serviceCounts.filter(c => c > 1).length;
+
+    // Visit frequency per beneficiary
+    const visitCountMap: Record<string, number> = {};
+    const lastVisitMap: Record<string, string> = {};
+    visitations.forEach(v => {
+      visitCountMap[v.beneficiary_id] = (visitCountMap[v.beneficiary_id] || 0) + 1;
+      if (!lastVisitMap[v.beneficiary_id] || v.visit_date > lastVisitMap[v.beneficiary_id]) {
+        lastVisitMap[v.beneficiary_id] = v.visit_date;
+      }
+    });
+    const visitCounts = Object.values(visitCountMap);
+    const avgVisitsPerBenef = visitCounts.length > 0
+      ? Math.round((visitCounts.reduce((s, v) => s + v, 0) / visitCounts.length) * 10) / 10
+      : 0;
+
+    // High-risk: no visit in 90+ days
+    const now = Date.now();
+    const overdue90 = activeBenefs.filter(b => {
+      const last = lastVisitMap[b.id];
+      if (!last) return true;
+      return (now - new Date(last).getTime()) > 90 * 24 * 60 * 60 * 1000;
+    }).length;
+
+    // Follow-up tracking
+    const totalFollowUpsRequired = visitations.filter(v => v.follow_up_required).length;
+    const followUpsWithDate = visitations.filter(v => v.follow_up_required && v.follow_up_date).length;
+    const followUpCompletionRate = totalFollowUpsRequired > 0
+      ? Math.round((followUpsWithDate / totalFollowUpsRequired) * 100)
+      : 100;
+
+    // Vulnerability analysis
+    const specialNeedsCount = activeBenefs.filter(b => b.has_special_needs).length;
+    const hivPositiveCount = activeBenefs.filter(b => b.hiv_status === 'positive').length;
+    const medicalConditionsCount = activeBenefs.filter(b => b.other_medical_conditions).length;
+    const missingDOB = activeBenefs.filter(b => !b.date_of_birth).length;
+    const missingLocation = activeBenefs.filter(b => !b.county && !b.location).length;
+
+    // Visit type breakdown
+    const visitTypeBreakdown: Record<string, number> = {};
+    visitations.forEach(v => {
+      if (dateRange && !isInDateRange(v.visit_date, dateRange)) return;
+      const type = v.visit_type || 'Unknown';
+      visitTypeBreakdown[type] = (visitTypeBreakdown[type] || 0) + 1;
+    });
+
+    // Service distribution (how many benefs have 0, 1, 2, 3+ services)
+    const serviceDistribution = [
+      { range: '0 services', count: activeBenefs.filter(b => !serviceCountMap[b.id]).length },
+      { range: '1 service', count: serviceCounts.filter(c => c === 1).length },
+      { range: '2 services', count: serviceCounts.filter(c => c === 2).length },
+      { range: '3+ services', count: serviceCounts.filter(c => c >= 3).length },
+    ];
+
+    return {
+      academicTrends,
+      gradeDistribution,
+      avgServicesPerBenef,
+      multiServiceBenefs,
+      avgVisitsPerBenef,
+      overdue90,
+      followUpCompletionRate,
+      totalFollowUpsRequired,
+      specialNeedsCount,
+      hivPositiveCount,
+      medicalConditionsCount,
+      missingDOB,
+      missingLocation,
+      visitTypeBreakdown,
+      serviceDistribution,
+      totalBeneficiariesWithVisits: Object.keys(visitCountMap).length,
+      visitCoverageRate: activeBenefs.length > 0
+        ? Math.round((Object.keys(visitCountMap).length / activeBenefs.length) * 100)
+        : 0,
+    };
+  }, [beneficiaries, academicRecords, enrollments, visitations, dateRange]);
+
   // HR Alerts
   const hrAlerts = useMemo(() => {
     const alerts: { type: 'warning' | 'danger' | 'info'; title: string; description: string }[] = [];
@@ -573,6 +703,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     monthlyStaffTrends,
     hrAlerts,
     programIntelligence,
+    beneficiaryImpact,
     isLoading,
   };
 }

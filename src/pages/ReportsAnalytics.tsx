@@ -21,6 +21,7 @@ import { SystemIntelligenceSection } from "@/components/analytics/SystemIntellig
 import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPanel";
 import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerformanceIntelligence";
 import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
+import { BeneficiaryImpactIntelligence } from "@/components/executive/BeneficiaryImpactIntelligence";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {
@@ -35,7 +36,7 @@ export default function ReportsAnalytics() {
     beneficiaries, programs, enrollments, visitations,
     reportsData, academicRecords, uploads,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
-    programIntelligence,
+    programIntelligence, beneficiaryImpact,
     isLoading,
   } = useExecutiveAnalytics(dateRange, programFilter);
 
@@ -113,10 +114,8 @@ export default function ReportsAnalytics() {
         </TabsContent>
 
         <TabsContent value="lifecycle">
-          <ChildLifecycleSection 
-            children={beneficiaries}
-            replacements={[]}
-            dateRange={dateRange}
+          <BeneficiaryImpactIntelligence
+            data={beneficiaryImpact}
             isLoading={isLoading}
           />
         </TabsContent>
