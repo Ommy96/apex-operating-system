@@ -114,10 +114,8 @@ export default function ReportsAnalytics() {
         </TabsContent>
 
         <TabsContent value="lifecycle">
-          <ChildLifecycleSection 
-            children={beneficiaries}
-            replacements={[]}
-            dateRange={dateRange}
+          <BeneficiaryImpactIntelligence
+            data={beneficiaryImpact}
             isLoading={isLoading}
           />
         </TabsContent>
