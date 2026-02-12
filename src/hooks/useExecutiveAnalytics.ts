@@ -393,6 +393,148 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     });
   }, [reportsData]);
 
+  // Program Intelligence
+  const programIntelligence = useMemo(() => {
+    // Coverage: enrollments per program/project
+    const programCoverage = programs.map(p => {
+      const programEnrollments = enrollments.filter(e => e.program_id === p.id);
+      const activeEnrollments = programEnrollments.filter(e => e.status === 'active');
+      const exitedEnrollments = programEnrollments.filter(e => e.status === 'exited' || e.status === 'completed');
+      const newInPeriod = programEnrollments.filter(e => dateRange && isInDateRange(e.created_at, dateRange));
+
+      // Get unique beneficiary IDs enrolled in this program
+      const enrolledBeneficiaryIds = new Set(programEnrollments.map(e => e.beneficiary_id));
+      const enrolledBeneficiaries = beneficiaries.filter(b => enrolledBeneficiaryIds.has(b.id));
+
+      // Gender distribution
+      const genderDist = { male: 0, female: 0, other: 0 };
+      enrolledBeneficiaries.forEach(b => {
+        if (b.gender === 'Male') genderDist.male++;
+        else if (b.gender === 'Female') genderDist.female++;
+        else genderDist.other++;
+      });
+
+      // Age distribution
+      const ageDist: Record<string, number> = { '0-5': 0, '6-12': 0, '13-17': 0, '18-25': 0, '26+': 0, 'Unknown': 0 };
+      enrolledBeneficiaries.forEach(b => {
+        if (!b.date_of_birth) { ageDist['Unknown']++; return; }
+        const age = Math.floor((Date.now() - new Date(b.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        if (age <= 5) ageDist['0-5']++;
+        else if (age <= 12) ageDist['6-12']++;
+        else if (age <= 17) ageDist['13-17']++;
+        else if (age <= 25) ageDist['18-25']++;
+        else ageDist['26+']++;
+      });
+
+      // Geographic distribution
+      const countyDist: Record<string, number> = {};
+      const subCountyDist: Record<string, number> = {};
+      enrolledBeneficiaries.forEach(b => {
+        const county = b.county || 'Unknown';
+        const subCounty = b.sub_county || 'Unknown';
+        countyDist[county] = (countyDist[county] || 0) + 1;
+        subCountyDist[subCounty] = (subCountyDist[subCounty] || 0) + 1;
+      });
+
+      // Program projects
+      const programProjects = projects.filter(pr => pr.program_id === p.id);
+
+      // Program visitations
+      const programVisitations = visitations.filter(v => {
+        const benefIds = enrolledBeneficiaryIds;
+        return benefIds.has(v.beneficiary_id);
+      });
+
+      // Program activities
+      const programActivities = activities.filter(a => a.program_id === p.id);
+
+      return {
+        programId: p.id,
+        programName: p.name,
+        isActive: p.is_active,
+        totalEnrolled: programEnrollments.length,
+        activeEnrolled: activeEnrollments.length,
+        exitedCount: exitedEnrollments.length,
+        newEnrollments: newInPeriod.length,
+        exitRate: programEnrollments.length > 0 ? Math.round((exitedEnrollments.length / programEnrollments.length) * 100) : 0,
+        genderDistribution: genderDist,
+        ageDistribution: ageDist,
+        countyDistribution: countyDist,
+        subCountyDistribution: subCountyDist,
+        projectCount: programProjects.length,
+        projects: programProjects,
+        visitationCount: programVisitations.length,
+        activityCount: programActivities.length,
+        participantCount: programActivities.reduce((s, a) => s + (a.actual_participants || 0), 0),
+      };
+    });
+
+    // Overall demographic summary
+    const activeBenefs = beneficiaries.filter(b => b.status === 'active');
+    const overallGender = { male: 0, female: 0, other: 0 };
+    const overallAge: Record<string, number> = { '0-5': 0, '6-12': 0, '13-17': 0, '18-25': 0, '26+': 0, 'Unknown': 0 };
+    const overallCounty: Record<string, number> = {};
+    const overallType: Record<string, number> = {};
+
+    activeBenefs.forEach(b => {
+      if (b.gender === 'Male') overallGender.male++;
+      else if (b.gender === 'Female') overallGender.female++;
+      else overallGender.other++;
+
+      if (!b.date_of_birth) { overallAge['Unknown']++; }
+      else {
+        const age = Math.floor((Date.now() - new Date(b.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        if (age <= 5) overallAge['0-5']++;
+        else if (age <= 12) overallAge['6-12']++;
+        else if (age <= 17) overallAge['13-17']++;
+        else if (age <= 25) overallAge['18-25']++;
+        else overallAge['26+']++;
+      }
+
+      const county = b.county || 'Unknown';
+      overallCounty[county] = (overallCounty[county] || 0) + 1;
+
+      const type = b.beneficiary_type || 'Unknown';
+      overallType[type] = (overallType[type] || 0) + 1;
+    });
+
+    // Enrollment monthly trends
+    const months = eachMonthOfInterval({ start: subMonths(new Date(), 5), end: new Date() });
+    const enrollmentTrends = months.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+      const range: DateRange = { from: monthStart, to: monthEnd };
+      const newEnrollments = enrollments.filter(e => isInDateRange(e.created_at, range));
+      const exits = enrollments.filter(e => e.exit_date && isInDateRange(e.exit_date, range));
+      return {
+        month: format(month, 'MMM yyyy'),
+        monthShort: format(month, 'MMM'),
+        newEnrollments: newEnrollments.length,
+        exits: exits.length,
+        net: newEnrollments.length - exits.length,
+      };
+    });
+
+    // Service delivery stats
+    const activeServices = enrollments.filter(e => e.status === 'active').length;
+    const completedServices = enrollments.filter(e => e.status === 'completed').length;
+    const avgServicesPerBeneficiary = activeBenefs.length > 0
+      ? Math.round((enrollments.length / activeBenefs.length) * 10) / 10
+      : 0;
+
+    return {
+      programCoverage,
+      overallGender,
+      overallAge,
+      overallCounty,
+      overallType,
+      enrollmentTrends,
+      activeServices,
+      completedServices,
+      avgServicesPerBeneficiary,
+    };
+  }, [beneficiaries, programs, projects, enrollments, visitations, activities, dateRange]);
+
   // HR Alerts
   const hrAlerts = useMemo(() => {
     const alerts: { type: 'warning' | 'danger' | 'info'; title: string; description: string }[] = [];
