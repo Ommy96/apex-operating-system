@@ -21,6 +21,7 @@ import { SystemIntelligenceSection } from "@/components/analytics/SystemIntellig
 import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPanel";
 import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerformanceIntelligence";
 import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
+import { BeneficiaryImpactIntelligence } from "@/components/executive/BeneficiaryImpactIntelligence";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {

@@ -703,6 +703,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     monthlyStaffTrends,
     hrAlerts,
     programIntelligence,
+    beneficiaryImpact,
     isLoading,
   };
 }
