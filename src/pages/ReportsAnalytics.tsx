@@ -17,9 +17,10 @@ import { ProgramPerformanceSection } from "@/components/analytics/ProgramPerform
 import { FieldActivitySection } from "@/components/analytics/FieldActivitySection";
 import { SystemIntelligenceSection } from "@/components/analytics/SystemIntelligenceSection";
 
-// Executive components (new)
+// Executive components
 import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPanel";
 import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerformanceIntelligence";
+import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {
@@ -34,6 +35,7 @@ export default function ReportsAnalytics() {
     beneficiaries, programs, enrollments, visitations,
     reportsData, academicRecords, uploads,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
+    programIntelligence,
     isLoading,
   } = useExecutiveAnalytics(dateRange, programFilter);
 
@@ -104,10 +106,8 @@ export default function ReportsAnalytics() {
         </TabsContent>
 
         <TabsContent value="programs">
-          <ProgramPerformanceSection 
-            programs={programs}
-            programData={null}
-            reportsData={reportsData}
+          <ProgramProjectIntelligence
+            data={programIntelligence}
             isLoading={isLoading}
           />
         </TabsContent>
