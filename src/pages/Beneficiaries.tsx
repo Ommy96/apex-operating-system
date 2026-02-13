@@ -80,6 +80,11 @@ interface BeneficiaryStats {
   active: number;
 }
 
+interface Program {
+  id: string;
+  name: string;
+}
+
 type BeneficiaryTypeFilter = 'all' | 'student' | 'adult' | 'group';
 type ViewMode = 'table' | 'grid';
 
@@ -106,6 +111,9 @@ export default function Beneficiaries() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
+  const [programFilter, setProgramFilter] = useState('all');
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [enrollmentMap, setEnrollmentMap] = useState<Record<string, Set<string>>>({});
   const [stats, setStats] = useState<BeneficiaryStats>({
     total: 0,
     students: 0,
@@ -117,6 +125,7 @@ export default function Beneficiaries() {
   useEffect(() => {
     if (organizationId) {
       fetchBeneficiaries();
+      fetchPrograms();
     }
   }, [organizationId]);
 
@@ -186,6 +195,29 @@ export default function Beneficiaries() {
     }
   };
 
+  const fetchPrograms = async () => {
+    if (!organizationId) return;
+    try {
+      const [programsRes, enrollmentsRes] = await Promise.all([
+        supabase.from('programs').select('id, name').eq('organization_id', organizationId).eq('is_active', true),
+        supabase.from('beneficiary_services').select('beneficiary_id, program_id').eq('organization_id', organizationId),
+      ]);
+      setPrograms(programsRes.data || []);
+      
+      // Build map: program_id -> Set<beneficiary_id>
+      const map: Record<string, Set<string>> = {};
+      (enrollmentsRes.data || []).forEach((e: any) => {
+        if (e.program_id) {
+          if (!map[e.program_id]) map[e.program_id] = new Set();
+          map[e.program_id].add(e.beneficiary_id);
+        }
+      });
+      setEnrollmentMap(map);
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
@@ -221,9 +253,40 @@ export default function Beneficiaries() {
       
       const matchesType = typeFilter === 'all' || b.beneficiary_type === typeFilter;
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+      const matchesProgram = programFilter === 'all' || (enrollmentMap[programFilter]?.has(b.id) ?? false);
       
-      return matchesSearch && matchesType && matchesStatus;
+      return matchesSearch && matchesType && matchesStatus && matchesProgram;
     });
+  };
+
+  const handleExport = () => {
+    const data = getFilteredBeneficiaries();
+    if (data.length === 0) {
+      toast({ title: "No data", description: "No beneficiaries to export", variant: "destructive" });
+      return;
+    }
+    const headers = ['Name', 'Type', 'Status', 'Gender', 'Date of Birth', 'Location', 'County', 'Academic Level', 'Institution', 'Members'];
+    const rows = data.map(b => [
+      b.display_name,
+      b.beneficiary_type,
+      b.status,
+      b.gender || '',
+      b.date_of_birth || '',
+      b.location || '',
+      b.county || '',
+      b.academic_level || '',
+      b.institution_name || '',
+      b.member_count?.toString() || '',
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `beneficiaries-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${data.length} beneficiaries exported to CSV` });
   };
 
   const getTypeIcon = (type: string) => {
@@ -273,7 +336,7 @@ export default function Beneficiaries() {
   };
 
   const filteredBeneficiaries = getFilteredBeneficiaries();
-  const hasActiveFilters = typeFilter !== 'all' || statusFilter !== 'all';
+  const hasActiveFilters = typeFilter !== 'all' || statusFilter !== 'all' || programFilter !== 'all';
 
   if (loading) {
     return (
@@ -461,6 +524,19 @@ export default function Beneficiaries() {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Program Filter (Desktop) */}
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="h-9 w-40 hidden md:flex">
+              <SelectValue placeholder="Program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              {programs.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {/* Status Filter (Desktop) */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-9 w-32 hidden md:flex">
@@ -481,12 +557,19 @@ export default function Beneficiaries() {
               onClick={() => {
                 setTypeFilter('all');
                 setStatusFilter('all');
+                setProgramFilter('all');
               }}
               className="h-9 px-2 text-muted-foreground"
             >
               <X className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Export Button */}
+          <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExport}>
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
           
           {/* View Switcher */}
           <ViewSwitcher
