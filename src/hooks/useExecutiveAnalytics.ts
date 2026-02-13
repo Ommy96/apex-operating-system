@@ -665,6 +665,93 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     };
   }, [beneficiaries, academicRecords, enrollments, visitations, dateRange]);
 
+  // Donor & Funding Intelligence
+  const donorIntelligence = useMemo(() => {
+    const activeBenefs = beneficiaries.filter(b => b.status === 'active');
+    const filteredDonors = dateRange?.from
+      ? donors.filter(d => d.created_at && isInDateRange(d.created_at, dateRange))
+      : donors;
+
+    const totalFunds = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+    const uniqueDonorNames = new Set(donors.map(d => d.donor_name));
+    const avgDonation = donors.length > 0 ? Math.round(totalFunds / donors.length) : 0;
+    const costPerBeneficiary = activeBenefs.length > 0 ? Math.round(totalFunds / activeBenefs.length) : 0;
+
+    // Donor ranking
+    const donorAgg: Record<string, { total: number; donations: number; beneficiaryIds: Set<string> }> = {};
+    donors.forEach(d => {
+      if (!donorAgg[d.donor_name]) donorAgg[d.donor_name] = { total: 0, donations: 0, beneficiaryIds: new Set() };
+      donorAgg[d.donor_name].total += d.amount_received || 0;
+      donorAgg[d.donor_name].donations++;
+      donorAgg[d.donor_name].beneficiaryIds.add(d.beneficiary_id);
+    });
+    const donorRanking = Object.entries(donorAgg)
+      .map(([name, v]) => ({ name, total: v.total, donations: v.donations, beneficiaries: v.beneficiaryIds.size }))
+      .sort((a, b) => b.total - a.total);
+
+    // Top donor concentration
+    const topDonorShare = totalFunds > 0 && donorRanking.length > 0
+      ? Math.round((donorRanking[0].total / totalFunds) * 100)
+      : 0;
+
+    // Program allocation
+    const programMap = new Map(programs.map(p => [p.id, p.name]));
+    const programFunds: Record<string, number> = {};
+    let unallocatedFunds = 0;
+    donors.forEach(d => {
+      if (d.program_id && programMap.has(d.program_id)) {
+        const pName = programMap.get(d.program_id)!;
+        programFunds[pName] = (programFunds[pName] || 0) + (d.amount_received || 0);
+      } else {
+        unallocatedFunds += d.amount_received || 0;
+      }
+    });
+    const programAllocation = Object.entries(programFunds)
+      .map(([program, amount]) => ({ program, amount, percentage: totalFunds > 0 ? Math.round((amount / totalFunds) * 100) : 0 }))
+      .sort((a, b) => b.amount - a.amount);
+
+    // Monthly trends
+    const months = eachMonthOfInterval({ start: subMonths(new Date(), 5), end: new Date() });
+    const monthlyTrends = months.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+      const range: DateRange = { from: monthStart, to: monthEnd };
+      const inMonth = donors.filter(d => d.donation_date ? isInDateRange(d.donation_date, range) : d.created_at ? isInDateRange(d.created_at, range) : false);
+      return {
+        month: format(month, 'MMM'),
+        amount: inMonth.reduce((s, d) => s + (d.amount_received || 0), 0),
+        count: inMonth.length,
+      };
+    });
+
+    // Growth: compare last 3 months vs previous 3 months
+    const recentMonths = monthlyTrends.slice(-3);
+    const olderMonths = monthlyTrends.slice(0, 3);
+    const recentTotal = recentMonths.reduce((s, m) => s + m.amount, 0);
+    const olderTotal = olderMonths.reduce((s, m) => s + m.amount, 0);
+    const fundingGrowth = olderTotal > 0 ? Math.round(((recentTotal - olderTotal) / olderTotal) * 100) : recentTotal > 0 ? 100 : 0;
+
+    // Beneficiary coverage
+    const beneficiaryIdsWithDonors = new Set(donors.map(d => d.beneficiary_id));
+    const beneficiariesWithDonors = activeBenefs.filter(b => beneficiaryIdsWithDonors.has(b.id)).length;
+
+    return {
+      totalFunds,
+      uniqueDonors: uniqueDonorNames.size,
+      totalDonations: donors.length,
+      avgDonation,
+      costPerBeneficiary,
+      donorRanking,
+      programAllocation,
+      monthlyTrends,
+      topDonorShare,
+      unallocatedFunds,
+      fundingGrowth,
+      beneficiariesWithDonors,
+      beneficiariesWithoutDonors: activeBenefs.length - beneficiariesWithDonors,
+    };
+  }, [beneficiaries, donors, programs, dateRange]);
+
   // HR Alerts
   const hrAlerts = useMemo(() => {
     const alerts: { type: 'warning' | 'danger' | 'info'; title: string; description: string }[] = [];
@@ -704,6 +791,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     hrAlerts,
     programIntelligence,
     beneficiaryImpact,
+    donorIntelligence,
     isLoading,
   };
 }

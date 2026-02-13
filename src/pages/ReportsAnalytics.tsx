@@ -22,6 +22,7 @@ import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPa
 import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerformanceIntelligence";
 import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
 import { BeneficiaryImpactIntelligence } from "@/components/executive/BeneficiaryImpactIntelligence";
+import { DonorFundingIntelligence } from "@/components/executive/DonorFundingIntelligence";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {
@@ -36,7 +37,7 @@ export default function ReportsAnalytics() {
     beneficiaries, programs, enrollments, visitations,
     reportsData, academicRecords, uploads,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
-    programIntelligence, beneficiaryImpact,
+    programIntelligence, beneficiaryImpact, donorIntelligence,
     isLoading,
   } = useExecutiveAnalytics(dateRange, programFilter);
 
@@ -45,6 +46,7 @@ export default function ReportsAnalytics() {
     { id: 'staff', label: 'Staff & HR Intelligence', icon: Activity },
     { id: 'programs', label: 'Program Intelligence', icon: Target },
     { id: 'lifecycle', label: 'Beneficiary Impact', icon: Users },
+    { id: 'donors', label: 'Donor & Funding', icon: DollarSign },
     { id: 'field', label: 'Visitations', icon: Home },
     { id: 'reports', label: 'Reports Summary', icon: FileText },
     { id: 'academic', label: 'Academic', icon: GraduationCap },
@@ -116,6 +118,13 @@ export default function ReportsAnalytics() {
         <TabsContent value="lifecycle">
           <BeneficiaryImpactIntelligence
             data={beneficiaryImpact}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+
+        <TabsContent value="donors">
+          <DonorFundingIntelligence
+            data={donorIntelligence}
             isLoading={isLoading}
           />
         </TabsContent>
