@@ -2677,6 +2677,7 @@ export type Database = {
         Row: {
           address: string | null
           country: string | null
+          county: string | null
           created_at: string
           description: string | null
           email: string | null
@@ -2685,7 +2686,10 @@ export type Database = {
           is_active: boolean
           logo_url: string | null
           name: string
+          onboarding_completed: boolean
+          organization_type: string | null
           phone: string | null
+          registration_number: string | null
           settings: Json | null
           slug: string
           stripe_customer_id: string | null
@@ -2704,6 +2708,7 @@ export type Database = {
         Insert: {
           address?: string | null
           country?: string | null
+          county?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
@@ -2712,7 +2717,10 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name: string
+          onboarding_completed?: boolean
+          organization_type?: string | null
           phone?: string | null
+          registration_number?: string | null
           settings?: Json | null
           slug: string
           stripe_customer_id?: string | null
@@ -2731,6 +2739,7 @@ export type Database = {
         Update: {
           address?: string | null
           country?: string | null
+          county?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
@@ -2739,7 +2748,10 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name?: string
+          onboarding_completed?: boolean
+          organization_type?: string | null
           phone?: string | null
+          registration_number?: string | null
           settings?: Json | null
           slug?: string
           stripe_customer_id?: string | null
