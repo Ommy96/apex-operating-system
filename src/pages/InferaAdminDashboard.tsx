@@ -15,9 +15,7 @@ import {
   Shield,
   Loader2,
   BarChart3,
-  Ticket,
   Flag,
-  Megaphone
 } from 'lucide-react';
 import { OrganizationManagement } from '@/components/admin/OrganizationManagement';
 import { UserAdministration } from '@/components/admin/UserAdministration';
@@ -75,7 +73,7 @@ export default function InferaAdminDashboard() {
           { label: "Organizations", value: stats?.totalOrganizations?.toString() || "0" },
           { label: "Active", value: stats?.activeOrganizations?.toString() || "0" },
           { label: "Users", value: stats?.totalUsers?.toString() || "0" },
-          { label: "Open Tickets", value: stats?.openTickets?.toString() || "0" },
+          { label: "Beneficiaries", value: stats?.totalBeneficiaries?.toString() || "0" },
         ]}
       />
 
@@ -135,10 +133,10 @@ export default function InferaAdminDashboard() {
                   colorVariant="purple"
                 />
                 <StatsCard
-                  title="Open Tickets"
-                  value={stats?.openTickets || 0}
-                  subtitle="Requiring attention"
-                  icon={Ticket}
+                  title="Active Programs"
+                  value={0}
+                  subtitle="Across all orgs"
+                  icon={Activity}
                   colorVariant="orange"
                 />
               </div>
@@ -234,14 +232,14 @@ export default function InferaAdminDashboard() {
                       className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                     >
                       <div className="p-3 rounded-xl bg-orange-500/10">
-                        <Ticket className="h-6 w-6 text-orange-500" />
+                        <Activity className="h-6 w-6 text-orange-500" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium">Support Tickets</h4>
-                        <p className="text-sm text-muted-foreground">Review and respond to support requests</p>
+                        <h4 className="font-medium">System Monitoring</h4>
+                        <p className="text-sm text-muted-foreground">Feature flags and platform controls</p>
                       </div>
-                      <Badge variant={stats?.openTickets && stats.openTickets > 0 ? "destructive" : "secondary"}>
-                        {stats?.openTickets || 0} open
+                      <Badge variant="secondary">
+                        Manage
                       </Badge>
                     </div>
 
@@ -250,11 +248,11 @@ export default function InferaAdminDashboard() {
                       className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                     >
                       <div className="p-3 rounded-xl bg-violet-500/10">
-                        <Megaphone className="h-6 w-6 text-violet-500" />
+                        <Flag className="h-6 w-6 text-violet-500" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium">Platform Announcements</h4>
-                        <p className="text-sm text-muted-foreground">Create or manage system-wide announcements</p>
+                        <h4 className="font-medium">Feature Flags</h4>
+                        <p className="text-sm text-muted-foreground">Manage platform feature toggles</p>
                       </div>
                     </div>
                   </CardContent>
