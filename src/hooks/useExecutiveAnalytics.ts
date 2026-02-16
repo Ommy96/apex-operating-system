@@ -118,24 +118,21 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     enabled: !!orgId,
   });
 
-  // Reports (all types)
+  // Reports (remaining types only)
   const { data: reportsData, isLoading: loadingReports } = useQuery({
     queryKey: ['exec-reports', orgId],
     queryFn: async () => {
       if (!orgId) return null;
-      const [homeVisits, schoolVisits, programReports, activityReports, businessVisits] = await Promise.all([
-        supabase.from('home_visit_reports').select('*').eq('organization_id', orgId),
-        supabase.from('school_visit_reports').select('*').eq('organization_id', orgId),
+      const [programReports, activityReports] = await Promise.all([
         supabase.from('program_reports').select('*').eq('organization_id', orgId),
         supabase.from('activity_reports').select('*').eq('organization_id', orgId),
-        supabase.from('business_visit_reports').select('*').eq('organization_id', orgId),
       ]);
       return {
-        homeVisits: homeVisits.data || [],
-        schoolVisits: schoolVisits.data || [],
+        homeVisits: [] as any[],
+        schoolVisits: [] as any[],
         programReports: programReports.data || [],
         activityReports: activityReports.data || [],
-        businessVisits: businessVisits.data || [],
+        businessVisits: [] as any[],
       };
     },
     enabled: !!orgId,
