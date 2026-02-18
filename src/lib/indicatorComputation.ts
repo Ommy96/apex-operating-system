@@ -80,7 +80,7 @@ async function computeCount(
   let query = supabase.from(tableName as any).select('id', { count: 'exact', head: true });
   
   // Apply organization filter if the table has organization_id
-  const tablesWithOrgId = ['children', 'alumni', 'feeding_program', 'kipawa_sato', 'self_empowerment', 'support_groups', 'home_visit_reports', 'school_visit_reports', 'activity_reports', 'business_visit_reports'];
+  const tablesWithOrgId = ['children', 'home_visit_reports', 'school_visit_reports', 'business_visit_reports'];
   if (tablesWithOrgId.includes(tableName)) {
     query = query.eq('organization_id', organizationId);
   }

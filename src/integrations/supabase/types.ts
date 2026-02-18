@@ -289,59 +289,6 @@ export type Database = {
           },
         ]
       }
-      activity_reports: {
-        Row: {
-          beneficiary_impact: string
-          challenges: string
-          created_at: string
-          created_by: string | null
-          executive_summary: string
-          id: string
-          organization_id: string
-          program: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations: string
-          reporting_date: string
-          staff: string
-          updated_at: string
-        }
-        Insert: {
-          beneficiary_impact: string
-          challenges: string
-          created_at?: string
-          created_by?: string | null
-          executive_summary: string
-          id?: string
-          organization_id?: string
-          program: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations: string
-          reporting_date: string
-          staff: string
-          updated_at?: string
-        }
-        Update: {
-          beneficiary_impact?: string
-          challenges?: string
-          created_at?: string
-          created_by?: string | null
-          executive_summary?: string
-          id?: string
-          organization_id?: string
-          program?: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations?: string
-          reporting_date?: string
-          staff?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_reports_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       adult_dependants: {
         Row: {
           adult_id: string
@@ -2645,59 +2592,6 @@ export type Database = {
           },
         ]
       }
-      program_reports: {
-        Row: {
-          beneficiary_impact: string
-          challenges: string
-          created_at: string
-          created_by: string | null
-          executive_summary: string
-          id: string
-          organization_id: string
-          program: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations: string
-          reporting_date: string
-          staff: string
-          updated_at: string
-        }
-        Insert: {
-          beneficiary_impact: string
-          challenges: string
-          created_at?: string
-          created_by?: string | null
-          executive_summary: string
-          id?: string
-          organization_id?: string
-          program: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations: string
-          reporting_date: string
-          staff: string
-          updated_at?: string
-        }
-        Update: {
-          beneficiary_impact?: string
-          challenges?: string
-          created_at?: string
-          created_by?: string | null
-          executive_summary?: string
-          id?: string
-          organization_id?: string
-          program?: Database["public"]["Enums"]["program_type"]
-          proposed_recommendations?: string
-          reporting_date?: string
-          staff?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_reports_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       program_visit_types: {
         Row: {
           created_at: string
@@ -3448,27 +3342,6 @@ export type Database = {
       guardian_type: "father" | "mother" | "other"
       hiv_status_type: "positive" | "negative" | "unknown"
       parental_status_type: "Both alive" | "Both deceased" | "Partial"
-      program_type:
-        | "Education"
-        | "Kibera Early Dinner"
-        | "Kawangware Lunch Hour"
-        | "Kipawa Sato"
-        | "Self-Empowerment"
-        | "Support Groups"
-        | "Communication"
-        | "Chess"
-        | "Fundraising"
-        | "Admin"
-        | "Content Creation"
-        | "Kibera Early dinner"
-        | "Kibera Kipawa Sato"
-        | "Kawangware Kipawa Sato"
-        | "Self Empowerment"
-        | "Family Adoption"
-        | "Medical"
-        | "Rongai Sunday Feeding"
-        | "Kawangware Sunday Feeding"
-        | "Kibera Sunday Feeding"
       residence_type: "Kibera" | "Kawangware" | "Diaspora" | "Outside Nairobi"
       specific_skill_type:
         | "Singing"
@@ -3637,28 +3510,6 @@ export const Constants = {
       guardian_type: ["father", "mother", "other"],
       hiv_status_type: ["positive", "negative", "unknown"],
       parental_status_type: ["Both alive", "Both deceased", "Partial"],
-      program_type: [
-        "Education",
-        "Kibera Early Dinner",
-        "Kawangware Lunch Hour",
-        "Kipawa Sato",
-        "Self-Empowerment",
-        "Support Groups",
-        "Communication",
-        "Chess",
-        "Fundraising",
-        "Admin",
-        "Content Creation",
-        "Kibera Early dinner",
-        "Kibera Kipawa Sato",
-        "Kawangware Kipawa Sato",
-        "Self Empowerment",
-        "Family Adoption",
-        "Medical",
-        "Rongai Sunday Feeding",
-        "Kawangware Sunday Feeding",
-        "Kibera Sunday Feeding",
-      ],
       residence_type: ["Kibera", "Kawangware", "Diaspora", "Outside Nairobi"],
       specific_skill_type: [
         "Singing",

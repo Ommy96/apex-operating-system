@@ -54,13 +54,6 @@ const DATA_SOURCES = {
       { key: 'gender', label: 'Gender', options: ['male', 'female', 'other'] },
     ],
   },
-  support_groups: {
-    label: 'Support Groups',
-    fields: ['id', 'member_count', 'location'],
-    dateFields: ['created_at'],
-    numericFields: ['member_count'],
-    filterFields: [],
-  },
   home_visit_reports: {
     label: 'Home Visit Reports',
     fields: ['id', 'location', 'staff'],
@@ -76,12 +69,6 @@ const DATA_SOURCES = {
     filterFields: [
       { key: 'location', label: 'Location', options: ['coastal', 'nairobi'] },
     ],
-  },
-  activity_reports: {
-    label: 'Activity Reports',
-    fields: ['id', 'program', 'staff'],
-    dateFields: ['reporting_date', 'created_at'],
-    filterFields: [],
   },
 };
 

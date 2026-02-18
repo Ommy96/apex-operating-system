@@ -107,13 +107,11 @@ export function StaffPerformanceIntelligence({
       "Performance Score": s.performanceScore,
       "Home Visits": s.homeVisits,
       "School Visits": s.schoolVisits,
-      "Program Reports": s.programReports,
-      "Activity Reports": s.activityReports,
       "Business Visits": s.businessVisits,
       "Beneficiaries Registered": s.beneficiariesRegistered,
       "Observations": s.observationsRecorded,
       "Follow-ups Completed": s.followUpsCompleted,
-      "Total Reports": s.total,
+      "Total": s.total,
       "Active Days": s.activeDaysCount,
       "Consistency": `${s.consistency}%`,
       "Workload Level": s.workloadLevel,
@@ -482,8 +480,6 @@ export function StaffPerformanceIntelligence({
                         <TableHead className="text-center">Score</TableHead>
                         <TableHead className="text-center">Home</TableHead>
                         <TableHead className="text-center">School</TableHead>
-                        <TableHead className="text-center">Program</TableHead>
-                        <TableHead className="text-center">Activity</TableHead>
                         <TableHead className="text-center">Business</TableHead>
                         <TableHead className="text-center">Registered</TableHead>
                         <TableHead className="text-center">Observations</TableHead>
@@ -501,8 +497,6 @@ export function StaffPerformanceIntelligence({
                           </TableCell>
                           <TableCell className="text-center text-sm">{s.homeVisits}</TableCell>
                           <TableCell className="text-center text-sm">{s.schoolVisits}</TableCell>
-                          <TableCell className="text-center text-sm">{s.programReports}</TableCell>
-                          <TableCell className="text-center text-sm">{s.activityReports}</TableCell>
                           <TableCell className="text-center text-sm">{s.businessVisits}</TableCell>
                           <TableCell className="text-center text-sm">{s.beneficiariesRegistered}</TableCell>
                           <TableCell className="text-center text-sm">{s.observationsRecorded}</TableCell>
