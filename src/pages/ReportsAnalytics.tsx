@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  BarChart3, FileText, GraduationCap, Users, Home, Target,
+  BarChart3, GraduationCap, Users, Home, Target,
   Activity, Shield, Gauge, DollarSign
 } from "lucide-react";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
@@ -10,10 +10,7 @@ import { DateRange } from "react-day-picker";
 
 // Analytics sections (existing)
 import { AnalyticsDateFilter } from "@/components/analytics/AnalyticsDateFilter";
-import { ReportsSummarySection } from "@/components/analytics/ReportsSummarySection";
 import { AcademicPerformanceSection } from "@/components/analytics/AcademicPerformanceSection";
-import { ChildLifecycleSection } from "@/components/analytics/ChildLifecycleSection";
-import { ProgramPerformanceSection } from "@/components/analytics/ProgramPerformanceSection";
 import { FieldActivitySection } from "@/components/analytics/FieldActivitySection";
 import { SystemIntelligenceSection } from "@/components/analytics/SystemIntelligenceSection";
 
@@ -35,7 +32,7 @@ export default function ReportsAnalytics() {
 
   const {
     beneficiaries, programs, enrollments, visitations,
-    reportsData, academicRecords, uploads,
+    academicRecords, uploads,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
     programIntelligence, beneficiaryImpact, donorIntelligence,
     isLoading,
@@ -48,7 +45,6 @@ export default function ReportsAnalytics() {
     { id: 'lifecycle', label: 'Beneficiary Impact', icon: Users },
     { id: 'donors', label: 'Donor & Funding', icon: DollarSign },
     { id: 'field', label: 'Visitations', icon: Home },
-    { id: 'reports', label: 'Reports Summary', icon: FileText },
     { id: 'academic', label: 'Academic', icon: GraduationCap },
     { id: 'system', label: 'Data Quality', icon: Shield },
   ];
@@ -138,14 +134,6 @@ export default function ReportsAnalytics() {
           />
         </TabsContent>
 
-        <TabsContent value="reports">
-          <ReportsSummarySection 
-            reportsData={reportsData}
-            dateRange={dateRange}
-            isLoading={isLoading}
-          />
-        </TabsContent>
-
         <TabsContent value="academic">
           <AcademicPerformanceSection 
             academicRecords={academicRecords}
@@ -159,7 +147,7 @@ export default function ReportsAnalytics() {
             beneficiaries={beneficiaries}
             enrollments={enrollments}
             programs={programs}
-            reportsData={reportsData}
+            reportsData={null}
             uploads={uploads}
             isLoading={isLoading}
           />

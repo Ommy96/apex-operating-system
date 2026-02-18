@@ -9,8 +9,6 @@ export interface StaffMetric {
   name: string;
   homeVisits: number;
   schoolVisits: number;
-  programReports: number;
-  activityReports: number;
   businessVisits: number;
   beneficiariesRegistered: number;
   observationsRecorded: number;
@@ -119,24 +117,13 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
   });
 
   // Reports (remaining types only)
-  const { data: reportsData, isLoading: loadingReports } = useQuery({
-    queryKey: ['exec-reports', orgId],
-    queryFn: async () => {
-      if (!orgId) return null;
-      const [programReports, activityReports] = await Promise.all([
-        supabase.from('program_reports').select('*').eq('organization_id', orgId),
-        supabase.from('activity_reports').select('*').eq('organization_id', orgId),
-      ]);
-      return {
-        homeVisits: [] as any[],
-        schoolVisits: [] as any[],
-        programReports: programReports.data || [],
-        activityReports: activityReports.data || [],
-        businessVisits: [] as any[],
-      };
-    },
-    enabled: !!orgId,
-  });
+  // reportsData kept for backward compat with analytics components (empty arrays since tables dropped)
+  const reportsData = {
+    homeVisits: [] as any[],
+    schoolVisits: [] as any[],
+    businessVisits: [] as any[],
+  };
+  const loadingReports = false;
 
   // Academics
   const { data: academicRecords = [], isLoading: loadingAcademics } = useQuery({
@@ -232,39 +219,19 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
 
   // Staff metrics computation
   const staffMetrics: StaffMetric[] = useMemo(() => {
-    if (!reportsData) return [];
-
     const staffData: Record<string, Omit<StaffMetric, 'activeDaysCount' | 'consistency' | 'performanceScore' | 'workloadLevel'>> = {};
 
     const getOrCreate = (name: string) => {
       if (!staffData[name]) {
         staffData[name] = {
           name,
-          homeVisits: 0, schoolVisits: 0, programReports: 0,
-          activityReports: 0, businessVisits: 0, beneficiariesRegistered: 0,
+          homeVisits: 0, schoolVisits: 0, businessVisits: 0, beneficiariesRegistered: 0,
           observationsRecorded: 0, followUpsCompleted: 0, activitiesFacilitated: 0,
           total: 0, activeDays: new Set(),
         };
       }
       return staffData[name];
     };
-
-    const processReports = (reports: any[], field: string) => {
-      reports.forEach(r => {
-        if (dateRange && !isInDateRange(r.created_at, dateRange)) return;
-        const name = r.staff || 'Unknown';
-        const s = getOrCreate(name);
-        (s as any)[field]++;
-        s.total++;
-        s.activeDays.add(r.created_at?.substring(0, 10));
-      });
-    };
-
-    processReports(reportsData.homeVisits, 'homeVisits');
-    processReports(reportsData.schoolVisits, 'schoolVisits');
-    processReports(reportsData.programReports, 'programReports');
-    processReports(reportsData.activityReports, 'activityReports');
-    processReports(reportsData.businessVisits, 'businessVisits');
 
     // Count beneficiaries registered by created_by (user_id)
     const profileMap = new Map(profiles.map(p => [p.user_id, p.full_name || p.email || 'Unknown']));
@@ -330,11 +297,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     const activeBeneficiaries = beneficiaries.filter(b => b.status === 'active').length;
     const activePrograms = programs.filter(p => p.is_active).length;
     const activeProjects = projects.filter(p => p.status === 'active').length;
-    const totalReports = reportsData
-      ? reportsData.homeVisits.length + reportsData.schoolVisits.length +
-        reportsData.programReports.length + reportsData.activityReports.length +
-        reportsData.businessVisits.length
-      : 0;
+    const totalReports = visitations.length + observations.length;
     const totalDonorFunds = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
     const avgPerf = staffMetrics.length > 0
       ? Math.round(staffMetrics.reduce((s, m) => s + m.performanceScore, 0) / staffMetrics.length)
@@ -358,37 +321,34 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       avgStaffPerformance: avgPerf,
       totalDonorFunds,
       riskAlerts: overloadedStaff + pendingFollowUps + lowPerformers,
-      indicatorAchievement: 0, // Computed separately when indicators are loaded
+      indicatorAchievement: 0,
       newEnrollmentsThisPeriod: newEnrollments,
     };
-  }, [beneficiaries, programs, projects, reportsData, donors, staffMetrics, visitations, enrollments, dateRange]);
+  }, [beneficiaries, programs, projects, donors, staffMetrics, visitations, observations, enrollments, dateRange]);
 
   // Monthly trends for staff
   const monthlyStaffTrends = useMemo(() => {
-    if (!reportsData) return [];
     const months = eachMonthOfInterval({ start: subMonths(new Date(), 5), end: new Date() });
     return months.map(month => {
       const monthStart = startOfMonth(month);
       const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       const range: DateRange = { from: monthStart, to: monthEnd };
 
-      const countInMonth = (reports: any[]) => reports.filter(r => isInDateRange(r.created_at, range)).length;
       const uniqueStaff = new Set<string>();
-      [...reportsData.homeVisits, ...reportsData.schoolVisits, ...reportsData.programReports, ...reportsData.activityReports]
-        .filter(r => isInDateRange(r.created_at, range))
-        .forEach(r => uniqueStaff.add(r.staff || 'Unknown'));
+      visitations
+        .filter(v => isInDateRange(v.created_at, range))
+        .forEach(v => uniqueStaff.add(v.staff_name || 'Unknown'));
 
       return {
         month: format(month, 'MMM yyyy'),
         monthShort: format(month, 'MMM'),
         activeStaff: uniqueStaff.size,
-        totalReports: countInMonth(reportsData.homeVisits) + countInMonth(reportsData.schoolVisits) +
-          countInMonth(reportsData.programReports) + countInMonth(reportsData.activityReports),
-        homeVisits: countInMonth(reportsData.homeVisits),
-        schoolVisits: countInMonth(reportsData.schoolVisits),
+        totalReports: visitations.filter(v => isInDateRange(v.created_at, range)).length,
+        homeVisits: visitations.filter(v => isInDateRange(v.created_at, range) && v.visit_type === 'home').length,
+        schoolVisits: visitations.filter(v => isInDateRange(v.created_at, range) && v.visit_type === 'school').length,
       };
     });
-  }, [reportsData]);
+  }, [visitations]);
 
   // Program Intelligence
   const programIntelligence = useMemo(() => {

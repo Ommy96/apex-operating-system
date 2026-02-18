@@ -24,28 +24,3 @@ export const formatDocumentsData = (documents: any[]) => {
   }));
 };
 
-export const formatActivityReportsData = (reports: any[]) => {
-  return reports.map(report => ({
-    'Staff': report.staff,
-    'Program': report.program,
-    'Reporting Date': new Date(report.reporting_date).toLocaleDateString(),
-    'Executive Summary': report.executive_summary,
-    'Beneficiary Impact': report.beneficiary_impact,
-    'Challenges': report.challenges,
-    'Recommendations': report.proposed_recommendations,
-    'Created Date': new Date(report.created_at).toLocaleDateString(),
-  }));
-};
-
-export const formatProgramReportsData = (reports: any[]) => {
-  return reports.map(report => ({
-    'Staff': report.staff,
-    'Program': report.program,
-    'Reporting Date': new Date(report.reporting_date).toLocaleDateString(),
-    'Executive Summary': report.executive_summary,
-    'Beneficiary Impact': report.beneficiary_impact,
-    'Challenges': report.challenges,
-    'Recommendations': report.proposed_recommendations,
-    'Created Date': new Date(report.created_at).toLocaleDateString(),
-  }));
-};

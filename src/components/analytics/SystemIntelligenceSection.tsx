@@ -68,40 +68,32 @@ export function SystemIntelligenceSection({
 
   // Activity by module
   const moduleActivity = useMemo(() => {
-    if (!reportsData) return [];
     return [
-      { module: 'Home Visits', count: reportsData.homeVisits?.length || 0 },
-      { module: 'School Visits', count: reportsData.schoolVisits?.length || 0 },
-      { module: 'Program Reports', count: reportsData.programReports?.length || 0 },
-      { module: 'Activity Reports', count: reportsData.activityReports?.length || 0 },
-      { module: 'Uploads', count: docs.length }
+      { module: 'Uploads', count: docs.length },
+      { module: 'Enrollments', count: enrollments.length },
+      { module: 'Programs', count: programs.length },
     ].sort((a, b) => b.count - a.count);
-  }, [reportsData, docs]);
+  }, [docs, enrollments, programs]);
 
-  // Peak usage
+  // Peak usage — based on uploads
   const usageByHour = useMemo(() => {
-    if (!reportsData) return [];
     const hourCounts: Record<number, number> = {};
     for (let i = 0; i < 24; i++) hourCounts[i] = 0;
-    const all = [...(reportsData.homeVisits || []), ...(reportsData.schoolVisits || []), ...(reportsData.programReports || []), ...(reportsData.activityReports || [])];
-    all.forEach(r => { const h = getHours(new Date(r.created_at)); hourCounts[h]++; });
+    docs.forEach(r => { const h = getHours(new Date(r.created_at)); hourCounts[h]++; });
     return Object.entries(hourCounts).map(([hour, count]) => ({ hour: `${hour}:00`, count })).filter(h => parseInt(h.hour) >= 6 && parseInt(h.hour) <= 22);
-  }, [reportsData]);
+  }, [docs]);
 
-  // Usage by day
+  // Usage by day — based on uploads
   const usageByDay = useMemo(() => {
-    if (!reportsData) return [];
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayCounts: Record<number, number> = {};
     for (let i = 0; i < 7; i++) dayCounts[i] = 0;
-    const all = [...(reportsData.homeVisits || []), ...(reportsData.schoolVisits || []), ...(reportsData.programReports || []), ...(reportsData.activityReports || [])];
-    all.forEach(r => { dayCounts[getDay(new Date(r.created_at))]++; });
+    docs.forEach(r => { dayCounts[getDay(new Date(r.created_at))]++; });
     return Object.entries(dayCounts).map(([day, count]) => ({ day: days[parseInt(day)], count }));
-  }, [reportsData]);
+  }, [docs]);
 
-  // Monthly trends
+  // Monthly trends — uploads
   const monthlyActivity = useMemo(() => {
-    if (!reportsData) return [];
     const months = eachMonthOfInterval({ start: subMonths(new Date(), 5), end: new Date() });
     return months.map(month => {
       const ms = startOfMonth(month);
@@ -109,11 +101,11 @@ export function SystemIntelligenceSection({
       const countIn = (records: any[]) => records?.filter(r => isWithinInterval(new Date(r.created_at), { start: ms, end: me })).length || 0;
       return {
         month: format(month, 'MMM'),
-        reports: countIn(reportsData.homeVisits) + countIn(reportsData.schoolVisits) + countIn(reportsData.programReports) + countIn(reportsData.activityReports),
+        reports: countIn(enrollments),
         uploads: countIn(docs)
       };
     });
-  }, [reportsData, docs]);
+  }, [enrollments, docs]);
 
   const totalReports = moduleActivity.reduce((sum, m) => sum + m.count, 0);
 
