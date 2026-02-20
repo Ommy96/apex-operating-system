@@ -3791,6 +3791,25 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      register_organization: {
+        Args: {
+          _address?: string
+          _admin_user_id?: string
+          _country?: string
+          _county?: string
+          _description?: string
+          _email?: string
+          _features_enabled?: Json
+          _org_name: string
+          _org_slug: string
+          _org_type: string
+          _phone?: string
+          _registration_number?: string
+          _subscription_tier?: string
+          _website?: string
+        }
+        Returns: Json
+      }
       search_children_for_linking: {
         Args: { _org_id: string; _search_term: string }
         Returns: {
