@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   ArrowLeft, ArrowRight, Building2, User, Mail, Lock, Phone, Globe, MapPin,
-  Sparkles, CheckCircle2, LogOut, FileText, Crown, Zap, Shield, Check, Eye, Loader2
+  Sparkles, CheckCircle2, LogOut, FileText, Crown, Zap, Shield, Check, Eye, EyeOff, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -104,6 +104,8 @@ export default function RegisterOrganization() {
   const [step, setStep] = useState(0);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(organizationSchema),
@@ -167,7 +169,7 @@ export default function RegisterOrganization() {
       // 2 – create user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.adminEmail, password: data.adminPassword,
-        options: { emailRedirectTo: `${window.location.origin}/`, data: { full_name: data.adminFullName } },
+        options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { full_name: data.adminFullName } },
       });
       if (authError) {
         if (authError.message.includes('already registered')) { form.setError('adminEmail', { message: 'Email already registered. Please sign in.' }); setStep(1); }
@@ -193,8 +195,10 @@ export default function RegisterOrganization() {
         address: data.address || null, country: data.country || null,
         organization_type: data.organizationType, county: data.county || null,
         registration_number: data.registrationNumber || null,
-        subscription_tier: data.plan, is_active: true,
-        features_enabled: featuresEnabled, onboarding_completed: true,
+        subscription_tier: data.plan, subscription_status: 'active', is_active: true,
+        features_enabled: featuresEnabled,
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
       }).select().single();
       if (orgError) throw orgError;
 
@@ -204,11 +208,27 @@ export default function RegisterOrganization() {
       });
       if (memberError) throw memberError;
 
-      // 5 – profile
-      await supabase.from('profiles').update({ organization_id: newOrg.id, role: 'admin' }).eq('user_id', authData.user.id);
+      // 5 – profile update (keep for display purposes only, role is in user_roles)
+      await supabase.from('profiles').update({
+        organization_id: newOrg.id,
+        role: 'admin',
+      }).eq('user_id', authData.user.id);
 
-      // 6 – user_roles
-      await supabase.from('user_roles').upsert({ user_id: authData.user.id, role: 'admin', granted_at: new Date().toISOString() });
+      // 6 – user_roles (source of truth for role)
+      await supabase.from('user_roles').upsert({
+        user_id: authData.user.id, role: 'admin', granted_at: new Date().toISOString(),
+      });
+
+      // 7 – seed default RBAC roles for the organization
+      try {
+        await supabase.rpc('seed_default_org_roles', {
+          _org_id: newOrg.id,
+          _admin_user_id: authData.user.id,
+        });
+      } catch (rbacError) {
+        // Non-fatal: RBAC seeding failure doesn't block registration
+        console.warn('RBAC seeding warning:', rbacError);
+      }
 
       setRegistrationComplete(true);
       toast.success('Organization registered successfully!');
@@ -490,8 +510,12 @@ export default function RegisterOrganization() {
                     <FormItem>
                       <FormLabel>Password *</FormLabel>
                       <FormControl>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input type="password" placeholder="Min 8 chars, upper, lower, number" className="pl-10 h-11 rounded-xl" {...field} />
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input type={showPassword ? 'text' : 'password'} placeholder="Min 8 chars, upper, lower, number" className="pl-10 pr-10 h-11 rounded-xl" {...field} />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                       </FormControl>
                       {/* Password strength bar */}
@@ -515,8 +539,12 @@ export default function RegisterOrganization() {
                     <FormItem>
                       <FormLabel>Confirm Password *</FormLabel>
                       <FormControl>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input type="password" placeholder="Re-enter password" className="pl-10 h-11 rounded-xl" {...field} />
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input type={showConfirmPassword ? 'text' : 'password'} placeholder="Re-enter password" className="pl-10 pr-10 h-11 rounded-xl" {...field} />
+                          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                       </FormControl>
                       <FormMessage />

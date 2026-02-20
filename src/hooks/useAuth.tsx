@@ -27,15 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleChangeChannel, setRoleChangeChannel] = useState<any>(null);
 
-  // Function to fetch user role
+  // Function to fetch user role — reads from user_roles table (never profiles)
+  // to avoid privilege escalation attacks
   const fetchUserRole = useCallback(async (userId: string) => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-      return profile?.role || 'staff';
+      const { data } = await supabase
+        .rpc('get_user_role', { user_id: userId });
+      return (data as string) || 'staff';
     } catch (error) {
       console.error('Error fetching user role:', error);
       return 'staff';
@@ -95,15 +93,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to role changes for current user
+    // Subscribe to role changes — watch user_roles table (not profiles)
     const channel = supabase
       .channel('role-changes')
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'profiles',
+          table: 'user_roles',
           filter: `user_id=eq.${user.id}`
         },
         async (payload) => {
@@ -203,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -214,6 +212,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: error.message,
         variant: "destructive",
       });
+    } else if (data.user) {
+      // Track last login time (fire-and-forget, non-blocking)
+      supabase.from('profiles').update({ last_login_at: new Date().toISOString() })
+        .eq('user_id', data.user.id).then(() => {});
     }
     
     return { error };
