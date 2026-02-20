@@ -162,11 +162,7 @@ export default function RegisterOrganization() {
   const handleSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // 1 – slug uniqueness
-      const { data: existing } = await supabase.from('organizations').select('id').eq('slug', data.organizationSlug).maybeSingle();
-      if (existing) { form.setError('organizationSlug', { message: 'This URL is already taken' }); setStep(0); setIsLoading(false); return; }
-
-      // 2 – create user
+      // 1 – create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.adminEmail, password: data.adminPassword,
         options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { full_name: data.adminFullName } },
@@ -178,7 +174,7 @@ export default function RegisterOrganization() {
       }
       if (!authData.user) throw new Error('Failed to create user account');
 
-      // 3 – create org
+      // 2 – build features config
       const selectedPlan = PLANS.find(p => p.id === data.plan) || PLANS[0];
       const featuresEnabled = {
         max_users: selectedPlan.limits.users === -1 ? 9999 : selectedPlan.limits.users,
@@ -188,46 +184,32 @@ export default function RegisterOrganization() {
         custom_entities: data.plan === 'enterprise',
       };
 
-      const { data: newOrg, error: orgError } = await supabase.from('organizations').insert({
-        name: data.organizationName, slug: data.organizationSlug,
-        description: data.description || null, email: data.email || null,
-        phone: data.phone || null, website: data.website || null,
-        address: data.address || null, country: data.country || null,
-        organization_type: data.organizationType, county: data.county || null,
-        registration_number: data.registrationNumber || null,
-        subscription_tier: data.plan, subscription_status: 'active', is_active: true,
-        features_enabled: featuresEnabled,
-        onboarding_completed: true,
-        onboarding_completed_at: new Date().toISOString(),
-      }).select().single();
-      if (orgError) throw orgError;
-
-      // 4 – org membership
-      const { error: memberError } = await supabase.from('organization_members').insert({
-        user_id: authData.user.id, organization_id: newOrg.id, role: 'admin', is_primary: true,
-      });
-      if (memberError) throw memberError;
-
-      // 5 – profile update (keep for display purposes only, role is in user_roles)
-      await supabase.from('profiles').update({
-        organization_id: newOrg.id,
-        role: 'admin',
-      }).eq('user_id', authData.user.id);
-
-      // 6 – user_roles (source of truth for role)
-      await supabase.from('user_roles').upsert({
-        user_id: authData.user.id, role: 'admin', granted_at: new Date().toISOString(),
+      // 3 – create org via SECURITY DEFINER RPC (bypasses RLS safely)
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('register_organization', {
+        _org_name: data.organizationName,
+        _org_slug: data.organizationSlug,
+        _org_type: data.organizationType,
+        _description: data.description || null,
+        _email: data.email || null,
+        _phone: data.phone || null,
+        _website: data.website || null,
+        _address: data.address || null,
+        _country: data.country || null,
+        _county: data.county || null,
+        _registration_number: data.registrationNumber || null,
+        _subscription_tier: data.plan,
+        _features_enabled: featuresEnabled,
+        _admin_user_id: authData.user.id,
       });
 
-      // 7 – seed default RBAC roles for the organization
-      try {
-        await supabase.rpc('seed_default_org_roles', {
-          _org_id: newOrg.id,
-          _admin_user_id: authData.user.id,
-        });
-      } catch (rbacError) {
-        // Non-fatal: RBAC seeding failure doesn't block registration
-        console.warn('RBAC seeding warning:', rbacError);
+      if (rpcError) {
+        if (rpcError.message.includes('slug_taken')) {
+          form.setError('organizationSlug', { message: 'This URL is already taken' });
+          setStep(0);
+          setIsLoading(false);
+          return;
+        }
+        throw rpcError;
       }
 
       setRegistrationComplete(true);
