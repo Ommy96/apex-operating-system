@@ -502,9 +502,6 @@ export default function BeneficiaryProfile() {
                 Dependants ({dependants.length})
               </TabsTrigger>
             )}
-            <TabsTrigger value="donors" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              Donors ({donors.length})
-            </TabsTrigger>
             {beneficiary.beneficiary_type !== 'group' && (
               <TabsTrigger value="medical" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
                 Medical
@@ -815,49 +812,6 @@ export default function BeneficiaryProfile() {
             )}
           </TabsContent>
         )}
-
-        <TabsContent value="donors" className="space-y-4">
-          {donors.length === 0 ? (
-            <Card className="border-muted">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No donors linked to this beneficiary
-              </CardContent>
-            </Card>
-          ) : (
-            donors.map((donor) => (
-              <Card key={donor.id} className="border-success/10 hover:border-success/30 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-medium flex items-center gap-2 text-foreground">
-                        <Heart className="h-4 w-4 text-success" />
-                        {donor.donor_name}
-                      </h4>
-                      {donor.program?.name && (
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {donor.program.name}
-                        </Badge>
-                      )}
-                      {donor.donation_date && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Donated on {new Date(donor.donation_date).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                    {donor.amount_received && (
-                      <Badge className="bg-success/20 text-success border-success/30">
-                        KSH {donor.amount_received.toLocaleString()}
-                      </Badge>
-                    )}
-                  </div>
-                  {donor.notes && (
-                    <p className="text-sm text-muted-foreground mt-2">{donor.notes}</p>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </TabsContent>
 
         {beneficiary.beneficiary_type !== 'group' && (
           <TabsContent value="medical" className="space-y-4">
