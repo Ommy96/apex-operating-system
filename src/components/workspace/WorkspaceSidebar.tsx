@@ -21,7 +21,6 @@ import {
   Sparkles,
   LayoutDashboard,
   Users,
-  FileText,
   Settings,
   LogOut,
   Target,
@@ -45,7 +44,6 @@ const mainMenuItems = [
 
 const systemItems = [
   { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
-  { title: "Documents", url: "/documents", icon: FileText },
   { title: "Settings", url: "/organization-settings", icon: Settings },
 ];
 

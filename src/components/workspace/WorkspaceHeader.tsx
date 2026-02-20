@@ -35,7 +35,6 @@ const routeLabels: Record<string, string> = {
   programs: "Programs",
   dynamic: "Programs",
   "reports-analytics": "Analytics",
-  documents: "Documents",
   "organization-settings": "Settings",
   admin: "Admin",
   infera: "Platform Admin",
