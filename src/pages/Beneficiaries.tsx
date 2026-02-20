@@ -512,24 +512,26 @@ export default function Beneficiaries() {
               <SelectTrigger className="h-9 flex-1">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="student">Students</SelectItem>
-                <SelectItem value="adult">Adults</SelectItem>
-                <SelectItem value="group">Groups</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 flex-1">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="graduated">Graduated</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="student">Students</SelectItem>
+                  <SelectItem value="adult">Adults</SelectItem>
+                  <SelectItem value="group">Groups</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-9 flex-1">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="graduated">Graduated</SelectItem>
+                  <SelectItem value="dropped">Dropped</SelectItem>
+                  <SelectItem value="replaced">Replaced</SelectItem>
+                </SelectContent>
+              </Select>
           </div>
         </div>
         
@@ -557,6 +559,8 @@ export default function Beneficiaries() {
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
               <SelectItem value="graduated">Graduated</SelectItem>
+              <SelectItem value="dropped">Dropped</SelectItem>
+              <SelectItem value="replaced">Replaced</SelectItem>
             </SelectContent>
           </Select>
           
