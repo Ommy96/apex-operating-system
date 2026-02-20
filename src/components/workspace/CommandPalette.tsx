@@ -14,7 +14,6 @@ import {
   Users,
   Target,
   BarChart3,
-  FileText,
   Settings,
   Plus,
   Search,
@@ -30,7 +29,6 @@ const navigationItems = [
   { title: "Beneficiaries", url: "/beneficiaries", icon: Users, group: "Navigation" },
   { title: "Programs", url: "/programs-management", icon: Target, group: "Navigation" },
   { title: "Analytics", url: "/reports-analytics", icon: BarChart3, group: "Navigation" },
-  { title: "Documents", url: "/documents", icon: FileText, group: "Navigation" },
   { title: "Settings", url: "/organization-settings", icon: Settings, group: "Navigation" },
 ];
 
