@@ -476,6 +476,31 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
 
                     <FormField
                       control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="inactive">Inactive</SelectItem>
+                              <SelectItem value="graduated">Graduated</SelectItem>
+                              <SelectItem value="dropped">Dropped</SelectItem>
+                              <SelectItem value="replaced">Replaced</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="photo_url"
                       render={({ field }) => (
                         <FormItem>

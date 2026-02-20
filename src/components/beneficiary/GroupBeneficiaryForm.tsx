@@ -321,7 +321,9 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
                         <SelectContent>
                           <SelectItem value="active">Active</SelectItem>
                           <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="suspended">Suspended</SelectItem>
+                          <SelectItem value="graduated">Graduated</SelectItem>
+                          <SelectItem value="dropped">Dropped</SelectItem>
+                          <SelectItem value="replaced">Replaced</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
