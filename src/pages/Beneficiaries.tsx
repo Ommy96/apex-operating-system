@@ -469,32 +469,42 @@ export default function Beneficiaries() {
             />
           </div>
           
-          {/* Filter Chips */}
-          <FilterBar className="hidden md:flex">
-            <FilterChip
-              label="All Types"
-              active={typeFilter === 'all'}
-              onToggle={() => setTypeFilter('all')}
-            />
-            <FilterChip
-              label="Students"
-              active={typeFilter === 'student'}
-              onToggle={() => setTypeFilter('student')}
-              count={stats.students}
-            />
-            <FilterChip
-              label="Adults"
-              active={typeFilter === 'adult'}
-              onToggle={() => setTypeFilter('adult')}
-              count={stats.adults}
-            />
-            <FilterChip
-              label="Groups"
-              active={typeFilter === 'group'}
-              onToggle={() => setTypeFilter('group')}
-              count={stats.groups}
-            />
-          </FilterBar>
+          {/* Type Filter Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-2 hidden md:flex">
+                {typeFilter === 'all' && <Users className="h-4 w-4" />}
+                {typeFilter === 'student' && <GraduationCap className="h-4 w-4" />}
+                {typeFilter === 'adult' && <UserCheck className="h-4 w-4" />}
+                {typeFilter === 'group' && <UsersRound className="h-4 w-4" />}
+                {typeFilter === 'all' ? 'All Types' : typeFilter === 'student' ? 'Students' : typeFilter === 'adult' ? 'Adults' : 'Groups'}
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-44">
+              <DropdownMenuItem onClick={() => setTypeFilter('all')} className="gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                All Types
+                <span className="ml-auto text-xs text-muted-foreground">{stats.total}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setTypeFilter('student')} className="gap-2">
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                Students
+                <span className="ml-auto text-xs text-muted-foreground">{stats.students}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTypeFilter('adult')} className="gap-2">
+                <UserCheck className="h-4 w-4 text-muted-foreground" />
+                Adults
+                <span className="ml-auto text-xs text-muted-foreground">{stats.adults}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTypeFilter('group')} className="gap-2">
+                <UsersRound className="h-4 w-4 text-muted-foreground" />
+                Groups
+                <span className="ml-auto text-xs text-muted-foreground">{stats.groups}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           {/* Mobile Filters */}
           <div className="flex gap-2 md:hidden w-full">
