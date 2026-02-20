@@ -62,6 +62,13 @@ export type Database = {
             referencedRelation: "children"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "academic_history_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       academic_performance: {
@@ -116,10 +123,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "academic_performance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "academic_performance_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -212,10 +233,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -285,6 +320,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -374,6 +416,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_usage_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -640,10 +689,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "beneficiaries_legacy_child_id_fkey"
+            columns: ["legacy_child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "beneficiaries_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -709,6 +772,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "beneficiary_academics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       beneficiary_donors: {
@@ -764,6 +834,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_donors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -882,6 +959,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "beneficiary_services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "beneficiary_services_program_id_fkey"
             columns: ["program_id"]
             isOneToOne: false
@@ -988,6 +1072,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "beneficiary_uploads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       beneficiary_visitations: {
@@ -1060,6 +1151,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "beneficiary_visitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       child_programs: {
@@ -1105,6 +1203,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_programs_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
             referencedColumns: ["id"]
           },
           {
@@ -1251,6 +1356,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "children_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       documents: {
@@ -1302,6 +1414,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1362,10 +1481,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "entities_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "entities_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1404,6 +1537,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1477,6 +1617,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1586,6 +1733,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "guardians_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       indicator_categories: {
@@ -1634,6 +1788,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1881,6 +2042,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "indicators_template_source_id_fkey"
             columns: ["template_source_id"]
             isOneToOne: false
@@ -1926,6 +2094,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_entries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
             referencedColumns: ["id"]
           },
           {
@@ -1982,6 +2157,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "organization_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       organization_members: {
@@ -2024,6 +2206,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2163,6 +2352,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       program_beneficiaries: {
@@ -2214,10 +2410,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_beneficiaries_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "program_beneficiaries_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_beneficiaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2275,6 +2485,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_donors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "program_donors_program_id_fkey"
             columns: ["program_id"]
             isOneToOne: false
@@ -2317,6 +2534,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_entries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
             referencedColumns: ["id"]
           },
           {
@@ -2389,6 +2613,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2532,6 +2763,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_observations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2695,10 +2933,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_visits_linked_child_id_fkey"
+            columns: ["linked_child_id"]
+            isOneToOne: false
+            referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "program_visits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2807,6 +3059,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "programs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       projects: {
@@ -2882,6 +3141,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3059,6 +3325,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rbac_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rbac_user_role_assignments: {
@@ -3095,6 +3368,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rbac_user_role_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3227,7 +3507,222 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      children_safe_view: {
+        Row: {
+          academic_level:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          address: string | null
+          course_name: string | null
+          created_at: string | null
+          created_by: string | null
+          date_of_birth: string | null
+          donation_received_ksh: number | null
+          donor: string | null
+          enrollment_date: string | null
+          first_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          grade: string | null
+          id: string | null
+          inactive_date: string | null
+          inactive_reason: string | null
+          institution_name: string | null
+          last_name: string | null
+          organization_id: string | null
+          parental_status:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
+          photo_url: string | null
+          receives_hbc: boolean | null
+          receives_shopping: boolean | null
+          receives_transport: boolean | null
+          replacement_status: string | null
+          residence: Database["public"]["Enums"]["residence_type"] | null
+          status: string | null
+          student_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          address?: string | null
+          course_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_of_birth?: string | null
+          donation_received_ksh?: number | null
+          donor?: string | null
+          enrollment_date?: string | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          id?: string | null
+          inactive_date?: string | null
+          inactive_reason?: string | null
+          institution_name?: string | null
+          last_name?: string | null
+          organization_id?: string | null
+          parental_status?:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
+          photo_url?: string | null
+          receives_hbc?: boolean | null
+          receives_shopping?: boolean | null
+          receives_transport?: boolean | null
+          replacement_status?: string | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          status?: string | null
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          academic_level?:
+            | Database["public"]["Enums"]["academic_level_type"]
+            | null
+          address?: string | null
+          course_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_of_birth?: string | null
+          donation_received_ksh?: number | null
+          donor?: string | null
+          enrollment_date?: string | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          grade?: string | null
+          id?: string | null
+          inactive_date?: string | null
+          inactive_reason?: string | null
+          institution_name?: string | null
+          last_name?: string | null
+          organization_id?: string | null
+          parental_status?:
+            | Database["public"]["Enums"]["parental_status_type"]
+            | null
+          photo_url?: string | null
+          receives_hbc?: boolean | null
+          receives_shopping?: boolean | null
+          receives_transport?: boolean | null
+          replacement_status?: string | null
+          residence?: Database["public"]["Enums"]["residence_type"] | null
+          status?: string | null
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "children_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations_public_view: {
+        Row: {
+          address: string | null
+          country: string | null
+          county: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          features_enabled: Json | null
+          id: string | null
+          is_active: boolean | null
+          logo_url: string | null
+          name: string | null
+          onboarding_completed: boolean | null
+          organization_type: string | null
+          phone: string | null
+          registration_number: string | null
+          settings: Json | null
+          slug: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          suspended_at: string | null
+          suspended_reason: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+          usage_stats: Json | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          features_enabled?: never
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          organization_type?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          settings?: never
+          slug?: string | null
+          stripe_customer_id?: never
+          stripe_subscription_id?: never
+          subscription_ends_at?: never
+          subscription_started_at?: never
+          subscription_status?: never
+          subscription_tier?: never
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          trial_ends_at?: never
+          updated_at?: string | null
+          usage_stats?: never
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          features_enabled?: never
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          organization_type?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          settings?: never
+          slug?: string | null
+          stripe_customer_id?: never
+          stripe_subscription_id?: never
+          subscription_ends_at?: never
+          subscription_started_at?: never
+          subscription_status?: never
+          subscription_tier?: never
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          trial_ends_at?: never
+          updated_at?: string | null
+          usage_stats?: never
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_approve_request: { Args: { request_id: string }; Returns: boolean }
