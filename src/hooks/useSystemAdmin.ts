@@ -20,6 +20,8 @@ export interface OrganizationWithSubscription {
   suspended_at: string | null;
   suspended_reason: string | null;
   created_at: string;
+  onboarding_completed: boolean;
+  onboarding_completed_at: string | null;
   member_count?: number;
   beneficiary_count?: number;
 }
@@ -59,6 +61,8 @@ export interface SystemStats {
   totalUsers: number;
   totalBeneficiaries: number;
   revenueByTier: { tier: string; count: number }[];
+  onboardingCompleted: number;
+  onboardingPending: number;
 }
 
 // Hook for fetching all organizations with subscription details
@@ -75,7 +79,7 @@ export function useAllOrganizations() {
           id, name, slug, email, phone, is_active,
           subscription_tier, subscription_status, stripe_customer_id,
           features_enabled, trial_ends_at, suspended_at, suspended_reason,
-          created_at
+          created_at, onboarding_completed, onboarding_completed_at
         `)
         .order('created_at', { ascending: false });
 
@@ -311,6 +315,7 @@ export function useSystemStats() {
         usersRes,
         beneficiariesRes,
         tierStatsRes,
+        onboardingCompletedRes,
       ] = await Promise.all([
         supabase.from('organizations').select('*', { count: 'exact', head: true }),
         supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_active', true),
@@ -318,7 +323,11 @@ export function useSystemStats() {
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('beneficiaries').select('*', { count: 'exact', head: true }),
         supabase.from('organizations').select('subscription_tier'),
+        supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('onboarding_completed', true),
       ]);
+
+      const totalOrgs = orgsRes.count || 0;
+      const completedOnboarding = onboardingCompletedRes.count || 0;
 
       // Calculate tier distribution
       const tierCounts: Record<string, number> = {};
@@ -328,12 +337,14 @@ export function useSystemStats() {
       });
 
       return {
-        totalOrganizations: orgsRes.count || 0,
+        totalOrganizations: totalOrgs,
         activeOrganizations: activeOrgsRes.count || 0,
         suspendedOrganizations: suspendedOrgsRes.count || 0,
         totalUsers: usersRes.count || 0,
         totalBeneficiaries: beneficiariesRes.count || 0,
         revenueByTier: Object.entries(tierCounts).map(([tier, count]) => ({ tier, count })),
+        onboardingCompleted: completedOnboarding,
+        onboardingPending: totalOrgs - completedOnboarding,
       } as SystemStats;
     },
     enabled: isSuperAdminUser,

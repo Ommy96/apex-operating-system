@@ -2231,6 +2231,7 @@ export type Database = {
           logo_url: string | null
           name: string
           onboarding_completed: boolean
+          onboarding_completed_at: string | null
           organization_type: string | null
           phone: string | null
           registration_number: string | null
@@ -2262,6 +2263,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           organization_type?: string | null
           phone?: string | null
           registration_number?: string | null
@@ -2293,6 +2295,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           organization_type?: string | null
           phone?: string | null
           registration_number?: string | null
@@ -2319,6 +2322,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          last_login_at: string | null
           organization_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -2329,6 +2333,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          last_login_at?: string | null
           organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -2339,6 +2344,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          last_login_at?: string | null
           organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -3797,6 +3803,10 @@ export type Database = {
           last_name: string
           student_id: string
         }[]
+      }
+      seed_default_org_roles: {
+        Args: { _admin_user_id: string; _org_id: string }
+        Returns: undefined
       }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }

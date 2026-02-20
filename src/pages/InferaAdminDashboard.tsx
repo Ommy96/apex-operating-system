@@ -133,9 +133,9 @@ export default function InferaAdminDashboard() {
                   colorVariant="purple"
                 />
                 <StatsCard
-                  title="Active Programs"
-                  value={0}
-                  subtitle="Across all orgs"
+                  title="Onboarding Complete"
+                  value={stats?.onboardingCompleted || 0}
+                  subtitle={`${stats?.onboardingPending || 0} still pending`}
                   icon={Activity}
                   colorVariant="orange"
                 />

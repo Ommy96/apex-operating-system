@@ -185,6 +185,7 @@ export function OrganizationManagement() {
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center">Members</TableHead>
                   <TableHead className="text-center">Beneficiaries</TableHead>
+                  <TableHead>Onboarding</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -225,6 +226,15 @@ export function OrganizationManagement() {
                         {org.beneficiary_count}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      {org.onboarding_completed ? (
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />Complete
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">Pending</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(org.created_at), 'MMM d, yyyy')}
                     </TableCell>
@@ -244,7 +254,7 @@ export function OrganizationManagement() {
                           </DropdownMenuItem>
                           {org.suspended_at ? (
                             <DropdownMenuItem onClick={() => handleActivate(org)}>
-                              <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
                               Activate
                             </DropdownMenuItem>
                           ) : (
@@ -268,7 +278,7 @@ export function OrganizationManagement() {
                 ))}
                 {(!filteredOrgs || filteredOrgs.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No organizations found
                     </TableCell>
                   </TableRow>
