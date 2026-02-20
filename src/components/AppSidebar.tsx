@@ -22,7 +22,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LayoutDashboard,
   Users,
-  FileText,
   Settings,
   LogOut,
   Target,
@@ -130,7 +129,6 @@ export function AppSidebar() {
 
   const systemItems = [
     { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
-    { title: "Documents", url: "/documents", icon: FileText, show: can.viewBeneficiaries },
     { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
     { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
   ].filter(item => item.show);

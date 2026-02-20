@@ -20,7 +20,7 @@ import BeneficiaryProfile from "./pages/BeneficiaryProfile";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import InferaAdminDashboard from "./pages/InferaAdminDashboard";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
-import Documents from "./pages/Documents";
+
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
@@ -126,13 +126,6 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <OrganizationSettings />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/documents" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Documents />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
