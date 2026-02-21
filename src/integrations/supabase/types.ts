@@ -894,6 +894,146 @@ export type Database = {
           },
         ]
       }
+      beneficiary_progress_logs: {
+        Row: {
+          beneficiary_id: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          log_date: string
+          logged_by: string | null
+          organization_id: string
+          previous_value: number | null
+          progress_value: number | null
+          title: string
+        }
+        Insert: {
+          beneficiary_id: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          log_date?: string
+          logged_by?: string | null
+          organization_id: string
+          previous_value?: number | null
+          progress_value?: number | null
+          title: string
+        }
+        Update: {
+          beneficiary_id?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          log_date?: string
+          logged_by?: string | null
+          organization_id?: string
+          previous_value?: number | null
+          progress_value?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_progress_logs_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_progress_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_progress_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_risk_scores: {
+        Row: {
+          academic_trend_score: number | null
+          assessed_by: string | null
+          assessment_date: string
+          beneficiary_id: string
+          created_at: string
+          dropout_risk_score: number | null
+          engagement_score: number | null
+          followup_compliance_score: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          overall_risk_level: string | null
+          risk_flags: Json | null
+          updated_at: string
+          vulnerability_index: number | null
+        }
+        Insert: {
+          academic_trend_score?: number | null
+          assessed_by?: string | null
+          assessment_date?: string
+          beneficiary_id: string
+          created_at?: string
+          dropout_risk_score?: number | null
+          engagement_score?: number | null
+          followup_compliance_score?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          overall_risk_level?: string | null
+          risk_flags?: Json | null
+          updated_at?: string
+          vulnerability_index?: number | null
+        }
+        Update: {
+          academic_trend_score?: number | null
+          assessed_by?: string | null
+          assessment_date?: string
+          beneficiary_id?: string
+          created_at?: string
+          dropout_risk_score?: number | null
+          engagement_score?: number | null
+          followup_compliance_score?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          overall_risk_level?: string | null
+          risk_flags?: Json | null
+          updated_at?: string
+          vulnerability_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_risk_scores_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_risk_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_risk_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiary_services: {
         Row: {
           activity_id: string | null
@@ -2596,6 +2736,191 @@ export type Database = {
           },
         ]
       }
+      logframe_indicators: {
+        Row: {
+          actual_value: number | null
+          created_at: string
+          custom_indicator_name: string | null
+          id: string
+          indicator_id: string | null
+          logframe_level_id: string
+          reporting_frequency: string | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_value?: number | null
+          created_at?: string
+          custom_indicator_name?: string | null
+          id?: string
+          indicator_id?: string | null
+          logframe_level_id: string
+          reporting_frequency?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: number | null
+          created_at?: string
+          custom_indicator_name?: string | null
+          id?: string
+          indicator_id?: string | null
+          logframe_level_id?: string
+          reporting_frequency?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logframe_indicators_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_indicators_logframe_level_id_fkey"
+            columns: ["logframe_level_id"]
+            isOneToOne: false
+            referencedRelation: "logframe_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logframe_levels: {
+        Row: {
+          assumptions: string | null
+          created_at: string
+          description: string | null
+          id: string
+          level_type: string
+          logframe_id: string
+          means_of_verification: string | null
+          narrative: string | null
+          parent_id: string | null
+          risks: string | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assumptions?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          level_type: string
+          logframe_id: string
+          means_of_verification?: string | null
+          narrative?: string | null
+          parent_id?: string | null
+          risks?: string | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assumptions?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          level_type?: string
+          logframe_id?: string
+          means_of_verification?: string | null
+          narrative?: string | null
+          parent_id?: string | null
+          risks?: string | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logframe_levels_logframe_id_fkey"
+            columns: ["logframe_id"]
+            isOneToOne: false
+            referencedRelation: "logframes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_levels_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "logframe_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logframes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logframes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_entries: {
         Row: {
           child_id: string | null
@@ -4022,6 +4347,426 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      survey_answers: {
+        Row: {
+          answer_json: Json | null
+          answer_number: number | null
+          answer_text: string | null
+          created_at: string
+          id: string
+          question_id: string
+          response_id: string
+        }
+        Insert: {
+          answer_json?: Json | null
+          answer_number?: number | null
+          answer_text?: string | null
+          created_at?: string
+          id?: string
+          question_id: string
+          response_id: string
+        }
+        Update: {
+          answer_json?: Json | null
+          answer_number?: number | null
+          answer_text?: string | null
+          created_at?: string
+          id?: string
+          question_id?: string
+          response_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "survey_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_questions: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean | null
+          linked_indicator_id: string | null
+          options: Json | null
+          question_text: string
+          question_type: string
+          section: string | null
+          sort_order: number | null
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          linked_indicator_id?: string | null
+          options?: Json | null
+          question_text: string
+          question_type: string
+          section?: string | null
+          sort_order?: number | null
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          linked_indicator_id?: string | null
+          options?: Json | null
+          question_text?: string
+          question_type?: string
+          section?: string | null
+          sort_order?: number | null
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_questions_linked_indicator_id_fkey"
+            columns: ["linked_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          beneficiary_id: string | null
+          created_at: string
+          id: string
+          respondent_name: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          survey_id: string
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          created_at?: string
+          id?: string
+          respondent_name?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          survey_id: string
+        }
+        Update: {
+          beneficiary_id?: string | null
+          created_at?: string
+          id?: string
+          respondent_name?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          start_date: string | null
+          status: string
+          survey_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string
+          survey_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string
+          survey_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_of_change: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          narrative: string | null
+          organization_id: string
+          program_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          narrative?: string | null
+          organization_id: string
+          program_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          narrative?: string | null
+          organization_id?: string
+          program_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_of_change_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theory_of_change_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theory_of_change_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toc_connections: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          source_node_id: string
+          target_node_id: string
+          toc_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          source_node_id: string
+          target_node_id: string
+          toc_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          source_node_id?: string
+          target_node_id?: string
+          toc_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toc_connections_source_node_id_fkey"
+            columns: ["source_node_id"]
+            isOneToOne: false
+            referencedRelation: "toc_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "toc_connections_target_node_id_fkey"
+            columns: ["target_node_id"]
+            isOneToOne: false
+            referencedRelation: "toc_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "toc_connections_toc_id_fkey"
+            columns: ["toc_id"]
+            isOneToOne: false
+            referencedRelation: "theory_of_change"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toc_node_indicators: {
+        Row: {
+          created_at: string
+          id: string
+          indicator_id: string | null
+          toc_node_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indicator_id?: string | null
+          toc_node_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indicator_id?: string | null
+          toc_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toc_node_indicators_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "toc_node_indicators_toc_node_id_fkey"
+            columns: ["toc_node_id"]
+            isOneToOne: false
+            referencedRelation: "toc_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toc_nodes: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          node_type: string
+          position_x: number | null
+          position_y: number | null
+          sort_order: number | null
+          title: string
+          toc_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          node_type: string
+          position_x?: number | null
+          position_y?: number | null
+          sort_order?: number | null
+          title: string
+          toc_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          node_type?: string
+          position_x?: number | null
+          position_y?: number | null
+          sort_order?: number | null
+          title?: string
+          toc_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toc_nodes_toc_id_fkey"
+            columns: ["toc_id"]
+            isOneToOne: false
+            referencedRelation: "theory_of_change"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

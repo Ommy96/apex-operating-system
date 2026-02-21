@@ -27,6 +27,7 @@ import {
   Shield,
   BarChart3,
   Wallet,
+  GitBranch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,6 +43,7 @@ const mainMenuItems = [
   { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
   { title: "Programs", url: "/programs-management", icon: Target },
   { title: "Financial", url: "/financial", icon: Wallet },
+  { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
 ];
 
 const systemItems = [

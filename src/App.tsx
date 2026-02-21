@@ -32,6 +32,7 @@ import DynamicProgramPage from "./pages/DynamicProgramPage";
 import CustomReports from "./pages/CustomReports";
 import EntityDataPage from "./pages/EntityDataPage";
 import FinancialSuite from "./pages/FinancialSuite";
+import MESuite from "./pages/MEsuite";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +107,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <FinancialSuite />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me-suite" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <MESuite />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
