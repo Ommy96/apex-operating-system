@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealtimeTable } from '@/hooks/useRealtimeSubscription';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -127,6 +128,21 @@ export default function Beneficiaries() {
       fetchBeneficiaries();
       fetchPrograms();
     }
+  }, [organizationId]);
+
+  // Real-time: auto-refresh when beneficiaries or enrollments change
+  useEffect(() => {
+    if (!organizationId) return;
+    const channel = supabase
+      .channel('beneficiaries_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiaries', filter: `organization_id=eq.${organizationId}` }, () => {
+        fetchBeneficiaries();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services', filter: `organization_id=eq.${organizationId}` }, () => {
+        fetchPrograms();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [organizationId]);
 
   // Handle edit query params

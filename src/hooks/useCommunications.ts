@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function useCommunications() {
   const { currentOrganization } = useOrganization();
@@ -179,6 +180,13 @@ export function useCommunications() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  // Real-time subscriptions for communications tables
+  useRealtimeSubscription([
+    { table: "notifications", queryKeys: [["notifications", user?.id || ""]], filterColumn: "user_id", filterValue: user?.id, enabled: !!user?.id },
+    { table: "stakeholder_messages", queryKeys: [["stakeholder-messages", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "campaigns", queryKeys: [["campaigns", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     notifications, unreadCount, loadingNotifications, markAsRead, markAllRead,

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export interface ManagedDocument {
   id: string;
@@ -302,6 +303,11 @@ export function useDocumentManagement() {
     },
     onError: (e: any) => toast.error(e.message || "Failed to update document"),
   });
+
+  // Real-time subscriptions
+  useRealtimeSubscription([
+    { table: "managed_documents", queryKeys: [["managed-documents", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     documents: documents || [],

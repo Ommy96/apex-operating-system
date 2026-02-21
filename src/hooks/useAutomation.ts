@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function useAutomation() {
   const { currentOrganization } = useOrganization();
@@ -308,6 +309,14 @@ export function useAutomation() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  // Real-time subscriptions for automation tables
+  useRealtimeSubscription([
+    { table: "automation_rules", queryKeys: [["automation-rules", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "automation_logs", queryKeys: [["automation-logs", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "alert_rules", queryKeys: [["alert-rules", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "alert_instances", queryKeys: [["alert-instances", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     rules, createRule, updateRule, deleteRule, automationLogs,
