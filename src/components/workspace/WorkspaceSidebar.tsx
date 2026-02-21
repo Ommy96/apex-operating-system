@@ -30,6 +30,7 @@ import {
   GitBranch,
   UserCog,
   Zap,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +38,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
+import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -48,6 +50,7 @@ const mainMenuItems = [
   { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
   { title: "HR & Staff", url: "/hr", icon: UserCog },
   { title: "Automation", url: "/automation", icon: Zap },
+  { title: "Communications", url: "/communications", icon: MessageCircle },
 ];
 
 const systemItems = [
@@ -152,10 +155,13 @@ export function WorkspaceSidebar() {
               <Target className="h-5 w-5 text-white" />
             </div>
             {!isCollapsed && (
-              <div className="flex flex-col animate-fade-in min-w-0">
-                <span className="font-bold text-sidebar-foreground text-sm tracking-tight">Ufanisi</span>
-                <span className="text-[11px] text-sidebar-muted truncate">Data Platform</span>
-              </div>
+              <>
+                <div className="flex flex-col animate-fade-in min-w-0 flex-1">
+                  <span className="font-bold text-sidebar-foreground text-sm tracking-tight">Ufanisi</span>
+                  <span className="text-[11px] text-sidebar-muted truncate">Data Platform</span>
+                </div>
+                <NotificationBell />
+              </>
             )}
           </div>
           <OrganizationSwitcher collapsed={isCollapsed} />
