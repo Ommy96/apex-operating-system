@@ -188,6 +188,9 @@ export function useFinancials() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["donor-support-totals"] });
+      queryClient.invalidateQueries({ queryKey: ["cost-analytics"] });
       toast.success("Expense deleted");
     },
     onError: (e: any) => toast.error(e.message),
