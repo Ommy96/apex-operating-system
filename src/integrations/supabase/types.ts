@@ -6679,6 +6679,233 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_assignments: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          role_title: string
+          start_date: string
+          status: string
+          supervisor_name: string | null
+          updated_at: string
+          volunteer_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          role_title: string
+          start_date: string
+          status?: string
+          supervisor_name?: string | null
+          updated_at?: string
+          volunteer_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          role_title?: string
+          start_date?: string
+          status?: string
+          supervisor_name?: string | null
+          updated_at?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_assignments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_assignments_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_hours: {
+        Row: {
+          assignment_id: string | null
+          created_at: string
+          description: string | null
+          hours: number
+          id: string
+          log_date: string
+          organization_id: string
+          verified_at: string | null
+          verified_by: string | null
+          volunteer_id: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          created_at?: string
+          description?: string | null
+          hours: number
+          id?: string
+          log_date: string
+          organization_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+          volunteer_id: string
+        }
+        Update: {
+          assignment_id?: string | null
+          created_at?: string
+          description?: string | null
+          hours?: number
+          id?: string
+          log_date?: string
+          organization_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_hours_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_hours_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_hours_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_hours_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteers: {
+        Row: {
+          availability: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          end_date: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          photo_url: string | null
+          skills: string[] | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          end_date?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          photo_url?: string | null
+          skills?: string[] | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          end_date?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          photo_url?: string | null
+          skills?: string[] | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       children_safe_view: {
