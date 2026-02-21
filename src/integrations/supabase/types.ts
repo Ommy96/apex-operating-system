@@ -3538,6 +3538,132 @@ export type Database = {
           },
         ]
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          beneficiary_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          donor_id: string | null
+          donor_name: string | null
+          expense_id: string | null
+          funding_category: string | null
+          grant_id: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          donor_id?: string | null
+          donor_name?: string | null
+          expense_id?: string | null
+          funding_category?: string | null
+          grant_id?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          transaction_date?: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          donor_id?: string | null
+          donor_name?: string | null
+          expense_id?: string | null
+          funding_category?: string | null
+          grant_id?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_donors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grant_compliance_items: {
         Row: {
           completed_at: string | null
