@@ -37,6 +37,7 @@ import HRManagement from "./pages/HRManagement";
 import AutomationEngine from "./pages/AutomationEngine";
 import CommunicationsHub from "./pages/CommunicationsHub";
 import AIInsights from "./pages/AIInsights";
+import DocumentManagement from "./pages/DocumentManagement";
 
 const queryClient = new QueryClient();
 
@@ -146,6 +147,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <AIInsights />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/document-management" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <DocumentManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

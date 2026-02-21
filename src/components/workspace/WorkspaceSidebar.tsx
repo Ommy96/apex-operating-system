@@ -32,6 +32,7 @@ import {
   Zap,
   MessageCircle,
   Bot,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -53,6 +54,7 @@ const mainMenuItems = [
   { title: "Automation", url: "/automation", icon: Zap },
   { title: "Communications", url: "/communications", icon: MessageCircle },
   { title: "AI Insights", url: "/ai-insights", icon: Bot },
+  { title: "Documents", url: "/document-management", icon: FileText },
 ];
 
 const systemItems = [
