@@ -37,6 +37,7 @@ import {
   Presentation,
   Heart,
   Building2,
+  Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,6 +64,7 @@ const mainMenuItems = [
   { title: "Board Portal", url: "/board-reporting", icon: Presentation },
   { title: "Volunteers", url: "/volunteers", icon: Heart },
   { title: "Branches", url: "/branches", icon: Building2 },
+  { title: "Partners", url: "/partners", icon: Handshake },
 ];
 
 const systemItems = [
