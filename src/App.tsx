@@ -29,7 +29,7 @@ import { SuperAdminRoute } from "./components/SuperAdminRoute";
 import { SessionManager } from "./components/SessionManager";
 import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
-import CustomReports from "./pages/CustomReports";
+// CustomReports merged into ReportsAnalytics
 import EntityDataPage from "./pages/EntityDataPage";
 import FinancialSuite from "./pages/FinancialSuite";
 import MESuite from "./pages/MEsuite";
@@ -197,13 +197,7 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/custom-reports" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <CustomReports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
+            {/* CustomReports merged into ReportsAnalytics as "Custom Reports" tab */}
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>
