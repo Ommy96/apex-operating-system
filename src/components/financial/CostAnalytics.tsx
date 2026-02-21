@@ -1,10 +1,12 @@
 import { useFinancials } from "@/hooks/useFinancials";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { DollarSign, Users, TrendingDown, PieChart as PieChartIcon } from "lucide-react";
+import { DollarSign, Users, TrendingDown, PieChart as PieChartIcon, Heart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
 const COLORS = [
   "hsl(222, 47%, 31%)",
   "hsl(217, 91%, 60%)",
@@ -18,6 +20,25 @@ const COLORS = [
 
 export function CostAnalytics() {
   const { costAnalytics } = useFinancials();
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  // Fetch donor support totals from financial_transactions
+  const { data: donorTotals } = useQuery({
+    queryKey: ["donor-support-totals", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("financial_transactions")
+        .select("amount, beneficiary_id")
+        .eq("organization_id", orgId!)
+        .eq("transaction_type", "beneficiary_support");
+      if (error) throw error;
+      const total = (data || []).reduce((s, t) => s + Number(t.amount || 0), 0);
+      const uniqueBeneficiaries = new Set((data || []).map(t => t.beneficiary_id).filter(Boolean)).size;
+      return { total, uniqueBeneficiaries, costPerSupported: uniqueBeneficiaries > 0 ? total / uniqueBeneficiaries : 0 };
+    },
+    enabled: !!orgId,
+  });
 
   if (costAnalytics.isLoading) {
     return <div className="space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}</div>;
@@ -39,22 +60,26 @@ export function CostAnalytics() {
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><DollarSign className="h-5 w-5 text-primary" /></div>
           <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-foreground">KES {totalExpenses.toLocaleString()}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10"><Users className="h-5 w-5 text-success" /></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10"><Heart className="h-5 w-5 text-success" /></div>
+          <div><p className="text-xs text-muted-foreground">Donor Support</p><p className="text-lg font-bold text-foreground">KES {(donorTotals?.total || 0).toLocaleString()}</p></div>
+        </CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4 p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10"><Users className="h-5 w-5 text-accent" /></div>
           <div><p className="text-xs text-muted-foreground">Active Beneficiaries</p><p className="text-lg font-bold text-foreground">{totalBeneficiaries.toLocaleString()}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10"><TrendingDown className="h-5 w-5 text-accent" /></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10"><TrendingDown className="h-5 w-5 text-warning" /></div>
           <div><p className="text-xs text-muted-foreground">Cost Per Beneficiary</p><p className="text-lg font-bold text-foreground">KES {overallCostPerBeneficiary.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10"><PieChartIcon className="h-5 w-5 text-warning" /></div>
-          <div><p className="text-xs text-muted-foreground">Programs Tracked</p><p className="text-lg font-bold text-foreground">{programCosts.length}</p></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10"><PieChartIcon className="h-5 w-5 text-info" /></div>
+          <div><p className="text-xs text-muted-foreground">Support/Beneficiary</p><p className="text-lg font-bold text-foreground">KES {(donorTotals?.costPerSupported || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
         </CardContent></Card>
       </div>
 
