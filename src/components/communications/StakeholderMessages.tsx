@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessageSquarePlus, Mail, Phone, MessageCircle, User } from "lucide-react";
+import { MessageSquarePlus, Mail, Phone, MessageCircle, User, Trash2 } from "lucide-react";
 import { useCommunications } from "@/hooks/useCommunications";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,7 +28,7 @@ const channelColors: Record<string, string> = {
 };
 
 export function StakeholderMessages() {
-  const { messages, loadingMessages, createMessage } = useCommunications();
+  const { messages, loadingMessages, createMessage, deleteMessage } = useCommunications();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     channel: "internal",
@@ -141,7 +141,12 @@ export function StakeholderMessages() {
                   </div>
                   {msg.subject && <p className="text-xs font-medium text-foreground">{msg.subject}</p>}
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{msg.body}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}</p>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => deleteMessage.mutate(msg.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -188,9 +188,33 @@ export function useCommunications() {
     { table: "campaigns", queryKeys: [["campaigns", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
+  const deleteCampaign = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("campaigns").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      toast.success("Campaign deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteMessage = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("stakeholder_messages").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stakeholder-messages"] });
+      toast.success("Message deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return {
     notifications, unreadCount, loadingNotifications, markAsRead, markAllRead,
-    messages, loadingMessages, createMessage,
-    campaigns, loadingCampaigns, createCampaign, sendCampaign,
+    messages, loadingMessages, createMessage, deleteMessage,
+    campaigns, loadingCampaigns, createCampaign, sendCampaign, deleteCampaign,
   };
 }
