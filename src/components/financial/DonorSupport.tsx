@@ -1,27 +1,22 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTable } from "@/hooks/useRealtimeSubscription";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Users, TrendingUp, DollarSign, ArrowRight, Trash2 } from "lucide-react";
+import { Heart, Users, TrendingUp, DollarSign, ArrowRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { toast } from "sonner";
 import { format } from "date-fns";
 
 export function DonorSupport() {
   const { currentOrganization } = useOrganization();
-  const { userRole } = useAuth();
   const orgId = currentOrganization?.organization_id;
   const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<string>("all");
-  const canDelete = ["admin", "management", "owner"].includes(userRole || "");
 
   // Real-time subscription for financial transactions
   useRealtimeTable(
@@ -31,45 +26,25 @@ export function DonorSupport() {
     !!orgId
   );
 
-  const deleteTransaction = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("financial_transactions").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["financial-transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["donor-support-totals"] });
-      queryClient.invalidateQueries({ queryKey: ["cost-analytics"] });
-      toast.success("Transaction deleted");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  // Fetch all financial transactions for donor support
+  // Fetch all financial transactions with beneficiary name joined
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["financial-transactions", orgId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("financial_transactions")
-        .select("*")
+        .select("*, beneficiary:beneficiaries!financial_transactions_beneficiary_id_fkey(display_name)")
         .eq("organization_id", orgId!)
         .order("transaction_date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!orgId,
-  });
-
-  // Fetch beneficiary names for linking
-  const { data: beneficiaries = [] } = useQuery({
-    queryKey: ["beneficiary-names", orgId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("beneficiaries")
-        .select("id, display_name")
-        .eq("organization_id", orgId!)
-        .limit(500);
-      if (error) throw error;
+      if (error) {
+        // Fallback without join
+        const { data: fallback, error: err2 } = await supabase
+          .from("financial_transactions")
+          .select("*")
+          .eq("organization_id", orgId!)
+          .order("transaction_date", { ascending: false });
+        if (err2) throw err2;
+        return fallback?.map(t => ({ ...t, beneficiary: null })) || [];
+      }
       return data;
     },
     enabled: !!orgId,
@@ -94,8 +69,12 @@ export function DonorSupport() {
     return <div className="space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}</div>;
   }
 
-  const beneficiaryMap = Object.fromEntries(beneficiaries.map(b => [b.id, b.display_name]));
   const programMap = Object.fromEntries(programs.map(p => [p.id, p.name]));
+
+  const getBeneficiaryName = (t: any): string => {
+    if (t.beneficiary?.display_name) return t.beneficiary.display_name;
+    return "—";
+  };
 
   const donorTransactions = transactions.filter(t => t.transaction_type === "beneficiary_support");
   const expenseTransactions = transactions.filter(t => t.transaction_type === "expense");
@@ -245,12 +224,11 @@ export function DonorSupport() {
                 <TableHead>Program</TableHead>
                 <TableHead>Beneficiary</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                {canDelete && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={canDelete ? 8 : 7} className="text-center text-muted-foreground py-8">
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                   No transactions recorded yet. Donor contributions and expenses will appear here automatically.
                 </TableCell></TableRow>
               ) : filtered.slice(0, 100).map(t => (
@@ -266,17 +244,10 @@ export function DonorSupport() {
                   <TableCell className="font-medium max-w-[200px] truncate">{t.description || "—"}</TableCell>
                   <TableCell className="text-sm">{t.donor_name || "—"}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{t.program_id ? programMap[t.program_id] || "—" : "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{t.beneficiary_id ? beneficiaryMap[t.beneficiary_id] || "—" : "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{getBeneficiaryName(t)}</TableCell>
                   <TableCell className={`text-right font-medium ${t.transaction_type === "expense" ? "text-destructive" : "text-success"}`}>
                     {t.currency} {Number(t.amount).toLocaleString()}
                   </TableCell>
-                  {canDelete && (
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteTransaction.mutate(t.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </TableCell>
-                  )}
                 </TableRow>
               ))}
             </TableBody>
