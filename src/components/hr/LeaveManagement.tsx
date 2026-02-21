@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Calendar, Check, X, Palmtree } from "lucide-react";
+import { Plus, Calendar, Check, X, Palmtree, Trash2 } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import { useAuth } from "@/hooks/useAuth";
 import { format, differenceInCalendarDays } from "date-fns";
@@ -20,7 +20,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function LeaveManagement() {
-  const { leaveTypes, createLeaveType, leaveRequests, createLeaveRequest, updateLeaveRequest, orgMembers } = useHR();
+  const { leaveTypes, createLeaveType, leaveRequests, createLeaveRequest, updateLeaveRequest, deleteLeaveRequest, orgMembers } = useHR();
   const { isAdmin, isManagement } = useAuth();
   const [showRequest, setShowRequest] = useState(false);
   const [showType, setShowType] = useState(false);
@@ -154,6 +154,9 @@ export function LeaveManagement() {
                           </Button>
                         </div>
                       )}
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteLeaveRequest.mutate(r.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

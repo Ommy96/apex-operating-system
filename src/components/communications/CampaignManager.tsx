@@ -27,7 +27,7 @@ interface Recipient {
 }
 
 export function CampaignManager() {
-  const { campaigns, loadingCampaigns, createCampaign, sendCampaign } = useCommunications();
+  const { campaigns, loadingCampaigns, createCampaign, sendCampaign, deleteCampaign } = useCommunications();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -184,18 +184,23 @@ export function CampaignManager() {
                     <span>{format(new Date(c.created_at), "MMM d, yyyy")}</span>
                   </div>
                 </div>
-                {c.status === "draft" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5 shrink-0"
-                    onClick={() => sendCampaign.mutate(c.id)}
-                    disabled={sendCampaign.isPending}
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    Send
+                <div className="flex items-center gap-1 shrink-0">
+                  {c.status === "draft" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => sendCampaign.mutate(c.id)}
+                      disabled={sendCampaign.isPending}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      Send
+                    </Button>
+                  )}
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteCampaign.mutate(c.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                )}
+                </div>
               </div>
             </CardContent>
           </Card>

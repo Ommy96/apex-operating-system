@@ -336,10 +336,46 @@ export function useHR() {
     { table: "staff_tasks", queryKeys: [["staff-tasks", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
+  const deleteContract = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("staff_performance_contracts").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hr-contracts"] });
+      toast.success("Contract deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteLeaveRequest = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("leave_requests").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-requests"] });
+      toast.success("Leave request deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteCheckIn = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("field_check_ins").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["field-check-ins"] });
+      toast.success("Check-in deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return {
-    contracts, createContract, updateContract, createObjective, updateObjective,
-    leaveTypes, createLeaveType, leaveRequests, createLeaveRequest, updateLeaveRequest,
-    checkIns, createCheckIn, checkOut,
+    contracts, createContract, updateContract, deleteContract, createObjective, updateObjective,
+    leaveTypes, createLeaveType, leaveRequests, createLeaveRequest, updateLeaveRequest, deleteLeaveRequest,
+    checkIns, createCheckIn, checkOut, deleteCheckIn,
     tasks, createTask, updateTask, deleteTask,
     orgMembers,
   };

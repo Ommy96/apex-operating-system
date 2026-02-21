@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Navigation, Clock, LogOut } from "lucide-react";
+import { MapPin, Navigation, Clock, LogOut, Trash2 } from "lucide-react";
 import { useHR } from "@/hooks/useHR";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ const typeColors: Record<string, string> = {
 };
 
 export function FieldCheckIns() {
-  const { checkIns, createCheckIn, checkOut, orgMembers } = useHR();
+  const { checkIns, createCheckIn, checkOut, deleteCheckIn, orgMembers } = useHR();
   const [showManual, setShowManual] = useState(false);
   const [form, setForm] = useState({ check_in_type: "field_visit", location_name: "", notes: "" });
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -137,6 +137,9 @@ export function FieldCheckIns() {
                       {ci.checked_out_at && (
                         <span className="text-xs text-muted-foreground">Out: {format(new Date(ci.checked_out_at), "HH:mm")}</span>
                       )}
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteCheckIn.mutate(ci.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
