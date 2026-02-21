@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTable } from "@/hooks/useRealtimeSubscription";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +22,14 @@ export function DonorSupport() {
   const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<string>("all");
   const canDelete = ["admin", "management", "owner"].includes(userRole || "");
+
+  // Real-time subscription for financial transactions
+  useRealtimeTable(
+    "financial_transactions",
+    [["financial-transactions", orgId || ""], ["donor-support-totals", orgId || ""], ["cost-analytics", orgId || ""]],
+    orgId,
+    !!orgId
+  );
 
   const deleteTransaction = useMutation({
     mutationFn: async (id: string) => {
