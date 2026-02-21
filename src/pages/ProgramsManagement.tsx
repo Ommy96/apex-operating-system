@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTable } from "@/hooks/useRealtimeSubscription";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -88,6 +89,9 @@ const ProgramsManagement = () => {
     },
     enabled: !!currentOrganization?.organization_id,
   });
+
+  // Real-time: auto-refresh programs
+  useRealtimeTable("programs", [["programs-management", currentOrganization?.organization_id || ""], ["programs"], ["dynamic-programs"]], currentOrganization?.organization_id);
 
   const createMutation = useMutation({
     mutationFn: async (data: ProgramFormData) => {

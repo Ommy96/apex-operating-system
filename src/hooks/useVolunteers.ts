@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function useVolunteers() {
   const { user } = useAuth();
@@ -81,6 +82,13 @@ export function useVolunteers() {
   });
 
   const totalHours = hoursLog.reduce((sum, h) => sum + Number(h.hours || 0), 0);
+
+  // Real-time subscriptions
+  useRealtimeSubscription([
+    { table: "volunteers", queryKeys: [["volunteers", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "volunteer_assignments", queryKeys: [["volunteer-assignments", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "volunteer_hours", queryKeys: [["volunteer-hours", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     volunteers, assignments, hoursLog,

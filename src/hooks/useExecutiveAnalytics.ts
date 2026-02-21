@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { useMemo } from "react";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { DateRange } from "react-day-picker";
 import { isWithinInterval, differenceInDays, parseISO, startOfMonth, eachMonthOfInterval, subMonths, format } from "date-fns";
 
@@ -727,6 +728,16 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
   }, [staffMetrics]);
 
   const isLoading = loadingBeneficiaries || loadingReports || loadingEnrollments || loadingVisitations || loadingAcademics;
+
+  // Real-time subscriptions for executive analytics data
+  useRealtimeSubscription([
+    { table: "beneficiaries", queryKeys: [["exec-beneficiaries", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "beneficiary_services", queryKeys: [["exec-enrollments", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "beneficiary_visitations", queryKeys: [["exec-visitations", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "beneficiary_academics", queryKeys: [["exec-academics", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "beneficiary_donors", queryKeys: [["exec-donors", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "programs", queryKeys: [["exec-programs", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     beneficiaries,

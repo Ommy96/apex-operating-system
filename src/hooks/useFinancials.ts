@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function useFinancials() {
   const { currentOrganization } = useOrganization();
@@ -394,6 +395,15 @@ export function useFinancials() {
     },
     enabled: !!orgId,
   });
+
+  // Real-time subscriptions for all financial tables
+  useRealtimeSubscription([
+    { table: "budgets", queryKeys: [["budgets", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "budget_line_items", queryKeys: [["budget-line-items"]], enabled: !!orgId },
+    { table: "expenses", queryKeys: [["expenses", orgId || ""], ["cost-analytics", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "grants", queryKeys: [["grants", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "financial_transactions", queryKeys: [["financial-transactions", orgId || ""], ["donor-support-totals", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     budgets,

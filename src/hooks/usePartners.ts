@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function usePartners() {
   const { user } = useAuth();
@@ -68,6 +69,13 @@ export function usePartners() {
   });
 
   const totalResourceValue = sharedResources.reduce((sum, r) => sum + Number(r.value_amount || 0), 0);
+
+  // Real-time subscriptions
+  useRealtimeSubscription([
+    { table: "partner_organizations", queryKeys: [["partners", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "partner_shared_resources", queryKeys: [["partner-resources", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "partner_activities", queryKeys: [["partner-activities", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return { partners, sharedResources, jointActivities, loadingPartners, loadingResources, loadingActivities, createPartner, createResource, createActivity, totalResourceValue };
 }

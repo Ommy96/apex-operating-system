@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export function useHR() {
   const { currentOrganization } = useOrganization();
@@ -325,6 +326,15 @@ export function useHR() {
     },
     enabled: !!orgId,
   });
+
+  // Real-time subscriptions for HR tables
+  useRealtimeSubscription([
+    { table: "staff_performance_contracts", queryKeys: [["hr-contracts", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "staff_contract_objectives", queryKeys: [["hr-contracts", orgId || ""]], enabled: !!orgId },
+    { table: "leave_requests", queryKeys: [["leave-requests", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "staff_check_ins", queryKeys: [["check-ins", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "staff_tasks", queryKeys: [["staff-tasks", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     contracts, createContract, updateContract, createObjective, updateObjective,

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export interface ConsentRecord {
   id: string;
@@ -313,6 +314,14 @@ export function useCompliance() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  // Real-time subscriptions
+  useRealtimeSubscription([
+    { table: "consent_records", queryKeys: [["consent-records", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "data_retention_policies", queryKeys: [["retention-policies", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "data_access_requests", queryKeys: [["access-requests", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "compliance_exports", queryKeys: [["compliance-exports", orgId || ""]], orgId, enabled: !!orgId },
+  ]);
 
   return {
     consents: consents || [],
