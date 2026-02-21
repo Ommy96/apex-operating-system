@@ -49,26 +49,52 @@ import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
-  { title: "Programs", url: "/programs-management", icon: Target },
-  { title: "Financial", url: "/financial", icon: Wallet },
-  { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
-  { title: "HR & Staff", url: "/hr", icon: UserCog },
-  { title: "Automation", url: "/automation", icon: Zap },
-  { title: "Communications", url: "/communications", icon: MessageCircle },
-  { title: "AI Insights", url: "/ai-insights", icon: Bot },
-  { title: "Documents", url: "/document-management", icon: FileText },
-  { title: "Compliance", url: "/compliance", icon: ShieldCheck },
-  { title: "Board Portal", url: "/board-reporting", icon: Presentation },
-  { title: "Volunteers", url: "/volunteers", icon: Heart },
-  { title: "Branches", url: "/branches", icon: Building2 },
-  { title: "Partners", url: "/partners", icon: Handshake },
+// Grouped navigation structure
+const navGroups = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
+      { title: "Volunteers", url: "/volunteers", icon: Heart },
+      { title: "Partners", url: "/partners", icon: Handshake },
+    ],
+  },
+  {
+    label: "Programs & M&E",
+    items: [
+      { title: "Programs", url: "/programs-management", icon: Target },
+      { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
+      { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { title: "Financial", url: "/financial", icon: Wallet },
+      { title: "HR & Staff", url: "/hr", icon: UserCog },
+      { title: "Branches", url: "/branches", icon: Building2 },
+      { title: "Communications", url: "/communications", icon: MessageCircle },
+      { title: "Automation", url: "/automation", icon: Zap },
+    ],
+  },
+  {
+    label: "Governance",
+    items: [
+      { title: "Documents", url: "/document-management", icon: FileText },
+      { title: "Compliance", url: "/compliance", icon: ShieldCheck },
+      { title: "Board Portal", url: "/board-reporting", icon: Presentation },
+    ],
+  },
 ];
 
 const systemItems = [
-  { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
+  { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "Settings", url: "/organization-settings", icon: Settings },
 ];
 
@@ -182,28 +208,30 @@ export function WorkspaceSidebar() {
         </SidebarHeader>
 
         <SidebarContent className="px-2 pb-4 workspace-scroll">
-          {/* Main Menu */}
-          <SidebarGroup>
-            {!isCollapsed && (
-              <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
-                Main
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-0.5">
-                {mainMenuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <MenuItem 
-                      item={item} 
-                      isCollapsed={isCollapsed} 
-                      isActive={isActive} 
-                      onClick={handleNavClick} 
-                    />
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Grouped Navigation */}
+          {navGroups.map((group) => (
+            <SidebarGroup key={group.label} className="mt-1 first:mt-0">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
+                  {group.label}
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <MenuItem 
+                        item={item} 
+                        isCollapsed={isCollapsed} 
+                        isActive={isActive} 
+                        onClick={handleNavClick} 
+                      />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
 
           {/* Dynamic Programs */}
           {dynamicPrograms && dynamicPrograms.length > 0 && (
