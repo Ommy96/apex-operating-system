@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
-import { Handshake, Plus, Building, Package, CalendarDays, Globe, DollarSign } from "lucide-react";
+import { Handshake, Plus, Building, Package, CalendarDays, Globe, DollarSign, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 const partnerTypes = [
@@ -33,7 +33,7 @@ const resourceTypes = [
 ];
 
 export default function PartnerCollaboration() {
-  const { partners, sharedResources, jointActivities, loadingPartners, loadingResources, loadingActivities, createPartner, createResource, createActivity, totalResourceValue } = usePartners();
+  const { partners, sharedResources, jointActivities, loadingPartners, loadingResources, loadingActivities, createPartner, createResource, createActivity, deletePartner, deleteResource, deleteActivity, totalResourceValue } = usePartners();
 
   const [activeTab, setActiveTab] = useState("partners");
   const [showNewPartner, setShowNewPartner] = useState(false);
@@ -129,7 +129,10 @@ export default function PartnerCollaboration() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-foreground truncate">{p.partner_name}</h4>
-                    <Badge variant={p.status === "active" ? "default" : "secondary"} className="text-xs capitalize">{p.status}</Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={p.status === "active" ? "default" : "secondary"} className="text-xs capitalize">{p.status}</Badge>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => { if (confirm("Delete this partner?")) deletePartner.mutate(p.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
                   </div>
                   <Badge variant="outline" className="text-xs capitalize mb-2">{partnerTypes.find((t) => t.value === p.partner_type)?.label || p.partner_type}</Badge>
                   {p.contact_person && <p className="text-xs text-muted-foreground">👤 {p.contact_person}</p>}
@@ -186,18 +189,19 @@ export default function PartnerCollaboration() {
           <Card className="workspace-card"><CardContent className="p-0">
             <Table>
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead>Type</TableHead><TableHead>Direction</TableHead><TableHead>Value</TableHead>
+                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead>Type</TableHead><TableHead>Direction</TableHead><TableHead>Value</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {loadingResources ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-                : sharedResources.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No shared resources yet.</TableCell></TableRow>
+                 {loadingResources ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                 : sharedResources.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No shared resources yet.</TableCell></TableRow>
                 : sharedResources.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{(r.partner_organizations as any)?.partner_name || "—"}</TableCell>
                     <TableCell>{r.title}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs capitalize">{r.resource_type}</Badge></TableCell>
                     <TableCell><Badge variant="secondary" className="text-xs capitalize">{r.direction}</Badge></TableCell>
-                    <TableCell>{r.value_amount ? `KES ${Number(r.value_amount).toLocaleString()}` : "—"}</TableCell>
+                     <TableCell>{r.value_amount ? `KES ${Number(r.value_amount).toLocaleString()}` : "—"}</TableCell>
+                     <TableCell><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => { if (confirm("Delete this resource?")) deleteResource.mutate(r.id); }}><Trash2 className="h-3.5 w-3.5" /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -235,18 +239,19 @@ export default function PartnerCollaboration() {
           <Card className="workspace-card"><CardContent className="p-0">
             <Table>
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead>Date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead>
+                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead>Date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {loadingActivities ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-                : jointActivities.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No joint activities yet.</TableCell></TableRow>
+                 {loadingActivities ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                 : jointActivities.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No joint activities yet.</TableCell></TableRow>
                 : jointActivities.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">{(a.partner_organizations as any)?.partner_name || "—"}</TableCell>
                     <TableCell>{a.title}</TableCell>
                     <TableCell>{a.activity_date ? format(new Date(a.activity_date), "MMM d, yyyy") : "—"}</TableCell>
                     <TableCell>{a.location || "—"}</TableCell>
-                    <TableCell><Badge variant={a.status === "completed" ? "default" : "secondary"} className="text-xs capitalize">{a.status}</Badge></TableCell>
+                     <TableCell><Badge variant={a.status === "completed" ? "default" : "secondary"} className="text-xs capitalize">{a.status}</Badge></TableCell>
+                     <TableCell><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => { if (confirm("Delete this activity?")) deleteActivity.mutate(a.id); }}><Trash2 className="h-3.5 w-3.5" /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
