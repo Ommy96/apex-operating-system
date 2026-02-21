@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useRealtimeTable } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,13 +22,27 @@ export function DonorSupport() {
   const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<string>("all");
 
-  // Real-time subscription for financial transactions
-  useRealtimeTable(
-    "financial_transactions",
-    [["financial-transactions", orgId || ""], ["donor-support-totals", orgId || ""], ["cost-analytics", orgId || ""]],
-    orgId,
-    !!orgId
-  );
+  // Real-time subscription for financial transactions and donor sources
+  useRealtimeSubscription([
+    {
+      table: "financial_transactions",
+      queryKeys: [["financial-transactions", orgId || ""], ["donor-support-totals", orgId || ""], ["cost-analytics", orgId || ""]],
+      orgId,
+      enabled: !!orgId,
+    },
+    {
+      table: "beneficiary_donors",
+      queryKeys: [["financial-transactions", orgId || ""]],
+      orgId,
+      enabled: !!orgId,
+    },
+    {
+      table: "expenses",
+      queryKeys: [["financial-transactions", orgId || ""]],
+      orgId,
+      enabled: !!orgId,
+    },
+  ]);
 
   // Fetch all financial transactions with beneficiary name joined
   const { data: transactions = [], isLoading } = useQuery({
