@@ -367,6 +367,151 @@ export type Database = {
           },
         ]
       }
+      alert_instances: {
+        Row: {
+          alert_rule_id: string | null
+          category: string | null
+          created_at: string
+          id: string
+          is_read: boolean | null
+          is_resolved: boolean | null
+          message: string
+          metadata: Json | null
+          organization_id: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          alert_rule_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message: string
+          metadata?: Json | null
+          organization_id: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          alert_rule_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message?: string
+          metadata?: Json | null
+          organization_id?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_instances_alert_rule_id_fkey"
+            columns: ["alert_rule_id"]
+            isOneToOne: false
+            referencedRelation: "alert_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_instances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_instances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alert_rules: {
+        Row: {
+          category: string
+          condition_config: Json | null
+          condition_type: string
+          cooldown_hours: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          name: string
+          notification_channels: string[] | null
+          organization_id: string
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          condition_config?: Json | null
+          condition_type: string
+          cooldown_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name: string
+          notification_channels?: string[] | null
+          organization_id: string
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition_config?: Json | null
+          condition_type?: string
+          cooldown_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name?: string
+          notification_channels?: string[] | null
+          organization_id?: string
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_usage_logs: {
         Row: {
           created_at: string
@@ -528,6 +673,130 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      automation_logs: {
+        Row: {
+          actions_executed: Json | null
+          error_message: string | null
+          executed_at: string
+          id: string
+          organization_id: string
+          rule_id: string | null
+          rule_name: string | null
+          status: string
+          trigger_data: Json | null
+          trigger_event: string
+        }
+        Insert: {
+          actions_executed?: Json | null
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          organization_id: string
+          rule_id?: string | null
+          rule_name?: string | null
+          status?: string
+          trigger_data?: Json | null
+          trigger_event: string
+        }
+        Update: {
+          actions_executed?: Json | null
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          organization_id?: string
+          rule_id?: string | null
+          rule_name?: string | null
+          status?: string
+          trigger_data?: Json | null
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_rules: {
+        Row: {
+          actions: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          name: string
+          organization_id: string
+          trigger_conditions: Json | null
+          trigger_count: number | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name: string
+          organization_id: string
+          trigger_conditions?: Json | null
+          trigger_count?: number | null
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          name?: string
+          organization_id?: string
+          trigger_conditions?: Json | null
+          trigger_count?: number | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       beneficiaries: {
         Row: {
@@ -1768,6 +2037,158 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_report_runs: {
+        Row: {
+          created_at: string
+          generated_by: string | null
+          generated_data: Json | null
+          id: string
+          notes: string | null
+          organization_id: string
+          report_period_end: string
+          report_period_start: string
+          sent_at: string | null
+          sent_to: string[] | null
+          status: string
+          template_id: string | null
+          template_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          generated_by?: string | null
+          generated_data?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          report_period_end: string
+          report_period_start: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          generated_by?: string | null
+          generated_data?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          report_period_end?: string
+          report_period_start?: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_report_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_runs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "donor_report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_report_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          donor_name: string | null
+          id: string
+          include_beneficiary_stats: boolean | null
+          include_financials: boolean | null
+          include_photos: boolean | null
+          include_program_progress: boolean | null
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          program_id: string | null
+          sections: Json | null
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          donor_name?: string | null
+          id?: string
+          include_beneficiary_stats?: boolean | null
+          include_financials?: boolean | null
+          include_photos?: boolean | null
+          include_program_progress?: boolean | null
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          program_id?: string | null
+          sections?: Json | null
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          donor_name?: string | null
+          id?: string
+          include_beneficiary_stats?: boolean | null
+          include_financials?: boolean | null
+          include_photos?: boolean | null
+          include_program_progress?: boolean | null
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          program_id?: string | null
+          sections?: Json | null
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_report_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_templates_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
