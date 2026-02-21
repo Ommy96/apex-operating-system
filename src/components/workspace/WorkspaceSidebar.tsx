@@ -33,6 +33,7 @@ import {
   MessageCircle,
   Bot,
   FileText,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,6 +56,7 @@ const mainMenuItems = [
   { title: "Communications", url: "/communications", icon: MessageCircle },
   { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "Documents", url: "/document-management", icon: FileText },
+  { title: "Compliance", url: "/compliance", icon: ShieldCheck },
 ];
 
 const systemItems = [
