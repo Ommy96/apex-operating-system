@@ -35,6 +35,7 @@ import FinancialSuite from "./pages/FinancialSuite";
 import MESuite from "./pages/MEsuite";
 import HRManagement from "./pages/HRManagement";
 import AutomationEngine from "./pages/AutomationEngine";
+import ExecutiveIntelligence from "./pages/ExecutiveIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <AutomationEngine />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/executive" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ExecutiveIntelligence />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
