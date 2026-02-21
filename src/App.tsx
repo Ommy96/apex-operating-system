@@ -34,6 +34,7 @@ import EntityDataPage from "./pages/EntityDataPage";
 import FinancialSuite from "./pages/FinancialSuite";
 import MESuite from "./pages/MEsuite";
 import HRManagement from "./pages/HRManagement";
+import AutomationEngine from "./pages/AutomationEngine";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <HRManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/automation" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AutomationEngine />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

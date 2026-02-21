@@ -29,6 +29,7 @@ import {
   Wallet,
   GitBranch,
   UserCog,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +47,7 @@ const mainMenuItems = [
   { title: "Financial", url: "/financial", icon: Wallet },
   { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
   { title: "HR & Staff", url: "/hr", icon: UserCog },
+  { title: "Automation", url: "/automation", icon: Zap },
 ];
 
 const systemItems = [
