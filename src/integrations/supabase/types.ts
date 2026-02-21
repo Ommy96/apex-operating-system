@@ -2135,6 +2135,296 @@ export type Database = {
           },
         ]
       }
+      compliance_exports: {
+        Row: {
+          created_at: string
+          export_type: string
+          exported_by: string | null
+          file_url: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          record_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          export_type: string
+          exported_by?: string | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          record_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          export_type?: string
+          exported_by?: string | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          record_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_exports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_exports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consent_records: {
+        Row: {
+          beneficiary_id: string | null
+          consent_date: string | null
+          consent_given: boolean
+          consent_purpose: string
+          consent_type: string
+          created_at: string
+          evidence_url: string | null
+          expiry_date: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          recorded_by: string | null
+          status: string
+          subject_email: string | null
+          subject_name: string
+          updated_at: string
+          withdrawal_date: string | null
+          withdrawal_reason: string | null
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_purpose: string
+          consent_type: string
+          created_at?: string
+          evidence_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          recorded_by?: string | null
+          status?: string
+          subject_email?: string | null
+          subject_name: string
+          updated_at?: string
+          withdrawal_date?: string | null
+          withdrawal_reason?: string | null
+        }
+        Update: {
+          beneficiary_id?: string | null
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_purpose?: string
+          consent_type?: string
+          created_at?: string
+          evidence_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          recorded_by?: string | null
+          status?: string
+          subject_email?: string | null
+          subject_name?: string
+          updated_at?: string
+          withdrawal_date?: string | null
+          withdrawal_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_records_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_access_requests: {
+        Row: {
+          affected_tables: string[] | null
+          beneficiary_id: string | null
+          completed_at: string | null
+          created_at: string
+          data_deleted: boolean | null
+          data_exported: boolean | null
+          due_date: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          priority: string
+          reason: string | null
+          request_type: string
+          requested_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          subject_email: string | null
+          subject_identifier: string | null
+          subject_name: string
+          updated_at: string
+        }
+        Insert: {
+          affected_tables?: string[] | null
+          beneficiary_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          data_deleted?: boolean | null
+          data_exported?: boolean | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          priority?: string
+          reason?: string | null
+          request_type: string
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          subject_email?: string | null
+          subject_identifier?: string | null
+          subject_name: string
+          updated_at?: string
+        }
+        Update: {
+          affected_tables?: string[] | null
+          beneficiary_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          data_deleted?: boolean | null
+          data_exported?: boolean | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          priority?: string
+          reason?: string | null
+          request_type?: string
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          subject_email?: string | null
+          subject_identifier?: string | null
+          subject_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_access_requests_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_access_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_access_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_retention_policies: {
+        Row: {
+          action_on_expiry: string
+          created_at: string
+          created_by: string | null
+          data_category: string
+          description: string | null
+          id: string
+          is_active: boolean
+          last_executed_at: string | null
+          name: string
+          organization_id: string
+          retention_period_days: number
+          updated_at: string
+        }
+        Insert: {
+          action_on_expiry?: string
+          created_at?: string
+          created_by?: string | null
+          data_category: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          name: string
+          organization_id: string
+          retention_period_days: number
+          updated_at?: string
+        }
+        Update: {
+          action_on_expiry?: string
+          created_at?: string
+          created_by?: string | null
+          data_category?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          name?: string
+          organization_id?: string
+          retention_period_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_retention_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_retention_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_access_logs: {
         Row: {
           action: string

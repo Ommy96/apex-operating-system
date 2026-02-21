@@ -38,6 +38,7 @@ import AutomationEngine from "./pages/AutomationEngine";
 import CommunicationsHub from "./pages/CommunicationsHub";
 import AIInsights from "./pages/AIInsights";
 import DocumentManagement from "./pages/DocumentManagement";
+import ComplianceGovernance from "./pages/ComplianceGovernance";
 
 const queryClient = new QueryClient();
 
@@ -154,6 +155,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <DocumentManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ComplianceGovernance />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
