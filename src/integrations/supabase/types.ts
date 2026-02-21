@@ -2164,6 +2164,89 @@ export type Database = {
         }
         Relationships: []
       }
+      field_check_ins: {
+        Row: {
+          accuracy_meters: number | null
+          activity_id: string | null
+          beneficiary_id: string | null
+          check_in_type: string
+          checked_in_at: string
+          checked_out_at: string | null
+          created_at: string
+          id: string
+          latitude: number
+          location_name: string | null
+          longitude: number
+          notes: string | null
+          organization_id: string
+          photo_url: string | null
+          staff_user_id: string
+        }
+        Insert: {
+          accuracy_meters?: number | null
+          activity_id?: string | null
+          beneficiary_id?: string | null
+          check_in_type?: string
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          id?: string
+          latitude: number
+          location_name?: string | null
+          longitude: number
+          notes?: string | null
+          organization_id: string
+          photo_url?: string | null
+          staff_user_id: string
+        }
+        Update: {
+          accuracy_meters?: number | null
+          activity_id?: string | null
+          beneficiary_id?: string | null
+          check_in_type?: string
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number
+          location_name?: string | null
+          longitude?: number
+          notes?: string | null
+          organization_id?: string
+          photo_url?: string | null
+          staff_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_check_ins_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_check_ins_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_check_ins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_check_ins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grant_compliance_items: {
         Row: {
           completed_at: string | null
@@ -2732,6 +2815,200 @@ export type Database = {
             columns: ["template_source_id"]
             isOneToOne: false
             referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_balances: {
+        Row: {
+          carried_over_days: number | null
+          created_at: string
+          id: string
+          leave_type_id: string
+          organization_id: string
+          staff_user_id: string
+          total_days: number | null
+          updated_at: string
+          used_days: number | null
+          year: number
+        }
+        Insert: {
+          carried_over_days?: number | null
+          created_at?: string
+          id?: string
+          leave_type_id: string
+          organization_id: string
+          staff_user_id: string
+          total_days?: number | null
+          updated_at?: string
+          used_days?: number | null
+          year: number
+        }
+        Update: {
+          carried_over_days?: number | null
+          created_at?: string
+          id?: string
+          leave_type_id?: string
+          organization_id?: string
+          staff_user_id?: string
+          total_days?: number | null
+          updated_at?: string
+          used_days?: number | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balances_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          attachment_url: string | null
+          created_at: string
+          days_requested: number
+          end_date: string
+          id: string
+          leave_type_id: string
+          organization_id: string
+          reason: string | null
+          rejection_reason: string | null
+          staff_user_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          days_requested: number
+          end_date: string
+          id?: string
+          leave_type_id: string
+          organization_id: string
+          reason?: string | null
+          rejection_reason?: string | null
+          staff_user_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          days_requested?: number
+          end_date?: string
+          id?: string
+          leave_type_id?: string
+          organization_id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          staff_user_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_types: {
+        Row: {
+          color: string | null
+          created_at: string
+          default_days_per_year: number | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_paid: boolean | null
+          name: string
+          organization_id: string
+          requires_approval: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          default_days_per_year?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_paid?: boolean | null
+          name: string
+          organization_id: string
+          requires_approval?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          default_days_per_year?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_paid?: boolean | null
+          name?: string
+          organization_id?: string
+          requires_approval?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -4348,6 +4625,211 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_contract_objectives: {
+        Row: {
+          actual_value: number | null
+          contract_id: string
+          created_at: string
+          description: string | null
+          evidence: string | null
+          id: string
+          objective_title: string
+          score: number | null
+          sort_order: number | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          actual_value?: number | null
+          contract_id: string
+          created_at?: string
+          description?: string | null
+          evidence?: string | null
+          id?: string
+          objective_title: string
+          score?: number | null
+          sort_order?: number | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          actual_value?: number | null
+          contract_id?: string
+          created_at?: string
+          description?: string | null
+          evidence?: string | null
+          id?: string
+          objective_title?: string
+          score?: number | null
+          sort_order?: number | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_contract_objectives_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "staff_performance_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_performance_contracts: {
+        Row: {
+          contract_period_end: string
+          contract_period_start: string
+          contract_title: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          overall_score: number | null
+          reviewed_at: string | null
+          reviewer_comments: string | null
+          reviewer_id: string | null
+          staff_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contract_period_end: string
+          contract_period_start: string
+          contract_title: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          overall_score?: number | null
+          reviewed_at?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          staff_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contract_period_end?: string
+          contract_period_start?: string
+          contract_title?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          overall_score?: number | null
+          reviewed_at?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          staff_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_performance_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_performance_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_tasks: {
+        Row: {
+          assigned_by: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          organization_id: string
+          priority: string
+          program_id: string | null
+          project_id: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id: string
+          priority?: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id?: string
+          priority?: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_answers: {
         Row: {
           answer_json: Json | null
@@ -4568,6 +5050,38 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "staff_tasks"
             referencedColumns: ["id"]
           },
         ]

@@ -33,6 +33,7 @@ import CustomReports from "./pages/CustomReports";
 import EntityDataPage from "./pages/EntityDataPage";
 import FinancialSuite from "./pages/FinancialSuite";
 import MESuite from "./pages/MEsuite";
+import HRManagement from "./pages/HRManagement";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <MESuite />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/hr" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <HRManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
