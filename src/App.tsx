@@ -42,6 +42,7 @@ import ComplianceGovernance from "./pages/ComplianceGovernance";
 import BoardReporting from "./pages/BoardReporting";
 import VolunteerManagement from "./pages/VolunteerManagement";
 import BranchManagement from "./pages/BranchManagement";
+import PartnerCollaboration from "./pages/PartnerCollaboration";
 
 const queryClient = new QueryClient();
 
@@ -186,6 +187,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <BranchManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/partners" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <PartnerCollaboration />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

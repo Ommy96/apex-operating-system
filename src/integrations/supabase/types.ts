@@ -4886,6 +4886,243 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_activities: {
+        Row: {
+          activity_date: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          location: string | null
+          organization_id: string
+          outcome: string | null
+          participants_count: number | null
+          partner_id: string
+          program_id: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          organization_id: string
+          outcome?: string | null
+          participants_count?: number | null
+          partner_id: string
+          program_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          organization_id?: string
+          outcome?: string | null
+          participants_count?: number | null
+          partner_id?: string
+          program_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_activities_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_activities_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_organizations: {
+        Row: {
+          address: string | null
+          agreement_url: string | null
+          contact_email: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          partner_name: string
+          partner_type: string
+          partnership_end: string | null
+          partnership_start: string | null
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          agreement_url?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          partner_name: string
+          partner_type?: string
+          partnership_end?: string | null
+          partnership_start?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          agreement_url?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          partner_name?: string
+          partner_type?: string
+          partnership_end?: string | null
+          partnership_start?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_organizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_organizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_shared_resources: {
+        Row: {
+          created_at: string
+          currency: string | null
+          description: string | null
+          direction: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          partner_id: string
+          resource_type: string
+          start_date: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          value_amount: number | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          direction?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          partner_id: string
+          resource_type: string
+          start_date?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          value_amount?: number | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          direction?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          partner_id?: string
+          resource_type?: string
+          start_date?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          value_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_shared_resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_shared_resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_shared_resources_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
