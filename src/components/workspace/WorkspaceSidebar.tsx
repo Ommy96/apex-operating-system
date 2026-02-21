@@ -36,6 +36,7 @@ import {
   ShieldCheck,
   Presentation,
   Heart,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,6 +62,7 @@ const mainMenuItems = [
   { title: "Compliance", url: "/compliance", icon: ShieldCheck },
   { title: "Board Portal", url: "/board-reporting", icon: Presentation },
   { title: "Volunteers", url: "/volunteers", icon: Heart },
+  { title: "Branches", url: "/branches", icon: Building2 },
 ];
 
 const systemItems = [
