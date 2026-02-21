@@ -27,6 +27,7 @@ import {
   Target,
   Shield,
   Lock,
+  Wallet,
 } from "lucide-react";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -125,6 +126,7 @@ export function AppSidebar() {
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
     { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
     { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+    { title: "Financial", url: "/financial", icon: Wallet, show: true },
   ].filter(item => item.show);
 
   const systemItems = [

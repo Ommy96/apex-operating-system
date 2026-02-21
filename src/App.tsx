@@ -31,6 +31,7 @@ import NotFound from "./pages/NotFound";
 import DynamicProgramPage from "./pages/DynamicProgramPage";
 import CustomReports from "./pages/CustomReports";
 import EntityDataPage from "./pages/EntityDataPage";
+import FinancialSuite from "./pages/FinancialSuite";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,13 @@ const App = () => (
             } />
 
 
+            <Route path="/financial" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <FinancialSuite />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/custom-reports" element={
               <ProtectedRoute>
                 <DashboardLayout>

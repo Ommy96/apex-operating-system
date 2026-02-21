@@ -1160,6 +1160,213 @@ export type Database = {
           },
         ]
       }
+      budget_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          parent_category_id: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          parent_category_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          parent_category_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_line_items: {
+        Row: {
+          actual_spent: number | null
+          budget_id: string
+          category_id: string | null
+          created_at: string
+          description: string
+          id: string
+          notes: string | null
+          quantity: number | null
+          sort_order: number | null
+          total_amount: number | null
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          actual_spent?: number | null
+          budget_id: string
+          category_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          sort_order?: number | null
+          total_amount?: number | null
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          actual_spent?: number | null
+          budget_id?: string
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          sort_order?: number | null
+          total_amount?: number | null
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_line_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_line_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          fiscal_year: number
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          revision_number: number | null
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          fiscal_year: number
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          revision_number?: number | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          fiscal_year?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          revision_number?: number | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_programs: {
         Row: {
           child_id: string
@@ -1628,6 +1835,156 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          activity_id: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          budget_id: string | null
+          budget_line_item_id: string | null
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          expense_date: string
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_method: string | null
+          program_id: string | null
+          project_id: string | null
+          receipt_file_name: string | null
+          receipt_url: string | null
+          reference_number: string | null
+          reimbursement_date: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_by: string | null
+          title: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_id?: string | null
+          budget_line_item_id?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_method?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          receipt_file_name?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          reimbursement_date?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_by?: string | null
+          title: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_id?: string | null
+          budget_line_item_id?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_method?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          receipt_file_name?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          reimbursement_date?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_budget_line_item_id_fkey"
+            columns: ["budget_line_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_line_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flags: {
         Row: {
           created_at: string
@@ -1666,6 +2023,188 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      grant_compliance_items: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          due_date: string | null
+          grant_id: string
+          id: string
+          is_completed: boolean | null
+          item_description: string
+          notes: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          grant_id: string
+          id?: string
+          is_completed?: boolean | null
+          item_description: string
+          notes?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          grant_id?: string
+          id?: string
+          is_completed?: boolean | null
+          item_description?: string
+          notes?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_compliance_items_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grant_programs: {
+        Row: {
+          allocated_amount: number | null
+          created_at: string
+          grant_id: string
+          id: string
+          notes: string | null
+          program_id: string
+        }
+        Insert: {
+          allocated_amount?: number | null
+          created_at?: string
+          grant_id: string
+          id?: string
+          notes?: string | null
+          program_id: string
+        }
+        Update: {
+          allocated_amount?: number | null
+          created_at?: string
+          grant_id?: string
+          id?: string
+          notes?: string | null
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_programs_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_programs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grants: {
+        Row: {
+          amount_received: number | null
+          application_deadline: string | null
+          compliance_notes: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          donor_contact_email: string | null
+          donor_contact_phone: string | null
+          donor_name: string
+          end_date: string | null
+          grant_amount: number
+          grant_name: string
+          id: string
+          next_report_due: string | null
+          notes: string | null
+          objectives: string | null
+          organization_id: string
+          reporting_frequency: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_received?: number | null
+          application_deadline?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          donor_contact_email?: string | null
+          donor_contact_phone?: string | null
+          donor_name: string
+          end_date?: string | null
+          grant_amount?: number
+          grant_name: string
+          id?: string
+          next_report_due?: string | null
+          notes?: string | null
+          objectives?: string | null
+          organization_id: string
+          reporting_frequency?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_received?: number | null
+          application_deadline?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          donor_contact_email?: string | null
+          donor_contact_phone?: string | null
+          donor_name?: string
+          end_date?: string | null
+          grant_amount?: number
+          grant_name?: string
+          id?: string
+          next_report_due?: string | null
+          notes?: string | null
+          objectives?: string | null
+          organization_id?: string
+          reporting_frequency?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guardians: {
         Row: {
