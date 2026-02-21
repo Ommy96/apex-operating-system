@@ -434,12 +434,6 @@ export default function BeneficiaryProfile() {
                     <span>{beneficiary.gender}</span>
                   </div>
                 )}
-                {beneficiary.location && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 text-success" />
-                    <span>{beneficiary.location}</span>
-                  </div>
-                )}
                 {beneficiary.institution_name && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Building2 className="h-4 w-4 text-warning" />
@@ -622,10 +616,6 @@ export default function BeneficiaryProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Location/Residence</p>
-                <p className="font-medium">{beneficiary.location || '-'}</p>
-              </div>
               <div>
                 <p className="text-sm text-muted-foreground">County</p>
                 <p className="font-medium">{beneficiary.county || '-'}</p>
