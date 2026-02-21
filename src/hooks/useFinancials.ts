@@ -408,6 +408,20 @@ export function useFinancials() {
     { table: "financial_transactions", queryKeys: [["financial-transactions", orgId || ""], ["donor-support-totals", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
+  const deleteTransaction = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_transactions").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["financial-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["donor-support-totals"] });
+      queryClient.invalidateQueries({ queryKey: ["cost-analytics"] });
+      toast.success("Transaction deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return {
     budgets,
     createBudget,
@@ -433,5 +447,6 @@ export function useFinancials() {
     updateComplianceItem,
     programs,
     costAnalytics,
+    deleteTransaction,
   };
 }
