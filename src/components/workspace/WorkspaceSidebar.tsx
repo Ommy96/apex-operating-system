@@ -26,6 +26,7 @@ import {
   Target,
   Shield,
   BarChart3,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,7 @@ const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
   { title: "Programs", url: "/programs-management", icon: Target },
+  { title: "Financial", url: "/financial", icon: Wallet },
 ];
 
 const systemItems = [
