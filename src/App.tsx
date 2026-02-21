@@ -39,6 +39,7 @@ import CommunicationsHub from "./pages/CommunicationsHub";
 import AIInsights from "./pages/AIInsights";
 import DocumentManagement from "./pages/DocumentManagement";
 import ComplianceGovernance from "./pages/ComplianceGovernance";
+import BoardReporting from "./pages/BoardReporting";
 
 const queryClient = new QueryClient();
 
@@ -162,6 +163,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <ComplianceGovernance />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/board-reporting" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <BoardReporting />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

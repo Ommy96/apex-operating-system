@@ -34,6 +34,7 @@ import {
   Bot,
   FileText,
   ShieldCheck,
+  Presentation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +58,7 @@ const mainMenuItems = [
   { title: "AI Insights", url: "/ai-insights", icon: Bot },
   { title: "Documents", url: "/document-management", icon: FileText },
   { title: "Compliance", url: "/compliance", icon: ShieldCheck },
+  { title: "Board Portal", url: "/board-reporting", icon: Presentation },
 ];
 
 const systemItems = [
