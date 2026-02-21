@@ -1768,6 +1768,134 @@ export type Database = {
           },
         ]
       }
+      branch_staff: {
+        Row: {
+          assigned_at: string | null
+          branch_id: string
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          organization_id: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          branch_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          organization_id: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          branch_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          organization_id?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_staff_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branch_staff_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branch_staff_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branches: {
+        Row: {
+          address: string | null
+          code: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean | null
+          manager_name: string | null
+          manager_user_id: string | null
+          metadata: Json | null
+          name: string
+          organization_id: string
+          phone: string | null
+          region_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_name?: string | null
+          manager_user_id?: string | null
+          metadata?: Json | null
+          name: string
+          organization_id: string
+          phone?: string | null
+          region_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_name?: string | null
+          manager_user_id?: string | null
+          metadata?: Json | null
+          name?: string
+          organization_id?: string
+          phone?: string | null
+          region_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branches_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_categories: {
         Row: {
           created_at: string
@@ -5830,6 +5958,60 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "rbac_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regions: {
+        Row: {
+          coordinates: Json | null
+          country: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          coordinates?: Json | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          coordinates?: Json | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
