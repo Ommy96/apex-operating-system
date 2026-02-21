@@ -68,6 +68,33 @@ export function usePartners() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const deletePartner = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("partner_organizations").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["partners"] }); toast.success("Partner deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteResource = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("partner_shared_resources").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["partner-resources"] }); toast.success("Resource deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteActivity = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("partner_activities").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["partner-activities"] }); toast.success("Activity deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const totalResourceValue = sharedResources.reduce((sum, r) => sum + Number(r.value_amount || 0), 0);
 
   // Real-time subscriptions
@@ -77,5 +104,5 @@ export function usePartners() {
     { table: "partner_activities", queryKeys: [["partner-activities", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
-  return { partners, sharedResources, jointActivities, loadingPartners, loadingResources, loadingActivities, createPartner, createResource, createActivity, totalResourceValue };
+  return { partners, sharedResources, jointActivities, loadingPartners, loadingResources, loadingActivities, createPartner, createResource, createActivity, deletePartner, deleteResource, deleteActivity, totalResourceValue };
 }
