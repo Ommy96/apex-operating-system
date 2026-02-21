@@ -149,6 +149,7 @@ export function DonorSupport() {
     donorSummary[name] = (donorSummary[name] || 0) + Number(t.amount || 0);
   });
   const donorChartData = Object.entries(donorSummary)
+    .filter(([, amount]) => amount > 0)
     .map(([name, amount]) => ({ name, amount }))
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 10);
