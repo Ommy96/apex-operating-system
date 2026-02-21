@@ -2135,6 +2135,105 @@ export type Database = {
           },
         ]
       }
+      document_access_logs: {
+        Row: {
+          action: string
+          created_at: string
+          document_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          document_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "managed_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          change_notes: string | null
+          created_at: string
+          document_id: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          uploaded_by: string | null
+          version_number: number
+        }
+        Insert: {
+          change_notes?: string | null
+          created_at?: string
+          document_id: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          uploaded_by?: string | null
+          version_number: number
+        }
+        Update: {
+          change_notes?: string | null
+          created_at?: string
+          document_id?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          uploaded_by?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "managed_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: string | null
@@ -3769,6 +3868,81 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      managed_documents: {
+        Row: {
+          access_level: string
+          category: string
+          created_at: string
+          created_by: string | null
+          current_file_name: string | null
+          current_file_size: number | null
+          current_file_type: string | null
+          current_file_url: string | null
+          current_version: number
+          description: string | null
+          id: string
+          organization_id: string
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          access_level?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          current_file_name?: string | null
+          current_file_size?: number | null
+          current_file_type?: string | null
+          current_file_url?: string | null
+          current_version?: number
+          description?: string | null
+          id?: string
+          organization_id: string
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          access_level?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          current_file_name?: string | null
+          current_file_size?: number | null
+          current_file_type?: string | null
+          current_file_url?: string | null
+          current_version?: number
+          description?: string | null
+          id?: string
+          organization_id?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managed_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
