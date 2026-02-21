@@ -7,10 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Users, TrendingUp, DollarSign, ArrowRight } from "lucide-react";
+import { Heart, Users, TrendingUp, DollarSign, ArrowRight, Download, FileSpreadsheet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
+import { downloadExcel } from "@/lib/downloadUtils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export function DonorSupport() {
   const { currentOrganization } = useOrganization();
@@ -80,6 +84,42 @@ export function DonorSupport() {
   const expenseTransactions = transactions.filter(t => t.transaction_type === "expense");
   
   const filtered = filterType === "all" ? transactions : transactions.filter(t => t.transaction_type === filterType);
+
+  const formatExportRows = (rows: any[]) =>
+    rows.map(t => ({
+      Date: format(new Date(t.transaction_date), "dd MMM yyyy"),
+      Type: t.transaction_type?.replace(/_/g, " ") || "",
+      Description: t.description || "",
+      Donor: t.donor_name || "",
+      Program: t.program_id ? programMap[t.program_id] || "" : "",
+      Beneficiary: getBeneficiaryName(t),
+      Currency: t.currency || "KES",
+      Amount: Number(t.amount || 0),
+    }));
+
+  const handleExportExcel = () => {
+    const rows = formatExportRows(filtered);
+    downloadExcel(rows, "Financial_Transactions_Ledger", "Transactions");
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(14);
+    doc.text("Financial Transactions Ledger", 14, 18);
+    doc.setFontSize(9);
+    doc.text(`Generated: ${format(new Date(), "dd MMM yyyy HH:mm")}`, 14, 24);
+
+    const rows = formatExportRows(filtered);
+    autoTable(doc, {
+      startY: 30,
+      head: [["Date", "Type", "Description", "Donor", "Program", "Beneficiary", "Currency", "Amount"]],
+      body: rows.map(r => [r.Date, r.Type, r.Description, r.Donor, r.Program, r.Beneficiary, r.Currency, r.Amount.toLocaleString()]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [59, 130, 246] },
+    });
+
+    doc.save(`Financial_Transactions_Ledger_${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  };
 
   // Summaries
   const totalDonorSupport = donorTransactions.reduce((s, t) => s + Number(t.amount || 0), 0);
@@ -202,8 +242,15 @@ export function DonorSupport() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-base">Financial Transactions Ledger</CardTitle>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px] h-9"><SelectValue /></SelectTrigger>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExportPDF} disabled={filtered.length === 0}>
+              <Download className="h-3.5 w-3.5" /> PDF
+            </Button>
+            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExportExcel} disabled={filtered.length === 0}>
+              <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+            </Button>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[180px] h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="beneficiary_support">Donor Support</SelectItem>
@@ -211,7 +258,8 @@ export function DonorSupport() {
               <SelectItem value="program_grant">Grants</SelectItem>
               <SelectItem value="adjustment">Adjustments</SelectItem>
             </SelectContent>
-          </Select>
+           </Select>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
