@@ -1,20 +1,40 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Users, TrendingUp, DollarSign, ArrowRight } from "lucide-react";
+import { Heart, Users, TrendingUp, DollarSign, ArrowRight, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "sonner";
 import { format } from "date-fns";
 
 export function DonorSupport() {
   const { currentOrganization } = useOrganization();
+  const { userRole } = useAuth();
   const orgId = currentOrganization?.organization_id;
+  const queryClient = useQueryClient();
   const [filterType, setFilterType] = useState<string>("all");
+  const canDelete = ["admin", "management", "owner"].includes(userRole || "");
+
+  const deleteTransaction = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_transactions").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["financial-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["donor-support-totals"] });
+      queryClient.invalidateQueries({ queryKey: ["cost-analytics"] });
+      toast.success("Transaction deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   // Fetch all financial transactions for donor support
   const { data: transactions = [], isLoading } = useQuery({
@@ -216,11 +236,12 @@ export function DonorSupport() {
                 <TableHead>Program</TableHead>
                 <TableHead>Beneficiary</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                {canDelete && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableRow><TableCell colSpan={canDelete ? 8 : 7} className="text-center text-muted-foreground py-8">
                   No transactions recorded yet. Donor contributions and expenses will appear here automatically.
                 </TableCell></TableRow>
               ) : filtered.slice(0, 100).map(t => (
@@ -240,6 +261,13 @@ export function DonorSupport() {
                   <TableCell className={`text-right font-medium ${t.transaction_type === "expense" ? "text-destructive" : "text-success"}`}>
                     {t.currency} {Number(t.amount).toLocaleString()}
                   </TableCell>
+                  {canDelete && (
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteTransaction.mutate(t.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
