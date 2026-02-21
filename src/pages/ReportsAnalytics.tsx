@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart3, GraduationCap, Users, Home, Target,
-  Activity, Shield, Gauge, DollarSign
+  Activity, Shield, Gauge, DollarSign, HeartPulse, ShieldAlert, TrendingUp
 } from "lucide-react";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { startOfMonth, subMonths, endOfMonth } from "date-fns";
@@ -20,10 +20,13 @@ import { StaffPerformanceIntelligence } from "@/components/executive/StaffPerfor
 import { ProgramProjectIntelligence } from "@/components/executive/ProgramProjectIntelligence";
 import { BeneficiaryImpactIntelligence } from "@/components/executive/BeneficiaryImpactIntelligence";
 import { DonorFundingIntelligence } from "@/components/executive/DonorFundingIntelligence";
+import { OrgHealthScore } from "@/components/executive/OrgHealthScore";
+import { RiskDashboard } from "@/components/executive/RiskDashboard";
+import { ForecastingEngine } from "@/components/executive/ForecastingEngine";
 import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 export default function ReportsAnalytics() {
-  const [activeTab, setActiveTab] = useState("executive");
+  const [activeTab, setActiveTab] = useState("health");
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(subMonths(new Date(), 2)),
     to: endOfMonth(new Date())
@@ -39,9 +42,12 @@ export default function ReportsAnalytics() {
   } = useExecutiveAnalytics(dateRange, programFilter);
 
   const tabs = [
+    { id: 'health', label: 'Health Score', icon: HeartPulse },
+    { id: 'risks', label: 'Risk Dashboard', icon: ShieldAlert },
+    { id: 'forecast', label: 'Forecasting', icon: TrendingUp },
     { id: 'executive', label: 'Executive Summary', icon: Gauge },
-    { id: 'staff', label: 'Staff & HR Intelligence', icon: Activity },
-    { id: 'programs', label: 'Program Intelligence', icon: Target },
+    { id: 'staff', label: 'Staff & HR', icon: Activity },
+    { id: 'programs', label: 'Programs', icon: Target },
     { id: 'lifecycle', label: 'Beneficiary Impact', icon: Users },
     { id: 'donors', label: 'Donor & Funding', icon: DollarSign },
     { id: 'field', label: 'Visitations', icon: Home },
@@ -53,14 +59,12 @@ export default function ReportsAnalytics() {
     <div className="space-y-6 pb-8">
       <PageHeroHeader
         icon={BarChart3}
-        title="Executive Analytics Dashboard"
-        description="Centralized intelligence for organizational performance, HR insights, and program monitoring"
+        title="Executive Intelligence & Analytics"
+        description="Org health, risk monitoring, forecasting, and comprehensive performance analytics"
       />
 
-      {/* Executive Summary KPIs */}
       <ExecutiveSummaryPanel summary={executiveSummary} isLoading={isLoading} />
 
-      {/* Filters */}
       <AnalyticsDateFilter
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
@@ -69,7 +73,6 @@ export default function ReportsAnalytics() {
         programs={programs}
       />
 
-      {/* Section Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto md:flex-wrap h-auto gap-1 p-1 bg-muted/50">
@@ -85,6 +88,39 @@ export default function ReportsAnalytics() {
             ))}
           </TabsList>
         </div>
+
+        <TabsContent value="health">
+          <OrgHealthScore
+            summary={executiveSummary}
+            staffMetrics={staffMetrics}
+            beneficiaryImpact={beneficiaryImpact}
+            donorIntelligence={donorIntelligence}
+            programIntelligence={programIntelligence}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+
+        <TabsContent value="risks">
+          <RiskDashboard
+            summary={executiveSummary}
+            staffMetrics={staffMetrics}
+            hrAlerts={hrAlerts}
+            beneficiaryImpact={beneficiaryImpact}
+            donorIntelligence={donorIntelligence}
+            programIntelligence={programIntelligence}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+
+        <TabsContent value="forecast">
+          <ForecastingEngine
+            programIntelligence={programIntelligence}
+            donorIntelligence={donorIntelligence}
+            monthlyStaffTrends={monthlyStaffTrends}
+            summary={executiveSummary}
+            isLoading={isLoading}
+          />
+        </TabsContent>
 
         <TabsContent value="executive">
           <StaffPerformanceIntelligence

@@ -30,7 +30,6 @@ import {
   GitBranch,
   UserCog,
   Zap,
-  HeartPulse,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +48,6 @@ const mainMenuItems = [
   { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
   { title: "HR & Staff", url: "/hr", icon: UserCog },
   { title: "Automation", url: "/automation", icon: Zap },
-  { title: "Executive", url: "/executive", icon: HeartPulse },
 ];
 
 const systemItems = [
