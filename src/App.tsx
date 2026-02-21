@@ -40,6 +40,7 @@ import AIInsights from "./pages/AIInsights";
 import DocumentManagement from "./pages/DocumentManagement";
 import ComplianceGovernance from "./pages/ComplianceGovernance";
 import BoardReporting from "./pages/BoardReporting";
+import VolunteerManagement from "./pages/VolunteerManagement";
 
 const queryClient = new QueryClient();
 
@@ -170,6 +171,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <BoardReporting />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/volunteers" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <VolunteerManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

@@ -35,6 +35,7 @@ import {
   FileText,
   ShieldCheck,
   Presentation,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +60,7 @@ const mainMenuItems = [
   { title: "Documents", url: "/document-management", icon: FileText },
   { title: "Compliance", url: "/compliance", icon: ShieldCheck },
   { title: "Board Portal", url: "/board-reporting", icon: Presentation },
+  { title: "Volunteers", url: "/volunteers", icon: Heart },
 ];
 
 const systemItems = [
