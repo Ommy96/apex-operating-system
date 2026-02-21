@@ -36,6 +36,7 @@ import MESuite from "./pages/MEsuite";
 import HRManagement from "./pages/HRManagement";
 import AutomationEngine from "./pages/AutomationEngine";
 import CommunicationsHub from "./pages/CommunicationsHub";
+import AIInsights from "./pages/AIInsights";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +139,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <CommunicationsHub />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/ai-insights" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AIInsights />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
