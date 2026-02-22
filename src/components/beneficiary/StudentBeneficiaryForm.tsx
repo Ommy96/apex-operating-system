@@ -14,10 +14,10 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { GuardianForm } from './GuardianForm';
 import { CountySelector } from './CountySelector';
 import { SiblingSelector } from './SiblingSelector';
-import { DonorManager } from './DonorManager';
+
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
-import { User, Users, Heart, FileText, DollarSign, Loader2 } from 'lucide-react';
+import { User, Users, Heart, FileText, Loader2 } from 'lucide-react';
 
 // Guardian data structure
 interface GuardianData {
@@ -74,13 +74,6 @@ interface Sibling {
   relationship: string;
 }
 
-interface Donor {
-  donor_name: string;
-  amount_received: number | null;
-  donation_date: string;
-  notes: string;
-  program_id: string | null;
-}
 
 interface StudentBeneficiaryFormProps {
   beneficiary?: any;
@@ -92,7 +85,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
-  const [donors, setDonors] = useState<Donor[]>([]);
+  
   const { currentOrganization } = useOrganization();
 
   // Load existing siblings when editing
@@ -302,34 +295,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
           }]);
       }
 
-      // Save donors
-      if (donors.length > 0) {
-        // Delete existing donors
-        if (beneficiary?.id) {
-          await supabase
-            .from('beneficiary_donors')
-            .delete()
-            .eq('beneficiary_id', beneficiaryId);
-        }
-
-        for (const donor of donors) {
-          if (donor.donor_name) {
-            await supabase
-              .from('beneficiary_donors')
-              .insert([{
-                beneficiary_id: beneficiaryId,
-                organization_id: currentOrganization.organization_id,
-                donor_name: donor.donor_name,
-                amount_received: donor.amount_received,
-                donation_date: donor.donation_date || null,
-                notes: donor.notes || null,
-                program_id: donor.program_id || null,
-                created_by: user?.id,
-              }]);
-          }
-        }
-      }
-
       toast({
         title: "Success",
         description: beneficiary ? "Student beneficiary updated successfully" : "Student beneficiary created successfully",
@@ -370,10 +335,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 <TabsTrigger value="background" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Background</span>
-                </TabsTrigger>
-                <TabsTrigger value="donors" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="hidden sm:inline">Donors</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -749,18 +710,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                 </Card>
               </TabsContent>
 
-              {/* Donors Tab */}
-              <TabsContent value="donors" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Donors & Sponsors</CardTitle>
-                    <CardDescription>Track donations received for this student</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <DonorManager donors={donors} onChange={setDonors} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
 
             {/* Form Actions */}
