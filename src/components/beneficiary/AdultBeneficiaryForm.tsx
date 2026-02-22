@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
+import { CountySelector } from './CountySelector';
 import { DonorManager } from './DonorManager';
 import { DependantSelector } from './DependantSelector';
 import { User, Briefcase, Heart, DollarSign, Users, Loader2 } from 'lucide-react';
@@ -394,60 +395,12 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                     <CardDescription>Residence and location details</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>County</FormLabel>
-                            <FormControl>
-                              <Input placeholder="County" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="sub_county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Sub-County</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Sub-county" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="estate_village"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Estate/Village</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Estate or village" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="home_county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Home County</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Home county" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <CountySelector
+                      countyField="county"
+                      subCountyField="sub_county"
+                      homeCountyField="home_county"
+                      estateVillageField="estate_village"
+                    />
                   </CardContent>
                 </Card>
 
