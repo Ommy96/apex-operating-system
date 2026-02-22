@@ -162,6 +162,7 @@ export function DonorSupport() {
   const supportedBeneficiaries = new Set(donorTransactions.map(t => t.beneficiary_id).filter(Boolean)).size;
 
   // Program funding breakdown — for Donor Income, only count the LATEST donor record per beneficiary+program+donor combo
+  // PLUS direct program grants (program_grant transactions)
   const programFunding: Record<string, { income: number; expenses: number }> = {};
   
   // Build a map of latest donor amounts per unique (beneficiary_id, program_id, donor_name)
@@ -182,6 +183,14 @@ export function DonorSupport() {
     programFunding[programId].income += amount;
   });
 
+  // Add program_grant transactions (direct program funding, not tied to beneficiaries)
+  const programGrantTransactions = transactions.filter(t => t.transaction_type === "program_grant");
+  programGrantTransactions.forEach(t => {
+    if (!t.program_id) return;
+    if (!programFunding[t.program_id]) programFunding[t.program_id] = { income: 0, expenses: 0 };
+    programFunding[t.program_id].income += Number(t.amount || 0);
+  });
+
   // Add expenses to program funding
   transactions.forEach(t => {
     if (!t.program_id) return;
@@ -191,7 +200,7 @@ export function DonorSupport() {
     }
   });
 
-  // Donor summary for chart — use deduplicated (latest per beneficiary+program+donor) amounts
+  // Donor summary for chart — use deduplicated (latest per beneficiary+program+donor) amounts + program grants
   const donorSummaryDedup: Record<string, number> = {};
   latestDonorMap.forEach((amount, key) => {
     const donorName = key.split('_').slice(2).join('_') || "Unknown";
@@ -203,6 +212,11 @@ export function DonorSupport() {
       const name = t.donor_name || "Unknown";
       donorSummaryDedup[name] = (donorSummaryDedup[name] || 0) + Number(t.amount || 0);
     });
+  // Include program grant donors
+  programGrantTransactions.forEach(t => {
+    const name = t.donor_name || "Direct Program Funding";
+    donorSummaryDedup[name] = (donorSummaryDedup[name] || 0) + Number(t.amount || 0);
+  });
   const donorChartData = Object.entries(donorSummaryDedup)
     .filter(([, amount]) => amount > 0)
     .map(([name, amount]) => ({ name, amount }))
