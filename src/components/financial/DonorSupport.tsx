@@ -96,8 +96,27 @@ export function DonorSupport() {
 
   const donorTransactions = transactions.filter(t => t.transaction_type === "beneficiary_support");
   const expenseTransactions = transactions.filter(t => t.transaction_type === "expense");
-  
-  const filtered = filterType === "all" ? transactions : transactions.filter(t => t.transaction_type === filterType);
+
+  // For beneficiary_support, only keep the latest record per (beneficiary_id, program_id, donor_name)
+  const latestDonorTransactionIds = new Set<string>();
+  const seenDonorKeys = new Map<string, string>();
+  // Sort descending by date so first seen = latest
+  [...donorTransactions]
+    .sort((a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())
+    .forEach(t => {
+      const key = `${t.beneficiary_id || ''}_${t.program_id || ''}_${t.donor_name || ''}`;
+      if (!seenDonorKeys.has(key)) {
+        seenDonorKeys.set(key, t.id);
+        latestDonorTransactionIds.add(t.id);
+      }
+    });
+
+  // Deduplicated transactions: keep all non-donor transactions + only latest donor records
+  const deduplicatedTransactions = transactions.filter(t =>
+    t.transaction_type !== "beneficiary_support" || latestDonorTransactionIds.has(t.id)
+  );
+
+  const filtered = filterType === "all" ? deduplicatedTransactions : deduplicatedTransactions.filter(t => t.transaction_type === filterType);
 
   const formatExportRows = (rows: any[]) =>
     rows.map(t => ({
