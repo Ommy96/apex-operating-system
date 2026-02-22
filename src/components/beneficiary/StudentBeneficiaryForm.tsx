@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { GuardianForm } from './GuardianForm';
+import { CountySelector } from './CountySelector';
 import { SiblingSelector } from './SiblingSelector';
 import { DonorManager } from './DonorManager';
 import { MedicalInfoSection } from './MedicalInfoSection';
@@ -532,62 +533,12 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                     <CardDescription>Where the student lives</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>County</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Nairobi" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="sub_county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Sub County</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Westlands" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="estate_village"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Estate/Village</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Kibera" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="home_county"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Home County (Origin)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Kisumu" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <CountySelector
+                      countyField="county"
+                      subCountyField="sub_county"
+                      homeCountyField="home_county"
+                      estateVillageField="estate_village"
+                    />
                   </CardContent>
                 </Card>
 
