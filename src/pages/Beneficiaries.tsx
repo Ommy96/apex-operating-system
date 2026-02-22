@@ -17,6 +17,7 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentBeneficiaryForm, AdultBeneficiaryForm, GroupBeneficiaryForm } from '@/components/beneficiary';
+import { BulkBeneficiaryUpload } from '@/components/beneficiary/BulkBeneficiaryUpload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -594,6 +595,9 @@ export default function Beneficiaries() {
               <X className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Bulk Upload */}
+          {isAdmin && <BulkBeneficiaryUpload onSuccess={fetchBeneficiaries} />}
 
           {/* Export Button */}
           <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExport}>
