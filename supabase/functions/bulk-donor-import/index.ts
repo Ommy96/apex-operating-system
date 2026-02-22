@@ -29,7 +29,73 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { records, org_id, donor_name, dry_run } = await req.json();
+    const body = await req.json();
+    const { records, org_id, donor_name, dry_run, action, categories, multiplier, notes_text } = body;
+
+    // Bulk update action: update amount and notes for existing donor records by category
+    if (action === "bulk_update" || action === "bulk_update_null") {
+      if (!org_id || !donor_name || !multiplier) {
+        return new Response(
+          JSON.stringify({ error: "Missing fields for bulk_update" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { data: donorRecords, error: fetchErr } = await supabase
+        .from("beneficiary_donors")
+        .select("id, notes, amount_received")
+        .eq("organization_id", org_id)
+        .eq("donor_name", donor_name);
+
+      if (fetchErr) {
+        return new Response(
+          JSON.stringify({ error: fetchErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      let updated = 0;
+      const errors: string[] = [];
+      const categorySet = categories ? new Set((categories as string[]).map((c: string) => c.toLowerCase())) : null;
+
+      for (const record of donorRecords || []) {
+        // Skip already-updated records
+        if ((record.notes || "").includes("Annual")) continue;
+
+        if (action === "bulk_update_null") {
+          if (record.notes !== null && record.notes !== "") continue;
+        } else if (categorySet) {
+          const noteLC = (record.notes || "").toLowerCase();
+          const matchesCategory = Array.from(categorySet).some((cat) => noteLC.includes(cat));
+          if (!matchesCategory) continue;
+        }
+
+        const annualAmount = (record.amount_received || 0) * multiplier;
+        const baseNote = record.notes || "Bulk import";
+        const newNotes = notes_text
+          ? `${baseNote} | ${notes_text} | Annual: KES ${annualAmount.toLocaleString()}`
+          : `${baseNote} | Annual: KES ${annualAmount.toLocaleString()}`;
+
+        const { error: upErr } = await supabase
+          .from("beneficiary_donors")
+          .update({
+            amount_received: annualAmount,
+            notes: newNotes,
+          })
+          .eq("id", record.id);
+
+        if (upErr) {
+          errors.push(`Update failed for donor record ${record.id}: ${upErr.message}`);
+        } else {
+          updated++;
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ updated, errors, total_checked: (donorRecords || []).length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!records || !org_id || !donor_name) {
       return new Response(
