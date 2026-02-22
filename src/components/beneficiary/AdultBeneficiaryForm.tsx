@@ -13,9 +13,9 @@ import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { CountySelector } from './CountySelector';
-import { DonorManager } from './DonorManager';
+
 import { DependantSelector } from './DependantSelector';
-import { User, Briefcase, Heart, DollarSign, Users, Loader2 } from 'lucide-react';
+import { User, Briefcase, Heart, Users, Loader2 } from 'lucide-react';
 
 interface AdultFormData {
   first_name: string;
@@ -53,13 +53,6 @@ interface Dependant {
   grade?: string;
 }
 
-interface Donor {
-  donor_name: string;
-  amount_received: number | null;
-  donation_date: string;
-  notes: string;
-  program_id: string | null;
-}
 
 interface AdultBeneficiaryFormProps {
   beneficiary?: any;
@@ -71,7 +64,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [dependants, setDependants] = useState<Dependant[]>([]);
-  const [donors, setDonors] = useState<Donor[]>([]);
+  
   const { currentOrganization } = useOrganization();
 
   // Load existing dependants when editing
@@ -201,30 +194,6 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
           }]);
       }
 
-      // Save donors
-      if (beneficiary?.id) {
-        await supabase
-          .from('beneficiary_donors')
-          .delete()
-          .eq('beneficiary_id', beneficiaryId);
-      }
-
-      for (const donor of donors) {
-        if (donor.donor_name) {
-          await supabase
-            .from('beneficiary_donors')
-            .insert([{
-              beneficiary_id: beneficiaryId,
-              organization_id: currentOrganization.organization_id,
-              donor_name: donor.donor_name,
-              amount_received: donor.amount_received,
-              donation_date: donor.donation_date || null,
-              notes: donor.notes || null,
-              program_id: donor.program_id || null,
-              created_by: user?.id,
-            }]);
-        }
-      }
 
       toast({
         title: "Success",
@@ -266,10 +235,6 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                 <TabsTrigger value="dependants" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span className="hidden sm:inline">Dependants</span>
-                </TabsTrigger>
-                <TabsTrigger value="donors" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="hidden sm:inline">Donors</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -533,10 +498,6 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                 />
               </TabsContent>
 
-              {/* Donors Tab */}
-              <TabsContent value="donors" className="space-y-6 mt-6">
-                <DonorManager donors={donors} onChange={setDonors} />
-              </TabsContent>
             </Tabs>
 
             {/* Form Actions */}
