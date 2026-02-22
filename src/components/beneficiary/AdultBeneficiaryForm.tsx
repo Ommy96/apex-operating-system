@@ -25,6 +25,7 @@ interface AdultFormData {
   gender?: 'Male' | 'Female';
   phone?: string;
   photo_url?: string;
+  country?: string;
   county?: string;
   sub_county?: string;
   estate_village?: string;
@@ -103,6 +104,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
       gender: beneficiary?.gender || undefined,
       phone: beneficiary?.phone || '',
       photo_url: beneficiary?.photo_url || '',
+      country: beneficiary?.country || 'Kenya',
       county: beneficiary?.county || '',
       sub_county: beneficiary?.sub_county || '',
       estate_village: beneficiary?.estate_village || '',
@@ -147,6 +149,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
         date_of_birth: data.date_of_birth || null,
         gender: data.gender || null,
         photo_url: data.photo_url || null,
+        country: data.country || 'Kenya',
         county: data.county || null,
         sub_county: data.sub_county || null,
         estate_village: data.estate_village || null,
@@ -396,6 +399,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                   </CardHeader>
                   <CardContent>
                     <CountySelector
+                      countryField="country"
                       countyField="county"
                       subCountyField="sub_county"
                       homeCountyField="home_county"

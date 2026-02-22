@@ -807,6 +807,7 @@ export type Database = {
           background_image_url: string | null
           background_narrative: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          country: string | null
           county: string | null
           course_name: string | null
           created_at: string
@@ -857,6 +858,7 @@ export type Database = {
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          country?: string | null
           county?: string | null
           course_name?: string | null
           created_at?: string
@@ -907,6 +909,7 @@ export type Database = {
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
+          country?: string | null
           county?: string | null
           course_name?: string | null
           created_at?: string
