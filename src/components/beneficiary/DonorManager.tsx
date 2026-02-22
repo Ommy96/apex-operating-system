@@ -2,10 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, DollarSign } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Plus, Trash2, DollarSign, ChevronsUpDown, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
+import { cn } from '@/lib/utils';
 
 interface Donor {
   donor_name: string;
@@ -28,9 +31,12 @@ interface DonorManagerProps {
 export function DonorManager({ donors, onChange }: DonorManagerProps) {
   const { currentOrganization } = useOrganization();
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [existingDonors, setExistingDonors] = useState<string[]>([]);
+  const [openPopover, setOpenPopover] = useState<number | null>(null);
 
   useEffect(() => {
     if (!currentOrganization?.organization_id) return;
+    // Fetch programs and existing donor names in parallel
     supabase
       .from('programs')
       .select('id, name')
@@ -39,6 +45,17 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
       .order('name')
       .then(({ data }) => {
         if (data) setPrograms(data);
+      });
+
+    supabase
+      .from('beneficiary_donors')
+      .select('donor_name')
+      .eq('organization_id', currentOrganization.organization_id)
+      .then(({ data }) => {
+        if (data) {
+          const unique = [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
+          setExistingDonors(unique);
+        }
       });
   }, [currentOrganization?.organization_id]);
 
@@ -105,14 +122,59 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Donor Name *</label>
-                    <Input
-                      placeholder="Enter donor name"
-                      value={donor.donor_name}
-                      onChange={(e) =>
-                        updateDonor(index, 'donor_name', e.target.value)
-                      }
-                      className="mt-1"
-                    />
+                    <Popover open={openPopover === index} onOpenChange={(open) => setOpenPopover(open ? index : null)}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openPopover === index}
+                          className="w-full justify-between mt-1 font-normal"
+                        >
+                          {donor.donor_name || "Select or type donor name"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search or type new donor..."
+                            onValueChange={(search) => {
+                              // Allow free-text: update donor name as user types
+                              updateDonor(index, 'donor_name', search);
+                            }}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              {donor.donor_name ? (
+                                <button
+                                  className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
+                                  onClick={() => setOpenPopover(null)}
+                                >
+                                  Use "<span className="font-medium">{donor.donor_name}</span>"
+                                </button>
+                              ) : (
+                                "Type a donor name"
+                              )}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {existingDonors.map((name) => (
+                                <CommandItem
+                                  key={name}
+                                  value={name}
+                                  onSelect={(val) => {
+                                    updateDonor(index, 'donor_name', val);
+                                    setOpenPopover(null);
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4", donor.donor_name === name ? "opacity-100" : "opacity-0")} />
+                                  {name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div>
