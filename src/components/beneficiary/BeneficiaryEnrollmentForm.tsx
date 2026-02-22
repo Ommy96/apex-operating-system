@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,12 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +65,23 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [formData, setFormData] = useState<EnrollmentFormData>(emptyFormData);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
+  const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
+  const [existingDonors, setExistingDonors] = useState<string[]>([]);
+
+  // Fetch existing donor names for the combobox
+  useEffect(() => {
+    if (!currentOrganization?.organization_id) return;
+    supabase
+      .from('beneficiary_donors')
+      .select('donor_name')
+      .eq('organization_id', currentOrganization.organization_id)
+      .then(({ data }) => {
+        if (data) {
+          const unique = [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
+          setExistingDonors(unique);
+        }
+      });
+  }, [currentOrganization?.organization_id]);
 
   // Fetch programs
   const { data: programs } = useQuery({
@@ -348,11 +368,58 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                       <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2 space-y-1.5">
                           <Label className="text-xs">Donor Name</Label>
-                          <Input
-                            placeholder="Enter donor name"
-                            value={formData.donor_name}
-                            onChange={(e) => setFormData({ ...formData, donor_name: e.target.value })}
-                          />
+                          <Popover open={donorPopoverOpen} onOpenChange={setDonorPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={donorPopoverOpen}
+                                className="w-full justify-between font-normal"
+                              >
+                                {formData.donor_name || "Select or type donor name"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Search or type new donor..."
+                                  onValueChange={(search) => {
+                                    setFormData({ ...formData, donor_name: search });
+                                  }}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {formData.donor_name ? (
+                                      <button
+                                        className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
+                                        onClick={() => setDonorPopoverOpen(false)}
+                                      >
+                                        Use "<span className="font-medium">{formData.donor_name}</span>"
+                                      </button>
+                                    ) : (
+                                      "Type a donor name"
+                                    )}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {existingDonors.map((name) => (
+                                      <CommandItem
+                                        key={name}
+                                        value={name}
+                                        onSelect={(val) => {
+                                          setFormData({ ...formData, donor_name: val });
+                                          setDonorPopoverOpen(false);
+                                        }}
+                                      >
+                                        <Check className={cn("mr-2 h-4 w-4", formData.donor_name === name ? "opacity-100" : "opacity-0")} />
+                                        {name}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs">Amount (KSH)</Label>
