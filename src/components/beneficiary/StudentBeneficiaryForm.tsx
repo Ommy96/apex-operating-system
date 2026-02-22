@@ -42,6 +42,7 @@ interface StudentFormData {
   date_of_birth?: string;
   gender?: 'Male' | 'Female';
   photo_url?: string;
+  country?: string;
   county?: string;
   sub_county?: string;
   estate_village?: string;
@@ -122,6 +123,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
       date_of_birth: beneficiary?.date_of_birth || '',
       gender: beneficiary?.gender || undefined,
       photo_url: beneficiary?.photo_url || '',
+      country: beneficiary?.country || 'Kenya',
       county: beneficiary?.county || '',
       sub_county: beneficiary?.sub_county || '',
       estate_village: beneficiary?.estate_village || '',
@@ -180,6 +182,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         date_of_birth: data.date_of_birth || null,
         gender: data.gender || null,
         photo_url: data.photo_url || null,
+        country: data.country || 'Kenya',
         county: data.county || null,
         sub_county: data.sub_county || null,
         estate_village: data.estate_village || null,
@@ -534,6 +537,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <CountySelector
+                      countryField="country"
                       countyField="county"
                       subCountyField="sub_county"
                       homeCountyField="home_county"

@@ -1,0 +1,1 @@
+ALTER TABLE public.beneficiaries ADD COLUMN country text DEFAULT 'Kenya';
