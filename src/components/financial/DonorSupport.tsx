@@ -154,14 +154,32 @@ export function DonorSupport() {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 10);
 
-  // Program funding breakdown
+  // Program funding breakdown — for Donor Income, only count the LATEST donor record per beneficiary+program+donor combo
   const programFunding: Record<string, { income: number; expenses: number }> = {};
+  
+  // Build a map of latest donor amounts per unique (beneficiary_id, program_id, donor_name)
+  const latestDonorMap = new Map<string, number>();
+  donorTransactions
+    .filter(t => t.program_id)
+    .sort((a, b) => new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime())
+    .forEach(t => {
+      const key = `${t.beneficiary_id || ''}_${t.program_id}_${t.donor_name || ''}`;
+      latestDonorMap.set(key, Number(t.amount || 0));
+    });
+
+  // Aggregate latest donor amounts by program
+  latestDonorMap.forEach((amount, key) => {
+    const programId = key.split('_')[1];
+    if (!programId) return;
+    if (!programFunding[programId]) programFunding[programId] = { income: 0, expenses: 0 };
+    programFunding[programId].income += amount;
+  });
+
+  // Add expenses to program funding
   transactions.forEach(t => {
     if (!t.program_id) return;
-    if (!programFunding[t.program_id]) programFunding[t.program_id] = { income: 0, expenses: 0 };
-    if (t.transaction_type === "beneficiary_support" || t.transaction_type === "program_grant") {
-      programFunding[t.program_id].income += Number(t.amount || 0);
-    } else if (t.transaction_type === "expense") {
+    if (t.transaction_type === "expense") {
+      if (!programFunding[t.program_id]) programFunding[t.program_id] = { income: 0, expenses: 0 };
       programFunding[t.program_id].expenses += Number(t.amount || 0);
     }
   });
