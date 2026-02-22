@@ -137,7 +137,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     enabled: !!orgId,
   });
 
-  // Donors
+  // Donors (beneficiary-level)
   const { data: donors = [] } = useQuery({
     queryKey: ['exec-donors', orgId],
     queryFn: async () => {
@@ -146,6 +146,21 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
         .from('beneficiary_donors')
         .select('id, donor_name, amount_received, program_id, donation_date, beneficiary_id, created_at')
         .eq('organization_id', orgId);
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  // Program-level grants (direct program funding)
+  const { data: programGrants = [] } = useQuery({
+    queryKey: ['exec-program-grants', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data } = await supabase
+        .from('financial_transactions')
+        .select('id, donor_name, amount, program_id, transaction_date, created_at')
+        .eq('organization_id', orgId)
+        .eq('transaction_type', 'program_grant');
       return data || [];
     },
     enabled: !!orgId,
@@ -299,7 +314,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     const activePrograms = programs.filter(p => p.is_active).length;
     const activeProjects = projects.filter(p => p.status === 'active').length;
     const totalReports = visitations.length + observations.length;
-    const totalDonorFunds = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
+    const totalDonorFunds = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0) + programGrants.reduce((sum, g) => sum + (g.amount || 0), 0);
     const avgPerf = staffMetrics.length > 0
       ? Math.round(staffMetrics.reduce((s, m) => s + m.performanceScore, 0) / staffMetrics.length)
       : 0;
@@ -325,7 +340,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       indicatorAchievement: 0,
       newEnrollmentsThisPeriod: newEnrollments,
     };
-  }, [beneficiaries, programs, projects, donors, staffMetrics, visitations, observations, enrollments, dateRange]);
+  }, [beneficiaries, programs, projects, donors, programGrants, staffMetrics, visitations, observations, enrollments, dateRange]);
 
   // Monthly trends for staff
   const monthlyStaffTrends = useMemo(() => {
@@ -626,22 +641,35 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
   // Donor & Funding Intelligence
   const donorIntelligence = useMemo(() => {
     const activeBenefs = beneficiaries.filter(b => b.status === 'active');
-    const filteredDonors = dateRange?.from
-      ? donors.filter(d => d.created_at && isInDateRange(d.created_at, dateRange))
-      : donors;
 
-    const totalFunds = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
-    const uniqueDonorNames = new Set(donors.map(d => d.donor_name));
-    const avgDonation = donors.length > 0 ? Math.round(totalFunds / donors.length) : 0;
+    // Combine beneficiary-level donors + program-level grants
+    const beneficiaryFunds = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+    const programGrantFunds = programGrants.reduce((s, g) => s + (g.amount || 0), 0);
+    const totalFunds = beneficiaryFunds + programGrantFunds;
+
+    // Unique donors from both sources
+    const uniqueDonorNames = new Set([
+      ...donors.map(d => d.donor_name),
+      ...programGrants.filter(g => g.donor_name).map(g => g.donor_name!),
+    ]);
+
+    const totalDonationCount = donors.length + programGrants.length;
+    const avgDonation = totalDonationCount > 0 ? Math.round(totalFunds / totalDonationCount) : 0;
     const costPerBeneficiary = activeBenefs.length > 0 ? Math.round(totalFunds / activeBenefs.length) : 0;
 
-    // Donor ranking
+    // Donor ranking — merge both sources
     const donorAgg: Record<string, { total: number; donations: number; beneficiaryIds: Set<string> }> = {};
     donors.forEach(d => {
       if (!donorAgg[d.donor_name]) donorAgg[d.donor_name] = { total: 0, donations: 0, beneficiaryIds: new Set() };
       donorAgg[d.donor_name].total += d.amount_received || 0;
       donorAgg[d.donor_name].donations++;
       donorAgg[d.donor_name].beneficiaryIds.add(d.beneficiary_id);
+    });
+    programGrants.forEach(g => {
+      const name = g.donor_name || 'Direct Program Funding';
+      if (!donorAgg[name]) donorAgg[name] = { total: 0, donations: 0, beneficiaryIds: new Set() };
+      donorAgg[name].total += g.amount || 0;
+      donorAgg[name].donations++;
     });
     const donorRanking = Object.entries(donorAgg)
       .map(([name, v]) => ({ name, total: v.total, donations: v.donations, beneficiaries: v.beneficiaryIds.size }))
@@ -652,37 +680,46 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       ? Math.round((donorRanking[0].total / totalFunds) * 100)
       : 0;
 
-    // Program allocation
+    // Program allocation — beneficiary donors + program grants (no double counting since program_grant has no beneficiary_id)
     const programMap = new Map(programs.map(p => [p.id, p.name]));
-    const programFunds: Record<string, number> = {};
+    const programFundsMap: Record<string, number> = {};
     let unallocatedFunds = 0;
     donors.forEach(d => {
       if (d.program_id && programMap.has(d.program_id)) {
         const pName = programMap.get(d.program_id)!;
-        programFunds[pName] = (programFunds[pName] || 0) + (d.amount_received || 0);
+        programFundsMap[pName] = (programFundsMap[pName] || 0) + (d.amount_received || 0);
       } else {
         unallocatedFunds += d.amount_received || 0;
       }
     });
-    const programAllocation = Object.entries(programFunds)
+    programGrants.forEach(g => {
+      if (g.program_id && programMap.has(g.program_id)) {
+        const pName = programMap.get(g.program_id)!;
+        programFundsMap[pName] = (programFundsMap[pName] || 0) + (g.amount || 0);
+      } else {
+        unallocatedFunds += g.amount || 0;
+      }
+    });
+    const programAllocation = Object.entries(programFundsMap)
       .map(([program, amount]) => ({ program, amount, percentage: totalFunds > 0 ? Math.round((amount / totalFunds) * 100) : 0 }))
       .sort((a, b) => b.amount - a.amount);
 
-    // Monthly trends
+    // Monthly trends — combine both sources
     const months = eachMonthOfInterval({ start: subMonths(new Date(), 5), end: new Date() });
     const monthlyTrends = months.map(month => {
       const monthStart = startOfMonth(month);
       const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       const range: DateRange = { from: monthStart, to: monthEnd };
-      const inMonth = donors.filter(d => d.donation_date ? isInDateRange(d.donation_date, range) : d.created_at ? isInDateRange(d.created_at, range) : false);
+      const donorsInMonth = donors.filter(d => d.donation_date ? isInDateRange(d.donation_date, range) : d.created_at ? isInDateRange(d.created_at, range) : false);
+      const grantsInMonth = programGrants.filter(g => isInDateRange(g.transaction_date, range));
       return {
         month: format(month, 'MMM'),
-        amount: inMonth.reduce((s, d) => s + (d.amount_received || 0), 0),
-        count: inMonth.length,
+        amount: donorsInMonth.reduce((s, d) => s + (d.amount_received || 0), 0) + grantsInMonth.reduce((s, g) => s + (g.amount || 0), 0),
+        count: donorsInMonth.length + grantsInMonth.length,
       };
     });
 
-    // Growth: compare last 3 months vs previous 3 months
+    // Growth
     const recentMonths = monthlyTrends.slice(-3);
     const olderMonths = monthlyTrends.slice(0, 3);
     const recentTotal = recentMonths.reduce((s, m) => s + m.amount, 0);
@@ -696,7 +733,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     return {
       totalFunds,
       uniqueDonors: uniqueDonorNames.size,
-      totalDonations: donors.length,
+      totalDonations: totalDonationCount,
       avgDonation,
       costPerBeneficiary,
       donorRanking,
@@ -708,7 +745,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       beneficiariesWithDonors,
       beneficiariesWithoutDonors: activeBenefs.length - beneficiariesWithDonors,
     };
-  }, [beneficiaries, donors, programs, dateRange]);
+  }, [beneficiaries, donors, programGrants, programs, dateRange]);
 
   // HR Alerts
   const hrAlerts = useMemo(() => {
@@ -736,6 +773,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     { table: "beneficiary_visitations", queryKeys: [["exec-visitations", orgId || ""]], orgId, enabled: !!orgId },
     { table: "beneficiary_academics", queryKeys: [["exec-academics", orgId || ""]], orgId, enabled: !!orgId },
     { table: "beneficiary_donors", queryKeys: [["exec-donors", orgId || ""]], orgId, enabled: !!orgId },
+    { table: "financial_transactions", queryKeys: [["exec-program-grants", orgId || ""]], orgId, enabled: !!orgId },
     { table: "programs", queryKeys: [["exec-programs", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
