@@ -161,18 +161,6 @@ export function DonorSupport() {
   const uniqueDonors = new Set(donorTransactions.map(t => t.donor_name).filter(Boolean)).size;
   const supportedBeneficiaries = new Set(donorTransactions.map(t => t.beneficiary_id).filter(Boolean)).size;
 
-  // Donor summary for chart
-  const donorSummary: Record<string, number> = {};
-  donorTransactions.forEach(t => {
-    const name = t.donor_name || "Unknown";
-    donorSummary[name] = (donorSummary[name] || 0) + Number(t.amount || 0);
-  });
-  const donorChartData = Object.entries(donorSummary)
-    .filter(([, amount]) => amount > 0)
-    .map(([name, amount]) => ({ name, amount }))
-    .sort((a, b) => b.amount - a.amount)
-    .slice(0, 10);
-
   // Program funding breakdown — for Donor Income, only count the LATEST donor record per beneficiary+program+donor combo
   const programFunding: Record<string, { income: number; expenses: number }> = {};
   
@@ -202,6 +190,25 @@ export function DonorSupport() {
       programFunding[t.program_id].expenses += Number(t.amount || 0);
     }
   });
+
+  // Donor summary for chart — use deduplicated (latest per beneficiary+program+donor) amounts
+  const donorSummaryDedup: Record<string, number> = {};
+  latestDonorMap.forEach((amount, key) => {
+    const donorName = key.split('_').slice(2).join('_') || "Unknown";
+    donorSummaryDedup[donorName] = (donorSummaryDedup[donorName] || 0) + amount;
+  });
+  deduplicatedTransactions
+    .filter(t => t.transaction_type === "beneficiary_support" && !t.program_id)
+    .forEach(t => {
+      const name = t.donor_name || "Unknown";
+      donorSummaryDedup[name] = (donorSummaryDedup[name] || 0) + Number(t.amount || 0);
+    });
+  const donorChartData = Object.entries(donorSummaryDedup)
+    .filter(([, amount]) => amount > 0)
+    .map(([name, amount]) => ({ name, amount }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 10);
+  const chartHeight = Math.max(120, donorChartData.length * 60 + 40);
 
   const getTypeBadge = (type: string) => {
     const map: Record<string, string> = {
@@ -241,7 +248,7 @@ export function DonorSupport() {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Top Donors by Contribution</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={chartHeight}>
               <BarChart data={donorChartData} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 12 }} />
