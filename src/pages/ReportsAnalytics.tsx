@@ -327,6 +327,14 @@ export default function ReportsAnalytics() {
           />
         </TabsContent>
 
+        <TabsContent value="analysis">
+          <DataAnalysisSection
+            beneficiaries={beneficiaries}
+            donors={donors}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+
         <TabsContent value="system">
           <SystemIntelligenceSection 
             beneficiaries={beneficiaries}
