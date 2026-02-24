@@ -14,6 +14,7 @@ import { AnalyticsDateFilter } from "@/components/analytics/AnalyticsDateFilter"
 import { AcademicPerformanceSection } from "@/components/analytics/AcademicPerformanceSection";
 import { FieldActivitySection } from "@/components/analytics/FieldActivitySection";
 import { SystemIntelligenceSection } from "@/components/analytics/SystemIntelligenceSection";
+import { DataAnalysisSection } from "@/components/analytics/DataAnalysisSection";
 
 // Executive components
 import { ExecutiveSummaryPanel } from "@/components/executive/ExecutiveSummaryPanel";
@@ -77,7 +78,7 @@ export default function ReportsAnalytics() {
 
   const {
     beneficiaries, programs, enrollments, visitations,
-    academicRecords, uploads,
+    academicRecords, uploads, donors,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
     programIntelligence, beneficiaryImpact, donorIntelligence,
     isLoading,
@@ -207,6 +208,7 @@ export default function ReportsAnalytics() {
     { id: 'donors', label: 'Donor & Funding', icon: DollarSign },
     { id: 'field', label: 'Visitations', icon: Home },
     { id: 'academic', label: 'Academic', icon: GraduationCap },
+    { id: 'analysis', label: 'Data Analysis', icon: Search },
     { id: 'system', label: 'Data Quality', icon: Shield },
     { id: 'custom', label: 'Custom Reports', icon: FileText },
   ];
@@ -321,6 +323,14 @@ export default function ReportsAnalytics() {
           <AcademicPerformanceSection 
             academicRecords={academicRecords}
             beneficiaries={beneficiaries}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+
+        <TabsContent value="analysis">
+          <DataAnalysisSection
+            beneficiaries={beneficiaries}
+            donors={donors}
             isLoading={isLoading}
           />
         </TabsContent>
