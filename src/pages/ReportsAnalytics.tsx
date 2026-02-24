@@ -78,7 +78,7 @@ export default function ReportsAnalytics() {
 
   const {
     beneficiaries, programs, enrollments, visitations,
-    academicRecords, uploads,
+    academicRecords, uploads, donors,
     staffMetrics, executiveSummary, monthlyStaffTrends, hrAlerts,
     programIntelligence, beneficiaryImpact, donorIntelligence,
     isLoading,
