@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, DollarSign, Trash2 } from "lucide-react";
+import { Plus, DollarSign, Trash2, FolderKanban } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -32,8 +33,26 @@ export function ProgramFunding({ programId }: Props) {
     description: "",
     funding_category: "",
     notes: "",
+    project_id: "",
   });
 
+  // Fetch projects under this program
+  const { data: projects = [] } = useQuery({
+    queryKey: ["program-projects-for-funding", programId],
+    queryFn: async () => {
+      if (!programId) return [];
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, name, project_code")
+        .eq("program_id", programId)
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!programId,
+  });
+
+  // Fetch all funding (program-level and project-level)
   const { data: funding = [], isLoading } = useQuery({
     queryKey: ["program-funding", programId, orgId],
     queryFn: async () => {
@@ -57,12 +76,13 @@ export function ProgramFunding({ programId }: Props) {
       const { error } = await supabase.from("financial_transactions").insert({
         organization_id: orgId,
         program_id: programId,
+        project_id: form.project_id || null,
         transaction_type: "program_grant",
         donor_name: form.donor_name || null,
         amount: parseFloat(form.amount) || 0,
         currency: "KES",
         transaction_date: form.transaction_date,
-        description: form.description || `Direct program funding${form.donor_name ? ` from ${form.donor_name}` : ""}`,
+        description: form.description || `Direct funding${form.donor_name ? ` from ${form.donor_name}` : ""}`,
         funding_category: form.funding_category || "Program Grant",
         notes: form.notes || null,
         created_by: user?.id || null,
@@ -74,9 +94,9 @@ export function ProgramFunding({ programId }: Props) {
       queryClient.invalidateQueries({ queryKey: ["financial-transactions"] });
       queryClient.invalidateQueries({ queryKey: ["exec-donors"] });
       queryClient.invalidateQueries({ queryKey: ["donor-support-totals"] });
-      toast.success("Program funding added successfully");
+      toast.success("Funding added successfully");
       setIsOpen(false);
-      setForm({ donor_name: "", amount: "", transaction_date: new Date().toISOString().split("T")[0], description: "", funding_category: "", notes: "" });
+      setForm({ donor_name: "", amount: "", transaction_date: new Date().toISOString().split("T")[0], description: "", funding_category: "", notes: "", project_id: "" });
     },
     onError: (err) => toast.error("Failed to add funding: " + err.message),
   });
@@ -95,14 +115,42 @@ export function ProgramFunding({ programId }: Props) {
   });
 
   const totalFunding = funding.reduce((s, f) => s + Number(f.amount || 0), 0);
+  const programLevelFunding = funding.filter(f => !f.project_id);
+  const programLevelTotal = programLevelFunding.reduce((s, f) => s + Number(f.amount || 0), 0);
+
+  // Group funding by project
+  const projectFundingMap = new Map<string, { name: string; code: string | null; total: number; count: number }>();
+  funding.forEach(f => {
+    if (f.project_id) {
+      const existing = projectFundingMap.get(f.project_id);
+      const proj = projects.find(p => p.id === f.project_id);
+      if (existing) {
+        existing.total += Number(f.amount || 0);
+        existing.count += 1;
+      } else {
+        projectFundingMap.set(f.project_id, {
+          name: proj?.name || "Unknown Project",
+          code: proj?.project_code || null,
+          total: Number(f.amount || 0),
+          count: 1,
+        });
+      }
+    }
+  });
+
+  const getProjectName = (projectId: string | null) => {
+    if (!projectId) return null;
+    const proj = projects.find(p => p.id === projectId);
+    return proj?.name || "Unknown Project";
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Program Funding</h3>
+          <h3 className="text-base font-semibold text-foreground">Program & Project Funding</h3>
           <p className="text-sm text-muted-foreground">
-            Direct funding allocated to this program (not tied to individual beneficiaries)
+            Direct funding allocated to this program or its projects
           </p>
         </div>
         {isAdmin && (
@@ -114,7 +162,7 @@ export function ProgramFunding({ programId }: Props) {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Program Funding</DialogTitle>
+                <DialogTitle>Add Funding</DialogTitle>
               </DialogHeader>
               <form
                 onSubmit={(e) => {
@@ -127,6 +175,32 @@ export function ProgramFunding({ programId }: Props) {
                 }}
                 className="space-y-4"
               >
+                {/* Project selector */}
+                <div className="space-y-2">
+                  <Label>Allocate To</Label>
+                  <Select
+                    value={form.project_id}
+                    onValueChange={(val) => setForm({ ...form, project_id: val === "program_level" ? "" : val })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select program or project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="program_level">
+                        Program Level (General)
+                      </SelectItem>
+                      {projects.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}{p.project_code ? ` (${p.project_code})` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Choose a specific project or leave as program-level funding
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Donor / Funder Name</Label>
@@ -197,19 +271,66 @@ export function ProgramFunding({ programId }: Props) {
         )}
       </div>
 
-      {/* Summary */}
-      <Card>
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-            <DollarSign className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Total Direct Program Funding</p>
-            <p className="text-lg font-bold text-foreground">KES {totalFunding.toLocaleString()}</p>
-          </div>
-          <Badge variant="outline" className="ml-auto">{funding.length} record{funding.length !== 1 ? "s" : ""}</Badge>
-        </CardContent>
-      </Card>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <DollarSign className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Funding</p>
+              <p className="text-lg font-bold text-foreground">KES {totalFunding.toLocaleString()}</p>
+            </div>
+            <Badge variant="outline" className="ml-auto">{funding.length} records</Badge>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/50">
+              <DollarSign className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Program-Level</p>
+              <p className="text-lg font-bold text-foreground">KES {programLevelTotal.toLocaleString()}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+              <FolderKanban className="h-5 w-5 text-secondary-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Project-Level</p>
+              <p className="text-lg font-bold text-foreground">KES {(totalFunding - programLevelTotal).toLocaleString()}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Project Funding Breakdown */}
+      {projectFundingMap.size > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Funding by Project</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {Array.from(projectFundingMap.entries()).map(([projId, info]) => (
+              <div key={projId} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                <div>
+                  <p className="text-sm font-medium">{info.name}</p>
+                  {info.code && <p className="text-xs text-muted-foreground">{info.code}</p>}
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold">KES {info.total.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">{info.count} record{info.count !== 1 ? "s" : ""}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Records Table */}
       <Card>
@@ -218,6 +339,7 @@ export function ProgramFunding({ programId }: Props) {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Donor / Funder</TableHead>
+              <TableHead>Allocated To</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
@@ -227,12 +349,12 @@ export function ProgramFunding({ programId }: Props) {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
               </TableRow>
             ) : funding.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No direct program funding recorded yet. Click "Add Funding" to get started.
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  No funding recorded yet. Click "Add Funding" to get started.
                 </TableCell>
               </TableRow>
             ) : (
@@ -242,7 +364,17 @@ export function ProgramFunding({ programId }: Props) {
                     {format(new Date(f.transaction_date), "dd MMM yyyy")}
                   </TableCell>
                   <TableCell className="font-medium">{f.donor_name || "—"}</TableCell>
-                  <TableCell className="text-sm max-w-[200px] truncate">{f.description || "—"}</TableCell>
+                  <TableCell>
+                    {f.project_id ? (
+                      <Badge variant="secondary" className="text-xs gap-1">
+                        <FolderKanban className="h-3 w-3" />
+                        {getProjectName(f.project_id)}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">Program Level</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm max-w-[180px] truncate">{f.description || "—"}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-xs">{f.funding_category || "General"}</Badge>
                   </TableCell>
