@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, Megaphone, Bell } from "lucide-react";
+import { MessageCircle, Megaphone, Bell, Mail } from "lucide-react";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StakeholderMessages } from "@/components/communications/StakeholderMessages";
 import { CampaignManager } from "@/components/communications/CampaignManager";
+import { DirectMemberEmail } from "@/components/communications/DirectMemberEmail";
 import { useCommunications } from "@/hooks/useCommunications";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +12,11 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export default function CommunicationsHub() {
-  const [activeTab, setActiveTab] = useState("messages");
+  const [activeTab, setActiveTab] = useState("direct-email");
   const { notifications, unreadCount, markAsRead } = useCommunications();
 
   const tabs = [
+    { id: "direct-email", label: "Direct Email", icon: Mail },
     { id: "messages", label: "Messages", icon: MessageCircle },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "notifications", label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`, icon: Bell },
@@ -41,6 +43,10 @@ export default function CommunicationsHub() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="direct-email">
+          <DirectMemberEmail />
+        </TabsContent>
 
         <TabsContent value="messages">
           <StakeholderMessages />
