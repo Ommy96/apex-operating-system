@@ -180,87 +180,97 @@ const ProgramDashboard = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-6 space-y-6">
-          {/* Program Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Program Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {program.category && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Category</span>
-                    <span className="text-sm font-medium capitalize">{program.category}</span>
-                  </div>
-                )}
-                {program.target_population && program.target_population.length > 0 && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Target Population</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {program.target_population.map((pop: string) => (
-                        <Badge key={pop} variant="secondary" className="text-xs">{pop}</Badge>
+        {activeTab === "overview" && (
+          <TabsContent value="overview" forceMount className="mt-6 space-y-6">
+            {/* Program Details */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Program Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {program.category && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Category</span>
+                      <span className="text-sm font-medium capitalize">{program.category}</span>
+                    </div>
+                  )}
+                  {program.target_population && program.target_population.length > 0 && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Target Population</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {program.target_population.map((pop: string) => (
+                          <Badge key={pop} variant="secondary" className="text-xs">{pop}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {program.objectives && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Objectives</span>
+                      <p className="text-sm mt-1">{program.objectives}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Projects List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Projects ({projects?.length || 0})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {projects?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No projects yet</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {projects?.slice(0, 5).map((project) => (
+                        <div key={project.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                          <div>
+                            <p className="text-sm font-medium">{project.name}</p>
+                            {project.project_code && (
+                              <p className="text-xs text-muted-foreground">{project.project_code}</p>
+                            )}
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {project.status || 'Active'}
+                          </Badge>
+                        </div>
                       ))}
                     </div>
-                  </div>
-                )}
-                {program.objectives && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Objectives</span>
-                    <p className="text-sm mt-1">{program.objectives}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Projects List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Projects ({projects?.length || 0})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {projects?.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No projects yet</p>
-                ) : (
-                  <div className="space-y-2">
-                    {projects?.slice(0, 5).map((project) => (
-                      <div key={project.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                        <div>
-                          <p className="text-sm font-medium">{project.name}</p>
-                          {project.project_code && (
-                            <p className="text-xs text-muted-foreground">{project.project_code}</p>
-                          )}
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {project.status || 'Active'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            {/* Quick view of indicators */}
+            <ProgramIndicators programId={programId} showAddButton={false} />
+          </TabsContent>
+        )}
 
-          {/* Quick view of indicators */}
-          <ProgramIndicators programId={programId} showAddButton={false} />
-        </TabsContent>
+        {activeTab === "projects" && (
+          <TabsContent value="projects" forceMount className="mt-6">
+            <ProgramProjects programId={programId} />
+          </TabsContent>
+        )}
 
-        <TabsContent value="projects" className="mt-6">
-          <ProgramProjects programId={programId} />
-        </TabsContent>
+        {activeTab === "funding" && (
+          <TabsContent value="funding" forceMount className="mt-6">
+            <ProgramFunding programId={programId} />
+          </TabsContent>
+        )}
 
-        <TabsContent value="funding" className="mt-6">
-          <ProgramFunding programId={programId} />
-        </TabsContent>
+        {activeTab === "indicators" && (
+          <TabsContent value="indicators" forceMount className="mt-6">
+            <ProgramIndicators programId={programId} />
+          </TabsContent>
+        )}
 
-        <TabsContent value="indicators" className="mt-6">
-          <ProgramIndicators programId={programId} />
-        </TabsContent>
-
-        <TabsContent value="observations" className="mt-6">
-          <ProgramObservations programId={programId} />
-        </TabsContent>
+        {activeTab === "observations" && (
+          <TabsContent value="observations" forceMount className="mt-6">
+            <ProgramObservations programId={programId} />
+          </TabsContent>
+        )}
 
       </Tabs>
     </div>
