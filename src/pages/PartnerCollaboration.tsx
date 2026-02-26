@@ -188,10 +188,10 @@ export default function PartnerCollaboration() {
               </DialogContent>
             </Dialog>
           </div>
-          <Card className="workspace-card"><CardContent className="p-0">
-            <Table>
+          <Card className="workspace-card"><CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead>Type</TableHead><TableHead>Direction</TableHead><TableHead>Value</TableHead><TableHead className="w-10"></TableHead>
+                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead className="hidden sm:table-cell">Type</TableHead><TableHead className="hidden md:table-cell">Direction</TableHead><TableHead>Value</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
                  {loadingResources ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
@@ -238,10 +238,10 @@ export default function PartnerCollaboration() {
               </DialogContent>
             </Dialog>
           </div>
-          <Card className="workspace-card"><CardContent className="p-0">
-            <Table>
+          <Card className="workspace-card"><CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead>Date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead><TableHead className="w-10"></TableHead>
+                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead className="hidden sm:table-cell">Date</TableHead><TableHead className="hidden md:table-cell">Location</TableHead><TableHead>Status</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
                  {loadingActivities ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
