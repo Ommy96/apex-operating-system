@@ -157,15 +157,13 @@ export default function ComplianceGovernance() {
   const activePolicies = retentionPolicies.filter(p => p.is_active).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Compliance & Governance</h1>
-          <p className="text-sm text-muted-foreground">
-            Data protection controls, consent tracking, and audit-ready compliance
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Compliance & Governance</h1>
+        <p className="text-sm text-muted-foreground">
+          Data protection controls, consent tracking, and audit-ready compliance
+        </p>
       </div>
 
       {/* Stats */}
@@ -210,12 +208,14 @@ export default function ComplianceGovernance() {
 
       {/* Tabs */}
       <Tabs defaultValue="consent" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="consent">Consent Tracking</TabsTrigger>
-          <TabsTrigger value="retention">Retention Policies</TabsTrigger>
-          <TabsTrigger value="requests">Data Requests</TabsTrigger>
-          <TabsTrigger value="exports">Compliance Exports</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto md:grid md:grid-cols-4">
+            <TabsTrigger value="consent" className="text-xs sm:text-sm whitespace-nowrap">Consent</TabsTrigger>
+            <TabsTrigger value="retention" className="text-xs sm:text-sm whitespace-nowrap">Retention</TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">Requests</TabsTrigger>
+            <TabsTrigger value="exports" className="text-xs sm:text-sm whitespace-nowrap">Exports</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Consent Tracking */}
         <TabsContent value="consent" className="space-y-4">
@@ -225,15 +225,15 @@ export default function ComplianceGovernance() {
             </Button>
           </div>
           <Card>
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Subject</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Purpose</TableHead>
+                    <TableHead className="hidden sm:table-cell">Purpose</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>

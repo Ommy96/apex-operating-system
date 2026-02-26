@@ -82,11 +82,13 @@ export default function PartnerCollaboration() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="partners"><Building className="h-4 w-4 mr-1.5" />Partners</TabsTrigger>
-          <TabsTrigger value="resources"><Package className="h-4 w-4 mr-1.5" />Shared Resources</TabsTrigger>
-          <TabsTrigger value="activities"><CalendarDays className="h-4 w-4 mr-1.5" />Joint Activities</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="partners"><Building className="h-4 w-4 mr-1.5" />Partners</TabsTrigger>
+            <TabsTrigger value="resources"><Package className="h-4 w-4 mr-1.5" />Shared Resources</TabsTrigger>
+            <TabsTrigger value="activities"><CalendarDays className="h-4 w-4 mr-1.5" />Joint Activities</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Partners Tab */}
         <TabsContent value="partners" className="space-y-4">
@@ -186,10 +188,10 @@ export default function PartnerCollaboration() {
               </DialogContent>
             </Dialog>
           </div>
-          <Card className="workspace-card"><CardContent className="p-0">
-            <Table>
+          <Card className="workspace-card"><CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead>Type</TableHead><TableHead>Direction</TableHead><TableHead>Value</TableHead><TableHead className="w-10"></TableHead>
+                <TableHead>Partner</TableHead><TableHead>Resource</TableHead><TableHead className="hidden sm:table-cell">Type</TableHead><TableHead className="hidden md:table-cell">Direction</TableHead><TableHead>Value</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
                  {loadingResources ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
@@ -236,10 +238,10 @@ export default function PartnerCollaboration() {
               </DialogContent>
             </Dialog>
           </div>
-          <Card className="workspace-card"><CardContent className="p-0">
-            <Table>
+          <Card className="workspace-card"><CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader><TableRow>
-                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead>Date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead><TableHead className="w-10"></TableHead>
+                <TableHead>Partner</TableHead><TableHead>Activity</TableHead><TableHead className="hidden sm:table-cell">Date</TableHead><TableHead className="hidden md:table-cell">Location</TableHead><TableHead>Status</TableHead><TableHead className="w-10"></TableHead>
               </TableRow></TableHeader>
               <TableBody>
                  {loadingActivities ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>

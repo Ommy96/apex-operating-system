@@ -382,14 +382,16 @@ export default function ReportsAnalytics() {
             </div>
 
             <Tabs value={reportsSubTab} onValueChange={setReportsSubTab}>
-              <div className="flex items-center justify-between gap-4">
-                <TabsList>
-                  <TabsTrigger value="templates">Report Templates</TabsTrigger>
-                  <TabsTrigger value="entries">Submitted Reports</TabsTrigger>
-                </TabsList>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="overflow-x-auto w-full sm:w-auto">
+                  <TabsList className="inline-flex w-max sm:w-auto">
+                    <TabsTrigger value="templates">Templates</TabsTrigger>
+                    <TabsTrigger value="entries">Submitted</TabsTrigger>
+                  </TabsList>
+                </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="relative max-w-md flex-1">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                       placeholder="Search..."
@@ -402,9 +404,10 @@ export default function ReportsAnalytics() {
                     <Button 
                       onClick={() => { setEditingTemplate(null); setIsTemplateFormOpen(true); }}
                       className="gap-2"
+                      size="sm"
                     >
                       <Plus className="h-4 w-4" />
-                      New Template
+                      <span className="hidden sm:inline">New Template</span>
                     </Button>
                   )}
                 </div>

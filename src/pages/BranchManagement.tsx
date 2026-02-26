@@ -72,10 +72,12 @@ export default function BranchManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1.5" />Branches</TabsTrigger>
-          <TabsTrigger value="regions"><Globe className="h-4 w-4 mr-1.5" />Regions</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1.5" />Branches</TabsTrigger>
+            <TabsTrigger value="regions"><Globe className="h-4 w-4 mr-1.5" />Regions</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Branches Tab */}
         <TabsContent value="branches" className="space-y-4">
@@ -163,8 +165,8 @@ export default function BranchManagement() {
           </div>
 
           <Card className="workspace-card">
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Region</TableHead>

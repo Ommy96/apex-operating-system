@@ -166,16 +166,18 @@ export default function BoardReporting() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="reports">
-            <FileText className="h-4 w-4 mr-1.5" />
-            Reports
-          </TabsTrigger>
-          <TabsTrigger value="members">
-            <Users className="h-4 w-4 mr-1.5" />
-            Board Members
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="reports">
+              <FileText className="h-4 w-4 mr-1.5" />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="members">
+              <Users className="h-4 w-4 mr-1.5" />
+              Members
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Reports Tab */}
         <TabsContent value="reports" className="space-y-4">
@@ -188,7 +190,7 @@ export default function BoardReporting() {
                   New Report
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg">
+              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Board Report</DialogTitle>
                 </DialogHeader>
