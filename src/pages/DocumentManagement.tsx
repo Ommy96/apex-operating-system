@@ -154,16 +154,16 @@ export default function DocumentManagement() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Document Management</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Document Management</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">
             Secure file storage with version control and audit tracking
           </p>
         </div>
-        <Button onClick={() => setShowUpload(true)}>
+        <Button onClick={() => setShowUpload(true)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" /> Upload Document
         </Button>
       </div>
@@ -215,8 +215,8 @@ export default function DocumentManagement() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search documents..."
@@ -226,7 +226,7 @@ export default function DocumentManagement() {
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px]">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
@@ -243,16 +243,16 @@ export default function DocumentManagement() {
 
       {/* Documents Table */}
       <Card>
-        <CardContent className="p-0">
-          <Table>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Document</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead className="hidden sm:table-cell">Category</TableHead>
                 <TableHead>Version</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="w-[80px]">Actions</TableHead>
+                <TableHead className="hidden md:table-cell">Size</TableHead>
+                <TableHead className="hidden md:table-cell">Updated</TableHead>
+                <TableHead className="w-[60px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -420,7 +420,7 @@ export default function DocumentManagement() {
 
       {/* Document Detail Dialog */}
       <Dialog open={!!showDetail} onOpenChange={() => setShowDetail(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh]">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto mx-4 sm:mx-auto">
           {showDetail && (
             <>
               <DialogHeader>
@@ -447,11 +447,11 @@ export default function DocumentManagement() {
                 ))}
               </div>
 
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => handleDownload(showDetail)}>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button size="sm" onClick={() => handleDownload(showDetail)} className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-1" /> Download Latest
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setShowNewVersion(true)}>
+                <Button size="sm" variant="outline" onClick={() => setShowNewVersion(true)} className="w-full sm:w-auto">
                   <Upload className="h-4 w-4 mr-1" /> Upload New Version
                 </Button>
               </div>
