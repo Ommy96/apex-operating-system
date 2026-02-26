@@ -19,24 +19,26 @@ export default function MESuite() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
-          <TabsTrigger value="logframe" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <GitBranch className="h-4 w-4" />
-            <span className="hidden sm:inline">LogFrame</span>
-          </TabsTrigger>
-          <TabsTrigger value="toc" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Theory of Change</span>
-          </TabsTrigger>
-          <TabsTrigger value="surveys" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <ClipboardList className="h-4 w-4" />
-            <span className="hidden sm:inline">Surveys</span>
-          </TabsTrigger>
-          <TabsTrigger value="risk" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <AlertTriangle className="h-4 w-4" />
-            <span className="hidden sm:inline">Risk Tracking</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+            <TabsTrigger value="logframe" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <GitBranch className="h-4 w-4" />
+              <span className="hidden sm:inline">LogFrame</span>
+            </TabsTrigger>
+            <TabsTrigger value="toc" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Theory of Change</span>
+            </TabsTrigger>
+            <TabsTrigger value="surveys" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">Surveys</span>
+            </TabsTrigger>
+            <TabsTrigger value="risk" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="hidden sm:inline">Risk Tracking</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="logframe" className="mt-6">
           <LogFrameBuilder />

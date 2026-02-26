@@ -324,7 +324,7 @@ const ProgramsManagement = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
           title="Total Programs"
           value={programs?.length || 0}
@@ -346,8 +346,8 @@ const ProgramsManagement = () => {
       </div>
 
       {/* Search */}
-      <WorkspacePanel padding="sm" className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
+      <WorkspacePanel padding="sm" className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Search programs by name, location, or category..."
@@ -385,15 +385,15 @@ const ProgramsManagement = () => {
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-          <Table className="min-w-[800px]">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Program</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead className="hidden sm:table-cell">Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Target Population</TableHead>
-                <TableHead>Fields</TableHead>
+                <TableHead className="hidden md:table-cell">Location</TableHead>
+                <TableHead className="hidden lg:table-cell">Target Population</TableHead>
+                <TableHead className="hidden sm:table-cell">Fields</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
