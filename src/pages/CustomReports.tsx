@@ -396,13 +396,13 @@ const CustomReports = () => {
           ) : (
             <Card>
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[500px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Template</TableHead>
                       <TableHead>Report Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
+                      <TableHead className="hidden sm:table-cell">Created</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -420,7 +420,7 @@ const CustomReports = () => {
                               {entry.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
+                          <TableCell className="text-muted-foreground hidden sm:table-cell">
                             {new Date(entry.created_at).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-right">
