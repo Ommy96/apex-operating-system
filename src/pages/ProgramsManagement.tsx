@@ -383,8 +383,9 @@ const ProgramsManagement = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <Table>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Program</TableHead>
