@@ -160,7 +160,7 @@ export function ProgramFunding({ programId }: Props) {
                 <Plus className="h-4 w-4" /> Add Funding
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Funding</DialogTitle>
               </DialogHeader>
