@@ -519,6 +519,7 @@ const ProgramsManagement = () => {
               })}
             </TableBody>
           </Table>
+          </div>
         </Card>
       )}
     </div>
