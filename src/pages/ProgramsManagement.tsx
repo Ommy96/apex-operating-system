@@ -295,8 +295,8 @@ const ProgramsManagement = () => {
                   Add Program
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader className="pb-4 border-b">
+              <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                <DialogHeader className="pb-4 border-b flex-shrink-0">
                   <DialogTitle className="text-xl font-semibold">
                     {editingProgram ? 'Edit Program' : 'Create New Program'}
                   </DialogTitle>
@@ -307,7 +307,7 @@ const ProgramsManagement = () => {
                     }
                   </DialogDescription>
                 </DialogHeader>
-                <div className="pt-4">
+                <div className="flex-1 overflow-y-auto pt-4 min-h-0">
                   <ProgramForm
                     formData={formData}
                     onChange={setFormData}

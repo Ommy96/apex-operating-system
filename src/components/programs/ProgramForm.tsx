@@ -453,8 +453,8 @@ export const ProgramForm = ({
         </TabsContent>
       </Tabs>
 
-      {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t">
+      {/* Form Actions - sticky at bottom */}
+      <div className="flex items-center justify-end gap-3 pt-4 pb-2 border-t bg-background sticky bottom-0">
         <Button type="button" variant="outline" onClick={onCancel} className="min-w-[100px]">
           Cancel
         </Button>
