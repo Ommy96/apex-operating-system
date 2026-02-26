@@ -157,28 +157,30 @@ const ProgramDashboard = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="overview" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Overview</span>
-          </TabsTrigger>
-          <TabsTrigger value="projects" className="gap-2">
-            <FolderKanban className="h-4 w-4" />
-            <span className="hidden sm:inline">Projects</span>
-          </TabsTrigger>
-          <TabsTrigger value="funding" className="gap-2">
-            <DollarSign className="h-4 w-4" />
-            <span className="hidden sm:inline">Funding</span>
-          </TabsTrigger>
-          <TabsTrigger value="indicators" className="gap-2">
-            <Target className="h-4 w-4" />
-            <span className="hidden sm:inline">Indicators</span>
-          </TabsTrigger>
-          <TabsTrigger value="observations" className="gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">Observations</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="overview" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="gap-2">
+              <FolderKanban className="h-4 w-4" />
+              <span className="hidden sm:inline">Projects</span>
+            </TabsTrigger>
+            <TabsTrigger value="funding" className="gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">Funding</span>
+            </TabsTrigger>
+            <TabsTrigger value="indicators" className="gap-2">
+              <Target className="h-4 w-4" />
+              <span className="hidden sm:inline">Indicators</span>
+            </TabsTrigger>
+            <TabsTrigger value="observations" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Observations</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {activeTab === "overview" && (
           <TabsContent value="overview" forceMount className="mt-6 space-y-6">

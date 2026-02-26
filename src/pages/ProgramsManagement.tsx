@@ -324,7 +324,7 @@ const ProgramsManagement = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
           title="Total Programs"
           value={programs?.length || 0}
@@ -346,8 +346,8 @@ const ProgramsManagement = () => {
       </div>
 
       {/* Search */}
-      <WorkspacePanel padding="sm" className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
+      <WorkspacePanel padding="sm" className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Search programs by name, location, or category..."
@@ -385,15 +385,15 @@ const ProgramsManagement = () => {
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-          <Table className="min-w-[800px]">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Program</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead className="hidden sm:table-cell">Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Target Population</TableHead>
-                <TableHead>Fields</TableHead>
+                <TableHead className="hidden md:table-cell">Location</TableHead>
+                <TableHead className="hidden lg:table-cell">Target Population</TableHead>
+                <TableHead className="hidden sm:table-cell">Fields</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -424,7 +424,7 @@ const ProgramsManagement = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {categoryLabel ? (
                         <Badge variant="secondary" className="text-xs">{categoryLabel}</Badge>
                       ) : (
@@ -439,7 +439,7 @@ const ProgramsManagement = () => {
                         {statusBadge.label}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {locations.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {locations.slice(0, 2).map((loc) => (
@@ -458,7 +458,7 @@ const ProgramsManagement = () => {
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       {program.target_population && program.target_population.length > 0 ? (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[150px]">
                           <Users className="h-3 w-3 shrink-0" />
@@ -468,7 +468,7 @@ const ProgramsManagement = () => {
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {program.custom_fields && program.custom_fields.length > 0 ? (
                         <Badge variant="outline" className="text-xs gap-1">
                           <Settings2 className="h-3 w-3" />

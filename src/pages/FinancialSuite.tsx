@@ -21,28 +21,30 @@ export default function FinancialSuite() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 h-auto gap-1 bg-muted/50 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Overview</span>
-          </TabsTrigger>
-          <TabsTrigger value="budgets" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Wallet className="h-4 w-4" />
-            <span className="hidden sm:inline">Budgets</span>
-          </TabsTrigger>
-          <TabsTrigger value="expenses" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Receipt className="h-4 w-4" />
-            <span className="hidden sm:inline">Expenses</span>
-          </TabsTrigger>
-          <TabsTrigger value="grants" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Landmark className="h-4 w-4" />
-            <span className="hidden sm:inline">Grants</span>
-          </TabsTrigger>
-          <TabsTrigger value="cost-analytics" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <TrendingUp className="h-4 w-4" />
-            <span className="hidden sm:inline">Cost Analytics</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+            <TabsTrigger value="overview" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Heart className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="budgets" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">Budgets</span>
+            </TabsTrigger>
+            <TabsTrigger value="expenses" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Receipt className="h-4 w-4" />
+              <span className="hidden sm:inline">Expenses</span>
+            </TabsTrigger>
+            <TabsTrigger value="grants" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Landmark className="h-4 w-4" />
+              <span className="hidden sm:inline">Grants</span>
+            </TabsTrigger>
+            <TabsTrigger value="cost-analytics" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Cost Analytics</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview" className="mt-6">
           <DonorSupport />

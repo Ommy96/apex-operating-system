@@ -215,7 +215,7 @@ const CustomReports = () => {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Total Templates</CardDescription>
@@ -247,13 +247,15 @@ const CustomReports = () => {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <div className="flex items-center justify-between gap-4">
-          <TabsList>
-            <TabsTrigger value="templates">Report Templates</TabsTrigger>
-            <TabsTrigger value="entries">Submitted Reports</TabsTrigger>
-          </TabsList>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-max sm:w-auto">
+              <TabsTrigger value="templates">Report Templates</TabsTrigger>
+              <TabsTrigger value="entries">Submitted Reports</TabsTrigger>
+            </TabsList>
+          </div>
 
-          <div className="relative max-w-md flex-1">
+          <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search..."
@@ -394,13 +396,13 @@ const CustomReports = () => {
           ) : (
             <Card>
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[500px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Template</TableHead>
                       <TableHead>Report Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
+                      <TableHead className="hidden sm:table-cell">Created</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -418,7 +420,7 @@ const CustomReports = () => {
                               {entry.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
+                          <TableCell className="text-muted-foreground hidden sm:table-cell">
                             {new Date(entry.created_at).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-right">
