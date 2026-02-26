@@ -61,6 +61,8 @@ interface Beneficiary {
   status: string;
   location: string | null;
   county: string | null;
+  sub_county: string | null;
+  estate_village: string | null;
   academic_level: string | null;
   institution_name: string | null;
   member_count: number | null;
@@ -575,7 +577,7 @@ export default function Beneficiaries() {
                 <TableHead className="min-w-[90px]">Type</TableHead>
                 <TableHead className="min-w-[90px]">Status</TableHead>
                 <TableHead className="min-w-[140px] hidden md:table-cell">Details</TableHead>
-                <TableHead className="min-w-[120px] hidden lg:table-cell">Location</TableHead>
+                <TableHead className="min-w-[160px] hidden lg:table-cell">Village / Sub-County</TableHead>
                 <TableHead className="w-[120px] text-right sticky right-0 bg-muted/30 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -650,9 +652,15 @@ export default function Beneficiaries() {
                         </div>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        <span className="text-sm text-muted-foreground truncate">
-                          {beneficiary.location || beneficiary.institution_name || '—'}
-                        </span>
+                        <div className="text-sm text-muted-foreground">
+                          {beneficiary.estate_village && (
+                            <p className="truncate">{beneficiary.estate_village}</p>
+                          )}
+                          {beneficiary.sub_county && (
+                            <p className="text-xs truncate">{beneficiary.sub_county}</p>
+                          )}
+                          {!beneficiary.estate_village && !beneficiary.sub_county && '—'}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right sticky right-0 bg-card z-10">
                         <div className="flex items-center justify-end gap-0.5">
