@@ -424,7 +424,7 @@ const ProgramsManagement = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {categoryLabel ? (
                         <Badge variant="secondary" className="text-xs">{categoryLabel}</Badge>
                       ) : (
@@ -439,7 +439,7 @@ const ProgramsManagement = () => {
                         {statusBadge.label}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {locations.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {locations.slice(0, 2).map((loc) => (
@@ -458,7 +458,7 @@ const ProgramsManagement = () => {
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       {program.target_population && program.target_population.length > 0 ? (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[150px]">
                           <Users className="h-3 w-3 shrink-0" />
@@ -468,7 +468,7 @@ const ProgramsManagement = () => {
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {program.custom_fields && program.custom_fields.length > 0 ? (
                         <Badge variant="outline" className="text-xs gap-1">
                           <Settings2 className="h-3 w-3" />
