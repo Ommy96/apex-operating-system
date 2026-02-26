@@ -288,11 +288,11 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                 Enroll in Program
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Enroll in Program</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 pr-1">
                 {/* Program */}
                 <div className="space-y-2">
                   <Label>Program *</Label>
