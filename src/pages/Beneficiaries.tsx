@@ -507,10 +507,10 @@ export default function Beneficiaries() {
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="student">Students</SelectItem>
-              <SelectItem value="adult">Adults</SelectItem>
-              <SelectItem value="group">Groups</SelectItem>
+              <SelectItem value="all">All Types ({stats.total})</SelectItem>
+              <SelectItem value="student">Students ({stats.students})</SelectItem>
+              <SelectItem value="adult">Adults ({stats.adults})</SelectItem>
+              <SelectItem value="group">Groups ({stats.groups})</SelectItem>
             </SelectContent>
           </Select>
 
@@ -520,12 +520,12 @@ export default function Beneficiaries() {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="graduated">Graduated</SelectItem>
-              <SelectItem value="dropped">Dropped</SelectItem>
-              <SelectItem value="replaced">Replaced</SelectItem>
+              <SelectItem value="all">All Status ({beneficiaries.length})</SelectItem>
+              <SelectItem value="active">Active ({beneficiaries.filter(b => b.status === 'active').length})</SelectItem>
+              <SelectItem value="inactive">Inactive ({beneficiaries.filter(b => b.status === 'inactive').length})</SelectItem>
+              <SelectItem value="graduated">Graduated ({beneficiaries.filter(b => b.status === 'graduated').length})</SelectItem>
+              <SelectItem value="dropped">Dropped ({beneficiaries.filter(b => b.status === 'dropped').length})</SelectItem>
+              <SelectItem value="replaced">Replaced ({beneficiaries.filter(b => b.status === 'replaced').length})</SelectItem>
             </SelectContent>
           </Select>
 
@@ -535,9 +535,9 @@ export default function Beneficiaries() {
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="all">All Programs ({beneficiaries.length})</SelectItem>
               {programs.map(p => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>{p.name} ({enrollmentMap[p.id]?.size || 0})</SelectItem>
               ))}
             </SelectContent>
           </Select>
