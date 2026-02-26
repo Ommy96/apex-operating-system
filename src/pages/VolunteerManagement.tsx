@@ -87,11 +87,13 @@ export default function VolunteerManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="volunteers"><Users className="h-4 w-4 mr-1.5" />Volunteers</TabsTrigger>
-          <TabsTrigger value="assignments"><Briefcase className="h-4 w-4 mr-1.5" />Assignments</TabsTrigger>
-          <TabsTrigger value="hours"><Clock className="h-4 w-4 mr-1.5" />Hours Log</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="volunteers"><Users className="h-4 w-4 mr-1.5" />Volunteers</TabsTrigger>
+            <TabsTrigger value="assignments"><Briefcase className="h-4 w-4 mr-1.5" />Assignments</TabsTrigger>
+            <TabsTrigger value="hours"><Clock className="h-4 w-4 mr-1.5" />Hours Log</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Volunteers Tab */}
         <TabsContent value="volunteers" className="space-y-4">
@@ -183,14 +185,14 @@ export default function VolunteerManagement() {
           </div>
 
           <Card className="workspace-card">
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Volunteer</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>Supervisor</TableHead>
+                    <TableHead className="hidden sm:table-cell">Start Date</TableHead>
+                    <TableHead className="hidden md:table-cell">Supervisor</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -204,8 +206,8 @@ export default function VolunteerManagement() {
                       <TableRow key={a.id}>
                         <TableCell className="font-medium">{(a.volunteers as any)?.full_name || "—"}</TableCell>
                         <TableCell>{a.role_title}</TableCell>
-                        <TableCell>{format(new Date(a.start_date), "MMM d, yyyy")}</TableCell>
-                        <TableCell>{a.supervisor_name || "—"}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{format(new Date(a.start_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell className="hidden md:table-cell">{a.supervisor_name || "—"}</TableCell>
                         <TableCell><Badge variant={a.status === "active" ? "default" : "secondary"} className="capitalize">{a.status}</Badge></TableCell>
                       </TableRow>
                     ))
@@ -248,14 +250,14 @@ export default function VolunteerManagement() {
           </div>
 
           <Card className="workspace-card">
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[500px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Volunteer</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Hours</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead className="hidden sm:table-cell">Description</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -269,7 +271,7 @@ export default function VolunteerManagement() {
                         <TableCell className="font-medium">{(h.volunteers as any)?.full_name || "—"}</TableCell>
                         <TableCell>{format(new Date(h.log_date), "MMM d, yyyy")}</TableCell>
                         <TableCell>{Number(h.hours).toFixed(1)}h</TableCell>
-                        <TableCell className="text-muted-foreground max-w-[200px] truncate">{h.description || "—"}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-muted-foreground max-w-[200px] truncate">{h.description || "—"}</TableCell>
                       </TableRow>
                     ))
                   )}
