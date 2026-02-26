@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
-  List, LayoutGrid, Filter, Download, ChevronDown
+  List, LayoutGrid, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,13 +28,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -487,87 +480,7 @@ export default function Beneficiaries() {
             />
           </div>
 
-          <div className="flex items-center gap-2 ml-auto flex-wrap">
-            {/* Type Filter Dropdown - Desktop */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-2 hidden md:flex">
-                  {typeFilter === 'all' && <Users className="h-4 w-4" />}
-                  {typeFilter === 'student' && <GraduationCap className="h-4 w-4" />}
-                  {typeFilter === 'adult' && <UserCheck className="h-4 w-4" />}
-                  {typeFilter === 'group' && <UsersRound className="h-4 w-4" />}
-                  {typeFilter === 'all' ? 'All Types' : typeFilter === 'student' ? 'Students' : typeFilter === 'adult' ? 'Adults' : 'Groups'}
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-44">
-                <DropdownMenuItem onClick={() => setTypeFilter('all')} className="gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  All Types
-                  <span className="ml-auto text-xs text-muted-foreground">{stats.total}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setTypeFilter('student')} className="gap-2">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  Students
-                  <span className="ml-auto text-xs text-muted-foreground">{stats.students}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTypeFilter('adult')} className="gap-2">
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                  Adults
-                  <span className="ml-auto text-xs text-muted-foreground">{stats.adults}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTypeFilter('group')} className="gap-2">
-                  <UsersRound className="h-4 w-4 text-muted-foreground" />
-                  Groups
-                  <span className="ml-auto text-xs text-muted-foreground">{stats.groups}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Program Filter - Desktop */}
-            <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="h-9 w-40 hidden md:flex">
-                <SelectValue placeholder="Program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Programs</SelectItem>
-                {programs.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Status Filter - Desktop */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 w-32 hidden md:flex">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="graduated">Graduated</SelectItem>
-                <SelectItem value="dropped">Dropped</SelectItem>
-                <SelectItem value="replaced">Replaced</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setTypeFilter('all');
-                  setStatusFilter('all');
-                  setProgramFilter('all');
-                }}
-                className="h-9 px-2 text-muted-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-
+          <div className="flex items-center gap-2 ml-auto">
             {/* Bulk Upload */}
             {isAdmin && <BulkBeneficiaryUpload onSuccess={fetchBeneficiaries} />}
 
@@ -586,10 +499,11 @@ export default function Beneficiaries() {
           </div>
         </div>
 
-        {/* Row 2: Mobile Filters */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
+        {/* Row 2: Filters — visible on all breakpoints */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Type Filter */}
           <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as BeneficiaryTypeFilter)}>
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-9 w-[calc(33%-0.35rem)] sm:w-36">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -599,8 +513,10 @@ export default function Beneficiaries() {
               <SelectItem value="group">Groups</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Status Filter */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-9 w-[calc(33%-0.35rem)] sm:w-36">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -612,8 +528,10 @@ export default function Beneficiaries() {
               <SelectItem value="replaced">Replaced</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Program Filter */}
           <Select value={programFilter} onValueChange={setProgramFilter}>
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-9 w-[calc(34%-0.35rem)] sm:w-40">
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
@@ -623,6 +541,21 @@ export default function Beneficiaries() {
               ))}
             </SelectContent>
           </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setTypeFilter('all');
+                setStatusFilter('all');
+                setProgramFilter('all');
+              }}
+              className="h-9 px-2 text-muted-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </WorkspacePanel>
 
