@@ -221,9 +221,7 @@ const App = () => (
             } />
             <Route path="/admin/infera" element={
               <SuperAdminRoute>
-                <DashboardLayout>
-                  <InferaAdminDashboard />
-                </DashboardLayout>
+                <InferaAdminDashboard />
               </SuperAdminRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
