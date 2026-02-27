@@ -165,11 +165,11 @@ export function useAllOrganizations() {
             program_count: programsRes.count || 0,
             last_activity: lastActivityRes.data?.[0]?.created_at || null,
             health_score: 0,
-            risk_level: 'low' as const,
+            risk_level: 'low' as 'low' | 'medium' | 'high',
           };
           
           base.health_score = computeHealthScore(base);
-          base.risk_level = computeRiskLevel(base);
+          (base as any).risk_level = computeRiskLevel(base);
 
           return base as OrganizationWithSubscription;
         })
@@ -246,7 +246,7 @@ export function useOrganizationManagement() {
   const updateFeatureLimits = useMutation({
     mutationFn: async ({ orgId, features }: { orgId: string; features: Record<string, unknown> }) => {
       const { data: org } = await supabase.from('organizations').select('features_enabled').eq('id', orgId).single();
-      const merged = { ...(org?.features_enabled as Record<string, unknown> || {}), ...features };
+      const merged = { ...(org?.features_enabled as Record<string, unknown> || {}), ...features } as any;
       const { error } = await supabase.from('organizations').update({ features_enabled: merged }).eq('id', orgId);
       if (error) throw error;
     },
