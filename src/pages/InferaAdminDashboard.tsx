@@ -304,6 +304,18 @@ export default function InferaAdminDashboard() {
             <BillingDashboard />
           </TabsContent>
 
+          <TabsContent value="intelligence">
+            <PlatformIntelligence />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityCompliance />
+          </TabsContent>
+
+          <TabsContent value="risk">
+            <PlatformRiskDashboard />
+          </TabsContent>
+
           <TabsContent value="audit">
             <AuditLogViewer />
           </TabsContent>
