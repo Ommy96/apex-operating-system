@@ -14,6 +14,9 @@ import { UserAdministration } from '@/components/admin/UserAdministration';
 import { BillingDashboard } from '@/components/admin/BillingDashboard';
 import { SystemMonitoring } from '@/components/admin/SystemMonitoring';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+import { PlatformIntelligence } from '@/components/admin/PlatformIntelligence';
+import { SecurityCompliance } from '@/components/admin/SecurityCompliance';
+import { PlatformRiskDashboard } from '@/components/admin/PlatformRiskDashboard';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
