@@ -246,8 +246,11 @@ export default function InferaAdminDashboard() {
                     <div className="space-y-2">
                       {[
                         { tab: 'tenants', label: 'Tenant Management', desc: 'Organizations & subscriptions', icon: Building2, count: stats?.totalOrganizations, accent: 'amber' },
+                        { tab: 'intelligence', label: 'Platform Intelligence', desc: 'Global analytics & metrics', icon: Activity, count: null, accent: 'cyan' },
                         { tab: 'users', label: 'User Administration', desc: 'All platform users', icon: Users, count: stats?.totalUsers, accent: 'blue' },
                         { tab: 'billing', label: 'Revenue Center', desc: 'Billing & subscriptions', icon: CreditCard, count: `$${stats?.monthlyRevenue || 0}`, accent: 'emerald' },
+                        { tab: 'security', label: 'Security & Compliance', desc: 'Threat monitoring & compliance', icon: Shield, count: null, accent: 'purple' },
+                        { tab: 'risk', label: 'Risk Dashboard', desc: 'Platform risk assessment', icon: AlertTriangle, count: null, accent: 'red' },
                         { tab: 'audit', label: 'Audit Logs', desc: 'System-wide activity', icon: Eye, count: null, accent: 'purple' },
                         { tab: 'system', label: 'Feature Flags', desc: 'Module & feature control', icon: Flag, count: null, accent: 'cyan' },
                       ].map(({ tab, label, desc, icon: Icon, count, accent }) => (
