@@ -259,7 +259,7 @@ export default function InferaAdminDashboard() {
                           onClick={() => setActiveTab(tab)}
                           className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 hover:bg-slate-800/60 border border-slate-700/30 hover:border-slate-600/50 transition-all text-left"
                         >
-                          <Icon className={`h-5 w-5 ${accent === 'amber' ? 'text-amber-400' : accent === 'blue' ? 'text-blue-400' : accent === 'emerald' ? 'text-emerald-400' : accent === 'purple' ? 'text-purple-400' : 'text-cyan-400'}`} />
+                          <Icon className={`h-5 w-5 ${accent === 'amber' ? 'text-amber-400' : accent === 'blue' ? 'text-blue-400' : accent === 'emerald' ? 'text-emerald-400' : accent === 'purple' ? 'text-purple-400' : accent === 'red' ? 'text-red-400' : 'text-cyan-400'}`} />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-slate-200">{label}</div>
                             <div className="text-xs text-slate-500">{desc}</div>
