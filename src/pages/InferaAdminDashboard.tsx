@@ -14,6 +14,9 @@ import { UserAdministration } from '@/components/admin/UserAdministration';
 import { BillingDashboard } from '@/components/admin/BillingDashboard';
 import { SystemMonitoring } from '@/components/admin/SystemMonitoring';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+import { PlatformIntelligence } from '@/components/admin/PlatformIntelligence';
+import { SecurityCompliance } from '@/components/admin/SecurityCompliance';
+import { PlatformRiskDashboard } from '@/components/admin/PlatformRiskDashboard';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
@@ -115,6 +118,10 @@ export default function InferaAdminDashboard() {
                 <Building2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Tenants</span>
               </TabsTrigger>
+              <TabsTrigger value="intelligence" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Intelligence</span>
+              </TabsTrigger>
               <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Users</span>
@@ -123,13 +130,21 @@ export default function InferaAdminDashboard() {
                 <CreditCard className="h-4 w-4" />
                 <span className="hidden sm:inline">Revenue</span>
               </TabsTrigger>
+              <TabsTrigger value="security" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
+              <TabsTrigger value="risk" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="hidden sm:inline">Risk</span>
+              </TabsTrigger>
               <TabsTrigger value="audit" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Eye className="h-4 w-4" />
                 <span className="hidden sm:inline">Audit</span>
               </TabsTrigger>
               <TabsTrigger value="system" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Flag className="h-4 w-4" />
-                <span className="hidden sm:inline">Feature Flags</span>
+                <span className="hidden sm:inline">Flags</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -231,8 +246,11 @@ export default function InferaAdminDashboard() {
                     <div className="space-y-2">
                       {[
                         { tab: 'tenants', label: 'Tenant Management', desc: 'Organizations & subscriptions', icon: Building2, count: stats?.totalOrganizations, accent: 'amber' },
+                        { tab: 'intelligence', label: 'Platform Intelligence', desc: 'Global analytics & metrics', icon: Activity, count: null, accent: 'cyan' },
                         { tab: 'users', label: 'User Administration', desc: 'All platform users', icon: Users, count: stats?.totalUsers, accent: 'blue' },
                         { tab: 'billing', label: 'Revenue Center', desc: 'Billing & subscriptions', icon: CreditCard, count: `$${stats?.monthlyRevenue || 0}`, accent: 'emerald' },
+                        { tab: 'security', label: 'Security & Compliance', desc: 'Threat monitoring & compliance', icon: Shield, count: null, accent: 'purple' },
+                        { tab: 'risk', label: 'Risk Dashboard', desc: 'Platform risk assessment', icon: AlertTriangle, count: null, accent: 'red' },
                         { tab: 'audit', label: 'Audit Logs', desc: 'System-wide activity', icon: Eye, count: null, accent: 'purple' },
                         { tab: 'system', label: 'Feature Flags', desc: 'Module & feature control', icon: Flag, count: null, accent: 'cyan' },
                       ].map(({ tab, label, desc, icon: Icon, count, accent }) => (
@@ -241,7 +259,7 @@ export default function InferaAdminDashboard() {
                           onClick={() => setActiveTab(tab)}
                           className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 hover:bg-slate-800/60 border border-slate-700/30 hover:border-slate-600/50 transition-all text-left"
                         >
-                          <Icon className={`h-5 w-5 ${accent === 'amber' ? 'text-amber-400' : accent === 'blue' ? 'text-blue-400' : accent === 'emerald' ? 'text-emerald-400' : accent === 'purple' ? 'text-purple-400' : 'text-cyan-400'}`} />
+                          <Icon className={`h-5 w-5 ${accent === 'amber' ? 'text-amber-400' : accent === 'blue' ? 'text-blue-400' : accent === 'emerald' ? 'text-emerald-400' : accent === 'purple' ? 'text-purple-400' : accent === 'red' ? 'text-red-400' : 'text-cyan-400'}`} />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-slate-200">{label}</div>
                             <div className="text-xs text-slate-500">{desc}</div>
@@ -287,6 +305,18 @@ export default function InferaAdminDashboard() {
 
           <TabsContent value="billing">
             <BillingDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence">
+            <PlatformIntelligence />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityCompliance />
+          </TabsContent>
+
+          <TabsContent value="risk">
+            <PlatformRiskDashboard />
           </TabsContent>
 
           <TabsContent value="audit">
