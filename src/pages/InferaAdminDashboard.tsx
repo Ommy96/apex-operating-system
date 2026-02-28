@@ -118,6 +118,10 @@ export default function InferaAdminDashboard() {
                 <Building2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Tenants</span>
               </TabsTrigger>
+              <TabsTrigger value="intelligence" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Intelligence</span>
+              </TabsTrigger>
               <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Users</span>
@@ -126,13 +130,21 @@ export default function InferaAdminDashboard() {
                 <CreditCard className="h-4 w-4" />
                 <span className="hidden sm:inline">Revenue</span>
               </TabsTrigger>
+              <TabsTrigger value="security" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
+              <TabsTrigger value="risk" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="hidden sm:inline">Risk</span>
+              </TabsTrigger>
               <TabsTrigger value="audit" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Eye className="h-4 w-4" />
                 <span className="hidden sm:inline">Audit</span>
               </TabsTrigger>
               <TabsTrigger value="system" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Flag className="h-4 w-4" />
-                <span className="hidden sm:inline">Feature Flags</span>
+                <span className="hidden sm:inline">Flags</span>
               </TabsTrigger>
             </TabsList>
           </div>
