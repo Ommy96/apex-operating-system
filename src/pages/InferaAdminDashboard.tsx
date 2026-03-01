@@ -150,6 +150,22 @@ export default function InferaAdminDashboard() {
                 <Flag className="h-4 w-4" />
                 <span className="hidden sm:inline">Flags</span>
               </TabsTrigger>
+              <TabsTrigger value="config" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Config</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Brain className="h-4 w-4" />
+                <span className="hidden sm:inline">AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="whitelabel" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Palette className="h-4 w-4" />
+                <span className="hidden sm:inline">Branding</span>
+              </TabsTrigger>
+              <TabsTrigger value="comms" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Megaphone className="h-4 w-4" />
+                <span className="hidden sm:inline">Comms</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
