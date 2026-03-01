@@ -350,6 +350,22 @@ export default function InferaAdminDashboard() {
           <TabsContent value="system">
             <SystemMonitoring />
           </TabsContent>
+
+          <TabsContent value="config">
+            <SystemConfiguration />
+          </TabsContent>
+
+          <TabsContent value="ai">
+            <AIGatewayOversight />
+          </TabsContent>
+
+          <TabsContent value="whitelabel">
+            <WhiteLabelManagement />
+          </TabsContent>
+
+          <TabsContent value="comms">
+            <PlatformCommunications />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
