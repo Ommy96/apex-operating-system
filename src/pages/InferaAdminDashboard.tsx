@@ -273,6 +273,10 @@ export default function InferaAdminDashboard() {
                         { tab: 'risk', label: 'Risk Dashboard', desc: 'Platform risk assessment', icon: AlertTriangle, count: null, accent: 'red' },
                         { tab: 'audit', label: 'Audit Logs', desc: 'System-wide activity', icon: Eye, count: null, accent: 'purple' },
                         { tab: 'system', label: 'Feature Flags', desc: 'Module & feature control', icon: Flag, count: null, accent: 'cyan' },
+                        { tab: 'config', label: 'System Config', desc: 'Platform-wide settings', icon: Settings, count: null, accent: 'amber' },
+                        { tab: 'ai', label: 'AI Oversight', desc: 'Gateway usage & costs', icon: Brain, count: null, accent: 'blue' },
+                        { tab: 'whitelabel', label: 'White-Label', desc: 'Tenant branding & domains', icon: Palette, count: null, accent: 'purple' },
+                        { tab: 'comms', label: 'Communications', desc: 'Announcements & banners', icon: Megaphone, count: null, accent: 'cyan' },
                       ].map(({ tab, label, desc, icon: Icon, count, accent }) => (
                         <button
                           key={tab}
