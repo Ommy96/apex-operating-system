@@ -7,7 +7,7 @@ import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, Users, CreditCard, Activity, Shield, Loader2, BarChart3, 
   Flag, Globe, DollarSign, TrendingUp, Heart, Layers, AlertTriangle,
-  FileText, Eye, Zap,
+  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone,
 } from 'lucide-react';
 import { OrganizationManagement } from '@/components/admin/OrganizationManagement';
 import { UserAdministration } from '@/components/admin/UserAdministration';
@@ -17,6 +17,10 @@ import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { PlatformIntelligence } from '@/components/admin/PlatformIntelligence';
 import { SecurityCompliance } from '@/components/admin/SecurityCompliance';
 import { PlatformRiskDashboard } from '@/components/admin/PlatformRiskDashboard';
+import { SystemConfiguration } from '@/components/admin/SystemConfiguration';
+import { AIGatewayOversight } from '@/components/admin/AIGatewayOversight';
+import { WhiteLabelManagement } from '@/components/admin/WhiteLabelManagement';
+import { PlatformCommunications } from '@/components/admin/PlatformCommunications';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
@@ -146,6 +150,22 @@ export default function InferaAdminDashboard() {
                 <Flag className="h-4 w-4" />
                 <span className="hidden sm:inline">Flags</span>
               </TabsTrigger>
+              <TabsTrigger value="config" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Config</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Brain className="h-4 w-4" />
+                <span className="hidden sm:inline">AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="whitelabel" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Palette className="h-4 w-4" />
+                <span className="hidden sm:inline">Branding</span>
+              </TabsTrigger>
+              <TabsTrigger value="comms" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Megaphone className="h-4 w-4" />
+                <span className="hidden sm:inline">Comms</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -253,6 +273,10 @@ export default function InferaAdminDashboard() {
                         { tab: 'risk', label: 'Risk Dashboard', desc: 'Platform risk assessment', icon: AlertTriangle, count: null, accent: 'red' },
                         { tab: 'audit', label: 'Audit Logs', desc: 'System-wide activity', icon: Eye, count: null, accent: 'purple' },
                         { tab: 'system', label: 'Feature Flags', desc: 'Module & feature control', icon: Flag, count: null, accent: 'cyan' },
+                        { tab: 'config', label: 'System Config', desc: 'Platform-wide settings', icon: Settings, count: null, accent: 'amber' },
+                        { tab: 'ai', label: 'AI Oversight', desc: 'Gateway usage & costs', icon: Brain, count: null, accent: 'blue' },
+                        { tab: 'whitelabel', label: 'White-Label', desc: 'Tenant branding & domains', icon: Palette, count: null, accent: 'purple' },
+                        { tab: 'comms', label: 'Communications', desc: 'Announcements & banners', icon: Megaphone, count: null, accent: 'cyan' },
                       ].map(({ tab, label, desc, icon: Icon, count, accent }) => (
                         <button
                           key={tab}
@@ -325,6 +349,22 @@ export default function InferaAdminDashboard() {
 
           <TabsContent value="system">
             <SystemMonitoring />
+          </TabsContent>
+
+          <TabsContent value="config">
+            <SystemConfiguration />
+          </TabsContent>
+
+          <TabsContent value="ai">
+            <AIGatewayOversight />
+          </TabsContent>
+
+          <TabsContent value="whitelabel">
+            <WhiteLabelManagement />
+          </TabsContent>
+
+          <TabsContent value="comms">
+            <PlatformCommunications />
           </TabsContent>
         </Tabs>
       </div>
