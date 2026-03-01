@@ -26,16 +26,18 @@ const superAdminSchema = z.object({
 type SuperAdminFormData = z.infer<typeof superAdminSchema>;
 
 export default function SuperAdminLogin() {
-  const { user, signIn, loading } = useAuth();
+  const { user, signUp, signIn, loading } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const form = useForm<SuperAdminFormData>({
     resolver: zodResolver(superAdminSchema),
     defaultValues: {
-      email: '',
+      email: SUPER_ADMIN_EMAIL,
       password: '',
+      confirmPassword: '',
     },
   });
 
