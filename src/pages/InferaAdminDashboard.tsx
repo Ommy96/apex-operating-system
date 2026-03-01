@@ -7,7 +7,7 @@ import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, Users, CreditCard, Activity, Shield, Loader2, BarChart3, 
   Flag, Globe, DollarSign, TrendingUp, Heart, Layers, AlertTriangle,
-  FileText, Eye, Zap,
+  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone,
 } from 'lucide-react';
 import { OrganizationManagement } from '@/components/admin/OrganizationManagement';
 import { UserAdministration } from '@/components/admin/UserAdministration';
