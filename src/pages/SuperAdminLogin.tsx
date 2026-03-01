@@ -90,7 +90,6 @@ export default function SuperAdminLogin() {
   const handleSubmit = async (data: SuperAdminFormData) => {
     setError(null);
     
-    // Check if email matches super admin before attempting login
     if (!isSuperAdmin(data.email)) {
       setError('Access denied. This portal is restricted to system administrators.');
       return;
@@ -98,8 +97,35 @@ export default function SuperAdminLogin() {
 
     setIsLoading(true);
     try {
-      await signIn(data.email, data.password);
-      // Navigation will happen automatically via the redirect above
+      if (isRegistering) {
+        // First-time setup: create the super admin account
+        const { error: signUpError } = await signUp(data.email, data.password, 'Super Admin');
+        if (signUpError) {
+          setError(signUpError.message || 'Registration failed');
+          return;
+        }
+        // Try signing in immediately (auto-confirm may be enabled)
+        const { error: signInError } = await signIn(data.email, data.password);
+        if (signInError) {
+          // Account created but needs email confirmation
+          setError(null);
+          setIsRegistering(false);
+          toast({
+            title: "Account Created",
+            description: "Super admin account created. Please check your email to confirm, then sign in.",
+          });
+        }
+      } else {
+        const { error: signInError } = await signIn(data.email, data.password);
+        if (signInError) {
+          // If login fails with "Invalid login credentials", suggest registration
+          if (signInError.message?.includes('Invalid login credentials')) {
+            setError('No account found. Use "First-Time Setup" to create your admin account.');
+          } else {
+            setError(signInError.message || 'Authentication failed');
+          }
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -109,7 +135,6 @@ export default function SuperAdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -130,10 +155,12 @@ export default function SuperAdminLogin() {
           </div>
           
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-            System Administrator
+            {isRegistering ? 'First-Time Setup' : 'System Administrator'}
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Infera Platform Administration Portal
+            {isRegistering 
+              ? 'Create your super admin account to get started' 
+              : 'Infera Platform Administration Portal'}
           </CardDescription>
         </CardHeader>
         
@@ -158,8 +185,9 @@ export default function SuperAdminLogin() {
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                         <Input 
                           type="email"
-                          placeholder="Enter admin email" 
-                          className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20" 
+                          placeholder="Enter admin email"
+                          disabled
+                          className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-70" 
                           {...field} 
                         />
                       </div>
@@ -180,7 +208,7 @@ export default function SuperAdminLogin() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                         <Input 
                           type="password" 
-                          placeholder="Enter password" 
+                          placeholder={isRegistering ? "Create a strong password" : "Enter password"}
                           className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20" 
                           {...field} 
                         />
@@ -190,6 +218,30 @@ export default function SuperAdminLogin() {
                   </FormItem>
                 )}
               />
+
+              {isRegistering && (
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-300 font-medium">Confirm Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                          <Input 
+                            type="password" 
+                            placeholder="Confirm your password"
+                            className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20" 
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               
               <Button 
                 type="submit" 
@@ -199,12 +251,12 @@ export default function SuperAdminLogin() {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Authenticating...
+                    {isRegistering ? 'Creating Account...' : 'Authenticating...'}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4" />
-                    Access Admin Portal
+                    {isRegistering ? 'Create Admin Account' : 'Access Admin Portal'}
                   </div>
                 )}
               </Button>
@@ -212,7 +264,20 @@ export default function SuperAdminLogin() {
           </Form>
 
           <div className="mt-6 pt-4 border-t border-slate-700">
-            <p className="text-center text-xs text-slate-500">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setError(null);
+                form.setValue('confirmPassword', '');
+              }}
+              className="w-full text-center text-sm text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              {isRegistering 
+                ? '← Back to Sign In' 
+                : 'First time? Set up your admin account →'}
+            </button>
+            <p className="text-center text-xs text-slate-500 mt-3">
               This portal is exclusively for Infera system administrators.
               <br />
               Unauthorized access attempts are logged.
