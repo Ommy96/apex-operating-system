@@ -84,7 +84,7 @@ export function IntegrationSettings({ section }: Props) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {service.status === 'connected' && <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Connected</Badge>}
+                  {service.status === 'connected' && <Badge variant="secondary" className="border-primary/20 text-primary">Connected</Badge>}
                   {service.status === 'coming_soon' && <Badge variant="outline" className="text-xs">Coming Soon</Badge>}
                   {service.status === 'available' && (
                     <Button variant="outline" size="sm" disabled={!isAdmin}>Connect</Button>
