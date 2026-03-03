@@ -16,6 +16,7 @@ import { BeneficiaryAcademicsTab } from '@/components/beneficiary/BeneficiaryAca
 import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploadsTab';
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
+import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -661,6 +662,12 @@ export default function BeneficiaryProfile() {
         {/* Academics Tab (Students Only) */}
         {beneficiary.beneficiary_type === 'student' && (
           <TabsContent value="academics" className="space-y-4">
+            <AcademicProgressionInfo 
+              beneficiaryId={beneficiary.id}
+              currentGrade={beneficiary.grade}
+              currentLevel={beneficiary.academic_level}
+              status={beneficiary.status}
+            />
             <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
           </TabsContent>
         )}
