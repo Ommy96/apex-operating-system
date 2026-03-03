@@ -18,6 +18,7 @@ import { SiblingSelector } from './SiblingSelector';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
 import { User, Users, Heart, FileText, Loader2 } from 'lucide-react';
+import { ACADEMIC_LEVEL_GRADE_MAP, ACADEMIC_LEVELS } from '@/lib/academicGradeMapping';
 
 // Guardian data structure
 interface GuardianData {
@@ -85,6 +86,11 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
+
+  const watchedLevel = form.watch('academic_level');
+  const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
+    ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
+    : [];
   
   const { currentOrganization } = useOrganization();
 
@@ -520,21 +526,26 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Academic Level</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Reset grade when level changes
+                                const levelConfig = ACADEMIC_LEVEL_GRADE_MAP[value];
+                                if (levelConfig && !levelConfig.isFreeText) {
+                                  form.setValue('grade', '');
+                                }
+                              }} 
+                              value={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select level" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="Pre Primary">Pre Primary</SelectItem>
-                                <SelectItem value="Lower Primary">Lower Primary</SelectItem>
-                                <SelectItem value="Upper Primary">Upper Primary</SelectItem>
-                                <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
-                                <SelectItem value="Secondary School">Secondary School</SelectItem>
-                                <SelectItem value="Senior School">Senior School</SelectItem>
-                                <SelectItem value="Tertiary">Tertiary</SelectItem>
-                                <SelectItem value="Special School">Special School</SelectItem>
+                                {ACADEMIC_LEVELS.map(level => (
+                                  <SelectItem key={level} value={level}>{level}</SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -556,40 +567,45 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="grade"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Grade/Form/Year</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                      {watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel]?.isFreeText ? (
+                        <FormField
+                          control={form.control}
+                          name="grade"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Enter Grade/Class/Level</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select grade" />
-                                </SelectTrigger>
+                                <Input placeholder="Enter grade or class" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Play Group">Play Group</SelectItem>
-                                <SelectItem value="PP1">PP1</SelectItem>
-                                <SelectItem value="PP2">PP2</SelectItem>
-                                {[1,2,3,4,5,6,7,8,9,10,11,12].map(g => (
-                                  <SelectItem key={g} value={`Grade ${g}`}>Grade {g}</SelectItem>
-                                ))}
-                                {[2,3,4].map(f => (
-                                  <SelectItem key={f} value={`Form ${f}`}>Form {f}</SelectItem>
-                                ))}
-                                {[1,2,3,4].map(y => (
-                                  <SelectItem key={y} value={`${y}${y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} Year`}>
-                                    {y}{y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} Year
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      {form.watch('academic_level') === 'Tertiary' && (
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : (
+                        <FormField
+                          control={form.control}
+                          name="grade"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Grade/Form/Year</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={watchedLevel ? "Select grade" : "Select level first"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {gradeOptions.map(grade => (
+                                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      {watchedLevel === 'Tertiary' && (
                         <FormField
                           control={form.control}
                           name="course_name"
