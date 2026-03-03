@@ -75,10 +75,7 @@ interface Sibling {
   relationship: string;
 }
 
-  const watchedLevel = form.watch('academic_level');
-  const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
-    ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
-    : [];
+
 
 interface StudentBeneficiaryFormProps {
   beneficiary?: any;
@@ -147,6 +144,11 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
       status: beneficiary?.status || 'active',
     },
   });
+
+  const watchedLevel = form.watch('academic_level');
+  const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
+    ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
+    : [];
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
