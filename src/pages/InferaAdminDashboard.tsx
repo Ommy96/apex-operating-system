@@ -113,7 +113,10 @@ export default function InferaAdminDashboard() {
               <Shield className="h-3 w-3 mr-1" />
               Super Admin
             </Badge>
-          </div>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400 hover:text-red-400 hover:bg-slate-800">
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </Button>
         </div>
       </div>
 
