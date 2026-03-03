@@ -69,7 +69,6 @@ export default function InferaAdminDashboard() {
     await signOut();
     navigate('/super-admin');
   };
-  const [activeTab, setActiveTab] = useState('overview');
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
 
