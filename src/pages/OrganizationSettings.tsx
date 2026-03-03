@@ -16,6 +16,7 @@ import { ExecutiveSettings } from '@/components/settings/ExecutiveSettings';
 import { SubscriptionSettings } from '@/components/settings/SubscriptionSettings';
 import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
 import { AISettings } from '@/components/settings/AISettings';
+import { AcademicSettings } from '@/components/settings/AcademicSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,7 @@ export default function OrganizationSettings() {
       case 'int-apis': return <IntegrationSettings section="int-apis" />;
       case 'int-services': return <IntegrationSettings section="int-services" />;
       case 'ai-config': return <AISettings />;
+      case 'academic-config': return <AcademicSettings />;
       default: return <OrganizationProfileSettings />;
     }
   };
