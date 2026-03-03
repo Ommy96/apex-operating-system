@@ -64,7 +64,7 @@ export function AcademicProgressionInfo({ beneficiaryId, currentGrade, currentLe
                 <p className="text-sm text-muted-foreground">Next Grade</p>
                 {isGraduated ? (
                   <p className="text-lg font-bold text-success">Graduated</p>
-                ) : nextInfo && nextInfo !== 'graduated' ? (
+                ) : nextInfo && typeof nextInfo !== 'string' ? (
                   <>
                     <p className="text-lg font-bold text-info">{nextInfo.nextGrade}</p>
                     <p className="text-xs text-muted-foreground">{nextInfo.nextLevel}</p>
