@@ -60,8 +60,15 @@ function StatBlock({ label, value, icon: Icon, accent = 'slate' }: { label: stri
 }
 
 export default function InferaAdminDashboard() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: stats, isLoading } = useSystemStats();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/super-admin');
+  };
   const [activeTab, setActiveTab] = useState('overview');
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
