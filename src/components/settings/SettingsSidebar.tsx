@@ -6,7 +6,7 @@ import {
   TrendingUp, CreditCard, Plug, Brain, Search, ChevronRight,
   Shield, Lock, Bell, Globe, GitBranch, Target, ClipboardList,
   DollarSign, Settings, FileCheck, UserCheck, LayoutDashboard,
-  Key, Webhook,
+  Key, Webhook, GraduationCap,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -56,6 +56,8 @@ const settingsSections: SettingsSection[] = [
   { id: 'int-services', label: 'Connected Services', icon: Plug, description: 'MPesa, QuickBooks, Mailchimp', category: 'Integrations' },
   // AI
   { id: 'ai-config', label: 'AI & Intelligence', icon: Brain, description: 'AI assistant, risk sensitivity', category: 'AI Configuration' },
+  // Academic
+  { id: 'academic-config', label: 'Academic Configuration', icon: GraduationCap, description: 'Grade progression, auto-advancement', category: 'Academic' },
 ];
 
 const categoryIcons: Record<string, any> = {
@@ -70,6 +72,7 @@ const categoryIcons: Record<string, any> = {
   'Subscription': CreditCard,
   'Integrations': Plug,
   'AI Configuration': Brain,
+  'Academic': GraduationCap,
 };
 
 interface SettingsSidebarProps {
