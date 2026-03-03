@@ -117,6 +117,7 @@ export default function InferaAdminDashboard() {
               <LogOut className="h-4 w-4 mr-1" />
               Logout
             </Button>
+          </div>
         </div>
       </div>
 
