@@ -75,11 +75,6 @@ interface Sibling {
   relationship: string;
 }
 
-  const watchedLevel = form.watch('academic_level');
-  const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
-    ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
-    : [];
-
 
 interface StudentBeneficiaryFormProps {
   beneficiary?: any;
