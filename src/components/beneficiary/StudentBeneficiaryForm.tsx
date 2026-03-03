@@ -86,11 +86,6 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
-
-  const watchedLevel = form.watch('academic_level');
-  const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
-    ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
-    : [];
   
   const { currentOrganization } = useOrganization();
 
