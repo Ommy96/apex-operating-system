@@ -7,8 +7,10 @@ import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, Users, CreditCard, Activity, Shield, Loader2, BarChart3, 
   Flag, Globe, DollarSign, TrendingUp, Heart, Layers, AlertTriangle,
-  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone,
+  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone, LogOut,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { OrganizationManagement } from '@/components/admin/OrganizationManagement';
 import { UserAdministration } from '@/components/admin/UserAdministration';
 import { BillingDashboard } from '@/components/admin/BillingDashboard';
@@ -58,9 +60,15 @@ function StatBlock({ label, value, icon: Icon, accent = 'slate' }: { label: stri
 }
 
 export default function InferaAdminDashboard() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: stats, isLoading } = useSystemStats();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/super-admin');
+  };
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
 
@@ -105,6 +113,10 @@ export default function InferaAdminDashboard() {
               <Shield className="h-3 w-3 mr-1" />
               Super Admin
             </Badge>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400 hover:text-red-400 hover:bg-slate-800">
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>
