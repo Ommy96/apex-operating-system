@@ -1230,6 +1230,79 @@ export type Database = {
           },
         ]
       }
+      beneficiary_progression_history: {
+        Row: {
+          academic_year: number
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_repeating: boolean
+          new_academic_level: string | null
+          new_grade: string | null
+          notes: string | null
+          organization_id: string
+          previous_academic_level: string | null
+          previous_grade: string | null
+          progression_date: string
+          progression_type: string
+        }
+        Insert: {
+          academic_year: number
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_repeating?: boolean
+          new_academic_level?: string | null
+          new_grade?: string | null
+          notes?: string | null
+          organization_id: string
+          previous_academic_level?: string | null
+          previous_grade?: string | null
+          progression_date?: string
+          progression_type?: string
+        }
+        Update: {
+          academic_year?: number
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_repeating?: boolean
+          new_academic_level?: string | null
+          new_grade?: string | null
+          notes?: string | null
+          organization_id?: string
+          previous_academic_level?: string | null
+          previous_grade?: string | null
+          progression_date?: string
+          progression_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_progression_history_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_progression_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_progression_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiary_risk_scores: {
         Row: {
           academic_trend_score: number | null
