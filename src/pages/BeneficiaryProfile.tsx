@@ -446,6 +446,7 @@ export default function BeneficiaryProfile() {
                     <GraduationCap className="h-4 w-4 text-success" />
                     <span>{beneficiary.grade}</span>
                   </div>
+                )}
                 {beneficiary.member_count && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4 text-primary" />
