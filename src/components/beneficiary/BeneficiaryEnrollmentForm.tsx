@@ -29,6 +29,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+interface DonorEntry {
+  donor_name: string;
+  amount_received: string;
+  donation_date: string;
+  donor_notes: string;
+}
+
 interface EnrollmentFormData {
   program_id: string;
   project_id: string;
@@ -40,6 +47,13 @@ interface EnrollmentFormData {
   donation_date: string;
   donor_notes: string;
 }
+
+const emptyDonorEntry: DonorEntry = {
+  donor_name: '',
+  amount_received: '',
+  donation_date: new Date().toISOString().split('T')[0],
+  donor_notes: '',
+};
 
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
@@ -67,6 +81,10 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
   const [existingDonors, setExistingDonors] = useState<string[]>([]);
+  // Add Donor to existing enrollment
+  const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
+  const [newDonorEntry, setNewDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
+  const [addDonorPopoverOpen, setAddDonorPopoverOpen] = useState(false);
 
   // Fetch existing donor names for the combobox
   useEffect(() => {
@@ -245,6 +263,37 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     },
     onError: (error) => toast.error('Failed to delete donor: ' + error.message),
   });
+
+  const addDonorMutation = useMutation({
+    mutationFn: async ({ programId, donor }: { programId: string; donor: DonorEntry }) => {
+      if (!currentOrganization?.organization_id) throw new Error('No organization');
+      if (!donor.donor_name.trim()) throw new Error('Donor name is required');
+      const { error } = await supabase.from('beneficiary_donors').insert([{
+        organization_id: currentOrganization.organization_id,
+        beneficiary_id: beneficiaryId,
+        program_id: programId,
+        donor_name: donor.donor_name.trim(),
+        amount_received: donor.amount_received ? parseFloat(donor.amount_received) : null,
+        donation_date: donor.donation_date || null,
+        notes: donor.donor_notes || null,
+        created_by: user?.id,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      toast.success('Donor added successfully');
+      setAddDonorForProgramId(null);
+      setNewDonorEntry(emptyDonorEntry);
+    },
+    onError: (error) => toast.error('Failed to add donor: ' + error.message),
+  });
+
+  const handleAddDonorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addDonorForProgramId) return;
+    addDonorMutation.mutate({ programId: addDonorForProgramId, donor: newDonorEntry });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -555,47 +604,61 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                   </div>
 
                   {/* Donors for this program */}
-                  {programDonors.length > 0 && (
-                    <>
-                      <Separator />
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                          <Heart className="h-3 w-3 text-success" />
-                          Sponsors
-                        </p>
-                        {programDonors.map((donor: any) => (
-                          <div key={donor.id} className="flex items-center justify-between bg-success/5 border border-success/20 rounded-md px-3 py-2">
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-medium text-foreground">{donor.donor_name}</p>
-                              {donor.donation_date && (
-                                <p className="text-xs text-muted-foreground">
-                                  {format(new Date(donor.donation_date), 'MMM d, yyyy')}
-                                </p>
-                              )}
-                              {donor.notes && (
-                                <p className="text-xs text-muted-foreground">{donor.notes}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {donor.amount_received && (
-                                <Badge className="bg-success/20 text-success border-success/30 text-xs">
-                                  KSH {donor.amount_received.toLocaleString()}
-                                </Badge>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
-                                onClick={() => setDeleteDonorId(donor.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Heart className="h-3 w-3 text-success" />
+                        Sponsors ({programDonors.length})
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          setAddDonorForProgramId(programId);
+                          setNewDonorEntry(emptyDonorEntry);
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Donor
+                      </Button>
+                    </div>
+                    {programDonors.length === 0 && (
+                      <p className="text-xs text-muted-foreground italic py-1">No sponsors linked to this program yet</p>
+                    )}
+                    {programDonors.map((donor: any) => (
+                      <div key={donor.id} className="flex items-center justify-between bg-success/5 border border-success/20 rounded-md px-3 py-2">
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium text-foreground">{donor.donor_name}</p>
+                          {donor.donation_date && (
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(donor.donation_date), 'MMM d, yyyy')}
+                            </p>
+                          )}
+                          {donor.notes && (
+                            <p className="text-xs text-muted-foreground">{donor.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {donor.amount_received && (
+                            <Badge className="bg-success/20 text-success border-success/30 text-xs">
+                              KSH {donor.amount_received.toLocaleString()}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteDonorId(donor.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
-                    </>
-                  )}
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -644,6 +707,107 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Donor to existing enrollment dialog */}
+      <Dialog open={!!addDonorForProgramId} onOpenChange={(open) => { if (!open) setAddDonorForProgramId(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-success" />
+              Add Donor / Sponsor
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddDonorSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Donor Name *</Label>
+              <Popover open={addDonorPopoverOpen} onOpenChange={setAddDonorPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between font-normal"
+                  >
+                    {newDonorEntry.donor_name || "Select or type donor name"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or type new donor..."
+                      onValueChange={(search) => setNewDonorEntry({ ...newDonorEntry, donor_name: search })}
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        {newDonorEntry.donor_name ? (
+                          <button
+                            type="button"
+                            className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
+                            onClick={() => setAddDonorPopoverOpen(false)}
+                          >
+                            Use "<span className="font-medium">{newDonorEntry.donor_name}</span>"
+                          </button>
+                        ) : "Type a donor name"}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {existingDonors.map((name) => (
+                          <CommandItem
+                            key={name}
+                            value={name}
+                            onSelect={(val) => {
+                              setNewDonorEntry({ ...newDonorEntry, donor_name: val });
+                              setAddDonorPopoverOpen(false);
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", newDonorEntry.donor_name === name ? "opacity-100" : "opacity-0")} />
+                            {name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Amount (KSH)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={newDonorEntry.amount_received}
+                  onChange={(e) => setNewDonorEntry({ ...newDonorEntry, amount_received: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Donation Date</Label>
+                <Input
+                  type="date"
+                  value={newDonorEntry.donation_date}
+                  onChange={(e) => setNewDonorEntry({ ...newDonorEntry, donation_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Notes</Label>
+              <Input
+                placeholder="Additional notes"
+                value={newDonorEntry.donor_notes}
+                onChange={(e) => setNewDonorEntry({ ...newDonorEntry, donor_notes: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setAddDonorForProgramId(null)}>Cancel</Button>
+              <Button type="submit" disabled={addDonorMutation.isPending}>
+                {addDonorMutation.isPending ? 'Adding...' : 'Add Donor'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
