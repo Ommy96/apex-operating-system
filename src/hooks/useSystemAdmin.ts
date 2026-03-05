@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { isSuperAdmin } from '@/lib/superAdmin';
+import { useRealtimeSubscription } from './useRealtimeSubscription';
 
 // Types
 export interface OrganizationWithSubscription {
@@ -373,10 +374,20 @@ export function useGlobalAuditLogs(filters?: { orgId?: string; userId?: string; 
   });
 }
 
-// Hook for system statistics - enhanced
+// Hook for system statistics - enhanced with realtime
 export function useSystemStats() {
   const { user } = useAuth();
   const isSuperAdminUser = isSuperAdmin(user?.email);
+
+  // Real-time subscriptions for live updates
+  useRealtimeSubscription([
+    { table: 'organizations', queryKeys: [['admin-system-stats'], ['admin-all-organizations']], enabled: isSuperAdminUser },
+    { table: 'profiles', queryKeys: [['admin-system-stats'], ['admin-all-users']], enabled: isSuperAdminUser },
+    { table: 'beneficiaries', queryKeys: [['admin-system-stats']], enabled: isSuperAdminUser },
+    { table: 'programs', queryKeys: [['admin-system-stats']], enabled: isSuperAdminUser },
+    { table: 'organization_members', queryKeys: [['admin-system-stats'], ['admin-all-organizations']], enabled: isSuperAdminUser },
+    { table: 'audit_logs', queryKeys: [['admin-audit-logs']], enabled: isSuperAdminUser },
+  ]);
 
   return useQuery({
     queryKey: ['admin-system-stats'],
