@@ -29,6 +29,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+interface DonorEntry {
+  donor_name: string;
+  amount_received: string;
+  donation_date: string;
+  donor_notes: string;
+}
+
 interface EnrollmentFormData {
   program_id: string;
   project_id: string;
@@ -40,6 +47,13 @@ interface EnrollmentFormData {
   donation_date: string;
   donor_notes: string;
 }
+
+const emptyDonorEntry: DonorEntry = {
+  donor_name: '',
+  amount_received: '',
+  donation_date: new Date().toISOString().split('T')[0],
+  donor_notes: '',
+};
 
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
