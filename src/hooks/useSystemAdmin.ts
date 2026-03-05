@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { isSuperAdmin } from '@/lib/superAdmin';
+import { useRealtimeSubscription } from './useRealtimeSubscription';
 
 // Types
 export interface OrganizationWithSubscription {
