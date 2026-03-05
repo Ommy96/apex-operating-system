@@ -604,47 +604,61 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                   </div>
 
                   {/* Donors for this program */}
-                  {programDonors.length > 0 && (
-                    <>
-                      <Separator />
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                          <Heart className="h-3 w-3 text-success" />
-                          Sponsors
-                        </p>
-                        {programDonors.map((donor: any) => (
-                          <div key={donor.id} className="flex items-center justify-between bg-success/5 border border-success/20 rounded-md px-3 py-2">
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-medium text-foreground">{donor.donor_name}</p>
-                              {donor.donation_date && (
-                                <p className="text-xs text-muted-foreground">
-                                  {format(new Date(donor.donation_date), 'MMM d, yyyy')}
-                                </p>
-                              )}
-                              {donor.notes && (
-                                <p className="text-xs text-muted-foreground">{donor.notes}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {donor.amount_received && (
-                                <Badge className="bg-success/20 text-success border-success/30 text-xs">
-                                  KSH {donor.amount_received.toLocaleString()}
-                                </Badge>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
-                                onClick={() => setDeleteDonorId(donor.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Heart className="h-3 w-3 text-success" />
+                        Sponsors ({programDonors.length})
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          setAddDonorForProgramId(programId);
+                          setNewDonorEntry(emptyDonorEntry);
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Donor
+                      </Button>
+                    </div>
+                    {programDonors.length === 0 && (
+                      <p className="text-xs text-muted-foreground italic py-1">No sponsors linked to this program yet</p>
+                    )}
+                    {programDonors.map((donor: any) => (
+                      <div key={donor.id} className="flex items-center justify-between bg-success/5 border border-success/20 rounded-md px-3 py-2">
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium text-foreground">{donor.donor_name}</p>
+                          {donor.donation_date && (
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(donor.donation_date), 'MMM d, yyyy')}
+                            </p>
+                          )}
+                          {donor.notes && (
+                            <p className="text-xs text-muted-foreground">{donor.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {donor.amount_received && (
+                            <Badge className="bg-success/20 text-success border-success/30 text-xs">
+                              KSH {donor.amount_received.toLocaleString()}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteDonorId(donor.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
-                    </>
-                  )}
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             );
