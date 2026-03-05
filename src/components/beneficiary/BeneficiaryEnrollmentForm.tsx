@@ -264,6 +264,37 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     onError: (error) => toast.error('Failed to delete donor: ' + error.message),
   });
 
+  const addDonorMutation = useMutation({
+    mutationFn: async ({ programId, donor }: { programId: string; donor: DonorEntry }) => {
+      if (!currentOrganization?.organization_id) throw new Error('No organization');
+      if (!donor.donor_name.trim()) throw new Error('Donor name is required');
+      const { error } = await supabase.from('beneficiary_donors').insert([{
+        organization_id: currentOrganization.organization_id,
+        beneficiary_id: beneficiaryId,
+        program_id: programId,
+        donor_name: donor.donor_name.trim(),
+        amount_received: donor.amount_received ? parseFloat(donor.amount_received) : null,
+        donation_date: donor.donation_date || null,
+        notes: donor.donor_notes || null,
+        created_by: user?.id,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      toast.success('Donor added successfully');
+      setAddDonorForProgramId(null);
+      setNewDonorEntry(emptyDonorEntry);
+    },
+    onError: (error) => toast.error('Failed to add donor: ' + error.message),
+  });
+
+  const handleAddDonorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addDonorForProgramId) return;
+    addDonorMutation.mutate({ programId: addDonorForProgramId, donor: newDonorEntry });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.program_id) {
