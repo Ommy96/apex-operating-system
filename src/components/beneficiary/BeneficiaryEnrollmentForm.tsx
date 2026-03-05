@@ -81,6 +81,10 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
   const [existingDonors, setExistingDonors] = useState<string[]>([]);
+  // Add Donor to existing enrollment
+  const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
+  const [newDonorEntry, setNewDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
+  const [addDonorPopoverOpen, setAddDonorPopoverOpen] = useState(false);
 
   // Fetch existing donor names for the combobox
   useEffect(() => {
