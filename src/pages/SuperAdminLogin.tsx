@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 import { Shield, Lock, Mail, AlertCircle } from 'lucide-react';
 import { SUPER_ADMIN_EMAIL, isSuperAdmin } from '@/lib/superAdmin';
 
@@ -15,15 +16,8 @@ export default function SuperAdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
-
-  const form = useForm<SuperAdminFormData>({
-    resolver: zodResolver(superAdminSchema),
-    defaultValues: {
-      email: SUPER_ADMIN_EMAIL,
-      password: '',
-      confirmPassword: '',
-    },
-  });
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   if (loading) {
     return (
@@ -36,12 +30,10 @@ export default function SuperAdminLogin() {
     );
   }
 
-  // If user is logged in and is super admin, redirect to admin dashboard
   if (user && isSuperAdmin(user.email)) {
     return <Navigate to="/admin/infera" replace />;
   }
 
-  // If user is logged in but NOT super admin, show access denied
   if (user && !isSuperAdmin(user.email)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
@@ -71,27 +63,30 @@ export default function SuperAdminLogin() {
     );
   }
 
-  const handleSubmit = async (data: SuperAdminFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
-    
-    if (!isSuperAdmin(data.email)) {
-      setError('Access denied. This portal is restricted to system administrators.');
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (isRegistering && password !== confirmPassword) {
+      setError("Passwords don't match");
       return;
     }
 
     setIsLoading(true);
     try {
       if (isRegistering) {
-        // First-time setup: create the super admin account
-        const { error: signUpError } = await signUp(data.email, data.password, 'Super Admin');
+        const { error: signUpError } = await signUp(SUPER_ADMIN_EMAIL, password, 'Super Admin');
         if (signUpError) {
           setError(signUpError.message || 'Registration failed');
           return;
         }
-        // Try signing in immediately (auto-confirm may be enabled)
-        const { error: signInError } = await signIn(data.email, data.password);
+        const { error: signInError } = await signIn(SUPER_ADMIN_EMAIL, password);
         if (signInError) {
-          // Account created but needs email confirmation
           setError(null);
           setIsRegistering(false);
           toast({
@@ -100,9 +95,8 @@ export default function SuperAdminLogin() {
           });
         }
       } else {
-        const { error: signInError } = await signIn(data.email, data.password);
+        const { error: signInError } = await signIn(SUPER_ADMIN_EMAIL, password);
         if (signInError) {
-          // If login fails with "Invalid login credentials", suggest registration
           if (signInError.message?.includes('Invalid login credentials')) {
             setError('No account found. Use "First-Time Setup" to create your admin account.');
           } else {
@@ -127,7 +121,7 @@ export default function SuperAdminLogin() {
 
       <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-slate-800/80 backdrop-blur-xl overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500" />
-        
+
         <CardHeader className="text-center pt-8 pb-4">
           <div className="flex justify-center mb-4">
             <div className="relative group">
@@ -137,17 +131,17 @@ export default function SuperAdminLogin() {
               </div>
             </div>
           </div>
-          
+
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
             {isRegistering ? 'First-Time Setup' : 'System Administrator'}
           </CardTitle>
           <CardDescription className="text-slate-400">
-            {isRegistering 
-              ? 'Create your super admin account to get started' 
+            {isRegistering
+              ? 'Create your super admin account to get started'
               : 'Infera Platform Administration Portal'}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="px-6 pb-8">
           {error && (
             <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-500/30">
@@ -156,96 +150,68 @@ export default function SuperAdminLogin() {
             </Alert>
           )}
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-300 font-medium">Admin Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                        <Input 
-                          type="email"
-                          placeholder="Enter admin email"
-                          disabled
-                          className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-70" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-300 font-medium">Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                        <Input 
-                          type="password" 
-                          placeholder={isRegistering ? "Create a strong password" : "Enter password"}
-                          className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {isRegistering && (
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300 font-medium">Confirm Password</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                          <Input 
-                            type="password" 
-                            placeholder="Confirm your password"
-                            className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20" 
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-slate-300 font-medium">Admin Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Input
+                  type="email"
+                  value={SUPER_ADMIN_EMAIL}
+                  disabled
+                  className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-70"
                 />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-300 font-medium">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Input
+                  type="password"
+                  placeholder={isRegistering ? "Create a strong password" : "Enter password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20"
+                />
+              </div>
+            </div>
+
+            {isRegistering && (
+              <div className="space-y-2">
+                <Label className="text-slate-300 font-medium">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Input
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20"
+                  />
+                </div>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 transition-opacity font-semibold shadow-lg text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {isRegistering ? 'Creating Account...' : 'Authenticating...'}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  {isRegistering ? 'Create Admin Account' : 'Access Admin Portal'}
+                </div>
               )}
-              
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {isRegistering ? 'Creating Account...' : 'Authenticating...'}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {isRegistering ? 'Create Admin Account' : 'Access Admin Portal'}
-                  </div>
-                )}
-              </Button>
-            </form>
-          </Form>
+            </Button>
+          </form>
 
           <div className="mt-6 pt-4 border-t border-slate-700">
             <button
@@ -253,12 +219,12 @@ export default function SuperAdminLogin() {
               onClick={() => {
                 setIsRegistering(!isRegistering);
                 setError(null);
-                form.setValue('confirmPassword', '');
+                setConfirmPassword('');
               }}
               className="w-full text-center text-sm text-amber-400 hover:text-amber-300 transition-colors"
             >
-              {isRegistering 
-                ? '← Back to Sign In' 
+              {isRegistering
+                ? '← Back to Sign In'
                 : 'First time? Set up your admin account →'}
             </button>
             <p className="text-center text-xs text-slate-500 mt-3">
@@ -268,7 +234,7 @@ export default function SuperAdminLogin() {
             </p>
           </div>
         </CardContent>
-        
+
         <div className="h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
       </Card>
     </div>
