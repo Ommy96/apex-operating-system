@@ -6,25 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Shield, Lock, Mail, AlertCircle, Sparkles } from 'lucide-react';
+import { Shield, Lock, Mail, AlertCircle } from 'lucide-react';
 import { SUPER_ADMIN_EMAIL, isSuperAdmin } from '@/lib/superAdmin';
-
-const superAdminSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  if (data.confirmPassword !== undefined) {
-    return data.password === data.confirmPassword;
-  }
-  return true;
-}, { message: "Passwords don't match", path: ["confirmPassword"] });
-
-type SuperAdminFormData = z.infer<typeof superAdminSchema>;
 
 export default function SuperAdminLogin() {
   const { user, signUp, signIn, loading } = useAuth();
