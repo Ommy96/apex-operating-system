@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2, ChevronsUpDown } from 'lucide-react';
+import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2, ChevronsUpDown, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -85,6 +85,10 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
   const [newDonorEntry, setNewDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
   const [addDonorPopoverOpen, setAddDonorPopoverOpen] = useState(false);
+  // Edit Donor
+  const [editDonorId, setEditDonorId] = useState<string | null>(null);
+  const [editDonorEntry, setEditDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
+  const [editDonorPopoverOpen, setEditDonorPopoverOpen] = useState(false);
 
   // Fetch existing donor names for the combobox
   useEffect(() => {
@@ -288,6 +292,45 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     },
     onError: (error) => toast.error('Failed to add donor: ' + error.message),
   });
+
+  const updateDonorMutation = useMutation({
+    mutationFn: async ({ donorId, donor }: { donorId: string; donor: DonorEntry }) => {
+      if (!donor.donor_name.trim()) throw new Error('Donor name is required');
+      const { error } = await supabase
+        .from('beneficiary_donors')
+        .update({
+          donor_name: donor.donor_name.trim(),
+          amount_received: donor.amount_received ? parseFloat(donor.amount_received) : null,
+          donation_date: donor.donation_date || null,
+          notes: donor.donor_notes || null,
+        })
+        .eq('id', donorId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      toast.success('Donor updated successfully');
+      setEditDonorId(null);
+      setEditDonorEntry(emptyDonorEntry);
+    },
+    onError: (error) => toast.error('Failed to update donor: ' + error.message),
+  });
+
+  const handleEditDonorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editDonorId) return;
+    updateDonorMutation.mutate({ donorId: editDonorId, donor: editDonorEntry });
+  };
+
+  const openEditDonor = (donor: any) => {
+    setEditDonorId(donor.id);
+    setEditDonorEntry({
+      donor_name: donor.donor_name || '',
+      amount_received: donor.amount_received?.toString() || '',
+      donation_date: donor.donation_date || new Date().toISOString().split('T')[0],
+      donor_notes: donor.notes || '',
+    });
+  };
 
   const handleAddDonorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -650,6 +693,14 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                            onClick={() => openEditDonor(donor)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-6 w-6 text-destructive hover:text-destructive"
                             onClick={() => setDeleteDonorId(donor.id)}
                           >
@@ -803,6 +854,107 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
               <Button type="button" variant="outline" onClick={() => setAddDonorForProgramId(null)}>Cancel</Button>
               <Button type="submit" disabled={addDonorMutation.isPending}>
                 {addDonorMutation.isPending ? 'Adding...' : 'Add Donor'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Donor dialog */}
+      <Dialog open={!!editDonorId} onOpenChange={(open) => { if (!open) setEditDonorId(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5 text-primary" />
+              Edit Donor / Sponsor
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditDonorSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Donor Name *</Label>
+              <Popover open={editDonorPopoverOpen} onOpenChange={setEditDonorPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between font-normal"
+                  >
+                    {editDonorEntry.donor_name || "Select or type donor name"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or type new donor..."
+                      onValueChange={(search) => setEditDonorEntry({ ...editDonorEntry, donor_name: search })}
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        {editDonorEntry.donor_name ? (
+                          <button
+                            type="button"
+                            className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
+                            onClick={() => setEditDonorPopoverOpen(false)}
+                          >
+                            Use "<span className="font-medium">{editDonorEntry.donor_name}</span>"
+                          </button>
+                        ) : "Type a donor name"}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {existingDonors.map((name) => (
+                          <CommandItem
+                            key={name}
+                            value={name}
+                            onSelect={(val) => {
+                              setEditDonorEntry({ ...editDonorEntry, donor_name: val });
+                              setEditDonorPopoverOpen(false);
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", editDonorEntry.donor_name === name ? "opacity-100" : "opacity-0")} />
+                            {name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Amount (KSH)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={editDonorEntry.amount_received}
+                  onChange={(e) => setEditDonorEntry({ ...editDonorEntry, amount_received: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Donation Date</Label>
+                <Input
+                  type="date"
+                  value={editDonorEntry.donation_date}
+                  onChange={(e) => setEditDonorEntry({ ...editDonorEntry, donation_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Notes</Label>
+              <Input
+                placeholder="Additional notes"
+                value={editDonorEntry.donor_notes}
+                onChange={(e) => setEditDonorEntry({ ...editDonorEntry, donor_notes: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setEditDonorId(null)}>Cancel</Button>
+              <Button type="submit" disabled={updateDonorMutation.isPending}>
+                {updateDonorMutation.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>
