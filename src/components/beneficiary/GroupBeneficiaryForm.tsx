@@ -38,6 +38,7 @@ const groupFormSchema = z.object({
   group_schedule: z.string().optional(),
   group_activities: z.array(z.string()).optional(),
   status: z.string(),
+  funding_required: z.number().optional(),
 });
 
 type GroupFormData = z.infer<typeof groupFormSchema>;
