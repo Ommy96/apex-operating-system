@@ -173,7 +173,7 @@ const Index = () => {
                   </div>
                 ))}
               </div>
-              <p className="text-accent-light mt-6 font-medium">Your data. Your impact. Your control.</p>
+              <p className="text-amber-400 mt-6 font-medium">Your data. Your impact. Your control.</p>
             </div>
           </div>
         </div>
