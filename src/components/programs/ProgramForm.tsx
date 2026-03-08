@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   Plus, MapPin, X, Settings2, Calendar, Users, Target, 
-  FileText, Globe, Sparkles 
+  FileText, Globe, Sparkles, DollarSign 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -215,6 +215,7 @@ const ProgramsManagement = () => {
       target_population: program.target_population || [],
       geographic_coverage: extractGeographicCoverage(program.geographic_coverage),
       objectives: program.objectives || "",
+      annual_funding_required: (program as any).annual_funding_required || 0,
     });
     setIsFormOpen(true);
   };
