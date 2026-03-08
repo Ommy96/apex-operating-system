@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2, ChevronsUpDown, Pencil } from 'lucide-react';
+import { Plus, FolderKanban, X, Check, Heart, DollarSign, Trash2, ChevronsUpDown, Pencil, ChevronDown, ChevronUp, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,84 +30,66 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-interface DonorEntry {
-  donor_name: string;
-  amount_received: string;
-  donation_date: string;
-  donor_notes: string;
-}
-
-interface EnrollmentFormData {
-  program_id: string;
-  project_id: string;
-  enrolled_date: string;
-  notes: string;
-  // Donor fields (optional)
-  donor_name: string;
-  amount_received: string;
-  donation_date: string;
-  donor_notes: string;
-}
-
-const emptyDonorEntry: DonorEntry = {
-  donor_name: '',
-  amount_received: '',
-  donation_date: new Date().toISOString().split('T')[0],
-  donor_notes: '',
-};
-
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
   showTitle?: boolean;
 }
 
-const emptyFormData: EnrollmentFormData = {
-  program_id: '',
-  project_id: '',
-  enrolled_date: new Date().toISOString().split('T')[0],
-  notes: '',
-  donor_name: '',
-  amount_received: '',
-  donation_date: new Date().toISOString().split('T')[0],
-  donor_notes: '',
-};
-
 export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: BeneficiaryEnrollmentFormProps) => {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState<EnrollmentFormData>(emptyFormData);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
+
+  // Enrollment form state
+  const [isEnrollOpen, setIsEnrollOpen] = useState(false);
+  const [enrollProgramId, setEnrollProgramId] = useState('');
+  const [enrollProjectIds, setEnrollProjectIds] = useState<string[]>([]);
+  const [enrollDate, setEnrollDate] = useState(new Date().toISOString().split('T')[0]);
+  const [enrollNotes, setEnrollNotes] = useState('');
+
+  // Donation form state
+  const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [donorName, setDonorName] = useState('');
+  const [donationAmount, setDonationAmount] = useState('');
+  const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
+  const [donationProgramId, setDonationProgramId] = useState('');
+  const [donationNotes, setDonationNotes] = useState('');
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
-  const [existingDonors, setExistingDonors] = useState<string[]>([]);
-  // Add Donor to existing enrollment
-  const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
-  const [newDonorEntry, setNewDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
-  const [addDonorPopoverOpen, setAddDonorPopoverOpen] = useState(false);
-  // Edit Donor
+
+  // Edit donor
   const [editDonorId, setEditDonorId] = useState<string | null>(null);
-  const [editDonorEntry, setEditDonorEntry] = useState<DonorEntry>(emptyDonorEntry);
+  const [editDonorName, setEditDonorName] = useState('');
+  const [editDonorAmount, setEditDonorAmount] = useState('');
+  const [editDonorDate, setEditDonorDate] = useState('');
+  const [editDonorNotes, setEditDonorNotes] = useState('');
   const [editDonorPopoverOpen, setEditDonorPopoverOpen] = useState(false);
 
-  // Fetch existing donor names for the combobox
-  useEffect(() => {
-    if (!currentOrganization?.organization_id) return;
-    supabase
-      .from('beneficiary_donors')
-      .select('donor_name')
-      .eq('organization_id', currentOrganization.organization_id)
-      .then(({ data }) => {
-        if (data) {
-          const unique = [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
-          setExistingDonors(unique);
-        }
-      });
-  }, [currentOrganization?.organization_id]);
+  // Delete confirmations
+  const [deleteEnrollmentId, setDeleteEnrollmentId] = useState<string | null>(null);
+  const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
+
+  // Expanded sections
+  const [expandedDonors, setExpandedDonors] = useState(false);
+
+  // Fetch existing donor names
+  const { data: existingDonors = [] } = useQuery({
+    queryKey: ['existing-donor-names', currentOrganization?.organization_id],
+    queryFn: async () => {
+      if (!currentOrganization?.organization_id) return [];
+      const { data } = await supabase
+        .from('beneficiary_donors')
+        .select('donor_name')
+        .eq('organization_id', currentOrganization.organization_id);
+      if (data) {
+        return [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
+      }
+      return [];
+    },
+    enabled: !!currentOrganization?.organization_id,
+  });
 
   // Fetch programs
-  const { data: programs } = useQuery({
+  const { data: programs = [] } = useQuery({
     queryKey: ['programs-dropdown', currentOrganization?.organization_id],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
@@ -117,28 +100,28 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         .eq('is_active', true)
         .order('name');
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!currentOrganization?.organization_id,
   });
 
-  // Fetch projects for selected program
-  const { data: projects } = useQuery({
-    queryKey: ['projects-dropdown', formData.program_id],
+  // Fetch projects for enrollment form
+  const { data: enrollProjects = [] } = useQuery({
+    queryKey: ['projects-for-enroll', enrollProgramId],
     queryFn: async () => {
-      if (!formData.program_id) return [];
+      if (!enrollProgramId) return [];
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
-        .eq('program_id', formData.program_id)
+        .eq('program_id', enrollProgramId)
         .order('name');
       if (error) throw error;
-      return data;
+      return data || [];
     },
-    enabled: !!formData.program_id,
+    enabled: !!enrollProgramId,
   });
 
-  // Fetch current enrollments
+  // Fetch enrollments
   const { data: enrollments, isLoading } = useQuery({
     queryKey: ['beneficiary-enrollments', beneficiaryId],
     queryFn: async () => {
@@ -152,13 +135,13 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         .eq('beneficiary_id', beneficiaryId)
         .order('enrolled_date', { ascending: false });
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!beneficiaryId,
   });
 
-  // Fetch donors grouped by program
-  const { data: donors } = useQuery({
+  // Fetch donors
+  const { data: donors = [] } = useQuery({
     queryKey: ['beneficiary-donors', beneficiaryId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -167,799 +150,567 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         .eq('beneficiary_id', beneficiaryId)
         .order('donation_date', { ascending: false });
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!beneficiaryId,
   });
 
+  // Group enrollments by program
+  const enrollmentsByProgram = (enrollments || []).reduce((acc, e) => {
+    const progId = (e.programs as any)?.id || 'none';
+    if (!acc[progId]) acc[progId] = { program: e.programs, entries: [] };
+    acc[progId].entries.push(e);
+    return acc;
+  }, {} as Record<string, { program: any; entries: typeof enrollments }>);
+
+  // Enroll mutation - creates one row per project (or one row if no projects selected)
   const enrollMutation = useMutation({
-    mutationFn: async (data: EnrollmentFormData) => {
-      if (!currentOrganization?.organization_id) throw new Error('No organization');
+    mutationFn: async () => {
+      if (!currentOrganization?.organization_id || !enrollProgramId) throw new Error('Missing data');
 
-      // Insert enrollment
-      const { error: enrollError } = await supabase.from('beneficiary_services').insert([{
-        organization_id: currentOrganization.organization_id,
-        beneficiary_id: beneficiaryId,
-        program_id: data.program_id || null,
-        project_id: data.project_id || null,
-        enrolled_date: data.enrolled_date,
-        status: 'Active',
-        notes: data.notes || null,
-        created_by: user?.id,
-      }]);
-      if (enrollError) throw enrollError;
+      const rows = enrollProjectIds.length > 0
+        ? enrollProjectIds.map(projectId => ({
+            organization_id: currentOrganization.organization_id,
+            beneficiary_id: beneficiaryId,
+            program_id: enrollProgramId,
+            project_id: projectId,
+            enrolled_date: enrollDate,
+            status: 'Active',
+            notes: enrollNotes || null,
+            created_by: user?.id,
+          }))
+        : [{
+            organization_id: currentOrganization.organization_id,
+            beneficiary_id: beneficiaryId,
+            program_id: enrollProgramId,
+            project_id: null,
+            enrolled_date: enrollDate,
+            status: 'Active',
+            notes: enrollNotes || null,
+            created_by: user?.id,
+          }];
 
-      // If donor name provided, also insert donor record linked to this program
-      if (data.donor_name.trim()) {
-        const { error: donorError } = await supabase.from('beneficiary_donors').insert([{
-          organization_id: currentOrganization.organization_id,
-          beneficiary_id: beneficiaryId,
-          program_id: data.program_id || null,
-          donor_name: data.donor_name.trim(),
-          amount_received: data.amount_received ? parseFloat(data.amount_received) : null,
-          donation_date: data.donation_date || null,
-          notes: data.donor_notes || null,
-          created_by: user?.id,
-        }]);
-        if (donorError) throw donorError;
-      }
+      const { error } = await supabase.from('beneficiary_services').insert(rows);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
       queryClient.invalidateQueries({ queryKey: ['program-stats'] });
-      toast.success('Enrolled successfully');
-      setFormData(emptyFormData);
-      setIsFormOpen(false);
+      toast.success(`Enrolled in ${enrollProjectIds.length > 1 ? enrollProjectIds.length + ' projects' : 'program'} successfully`);
+      resetEnrollForm();
     },
     onError: (error) => toast.error('Failed to enroll: ' + error.message),
   });
 
+  // Add donation mutation
+  const addDonationMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrganization?.organization_id || !donorName.trim()) throw new Error('Donor name required');
+      const { error } = await supabase.from('beneficiary_donors').insert([{
+        organization_id: currentOrganization.organization_id,
+        beneficiary_id: beneficiaryId,
+        program_id: donationProgramId || null,
+        donor_name: donorName.trim(),
+        amount_received: donationAmount ? parseFloat(donationAmount) : null,
+        donation_date: donationDate || null,
+        notes: donationNotes || null,
+        created_by: user?.id,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      toast.success('Donation recorded');
+      resetDonationForm();
+    },
+    onError: (error) => toast.error('Failed: ' + error.message),
+  });
+
+  // Update status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status, exitDate }: { id: string; status: string; exitDate?: string }) => {
       const updates: Record<string, any> = { status };
       if (exitDate) updates.exit_date = exitDate;
       if (status === 'Active') updates.exit_date = null;
-      
-      const { error } = await supabase
-        .from('beneficiary_services')
-        .update(updates)
-        .eq('id', id);
+      const { error } = await supabase.from('beneficiary_services').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['program-stats'] });
       toast.success('Status updated');
     },
-    onError: (error) => toast.error('Failed to update: ' + error.message),
+    onError: (error) => toast.error('Failed: ' + error.message),
   });
 
-  const deleteMutation = useMutation({
+  // Delete enrollment
+  const deleteEnrollmentMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('beneficiary_services')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('beneficiary_services').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['program-stats'] });
       toast.success('Enrollment removed');
-      setDeleteId(null);
+      setDeleteEnrollmentId(null);
     },
-    onError: (error) => toast.error('Failed to delete: ' + error.message),
   });
 
+  // Delete donor
   const deleteDonorMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('beneficiary_donors')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('beneficiary_donors').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
-      toast.success('Donor removed');
+      toast.success('Donation removed');
       setDeleteDonorId(null);
     },
-    onError: (error) => toast.error('Failed to delete donor: ' + error.message),
   });
 
-  const addDonorMutation = useMutation({
-    mutationFn: async ({ programId, donor }: { programId: string; donor: DonorEntry }) => {
-      if (!currentOrganization?.organization_id) throw new Error('No organization');
-      if (!donor.donor_name.trim()) throw new Error('Donor name is required');
-      const { error } = await supabase.from('beneficiary_donors').insert([{
-        organization_id: currentOrganization.organization_id,
-        beneficiary_id: beneficiaryId,
-        program_id: programId,
-        donor_name: donor.donor_name.trim(),
-        amount_received: donor.amount_received ? parseFloat(donor.amount_received) : null,
-        donation_date: donor.donation_date || null,
-        notes: donor.donor_notes || null,
-        created_by: user?.id,
-      }]);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
-      toast.success('Donor added successfully');
-      setAddDonorForProgramId(null);
-      setNewDonorEntry(emptyDonorEntry);
-    },
-    onError: (error) => toast.error('Failed to add donor: ' + error.message),
-  });
-
+  // Update donor
   const updateDonorMutation = useMutation({
-    mutationFn: async ({ donorId, donor }: { donorId: string; donor: DonorEntry }) => {
-      if (!donor.donor_name.trim()) throw new Error('Donor name is required');
-      const { error } = await supabase
-        .from('beneficiary_donors')
-        .update({
-          donor_name: donor.donor_name.trim(),
-          amount_received: donor.amount_received ? parseFloat(donor.amount_received) : null,
-          donation_date: donor.donation_date || null,
-          notes: donor.donor_notes || null,
-        })
-        .eq('id', donorId);
+    mutationFn: async () => {
+      if (!editDonorId || !editDonorName.trim()) throw new Error('Donor name required');
+      const { error } = await supabase.from('beneficiary_donors').update({
+        donor_name: editDonorName.trim(),
+        amount_received: editDonorAmount ? parseFloat(editDonorAmount) : null,
+        donation_date: editDonorDate || null,
+        notes: editDonorNotes || null,
+      }).eq('id', editDonorId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
-      toast.success('Donor updated successfully');
+      toast.success('Donation updated');
       setEditDonorId(null);
-      setEditDonorEntry(emptyDonorEntry);
     },
-    onError: (error) => toast.error('Failed to update donor: ' + error.message),
   });
 
-  const handleEditDonorSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editDonorId) return;
-    updateDonorMutation.mutate({ donorId: editDonorId, donor: editDonorEntry });
+  const resetEnrollForm = () => {
+    setEnrollProgramId('');
+    setEnrollProjectIds([]);
+    setEnrollDate(new Date().toISOString().split('T')[0]);
+    setEnrollNotes('');
+    setIsEnrollOpen(false);
+  };
+
+  const resetDonationForm = () => {
+    setDonorName('');
+    setDonationAmount('');
+    setDonationDate(new Date().toISOString().split('T')[0]);
+    setDonationProgramId('');
+    setDonationNotes('');
+    setIsDonationOpen(false);
+  };
+
+  const toggleProject = (projectId: string) => {
+    setEnrollProjectIds(prev =>
+      prev.includes(projectId) ? prev.filter(id => id !== projectId) : [...prev, projectId]
+    );
   };
 
   const openEditDonor = (donor: any) => {
     setEditDonorId(donor.id);
-    setEditDonorEntry({
-      donor_name: donor.donor_name || '',
-      amount_received: donor.amount_received?.toString() || '',
-      donation_date: donor.donation_date || new Date().toISOString().split('T')[0],
-      donor_notes: donor.notes || '',
-    });
-  };
-
-  const handleAddDonorSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!addDonorForProgramId) return;
-    addDonorMutation.mutate({ programId: addDonorForProgramId, donor: newDonorEntry });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.program_id) {
-      toast.error('Please select a program');
-      return;
-    }
-    enrollMutation.mutate(formData);
+    setEditDonorName(donor.donor_name || '');
+    setEditDonorAmount(donor.amount_received?.toString() || '');
+    setEditDonorDate(donor.donation_date || '');
+    setEditDonorNotes(donor.notes || '');
   };
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case 'Active': return <Badge className="bg-success/10 text-success">Active</Badge>;
-      case 'Completed': return <Badge className="bg-primary/10 text-primary">Completed</Badge>;
-      case 'Dropped': return <Badge className="bg-destructive/10 text-destructive">Dropped</Badge>;
-      case 'Transferred': return <Badge className="bg-warning/10 text-warning">Transferred</Badge>;
+      case 'Active': return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
+      case 'Completed': return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
+      case 'Dropped': return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Dropped</Badge>;
+      case 'Transferred': return <Badge className="bg-warning/10 text-warning border-warning/20">Transferred</Badge>;
       default: return <Badge variant="secondary">{status || 'Unknown'}</Badge>;
     }
   };
 
-  // Get donors for a specific program enrollment
-  const getDonorsForProgram = (programId: string | null | undefined) => {
-    if (!programId || !donors) return [];
-    return donors.filter((d: any) => d.program_id === programId);
-  };
+  // Donor name combobox component
+  const DonorNameCombobox = ({ value, onChange, open, onOpenChange }: {
+    value: string; onChange: (v: string) => void; open: boolean; onOpenChange: (o: boolean) => void;
+  }) => (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+          {value || "Select or type donor name"}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+        <Command>
+          <CommandInput placeholder="Search or type new donor..." onValueChange={onChange} />
+          <CommandList>
+            <CommandEmpty>
+              {value ? (
+                <button type="button" className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded" onClick={() => onOpenChange(false)}>
+                  Use "<span className="font-medium">{value}</span>"
+                </button>
+              ) : "Type a donor name"}
+            </CommandEmpty>
+            <CommandGroup>
+              {existingDonors.map((name) => (
+                <CommandItem key={name} value={name} onSelect={(val) => { onChange(val); onOpenChange(false); }}>
+                  <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
+                  {name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+
+  // Aggregate donation totals
+  const totalDonations = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
+
+  // Enrolled program IDs to prevent duplicate enrollment
+  const enrolledProgramIds = new Set((enrollments || []).map((e: any) => (e.programs as any)?.id).filter(Boolean));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Header with actions */}
       {showTitle && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold">Program Enrollments</h3>
-            <p className="text-sm text-muted-foreground">
-              Manage program enrollments and associated sponsors
-            </p>
+            <h3 className="text-lg font-semibold">Programs & Donations</h3>
+            <p className="text-sm text-muted-foreground">Manage enrollments and record donations</p>
           </div>
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Enroll in Program
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
-              <DialogHeader>
-                <DialogTitle>Enroll in Program</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 pr-1">
-                {/* Program */}
-                <div className="space-y-2">
-                  <Label>Program *</Label>
-                  <Select
-                    value={formData.program_id}
-                    onValueChange={(value) => setFormData({ ...formData, program_id: value, project_id: '' })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a program" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {programs?.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Project */}
-                <div className="space-y-2">
-                  <Label>Project (Optional)</Label>
-                  <Select
-                    value={formData.project_id}
-                    onValueChange={(value) => setFormData({ ...formData, project_id: value })}
-                    disabled={!formData.program_id}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {projects?.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Enrollment Date */}
-                <div className="space-y-2">
-                  <Label>Enrollment Date *</Label>
-                  <Input
-                    type="date"
-                    value={formData.enrolled_date}
-                    onChange={(e) => setFormData({ ...formData, enrolled_date: e.target.value })}
-                    required
-                  />
-                </div>
-
-                {/* Notes */}
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Any additional notes about this enrollment..."
-                    rows={2}
-                  />
-                </div>
-
-                {/* Donor Section - shown when program is selected */}
-                {formData.program_id && (
-                  <>
-                    <Separator />
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Heart className="h-4 w-4 text-success" />
-                        <Label className="text-sm font-semibold">Sponsor / Donor (Optional)</Label>
-                      </div>
-                      <p className="text-xs text-muted-foreground -mt-1">
-                        Add a donor sponsoring this beneficiary for this program
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="col-span-2 space-y-1.5">
-                          <Label className="text-xs">Donor Name</Label>
-                          <Popover open={donorPopoverOpen} onOpenChange={setDonorPopoverOpen}>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={donorPopoverOpen}
-                                className="w-full justify-between font-normal"
-                              >
-                                {formData.donor_name || "Select or type donor name"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-                              <Command>
-                                <CommandInput
-                                  placeholder="Search or type new donor..."
-                                  onValueChange={(search) => {
-                                    setFormData({ ...formData, donor_name: search });
-                                  }}
-                                />
-                                <CommandList>
-                                  <CommandEmpty>
-                                    {formData.donor_name ? (
-                                      <button
-                                        className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
-                                        onClick={() => setDonorPopoverOpen(false)}
-                                      >
-                                        Use "<span className="font-medium">{formData.donor_name}</span>"
-                                      </button>
-                                    ) : (
-                                      "Type a donor name"
-                                    )}
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {existingDonors.map((name) => (
-                                      <CommandItem
-                                        key={name}
-                                        value={name}
-                                        onSelect={(val) => {
-                                          setFormData({ ...formData, donor_name: val });
-                                          setDonorPopoverOpen(false);
-                                        }}
-                                      >
-                                        <Check className={cn("mr-2 h-4 w-4", formData.donor_name === name ? "opacity-100" : "opacity-0")} />
-                                        {name}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Amount (KSH)</Label>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={formData.amount_received}
-                            onChange={(e) => setFormData({ ...formData, amount_received: e.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Donation Date</Label>
-                          <Input
-                            type="date"
-                            value={formData.donation_date}
-                            onChange={(e) => setFormData({ ...formData, donation_date: e.target.value })}
-                          />
-                        </div>
-                        <div className="col-span-2 space-y-1.5">
-                          <Label className="text-xs">Notes</Label>
-                          <Input
-                            placeholder="Additional notes"
-                            value={formData.donor_notes}
-                            onChange={(e) => setFormData({ ...formData, donor_notes: e.target.value })}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={enrollMutation.isPending}>
-                    {enrollMutation.isPending ? 'Enrolling...' : 'Enroll'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setIsDonationOpen(true)}>
+              <DollarSign className="h-4 w-4" />
+              Record Donation
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={() => setIsEnrollOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Enroll in Program
+            </Button>
+          </div>
         </div>
       )}
 
+      {/* ===== ENROLLMENTS SECTION ===== */}
       {isLoading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </div>
-      ) : enrollments?.length === 0 ? (
+      ) : Object.keys(enrollmentsByProgram).length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-8 text-center text-muted-foreground">
             <FolderKanban className="h-10 w-10 mx-auto mb-3 opacity-50" />
             <p>Not enrolled in any programs yet</p>
-            <Button variant="link" onClick={() => setIsFormOpen(true)} className="mt-2">
+            <Button variant="link" onClick={() => setIsEnrollOpen(true)} className="mt-2">
               Enroll in a program
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {enrollments?.map((enrollment) => {
-            const programId = (enrollment.programs as any)?.id;
-            const programDonors = getDonorsForProgram(programId);
-
-            return (
-              <Card key={enrollment.id}>
-                <CardContent className="p-4 space-y-3">
-                  {/* Enrollment header */}
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {(enrollment.programs as { name: string })?.name || 'Unknown Program'}
-                        </span>
-                        {getStatusBadge(enrollment.status)}
-                      </div>
-                      {enrollment.projects && (
-                        <p className="text-sm text-muted-foreground">
-                          Project: {(enrollment.projects as { name: string })?.name}
-                        </p>
-                      )}
-                      <div className="text-xs text-muted-foreground flex items-center gap-3">
-                        <span>Enrolled: {format(new Date(enrollment.enrolled_date), 'MMM d, yyyy')}</span>
-                        {enrollment.exit_date && (
-                          <span>Exited: {format(new Date(enrollment.exit_date), 'MMM d, yyyy')}</span>
-                        )}
-                      </div>
-                      {enrollment.notes && (
-                        <p className="text-sm text-muted-foreground mt-1">{enrollment.notes}</p>
-                      )}
-                    </div>
+          {Object.entries(enrollmentsByProgram).map(([progId, group]) => (
+            <Card key={progId} className="overflow-hidden">
+              <CardContent className="p-0">
+                {/* Program header */}
+                <div className="bg-muted/30 px-4 py-3 border-b border-border/50">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {enrollment.status === 'Active' ? (
-                        <Select
-                          onValueChange={(status) => {
+                      <FolderKanban className="h-4 w-4 text-primary" />
+                      <span className="font-semibold text-sm">{group.program?.name || 'Unknown Program'}</span>
+                      <Badge variant="secondary" className="text-xs">{group.entries.length} enrollment{group.entries.length !== 1 ? 's' : ''}</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enrollment rows */}
+                <div className="divide-y divide-border/50">
+                  {group.entries.map((enrollment) => (
+                    <div key={enrollment.id} className="px-4 py-3 flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {enrollment.projects ? (
+                            <span className="text-sm flex items-center gap-1.5">
+                              <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                              {(enrollment.projects as any)?.name}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground italic">Program-level enrollment</span>
+                          )}
+                          {getStatusBadge(enrollment.status)}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span>Enrolled: {format(new Date(enrollment.enrolled_date), 'MMM d, yyyy')}</span>
+                          {enrollment.exit_date && <span>Exited: {format(new Date(enrollment.exit_date), 'MMM d, yyyy')}</span>}
+                        </div>
+                        {enrollment.notes && <p className="text-xs text-muted-foreground mt-1">{enrollment.notes}</p>}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {enrollment.status === 'Active' ? (
+                          <Select onValueChange={(status) => {
                             updateStatusMutation.mutate({
                               id: enrollment.id,
                               status,
                               exitDate: status !== 'Active' ? new Date().toISOString().split('T')[0] : undefined,
                             });
-                          }}
-                        >
-                          <SelectTrigger className="w-[130px] h-8 text-xs">
-                            <SelectValue placeholder="Change status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Completed">Mark Completed</SelectItem>
-                            <SelectItem value="Dropped">Mark Dropped</SelectItem>
-                            <SelectItem value="Transferred">Mark Transferred</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs"
-                          onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'Active' })}
-                        >
-                          <Check className="h-3 w-3 mr-1" />
-                          Reactivate
+                          }}>
+                            <SelectTrigger className="w-[120px] h-7 text-xs">
+                              <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Completed">Completed</SelectItem>
+                              <SelectItem value="Dropped">Dropped</SelectItem>
+                              <SelectItem value="Transferred">Transferred</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Button variant="outline" size="sm" className="h-7 text-xs"
+                            onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'Active' })}>
+                            Reactivate
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteEnrollmentId(enrollment.id)}>
+                          <X className="h-3.5 w-3.5" />
                         </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => setDeleteId(enrollment.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Donors for this program */}
-                  <Separator />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <Heart className="h-3 w-3 text-success" />
-                        Sponsors ({programDonors.length})
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs gap-1"
-                        onClick={() => {
-                          setAddDonorForProgramId(programId);
-                          setNewDonorEntry(emptyDonorEntry);
-                        }}
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Donor
-                      </Button>
-                    </div>
-                    {programDonors.length === 0 && (
-                      <p className="text-xs text-muted-foreground italic py-1">No sponsors linked to this program yet</p>
-                    )}
-                    {programDonors.map((donor: any) => (
-                      <div key={donor.id} className="flex items-center justify-between bg-success/5 border border-success/20 rounded-md px-3 py-2">
-                        <div className="space-y-0.5">
-                          <p className="text-sm font-medium text-foreground">{donor.donor_name}</p>
-                          {donor.donation_date && (
-                            <p className="text-xs text-muted-foreground">
-                              {format(new Date(donor.donation_date), 'MMM d, yyyy')}
-                            </p>
-                          )}
-                          {donor.notes && (
-                            <p className="text-xs text-muted-foreground">{donor.notes}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {donor.amount_received && (
-                            <Badge className="bg-success/20 text-success border-success/30 text-xs">
-                              KSH {donor.amount_received.toLocaleString()}
-                            </Badge>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                            onClick={() => openEditDonor(donor)}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive hover:text-destructive"
-                            onClick={() => setDeleteDonorId(donor.id)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
-      {/* Enrollment delete dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Enrollment</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove this enrollment record. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
-            >
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* ===== DONATIONS SECTION ===== */}
+      {donors.length > 0 && (
+        <div className="space-y-3">
+          <button
+            onClick={() => setExpandedDonors(!expandedDonors)}
+            className="flex items-center gap-2 w-full text-left group"
+          >
+            <Heart className="h-4 w-4 text-success" />
+            <span className="font-semibold text-sm">Donation History ({donors.length})</span>
+            <Badge variant="secondary" className="text-xs font-mono">KES {totalDonations.toLocaleString()}</Badge>
+            {expandedDonors ? <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" /> : <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />}
+          </button>
 
-      {/* Donor delete dialog */}
-      <AlertDialog open={!!deleteDonorId} onOpenChange={() => setDeleteDonorId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Sponsor</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove this sponsor record. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteDonorId && deleteDonorMutation.mutate(deleteDonorId)}
-            >
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          {expandedDonors && (
+            <div className="space-y-2">
+              {donors.map((donor: any) => (
+                <div key={donor.id} className="flex items-center justify-between bg-muted/30 border border-border/50 rounded-lg px-3 py-2.5">
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium">{donor.donor_name}</span>
+                      {donor.program?.name && (
+                        <Badge variant="outline" className="text-xs">{donor.program.name}</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      {donor.donation_date && <span>{format(new Date(donor.donation_date), 'MMM d, yyyy')}</span>}
+                      {donor.notes && <span className="truncate max-w-[200px]">{donor.notes}</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {donor.amount_received != null && (
+                      <span className="text-sm font-mono font-semibold text-success">KES {donor.amount_received.toLocaleString()}</span>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDonor(donor)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteDonorId(donor.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Add Donor to existing enrollment dialog */}
-      <Dialog open={!!addDonorForProgramId} onOpenChange={(open) => { if (!open) setAddDonorForProgramId(null); }}>
+      {/* ===== ENROLL DIALOG ===== */}
+      <Dialog open={isEnrollOpen} onOpenChange={setIsEnrollOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-success" />
-              Add Donor / Sponsor
+              <FolderKanban className="h-5 w-5 text-primary" />
+              Enroll in Program
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddDonorSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Donor Name *</Label>
-              <Popover open={addDonorPopoverOpen} onOpenChange={setAddDonorPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between font-normal"
-                  >
-                    {newDonorEntry.donor_name || "Select or type donor name"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search or type new donor..."
-                      onValueChange={(search) => setNewDonorEntry({ ...newDonorEntry, donor_name: search })}
-                    />
-                    <CommandList>
-                      <CommandEmpty>
-                        {newDonorEntry.donor_name ? (
-                          <button
-                            type="button"
-                            className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
-                            onClick={() => setAddDonorPopoverOpen(false)}
-                          >
-                            Use "<span className="font-medium">{newDonorEntry.donor_name}</span>"
-                          </button>
-                        ) : "Type a donor name"}
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {existingDonors.map((name) => (
-                          <CommandItem
-                            key={name}
-                            value={name}
-                            onSelect={(val) => {
-                              setNewDonorEntry({ ...newDonorEntry, donor_name: val });
-                              setAddDonorPopoverOpen(false);
-                            }}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", newDonorEntry.donor_name === name ? "opacity-100" : "opacity-0")} />
-                            {name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+          <form onSubmit={(e) => { e.preventDefault(); enrollMutation.mutate(); }} className="space-y-4">
+            {/* Program */}
+            <div className="space-y-2">
+              <Label>Program *</Label>
+              <Select value={enrollProgramId} onValueChange={(v) => { setEnrollProgramId(v); setEnrollProjectIds([]); }}>
+                <SelectTrigger><SelectValue placeholder="Select a program" /></SelectTrigger>
+                <SelectContent>
+                  {programs.map((p) => (
+                    <SelectItem key={p.id} value={p.id} disabled={enrolledProgramIds.has(p.id)}>
+                      {p.name} {enrolledProgramIds.has(p.id) ? '(enrolled)' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Amount (KSH)</Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={newDonorEntry.amount_received}
-                  onChange={(e) => setNewDonorEntry({ ...newDonorEntry, amount_received: e.target.value })}
-                />
+            {/* Projects - multi-select checkboxes */}
+            {enrollProgramId && enrollProjects.length > 0 && (
+              <div className="space-y-2">
+                <Label>Projects <span className="text-muted-foreground font-normal">(select one or more)</span></Label>
+                <div className="border rounded-lg divide-y max-h-[200px] overflow-y-auto">
+                  {enrollProjects.map((project) => (
+                    <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
+                      <Checkbox
+                        checked={enrollProjectIds.includes(project.id)}
+                        onCheckedChange={() => toggleProject(project.id)}
+                      />
+                      <span className="text-sm">{project.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {enrollProjectIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{enrollProjectIds.length} project{enrollProjectIds.length !== 1 ? 's' : ''} selected</p>
+                )}
               </div>
-              <div className="space-y-1.5">
-                <Label>Donation Date</Label>
-                <Input
-                  type="date"
-                  value={newDonorEntry.donation_date}
-                  onChange={(e) => setNewDonorEntry({ ...newDonorEntry, donation_date: e.target.value })}
-                />
-              </div>
+            )}
+
+            {/* Date */}
+            <div className="space-y-2">
+              <Label>Enrollment Date</Label>
+              <Input type="date" value={enrollDate} onChange={(e) => setEnrollDate(e.target.value)} />
             </div>
 
-            <div className="space-y-1.5">
+            {/* Notes */}
+            <div className="space-y-2">
               <Label>Notes</Label>
-              <Input
-                placeholder="Additional notes"
-                value={newDonorEntry.donor_notes}
-                onChange={(e) => setNewDonorEntry({ ...newDonorEntry, donor_notes: e.target.value })}
-              />
+              <Textarea value={enrollNotes} onChange={(e) => setEnrollNotes(e.target.value)} placeholder="Optional notes..." rows={2} />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setAddDonorForProgramId(null)}>Cancel</Button>
-              <Button type="submit" disabled={addDonorMutation.isPending}>
-                {addDonorMutation.isPending ? 'Adding...' : 'Add Donor'}
+              <Button type="button" variant="outline" onClick={resetEnrollForm}>Cancel</Button>
+              <Button type="submit" disabled={!enrollProgramId || enrollMutation.isPending}>
+                {enrollMutation.isPending ? 'Enrolling...' : 'Enroll'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Donor dialog */}
+      {/* ===== RECORD DONATION DIALOG ===== */}
+      <Dialog open={isDonationOpen} onOpenChange={setIsDonationOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-success" />
+              Record Donation
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); addDonationMutation.mutate(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Donor Name *</Label>
+              <DonorNameCombobox value={donorName} onChange={setDonorName} open={donorPopoverOpen} onOpenChange={setDonorPopoverOpen} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Amount (KES)</Label>
+                <Input type="number" placeholder="0" value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input type="date" value={donationDate} onChange={(e) => setDonationDate(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Program <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Select value={donationProgramId} onValueChange={setDonationProgramId}>
+                <SelectTrigger><SelectValue placeholder="General donation" /></SelectTrigger>
+                <SelectContent>
+                  {programs.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Input placeholder="e.g. Term 1 payment, Monthly support..." value={donationNotes} onChange={(e) => setDonationNotes(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={resetDonationForm}>Cancel</Button>
+              <Button type="submit" disabled={!donorName.trim() || addDonationMutation.isPending}>
+                {addDonationMutation.isPending ? 'Saving...' : 'Record Donation'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== EDIT DONATION DIALOG ===== */}
       <Dialog open={!!editDonorId} onOpenChange={(open) => { if (!open) setEditDonorId(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-primary" />
-              Edit Donor / Sponsor
-            </DialogTitle>
+            <DialogTitle>Edit Donation</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditDonorSubmit} className="space-y-4">
-            <div className="space-y-1.5">
+          <form onSubmit={(e) => { e.preventDefault(); updateDonorMutation.mutate(); }} className="space-y-4">
+            <div className="space-y-2">
               <Label>Donor Name *</Label>
-              <Popover open={editDonorPopoverOpen} onOpenChange={setEditDonorPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between font-normal"
-                  >
-                    {editDonorEntry.donor_name || "Select or type donor name"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search or type new donor..."
-                      onValueChange={(search) => setEditDonorEntry({ ...editDonorEntry, donor_name: search })}
-                    />
-                    <CommandList>
-                      <CommandEmpty>
-                        {editDonorEntry.donor_name ? (
-                          <button
-                            type="button"
-                            className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded"
-                            onClick={() => setEditDonorPopoverOpen(false)}
-                          >
-                            Use "<span className="font-medium">{editDonorEntry.donor_name}</span>"
-                          </button>
-                        ) : "Type a donor name"}
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {existingDonors.map((name) => (
-                          <CommandItem
-                            key={name}
-                            value={name}
-                            onSelect={(val) => {
-                              setEditDonorEntry({ ...editDonorEntry, donor_name: val });
-                              setEditDonorPopoverOpen(false);
-                            }}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", editDonorEntry.donor_name === name ? "opacity-100" : "opacity-0")} />
-                            {name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <DonorNameCombobox value={editDonorName} onChange={setEditDonorName} open={editDonorPopoverOpen} onOpenChange={setEditDonorPopoverOpen} />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Amount (KSH)</Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={editDonorEntry.amount_received}
-                  onChange={(e) => setEditDonorEntry({ ...editDonorEntry, amount_received: e.target.value })}
-                />
+              <div className="space-y-2">
+                <Label>Amount (KES)</Label>
+                <Input type="number" placeholder="0" value={editDonorAmount} onChange={(e) => setEditDonorAmount(e.target.value)} />
               </div>
-              <div className="space-y-1.5">
-                <Label>Donation Date</Label>
-                <Input
-                  type="date"
-                  value={editDonorEntry.donation_date}
-                  onChange={(e) => setEditDonorEntry({ ...editDonorEntry, donation_date: e.target.value })}
-                />
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input type="date" value={editDonorDate} onChange={(e) => setEditDonorDate(e.target.value)} />
               </div>
             </div>
-
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Notes</Label>
-              <Input
-                placeholder="Additional notes"
-                value={editDonorEntry.donor_notes}
-                onChange={(e) => setEditDonorEntry({ ...editDonorEntry, donor_notes: e.target.value })}
-              />
+              <Input placeholder="Notes..." value={editDonorNotes} onChange={(e) => setEditDonorNotes(e.target.value)} />
             </div>
-
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setEditDonorId(null)}>Cancel</Button>
               <Button type="submit" disabled={updateDonorMutation.isPending}>
-                {updateDonorMutation.isPending ? 'Saving...' : 'Save Changes'}
+                {updateDonorMutation.isPending ? 'Saving...' : 'Update'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete enrollment dialog */}
+      <AlertDialog open={!!deleteEnrollmentId} onOpenChange={() => setDeleteEnrollmentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Enrollment</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently remove this enrollment. This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteEnrollmentId && deleteEnrollmentMutation.mutate(deleteEnrollmentId)}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete donor dialog */}
+      <AlertDialog open={!!deleteDonorId} onOpenChange={() => setDeleteDonorId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Donation</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently remove this donation record. This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteDonorId && deleteDonorMutation.mutate(deleteDonorId)}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
