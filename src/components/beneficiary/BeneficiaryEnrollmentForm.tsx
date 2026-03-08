@@ -557,29 +557,28 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         </div>
       )}
 
-      {/* ===== DONATIONS SECTION ===== */}
-      {donors.length > 0 && (
+      {/* ===== GENERAL DONATIONS (not linked to a program) ===== */}
+      {unlinkedDonors.length > 0 && (
         <div className="space-y-3">
           <button
             onClick={() => setExpandedDonors(!expandedDonors)}
             className="flex items-center gap-2 w-full text-left group"
           >
-            <Heart className="h-4 w-4 text-success" />
-            <span className="font-semibold text-sm">Donation History ({donors.length})</span>
-            <Badge variant="secondary" className="text-xs font-mono">KES {totalDonations.toLocaleString()}</Badge>
+            <DollarSign className="h-4 w-4 text-success" />
+            <span className="font-semibold text-sm">General Donations ({unlinkedDonors.length})</span>
+            <Badge variant="secondary" className="text-xs font-mono">
+              KES {unlinkedDonors.reduce((sum, d) => sum + (d.amount_received || 0), 0).toLocaleString()}
+            </Badge>
             {expandedDonors ? <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" /> : <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />}
           </button>
 
           {expandedDonors && (
             <div className="space-y-2">
-              {donors.map((donor: any) => (
+              {unlinkedDonors.map((donor: any) => (
                 <div key={donor.id} className="flex items-center justify-between bg-muted/30 border border-border/50 rounded-lg px-3 py-2.5">
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium">{donor.donor_name}</span>
-                      {donor.program?.name && (
-                        <Badge variant="outline" className="text-xs">{donor.program.name}</Badge>
-                      )}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {donor.donation_date && <span>{format(new Date(donor.donation_date), 'MMM d, yyyy')}</span>}
