@@ -117,31 +117,19 @@ export function DonorPortalSettings() {
     if (!orgId || !newDonorName.trim() || !newDonorEmail.trim() || !newDonorPassword.trim()) return;
     setCreating(true);
     try {
-      // Create auth user via Supabase admin (this will use the regular signUp)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newDonorEmail.trim(),
-        password: newDonorPassword.trim(),
-        options: {
-          data: { full_name: newDonorName.trim(), is_donor: true },
+      // Create donor via edge function (uses admin API, doesn't affect current session)
+      const { data, error } = await supabase.functions.invoke('create-donor-account', {
+        body: {
+          email: newDonorEmail.trim(),
+          password: newDonorPassword.trim(),
+          donor_name: newDonorName.trim(),
+          phone: newDonorPhone.trim() || null,
+          organization_id: orgId,
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create user');
-
-      // Create donor account record
-      const { error: donorError } = await supabase
-        .from('donor_accounts')
-        .insert({
-          user_id: authData.user.id,
-          donor_name: newDonorName.trim(),
-          email: newDonorEmail.trim(),
-          phone: newDonorPhone.trim() || null,
-          organization_id: orgId,
-          is_active: true,
-        } as any);
-
-      if (donorError) throw donorError;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       queryClient.invalidateQueries({ queryKey: ['donor-accounts'] });
       toast.success('Donor account created successfully');
