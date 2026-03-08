@@ -164,9 +164,9 @@ const ProjectDashboard = () => {
 
   // Funding calculations
   const totalBudget = project?.budget || 0;
-  const totalGrantFunding = grants.reduce((sum: number, g: any) => sum + (g.amount || 0), 0);
+  const totalDirectFunding = projectFunding.reduce((sum: number, g: any) => sum + (g.amount || 0), 0);
   const totalDonorFunding = donorContributions.reduce((sum: number, d: any) => sum + (d.amount_received || 0), 0);
-  const totalFunding = totalGrantFunding + totalDonorFunding;
+  const totalFunding = totalDirectFunding + totalDonorFunding;
   const totalExpenses = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
   const totalFundingRequired = enrolledBeneficiaries.reduce((sum: number, b: any) => sum + (b.funding_required || 0), 0);
   const fundingGap = Math.max(totalFundingRequired - totalFunding, 0);
