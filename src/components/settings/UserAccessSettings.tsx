@@ -35,6 +35,12 @@ export function UserAccessSettings({ section }: Props) {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
 
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberPassword, setNewMemberPassword] = useState('');
+  const [newMemberRole, setNewMemberRole] = useState('member');
+
   const { data: members, isLoading: membersLoading } = useQuery({
     queryKey: ['organization-members', currentOrganization?.organization_id],
     queryFn: async () => {
