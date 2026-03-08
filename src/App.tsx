@@ -207,6 +207,11 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/field-mode" element={
+              <ProtectedRoute>
+                <FieldMode />
+              </ProtectedRoute>
+            } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>
