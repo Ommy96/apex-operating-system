@@ -30,6 +30,7 @@ export interface ProgramFormData {
   target_population: string[];
   geographic_coverage: string;
   objectives: string;
+  annual_funding_required: number;
 }
 
 interface ProgramFormProps {
