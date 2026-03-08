@@ -245,41 +245,86 @@ export function UserAccessSettings({ section }: Props) {
               <CardDescription>Manage team members and their access</CardDescription>
             </div>
             {isAdmin && (
-              <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2"><UserPlus className="h-4 w-4" /> Invite Member</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Invite a New Member</DialogTitle>
-                    <DialogDescription>Send an invitation to join {currentOrganization?.organization_name}</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Email Address</Label>
-                      <Input type="email" placeholder="colleague@example.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2"><UserPlus className="h-4 w-4" /> Create Member</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create a New Member</DialogTitle>
+                      <DialogDescription>Create an account and add them to {currentOrganization?.organization_name}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Full Name</Label>
+                        <Input placeholder="John Doe" value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email Address</Label>
+                        <Input type="email" placeholder="member@example.com" value={newMemberEmail} onChange={(e) => setNewMemberEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Password</Label>
+                        <Input type="password" placeholder="Min 6 characters" value={newMemberPassword} onChange={(e) => setNewMemberPassword(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Role</Label>
+                        <Select value={newMemberRole} onValueChange={setNewMemberRole}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Role</Label>
-                      <Select value={inviteRole} onValueChange={setInviteRole}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="member">Member</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+                      <Button onClick={() => createMemberMutation.mutate()} disabled={createMemberMutation.isPending || !newMemberEmail || !newMemberName || !newMemberPassword} className="gap-2">
+                        {createMemberMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                        Create Member
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="gap-2"><Send className="h-4 w-4" /> Invite Member</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Invite a New Member</DialogTitle>
+                      <DialogDescription>Send an invitation to join {currentOrganization?.organization_name}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Email Address</Label>
+                        <Input type="email" placeholder="colleague@example.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Role</Label>
+                        <Select value={inviteRole} onValueChange={setInviteRole}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={() => sendInviteMutation.mutate()} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
-                      {sendInviteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      Send Invitation
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
+                      <Button onClick={() => sendInviteMutation.mutate()} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
+                        {sendInviteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        Send Invitation
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             )}
           </div>
         </CardHeader>
