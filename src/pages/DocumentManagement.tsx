@@ -115,6 +115,8 @@ export default function DocumentManagement() {
     setUploadCategory("general");
     setUploadTags("");
     setUploadFile(null);
+    setUploadDonorVisible(false);
+    setUploadDocType("general");
   };
 
   const openDetail = async (doc: ManagedDocument) => {
