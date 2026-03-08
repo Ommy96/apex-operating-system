@@ -73,6 +73,8 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
   });
 
   const status = watch("status");
+  const sponsorshipRequired = watch("sponsorship_required");
+  const fundingCycle = watch("funding_cycle");
 
   // Populate form when editing
   useEffect(() => {
