@@ -443,6 +443,11 @@ export default function BeneficiaryProfile() {
               <span className="hidden sm:inline">Timeline</span>
               <span className="sm:hidden">Time</span>
             </TabsTrigger>
+            <TabsTrigger value="risk" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Risk</span>
+              <span className="sm:hidden">Risk</span>
+            </TabsTrigger>
             {beneficiary.beneficiary_type === 'student' && (
               <>
                 <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
