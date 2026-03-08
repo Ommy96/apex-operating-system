@@ -65,6 +65,7 @@ export default function OrganizationSettings() {
       case 'int-services': return <IntegrationSettings section="int-services" />;
       case 'ai-config': return <AISettings />;
       case 'academic-config': return <AcademicSettings />;
+      case 'donor-portal': return <DonorPortalSettings />;
       default: return <OrganizationProfileSettings />;
     }
   };

@@ -70,6 +70,7 @@ const categoryIcons: Record<string, any> = {
   'Automation': Zap,
   'Compliance': FileText,
   'Partners & Volunteers': Handshake,
+  'Donor Portal': Heart,
   'Executive Intelligence': TrendingUp,
   'Subscription': CreditCard,
   'Integrations': Plug,
