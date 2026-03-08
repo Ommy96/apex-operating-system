@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, Banknote } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, Banknote, Eye } from "lucide-react";
 import { ProjectForm } from "./ProjectForm";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ interface ProgramProjectsProps {
 
 export function ProgramProjects({ programId }: ProgramProjectsProps) {
   const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -160,10 +162,10 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
               </TableHeader>
               <TableBody>
                 {projects?.map((project) => (
-                  <TableRow key={project.id}>
+                  <TableRow key={project.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/projects/dashboard/${project.id}`)}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{project.name}</p>
+                        <p className="font-medium text-primary hover:underline">{project.name}</p>
                         {project.project_code && (
                           <p className="text-xs text-muted-foreground">{project.project_code}</p>
                         )}
@@ -221,12 +223,16 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(project)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/projects/dashboard/${project.id}`); }}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Dashboard
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(project); }}>
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => setDeleteProject(project)}
+                            onClick={(e) => { e.stopPropagation(); setDeleteProject(project); }}
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
