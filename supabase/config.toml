@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.create-org-member]
 verify_jwt = false
+
+[functions.delete-org-member]
+verify_jwt = false
