@@ -162,10 +162,10 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
               </TableHeader>
               <TableBody>
                 {projects?.map((project) => (
-                  <TableRow key={project.id}>
+                  <TableRow key={project.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/projects/dashboard/${project.id}`)}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{project.name}</p>
+                        <p className="font-medium text-primary hover:underline">{project.name}</p>
                         {project.project_code && (
                           <p className="text-xs text-muted-foreground">{project.project_code}</p>
                         )}
