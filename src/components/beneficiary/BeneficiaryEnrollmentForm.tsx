@@ -56,6 +56,9 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [donationNotes, setDonationNotes] = useState('');
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
 
+  // Add donor for specific program (shortcut from enrollment card)
+  const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
+
   // Edit donor
   const [editDonorId, setEditDonorId] = useState<string | null>(null);
   const [editDonorName, setEditDonorName] = useState('');
