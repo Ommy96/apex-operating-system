@@ -189,7 +189,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate('/auth')}
-              className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg px-8"
+              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 px-8 border-0"
             >
               Request a Demo
               <ArrowRight className="w-5 h-5 ml-2" />
