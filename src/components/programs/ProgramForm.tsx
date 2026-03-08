@@ -360,6 +360,25 @@ export const ProgramForm = ({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="annual_funding_required" className="text-sm font-medium flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Annual Funding Required (per Beneficiary)
+                </Label>
+                <Input
+                  id="annual_funding_required"
+                  type="number"
+                  min="0"
+                  value={formData.annual_funding_required || ''}
+                  onChange={(e) => onChange({ ...formData, annual_funding_required: parseFloat(e.target.value) || 0 })}
+                  placeholder="e.g., 50000"
+                  className="h-10"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The annual amount needed per beneficiary enrolled in this program (KES)
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="geographic_coverage" className="text-sm font-medium flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   Geographic Coverage
