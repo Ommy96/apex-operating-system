@@ -143,6 +143,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
       religion: beneficiary?.religion || '',
       background_image_url: beneficiary?.background_image_url || '',
       status: beneficiary?.status || 'active',
+      funding_required: beneficiary?.funding_required || undefined,
     },
   });
 
