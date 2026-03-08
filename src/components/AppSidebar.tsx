@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation, UserCheck, GitBranch,
-  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2,
+  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, Heart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
