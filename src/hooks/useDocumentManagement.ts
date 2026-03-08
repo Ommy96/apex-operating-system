@@ -134,12 +134,16 @@ export function useDocumentManagement() {
       category,
       tags,
       file,
+      donor_visible,
+      document_type,
     }: {
       title: string;
       description?: string;
       category: string;
       tags?: string[];
       file: File;
+      donor_visible?: boolean;
+      document_type?: string;
     }) => {
       if (!orgId || !user) throw new Error("Not authenticated");
 
@@ -161,7 +165,9 @@ export function useDocumentManagement() {
           current_file_type: file.type,
           created_by: user.id,
           updated_by: user.id,
-        })
+          donor_visible: donor_visible || false,
+          document_type: document_type || 'general',
+        } as any)
         .select()
         .single();
       if (docError) throw docError;
@@ -274,6 +280,8 @@ export function useDocumentManagement() {
       category,
       tags,
       status,
+      donor_visible,
+      document_type,
     }: {
       id: string;
       title?: string;
@@ -281,6 +289,8 @@ export function useDocumentManagement() {
       category?: string;
       tags?: string[];
       status?: string;
+      donor_visible?: boolean;
+      document_type?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
       const updates: any = { updated_by: user.id };
@@ -289,6 +299,8 @@ export function useDocumentManagement() {
       if (category !== undefined) updates.category = category;
       if (tags !== undefined) updates.tags = tags;
       if (status !== undefined) updates.status = status;
+      if (donor_visible !== undefined) updates.donor_visible = donor_visible;
+      if (document_type !== undefined) updates.document_type = document_type;
 
       const { error } = await supabase
         .from("managed_documents")

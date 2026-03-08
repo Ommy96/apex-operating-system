@@ -46,6 +46,8 @@ const BranchManagement = lazy(() => import("./pages/BranchManagement"));
 const PartnerCollaboration = lazy(() => import("./pages/PartnerCollaboration"));
 const RiskIntelligence = lazy(() => import("./pages/RiskIntelligence"));
 const FieldMode = lazy(() => import("./pages/FieldMode"));
+const DonorAuth = lazy(() => import("./pages/DonorAuth"));
+const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 
 const queryClient = new QueryClient();
 
@@ -266,6 +268,9 @@ const App = () => (
                 <LazyRoute><InferaAdminDashboard /></LazyRoute>
               </SuperAdminRoute>
             } />
+            {/* Donor Portal (standalone, no DashboardLayout) */}
+            <Route path="/donor/login" element={<LazyRoute><DonorAuth /></LazyRoute>} />
+            <Route path="/donor/dashboard" element={<LazyRoute><DonorPortal /></LazyRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
           </Routes>

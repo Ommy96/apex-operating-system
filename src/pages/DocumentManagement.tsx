@@ -2,13 +2,15 @@ import { useState, useRef, useCallback } from "react";
 import { format } from "date-fns";
 import {
   FileText, Upload, Search, Filter, Trash2, Download, History,
-  Eye, Plus, X, FolderOpen, Shield, Clock, Tag, MoreVertical,
+  Eye, Plus, X, FolderOpen, Shield, Clock, Tag, MoreVertical, Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
@@ -34,6 +36,14 @@ import {
 const CATEGORIES = [
   "general", "policy", "report", "contract", "template",
   "procedure", "guideline", "form", "financial", "legal",
+];
+
+const DOCUMENT_TYPES = [
+  { value: "general", label: "General" },
+  { value: "progress_report", label: "Progress Report" },
+  { value: "thank_you_letter", label: "Thank You Letter" },
+  { value: "audit_report", label: "Audit Report" },
+  { value: "program_report", label: "Program Report" },
 ];
 
 function formatFileSize(bytes: number | null) {
@@ -66,6 +76,8 @@ export default function DocumentManagement() {
   const [uploadCategory, setUploadCategory] = useState("general");
   const [uploadTags, setUploadTags] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadDonorVisible, setUploadDonorVisible] = useState(false);
+  const [uploadDocType, setUploadDocType] = useState("general");
   const fileRef = useRef<HTMLInputElement>(null);
 
   // New version state
@@ -90,6 +102,8 @@ export default function DocumentManagement() {
       category: uploadCategory,
       tags: uploadTags ? uploadTags.split(",").map((t) => t.trim()).filter(Boolean) : [],
       file: uploadFile,
+      donor_visible: uploadDonorVisible,
+      document_type: uploadDocType,
     });
     setShowUpload(false);
     resetUploadForm();
@@ -101,6 +115,8 @@ export default function DocumentManagement() {
     setUploadCategory("general");
     setUploadTags("");
     setUploadFile(null);
+    setUploadDonorVisible(false);
+    setUploadDocType("general");
   };
 
   const openDetail = async (doc: ManagedDocument) => {
@@ -279,7 +295,12 @@ export default function DocumentManagement() {
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-primary shrink-0" />
                         <div className="min-w-0">
-                          <p className="font-medium truncate">{doc.title}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{doc.title}</p>
+                            {(doc as any).donor_visible && (
+                              <Heart className="h-3.5 w-3.5 text-primary shrink-0" />
+                            )}
+                          </div>
                           {doc.description && (
                             <p className="text-xs text-muted-foreground truncate max-w-[300px]">
                               {doc.description}
@@ -376,6 +397,31 @@ export default function DocumentManagement() {
               value={uploadTags}
               onChange={(e) => setUploadTags(e.target.value)}
             />
+            <Select value={uploadDocType} onValueChange={setUploadDocType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Document Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {DOCUMENT_TYPES.map((dt) => (
+                  <SelectItem key={dt.value} value={dt.value}>
+                    {dt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-primary" />
+                <Label htmlFor="donor-visible" className="text-sm font-medium cursor-pointer">
+                  Visible to Donors
+                </Label>
+              </div>
+              <Switch
+                id="donor-visible"
+                checked={uploadDonorVisible}
+                onCheckedChange={setUploadDonorVisible}
+              />
+            </div>
             <div
               className="border-2 border-dashed border-border/60 rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 transition-colors"
               onClick={() => fileRef.current?.click()}
@@ -445,6 +491,24 @@ export default function DocumentManagement() {
                     {tag}
                   </Badge>
                 ))}
+              </div>
+
+              {/* Donor Visibility Toggle */}
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-primary" />
+                  <Label className="text-sm font-medium">Donor Portal Visibility</Label>
+                </div>
+                <Switch
+                  checked={(showDetail as any).donor_visible || false}
+                  onCheckedChange={(checked) => {
+                    updateDocument.mutate({
+                      id: showDetail.id,
+                      donor_visible: checked,
+                    });
+                    setShowDetail({ ...showDetail, ...({ donor_visible: checked } as any) });
+                  }}
+                />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2">
