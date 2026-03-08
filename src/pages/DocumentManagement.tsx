@@ -102,6 +102,8 @@ export default function DocumentManagement() {
       category: uploadCategory,
       tags: uploadTags ? uploadTags.split(",").map((t) => t.trim()).filter(Boolean) : [],
       file: uploadFile,
+      donor_visible: uploadDonorVisible,
+      document_type: uploadDocType,
     });
     setShowUpload(false);
     resetUploadForm();
