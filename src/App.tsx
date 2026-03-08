@@ -46,6 +46,7 @@ import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import FieldMode from "./pages/FieldMode";
+import DonorManagement from "./pages/DonorManagement";
 
 const queryClient = new QueryClient();
 
