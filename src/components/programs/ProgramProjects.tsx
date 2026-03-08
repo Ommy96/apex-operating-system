@@ -223,7 +223,11 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(project)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/projects/dashboard/${project.id}`); }}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Dashboard
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(project); }}>
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
