@@ -392,6 +392,31 @@ export default function DocumentManagement() {
               value={uploadTags}
               onChange={(e) => setUploadTags(e.target.value)}
             />
+            <Select value={uploadDocType} onValueChange={setUploadDocType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Document Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {DOCUMENT_TYPES.map((dt) => (
+                  <SelectItem key={dt.value} value={dt.value}>
+                    {dt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-primary" />
+                <Label htmlFor="donor-visible" className="text-sm font-medium cursor-pointer">
+                  Visible to Donors
+                </Label>
+              </div>
+              <Switch
+                id="donor-visible"
+                checked={uploadDonorVisible}
+                onCheckedChange={setUploadDonorVisible}
+              />
+            </div>
             <div
               className="border-2 border-dashed border-border/60 rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 transition-colors"
               onClick={() => fileRef.current?.click()}
