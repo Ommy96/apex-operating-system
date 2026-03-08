@@ -109,6 +109,35 @@ export function UserAccessSettings({ section }: Props) {
     },
   });
 
+  const createMemberMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrganization?.organization_id || !newMemberEmail || !newMemberName || !newMemberPassword) throw new Error('Missing data');
+      const { data, error } = await supabase.functions.invoke('create-org-member', {
+        body: {
+          email: newMemberEmail.trim(),
+          password: newMemberPassword.trim(),
+          full_name: newMemberName.trim(),
+          role: newMemberRole,
+          organization_id: currentOrganization.organization_id,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      toast({ title: 'Member created successfully' });
+      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      setCreateDialogOpen(false);
+      setNewMemberName('');
+      setNewMemberEmail('');
+      setNewMemberPassword('');
+      setNewMemberRole('member');
+    },
+    onError: (err: any) => {
+      toast({ title: 'Failed to create member', description: err.message, variant: 'destructive' });
+    },
+  });
+
   const cancelInviteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('organization_invitations').update({ status: 'cancelled' }).eq('id', id);
