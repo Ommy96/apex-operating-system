@@ -454,6 +454,26 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
 
                     <FormField
                       control={form.control}
+                      name="funding_required"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Annual Funding Required (KES)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="0"
+                              placeholder="e.g., 50000"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="background_narrative"
                       render={({ field }) => (
                         <FormItem>

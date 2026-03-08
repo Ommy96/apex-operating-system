@@ -490,7 +490,7 @@ export default function BeneficiaryProfile() {
         {/* Sponsorship & Funding Tab */}
         <TabsContent value="funding" className="space-y-4">
           <SponsorshipCoverageSection beneficiaryId={beneficiary.id} />
-          <SponsorshipFundingTab donors={donors} />
+          <SponsorshipFundingTab donors={donors} fundingRequired={(beneficiary as any).funding_required} />
         </TabsContent>
 
         {/* Observations Tab */}
