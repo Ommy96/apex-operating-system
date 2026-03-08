@@ -46,6 +46,8 @@ const BranchManagement = lazy(() => import("./pages/BranchManagement"));
 const PartnerCollaboration = lazy(() => import("./pages/PartnerCollaboration"));
 const RiskIntelligence = lazy(() => import("./pages/RiskIntelligence"));
 const FieldMode = lazy(() => import("./pages/FieldMode"));
+const DonorAuth = lazy(() => import("./pages/DonorAuth"));
+const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 
 const queryClient = new QueryClient();
 
