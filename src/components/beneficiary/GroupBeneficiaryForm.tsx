@@ -112,6 +112,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
         group_schedule: data.group_schedule || null,
         group_activities: activities.length > 0 ? activities : null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         organization_id: currentOrganization.organization_id,
       };
 
