@@ -748,7 +748,7 @@ export default function Beneficiaries() {
               </WorkspacePanel>
             </div>
           ) : (
-            filteredBeneficiaries.map((beneficiary) => {
+            pagination.paginatedItems.map((beneficiary) => {
               const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
               const age = calculateAge(beneficiary.date_of_birth);
               
