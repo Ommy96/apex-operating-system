@@ -56,6 +56,9 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [donationNotes, setDonationNotes] = useState('');
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
 
+  // Add donor for specific program (shortcut from enrollment card)
+  const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
+
   // Edit donor
   const [editDonorId, setEditDonorId] = useState<string | null>(null);
   const [editDonorName, setEditDonorName] = useState('');
@@ -367,8 +370,23 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   // Aggregate donation totals
   const totalDonations = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
 
+  // Get donors for a specific program
+  const getDonorsForProgram = (programId: string | null | undefined) => {
+    if (!programId || !donors) return [];
+    return donors.filter((d: any) => d.program_id === programId);
+  };
+
+  // Get unlinked donors (no program)
+  const unlinkedDonors = donors.filter((d: any) => !d.program_id);
+
   // Enrolled program IDs to prevent duplicate enrollment
   const enrolledProgramIds = new Set((enrollments || []).map((e: any) => (e.programs as any)?.id).filter(Boolean));
+
+  // When opening donation dialog from a program card, pre-select the program
+  const openDonationForProgram = (programId: string) => {
+    setDonationProgramId(programId);
+    setIsDonationOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -477,35 +495,90 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                     </div>
                   ))}
                 </div>
+
+                {/* Sponsors/Donors for this program */}
+                {(() => {
+                  const programDonors = getDonorsForProgram(progId);
+                  const programDonorTotal = programDonors.reduce((sum: number, d: any) => sum + (d.amount_received || 0), 0);
+                  return (
+                    <div className="border-t border-border/50 px-4 py-3 bg-success/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Heart className="h-3.5 w-3.5 text-success" />
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Sponsors ({programDonors.length})
+                          </span>
+                          {programDonorTotal > 0 && (
+                            <Badge variant="secondary" className="text-xs font-mono">KES {programDonorTotal.toLocaleString()}</Badge>
+                          )}
+                        </div>
+                        <Button type="button" variant="outline" size="sm" className="h-6 text-xs gap-1"
+                          onClick={() => openDonationForProgram(progId)}>
+                          <Plus className="h-3 w-3" />
+                          Add Donor
+                        </Button>
+                      </div>
+                      {programDonors.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic">No sponsors linked to this program yet</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {programDonors.map((donor: any) => (
+                            <div key={donor.id} className="flex items-center justify-between bg-background/80 border border-border/50 rounded-md px-3 py-1.5">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">{donor.donor_name}</span>
+                                  {donor.donation_date && (
+                                    <span className="text-xs text-muted-foreground">{format(new Date(donor.donation_date), 'MMM d, yyyy')}</span>
+                                  )}
+                                </div>
+                                {donor.notes && <p className="text-xs text-muted-foreground truncate">{donor.notes}</p>}
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {donor.amount_received != null && (
+                                  <span className="text-xs font-mono font-semibold text-success">KES {donor.amount_received.toLocaleString()}</span>
+                                )}
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEditDonor(donor)}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => setDeleteDonorId(donor.id)}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
 
-      {/* ===== DONATIONS SECTION ===== */}
-      {donors.length > 0 && (
+      {/* ===== GENERAL DONATIONS (not linked to a program) ===== */}
+      {unlinkedDonors.length > 0 && (
         <div className="space-y-3">
           <button
             onClick={() => setExpandedDonors(!expandedDonors)}
             className="flex items-center gap-2 w-full text-left group"
           >
-            <Heart className="h-4 w-4 text-success" />
-            <span className="font-semibold text-sm">Donation History ({donors.length})</span>
-            <Badge variant="secondary" className="text-xs font-mono">KES {totalDonations.toLocaleString()}</Badge>
+            <DollarSign className="h-4 w-4 text-success" />
+            <span className="font-semibold text-sm">General Donations ({unlinkedDonors.length})</span>
+            <Badge variant="secondary" className="text-xs font-mono">
+              KES {unlinkedDonors.reduce((sum, d) => sum + (d.amount_received || 0), 0).toLocaleString()}
+            </Badge>
             {expandedDonors ? <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" /> : <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />}
           </button>
 
           {expandedDonors && (
             <div className="space-y-2">
-              {donors.map((donor: any) => (
+              {unlinkedDonors.map((donor: any) => (
                 <div key={donor.id} className="flex items-center justify-between bg-muted/30 border border-border/50 rounded-lg px-3 py-2.5">
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium">{donor.donor_name}</span>
-                      {donor.program?.name && (
-                        <Badge variant="outline" className="text-xs">{donor.program.name}</Badge>
-                      )}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {donor.donation_date && <span>{format(new Date(donor.donation_date), 'MMM d, yyyy')}</span>}
