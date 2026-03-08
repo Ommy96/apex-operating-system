@@ -124,11 +124,11 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coreFeatures.map((feature, index) => (
-              <Card key={index} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-accent/30 transition-colors">
+              <Card key={index} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-primary-foreground/20 transition-colors">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-lg border border-accent/20">
-                      <feature.icon className="w-5 h-5 text-accent-light" />
+                    <div className={`p-2 ${feature.accentBg} rounded-lg border ${feature.accentBorder}`}>
+                      <feature.icon className={`w-5 h-5 ${feature.accent}`} />
                     </div>
                     <CardTitle className="text-primary-foreground text-lg">{feature.title}</CardTitle>
                   </div>
