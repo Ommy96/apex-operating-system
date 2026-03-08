@@ -206,6 +206,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         background_image_url: data.background_image_url || null,
         student_id_number: data.student_id_number || null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         created_by: user?.id,
       };
 
