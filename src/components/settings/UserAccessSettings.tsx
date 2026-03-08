@@ -424,7 +424,7 @@ export function UserAccessSettings({ section }: Props) {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => removeMemberMutation.mutate(member.id)} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
+                            <AlertDialogAction onClick={() => removeMemberMutation.mutate({ memberId: member.id, userId: member.user_id })} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
