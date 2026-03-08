@@ -48,6 +48,7 @@ const RiskIntelligence = lazy(() => import("./pages/RiskIntelligence"));
 const FieldMode = lazy(() => import("./pages/FieldMode"));
 const DonorAuth = lazy(() => import("./pages/DonorAuth"));
 const DonorPortal = lazy(() => import("./pages/DonorPortal"));
+const BoardPortal = lazy(() => import("./pages/BoardPortal"));
 
 const queryClient = new QueryClient();
 
@@ -271,6 +272,8 @@ const App = () => (
             {/* Donor Portal (standalone, no DashboardLayout) */}
             <Route path="/donor/login" element={<LazyRoute><DonorAuth /></LazyRoute>} />
             <Route path="/donor/dashboard" element={<LazyRoute><DonorPortal /></LazyRoute>} />
+            {/* Board Portal (standalone, no DashboardLayout) */}
+            <Route path="/board-portal" element={<LazyRoute><BoardPortal /></LazyRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
           </Routes>

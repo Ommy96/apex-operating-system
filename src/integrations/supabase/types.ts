@@ -1648,8 +1648,89 @@ export type Database = {
           },
         ]
       }
+      board_action_items: {
+        Row: {
+          assigned_member_id: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          organization_id: string
+          priority: string | null
+          report_id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_member_id?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id: string
+          priority?: string | null
+          report_id: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_member_id?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id?: string
+          priority?: string | null
+          report_id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_action_items_assigned_member_id_fkey"
+            columns: ["assigned_member_id"]
+            isOneToOne: false
+            referencedRelation: "board_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_action_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_action_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_action_items_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "board_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       board_members: {
         Row: {
+          access_token: string | null
           created_at: string
           email: string
           full_name: string
@@ -1660,10 +1741,12 @@ export type Database = {
           organization_id: string
           role: string
           title: string | null
+          token_expires_at: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          access_token?: string | null
           created_at?: string
           email: string
           full_name: string
@@ -1674,10 +1757,12 @@ export type Database = {
           organization_id: string
           role?: string
           title?: string | null
+          token_expires_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          access_token?: string | null
           created_at?: string
           email?: string
           full_name?: string
@@ -1688,6 +1773,7 @@ export type Database = {
           organization_id?: string
           role?: string
           title?: string | null
+          token_expires_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1704,6 +1790,159 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_report_approvals: {
+        Row: {
+          board_member_id: string
+          comments: string | null
+          decision: string
+          id: string
+          organization_id: string
+          report_id: string
+          voted_at: string | null
+        }
+        Insert: {
+          board_member_id: string
+          comments?: string | null
+          decision: string
+          id?: string
+          organization_id: string
+          report_id: string
+          voted_at?: string | null
+        }
+        Update: {
+          board_member_id?: string
+          comments?: string | null
+          decision?: string
+          id?: string
+          organization_id?: string
+          report_id?: string
+          voted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_report_approvals_board_member_id_fkey"
+            columns: ["board_member_id"]
+            isOneToOne: false
+            referencedRelation: "board_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_approvals_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "board_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_report_comments: {
+        Row: {
+          author_email: string
+          author_name: string
+          board_member_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_resolved: boolean | null
+          organization_id: string
+          parent_comment_id: string | null
+          report_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          section_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_email: string
+          author_name: string
+          board_member_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          organization_id: string
+          parent_comment_id?: string | null
+          report_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          section_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_email?: string
+          author_name?: string
+          board_member_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          organization_id?: string
+          parent_comment_id?: string | null
+          report_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          section_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_report_comments_board_member_id_fkey"
+            columns: ["board_member_id"]
+            isOneToOne: false
+            referencedRelation: "board_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "board_report_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_comments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "board_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_report_comments_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "board_report_sections"
             referencedColumns: ["id"]
           },
         ]

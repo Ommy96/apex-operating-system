@@ -29,3 +29,7 @@ verify_jwt = false
 
 [functions.delete-org-member]
 verify_jwt = false
+
+[functions.board-portal]
+verify_jwt = false
+verify_jwt = false

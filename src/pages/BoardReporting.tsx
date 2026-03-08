@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
+import { BoardCollaborationPanel } from "@/components/board/BoardCollaborationPanel";
 import {
   Presentation,
   Plus,
@@ -485,6 +486,10 @@ function ReportDetail({
           </Card>
         ))}
       </div>
+
+      {/* Collaboration Panel */}
+      <Separator className="my-6" />
+      <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
     </div>
   );
 }
