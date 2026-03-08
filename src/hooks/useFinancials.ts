@@ -317,6 +317,154 @@ export function useFinancials() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // ── Grant Reports ──
+  const useGrantReports = (grantId: string | null) =>
+    useQuery({
+      queryKey: ["grant-reports", grantId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("grant_reports")
+          .select("*")
+          .eq("grant_id", grantId!)
+          .order("due_date", { ascending: true });
+        if (error) throw error;
+        return data;
+      },
+      enabled: !!grantId,
+    });
+
+  const createGrantReport = useMutation({
+    mutationFn: async (values: any) => {
+      const { error } = await supabase.from("grant_reports").insert({
+        ...values,
+        organization_id: orgId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["grant-reports"] });
+      toast.success("Report schedule added");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateGrantReport = useMutation({
+    mutationFn: async ({ id, ...values }: any) => {
+      const { error } = await supabase.from("grant_reports").update(values).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["grant-reports"] });
+      toast.success("Report updated");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // ── Grant Documents ──
+  const useGrantDocuments = (grantId: string | null) =>
+    useQuery({
+      queryKey: ["grant-documents", grantId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("grant_documents")
+          .select("*")
+          .eq("grant_id", grantId!)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      },
+      enabled: !!grantId,
+    });
+
+  const createGrantDocument = useMutation({
+    mutationFn: async (values: any) => {
+      const { error } = await supabase.from("grant_documents").insert({
+        ...values,
+        organization_id: orgId,
+        uploaded_by: user?.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["grant-documents"] });
+      toast.success("Document uploaded");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteGrantDocument = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("grant_documents").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["grant-documents"] });
+      toast.success("Document removed");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // ── Grant Budget Utilization ──
+  const useGrantUtilization = (grantId: string | null) =>
+    useQuery({
+      queryKey: ["grant-utilization", grantId],
+      queryFn: async () => {
+        // Get linked programs
+        const { data: linkedProgs } = await supabase
+          .from("grant_programs")
+          .select("program_id, allocated_amount")
+          .eq("grant_id", grantId!);
+        const programIds = (linkedProgs || []).map(p => p.program_id);
+        if (programIds.length === 0) return { totalAllocated: 0, totalSpent: 0, byProgram: [] };
+
+        // Get expenses for those programs
+        const { data: expenses } = await supabase
+          .from("expenses")
+          .select("program_id, amount, programs(name)")
+          .eq("organization_id", orgId!)
+          .in("program_id", programIds);
+
+        const byProgram = (linkedProgs || []).map(lp => {
+          const spent = (expenses || [])
+            .filter(e => e.program_id === lp.program_id)
+            .reduce((s, e) => s + Number(e.amount || 0), 0);
+          const progName = (expenses || []).find(e => e.program_id === lp.program_id)?.programs?.name || 'Unknown';
+          return {
+            programId: lp.program_id,
+            programName: progName,
+            allocated: Number(lp.allocated_amount || 0),
+            spent,
+            remaining: Number(lp.allocated_amount || 0) - spent,
+            utilization: Number(lp.allocated_amount || 0) > 0 ? (spent / Number(lp.allocated_amount || 0)) * 100 : 0,
+          };
+        });
+
+        return {
+          totalAllocated: byProgram.reduce((s, p) => s + p.allocated, 0),
+          totalSpent: byProgram.reduce((s, p) => s + p.spent, 0),
+          byProgram,
+        };
+      },
+      enabled: !!grantId && !!orgId,
+    });
+
+  // ── All upcoming grant reports (for dashboard alerts) ──
+  const upcomingGrantReports = useQuery({
+    queryKey: ["upcoming-grant-reports", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("grant_reports")
+        .select("*, grants(grant_name)")
+        .eq("organization_id", orgId!)
+        .eq("status", "pending")
+        .order("due_date", { ascending: true })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
   // ── Programs list (for selectors) ──
   const programs = useQuery({
     queryKey: ["programs-list", orgId],
@@ -445,6 +593,14 @@ export function useFinancials() {
     useGrantCompliance,
     createComplianceItem,
     updateComplianceItem,
+    useGrantReports,
+    createGrantReport,
+    updateGrantReport,
+    useGrantDocuments,
+    createGrantDocument,
+    deleteGrantDocument,
+    useGrantUtilization,
+    upcomingGrantReports,
     programs,
     costAnalytics,
     deleteTransaction,
