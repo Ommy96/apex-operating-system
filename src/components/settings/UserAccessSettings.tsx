@@ -18,6 +18,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 interface Props {
   section: 'user-roles' | 'user-settings' | 'user-security';
