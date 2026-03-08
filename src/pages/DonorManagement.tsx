@@ -293,7 +293,7 @@ export default function DonorManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDonors.map(donor => (
+                  {donorPagination.paginatedItems.map(donor => (
                     <TableRow
                       key={donor.name}
                       className="cursor-pointer hover:bg-muted/50"
