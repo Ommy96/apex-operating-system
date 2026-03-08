@@ -66,6 +66,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       start_date: "",
       end_date: "",
       expected_outputs: "",
+      estimated_cost: "",
+      funding_cycle: "annually",
+      sponsorship_required: false,
     },
   });
 
