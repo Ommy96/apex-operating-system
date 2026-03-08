@@ -493,6 +493,24 @@ export default function DocumentManagement() {
                 ))}
               </div>
 
+              {/* Donor Visibility Toggle */}
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-primary" />
+                  <Label className="text-sm font-medium">Donor Portal Visibility</Label>
+                </div>
+                <Switch
+                  checked={(showDetail as any).donor_visible || false}
+                  onCheckedChange={(checked) => {
+                    updateDocument.mutate({
+                      id: showDetail.id,
+                      donor_visible: checked,
+                    });
+                    setShowDetail({ ...showDetail, ...({ donor_visible: checked } as any) });
+                  }}
+                />
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button size="sm" onClick={() => handleDownload(showDetail)} className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-1" /> Download Latest
