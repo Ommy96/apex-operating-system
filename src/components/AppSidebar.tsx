@@ -20,7 +20,7 @@ import {
 import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
-  FileText, ClipboardCheck, Presentation, UserCheck, GitBranch,
+  FileText, ClipboardCheck, Presentation, UserCheck,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, Heart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -84,11 +84,10 @@ interface MenuGroup {
   items: Array<{ title: string; url: string; icon: any; show: boolean }>;
 }
 
-export function AppSidebar() { // v2
+export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, user } = useAuth();
-  const { can, isSuperAdmin: superAdmin, hasModuleAccess } = usePermissions();
-  const { currentOrganization } = useOrganization();
+  const { can, isSuperAdmin: superAdmin } = usePermissions();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -120,7 +119,6 @@ export function AppSidebar() { // v2
     await signOut();
   };
 
-  // Organized into logical domain groups
   const menuGroups: MenuGroup[] = [
     {
       label: "Overview",
@@ -132,7 +130,7 @@ export function AppSidebar() { // v2
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-        { title: "Donor Management", url: "/donors", icon: Heart, show: true },
+        { title: "Donors", url: "/donors", icon: Heart, show: true },
         { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
         { title: "Partners", url: "/partners", icon: Handshake, show: true },
       ],
@@ -184,7 +182,6 @@ export function AppSidebar() { // v2
         )} 
         collapsible="icon"
       >
-        {/* Header */}
         <SidebarHeader className="p-4 pb-2">
           <div className={cn(
             "flex items-center gap-3 transition-all duration-200 mb-3",
@@ -233,7 +230,6 @@ export function AppSidebar() { // v2
             );
           })}
 
-          {/* Dynamic Programs */}
           {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
@@ -258,7 +254,6 @@ export function AppSidebar() { // v2
             </SidebarGroup>
           )}
 
-          {/* Super Admin */}
           {isSuperAdmin(user?.email) && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
@@ -283,7 +278,6 @@ export function AppSidebar() { // v2
           )}
         </SidebarContent>
 
-        {/* Footer */}
         <SidebarFooter className="p-3 mt-auto border-t border-sidebar-border/30">
           {isCollapsed ? (
             <Tooltip delayDuration={0}>
