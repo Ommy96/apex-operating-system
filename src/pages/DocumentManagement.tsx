@@ -76,6 +76,8 @@ export default function DocumentManagement() {
   const [uploadCategory, setUploadCategory] = useState("general");
   const [uploadTags, setUploadTags] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadDonorVisible, setUploadDonorVisible] = useState(false);
+  const [uploadDocType, setUploadDocType] = useState("general");
   const fileRef = useRef<HTMLInputElement>(null);
 
   // New version state
