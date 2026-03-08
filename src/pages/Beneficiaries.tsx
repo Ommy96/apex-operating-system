@@ -736,78 +736,80 @@ export default function Beneficiaries() {
 
       {/* Grid View */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredBeneficiaries.length === 0 ? (
-            <div className="col-span-full">
-              <WorkspacePanel className="h-32 flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <Users className="h-10 w-10 mb-2 mx-auto opacity-40" />
-                  <p className="font-medium">No beneficiaries found</p>
-                  <p className="text-sm">Try adjusting your filters</p>
-                </div>
-              </WorkspacePanel>
-            </div>
-          ) : (
-            pagination.paginatedItems.map((beneficiary) => {
-              const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
-              const age = calculateAge(beneficiary.date_of_birth);
-              
-              return (
-                <WorkspacePanel
-                  key={beneficiary.id}
-                  padding="md"
-                  className="cursor-pointer hover:shadow-md transition-shadow group"
-                  onClick={() => setSelectedBeneficiary(beneficiary)}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <Avatar className="h-12 w-12 border border-border/50">
-                      {beneficiary.photo_url ? (
-                        <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-                      ) : null}
-                      <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-sm font-medium">
-                        {getInitials(beneficiary.display_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <StatusBadge variant={getStatusVariant(beneficiary.status)} dot>
-                      {beneficiary.status}
-                    </StatusBadge>
-                  </div>
-                  
-                  <h3 className="font-medium text-foreground mb-1 truncate group-hover:text-primary transition-colors">
-                    {beneficiary.display_name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                    <TypeIcon className="h-3.5 w-3.5" />
-                    <span className="capitalize">{beneficiary.beneficiary_type}</span>
-                    {age && <span>• {age} yrs</span>}
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground truncate">
-                    {beneficiary.location || beneficiary.institution_name || 'No location'}
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredBeneficiaries.length === 0 ? (
+              <div className="col-span-full">
+                <WorkspacePanel className="h-32 flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <Users className="h-10 w-10 mb-2 mx-auto opacity-40" />
+                    <p className="font-medium">No beneficiaries found</p>
+                    <p className="text-sm">Try adjusting your filters</p>
                   </div>
                 </WorkspacePanel>
-              );
-            })
-          )}
-        </div>
-        <PaginationControls
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          totalItems={pagination.totalItems}
-          startIndex={pagination.startIndex}
-          endIndex={pagination.endIndex}
-          pageSize={pagination.pageSize}
-          pageSizeOptions={pagination.pageSizeOptions}
-          canGoNext={pagination.canGoNext}
-          canGoPrevious={pagination.canGoPrevious}
-          onPageChange={pagination.setCurrentPage}
-          onPageSizeChange={pagination.setPageSize}
-          onFirst={pagination.goToFirstPage}
-          onLast={pagination.goToLastPage}
-          onNext={pagination.goToNextPage}
-          onPrevious={pagination.goToPreviousPage}
-        />
+              </div>
+            ) : (
+              pagination.paginatedItems.map((beneficiary) => {
+                const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
+                const age = calculateAge(beneficiary.date_of_birth);
+                
+                return (
+                  <WorkspacePanel
+                    key={beneficiary.id}
+                    padding="md"
+                    className="cursor-pointer hover:shadow-md transition-shadow group"
+                    onClick={() => setSelectedBeneficiary(beneficiary)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <Avatar className="h-12 w-12 border border-border/50">
+                        {beneficiary.photo_url ? (
+                          <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
+                        ) : null}
+                        <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-sm font-medium">
+                          {getInitials(beneficiary.display_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <StatusBadge variant={getStatusVariant(beneficiary.status)} dot>
+                        {beneficiary.status}
+                      </StatusBadge>
+                    </div>
+                    
+                    <h3 className="font-medium text-foreground mb-1 truncate group-hover:text-primary transition-colors">
+                      {beneficiary.display_name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                      <TypeIcon className="h-3.5 w-3.5" />
+                      <span className="capitalize">{beneficiary.beneficiary_type}</span>
+                      {age && <span>• {age} yrs</span>}
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground truncate">
+                      {beneficiary.location || beneficiary.institution_name || 'No location'}
+                    </div>
+                  </WorkspacePanel>
+                );
+              })
+            )}
+          </div>
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            pageSize={pagination.pageSize}
+            pageSizeOptions={pagination.pageSizeOptions}
+            canGoNext={pagination.canGoNext}
+            canGoPrevious={pagination.canGoPrevious}
+            onPageChange={pagination.setCurrentPage}
+            onPageSizeChange={pagination.setPageSize}
+            onFirst={pagination.goToFirstPage}
+            onLast={pagination.goToLastPage}
+            onNext={pagination.goToNextPage}
+            onPrevious={pagination.goToPreviousPage}
+          />
+        </>
       )}
 
       {/* Detail Side Panel */}
