@@ -127,6 +127,45 @@ export function usePermissions() {
     
     // Attendance
     viewAttendance: superAdmin || permissions.includes('attendance.view.attendance'),
+
+    // Financial
+    viewFinancials: superAdmin || permissions.includes('financial.view.financials'),
+
+    // HR
+    viewHR: superAdmin || permissions.includes('hr.view.staff'),
+
+    // Communications
+    viewCommunications: superAdmin || permissions.includes('communications.view.communications'),
+
+    // Automation
+    viewAutomation: superAdmin || permissions.includes('automation.view.automation'),
+
+    // Documents
+    viewDocuments: superAdmin || permissions.includes('documents.view.documents'),
+
+    // Compliance
+    viewCompliance: superAdmin || permissions.includes('compliance.view.compliance'),
+
+    // Board
+    viewBoard: superAdmin || permissions.includes('board.view.reports'),
+
+    // Branches
+    viewBranches: superAdmin || permissions.includes('branches.view.branches'),
+
+    // Volunteers
+    viewVolunteers: superAdmin || permissions.includes('volunteers.view.volunteers'),
+
+    // Partners
+    viewPartners: superAdmin || permissions.includes('partners.view.partners'),
+
+    // Risk
+    viewRisk: superAdmin || permissions.includes('risk.view.risk'),
+
+    // M&E
+    viewME: superAdmin || permissions.includes('me.view.me'),
+
+    // AI
+    viewAI: superAdmin || permissions.includes('ai.view.insights'),
   }), [permissions, superAdmin]);
 
   const isLoading = permissionsLoading || rolesLoading;
