@@ -59,6 +59,7 @@ const emptyFormData: ProgramFormData = {
   target_population: [],
   geographic_coverage: "",
   objectives: "",
+  annual_funding_required: 0,
 };
 
 const ProgramsManagement = () => {
@@ -114,6 +115,7 @@ const ProgramsManagement = () => {
         target_population: data.target_population.length > 0 ? data.target_population : null,
         geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
         objectives: data.objectives || null,
+        annual_funding_required: data.annual_funding_required || 0,
       }]);
       if (error) throw error;
     },
@@ -146,6 +148,7 @@ const ProgramsManagement = () => {
         target_population: data.target_population.length > 0 ? data.target_population : null,
         geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
         objectives: data.objectives || null,
+        annual_funding_required: data.annual_funding_required || 0,
       }).eq('id', id);
       if (error) throw error;
     },
@@ -212,6 +215,7 @@ const ProgramsManagement = () => {
       target_population: program.target_population || [],
       geographic_coverage: extractGeographicCoverage(program.geographic_coverage),
       objectives: program.objectives || "",
+      annual_funding_required: (program as any).annual_funding_required || 0,
     });
     setIsFormOpen(true);
   };

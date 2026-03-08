@@ -6120,6 +6120,7 @@ export type Database = {
       }
       programs: {
         Row: {
+          annual_funding_required: number | null
           category: string | null
           color: string | null
           created_at: string
@@ -6147,6 +6148,7 @@ export type Database = {
           target_population: string[] | null
         }
         Insert: {
+          annual_funding_required?: number | null
           category?: string | null
           color?: string | null
           created_at?: string
@@ -6174,6 +6176,7 @@ export type Database = {
           target_population?: string[] | null
         }
         Update: {
+          annual_funding_required?: number | null
           category?: string | null
           color?: string | null
           created_at?: string

@@ -99,7 +99,7 @@ interface Donor {
   donation_date: string | null;
   notes: string | null;
   program_id: string | null;
-  program?: { name: string } | null;
+  program?: { name: string; annual_funding_required: number | null } | null;
 }
 
 export default function BeneficiaryProfile() {
@@ -151,7 +151,7 @@ export default function BeneficiaryProfile() {
       // Fetch donors
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
-        .select('*, program:programs(name)')
+        .select('*, program:programs(name, annual_funding_required)')
         .eq('beneficiary_id', id);
 
       if (donorsData) setDonors(donorsData);

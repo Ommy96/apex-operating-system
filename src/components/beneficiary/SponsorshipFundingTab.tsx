@@ -11,7 +11,7 @@ interface Donor {
   donation_date: string | null;
   notes: string | null;
   program_id: string | null;
-  program?: { name: string } | null;
+  program?: { name: string; annual_funding_required: number | null } | null;
 }
 
 interface SponsorshipFundingTabProps {
@@ -20,6 +20,16 @@ interface SponsorshipFundingTabProps {
 
 export function SponsorshipFundingTab({ donors }: SponsorshipFundingTabProps) {
   const totalFunding = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
+
+  // Calculate total required from program-level defaults (unique programs only)
+  const programRequirements = new Map<string, number>();
+  donors.forEach((d) => {
+    const prog = d.program?.name || 'General';
+    if (!programRequirements.has(prog)) {
+      programRequirements.set(prog, d.program?.annual_funding_required || 0);
+    }
+  });
+  const totalRequired = Array.from(programRequirements.values()).reduce((sum, v) => sum + v, 0) || undefined;
 
   // Group by program
   const programBreakdown = donors.reduce((acc, d) => {
@@ -33,7 +43,7 @@ export function SponsorshipFundingTab({ donors }: SponsorshipFundingTabProps) {
       {/* Coverage Bar */}
       <Card className="border-primary/10">
         <CardContent className="p-5">
-          <FundingCoverageBar totalReceived={totalFunding} />
+          <FundingCoverageBar totalReceived={totalFunding} totalRequired={totalRequired} />
         </CardContent>
       </Card>
 

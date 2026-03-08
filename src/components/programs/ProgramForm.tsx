@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   Plus, MapPin, X, Settings2, Calendar, Users, Target, 
-  FileText, Globe, Sparkles 
+  FileText, Globe, Sparkles, DollarSign 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export interface ProgramFormData {
   target_population: string[];
   geographic_coverage: string;
   objectives: string;
+  annual_funding_required: number;
 }
 
 interface ProgramFormProps {
@@ -356,6 +357,25 @@ export const ProgramForm = ({
                     ))}
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="annual_funding_required" className="text-sm font-medium flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Annual Funding Required (per Beneficiary)
+                </Label>
+                <Input
+                  id="annual_funding_required"
+                  type="number"
+                  min="0"
+                  value={formData.annual_funding_required || ''}
+                  onChange={(e) => onChange({ ...formData, annual_funding_required: parseFloat(e.target.value) || 0 })}
+                  placeholder="e.g., 50000"
+                  className="h-10"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The annual amount needed per beneficiary enrolled in this program (KES)
+                </p>
               </div>
 
               <div className="space-y-2">
