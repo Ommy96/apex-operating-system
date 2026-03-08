@@ -132,7 +132,7 @@ export function AppSidebar() { // v2
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-        { title: "Donors", url: "/donors", icon: Heart, show: true },
+        { title: "Donor Management", url: "/donors", icon: Heart, show: true },
         { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
         { title: "Partners", url: "/partners", icon: Handshake, show: true },
       ],
