@@ -82,7 +82,7 @@ export function GlobalSearchBar() {
           type: "beneficiary" as const,
           title: b.display_name,
           subtitle: `${b.beneficiary_type} · ${b.status}`,
-          url: `/beneficiary/${b.id}`,
+          url: `/beneficiaries/${b.id}`,
         })),
         ...(programs.data || []).map((p) => ({
           id: p.id,
