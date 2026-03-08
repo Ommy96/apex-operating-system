@@ -6,7 +6,7 @@ import {
   TrendingUp, CreditCard, Plug, Brain, Search, ChevronRight,
   Shield, Lock, Bell, Globe, GitBranch, Target, ClipboardList,
   DollarSign, Settings, FileCheck, UserCheck, LayoutDashboard,
-  Key, Webhook, GraduationCap,
+  Key, Webhook, GraduationCap, Heart,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -45,6 +45,8 @@ const settingsSections: SettingsSection[] = [
   // Partners & Volunteers
   { id: 'partner-access', label: 'Partner Access', icon: Handshake, description: 'Data sharing scope, visibility', category: 'Partners & Volunteers' },
   { id: 'volunteer-settings', label: 'Volunteer Settings', icon: UserCheck, description: 'Onboarding, roles, tracking', category: 'Partners & Volunteers' },
+  // Donor Portal
+  { id: 'donor-portal', label: 'Donor Portal', icon: Heart, description: 'Donor accounts & portal access', category: 'Donor Portal' },
   // Executive
   { id: 'exec-dashboard', label: 'Dashboard Customization', icon: LayoutDashboard, description: 'Widgets, KPIs, forecasting', category: 'Executive Intelligence' },
   { id: 'exec-reports', label: 'Report Templates', icon: BarChart3, description: 'Donor, board, impact templates', category: 'Executive Intelligence' },
@@ -68,6 +70,7 @@ const categoryIcons: Record<string, any> = {
   'Automation': Zap,
   'Compliance': FileText,
   'Partners & Volunteers': Handshake,
+  'Donor Portal': Heart,
   'Executive Intelligence': TrendingUp,
   'Subscription': CreditCard,
   'Integrations': Plug,

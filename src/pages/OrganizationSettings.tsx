@@ -17,6 +17,7 @@ import { SubscriptionSettings } from '@/components/settings/SubscriptionSettings
 import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
 import { AISettings } from '@/components/settings/AISettings';
 import { AcademicSettings } from '@/components/settings/AcademicSettings';
+import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,7 @@ export default function OrganizationSettings() {
       case 'int-services': return <IntegrationSettings section="int-services" />;
       case 'ai-config': return <AISettings />;
       case 'academic-config': return <AcademicSettings />;
+      case 'donor-portal': return <DonorPortalSettings />;
       default: return <OrganizationProfileSettings />;
     }
   };
