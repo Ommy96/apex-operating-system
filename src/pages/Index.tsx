@@ -54,14 +54,24 @@ const Index = () => {
                 <p className="text-xs text-accent-light/80">Data that drives real impact</p>
               </div>
             </div>
-            <Button 
-              onClick={() => navigate(user ? '/dashboard' : '/auth')}
-              className="bg-accent hover:bg-accent-dark text-accent-foreground border-0"
-              size="sm"
-            >
-              {user ? 'Dashboard' : 'Sign In'}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate('/donor/login')}
+                variant="outline"
+                size="sm"
+                className="border-accent/30 text-accent-light hover:bg-accent/10"
+              >
+                Donor Portal
+              </Button>
+              <Button 
+                onClick={() => navigate(user ? '/dashboard' : '/auth')}
+                className="bg-accent hover:bg-accent-dark text-accent-foreground border-0"
+                size="sm"
+              >
+                {user ? 'Dashboard' : 'Sign In'}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
