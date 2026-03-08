@@ -333,6 +333,27 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="funding_required"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Annual Funding Required (KES)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          placeholder="e.g., 50000"
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </TabsContent>
 
               <TabsContent value="activities" className="space-y-6 pt-4">
