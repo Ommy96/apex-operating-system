@@ -115,27 +115,34 @@ export function UserAccessSettings({ section }: Props) {
   });
 
   const removeMemberMutation = useMutation({
-    mutationFn: async ({ memberId, userId }: { memberId: string; userId: string }) => {
+    mutationFn: async ({ userId }: { memberId: string; userId: string }) => {
       if (!currentOrganization?.organization_id) throw new Error('No org');
-      const orgId = currentOrganization.organization_id;
-
-      // Delete from organization_members (if exists — may be rbac-only user)
-      if (!memberId.startsWith('rbac-')) {
-        const { error } = await supabase.from('organization_members').delete().eq('id', memberId);
-        if (error) throw error;
+      const { data, error } = await supabase.functions.invoke('delete-org-member', {
+        body: {
+          user_id: userId,
+          organization_id: currentOrganization.organization_id,
+        },
+      });
+      if (error) {
+        const context = (error as any)?.context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            throw new Error(body?.error || error.message);
+          } catch (e: any) {
+            if (e.message !== error.message) throw e;
+          }
+        }
+        throw error;
       }
-
-      // Also delete rbac_user_role_assignments for this user in this org
-      const { error: rbacError } = await supabase
-        .from('rbac_user_role_assignments')
-        .delete()
-        .eq('user_id', userId)
-        .eq('organization_id', orgId);
-      if (rbacError) throw rbacError;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
-      toast({ title: 'Member removed' });
+      toast({ title: 'Member removed successfully' });
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Failed to remove member', description: err.message, variant: 'destructive' });
     },
   });
 
