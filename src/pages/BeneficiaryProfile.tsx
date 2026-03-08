@@ -23,6 +23,7 @@ import { OverviewTab } from '@/components/beneficiary/OverviewTab';
 import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
+import { SponsorshipCoverageSection } from '@/components/beneficiary/SponsorshipCoverageSection';
 import {
   AlertDialog,
   AlertDialogAction,

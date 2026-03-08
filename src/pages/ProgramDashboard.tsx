@@ -279,6 +279,12 @@ const ProgramDashboard = () => {
           </TabsContent>
         )}
 
+        {activeTab === "sponsorship" && (
+          <TabsContent value="sponsorship" forceMount className="mt-6">
+            <ProgramSponsorshipDashboard programId={programId} />
+          </TabsContent>
+        )}
+
       </Tabs>
     </div>
   );
