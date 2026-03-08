@@ -38,8 +38,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--gradient-hero)' }}>
+      <a href="#landing-main" className="skip-to-content">
+        Skip to main content
+      </a>
       {/* Header */}
-      <header className="bg-primary-foreground/5 backdrop-blur-md border-b border-primary-foreground/10 sticky top-0 z-50">
+      <header role="banner" aria-label="Site header" className="bg-primary-foreground/5 backdrop-blur-md border-b border-primary-foreground/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
