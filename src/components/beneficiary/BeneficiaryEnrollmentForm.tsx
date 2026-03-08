@@ -495,6 +495,62 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                     </div>
                   ))}
                 </div>
+
+                {/* Sponsors/Donors for this program */}
+                {(() => {
+                  const programDonors = getDonorsForProgram(progId);
+                  const programDonorTotal = programDonors.reduce((sum: number, d: any) => sum + (d.amount_received || 0), 0);
+                  return (
+                    <div className="border-t border-border/50 px-4 py-3 bg-success/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Heart className="h-3.5 w-3.5 text-success" />
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Sponsors ({programDonors.length})
+                          </span>
+                          {programDonorTotal > 0 && (
+                            <Badge variant="secondary" className="text-xs font-mono">KES {programDonorTotal.toLocaleString()}</Badge>
+                          )}
+                        </div>
+                        <Button type="button" variant="outline" size="sm" className="h-6 text-xs gap-1"
+                          onClick={() => openDonationForProgram(progId)}>
+                          <Plus className="h-3 w-3" />
+                          Add Donor
+                        </Button>
+                      </div>
+                      {programDonors.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic">No sponsors linked to this program yet</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {programDonors.map((donor: any) => (
+                            <div key={donor.id} className="flex items-center justify-between bg-background/80 border border-border/50 rounded-md px-3 py-1.5">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">{donor.donor_name}</span>
+                                  {donor.donation_date && (
+                                    <span className="text-xs text-muted-foreground">{format(new Date(donor.donation_date), 'MMM d, yyyy')}</span>
+                                  )}
+                                </div>
+                                {donor.notes && <p className="text-xs text-muted-foreground truncate">{donor.notes}</p>}
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {donor.amount_received != null && (
+                                  <span className="text-xs font-mono font-semibold text-success">KES {donor.amount_received.toLocaleString()}</span>
+                                )}
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEditDonor(donor)}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => setDeleteDonorId(donor.id)}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
