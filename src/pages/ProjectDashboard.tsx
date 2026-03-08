@@ -128,20 +128,33 @@ const ProjectDashboard = () => {
     enabled: !!projectId && !isLoading,
   });
 
-  // Fetch expenses for this project
+  // Fetch expenses for this project or parent program
   const { data: expenses = [] } = useQuery({
-    queryKey: ['project-expenses', projectId],
+    queryKey: ['project-expenses', projectId, project?.program_id],
     queryFn: async () => {
       if (!projectId) return [];
-      const { data, error } = await supabase
+      // Try project-level expenses first
+      const { data: projData, error: pErr } = await supabase
         .from('expenses')
         .select('*')
         .eq('project_id', projectId)
         .order('expense_date', { ascending: false });
-      if (error) throw error;
-      return data || [];
+      if (pErr) throw pErr;
+      if (projData && projData.length > 0) return projData;
+
+      // Fallback to program-level expenses
+      if (project?.program_id) {
+        const { data: progData, error: prErr } = await supabase
+          .from('expenses')
+          .select('*')
+          .eq('program_id', project.program_id)
+          .order('expense_date', { ascending: false });
+        if (prErr) throw prErr;
+        return progData || [];
+      }
+      return [];
     },
-    enabled: !!projectId,
+    enabled: !!projectId && !isLoading,
   });
 
   // Fetch donor contributions linked to this project's beneficiaries
