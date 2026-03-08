@@ -44,12 +44,12 @@ export default function RiskIntelligence() {
 
   return (
     <div className="space-y-6">
-      <PageHeroHeader
-        title="Risk Intelligence"
-        subtitle="Predictive risk monitoring across beneficiaries, programs, and funding"
-        icon={ShieldAlert}
-        variant="danger"
-      />
+        <PageHeroHeader
+          title="Risk Intelligence"
+          description="Predictive risk monitoring across beneficiaries, programs, and funding"
+          icon={ShieldAlert}
+          iconColorClass="text-destructive"
+        />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
