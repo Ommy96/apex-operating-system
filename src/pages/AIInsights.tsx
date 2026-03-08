@@ -164,23 +164,46 @@ export default function AIInsights() {
               </div>
             ) : (
               messages.map((msg, i) => (
-                <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div key={i} className={`flex gap-3 max-w-3xl mx-auto w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.role === "assistant" && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent shadow-sm">
-                      <Bot className="h-4 w-4 text-primary-foreground" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20 mt-1">
+                      <Bot className="h-4.5 w-4.5 text-primary-foreground" />
                     </div>
                   )}
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted/50 border border-border/40"}`}>
+                  <div className={`rounded-2xl px-5 py-4 ${
+                    msg.role === "user" 
+                      ? "max-w-[75%] bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                      : "max-w-[85%] bg-card border border-border/50 shadow-sm"
+                  }`}>
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-foreground [&_table]:text-xs [&_th]:px-2 [&_td]:px-2 [&_th]:py-1 [&_td]:py-1">
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed
+                        [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:mt-4 [&_h1]:first:mt-0 [&_h1]:text-foreground
+                        [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:first:mt-0 [&_h2]:text-foreground
+                        [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:text-foreground
+                        [&_p]:mb-3 [&_p]:last:mb-0 [&_p]:text-sm [&_p]:leading-relaxed
+                        [&_ul]:mb-3 [&_ul]:space-y-1.5 [&_ul]:pl-0 [&_ul]:list-none
+                        [&_ol]:mb-3 [&_ol]:space-y-1.5 [&_ol]:pl-0 [&_ol]:list-none
+                        [&_li]:text-sm [&_li]:pl-4 [&_li]:relative [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[9px] [&_li]:before:h-1.5 [&_li]:before:w-1.5 [&_li]:before:rounded-full [&_li]:before:bg-primary/60
+                        [&_strong]:font-semibold [&_strong]:text-foreground
+                        [&_table]:w-full [&_table]:text-xs [&_table]:border-collapse [&_table]:rounded-xl [&_table]:overflow-hidden [&_table]:my-3
+                        [&_thead]:bg-muted/80
+                        [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_th]:text-foreground [&_th]:border-b [&_th]:border-border/50
+                        [&_td]:px-3 [&_td]:py-2 [&_td]:border-b [&_td]:border-border/30 [&_td]:text-muted-foreground
+                        [&_tr:last-child_td]:border-b-0
+                        [&_tr:hover_td]:bg-muted/30
+                        [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-xs [&_code]:font-mono [&_code]:text-primary
+                        [&_pre]:bg-muted [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:my-3
+                        [&_blockquote]:border-l-3 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:my-3
+                        [&_hr]:border-border/40 [&_hr]:my-4
+                      ">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary shadow-sm mt-1">
                       <User className="h-4 w-4 text-secondary-foreground" />
                     </div>
                   )}
