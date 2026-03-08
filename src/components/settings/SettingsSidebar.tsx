@@ -45,6 +45,8 @@ const settingsSections: SettingsSection[] = [
   // Partners & Volunteers
   { id: 'partner-access', label: 'Partner Access', icon: Handshake, description: 'Data sharing scope, visibility', category: 'Partners & Volunteers' },
   { id: 'volunteer-settings', label: 'Volunteer Settings', icon: UserCheck, description: 'Onboarding, roles, tracking', category: 'Partners & Volunteers' },
+  // Donor Portal
+  { id: 'donor-portal', label: 'Donor Portal', icon: Heart, description: 'Donor accounts & portal access', category: 'Donor Portal' },
   // Executive
   { id: 'exec-dashboard', label: 'Dashboard Customization', icon: LayoutDashboard, description: 'Widgets, KPIs, forecasting', category: 'Executive Intelligence' },
   { id: 'exec-reports', label: 'Report Templates', icon: BarChart3, description: 'Donor, board, impact templates', category: 'Executive Intelligence' },
