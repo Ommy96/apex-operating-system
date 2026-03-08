@@ -84,7 +84,7 @@ interface MenuGroup {
   items: Array<{ title: string; url: string; icon: any; show: boolean }>;
 }
 
-export function AppSidebar() {
+export function AppSidebar() { // v2
   const { state, setOpenMobile } = useSidebar();
   const { signOut, user } = useAuth();
   const { can, isSuperAdmin: superAdmin, hasModuleAccess } = usePermissions();
