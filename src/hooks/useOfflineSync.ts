@@ -170,9 +170,11 @@ export function useOfflineSync() {
     await saveOfflineRecord(record);
     await refreshRecords();
 
-    // If online, sync immediately
+    // If online, sync immediately; otherwise register background sync
     if (isOnline) {
       syncAll();
+    } else {
+      registerBackgroundSync('offline-sync');
     }
   };
 
