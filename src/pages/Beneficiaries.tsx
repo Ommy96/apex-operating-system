@@ -791,6 +791,23 @@ export default function Beneficiaries() {
             })
           )}
         </div>
+        <PaginationControls
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          startIndex={pagination.startIndex}
+          endIndex={pagination.endIndex}
+          pageSize={pagination.pageSize}
+          pageSizeOptions={pagination.pageSizeOptions}
+          canGoNext={pagination.canGoNext}
+          canGoPrevious={pagination.canGoPrevious}
+          onPageChange={pagination.setCurrentPage}
+          onPageSizeChange={pagination.setPageSize}
+          onFirst={pagination.goToFirstPage}
+          onLast={pagination.goToLastPage}
+          onNext={pagination.goToNextPage}
+          onPrevious={pagination.goToPreviousPage}
+        />
       )}
 
       {/* Detail Side Panel */}
