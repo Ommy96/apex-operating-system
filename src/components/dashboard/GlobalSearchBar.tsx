@@ -89,7 +89,7 @@ export function GlobalSearchBar() {
           type: "program" as const,
           title: p.name,
           subtitle: p.status || "Active",
-          url: `/program/${p.id}`,
+          url: `/programs/dashboard/${p.id}`,
         })),
         ...(projects.data || []).map((p) => ({
           id: p.id,
