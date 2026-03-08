@@ -44,6 +44,7 @@ import VolunteerManagement from "./pages/VolunteerManagement";
 import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
 import RiskIntelligence from "./pages/RiskIntelligence";
+import FieldMode from "./pages/FieldMode";
 
 const queryClient = new QueryClient();
 
