@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.create-donor-account]
 verify_jwt = false
+
+[functions.create-org-member]
+verify_jwt = false
