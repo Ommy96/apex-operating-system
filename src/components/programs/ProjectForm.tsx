@@ -285,6 +285,52 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
             />
           </div>
 
+          {/* Sponsorship Settings */}
+          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Sponsorship Need</Label>
+                <p className="text-xs text-muted-foreground">Mark this project as a sponsorship need for beneficiaries</p>
+              </div>
+              <Switch
+                checked={sponsorshipRequired}
+                onCheckedChange={(checked) => setValue("sponsorship_required", checked)}
+              />
+            </div>
+
+            {sponsorshipRequired && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="estimated_cost">Cost Per Beneficiary (KES) *</Label>
+                  <Input
+                    id="estimated_cost"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 40000"
+                    {...register("estimated_cost")}
+                  />
+                  <p className="text-xs text-muted-foreground">Expected sponsorship cost per beneficiary</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Funding Cycle</Label>
+                  <Select value={fundingCycle} onValueChange={(v) => setValue("funding_cycle", v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="annually">Annually</SelectItem>
+                      <SelectItem value="termly">Termly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="one_time">One-Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
