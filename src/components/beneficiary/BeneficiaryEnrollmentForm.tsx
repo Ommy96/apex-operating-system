@@ -370,8 +370,23 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   // Aggregate donation totals
   const totalDonations = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
 
+  // Get donors for a specific program
+  const getDonorsForProgram = (programId: string | null | undefined) => {
+    if (!programId || !donors) return [];
+    return donors.filter((d: any) => d.program_id === programId);
+  };
+
+  // Get unlinked donors (no program)
+  const unlinkedDonors = donors.filter((d: any) => !d.program_id);
+
   // Enrolled program IDs to prevent duplicate enrollment
   const enrolledProgramIds = new Set((enrollments || []).map((e: any) => (e.programs as any)?.id).filter(Boolean));
+
+  // When opening donation dialog from a program card, pre-select the program
+  const openDonationForProgram = (programId: string) => {
+    setDonationProgramId(programId);
+    setIsDonationOpen(true);
+  };
 
   return (
     <div className="space-y-6">
