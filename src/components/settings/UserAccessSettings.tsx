@@ -31,6 +31,14 @@ export function UserAccessSettings({ section }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isAdmin = can.manageSettings || isSuperAdmin;
+  const orgId = currentOrganization?.organization_id ?? null;
+
+  useRealtimeSubscription([
+    { table: 'organization_members', queryKeys: [['organization-members', orgId!]], orgId, enabled: !!orgId && section === 'user-settings' },
+    { table: 'profiles', queryKeys: [['organization-members', orgId!]], enabled: !!orgId && section === 'user-settings' },
+    { table: 'organization_invitations', queryKeys: [['organization-invitations', orgId!]], orgId, enabled: !!orgId && isAdmin && section === 'user-settings' },
+    { table: 'rbac_user_role_assignments', queryKeys: [['organization-members', orgId!]], orgId, enabled: !!orgId && section === 'user-settings' },
+  ]);
 
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
