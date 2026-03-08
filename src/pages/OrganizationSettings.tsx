@@ -17,6 +17,7 @@ import { SubscriptionSettings } from '@/components/settings/SubscriptionSettings
 import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
 import { AISettings } from '@/components/settings/AISettings';
 import { AcademicSettings } from '@/components/settings/AcademicSettings';
+import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
