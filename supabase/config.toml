@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.academic-progression]
 verify_jwt = false
+
+[functions.ai-smart-insights]
+verify_jwt = false
