@@ -170,7 +170,7 @@ const Index = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-accent/10 border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="cta-heading" className="bg-accent/10 border-y border-primary-foreground/10 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-6">
             Ready to strengthen your monitoring, reporting, and impact?
