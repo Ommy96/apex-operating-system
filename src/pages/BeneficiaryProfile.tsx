@@ -519,6 +519,11 @@ export default function BeneficiaryProfile() {
           <ActivityTimeline beneficiaryId={beneficiary.id} />
         </TabsContent>
 
+        {/* Risk Intelligence Tab */}
+        <TabsContent value="risk" className="space-y-4">
+          <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
         {/* Siblings Tab (Students Only) */}
         {beneficiary.beneficiary_type === 'student' && (
           <TabsContent value="siblings" className="space-y-4">
