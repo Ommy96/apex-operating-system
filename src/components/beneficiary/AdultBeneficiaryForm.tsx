@@ -43,6 +43,7 @@ interface AdultFormData {
   background_narrative?: string;
   religion?: string;
   status: string;
+  funding_required?: number;
 }
 
 interface Dependant {
