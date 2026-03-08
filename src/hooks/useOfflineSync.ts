@@ -49,8 +49,10 @@ export function useOfflineSync() {
     }
   }, []);
 
+  // Initial load + request persistent storage
   useEffect(() => {
     refreshRecords();
+    requestPersistentStorage();
   }, [refreshRecords]);
 
   // Online/offline detection
