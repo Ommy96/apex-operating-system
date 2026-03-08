@@ -129,7 +129,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
     setIsSubmitting(true);
 
     try {
-      const projectData = {
+      const projectData: any = {
         name: data.name,
         project_code: data.project_code || null,
         description: data.description || null,
@@ -139,6 +139,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         expected_outputs: data.expected_outputs || null,
+        estimated_cost: data.estimated_cost ? parseFloat(data.estimated_cost) : 0,
+        funding_cycle: data.funding_cycle || "annually",
+        sponsorship_required: data.sponsorship_required || false,
         program_id: programId,
         organization_id: currentOrganization.organization_id,
         slug: generateSlug(data.name),
