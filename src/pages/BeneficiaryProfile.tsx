@@ -22,6 +22,7 @@ import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar'
 import { OverviewTab } from '@/components/beneficiary/OverviewTab';
 import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
+import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import {
   AlertDialog,
   AlertDialogAction,
