@@ -103,7 +103,7 @@ export function GlobalSearchBar() {
           type: "donor" as const,
           title: d.donor_name,
           subtitle: "Donor",
-          url: `/beneficiary/${d.beneficiary_id}`,
+          url: `/beneficiaries/${d.beneficiary_id}`,
         })),
       ];
 
