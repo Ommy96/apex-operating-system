@@ -168,7 +168,7 @@ const Index = () => {
               <div className="space-y-3">
                 {["Organization-level data isolation", "Role-based access control", "Secure authentication", "Your data stays yours"].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <Shield className="w-4 h-4 text-accent-light flex-shrink-0" />
+                    <Shield className="w-4 h-4 text-amber-400 flex-shrink-0" />
                     <span className="text-primary-foreground/80">{item}</span>
                   </div>
                 ))}
