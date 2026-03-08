@@ -11,6 +11,10 @@ import {
   OfflineRecord,
   SyncStatus,
 } from "@/lib/offlineStorage";
+import {
+  registerBackgroundSync,
+  requestPersistentStorage,
+} from "@/lib/serviceWorkerRegistration";
 import { toast } from "sonner";
 
 export interface SyncStats {
