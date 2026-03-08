@@ -46,6 +46,7 @@ import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import FieldMode from "./pages/FieldMode";
+import DonorManagement from "./pages/DonorManagement";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <Beneficiaries />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/donors" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <DonorManagement />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

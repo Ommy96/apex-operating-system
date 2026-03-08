@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation, UserCheck, GitBranch,
-  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2,
+  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, Heart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -132,6 +132,7 @@ export function AppSidebar() {
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Donors", url: "/donors", icon: Heart, show: true },
         { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
         { title: "Partners", url: "/partners", icon: Handshake, show: true },
       ],
