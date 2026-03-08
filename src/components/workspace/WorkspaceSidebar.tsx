@@ -181,6 +181,8 @@ export function WorkspaceSidebar() {
           isCollapsed ? "w-[68px]" : "w-[240px]"
         )} 
         collapsible="icon"
+        role="navigation"
+        aria-label="Main navigation"
       >
         {/* Header */}
         <SidebarHeader className="p-3 pb-2">

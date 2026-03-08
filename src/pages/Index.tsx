@@ -38,8 +38,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--gradient-hero)' }}>
+      <a href="#landing-main" className="skip-to-content">
+        Skip to main content
+      </a>
       {/* Header */}
-      <header className="bg-primary-foreground/5 backdrop-blur-md border-b border-primary-foreground/10 sticky top-0 z-50">
+      <header role="banner" aria-label="Site header" className="bg-primary-foreground/5 backdrop-blur-md border-b border-primary-foreground/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
@@ -64,13 +67,14 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <main id="landing-main" role="main">
+      <section aria-labelledby="hero-heading" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div className="text-center animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent-light text-sm mb-6">
             <Zap className="w-4 h-4" />
             One platform. Many organizations. Measurable impact.
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
+          <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
             Empower Your NGO with
             <br />
             <span className="text-accent-light">
@@ -102,10 +106,10 @@ const Index = () => {
       </section>
 
       {/* Core Features */}
-      <section className="bg-primary-foreground/5 backdrop-blur-sm border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="features-heading" className="bg-primary-foreground/5 backdrop-blur-sm border-y border-primary-foreground/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-primary-foreground mb-2">Core Features</h2>
+            <h2 id="features-heading" className="text-3xl font-bold text-primary-foreground mb-2">Core Features</h2>
             <p className="text-primary-foreground/60">Everything you need to manage programs effectively</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -166,9 +170,9 @@ const Index = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-accent/10 border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="cta-heading" className="bg-accent/10 border-y border-primary-foreground/10 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-6">
+          <h2 id="cta-heading" className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-6">
             Ready to strengthen your monitoring, reporting, and impact?
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -188,7 +192,8 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary-dark/50 border-t border-primary-foreground/10 py-8">
+      </main>
+      <footer role="contentinfo" className="bg-primary-dark/50 border-t border-primary-foreground/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">

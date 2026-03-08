@@ -129,13 +129,13 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
   return (
-    <header className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
+    <header role="banner" aria-label="Application header" className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
       {/* Left Section */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <SidebarTrigger className="p-2 hover:bg-muted rounded-lg transition-colors shrink-0" />
         
         {/* Breadcrumb Navigation */}
-        <Breadcrumb className="hidden md:flex">
+        <Breadcrumb aria-label="Breadcrumb navigation" className="hidden md:flex">
           <BreadcrumbList>
             {pathSegments.map((segment, index) => {
               const fullPath = '/' + pathSegments.slice(0, index + 1).join('/');
@@ -174,11 +174,12 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
       <Button
         variant="outline"
         onClick={onCommandOpen}
+        aria-label="Open search (Ctrl+K)"
         className="hidden sm:flex items-center gap-2 px-3 py-2 h-9 text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/50 border-border/50 rounded-lg min-w-[200px] lg:min-w-[280px]"
       >
-        <Search className="h-4 w-4" />
+        <Search className="h-4 w-4" aria-hidden="true" />
         <span className="text-sm">Search...</span>
-        <kbd className="ml-auto pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+        <kbd aria-hidden="true" className="ml-auto pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <Command className="h-3 w-3" />K
         </kbd>
       </Button>
