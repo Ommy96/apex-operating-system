@@ -594,7 +594,7 @@ export default function Beneficiaries() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredBeneficiaries.map((beneficiary) => {
+                pagination.paginatedItems.map((beneficiary) => {
                   const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
                   const age = calculateAge(beneficiary.date_of_birth);
                   
