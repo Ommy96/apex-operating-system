@@ -199,6 +199,13 @@ const App = () => (
               </ProtectedRoute>
             } />
             {/* CustomReports merged into ReportsAnalytics as "Custom Reports" tab */}
+            <Route path="/risk-intelligence" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <RiskIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>
