@@ -9,3 +9,4 @@ export { StatCard } from './StatCard';
 export { PageHeader, QuickAction } from './PageHeader';
 export { WorkspacePanel, WorkspacePanelHeader } from './WorkspacePanel';
 export { FilterChip, FilterBar } from './FilterChip';
+export { PaginationControls } from './PaginationControls';

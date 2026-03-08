@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { usePagination } from '@/hooks/usePagination';
+import { PaginationControls } from '@/components/workspace/PaginationControls';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -149,6 +151,8 @@ export default function DonorManagement() {
     return result;
   }, [aggregatedDonors, search, programFilter, sortField, sortDir]);
 
+  const donorPagination = usePagination(filteredDonors, { initialPageSize: 25 });
+
   const totalDonations = aggregatedDonors.reduce((s, d) => s + d.totalAmount, 0);
   const totalDonors = aggregatedDonors.length;
   const totalContributions = donorRecords?.length || 0;
@@ -289,7 +293,7 @@ export default function DonorManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDonors.map(donor => (
+                  {donorPagination.paginatedItems.map(donor => (
                     <TableRow
                       key={donor.name}
                       className="cursor-pointer hover:bg-muted/50"
@@ -319,6 +323,23 @@ export default function DonorManagement() {
               </Table>
             </div>
           )}
+          <PaginationControls
+            currentPage={donorPagination.currentPage}
+            totalPages={donorPagination.totalPages}
+            totalItems={donorPagination.totalItems}
+            startIndex={donorPagination.startIndex}
+            endIndex={donorPagination.endIndex}
+            pageSize={donorPagination.pageSize}
+            pageSizeOptions={donorPagination.pageSizeOptions}
+            canGoNext={donorPagination.canGoNext}
+            canGoPrevious={donorPagination.canGoPrevious}
+            onPageChange={donorPagination.setCurrentPage}
+            onPageSizeChange={donorPagination.setPageSize}
+            onFirst={donorPagination.goToFirstPage}
+            onLast={donorPagination.goToLastPage}
+            onNext={donorPagination.goToNextPage}
+            onPrevious={donorPagination.goToPreviousPage}
+          />
         </CardContent>
       </Card>
 

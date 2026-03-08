@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
@@ -46,7 +46,9 @@ import {
   FilterBar,
   WorkspacePanel,
   DetailPanel,
+  PaginationControls,
 } from '@/components/workspace';
+import { usePagination } from '@/hooks/usePagination';
 
 interface Beneficiary {
   id: string;
@@ -347,8 +349,10 @@ export default function Beneficiaries() {
     });
   };
 
-  const filteredBeneficiaries = getFilteredBeneficiaries();
+  const filteredBeneficiaries = useMemo(() => getFilteredBeneficiaries(), [beneficiaries, searchTerm, typeFilter, statusFilter, programFilter, enrollmentMap]);
   const hasActiveFilters = typeFilter !== 'all' || statusFilter !== 'all' || programFilter !== 'all';
+
+  const pagination = usePagination(filteredBeneficiaries, { initialPageSize: 25 });
 
   if (loading) {
     return (
@@ -561,10 +565,7 @@ export default function Beneficiaries() {
         </div>
       </WorkspacePanel>
 
-      {/* Results Count */}
-      <div className="text-sm text-muted-foreground">
-        Showing {filteredBeneficiaries.length} of {beneficiaries.length} beneficiaries
-      </div>
+      {/* Results Count is shown in pagination controls */}
 
       {/* Table View */}
       {viewMode === 'table' && (
@@ -593,7 +594,7 @@ export default function Beneficiaries() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredBeneficiaries.map((beneficiary) => {
+                pagination.paginatedItems.map((beneficiary) => {
                   const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
                   const age = calculateAge(beneficiary.date_of_birth);
                   
@@ -712,67 +713,103 @@ export default function Beneficiaries() {
               )}
             </TableBody>
           </Table>
-          </div>
+           </div>
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            pageSize={pagination.pageSize}
+            pageSizeOptions={pagination.pageSizeOptions}
+            canGoNext={pagination.canGoNext}
+            canGoPrevious={pagination.canGoPrevious}
+            onPageChange={pagination.setCurrentPage}
+            onPageSizeChange={pagination.setPageSize}
+            onFirst={pagination.goToFirstPage}
+            onLast={pagination.goToLastPage}
+            onNext={pagination.goToNextPage}
+            onPrevious={pagination.goToPreviousPage}
+          />
         </WorkspacePanel>
       )}
 
       {/* Grid View */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredBeneficiaries.length === 0 ? (
-            <div className="col-span-full">
-              <WorkspacePanel className="h-32 flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <Users className="h-10 w-10 mb-2 mx-auto opacity-40" />
-                  <p className="font-medium">No beneficiaries found</p>
-                  <p className="text-sm">Try adjusting your filters</p>
-                </div>
-              </WorkspacePanel>
-            </div>
-          ) : (
-            filteredBeneficiaries.map((beneficiary) => {
-              const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
-              const age = calculateAge(beneficiary.date_of_birth);
-              
-              return (
-                <WorkspacePanel
-                  key={beneficiary.id}
-                  padding="md"
-                  className="cursor-pointer hover:shadow-md transition-shadow group"
-                  onClick={() => setSelectedBeneficiary(beneficiary)}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <Avatar className="h-12 w-12 border border-border/50">
-                      {beneficiary.photo_url ? (
-                        <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-                      ) : null}
-                      <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-sm font-medium">
-                        {getInitials(beneficiary.display_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <StatusBadge variant={getStatusVariant(beneficiary.status)} dot>
-                      {beneficiary.status}
-                    </StatusBadge>
-                  </div>
-                  
-                  <h3 className="font-medium text-foreground mb-1 truncate group-hover:text-primary transition-colors">
-                    {beneficiary.display_name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                    <TypeIcon className="h-3.5 w-3.5" />
-                    <span className="capitalize">{beneficiary.beneficiary_type}</span>
-                    {age && <span>• {age} yrs</span>}
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground truncate">
-                    {beneficiary.location || beneficiary.institution_name || 'No location'}
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredBeneficiaries.length === 0 ? (
+              <div className="col-span-full">
+                <WorkspacePanel className="h-32 flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <Users className="h-10 w-10 mb-2 mx-auto opacity-40" />
+                    <p className="font-medium">No beneficiaries found</p>
+                    <p className="text-sm">Try adjusting your filters</p>
                   </div>
                 </WorkspacePanel>
-              );
-            })
-          )}
-        </div>
+              </div>
+            ) : (
+              pagination.paginatedItems.map((beneficiary) => {
+                const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
+                const age = calculateAge(beneficiary.date_of_birth);
+                
+                return (
+                  <WorkspacePanel
+                    key={beneficiary.id}
+                    padding="md"
+                    className="cursor-pointer hover:shadow-md transition-shadow group"
+                    onClick={() => setSelectedBeneficiary(beneficiary)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <Avatar className="h-12 w-12 border border-border/50">
+                        {beneficiary.photo_url ? (
+                          <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
+                        ) : null}
+                        <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-sm font-medium">
+                          {getInitials(beneficiary.display_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <StatusBadge variant={getStatusVariant(beneficiary.status)} dot>
+                        {beneficiary.status}
+                      </StatusBadge>
+                    </div>
+                    
+                    <h3 className="font-medium text-foreground mb-1 truncate group-hover:text-primary transition-colors">
+                      {beneficiary.display_name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                      <TypeIcon className="h-3.5 w-3.5" />
+                      <span className="capitalize">{beneficiary.beneficiary_type}</span>
+                      {age && <span>• {age} yrs</span>}
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground truncate">
+                      {beneficiary.location || beneficiary.institution_name || 'No location'}
+                    </div>
+                  </WorkspacePanel>
+                );
+              })
+            )}
+          </div>
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            pageSize={pagination.pageSize}
+            pageSizeOptions={pagination.pageSizeOptions}
+            canGoNext={pagination.canGoNext}
+            canGoPrevious={pagination.canGoPrevious}
+            onPageChange={pagination.setCurrentPage}
+            onPageSizeChange={pagination.setPageSize}
+            onFirst={pagination.goToFirstPage}
+            onLast={pagination.goToLastPage}
+            onNext={pagination.goToNextPage}
+            onPrevious={pagination.goToPreviousPage}
+          />
+        </>
       )}
 
       {/* Detail Side Panel */}
