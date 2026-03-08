@@ -355,8 +355,10 @@ export default function Beneficiaries() {
     });
   };
 
-  const filteredBeneficiaries = getFilteredBeneficiaries();
+  const filteredBeneficiaries = useMemo(() => getFilteredBeneficiaries(), [beneficiaries, searchTerm, typeFilter, statusFilter, programFilter, enrollmentMap]);
   const hasActiveFilters = typeFilter !== 'all' || statusFilter !== 'all' || programFilter !== 'all';
+
+  const pagination = usePagination(filteredBeneficiaries, { initialPageSize: 25 });
 
   if (loading) {
     return (
