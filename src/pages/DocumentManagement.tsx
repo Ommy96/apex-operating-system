@@ -38,6 +38,14 @@ const CATEGORIES = [
   "procedure", "guideline", "form", "financial", "legal",
 ];
 
+const DOCUMENT_TYPES = [
+  { value: "general", label: "General" },
+  { value: "progress_report", label: "Progress Report" },
+  { value: "thank_you_letter", label: "Thank You Letter" },
+  { value: "audit_report", label: "Audit Report" },
+  { value: "program_report", label: "Program Report" },
+];
+
 function formatFileSize(bytes: number | null) {
   if (!bytes) return "—";
   if (bytes < 1024) return `${bytes} B`;
