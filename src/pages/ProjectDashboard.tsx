@@ -135,13 +135,13 @@ const ProjectDashboard = () => {
   // Compute demographics
   const totalBeneficiaries = enrolledBeneficiaries.length;
 
-  const genderBreakdown = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
+  const genderBreakdown: Record<string, number> = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
     const g = b.gender || 'Unknown';
     acc[g] = (acc[g] || 0) + 1;
     return acc;
   }, {});
 
-  const locationBreakdown = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
+  const locationBreakdown: Record<string, number> = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
     const loc = b.county || 'Unknown';
     acc[loc] = (acc[loc] || 0) + 1;
     return acc;
@@ -156,7 +156,7 @@ const ProjectDashboard = () => {
   });
   const unknownAge = enrolledBeneficiaries.filter((b: any) => !b.date_of_birth).length;
 
-  const typeBreakdown = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
+  const typeBreakdown: Record<string, number> = enrolledBeneficiaries.reduce((acc: Record<string, number>, b: any) => {
     const t = b.beneficiary_type || 'unknown';
     acc[t] = (acc[t] || 0) + 1;
     return acc;
