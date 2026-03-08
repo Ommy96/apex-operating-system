@@ -21,6 +21,9 @@ interface ProjectFormData {
   start_date: string;
   end_date: string;
   expected_outputs: string;
+  estimated_cost: string;
+  funding_cycle: string;
+  sponsorship_required: boolean;
 }
 
 interface Project {
