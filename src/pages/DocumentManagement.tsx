@@ -295,7 +295,12 @@ export default function DocumentManagement() {
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-primary shrink-0" />
                         <div className="min-w-0">
-                          <p className="font-medium truncate">{doc.title}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{doc.title}</p>
+                            {(doc as any).donor_visible && (
+                              <Heart className="h-3.5 w-3.5 text-primary shrink-0" />
+                            )}
+                          </div>
                           {doc.description && (
                             <p className="text-xs text-muted-foreground truncate max-w-[300px]">
                               {doc.description}
