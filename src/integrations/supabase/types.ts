@@ -3790,6 +3790,67 @@ export type Database = {
           },
         ]
       }
+      grant_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_name: string
+          document_type: string | null
+          file_size: number | null
+          file_url: string
+          grant_id: string
+          id: string
+          organization_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_name: string
+          document_type?: string | null
+          file_size?: number | null
+          file_url: string
+          grant_id: string
+          id?: string
+          organization_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_name?: string
+          document_type?: string | null
+          file_size?: number | null
+          file_url?: string
+          grant_id?: string
+          id?: string
+          organization_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_documents_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grant_programs: {
         Row: {
           allocated_amount: number | null
@@ -3828,6 +3889,79 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grant_reports: {
+        Row: {
+          created_at: string
+          due_date: string
+          grant_id: string
+          id: string
+          notes: string | null
+          organization_id: string
+          report_title: string
+          report_type: string
+          reporting_period_end: string | null
+          reporting_period_start: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          grant_id: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          report_title: string
+          report_type?: string
+          reporting_period_end?: string | null
+          reporting_period_start?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          grant_id?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          report_title?: string
+          report_type?: string
+          reporting_period_end?: string | null
+          reporting_period_start?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_reports_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
