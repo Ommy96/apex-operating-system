@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, DollarSign, Clock, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,11 @@ import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploa
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
+import { ProfileQuickActions } from '@/components/beneficiary/ProfileQuickActions';
+import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
+import { OverviewTab } from '@/components/beneficiary/OverviewTab';
+import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
+import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,17 +100,6 @@ interface Donor {
   program?: { name: string } | null;
 }
 
-interface AcademicRecord {
-  id: string;
-  academic_year: number;
-  term: string;
-  overall_grade: string | null;
-  total_marks: number | null;
-  out_of: number | null;
-  position: number | null;
-  remarks: string | null;
-}
-
 export default function BeneficiaryProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -115,12 +109,12 @@ export default function BeneficiaryProfile() {
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
-  const [academics, setAcademics] = useState<AcademicRecord[]>([]);
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (id && currentOrganization?.organization_id) {
@@ -133,7 +127,6 @@ export default function BeneficiaryProfile() {
     setLoading(true);
     
     try {
-      // Fetch beneficiary
       const { data: beneficiaryData, error: beneficiaryError } = await supabase
         .from('beneficiaries')
         .select('*')
@@ -146,27 +139,11 @@ export default function BeneficiaryProfile() {
       // Fetch guardians
       const { data: guardiansData } = await supabase
         .from('beneficiary_guardians')
-        .select(`
-          id,
-          relationship,
-          guardians (
-            id,
-            full_name,
-            guardian_type,
-            phone,
-            email,
-            is_alive,
-            employment_type,
-            source_of_income
-          )
-        `)
+        .select(`id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income)`)
         .eq('beneficiary_id', id);
 
       if (guardiansData) {
-        setGuardians(guardiansData.map((g: any) => ({
-          ...g.guardians,
-          relationship: g.relationship
-        })));
+        setGuardians(guardiansData.map((g: any) => ({ ...g.guardians, relationship: g.relationship })));
       }
 
       // Fetch donors
@@ -175,24 +152,10 @@ export default function BeneficiaryProfile() {
         .select('*, program:programs(name)')
         .eq('beneficiary_id', id);
 
-      if (donorsData) {
-        setDonors(donorsData);
-      }
+      if (donorsData) setDonors(donorsData);
 
-      // Fetch academic records and siblings (for students)
+      // Fetch siblings (students)
       if (beneficiaryData.beneficiary_type === 'student') {
-        const { data: academicsData } = await supabase
-          .from('beneficiary_academics')
-          .select('*')
-          .eq('beneficiary_id', id)
-          .order('academic_year', { ascending: false })
-          .order('term', { ascending: false });
-
-        if (academicsData) {
-          setAcademics(academicsData);
-        }
-
-        // Fetch siblings
         const { data: siblingsData } = await supabase
           .from('beneficiary_siblings')
           .select('*, sibling:sibling_id(id, display_name, beneficiary_type, gender, status, photo_url, institution_name, grade)')
@@ -203,7 +166,7 @@ export default function BeneficiaryProfile() {
         }
       }
 
-      // Fetch dependants (for adults)
+      // Fetch dependants (adults)
       if (beneficiaryData.beneficiary_type === 'adult') {
         const { data: dependantsData } = await supabase
           .from('adult_dependants')
@@ -216,11 +179,7 @@ export default function BeneficiaryProfile() {
       }
     } catch (error) {
       console.error('Error fetching beneficiary:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load beneficiary details",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to load beneficiary details", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -229,25 +188,13 @@ export default function BeneficiaryProfile() {
   const handleDelete = async () => {
     if (!id) return;
     try {
-      const { error } = await supabase
-        .from('beneficiaries')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('beneficiaries').delete().eq('id', id);
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Beneficiary deleted successfully",
-      });
+      toast({ title: "Success", description: "Beneficiary deleted successfully" });
       navigate('/beneficiaries');
     } catch (error) {
       console.error('Error deleting beneficiary:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete beneficiary",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to delete beneficiary", variant: "destructive" });
     }
   };
 
@@ -258,27 +205,16 @@ export default function BeneficiaryProfile() {
 
   const handleDownloadReport = async () => {
     if (!beneficiary) return;
-    
     setGeneratingReport(true);
     try {
       await generateBeneficiaryReport({
-        beneficiary,
-        guardians,
-        donors,
-        academics,
+        beneficiary, guardians, donors, academics: [],
         organizationName: currentOrganization?.organization_name || 'Organization',
       });
-      toast({
-        title: "Success",
-        description: "Report downloaded successfully",
-      });
+      toast({ title: "Success", description: "Report downloaded successfully" });
     } catch (error) {
       console.error('Error generating report:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate report",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to generate report", variant: "destructive" });
     } finally {
       setGeneratingReport(false);
     }
@@ -290,9 +226,7 @@ export default function BeneficiaryProfile() {
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
     return age;
   };
 
@@ -325,8 +259,13 @@ export default function BeneficiaryProfile() {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+  const getInitials = (name: string) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+
+  const getFundingStatus = () => {
+    const total = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+    if (total === 0 && donors.length === 0) return { label: '🔴 Unfunded', color: 'bg-destructive/10 text-destructive' };
+    if (donors.length > 0 && total > 0) return { label: '🟢 Funded', color: 'bg-success/10 text-success' };
+    return { label: '🟡 Partial', color: 'bg-warning/10 text-warning' };
   };
 
   if (loading) {
@@ -352,65 +291,52 @@ export default function BeneficiaryProfile() {
 
   const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
   const age = calculateAge(beneficiary.date_of_birth);
+  const fundingStatus = getFundingStatus();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
+      {/* Navigation & Actions Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Button variant="ghost" onClick={() => navigate('/beneficiaries')} className="hover:bg-primary/10 self-start">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleDownloadReport}
-            disabled={generatingReport}
-            className="border-primary/30 text-primary hover:bg-primary/10"
-          >
-            {generatingReport ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4 mr-1" />
-            )}
+          <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={generatingReport} className="border-primary/30 text-primary hover:bg-primary/10">
+            {generatingReport ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
             <span className="hidden sm:inline">Download</span> Report
           </Button>
           <Button variant="outline" size="sm" onClick={handleEdit} className="border-info/30 text-info hover:bg-info/10">
-            <Edit2 className="h-4 w-4 mr-1" />
-            Edit
+            <Edit2 className="h-4 w-4 mr-1" />Edit
           </Button>
           {isAdmin && (
             <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete
+              <Trash2 className="h-4 w-4 mr-1" />Delete
             </Button>
           )}
         </div>
       </div>
 
-      {/* Profile Card */}
+      {/* Profile Header Card */}
       <Card className="overflow-hidden border-primary/20">
         <div className="h-2 bg-gradient-to-r from-primary via-info to-primary" />
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            <Avatar className="h-24 w-24 border-4 border-primary/20 shadow-lg">
-              {beneficiary.photo_url ? (
-                <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-              ) : null}
-              <AvatarFallback 
-                className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-info/20 text-primary"
-              >
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col md:flex-row gap-5">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-primary/20 shadow-lg shrink-0">
+              {beneficiary.photo_url ? <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} /> : null}
+              <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-info/20 text-primary">
                 {getInitials(beneficiary.display_name)}
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">{beneficiary.display_name}</h1>
-                  <div className="flex items-center gap-2 mt-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{beneficiary.display_name}</h1>
+                  {beneficiary.student_id_number && (
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">ID: {beneficiary.student_id_number}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
                     <Badge className={`capitalize ${getTypeBadgeColor(beneficiary.beneficiary_type)}`}>
                       <TypeIcon className="h-3 w-3 mr-1" />
                       {beneficiary.beneficiary_type}
@@ -418,38 +344,47 @@ export default function BeneficiaryProfile() {
                     <Badge className={getStatusBadgeColor(beneficiary.status)}>
                       {beneficiary.status}
                     </Badge>
+                    <Badge className={fundingStatus.color}>
+                      {fundingStatus.label}
+                    </Badge>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
                 {beneficiary.beneficiary_type !== 'group' && age && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span>{age} years old</span>
+                    <Calendar className="h-4 w-4 text-primary shrink-0" />
+                    <span>{age} yrs</span>
                   </div>
                 )}
                 {beneficiary.gender && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-info" />
-                    <span>{beneficiary.gender}</span>
+                    <Users className="h-4 w-4 text-info shrink-0" />
+                    <span className="capitalize">{beneficiary.gender}</span>
                   </div>
                 )}
                 {beneficiary.institution_name && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 className="h-4 w-4 text-warning" />
-                    <span>{beneficiary.institution_name}</span>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
+                    <Building2 className="h-4 w-4 text-warning shrink-0" />
+                    <span className="truncate">{beneficiary.institution_name}</span>
                   </div>
                 )}
                 {beneficiary.grade && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <GraduationCap className="h-4 w-4 text-success" />
-                    <span>{beneficiary.grade}</span>
+                    <GraduationCap className="h-4 w-4 text-success shrink-0" />
+                    <span>{beneficiary.academic_level ? `${beneficiary.academic_level} — ` : ''}{beneficiary.grade}</span>
+                  </div>
+                )}
+                {beneficiary.county && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 text-primary shrink-0" />
+                    <span>{beneficiary.county}{beneficiary.sub_county ? `, ${beneficiary.sub_county}` : ''}</span>
                   </div>
                 )}
                 {beneficiary.member_count && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-primary" />
+                    <Users className="h-4 w-4 text-primary shrink-0" />
                     <span>{beneficiary.member_count} members</span>
                   </div>
                 )}
@@ -459,47 +394,71 @@ export default function BeneficiaryProfile() {
         </CardContent>
       </Card>
 
+      {/* Quick Actions */}
+      <ProfileQuickActions
+        onAddObservation={() => setActiveTab('observations')}
+        onAddFunding={() => setActiveTab('funding')}
+        onEnrollProgram={() => setActiveTab('programs')}
+        onUploadDocument={() => setActiveTab('documents')}
+      />
+
       {/* Tabbed Content */}
-      <Tabs defaultValue="details" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto md:flex-wrap bg-muted/50 p-1 min-w-full md:min-w-0">
-            <TabsTrigger value="details" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              Details
+            <TabsTrigger value="overview" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <Activity className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Info</span>
             </TabsTrigger>
             <TabsTrigger value="programs" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <FolderKanban className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+              <FolderKanban className="h-3.5 w-3.5 mr-1" />
               Programs
             </TabsTrigger>
+            <TabsTrigger value="funding" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <DollarSign className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Sponsorship</span>
+              <span className="sm:hidden">Funds</span>
+            </TabsTrigger>
             <TabsTrigger value="observations" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-              Observations
+              <MessageSquare className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Observations</span>
+              <span className="sm:hidden">Obs</span>
             </TabsTrigger>
             {beneficiary.beneficiary_type === 'student' && (
               <TabsTrigger value="academics" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-                Academics
+                <GraduationCap className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Academics</span>
+                <span className="sm:hidden">Acad</span>
               </TabsTrigger>
             )}
+            <TabsTrigger value="documents" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <Upload className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Documents</span>
+              <span className="sm:hidden">Docs</span>
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Timeline</span>
+              <span className="sm:hidden">Time</span>
+            </TabsTrigger>
             {beneficiary.beneficiary_type === 'student' && (
-              <TabsTrigger value="uploads" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-                Uploads
-              </TabsTrigger>
-            )}
-            {beneficiary.beneficiary_type === 'student' && (
-              <TabsTrigger value="siblings" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-                Siblings ({siblings.length})
-              </TabsTrigger>
-            )}
-            {beneficiary.beneficiary_type === 'student' && (
-              <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                Guardians ({guardians.length})
-              </TabsTrigger>
+              <>
+                <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                  <Heart className="h-3.5 w-3.5 mr-1" />
+                  <span className="hidden sm:inline">Guardians ({guardians.length})</span>
+                  <span className="sm:hidden">Guard</span>
+                </TabsTrigger>
+                <TabsTrigger value="siblings" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                  <Users className="h-3.5 w-3.5 mr-1" />
+                  <span className="hidden sm:inline">Siblings ({siblings.length})</span>
+                  <span className="sm:hidden">Sibs</span>
+                </TabsTrigger>
+              </>
             )}
             {beneficiary.beneficiary_type === 'adult' && (
               <TabsTrigger value="dependants" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                <Users className="h-3.5 w-3.5 mr-1" />
                 Dependants ({dependants.length})
               </TabsTrigger>
             )}
@@ -511,153 +470,19 @@ export default function BeneficiaryProfile() {
           </TabsList>
         </div>
 
-        <TabsContent value="details" className="space-y-4">
-          {/* Student Details */}
-          {beneficiary.beneficiary_type === 'student' && (
-            <Card className="border-primary/20">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
-                <CardTitle className="text-lg text-primary flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5" />
-                  Academic Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Academic Level</p>
-                  <p className="font-medium">{beneficiary.academic_level || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Grade/Year</p>
-                  <p className="font-medium">{beneficiary.grade || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Institution</p>
-                  <p className="font-medium">{beneficiary.institution_name || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Course</p>
-                  <p className="font-medium">{beneficiary.course_name || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Student ID</p>
-                  <p className="font-medium">{beneficiary.student_id_number || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Year Enrolled</p>
-                  <p className="font-medium">{beneficiary.year_enrolled || '-'}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Adult Details */}
-          {beneficiary.beneficiary_type === 'adult' && (
-            <Card className="border-info/20">
-              <CardHeader className="bg-gradient-to-r from-info/5 to-transparent">
-                <CardTitle className="text-lg text-info flex items-center gap-2">
-                  <UserCheck className="h-5 w-5" />
-                  Self-Empowerment Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Source of Income</p>
-                  <p className="font-medium">{beneficiary.source_of_income || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Amount Given (KSH)</p>
-                  <p className="font-medium">{beneficiary.amount_given?.toLocaleString() || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">County</p>
-                  <p className="font-medium">{beneficiary.county || '-'}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Group Details */}
-          {beneficiary.beneficiary_type === 'group' && (
-            <Card className="border-warning/20">
-              <CardHeader className="bg-gradient-to-r from-warning/5 to-transparent">
-                <CardTitle className="text-lg text-warning flex items-center gap-2">
-                  <UsersRound className="h-5 w-5" />
-                  Group Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Member Count</p>
-                  <p className="font-medium">{beneficiary.member_count || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Meeting Schedule</p>
-                  <p className="font-medium">{beneficiary.group_schedule || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Leader Name</p>
-                  <p className="font-medium">{beneficiary.leader_name || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Leader Phone</p>
-                  <p className="font-medium">{beneficiary.leader_phone || '-'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Activities</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {beneficiary.group_activities?.map((activity, i) => (
-                      <Badge key={i} variant="secondary">{activity}</Badge>
-                    )) || <span className="text-muted-foreground">-</span>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Location Details */}
-          <Card className="border-success/20">
-            <CardHeader className="bg-gradient-to-r from-success/5 to-transparent">
-              <CardTitle className="text-lg text-success flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">County</p>
-                <p className="font-medium">{beneficiary.county || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Sub-County</p>
-                <p className="font-medium">{beneficiary.sub_county || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Estate/Village</p>
-                <p className="font-medium">{beneficiary.estate_village || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Home County</p>
-                <p className="font-medium">{beneficiary.home_county || '-'}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Background */}
-          {beneficiary.background_narrative && (
-            <Card className="border-muted">
-              <CardHeader>
-                <CardTitle className="text-lg">Background</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{beneficiary.background_narrative}</p>
-              </CardContent>
-            </Card>
-          )}
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-4">
+          <OverviewTab beneficiaryId={beneficiary.id} beneficiary={beneficiary} guardians={guardians} donors={donors} />
         </TabsContent>
 
         {/* Programs Tab */}
         <TabsContent value="programs" className="space-y-4">
           <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
+        {/* Sponsorship & Funding Tab */}
+        <TabsContent value="funding" className="space-y-4">
+          <SponsorshipFundingTab donors={donors} />
         </TabsContent>
 
         {/* Observations Tab */}
@@ -678,12 +503,15 @@ export default function BeneficiaryProfile() {
           </TabsContent>
         )}
 
-        {/* Uploads Tab (Students Only) */}
-        {beneficiary.beneficiary_type === 'student' && (
-          <TabsContent value="uploads" className="space-y-4">
-            <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
-          </TabsContent>
-        )}
+        {/* Documents Tab (All types) */}
+        <TabsContent value="documents" className="space-y-4">
+          <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
+        {/* Activity Timeline Tab */}
+        <TabsContent value="timeline" className="space-y-4">
+          <ActivityTimeline beneficiaryId={beneficiary.id} />
+        </TabsContent>
 
         {/* Siblings Tab (Students Only) */}
         {beneficiary.beneficiary_type === 'student' && (
@@ -705,16 +533,11 @@ export default function BeneficiaryProfile() {
                           {getInitials(sibling.display_name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-foreground">{sibling.display_name}</h4>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-foreground truncate">{sibling.display_name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs capitalize">{sibling.relationship}</Badge>
-                          {sibling.institution_name && (
-                            <span className="text-xs text-muted-foreground">{sibling.institution_name}</span>
-                          )}
-                          {sibling.grade && (
-                            <span className="text-xs text-muted-foreground">Grade {sibling.grade}</span>
-                          )}
+                          {sibling.institution_name && <span className="text-xs text-muted-foreground truncate">{sibling.institution_name}</span>}
                         </div>
                       </div>
                       <Badge className={getStatusBadgeColor(sibling.status || 'active')}>{sibling.status}</Badge>
@@ -759,14 +582,10 @@ export default function BeneficiaryProfile() {
                         </div>
                       )}
                       {guardian.employment_type && (
-                        <div>
-                          <span className="text-muted-foreground">Employment:</span> {guardian.employment_type}
-                        </div>
+                        <div><span className="text-muted-foreground">Employment:</span> {guardian.employment_type}</div>
                       )}
                       {guardian.source_of_income && (
-                        <div>
-                          <span className="text-muted-foreground">Income:</span> {guardian.source_of_income}
-                        </div>
+                        <div><span className="text-muted-foreground">Income:</span> {guardian.source_of_income}</div>
                       )}
                     </div>
                   </CardContent>
@@ -796,15 +615,11 @@ export default function BeneficiaryProfile() {
                           {getInitials(dep.display_name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-foreground">{dep.display_name}</h4>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-foreground truncate">{dep.display_name}</h4>
                         <div className="flex items-center gap-2 mt-1">
-                          {dep.institution_name && (
-                            <span className="text-xs text-muted-foreground">{dep.institution_name}</span>
-                          )}
-                          {dep.grade && (
-                            <span className="text-xs text-muted-foreground">Grade {dep.grade}</span>
-                          )}
+                          {dep.institution_name && <span className="text-xs text-muted-foreground">{dep.institution_name}</span>}
+                          {dep.grade && <span className="text-xs text-muted-foreground">Grade {dep.grade}</span>}
                         </div>
                       </div>
                       <Badge className={getStatusBadgeColor(dep.status || 'active')}>{dep.status}</Badge>
@@ -816,6 +631,7 @@ export default function BeneficiaryProfile() {
           </TabsContent>
         )}
 
+        {/* Medical Tab */}
         {beneficiary.beneficiary_type !== 'group' && (
           <TabsContent value="medical" className="space-y-4">
             <Card className="border-destructive/20">
@@ -862,14 +678,12 @@ export default function BeneficiaryProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {beneficiary.display_name}? This action cannot be undone and will remove all associated records.
+              Are you sure you want to delete {beneficiary.display_name}? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
