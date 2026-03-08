@@ -76,6 +76,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
       group_schedule: "",
       group_activities: [],
       status: "active",
+      funding_required: undefined,
     },
   });
 
