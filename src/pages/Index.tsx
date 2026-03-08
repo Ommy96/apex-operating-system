@@ -162,7 +162,7 @@ const Index = () => {
             </div>
             <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <Lock className="w-6 h-6 text-accent-light" />
+                <Lock className="w-6 h-6 text-amber-400" />
                 <h3 className="text-2xl font-bold text-primary-foreground">Data Security</h3>
               </div>
               <div className="space-y-3">
