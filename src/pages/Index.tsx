@@ -80,14 +80,14 @@ const Index = () => {
       <main id="landing-main" role="main">
       <section aria-labelledby="hero-heading" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div className="text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent-light text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
             <Zap className="w-4 h-4" />
             One platform. Many organizations. Measurable impact.
           </div>
           <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
             Empower Your NGO with
             <br />
-            <span className="text-accent-light">
+            <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
               Data-Driven Impact
             </span>
           </h1>
