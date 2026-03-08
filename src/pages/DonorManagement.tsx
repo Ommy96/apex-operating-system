@@ -187,10 +187,9 @@ export default function DonorManagement() {
     <div className="space-y-6">
       <PageHeroHeader
         title="Donor Management"
-        subtitle="Track all donors, contributions, and program sponsorships across your organization"
+        description="Track all donors, contributions, and program sponsorships across your organization"
         icon={Heart}
-        iconColor="text-rose-500"
-        iconBgColor="bg-rose-500/10"
+        iconColorClass="text-rose-500"
       />
 
       {/* Summary Cards */}
