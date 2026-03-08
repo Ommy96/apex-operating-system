@@ -67,20 +67,34 @@ const ProjectDashboard = () => {
     enabled: !!projectId,
   });
 
-  // Fetch beneficiaries enrolled in this project
+  // Fetch beneficiaries enrolled in this project (or its parent program)
   const { data: enrolledBeneficiaries = [] } = useQuery({
-    queryKey: ['project-beneficiaries', projectId],
+    queryKey: ['project-beneficiaries', projectId, project?.program_id],
     queryFn: async () => {
       if (!projectId) return [];
-      const { data, error } = await supabase
+      // First try project-level enrollments
+      const { data: projectEnrollments, error: pErr } = await supabase
         .from('beneficiary_services')
         .select('beneficiary_id, status, beneficiary:beneficiaries(id, display_name, gender, date_of_birth, county, sub_county, beneficiary_type, status, funding_required, academic_level, institution_name, photo_url)')
         .eq('project_id', projectId)
         .eq('status', 'active');
-      if (error) throw error;
-      return data?.map((e: any) => ({ ...e.beneficiary, enrollment_status: e.status })).filter(Boolean) || [];
+      if (pErr) throw pErr;
+      const projectResults = projectEnrollments?.map((e: any) => ({ ...e.beneficiary, enrollment_status: e.status })).filter(Boolean) || [];
+      if (projectResults.length > 0) return projectResults;
+
+      // Fallback: fetch program-level enrollments if project has a parent program
+      if (project?.program_id) {
+        const { data: programEnrollments, error: prErr } = await supabase
+          .from('beneficiary_services')
+          .select('beneficiary_id, status, beneficiary:beneficiaries(id, display_name, gender, date_of_birth, county, sub_county, beneficiary_type, status, funding_required, academic_level, institution_name, photo_url)')
+          .eq('program_id', project.program_id)
+          .eq('status', 'active');
+        if (prErr) throw prErr;
+        return programEnrollments?.map((e: any) => ({ ...e.beneficiary, enrollment_status: e.status })).filter(Boolean) || [];
+      }
+      return [];
     },
-    enabled: !!projectId,
+    enabled: !!projectId && !isLoading,
   });
 
   // Fetch funding (financial_transactions for this project, excluding expenses)
