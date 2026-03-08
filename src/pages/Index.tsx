@@ -156,7 +156,7 @@ const Index = () => {
                   </div>
                 ))}
               </div>
-              <p className="text-accent-light mt-6 text-sm italic">
+              <p className="text-emerald-400 mt-6 text-sm italic">
                 Built by practitioners, for practitioners.
               </p>
             </div>
