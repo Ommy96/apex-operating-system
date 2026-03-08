@@ -89,6 +89,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: project.start_date || "",
         end_date: project.end_date || "",
         expected_outputs: project.expected_outputs || "",
+        estimated_cost: (project as any).estimated_cost?.toString() || "",
+        funding_cycle: (project as any).funding_cycle || "annually",
+        sponsorship_required: (project as any).sponsorship_required || false,
       });
     } else {
       reset({
@@ -101,6 +104,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: "",
         end_date: "",
         expected_outputs: "",
+        estimated_cost: "",
+        funding_cycle: "annually",
+        sponsorship_required: false,
       });
     }
   }, [project, reset]);
