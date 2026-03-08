@@ -21,12 +21,12 @@ const Index = () => {
   const { user } = useAuth();
 
   const coreFeatures = [
-    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation" },
-    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking" },
-    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data" },
-    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports" },
-    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click" },
-    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team" }
+    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation", accent: "text-violet-400", accentBg: "bg-violet-500/10", accentBorder: "border-violet-500/20" },
+    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking", accent: "text-emerald-400", accentBg: "bg-emerald-500/10", accentBorder: "border-emerald-500/20" },
+    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data", accent: "text-amber-400", accentBg: "bg-amber-500/10", accentBorder: "border-amber-500/20" },
+    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports", accent: "text-rose-400", accentBg: "bg-rose-500/10", accentBorder: "border-rose-500/20" },
+    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click", accent: "text-cyan-400", accentBg: "bg-cyan-500/10", accentBorder: "border-cyan-500/20" },
+    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team", accent: "text-orange-400", accentBg: "bg-orange-500/10", accentBorder: "border-orange-500/20" }
   ];
 
   const benefits = [
