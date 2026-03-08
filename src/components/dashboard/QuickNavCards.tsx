@@ -47,10 +47,10 @@ export function QuickNavCards() {
     { title: "Programs", icon: Target, path: "/programs-management", count: counts?.programs ?? null, subtitle: "Active programs" },
     { title: "Projects", icon: FolderKanban, path: "/programs-management", count: counts?.projects ?? null, subtitle: "Total projects" },
     { title: "Donors", icon: HandCoins, path: "/beneficiaries", count: counts?.donors ?? null, subtitle: "Sponsor records" },
-    { title: "Finance", icon: Wallet, path: "/financial-suite", count: counts?.expenses ?? null, subtitle: "Expense records" },
+    { title: "Finance", icon: Wallet, path: "/financial", count: counts?.expenses ?? null, subtitle: "Expense records" },
     { title: "M&E", icon: BarChart3, path: "/me-suite", count: null, subtitle: "Monitoring & Evaluation" },
     { title: "Analytics", icon: BarChart3, path: "/reports-analytics", count: null, subtitle: "Reports & insights" },
-    { title: "Documents", icon: FileText, path: "/documents", count: null, subtitle: "File management" },
+    { title: "Documents", icon: FileText, path: "/document-management", count: null, subtitle: "File management" },
   ];
 
   return (
