@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.ai-smart-insights]
 verify_jwt = false
+
+[functions.create-donor-account]
+verify_jwt = false
