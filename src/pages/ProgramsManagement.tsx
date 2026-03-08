@@ -59,6 +59,7 @@ const emptyFormData: ProgramFormData = {
   target_population: [],
   geographic_coverage: "",
   objectives: "",
+  annual_funding_required: 0,
 };
 
 const ProgramsManagement = () => {
