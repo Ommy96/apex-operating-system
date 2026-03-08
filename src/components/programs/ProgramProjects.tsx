@@ -232,7 +232,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => setDeleteProject(project)}
+                            onClick={(e) => { e.stopPropagation(); setDeleteProject(project); }}
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
