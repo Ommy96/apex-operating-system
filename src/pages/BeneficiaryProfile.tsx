@@ -99,7 +99,7 @@ interface Donor {
   donation_date: string | null;
   notes: string | null;
   program_id: string | null;
-  program?: { name: string } | null;
+  program?: { name: string; annual_funding_required: number | null } | null;
 }
 
 export default function BeneficiaryProfile() {
