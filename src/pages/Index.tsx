@@ -106,7 +106,7 @@ const Index = () => {
       </section>
 
       {/* Core Features */}
-      <section className="bg-primary-foreground/5 backdrop-blur-sm border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="features-heading" className="bg-primary-foreground/5 backdrop-blur-sm border-y border-primary-foreground/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-primary-foreground mb-2">Core Features</h2>
