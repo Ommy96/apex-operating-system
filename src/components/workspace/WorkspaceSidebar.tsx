@@ -18,29 +18,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { 
-  Sparkles,
-  LayoutDashboard,
-  Users,
-  Settings,
-  LogOut,
-  Target,
-  Shield,
-  BarChart3,
-  Wallet,
-  GitBranch,
-  UserCog,
-  Zap,
-  MessageCircle,
-  Bot,
-  FileText,
-  ShieldCheck,
-  Presentation,
-  Heart,
-  Building2,
-  Handshake,
+  Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
+  Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
+  MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
+  Heart, Building2, Handshake, Activity, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -48,55 +33,6 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Grouped navigation structure
-const navGroups = [
-  {
-    label: "Overview",
-    items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: "People",
-    items: [
-      { title: "Beneficiaries", url: "/beneficiaries", icon: Users },
-      { title: "Volunteers", url: "/volunteers", icon: Heart },
-      { title: "Partners", url: "/partners", icon: Handshake },
-    ],
-  },
-  {
-    label: "Programs & M&E",
-    items: [
-      { title: "Programs", url: "/programs-management", icon: Target },
-      { title: "M&E Suite", url: "/me-suite", icon: GitBranch },
-      { title: "Analytics", url: "/reports-analytics", icon: BarChart3 },
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
-      { title: "Financial", url: "/financial", icon: Wallet },
-      { title: "HR & Staff", url: "/hr", icon: UserCog },
-      { title: "Branches", url: "/branches", icon: Building2 },
-      { title: "Communications", url: "/communications", icon: MessageCircle },
-      { title: "Automation", url: "/automation", icon: Zap },
-    ],
-  },
-  {
-    label: "Governance",
-    items: [
-      { title: "Documents", url: "/document-management", icon: FileText },
-      { title: "Compliance", url: "/compliance", icon: ShieldCheck },
-      { title: "Board Portal", url: "/board-reporting", icon: Presentation },
-    ],
-  },
-];
-
-const systemItems = [
-  { title: "AI Insights", url: "/ai-insights", icon: Bot },
-  { title: "Settings", url: "/organization-settings", icon: Settings },
-];
 
 interface MenuItemProps {
   item: { title: string; url: string; icon: any };
@@ -142,9 +78,15 @@ function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
   return content;
 }
 
+interface MenuGroup {
+  label: string;
+  items: Array<{ title: string; url: string; icon: any; show: boolean }>;
+}
+
 export function WorkspaceSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const { signOut, isAdmin, isManagement, user } = useAuth();
+  const { signOut, user } = useAuth();
+  const { can, isSuperAdmin: superAdmin } = usePermissions();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
@@ -174,7 +116,61 @@ export function WorkspaceSidebar() {
     await signOut();
   };
 
-  const superAdmin = isSuperAdmin(user?.email);
+  const isSuperAdminUser = isSuperAdmin(user?.email);
+
+  // Logically grouped navigation with permission checks
+  const menuGroups: MenuGroup[] = [
+    {
+      label: "Overview",
+      items: [
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
+      ],
+    },
+    {
+      label: "People",
+      items: [
+        { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Volunteers", url: "/volunteers", icon: Heart, show: true },
+        { title: "Partners", url: "/partners", icon: Handshake, show: true },
+      ],
+    },
+    {
+      label: "Programs & M&E",
+      items: [
+        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "M&E Suite", url: "/me-suite", icon: Activity, show: true },
+        { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+      ],
+    },
+    {
+      label: "Operations",
+      items: [
+        { title: "Financial", url: "/financial", icon: Wallet, show: true },
+        { title: "HR & Staff", url: "/hr", icon: UserCog, show: true },
+        { title: "Branches", url: "/branches", icon: Building2, show: true },
+        { title: "Communications", url: "/communications", icon: MessageCircle, show: true },
+        { title: "Automation", url: "/automation", icon: Zap, show: true },
+        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: true },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+      ],
+    },
+    {
+      label: "Governance",
+      items: [
+        { title: "Documents", url: "/document-management", icon: FileText, show: true },
+        { title: "Compliance", url: "/compliance", icon: ShieldCheck, show: true },
+        { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: true },
+        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: true },
+      ],
+    },
+    {
+      label: "Administration",
+      items: [
+        { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
+        { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
+      ],
+    },
+  ];
 
   return (
     <TooltipProvider>
@@ -208,37 +204,41 @@ export function WorkspaceSidebar() {
         </SidebarHeader>
 
         <SidebarContent className="px-2 pb-4 workspace-scroll">
-          {/* Grouped Navigation */}
-          {navGroups.map((group) => (
-            <SidebarGroup key={group.label} className="mt-1 first:mt-0">
-              {!isCollapsed && (
-                <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
-                  {group.label}
-                </SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu className="space-y-0.5">
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <MenuItem 
-                        item={item} 
-                        isCollapsed={isCollapsed} 
-                        isActive={isActive} 
-                        onClick={handleNavClick} 
-                      />
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
+          {menuGroups.map((group) => {
+            const visibleItems = group.items.filter(i => i.show);
+            if (visibleItems.length === 0) return null;
+
+            return (
+              <SidebarGroup key={group.label} className="mt-1 first:mt-0">
+                {!isCollapsed && (
+                  <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
+                    {group.label}
+                  </SidebarGroupLabel>
+                )}
+                <SidebarGroupContent>
+                  <SidebarMenu className="space-y-0.5">
+                    {visibleItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <MenuItem 
+                          item={item} 
+                          isCollapsed={isCollapsed} 
+                          isActive={isActive} 
+                          onClick={handleNavClick} 
+                        />
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            );
+          })}
 
           {/* Dynamic Programs */}
-          {dynamicPrograms && dynamicPrograms.length > 0 && (
+          {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
-                  Programs
+                  Program Spaces
                 </SidebarGroupLabel>
               )}
               <SidebarGroupContent>
@@ -258,33 +258,8 @@ export function WorkspaceSidebar() {
             </SidebarGroup>
           )}
 
-          {/* System - Only for Admin/Management */}
-          {(isAdmin || isManagement || superAdmin) && (
-            <SidebarGroup className="mt-4">
-              {!isCollapsed && (
-                <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
-                  System
-                </SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu className="space-y-0.5">
-                  {systemItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <MenuItem 
-                        item={item} 
-                        isCollapsed={isCollapsed} 
-                        isActive={isActive} 
-                        onClick={handleNavClick} 
-                      />
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
-
           {/* Super Admin */}
-          {superAdmin && (
+          {isSuperAdminUser && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1 flex items-center gap-1">
@@ -296,7 +271,7 @@ export function WorkspaceSidebar() {
                 <SidebarMenu className="space-y-0.5">
                   <SidebarMenuItem>
                     <MenuItem 
-                      item={{ title: "Admin Suite", url: "/admin/infera", icon: Shield }}
+                      item={{ title: "Control Center", url: "/admin/infera", icon: Shield }}
                       isCollapsed={isCollapsed} 
                       isActive={isActive} 
                       onClick={handleNavClick} 
