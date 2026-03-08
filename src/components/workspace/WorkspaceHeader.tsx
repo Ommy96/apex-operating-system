@@ -129,7 +129,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
   return (
-    <header className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
+    <header role="banner" aria-label="Application header" className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
       {/* Left Section */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <SidebarTrigger className="p-2 hover:bg-muted rounded-lg transition-colors shrink-0" />
