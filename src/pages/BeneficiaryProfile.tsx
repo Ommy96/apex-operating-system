@@ -151,7 +151,7 @@ export default function BeneficiaryProfile() {
       // Fetch donors
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
-        .select('*, program:programs(name, annual_funding_required)')
+        .select('*, program:programs(name)')
         .eq('beneficiary_id', id);
 
       if (donorsData) setDonors(donorsData);
