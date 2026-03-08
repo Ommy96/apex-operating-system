@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban, Users, DollarSign } from "lucide-react";
+import { ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban, Users, DollarSign, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { ProgramFunding } from "@/components/programs/ProgramFunding";
+import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponsorshipDashboard";
 import { format } from "date-fns";
 
 const ProgramDashboard = () => {
@@ -179,6 +180,10 @@ const ProgramDashboard = () => {
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Observations</span>
             </TabsTrigger>
+            <TabsTrigger value="sponsorship" className="gap-2">
+              <Heart className="h-4 w-4" />
+              <span className="hidden sm:inline">Sponsorship</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -271,6 +276,12 @@ const ProgramDashboard = () => {
         {activeTab === "observations" && (
           <TabsContent value="observations" forceMount className="mt-6">
             <ProgramObservations programId={programId} />
+          </TabsContent>
+        )}
+
+        {activeTab === "sponsorship" && (
+          <TabsContent value="sponsorship" forceMount className="mt-6">
+            <ProgramSponsorshipDashboard programId={programId} />
           </TabsContent>
         )}
 

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { FolderKanban, DollarSign, MessageSquare, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FundingCoverageBar } from './FundingCoverageBar';
+import { useBeneficiaryCoverage } from '@/hooks/useSponsorshipCoverage';
 
 interface OverviewTabProps {
   beneficiaryId: string;
@@ -15,6 +16,7 @@ interface OverviewTabProps {
 export function OverviewTab({ beneficiaryId, beneficiary, guardians, donors }: OverviewTabProps) {
   const [enrollmentCount, setEnrollmentCount] = useState(0);
   const [observationCount, setObservationCount] = useState(0);
+  const { data: coverages = [] } = useBeneficiaryCoverage(beneficiaryId);
 
   useEffect(() => {
     fetchCounts();
@@ -30,6 +32,12 @@ export function OverviewTab({ beneficiaryId, beneficiary, guardians, donors }: O
   };
 
   const totalFunding = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
+  
+  // Use coverage data if available, otherwise fall back to simple totals
+  const hasCoverage = coverages.length > 0;
+  const totalRequired = hasCoverage ? coverages.reduce((s, c) => s + c.totalRequired, 0) : undefined;
+  const totalReceived = hasCoverage ? coverages.reduce((s, c) => s + c.totalReceived, 0) : totalFunding;
+  const fundingGap = hasCoverage ? coverages.reduce((s, c) => s + c.gap, 0) : 0;
 
   return (
     <div className="space-y-4">
@@ -66,12 +74,30 @@ export function OverviewTab({ beneficiaryId, beneficiary, guardians, donors }: O
       </div>
 
       {/* Funding Coverage */}
-      {donors.length > 0 && (
+      {(donors.length > 0 || hasCoverage) && (
         <Card className="border-primary/10">
           <CardContent className="p-5">
-            <FundingCoverageBar totalReceived={totalFunding} />
+            <FundingCoverageBar totalReceived={totalReceived} totalRequired={totalRequired} />
           </CardContent>
         </Card>
+      )}
+
+      {/* Coverage status badges per program */}
+      {hasCoverage && (
+        <div className="flex flex-wrap gap-2">
+          {coverages.map(c => (
+            <Badge
+              key={c.programId}
+              className={
+                c.status === 'fully_funded' ? 'bg-success/20 text-success border-success/30' :
+                c.status === 'partially_funded' ? 'bg-warning/20 text-warning border-warning/30' :
+                'bg-destructive/20 text-destructive border-destructive/30'
+              }
+            >
+              {c.programName}: {c.status === 'fully_funded' ? '🟢' : c.status === 'partially_funded' ? '🟡' : '🔴'} {c.coverage}%
+            </Badge>
+          ))}
+        </div>
       )}
 
       {/* Basic Info Grid */}

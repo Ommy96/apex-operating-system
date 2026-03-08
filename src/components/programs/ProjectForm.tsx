@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,6 +22,9 @@ interface ProjectFormData {
   start_date: string;
   end_date: string;
   expected_outputs: string;
+  estimated_cost: string;
+  funding_cycle: string;
+  sponsorship_required: boolean;
 }
 
 interface Project {
@@ -62,10 +66,15 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       start_date: "",
       end_date: "",
       expected_outputs: "",
+      estimated_cost: "",
+      funding_cycle: "annually",
+      sponsorship_required: false,
     },
   });
 
   const status = watch("status");
+  const sponsorshipRequired = watch("sponsorship_required");
+  const fundingCycle = watch("funding_cycle");
 
   // Populate form when editing
   useEffect(() => {
@@ -80,6 +89,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: project.start_date || "",
         end_date: project.end_date || "",
         expected_outputs: project.expected_outputs || "",
+        estimated_cost: (project as any).estimated_cost?.toString() || "",
+        funding_cycle: (project as any).funding_cycle || "annually",
+        sponsorship_required: (project as any).sponsorship_required || false,
       });
     } else {
       reset({
@@ -92,6 +104,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: "",
         end_date: "",
         expected_outputs: "",
+        estimated_cost: "",
+        funding_cycle: "annually",
+        sponsorship_required: false,
       });
     }
   }, [project, reset]);
@@ -114,7 +129,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
     setIsSubmitting(true);
 
     try {
-      const projectData = {
+      const projectData: any = {
         name: data.name,
         project_code: data.project_code || null,
         description: data.description || null,
@@ -124,6 +139,9 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         expected_outputs: data.expected_outputs || null,
+        estimated_cost: data.estimated_cost ? parseFloat(data.estimated_cost) : 0,
+        funding_cycle: data.funding_cycle || "annually",
+        sponsorship_required: data.sponsorship_required || false,
         program_id: programId,
         organization_id: currentOrganization.organization_id,
         slug: generateSlug(data.name),
@@ -265,6 +283,52 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
               className="min-h-[80px]"
               {...register("expected_outputs")}
             />
+          </div>
+
+          {/* Sponsorship Settings */}
+          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Sponsorship Need</Label>
+                <p className="text-xs text-muted-foreground">Mark this project as a sponsorship need for beneficiaries</p>
+              </div>
+              <Switch
+                checked={sponsorshipRequired}
+                onCheckedChange={(checked) => setValue("sponsorship_required", checked)}
+              />
+            </div>
+
+            {sponsorshipRequired && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="estimated_cost">Cost Per Beneficiary (KES) *</Label>
+                  <Input
+                    id="estimated_cost"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 40000"
+                    {...register("estimated_cost")}
+                  />
+                  <p className="text-xs text-muted-foreground">Expected sponsorship cost per beneficiary</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Funding Cycle</Label>
+                  <Select value={fundingCycle} onValueChange={(v) => setValue("funding_cycle", v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="annually">Annually</SelectItem>
+                      <SelectItem value="termly">Termly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="one_time">One-Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

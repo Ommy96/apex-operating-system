@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, Receipt, Landmark, TrendingUp, Heart } from "lucide-react";
+import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target } from "lucide-react";
 import { BudgetPlanning } from "@/components/financial/BudgetPlanning";
 import { ExpenseTracking } from "@/components/financial/ExpenseTracking";
 import { GrantManagement } from "@/components/financial/GrantManagement";
 import { CostAnalytics } from "@/components/financial/CostAnalytics";
 import { DonorSupport } from "@/components/financial/DonorSupport";
+import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 
 export default function FinancialSuite() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -27,6 +28,10 @@ export default function FinancialSuite() {
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
+            <TabsTrigger value="sponsorship" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Target className="h-4 w-4" />
+              <span className="hidden sm:inline">Sponsorship</span>
+            </TabsTrigger>
             <TabsTrigger value="budgets" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Wallet className="h-4 w-4" />
               <span className="hidden sm:inline">Budgets</span>
@@ -46,8 +51,12 @@ export default function FinancialSuite() {
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="mt-6">
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          <SponsorshipMetrics />
           <DonorSupport />
+        </TabsContent>
+        <TabsContent value="sponsorship" className="mt-6">
+          <SponsorshipMetrics />
         </TabsContent>
         <TabsContent value="budgets" className="mt-6">
           <BudgetPlanning />

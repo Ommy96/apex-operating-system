@@ -23,6 +23,7 @@ import { OverviewTab } from '@/components/beneficiary/OverviewTab';
 import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
+import { SponsorshipCoverageSection } from '@/components/beneficiary/SponsorshipCoverageSection';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -488,6 +489,7 @@ export default function BeneficiaryProfile() {
 
         {/* Sponsorship & Funding Tab */}
         <TabsContent value="funding" className="space-y-4">
+          <SponsorshipCoverageSection beneficiaryId={beneficiary.id} />
           <SponsorshipFundingTab donors={donors} />
         </TabsContent>
 

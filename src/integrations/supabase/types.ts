@@ -6092,7 +6092,9 @@ export type Database = {
           custom_fields: Json | null
           description: string | null
           end_date: string | null
+          estimated_cost: number | null
           expected_outputs: string | null
+          funding_cycle: string | null
           id: string
           location: string | null
           name: string
@@ -6101,6 +6103,7 @@ export type Database = {
           project_code: string | null
           project_lead_id: string | null
           slug: string
+          sponsorship_required: boolean | null
           start_date: string | null
           status: string | null
           target_beneficiary_types: string[] | null
@@ -6114,7 +6117,9 @@ export type Database = {
           custom_fields?: Json | null
           description?: string | null
           end_date?: string | null
+          estimated_cost?: number | null
           expected_outputs?: string | null
+          funding_cycle?: string | null
           id?: string
           location?: string | null
           name: string
@@ -6123,6 +6128,7 @@ export type Database = {
           project_code?: string | null
           project_lead_id?: string | null
           slug: string
+          sponsorship_required?: boolean | null
           start_date?: string | null
           status?: string | null
           target_beneficiary_types?: string[] | null
@@ -6136,7 +6142,9 @@ export type Database = {
           custom_fields?: Json | null
           description?: string | null
           end_date?: string | null
+          estimated_cost?: number | null
           expected_outputs?: string | null
+          funding_cycle?: string | null
           id?: string
           location?: string | null
           name?: string
@@ -6145,6 +6153,7 @@ export type Database = {
           project_code?: string | null
           project_lead_id?: string | null
           slug?: string
+          sponsorship_required?: boolean | null
           start_date?: string | null
           status?: string | null
           target_beneficiary_types?: string[] | null
