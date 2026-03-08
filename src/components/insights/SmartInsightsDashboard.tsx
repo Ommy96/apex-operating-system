@@ -69,7 +69,7 @@ function BeneficiaryRiskCard({ risk }: { risk: BeneficiaryRisk }) {
               <TooltipContent><p>AI-calculated risk score (0-100). Higher = more urgent.</p></TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate(`/beneficiary/${risk.beneficiaryId}`)}>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate(`/beneficiaries/${risk.beneficiaryId}`)}>
             View <ArrowRight className="h-3 w-3 ml-1" />
           </Button>
         </div>

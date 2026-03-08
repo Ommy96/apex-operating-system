@@ -82,14 +82,14 @@ export function GlobalSearchBar() {
           type: "beneficiary" as const,
           title: b.display_name,
           subtitle: `${b.beneficiary_type} · ${b.status}`,
-          url: `/beneficiary/${b.id}`,
+          url: `/beneficiaries/${b.id}`,
         })),
         ...(programs.data || []).map((p) => ({
           id: p.id,
           type: "program" as const,
           title: p.name,
           subtitle: p.status || "Active",
-          url: `/program/${p.id}`,
+          url: `/programs/dashboard/${p.id}`,
         })),
         ...(projects.data || []).map((p) => ({
           id: p.id,
@@ -103,7 +103,7 @@ export function GlobalSearchBar() {
           type: "donor" as const,
           title: d.donor_name,
           subtitle: "Donor",
-          url: `/beneficiary/${d.beneficiary_id}`,
+          url: `/beneficiaries/${d.beneficiary_id}`,
         })),
       ];
 
