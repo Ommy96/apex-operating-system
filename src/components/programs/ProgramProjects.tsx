@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, Banknote } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, Banknote, Eye } from "lucide-react";
 import { ProjectForm } from "./ProjectForm";
 import { format } from "date-fns";
 import { toast } from "sonner";
