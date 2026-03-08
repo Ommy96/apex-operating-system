@@ -11,6 +11,10 @@ import {
   OfflineRecord,
   SyncStatus,
 } from "@/lib/offlineStorage";
+import {
+  registerBackgroundSync,
+  requestPersistentStorage,
+} from "@/lib/serviceWorkerRegistration";
 import { toast } from "sonner";
 
 export interface SyncStats {
@@ -45,8 +49,10 @@ export function useOfflineSync() {
     }
   }, []);
 
+  // Initial load + request persistent storage
   useEffect(() => {
     refreshRecords();
+    requestPersistentStorage();
   }, [refreshRecords]);
 
   // Online/offline detection
@@ -164,9 +170,11 @@ export function useOfflineSync() {
     await saveOfflineRecord(record);
     await refreshRecords();
 
-    // If online, sync immediately
+    // If online, sync immediately; otherwise register background sync
     if (isOnline) {
       syncAll();
+    } else {
+      registerBackgroundSync('offline-sync');
     }
   };
 
