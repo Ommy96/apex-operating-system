@@ -135,7 +135,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
         <SidebarTrigger className="p-2 hover:bg-muted rounded-lg transition-colors shrink-0" />
         
         {/* Breadcrumb Navigation */}
-        <Breadcrumb className="hidden md:flex">
+        <Breadcrumb aria-label="Breadcrumb navigation" className="hidden md:flex">
           <BreadcrumbList>
             {pathSegments.map((segment, index) => {
               const fullPath = '/' + pathSegments.slice(0, index + 1).join('/');
