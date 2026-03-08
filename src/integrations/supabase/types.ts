@@ -2990,6 +2990,60 @@ export type Database = {
           },
         ]
       }
+      donor_accounts: {
+        Row: {
+          created_at: string | null
+          donor_name: string
+          email: string
+          id: string
+          is_active: boolean | null
+          last_login_at: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          donor_name: string
+          email: string
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          donor_name?: string
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donor_report_runs: {
         Row: {
           created_at: string
@@ -4840,6 +4894,8 @@ export type Database = {
           current_file_url: string | null
           current_version: number
           description: string | null
+          document_type: string | null
+          donor_visible: boolean | null
           id: string
           organization_id: string
           status: string
@@ -4859,6 +4915,8 @@ export type Database = {
           current_file_url?: string | null
           current_version?: number
           description?: string | null
+          document_type?: string | null
+          donor_visible?: boolean | null
           id?: string
           organization_id: string
           status?: string
@@ -4878,6 +4936,8 @@ export type Database = {
           current_file_url?: string | null
           current_version?: number
           description?: string | null
+          document_type?: string | null
+          donor_visible?: boolean | null
           id?: string
           organization_id?: string
           status?: string
