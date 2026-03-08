@@ -43,7 +43,7 @@ export function SponsorshipFundingTab({ donors }: SponsorshipFundingTabProps) {
       {/* Coverage Bar */}
       <Card className="border-primary/10">
         <CardContent className="p-5">
-          <FundingCoverageBar totalReceived={totalFunding} />
+          <FundingCoverageBar totalReceived={totalFunding} totalRequired={totalRequired} />
         </CardContent>
       </Card>
 
