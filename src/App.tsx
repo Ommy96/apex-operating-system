@@ -44,6 +44,7 @@ import VolunteerManagement from "./pages/VolunteerManagement";
 import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
 import RiskIntelligence from "./pages/RiskIntelligence";
+import FieldMode from "./pages/FieldMode";
 
 const queryClient = new QueryClient();
 
@@ -204,6 +205,11 @@ const App = () => (
                 <DashboardLayout>
                   <RiskIntelligence />
                 </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/field-mode" element={
+              <ProtectedRoute>
+                <FieldMode />
               </ProtectedRoute>
             } />
             <Route path="/reports-analytics" element={

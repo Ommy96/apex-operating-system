@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Smartphone } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LayoutDashboard,
@@ -128,6 +128,7 @@ export function AppSidebar() {
     { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
     { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
     { title: "Financial", url: "/financial", icon: Wallet, show: true },
+    { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
   ].filter(item => item.show);
 
   const systemItems = [
