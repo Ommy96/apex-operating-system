@@ -119,6 +119,16 @@ export function AppSidebar() {
     await signOut();
   };
 
+  // Build menu groups - updated 2026-03-08
+  const peopleItems = [
+    { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+    { title: "Donors", url: "/donors", icon: HandCoins, show: true },
+    { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
+    { title: "Partners", url: "/partners", icon: Handshake, show: true },
+  ];
+  
+  console.log("[Sidebar] People items:", peopleItems.map(i => `${i.title}:${i.show}`));
+
   const menuGroups: MenuGroup[] = [
     {
       label: "Overview",
@@ -128,12 +138,7 @@ export function AppSidebar() {
     },
     {
       label: "People",
-      items: [
-        { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-        { title: "Donors", url: "/donors", icon: HandCoins, show: true },
-        { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
-        { title: "Partners", url: "/partners", icon: Handshake, show: true },
-      ],
+      items: peopleItems,
     },
     {
       label: "Programs & M&E",
