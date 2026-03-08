@@ -37,6 +37,7 @@ interface ProgramProjectsProps {
 
 export function ProgramProjects({ programId }: ProgramProjectsProps) {
   const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
