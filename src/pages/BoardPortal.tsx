@@ -4,14 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   Presentation, FileText, Calendar, CheckCircle2, XCircle,
-  MessageSquare, Send, Clock, ArrowLeft, Shield, Users, Minus
+  MessageSquare, Send, Clock, ArrowLeft, Shield, Minus
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -21,7 +21,6 @@ interface BoardMember {
   full_name: string;
   email: string;
   role: string;
-  title: string | null;
   organization_id: string;
 }
 
@@ -42,6 +41,7 @@ export default function BoardPortal() {
   const tokenFromUrl = searchParams.get("token");
 
   const [accessToken, setAccessToken] = useState(tokenFromUrl || "");
+  const [storedToken, setStoredToken] = useState("");
   const [member, setMember] = useState<BoardMember | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -52,19 +52,23 @@ export default function BoardPortal() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
 
-  // Comment form
   const [commentContent, setCommentContent] = useState("");
   const [commentSectionId, setCommentSectionId] = useState<string | null>(null);
-
-  // Approval form
   const [approvalDecision, setApprovalDecision] = useState<string>("");
   const [approvalComments, setApprovalComments] = useState("");
 
   useEffect(() => {
-    if (tokenFromUrl) {
-      handleLogin(tokenFromUrl);
-    }
+    if (tokenFromUrl) handleLogin(tokenFromUrl);
   }, [tokenFromUrl]);
+
+  const callPortal = async (action: string, params: Record<string, any> = {}) => {
+    const { data, error } = await supabase.functions.invoke("board-portal", {
+      body: { action, access_token: storedToken, ...params },
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
 
   const handleLogin = async (token?: string) => {
     const t = token || accessToken;
@@ -72,38 +76,20 @@ export default function BoardPortal() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from("board_members")
-        .select("*")
-        .eq("access_token", t.trim())
-        .eq("is_active", true)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("board-portal", {
+        body: { action: "get_reports", access_token: t.trim() },
+      });
 
-      if (error || !data) {
-        toast.error("Invalid or expired access token");
+      if (error || data?.error) {
+        toast.error(data?.error || "Invalid or expired access token");
         setLoading(false);
         return;
       }
 
-      // Check token expiry
-      if (data.token_expires_at && new Date(data.token_expires_at) < new Date()) {
-        toast.error("Access token has expired. Please request a new one.");
-        setLoading(false);
-        return;
-      }
-
-      setMember(data);
+      setStoredToken(t.trim());
+      setMember(data.member);
+      setReports(data.data || []);
       setAuthenticated(true);
-
-      // Load published reports for this org
-      const { data: reportsData } = await supabase
-        .from("board_reports")
-        .select("*")
-        .eq("organization_id", data.organization_id)
-        .in("status", ["published", "in_review", "approved"])
-        .order("created_at", { ascending: false });
-
-      setReports(reportsData || []);
     } catch {
       toast.error("Something went wrong");
     }
@@ -112,64 +98,54 @@ export default function BoardPortal() {
 
   const loadReportDetails = async (report: Report) => {
     setSelectedReport(report);
-
-    const [sectionsRes, commentsRes, approvalsRes, actionsRes] = await Promise.all([
-      supabase.from("board_report_sections").select("*").eq("report_id", report.id).order("sort_order"),
-      supabase.from("board_report_comments").select("*").eq("report_id", report.id).order("created_at", { ascending: true }),
-      supabase.from("board_report_approvals").select("*, board_members(full_name)").eq("report_id", report.id),
-      supabase.from("board_action_items").select("*, board_members(full_name)").eq("report_id", report.id).order("created_at"),
-    ]);
-
-    setSections(sectionsRes.data || []);
-    setComments(commentsRes.data || []);
-    setApprovals(approvalsRes.data || []);
-    setActionItems(actionsRes.data || []);
+    try {
+      const [sectionsRes, commentsRes, approvalsRes, actionsRes] = await Promise.all([
+        callPortal("get_report_sections", { report_id: report.id }),
+        callPortal("get_comments", { report_id: report.id }),
+        callPortal("get_approvals", { report_id: report.id }),
+        callPortal("get_action_items", { report_id: report.id }),
+      ]);
+      setSections(sectionsRes.data || []);
+      setComments(commentsRes.data || []);
+      setApprovals(approvalsRes.data || []);
+      setActionItems(actionsRes.data || []);
+    } catch (e: any) {
+      toast.error("Failed to load report details");
+    }
   };
 
   const submitComment = async () => {
-    if (!commentContent.trim() || !member || !selectedReport) return;
-
-    const { error } = await supabase.from("board_report_comments").insert({
-      report_id: selectedReport.id,
-      section_id: commentSectionId,
-      organization_id: member.organization_id,
-      author_name: member.full_name,
-      author_email: member.email,
-      board_member_id: member.id,
-      content: commentContent.trim(),
-    });
-
-    if (error) {
+    if (!commentContent.trim() || !selectedReport) return;
+    try {
+      await callPortal("add_comment", {
+        report_id: selectedReport.id,
+        section_id: commentSectionId,
+        content: commentContent.trim(),
+      });
+      toast.success("Comment posted");
+      setCommentContent("");
+      setCommentSectionId(null);
+      loadReportDetails(selectedReport);
+    } catch {
       toast.error("Failed to post comment");
-      return;
     }
-
-    toast.success("Comment posted");
-    setCommentContent("");
-    setCommentSectionId(null);
-    loadReportDetails(selectedReport);
   };
 
   const submitApproval = async () => {
-    if (!approvalDecision || !member || !selectedReport) return;
-
-    const { error } = await supabase.from("board_report_approvals").upsert({
-      report_id: selectedReport.id,
-      organization_id: member.organization_id,
-      board_member_id: member.id,
-      decision: approvalDecision,
-      comments: approvalComments || null,
-    }, { onConflict: "report_id,board_member_id" });
-
-    if (error) {
+    if (!approvalDecision || !selectedReport) return;
+    try {
+      await callPortal("submit_approval", {
+        report_id: selectedReport.id,
+        decision: approvalDecision,
+        comments: approvalComments || null,
+      });
+      toast.success(`Vote recorded: ${approvalDecision}`);
+      setApprovalDecision("");
+      setApprovalComments("");
+      loadReportDetails(selectedReport);
+    } catch {
       toast.error("Failed to submit vote");
-      return;
     }
-
-    toast.success(`Vote recorded: ${approvalDecision}`);
-    setApprovalDecision("");
-    setApprovalComments("");
-    loadReportDetails(selectedReport);
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
@@ -178,7 +154,7 @@ export default function BoardPortal() {
     approved: { label: "Approved", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
   };
 
-  const myApproval = approvals.find((a) => a.board_member_id === member?.id);
+  const myApproval = approvals.find((a: any) => a.board_member_id === member?.id);
 
   // Login screen
   if (!authenticated) {
@@ -220,7 +196,6 @@ export default function BoardPortal() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
         <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
-          {/* Header */}
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" onClick={() => setSelectedReport(null)}>
               <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to Reports
@@ -262,8 +237,8 @@ export default function BoardPortal() {
           {/* Report Sections */}
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Report Sections</h3>
-            {sections.filter(s => s.is_visible !== false).map((section) => {
-              const sectionComments = comments.filter((c) => c.section_id === section.id);
+            {sections.filter((s: any) => s.is_visible !== false).map((section: any) => {
+              const sectionComments = comments.filter((c: any) => c.section_id === section.id);
               return (
                 <Card key={section.id}>
                   <CardHeader className="pb-2">
@@ -273,18 +248,16 @@ export default function BoardPortal() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {section.narrative && (
+                    {section.narrative ? (
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap">{section.narrative}</p>
-                    )}
-                    {!section.narrative && (
+                    ) : (
                       <p className="text-sm text-muted-foreground italic">No content added yet.</p>
                     )}
 
-                    {/* Section comments */}
                     {sectionComments.length > 0 && (
                       <div className="border-t pt-3 space-y-2">
                         <p className="text-xs font-medium text-muted-foreground">Comments ({sectionComments.length})</p>
-                        {sectionComments.map((c) => (
+                        {sectionComments.map((c: any) => (
                           <div key={c.id} className="bg-muted/50 rounded-lg p-3 text-sm">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-medium text-foreground">{c.author_name}</span>
@@ -296,31 +269,18 @@ export default function BoardPortal() {
                       </div>
                     )}
 
-                    {/* Add comment to section */}
                     {commentSectionId === section.id ? (
                       <div className="border-t pt-3 space-y-2">
-                        <Textarea
-                          value={commentContent}
-                          onChange={(e) => setCommentContent(e.target.value)}
-                          placeholder="Write your comment..."
-                          rows={2}
-                        />
+                        <Textarea value={commentContent} onChange={(e) => setCommentContent(e.target.value)} placeholder="Write your comment..." rows={2} />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={submitComment} disabled={!commentContent.trim()}>
                             <Send className="h-3.5 w-3.5 mr-1" /> Post
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => { setCommentSectionId(null); setCommentContent(""); }}>
-                            Cancel
-                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => { setCommentSectionId(null); setCommentContent(""); }}>Cancel</Button>
                         </div>
                       </div>
                     ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-xs"
-                        onClick={() => setCommentSectionId(section.id)}
-                      >
+                      <Button size="sm" variant="ghost" className="text-xs" onClick={() => setCommentSectionId(section.id)}>
                         <MessageSquare className="h-3.5 w-3.5 mr-1" /> Comment
                       </Button>
                     )}
@@ -330,7 +290,7 @@ export default function BoardPortal() {
             })}
           </div>
 
-          {/* General Comments */}
+          {/* General Discussion */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
@@ -338,7 +298,7 @@ export default function BoardPortal() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {comments.filter(c => !c.section_id).map((c) => (
+              {comments.filter((c: any) => !c.section_id).map((c: any) => (
                 <div key={c.id} className="bg-muted/50 rounded-lg p-3 text-sm">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-foreground">{c.author_name}</span>
@@ -371,10 +331,9 @@ export default function BoardPortal() {
                 <CardDescription>Cast your vote on this report</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Existing votes */}
                 {approvals.length > 0 && (
                   <div className="space-y-2">
-                    {approvals.map((a) => (
+                    {approvals.map((a: any) => (
                       <div key={a.id} className="flex items-center gap-3 text-sm">
                         {a.decision === "approved" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
                         {a.decision === "rejected" && <XCircle className="h-4 w-4 text-destructive" />}
@@ -390,13 +349,12 @@ export default function BoardPortal() {
                   </div>
                 )}
 
-                {/* My vote */}
-                {myApproval ? (
+                {myApproval && (
                   <p className="text-sm text-muted-foreground">
                     You voted: <Badge variant={myApproval.decision === "approved" ? "default" : myApproval.decision === "rejected" ? "destructive" : "secondary"} className="capitalize ml-1">{myApproval.decision}</Badge>
                     <span className="ml-2">(you can change your vote below)</span>
                   </p>
-                ) : null}
+                )}
 
                 <div className="grid gap-3">
                   <div>
@@ -414,9 +372,7 @@ export default function BoardPortal() {
                     <Label>Comments (optional)</Label>
                     <Textarea value={approvalComments} onChange={(e) => setApprovalComments(e.target.value)} placeholder="Any remarks..." rows={2} />
                   </div>
-                  <Button onClick={submitApproval} disabled={!approvalDecision}>
-                    Submit Vote
-                  </Button>
+                  <Button onClick={submitApproval} disabled={!approvalDecision}>Submit Vote</Button>
                 </div>
               </CardContent>
             </Card>
@@ -432,7 +388,7 @@ export default function BoardPortal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {actionItems.map((item) => (
+                  {actionItems.map((item: any) => (
                     <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
                       <div className={`h-2 w-2 rounded-full mt-1.5 ${
                         item.status === "completed" ? "bg-emerald-500" :
@@ -463,7 +419,6 @@ export default function BoardPortal() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -474,21 +429,18 @@ export default function BoardPortal() {
               <p className="text-sm text-muted-foreground">Welcome, {member?.full_name}</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => { setAuthenticated(false); setMember(null); setAccessToken(""); }}>
+          <Button variant="outline" size="sm" onClick={() => { setAuthenticated(false); setMember(null); setAccessToken(""); setStoredToken(""); }}>
             Sign Out
           </Button>
         </div>
 
-        {/* Reports */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <FileText className="h-5 w-5" /> Board Reports
           </h2>
           {reports.length === 0 ? (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No reports available yet.
-              </CardContent>
+              <CardContent className="p-8 text-center text-muted-foreground">No reports available yet.</CardContent>
             </Card>
           ) : (
             reports.map((report) => (
