@@ -151,6 +151,8 @@ export default function DonorManagement() {
     return result;
   }, [aggregatedDonors, search, programFilter, sortField, sortDir]);
 
+  const donorPagination = usePagination(filteredDonors, { initialPageSize: 25 });
+
   const totalDonations = aggregatedDonors.reduce((s, d) => s + d.totalAmount, 0);
   const totalDonors = aggregatedDonors.length;
   const totalContributions = donorRecords?.length || 0;
