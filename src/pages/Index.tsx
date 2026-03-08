@@ -151,7 +151,7 @@ const Index = () => {
               <div className="space-y-3">
                 {benefits.map((item, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent-light flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                     <span className="text-primary-foreground/80">{item}</span>
                   </div>
                 ))}
