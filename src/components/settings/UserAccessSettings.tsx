@@ -55,26 +55,50 @@ export function UserAccessSettings({ section }: Props) {
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
       const orgId = currentOrganization.organization_id;
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select('*')
-        .eq('organization_id', orgId)
-        .order('role', { ascending: true });
-      if (error) throw error;
 
-      const memberIds = data.map(m => m.user_id);
-      const { data: profiles } = await supabase.from('profiles').select('user_id, full_name, email').in('user_id', memberIds);
-      const { data: assignments } = await supabase.from('rbac_user_role_assignments').select('user_id, role_id').eq('organization_id', orgId).eq('is_active', true);
-      const { data: rbacRoles } = await supabase.from('rbac_roles').select('id, name, display_name, color').eq('is_active', true);
+      // Fetch from both organization_members and rbac_user_role_assignments
+      const [membersRes, assignmentsRes, rbacRolesRes] = await Promise.all([
+        supabase.from('organization_members').select('*').eq('organization_id', orgId).order('role', { ascending: true }),
+        supabase.from('rbac_user_role_assignments').select('user_id, role_id').eq('organization_id', orgId).eq('is_active', true),
+        supabase.from('rbac_roles').select('id, name, display_name, color').eq('is_active', true),
+      ]);
 
-      const roleMap = new Map(rbacRoles?.map(r => [r.id, r]) || []);
+      if (membersRes.error) throw membersRes.error;
+      const orgMembers = membersRes.data || [];
+      const assignments = assignmentsRes.data || [];
+      const rbacRoles = rbacRolesRes.data || [];
+
+      // Collect all unique user IDs from both tables
+      const memberUserIds = new Set(orgMembers.map(m => m.user_id));
+      const assignmentUserIds = new Set(assignments.map(a => a.user_id));
+      const allUserIds = [...new Set([...memberUserIds, ...assignmentUserIds])];
+
+      if (allUserIds.length === 0) return [];
+
+      const { data: profiles } = await supabase.from('profiles').select('user_id, full_name, email').in('user_id', allUserIds);
+
+      const roleMap = new Map(rbacRoles.map(r => [r.id, r]));
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const orgMemberMap = new Map(orgMembers.map(m => [m.user_id, m]));
 
-      return data.map(member => ({
-        ...member,
-        profile: profileMap.get(member.user_id),
-        rbacRoles: (assignments || []).filter(a => a.user_id === member.user_id).map(a => roleMap.get(a.role_id)).filter(Boolean),
-      }));
+      // Build unified member list
+      return allUserIds.map(userId => {
+        const orgMember = orgMemberMap.get(userId);
+        const userRoles = assignments.filter(a => a.user_id === userId).map(a => roleMap.get(a.role_id)).filter(Boolean);
+        return {
+          id: orgMember?.id || `rbac-${userId}`,
+          user_id: userId,
+          organization_id: orgId,
+          role: orgMember?.role || 'member',
+          is_primary: orgMember?.is_primary ?? false,
+          joined_at: orgMember?.joined_at || null,
+          created_at: orgMember?.created_at || '',
+          updated_at: orgMember?.updated_at || '',
+          profile: profileMap.get(userId),
+          rbacRoles: userRoles,
+          isOrgMember: !!orgMember,
+        };
+      });
     },
     enabled: !!currentOrganization?.organization_id && section === 'user-settings',
   });
@@ -91,9 +115,23 @@ export function UserAccessSettings({ section }: Props) {
   });
 
   const removeMemberMutation = useMutation({
-    mutationFn: async (memberId: string) => {
-      const { error } = await supabase.from('organization_members').delete().eq('id', memberId);
-      if (error) throw error;
+    mutationFn: async ({ memberId, userId }: { memberId: string; userId: string }) => {
+      if (!currentOrganization?.organization_id) throw new Error('No org');
+      const orgId = currentOrganization.organization_id;
+
+      // Delete from organization_members (if exists — may be rbac-only user)
+      if (!memberId.startsWith('rbac-')) {
+        const { error } = await supabase.from('organization_members').delete().eq('id', memberId);
+        if (error) throw error;
+      }
+
+      // Also delete rbac_user_role_assignments for this user in this org
+      const { error: rbacError } = await supabase
+        .from('rbac_user_role_assignments')
+        .delete()
+        .eq('user_id', userId)
+        .eq('organization_id', orgId);
+      if (rbacError) throw rbacError;
     },
     onSuccess: () => {
       toast({ title: 'Member removed' });
@@ -386,7 +424,7 @@ export function UserAccessSettings({ section }: Props) {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => removeMemberMutation.mutate(member.id)} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
+                            <AlertDialogAction onClick={() => removeMemberMutation.mutate({ memberId: member.id, userId: member.user_id })} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
