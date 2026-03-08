@@ -516,33 +516,39 @@ const ProjectDashboard = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-success" />
-                Direct Grants ({grants.length})
+                Direct Funding ({projectFunding.length})
               </CardTitle>
               <CardDescription>Direct funding allocated to this project</CardDescription>
             </CardHeader>
             <CardContent>
-              {grants.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">No direct grants recorded</p>
+              {projectFunding.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">No direct funding recorded</p>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Donor</TableHead>
+                        <TableHead>Donor / Description</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className="hidden md:table-cell">Notes</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {grants.map((g: any) => (
+                      {projectFunding.map((g: any) => (
                         <TableRow key={g.id}>
-                          <TableCell className="font-medium">{g.donor_name || '-'}</TableCell>
+                          <TableCell className="font-medium">{g.donor_name || g.description || '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {g.transaction_type?.replace('_', ' ') || '-'}
+                            </Badge>
+                          </TableCell>
                           <TableCell className="text-right font-mono text-success">
                             {formatCurrency(g.amount || 0)}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {g.grant_date ? format(new Date(g.grant_date), 'dd MMM yyyy') : '-'}
+                            {g.transaction_date ? format(new Date(g.transaction_date), 'dd MMM yyyy') : '-'}
                           </TableCell>
                           <TableCell className="hidden md:table-cell text-sm text-muted-foreground truncate max-w-[200px]">
                             {g.notes || '-'}
