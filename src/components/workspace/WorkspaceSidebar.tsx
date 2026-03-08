@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
-  Heart, Building2, Handshake, Activity, BarChart3,
+  Heart, Building2, Handshake, Activity, BarChart3, HandCoins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
