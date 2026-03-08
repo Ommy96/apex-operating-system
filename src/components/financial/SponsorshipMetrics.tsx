@@ -47,7 +47,7 @@ export function SponsorshipMetrics() {
             <p className="text-xs text-muted-foreground">Funding Gap</p>
           </div>
           <div className="text-center">
-            <Percent className="h-5 w-5 mx-auto mb-1" className={getStatusColor()} />
+            <Percent className={`h-5 w-5 mx-auto mb-1 ${getStatusColor()}`} />
             <p className={`text-lg font-bold ${getStatusColor()}`}>{metrics.coverageRate}%</p>
             <p className="text-xs text-muted-foreground">Coverage Rate</p>
           </div>
