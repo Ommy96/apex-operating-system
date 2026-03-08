@@ -134,12 +134,16 @@ export function useDocumentManagement() {
       category,
       tags,
       file,
+      donor_visible,
+      document_type,
     }: {
       title: string;
       description?: string;
       category: string;
       tags?: string[];
       file: File;
+      donor_visible?: boolean;
+      document_type?: string;
     }) => {
       if (!orgId || !user) throw new Error("Not authenticated");
 
@@ -161,7 +165,9 @@ export function useDocumentManagement() {
           current_file_type: file.type,
           created_by: user.id,
           updated_by: user.id,
-        })
+          donor_visible: donor_visible || false,
+          document_type: document_type || 'general',
+        } as any)
         .select()
         .single();
       if (docError) throw docError;
