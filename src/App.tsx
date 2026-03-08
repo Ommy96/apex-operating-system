@@ -43,6 +43,7 @@ import BoardReporting from "./pages/BoardReporting";
 import VolunteerManagement from "./pages/VolunteerManagement";
 import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
+import RiskIntelligence from "./pages/RiskIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -198,6 +199,13 @@ const App = () => (
               </ProtectedRoute>
             } />
             {/* CustomReports merged into ReportsAnalytics as "Custom Reports" tab */}
+            <Route path="/risk-intelligence" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <RiskIntelligence />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>

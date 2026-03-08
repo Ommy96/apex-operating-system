@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, DollarSign, Clock, Activity } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, DollarSign, Clock, Activity, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar'
 import { OverviewTab } from '@/components/beneficiary/OverviewTab';
 import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
+import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -442,6 +443,11 @@ export default function BeneficiaryProfile() {
               <span className="hidden sm:inline">Timeline</span>
               <span className="sm:hidden">Time</span>
             </TabsTrigger>
+            <TabsTrigger value="risk" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Risk</span>
+              <span className="sm:hidden">Risk</span>
+            </TabsTrigger>
             {beneficiary.beneficiary_type === 'student' && (
               <>
                 <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
@@ -511,6 +517,11 @@ export default function BeneficiaryProfile() {
         {/* Activity Timeline Tab */}
         <TabsContent value="timeline" className="space-y-4">
           <ActivityTimeline beneficiaryId={beneficiary.id} />
+        </TabsContent>
+
+        {/* Risk Intelligence Tab */}
+        <TabsContent value="risk" className="space-y-4">
+          <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
         </TabsContent>
 
         {/* Siblings Tab (Students Only) */}

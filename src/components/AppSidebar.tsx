@@ -26,6 +26,7 @@ import {
   LogOut,
   Target,
   Shield,
+  ShieldAlert,
   Lock,
   Wallet,
 } from "lucide-react";
@@ -130,6 +131,7 @@ export function AppSidebar() {
   ].filter(item => item.show);
 
   const systemItems = [
+    { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: true },
     { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
     { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
     { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
