@@ -94,6 +94,13 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/donors" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <DonorManagement />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/beneficiaries/:id" element={
               <ProtectedRoute>
                 <DashboardLayout>
