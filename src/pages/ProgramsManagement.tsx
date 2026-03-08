@@ -148,6 +148,7 @@ const ProgramsManagement = () => {
         target_population: data.target_population.length > 0 ? data.target_population : null,
         geographic_coverage: data.geographic_coverage ? { region: data.geographic_coverage } : null,
         objectives: data.objectives || null,
+        annual_funding_required: data.annual_funding_required || 0,
       }).eq('id', id);
       if (error) throw error;
     },
