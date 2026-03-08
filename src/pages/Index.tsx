@@ -21,12 +21,12 @@ const Index = () => {
   const { user } = useAuth();
 
   const coreFeatures = [
-    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation" },
-    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking" },
-    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data" },
-    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports" },
-    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click" },
-    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team" }
+    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation", accent: "text-violet-400", accentBg: "bg-violet-500/10", accentBorder: "border-violet-500/20" },
+    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking", accent: "text-emerald-400", accentBg: "bg-emerald-500/10", accentBorder: "border-emerald-500/20" },
+    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data", accent: "text-amber-400", accentBg: "bg-amber-500/10", accentBorder: "border-amber-500/20" },
+    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports", accent: "text-rose-400", accentBg: "bg-rose-500/10", accentBorder: "border-rose-500/20" },
+    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click", accent: "text-cyan-400", accentBg: "bg-cyan-500/10", accentBorder: "border-cyan-500/20" },
+    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team", accent: "text-orange-400", accentBg: "bg-orange-500/10", accentBorder: "border-orange-500/20" }
   ];
 
   const benefits = [
@@ -80,14 +80,14 @@ const Index = () => {
       <main id="landing-main" role="main">
       <section aria-labelledby="hero-heading" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div className="text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent-light text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
             <Zap className="w-4 h-4" />
             One platform. Many organizations. Measurable impact.
           </div>
           <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
             Empower Your NGO with
             <br />
-            <span className="text-accent-light">
+            <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
               Data-Driven Impact
             </span>
           </h1>
@@ -99,7 +99,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate('/auth')}
-              className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg px-8"
+              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 px-8 border-0"
             >
               Request a Demo
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -124,11 +124,11 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coreFeatures.map((feature, index) => (
-              <Card key={index} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-accent/30 transition-colors">
+              <Card key={index} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-primary-foreground/20 transition-colors">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-lg border border-accent/20">
-                      <feature.icon className="w-5 h-5 text-accent-light" />
+                    <div className={`p-2 ${feature.accentBg} rounded-lg border ${feature.accentBorder}`}>
+                      <feature.icon className={`w-5 h-5 ${feature.accent}`} />
                     </div>
                     <CardTitle className="text-primary-foreground text-lg">{feature.title}</CardTitle>
                   </div>
@@ -151,29 +151,29 @@ const Index = () => {
               <div className="space-y-3">
                 {benefits.map((item, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent-light flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                     <span className="text-primary-foreground/80">{item}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-accent-light mt-6 text-sm italic">
+              <p className="text-emerald-400 mt-6 text-sm italic">
                 Built by practitioners, for practitioners.
               </p>
             </div>
             <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <Lock className="w-6 h-6 text-accent-light" />
+                <Lock className="w-6 h-6 text-amber-400" />
                 <h3 className="text-2xl font-bold text-primary-foreground">Data Security</h3>
               </div>
               <div className="space-y-3">
                 {["Organization-level data isolation", "Role-based access control", "Secure authentication", "Your data stays yours"].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <Shield className="w-4 h-4 text-accent-light flex-shrink-0" />
+                    <Shield className="w-4 h-4 text-amber-400 flex-shrink-0" />
                     <span className="text-primary-foreground/80">{item}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-accent-light mt-6 font-medium">Your data. Your impact. Your control.</p>
+              <p className="text-amber-400 mt-6 font-medium">Your data. Your impact. Your control.</p>
             </div>
           </div>
         </div>
@@ -189,7 +189,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate('/auth')}
-              className="bg-accent hover:bg-accent-dark text-accent-foreground shadow-lg px-8"
+              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 px-8 border-0"
             >
               Request a Demo
               <ArrowRight className="w-5 h-5 ml-2" />
