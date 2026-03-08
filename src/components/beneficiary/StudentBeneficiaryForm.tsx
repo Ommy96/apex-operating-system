@@ -67,6 +67,7 @@ interface StudentFormData {
   religion?: string;
   background_image_url?: string;
   status: string;
+  funding_required?: number;
 }
 
 interface Sibling {
