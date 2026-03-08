@@ -43,6 +43,7 @@ import BoardReporting from "./pages/BoardReporting";
 import VolunteerManagement from "./pages/VolunteerManagement";
 import BranchManagement from "./pages/BranchManagement";
 import PartnerCollaboration from "./pages/PartnerCollaboration";
+import RiskIntelligence from "./pages/RiskIntelligence";
 
 const queryClient = new QueryClient();
 
