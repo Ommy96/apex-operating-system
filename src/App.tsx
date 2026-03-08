@@ -12,6 +12,7 @@ import RoleManagement from "./pages/RoleManagement";
 import Dashboard from "./pages/Dashboard";
 import ProgramsManagement from "./pages/ProgramsManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
+import ProjectDashboard from "./pages/ProjectDashboard";
 
 
 
