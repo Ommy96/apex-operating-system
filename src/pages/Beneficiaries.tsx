@@ -565,10 +565,7 @@ export default function Beneficiaries() {
         </div>
       </WorkspacePanel>
 
-      {/* Results Count */}
-      <div className="text-sm text-muted-foreground">
-        Showing {filteredBeneficiaries.length} of {beneficiaries.length} beneficiaries
-      </div>
+      {/* Results Count is shown in pagination controls */}
 
       {/* Table View */}
       {viewMode === 'table' && (
