@@ -323,6 +323,23 @@ export default function DonorManagement() {
               </Table>
             </div>
           )}
+          <PaginationControls
+            currentPage={donorPagination.currentPage}
+            totalPages={donorPagination.totalPages}
+            totalItems={donorPagination.totalItems}
+            startIndex={donorPagination.startIndex}
+            endIndex={donorPagination.endIndex}
+            pageSize={donorPagination.pageSize}
+            pageSizeOptions={donorPagination.pageSizeOptions}
+            canGoNext={donorPagination.canGoNext}
+            canGoPrevious={donorPagination.canGoPrevious}
+            onPageChange={donorPagination.setCurrentPage}
+            onPageSizeChange={donorPagination.setPageSize}
+            onFirst={donorPagination.goToFirstPage}
+            onLast={donorPagination.goToLastPage}
+            onNext={donorPagination.goToNextPage}
+            onPrevious={donorPagination.goToPreviousPage}
+          />
         </CardContent>
       </Card>
 
