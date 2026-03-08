@@ -113,6 +113,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
       background_narrative: beneficiary?.background_narrative || '',
       religion: beneficiary?.religion || '',
       status: beneficiary?.status || 'active',
+      funding_required: beneficiary?.funding_required || undefined,
     },
   });
 
