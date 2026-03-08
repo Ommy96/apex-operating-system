@@ -12,6 +12,7 @@ import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { ProgramFunding } from "@/components/programs/ProgramFunding";
+import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponsorshipDashboard";
 import { format } from "date-fns";
 
 const ProgramDashboard = () => {
