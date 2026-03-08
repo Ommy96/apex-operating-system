@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
-  Heart, Building2, Handshake, Activity, BarChart3,
+  Heart, Building2, Handshake, Activity, BarChart3, HandCoins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -130,6 +130,7 @@ export function WorkspaceSidebar() {
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Donors", url: "/donors", icon: HandCoins, show: true },
         { title: "Volunteers", url: "/volunteers", icon: Heart, show: true },
         { title: "Partners", url: "/partners", icon: Handshake, show: true },
       ],
