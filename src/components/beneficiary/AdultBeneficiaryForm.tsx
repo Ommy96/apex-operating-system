@@ -159,6 +159,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
         background_narrative: data.background_narrative || null,
         religion: data.religion || null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         created_by: user?.id,
       };
 
