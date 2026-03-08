@@ -816,6 +816,7 @@ export type Database = {
           display_name: string
           estate_village: string | null
           first_name: string | null
+          funding_required: number | null
           future_ambition: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
           grade: string | null
@@ -867,6 +868,7 @@ export type Database = {
           display_name: string
           estate_village?: string | null
           first_name?: string | null
+          funding_required?: number | null
           future_ambition?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           grade?: string | null
@@ -918,6 +920,7 @@ export type Database = {
           display_name?: string
           estate_village?: string | null
           first_name?: string | null
+          funding_required?: number | null
           future_ambition?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           grade?: string | null

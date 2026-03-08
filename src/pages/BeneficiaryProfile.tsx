@@ -99,7 +99,7 @@ interface Donor {
   donation_date: string | null;
   notes: string | null;
   program_id: string | null;
-  program?: { name: string; annual_funding_required: number | null } | null;
+  program?: { name: string } | null;
 }
 
 export default function BeneficiaryProfile() {
@@ -151,7 +151,7 @@ export default function BeneficiaryProfile() {
       // Fetch donors
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
-        .select('*, program:programs(name, annual_funding_required)')
+        .select('*, program:programs(name)')
         .eq('beneficiary_id', id);
 
       if (donorsData) setDonors(donorsData);
@@ -490,7 +490,7 @@ export default function BeneficiaryProfile() {
         {/* Sponsorship & Funding Tab */}
         <TabsContent value="funding" className="space-y-4">
           <SponsorshipCoverageSection beneficiaryId={beneficiary.id} />
-          <SponsorshipFundingTab donors={donors} />
+          <SponsorshipFundingTab donors={donors} fundingRequired={(beneficiary as any).funding_required} />
         </TabsContent>
 
         {/* Observations Tab */}

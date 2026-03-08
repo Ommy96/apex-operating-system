@@ -1,0 +1,1 @@
+ALTER TABLE public.beneficiaries ADD COLUMN IF NOT EXISTS funding_required numeric DEFAULT 0;

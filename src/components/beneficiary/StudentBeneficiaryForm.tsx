@@ -67,6 +67,7 @@ interface StudentFormData {
   religion?: string;
   background_image_url?: string;
   status: string;
+  funding_required?: number;
 }
 
 interface Sibling {
@@ -142,6 +143,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
       religion: beneficiary?.religion || '',
       background_image_url: beneficiary?.background_image_url || '',
       status: beneficiary?.status || 'active',
+      funding_required: beneficiary?.funding_required || undefined,
     },
   });
 
@@ -204,6 +206,7 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
         background_image_url: data.background_image_url || null,
         student_id_number: data.student_id_number || null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         created_by: user?.id,
       };
 
@@ -466,6 +469,26 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                               <SelectItem value="replaced">Replaced</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="funding_required"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Annual Funding Required (KES)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="0"
+                              placeholder="e.g., 50000"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

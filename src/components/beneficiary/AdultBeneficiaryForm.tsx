@@ -43,6 +43,7 @@ interface AdultFormData {
   background_narrative?: string;
   religion?: string;
   status: string;
+  funding_required?: number;
 }
 
 interface Dependant {
@@ -112,6 +113,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
       background_narrative: beneficiary?.background_narrative || '',
       religion: beneficiary?.religion || '',
       status: beneficiary?.status || 'active',
+      funding_required: beneficiary?.funding_required || undefined,
     },
   });
 
@@ -157,6 +159,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
         background_narrative: data.background_narrative || null,
         religion: data.religion || null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         created_by: user?.id,
       };
 
@@ -440,6 +443,26 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                             <Input 
                               type="number" 
                               placeholder="0"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="funding_required"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Annual Funding Required (KES)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="0"
+                              placeholder="e.g., 50000"
                               {...field}
                               onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                             />

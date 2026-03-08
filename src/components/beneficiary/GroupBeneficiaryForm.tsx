@@ -38,6 +38,7 @@ const groupFormSchema = z.object({
   group_schedule: z.string().optional(),
   group_activities: z.array(z.string()).optional(),
   status: z.string(),
+  funding_required: z.number().optional(),
 });
 
 type GroupFormData = z.infer<typeof groupFormSchema>;
@@ -75,6 +76,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
       group_schedule: "",
       group_activities: [],
       status: "active",
+      funding_required: undefined,
     },
   });
 
@@ -110,6 +112,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
         group_schedule: data.group_schedule || null,
         group_activities: activities.length > 0 ? activities : null,
         status: data.status,
+        funding_required: data.funding_required || 0,
         organization_id: currentOrganization.organization_id,
       };
 
@@ -326,6 +329,27 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
                           <SelectItem value="replaced">Replaced</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="funding_required"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Annual Funding Required (KES)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          placeholder="e.g., 50000"
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
