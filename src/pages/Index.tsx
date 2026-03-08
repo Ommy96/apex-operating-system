@@ -74,7 +74,7 @@ const Index = () => {
             <Zap className="w-4 h-4" />
             One platform. Many organizations. Measurable impact.
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
+          <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
             Empower Your NGO with
             <br />
             <span className="text-accent-light">
