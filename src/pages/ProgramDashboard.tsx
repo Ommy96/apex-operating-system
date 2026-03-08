@@ -180,6 +180,10 @@ const ProgramDashboard = () => {
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Observations</span>
             </TabsTrigger>
+            <TabsTrigger value="sponsorship" className="gap-2">
+              <Heart className="h-4 w-4" />
+              <span className="hidden sm:inline">Sponsorship</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
