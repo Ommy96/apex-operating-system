@@ -49,12 +49,6 @@ import {
   PaginationControls,
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
-  ViewSwitcher,
-  FilterChip,
-  FilterBar,
-  WorkspacePanel,
-  DetailPanel,
-} from '@/components/workspace';
 
 interface Beneficiary {
   id: string;
