@@ -48,6 +48,18 @@ const FieldMode = lazy(() => import("./pages/FieldMode"));
 
 const queryClient = new QueryClient();
 
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+    </div>
+  );
+}
+
+function LazyRoute({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -59,201 +71,198 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/register-organization" element={<RegisterOrganization />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/super-admin" element={<SuperAdminLogin />} />
+            <Route path="/" element={<LazyRoute><Index /></LazyRoute>} />
+            <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
+            <Route path="/register-organization" element={<LazyRoute><RegisterOrganization /></LazyRoute>} />
+            <Route path="/reset-password" element={<LazyRoute><ResetPassword /></LazyRoute>} />
+            <Route path="/super-admin" element={<LazyRoute><SuperAdminLogin /></LazyRoute>} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <Dashboard />
+                  <LazyRoute><Dashboard /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs-management" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ProgramsManagement />
+                  <LazyRoute><ProgramsManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/entities/:slug" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <EntityDataPage />
+                  <LazyRoute><EntityDataPage /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/beneficiaries" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <Beneficiaries />
+                  <LazyRoute><Beneficiaries /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/donors" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <DonorManagement />
+                  <LazyRoute><DonorManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/beneficiaries/:id" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <BeneficiaryProfile />
+                  <LazyRoute><BeneficiaryProfile /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dynamic/:programId" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <DynamicProgramPage />
+                  <LazyRoute><DynamicProgramPage /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dashboard/:programId" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ProgramDashboard />
+                  <LazyRoute><ProgramDashboard /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/projects/dashboard/:projectId" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ProjectDashboard />
+                  <LazyRoute><ProjectDashboard /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-
-
             <Route path="/financial" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <FinancialSuite />
+                  <LazyRoute><FinancialSuite /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/me-suite" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <MESuite />
+                  <LazyRoute><MESuite /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <HRManagement />
+                  <LazyRoute><HRManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/automation" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <AutomationEngine />
+                  <LazyRoute><AutomationEngine /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/communications" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <CommunicationsHub />
+                  <LazyRoute><CommunicationsHub /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/ai-insights" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <AIInsights />
+                  <LazyRoute><AIInsights /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/document-management" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <DocumentManagement />
+                  <LazyRoute><DocumentManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/compliance" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ComplianceGovernance />
+                  <LazyRoute><ComplianceGovernance /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/board-reporting" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <BoardReporting />
+                  <LazyRoute><BoardReporting /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/volunteers" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <VolunteerManagement />
+                  <LazyRoute><VolunteerManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/branches" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <BranchManagement />
+                  <LazyRoute><BranchManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/partners" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <PartnerCollaboration />
+                  <LazyRoute><PartnerCollaboration /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            {/* CustomReports merged into ReportsAnalytics as "Custom Reports" tab */}
             <Route path="/risk-intelligence" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <RiskIntelligence />
+                  <LazyRoute><RiskIntelligence /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/field-mode" element={
               <ProtectedRoute>
-                <FieldMode />
+                <LazyRoute><FieldMode /></LazyRoute>
               </ProtectedRoute>
             } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout>
-                  <ReportsAnalytics />
+                  <LazyRoute><ReportsAnalytics /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/role-management" element={
               <ProtectedRoute requirePermission={{ module: 'users', action: 'manage', resource: 'roles' }}>
                 <DashboardLayout>
-                  <RoleManagement />
+                  <LazyRoute><RoleManagement /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/organization-settings" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <OrganizationSettings />
+                  <LazyRoute><OrganizationSettings /></LazyRoute>
                 </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/infera" element={
               <SuperAdminRoute>
-                <InferaAdminDashboard />
+                <LazyRoute><InferaAdminDashboard /></LazyRoute>
               </SuperAdminRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
           </Routes>
         </BrowserRouter>
         </div>
