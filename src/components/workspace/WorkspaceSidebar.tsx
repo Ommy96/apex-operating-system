@@ -130,6 +130,7 @@ export function WorkspaceSidebar() {
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Donors", url: "/donors", icon: HandCoins, show: true },
         { title: "Volunteers", url: "/volunteers", icon: Heart, show: true },
         { title: "Partners", url: "/partners", icon: Handshake, show: true },
       ],
