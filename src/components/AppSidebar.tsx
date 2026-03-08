@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Smartphone } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LayoutDashboard,
