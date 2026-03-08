@@ -83,16 +83,17 @@ const ProjectDashboard = () => {
     enabled: !!projectId,
   });
 
-  // Fetch funding (program_grants for this project)
-  const { data: grants = [] } = useQuery({
-    queryKey: ['project-grants', projectId],
+  // Fetch funding (financial_transactions for this project, excluding expenses)
+  const { data: projectFunding = [] } = useQuery({
+    queryKey: ['project-funding', projectId],
     queryFn: async () => {
       if (!projectId) return [];
       const { data, error } = await supabase
-        .from('program_grants')
+        .from('financial_transactions')
         .select('*')
         .eq('project_id', projectId)
-        .order('grant_date', { ascending: false });
+        .neq('transaction_type', 'expense')
+        .order('transaction_date', { ascending: false });
       if (error) throw error;
       return data || [];
     },
