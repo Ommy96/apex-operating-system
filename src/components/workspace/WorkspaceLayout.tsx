@@ -13,6 +13,9 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   return (
     <SidebarProvider>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <div className="min-h-screen min-h-[100dvh] flex w-full bg-background">
         <WorkspaceSidebar />
         
@@ -20,7 +23,12 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
           <WorkspaceHeader onCommandOpen={() => setCommandOpen(true)} />
           
           {/* Main Workspace Content */}
-          <main className="flex-1 overflow-auto p-4 md:p-6 workspace-scroll">
+          <main
+            id="main-content"
+            role="main"
+            aria-label="Page content"
+            className="flex-1 overflow-auto p-4 md:p-6 workspace-scroll"
+          >
             <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
               {children}
             </div>

@@ -192,7 +192,8 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary-dark/50 border-t border-primary-foreground/10 py-8">
+      </main>
+      <footer role="contentinfo" className="bg-primary-dark/50 border-t border-primary-foreground/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
