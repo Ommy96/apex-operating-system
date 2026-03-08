@@ -26,6 +26,7 @@ import {
   LogOut,
   Target,
   Shield,
+  ShieldAlert,
   Lock,
   Wallet,
 } from "lucide-react";
