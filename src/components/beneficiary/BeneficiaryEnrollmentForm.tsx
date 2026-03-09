@@ -637,8 +637,8 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                 <SelectTrigger><SelectValue placeholder="Select a program" /></SelectTrigger>
                 <SelectContent>
                   {programs.map((p) => (
-                    <SelectItem key={p.id} value={p.id} disabled={enrolledProgramIds.has(p.id)}>
-                      {p.name} {enrolledProgramIds.has(p.id) ? '(enrolled)' : ''}
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
