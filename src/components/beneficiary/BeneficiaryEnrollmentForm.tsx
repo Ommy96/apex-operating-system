@@ -646,25 +646,41 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
             </div>
 
             {/* Projects - multi-select checkboxes */}
-            {enrollProgramId && enrollProjects.length > 0 && (
-              <div className="space-y-2">
-                <Label>Projects <span className="text-muted-foreground font-normal">(select one or more)</span></Label>
-                <div className="border rounded-lg divide-y max-h-[200px] overflow-y-auto">
-                  {enrollProjects.map((project) => (
-                    <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
-                      <Checkbox
-                        checked={enrollProjectIds.includes(project.id)}
-                        onCheckedChange={() => toggleProject(project.id)}
-                      />
-                      <span className="text-sm">{project.name}</span>
-                    </label>
-                  ))}
+            {enrollProgramId && enrollProjects.length > 0 && (() => {
+              const alreadyEnrolledProjectIds = enrolledProjectsByProgram[enrollProgramId] || new Set<string>();
+              const availableProjects = enrollProjects.filter(p => !alreadyEnrolledProjectIds.has(p.id));
+              const alreadyEnrolledProjects = enrollProjects.filter(p => alreadyEnrolledProjectIds.has(p.id));
+              
+              return (
+                <div className="space-y-2">
+                  <Label>Projects <span className="text-muted-foreground font-normal">(select one or more)</span></Label>
+                  <div className="border rounded-lg divide-y max-h-[200px] overflow-y-auto">
+                    {availableProjects.map((project) => (
+                      <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
+                        <Checkbox
+                          checked={enrollProjectIds.includes(project.id)}
+                          onCheckedChange={() => toggleProject(project.id)}
+                        />
+                        <span className="text-sm">{project.name}</span>
+                      </label>
+                    ))}
+                    {alreadyEnrolledProjects.map((project) => (
+                      <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 opacity-50 cursor-not-allowed">
+                        <Checkbox checked disabled />
+                        <span className="text-sm">{project.name}</span>
+                        <Badge variant="secondary" className="text-xs ml-auto">Enrolled</Badge>
+                      </label>
+                    ))}
+                  </div>
+                  {availableProjects.length === 0 && (
+                    <p className="text-xs text-warning">All projects under this program are already enrolled</p>
+                  )}
+                  {enrollProjectIds.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{enrollProjectIds.length} project{enrollProjectIds.length !== 1 ? 's' : ''} selected</p>
+                  )}
                 </div>
-                {enrollProjectIds.length > 0 && (
-                  <p className="text-xs text-muted-foreground">{enrollProjectIds.length} project{enrollProjectIds.length !== 1 ? 's' : ''} selected</p>
-                )}
-              </div>
-            )}
+              );
+            })()}
 
             {/* Date */}
             <div className="space-y-2">
