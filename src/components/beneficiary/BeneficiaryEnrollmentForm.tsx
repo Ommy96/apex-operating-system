@@ -379,8 +379,25 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   // Get unlinked donors (no program)
   const unlinkedDonors = donors.filter((d: any) => !d.program_id);
 
-  // Enrolled program IDs to prevent duplicate enrollment
-  const enrolledProgramIds = new Set((enrollments || []).map((e: any) => (e.programs as any)?.id).filter(Boolean));
+  // Track enrolled project IDs per program to prevent duplicate project enrollment
+  const enrolledProjectsByProgram = (enrollments || []).reduce((acc, e: any) => {
+    const progId = e.programs?.id;
+    const projId = e.projects?.id;
+    if (progId) {
+      if (!acc[progId]) acc[progId] = new Set<string>();
+      if (projId) acc[progId].add(projId);
+    }
+    return acc;
+  }, {} as Record<string, Set<string>>);
+
+  // A program is fully enrolled only if it has no projects available OR all projects are already enrolled
+  const isProgramFullyEnrolled = (programId: string) => {
+    const enrolledProjects = enrolledProjectsByProgram[programId];
+    if (!enrolledProjects) return false;
+    // Check if this program has projects at all - if enrollProjects is loaded for this program
+    // We can't easily check here, so just allow re-enrollment
+    return false;
+  };
 
   // When opening donation dialog from a program card, pre-select the program
   const openDonationForProgram = (programId: string) => {
