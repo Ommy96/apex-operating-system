@@ -511,11 +511,11 @@ const ProjectDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
+                     <TableHead>Name</TableHead>
                         <TableHead>Type</TableHead>
-                        <TableHead>Gender</TableHead>
-                        <TableHead>County</TableHead>
-                        <TableHead className="text-right">Funding Required</TableHead>
+                        <TableHead className="hidden sm:table-cell">Gender</TableHead>
+                        <TableHead className="hidden sm:table-cell">County</TableHead>
+                        <TableHead className="hidden md:table-cell text-right">Funding Required</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
