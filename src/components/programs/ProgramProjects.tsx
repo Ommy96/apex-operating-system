@@ -147,16 +147,17 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table>
+            <div className="overflow-x-auto">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Project</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Timeline</TableHead>
+                  <TableHead className="hidden sm:table-cell">Location</TableHead>
+                  <TableHead className="hidden sm:table-cell">Budget</TableHead>
+                  <TableHead className="hidden md:table-cell">Timeline</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
