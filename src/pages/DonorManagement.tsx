@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/workspace/PaginationControls';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Input } from '@/components/ui/input';
@@ -11,12 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, ChevronDown, ChevronUp, UserPlus, CheckCircle2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { PageHeroHeader } from '@/components/PageHeroHeader';
+import { toast } from 'sonner';
 
 interface DonorRecord {
   id: string;
