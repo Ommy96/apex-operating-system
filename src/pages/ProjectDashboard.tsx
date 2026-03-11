@@ -245,7 +245,7 @@ const ProjectDashboard = () => {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">{project.name}</h1>
             <Badge variant="outline" className={getStatusBadgeClass(project.status)}>
               {project.status?.replace('_', ' ') || 'Planning'}
             </Badge>
