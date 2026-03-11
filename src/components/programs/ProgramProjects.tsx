@@ -182,7 +182,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         {project.status?.replace('_', ' ') || 'Planning'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {project.location ? (
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -192,7 +192,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {project.budget ? (
                         <div className="flex items-center gap-1 text-sm">
                           <Banknote className="h-3 w-3 text-muted-foreground" />
@@ -202,7 +202,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {project.start_date || project.end_date ? (
                         <div className="flex items-center gap-1 text-sm">
                           <Calendar className="h-3 w-3 text-muted-foreground" />
