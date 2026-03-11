@@ -110,6 +110,7 @@ export default function DonorManagement() {
     }
   };
 
+  const { data: donorRecords, isLoading } = useQuery({
     queryKey: ['all-donors', orgId],
     queryFn: async () => {
       const { data, error } = await supabase
