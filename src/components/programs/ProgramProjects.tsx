@@ -115,14 +115,14 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold">Projects</h3>
           <p className="text-sm text-muted-foreground">
             Manage projects and initiatives under this program
           </p>
         </div>
-        <Button onClick={handleAddNew} className="gap-2">
+        <Button onClick={handleAddNew} className="gap-2 shrink-0 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add Project
         </Button>

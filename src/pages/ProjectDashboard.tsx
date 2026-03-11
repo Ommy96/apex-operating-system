@@ -526,9 +526,9 @@ const ProjectDashboard = () => {
                           <TableCell>
                             <Badge variant="secondary" className="text-xs capitalize">{b.beneficiary_type}</Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">{b.gender || '-'}</TableCell>
-                          <TableCell className="text-muted-foreground">{b.county || '-'}</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="hidden sm:table-cell text-muted-foreground">{b.gender || '-'}</TableCell>
+                          <TableCell className="hidden sm:table-cell text-muted-foreground">{b.county || '-'}</TableCell>
+                          <TableCell className="hidden md:table-cell text-right font-mono">
                             {b.funding_required ? formatCurrency(b.funding_required) : '-'}
                           </TableCell>
                           <TableCell>

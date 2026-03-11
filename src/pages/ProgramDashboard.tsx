@@ -135,7 +135,7 @@ const ProgramDashboard = () => {
               <FolderKanban className="h-4 w-4" />
               Projects
             </CardDescription>
-            <CardTitle className="text-2xl">{projects?.length || 0}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{projects?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
