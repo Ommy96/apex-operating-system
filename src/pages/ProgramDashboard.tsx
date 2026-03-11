@@ -101,19 +101,19 @@ const ProgramDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/programs-management')}>
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/programs-management')} className="shrink-0 mt-0.5">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{program.name}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{program.name}</h1>
             <Badge variant="outline" className={getStatusBadge(program.status)}>
               {program.status || 'Planning'}
             </Badge>
           </div>
           {program.description && (
-            <p className="text-muted-foreground mt-1">{program.description}</p>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{program.description}</p>
           )}
         </div>
       </div>
@@ -126,7 +126,7 @@ const ProgramDashboard = () => {
               <Users className="h-4 w-4" />
               Beneficiaries
             </CardDescription>
-            <CardTitle className="text-2xl">{beneficiaryCount || 0}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{beneficiaryCount || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -135,7 +135,7 @@ const ProgramDashboard = () => {
               <FolderKanban className="h-4 w-4" />
               Projects
             </CardDescription>
-            <CardTitle className="text-2xl">{projects?.length || 0}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{projects?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>

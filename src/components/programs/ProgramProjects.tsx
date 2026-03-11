@@ -115,14 +115,14 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold">Projects</h3>
           <p className="text-sm text-muted-foreground">
             Manage projects and initiatives under this program
           </p>
         </div>
-        <Button onClick={handleAddNew} className="gap-2">
+        <Button onClick={handleAddNew} className="gap-2 shrink-0 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add Project
         </Button>
@@ -147,16 +147,17 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table>
+            <div className="overflow-x-auto">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Project</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Timeline</TableHead>
+                  <TableHead className="hidden sm:table-cell">Location</TableHead>
+                  <TableHead className="hidden sm:table-cell">Budget</TableHead>
+                  <TableHead className="hidden md:table-cell">Timeline</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -181,7 +182,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         {project.status?.replace('_', ' ') || 'Planning'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {project.location ? (
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -191,7 +192,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {project.budget ? (
                         <div className="flex items-center gap-1 text-sm">
                           <Banknote className="h-3 w-3 text-muted-foreground" />
@@ -201,7 +202,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {project.start_date || project.end_date ? (
                         <div className="flex items-center gap-1 text-sm">
                           <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -244,7 +245,8 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+          </Table>
+            </div>
           </CardContent>
         </Card>
       )}

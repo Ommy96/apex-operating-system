@@ -146,7 +146,7 @@ export function ProgramFunding({ programId }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-foreground">Program & Project Funding</h3>
           <p className="text-sm text-muted-foreground">
@@ -272,7 +272,7 @@ export function ProgramFunding({ programId }: Props) {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -333,15 +333,16 @@ export function ProgramFunding({ programId }: Props) {
       )}
 
       {/* Records Table */}
-      <Card>
-        <Table>
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Donor / Funder</TableHead>
-              <TableHead>Allocated To</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead className="hidden sm:table-cell">Allocated To</TableHead>
+              <TableHead className="hidden md:table-cell">Description</TableHead>
+              <TableHead className="hidden sm:table-cell">Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               {isAdmin && <TableHead className="w-10" />}
             </TableRow>
@@ -364,7 +365,7 @@ export function ProgramFunding({ programId }: Props) {
                     {format(new Date(f.transaction_date), "dd MMM yyyy")}
                   </TableCell>
                   <TableCell className="font-medium">{f.donor_name || "—"}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {f.project_id ? (
                       <Badge variant="secondary" className="text-xs gap-1">
                         <FolderKanban className="h-3 w-3" />
@@ -374,8 +375,8 @@ export function ProgramFunding({ programId }: Props) {
                       <Badge variant="outline" className="text-xs">Program Level</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm max-w-[180px] truncate">{f.description || "—"}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell text-sm max-w-[180px] truncate">{f.description || "—"}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary" className="text-xs">{f.funding_category || "General"}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium text-success">
@@ -398,6 +399,7 @@ export function ProgramFunding({ programId }: Props) {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );

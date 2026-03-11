@@ -237,7 +237,7 @@ const ProjectDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 mt-1">
@@ -245,7 +245,7 @@ const ProjectDashboard = () => {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">{project.name}</h1>
             <Badge variant="outline" className={getStatusBadgeClass(project.status)}>
               {project.status?.replace('_', ' ') || 'Planning'}
             </Badge>
@@ -282,39 +282,39 @@ const ProjectDashboard = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-primary/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-primary mb-1">
-              <Users className="h-4 w-4" />
-              <span className="text-xs font-medium">Beneficiaries</span>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 text-primary mb-1">
+              <Users className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs font-medium truncate">Beneficiaries</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{totalBeneficiaries}</p>
+            <p className="text-lg sm:text-2xl font-bold text-foreground">{totalBeneficiaries}</p>
           </CardContent>
         </Card>
         <Card className="border-success/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-success mb-1">
-              <DollarSign className="h-4 w-4" />
-              <span className="text-xs font-medium">Total Funding</span>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 text-success mb-1">
+              <DollarSign className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs font-medium truncate">Total Funding</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{formatCurrency(totalFunding)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{formatCurrency(totalFunding)}</p>
           </CardContent>
         </Card>
         <Card className="border-warning/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-warning mb-1">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-xs font-medium">Funding Required</span>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 text-warning mb-1">
+              <TrendingUp className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs font-medium truncate">Funding Req.</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{formatCurrency(totalFundingRequired)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{formatCurrency(totalFundingRequired)}</p>
           </CardContent>
         </Card>
         <Card className="border-destructive/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-destructive mb-1">
-              <BarChart3 className="h-4 w-4" />
-              <span className="text-xs font-medium">Funding Gap</span>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 text-destructive mb-1">
+              <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-xs font-medium truncate">Funding Gap</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{formatCurrency(fundingGap)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{formatCurrency(fundingGap)}</p>
           </CardContent>
         </Card>
       </div>
@@ -511,11 +511,11 @@ const ProjectDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
+                     <TableHead>Name</TableHead>
                         <TableHead>Type</TableHead>
-                        <TableHead>Gender</TableHead>
-                        <TableHead>County</TableHead>
-                        <TableHead className="text-right">Funding Required</TableHead>
+                        <TableHead className="hidden sm:table-cell">Gender</TableHead>
+                        <TableHead className="hidden sm:table-cell">County</TableHead>
+                        <TableHead className="hidden md:table-cell text-right">Funding Required</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -526,9 +526,9 @@ const ProjectDashboard = () => {
                           <TableCell>
                             <Badge variant="secondary" className="text-xs capitalize">{b.beneficiary_type}</Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">{b.gender || '-'}</TableCell>
-                          <TableCell className="text-muted-foreground">{b.county || '-'}</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="hidden sm:table-cell text-muted-foreground">{b.gender || '-'}</TableCell>
+                          <TableCell className="hidden sm:table-cell text-muted-foreground">{b.county || '-'}</TableCell>
+                          <TableCell className="hidden md:table-cell text-right font-mono">
                             {b.funding_required ? formatCurrency(b.funding_required) : '-'}
                           </TableCell>
                           <TableCell>
