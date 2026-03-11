@@ -438,6 +438,85 @@ export default function DonorManagement() {
 
               <Separator />
 
+              {/* Portal Account Section */}
+              {(() => {
+                const acct = donorAccountMap.get(selectedDonor.name.trim().toLowerCase());
+                if (acct) {
+                  return (
+                    <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <div className="text-sm">
+                        <span className="font-medium">Portal Account Active</span>
+                        <span className="text-muted-foreground ml-2">({acct.email})</span>
+                      </div>
+                    </div>
+                  );
+                }
+                if (!showCreateAccount) {
+                  return (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowCreateAccount(true)}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Create Portal Account
+                    </Button>
+                  );
+                }
+                return (
+                  <div className="space-y-3 p-3 border rounded-lg">
+                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" /> Create Portal Account for {selectedDonor.name}
+                    </h4>
+                    <div className="space-y-2">
+                      <div>
+                        <Label className="text-xs">Email *</Label>
+                        <Input
+                          type="email"
+                          placeholder="donor@example.com"
+                          value={accountEmail}
+                          onChange={e => setAccountEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Password *</Label>
+                        <Input
+                          type="password"
+                          placeholder="Minimum 6 characters"
+                          value={accountPassword}
+                          onChange={e => setAccountPassword(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Phone (optional)</Label>
+                        <Input
+                          type="tel"
+                          placeholder="+254..."
+                          value={accountPhone}
+                          onChange={e => setAccountPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleCreateDonorAccount}
+                        disabled={creatingAccount || !accountEmail || !accountPassword}
+                      >
+                        {creatingAccount && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                        Create Account
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setShowCreateAccount(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <Separator />
+
               <div>
                 <h4 className="text-sm font-semibold mb-2">Contribution History</h4>
                 <ScrollArea className="max-h-[300px]">
