@@ -375,6 +375,15 @@ export default function DonorManagement() {
                       <TableCell className="text-sm text-muted-foreground">
                         {donor.lastDonation ? format(new Date(donor.lastDonation), 'MMM dd, yyyy') : '—'}
                       </TableCell>
+                      <TableCell className="text-center">
+                        {donorAccountMap.has(donor.name.trim().toLowerCase()) ? (
+                          <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600">
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-muted-foreground">No Account</Badge>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
