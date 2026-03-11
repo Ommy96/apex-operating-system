@@ -365,7 +365,7 @@ export function ProgramFunding({ programId }: Props) {
                     {format(new Date(f.transaction_date), "dd MMM yyyy")}
                   </TableCell>
                   <TableCell className="font-medium">{f.donor_name || "—"}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {f.project_id ? (
                       <Badge variant="secondary" className="text-xs gap-1">
                         <FolderKanban className="h-3 w-3" />
@@ -375,8 +375,8 @@ export function ProgramFunding({ programId }: Props) {
                       <Badge variant="outline" className="text-xs">Program Level</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm max-w-[180px] truncate">{f.description || "—"}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell text-sm max-w-[180px] truncate">{f.description || "—"}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary" className="text-xs">{f.funding_category || "General"}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium text-success">
