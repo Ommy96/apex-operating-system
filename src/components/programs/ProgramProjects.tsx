@@ -245,7 +245,8 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+          </Table>
+            </div>
           </CardContent>
         </Card>
       )}
