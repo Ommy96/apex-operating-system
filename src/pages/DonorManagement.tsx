@@ -344,6 +344,7 @@ export default function DonorManagement() {
                     </TableHead>
                     <TableHead className="text-center">Beneficiaries</TableHead>
                     <TableHead>Programs</TableHead>
+                    <TableHead className="text-center">Portal</TableHead>
                     <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lastDonation')}>
                       <span className="flex items-center">Last Donation <SortIcon field="lastDonation" /></span>
                     </TableHead>
