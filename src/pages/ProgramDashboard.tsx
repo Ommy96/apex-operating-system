@@ -126,7 +126,7 @@ const ProgramDashboard = () => {
               <Users className="h-4 w-4" />
               Beneficiaries
             </CardDescription>
-            <CardTitle className="text-2xl">{beneficiaryCount || 0}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{beneficiaryCount || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
