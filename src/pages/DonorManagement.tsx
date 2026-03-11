@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/workspace/PaginationControls';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Input } from '@/components/ui/input';
@@ -11,12 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, ChevronDown, ChevronUp, UserPlus, CheckCircle2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { PageHeroHeader } from '@/components/PageHeroHeader';
+import { toast } from 'sonner';
 
 interface DonorRecord {
   id: string;
@@ -50,8 +52,63 @@ export default function DonorManagement() {
   const [sortField, setSortField] = useState<'name' | 'totalAmount' | 'donationCount' | 'lastDonation'>('totalAmount');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedDonor, setSelectedDonor] = useState<AggregatedDonor | null>(null);
-
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountPassword, setAccountPassword] = useState('');
+  const [accountPhone, setAccountPhone] = useState('');
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
+
+  // Fetch existing donor accounts to show status
+  const { data: donorAccounts } = useQuery({
+    queryKey: ['donor-accounts-list', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('donor_accounts')
+        .select('id, donor_name, email, is_active')
+        .eq('organization_id', orgId!);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  const donorAccountMap = useMemo(() => {
+    const map = new Map<string, { email: string; isActive: boolean }>();
+    donorAccounts?.forEach(a => {
+      map.set(a.donor_name.trim().toLowerCase(), { email: a.email, isActive: a.is_active });
+    });
+    return map;
+  }, [donorAccounts]);
+
+  const handleCreateDonorAccount = async () => {
+    if (!selectedDonor || !orgId || !accountEmail || !accountPassword) return;
+    setCreatingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-donor-account', {
+        body: {
+          email: accountEmail,
+          password: accountPassword,
+          donor_name: selectedDonor.name,
+          phone: accountPhone || undefined,
+          organization_id: orgId,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Portal account created for ${selectedDonor.name}`);
+      setShowCreateAccount(false);
+      setAccountEmail('');
+      setAccountPassword('');
+      setAccountPhone('');
+      queryClient.invalidateQueries({ queryKey: ['donor-accounts-list'] });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create donor account');
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
 
   const { data: donorRecords, isLoading } = useQuery({
     queryKey: ['all-donors', orgId],
@@ -287,6 +344,7 @@ export default function DonorManagement() {
                     </TableHead>
                     <TableHead className="text-center">Beneficiaries</TableHead>
                     <TableHead>Programs</TableHead>
+                    <TableHead className="text-center">Portal</TableHead>
                     <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lastDonation')}>
                       <span className="flex items-center">Last Donation <SortIcon field="lastDonation" /></span>
                     </TableHead>
@@ -317,6 +375,15 @@ export default function DonorManagement() {
                       <TableCell className="text-sm text-muted-foreground">
                         {donor.lastDonation ? format(new Date(donor.lastDonation), 'MMM dd, yyyy') : '—'}
                       </TableCell>
+                      <TableCell className="text-center">
+                        {donorAccountMap.has(donor.name.trim().toLowerCase()) ? (
+                          <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600">
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-muted-foreground">No Account</Badge>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -344,8 +411,8 @@ export default function DonorManagement() {
       </Card>
 
       {/* Donor Detail Dialog */}
-      <Dialog open={!!selectedDonor} onOpenChange={() => setSelectedDonor(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={!!selectedDonor} onOpenChange={(open) => { if (!open) { setSelectedDonor(null); setShowCreateAccount(false); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-rose-500" />
@@ -368,6 +435,85 @@ export default function DonorManagement() {
                   <p className="text-xs text-muted-foreground">Programs</p>
                 </div>
               </div>
+
+              <Separator />
+
+              {/* Portal Account Section */}
+              {(() => {
+                const acct = donorAccountMap.get(selectedDonor.name.trim().toLowerCase());
+                if (acct) {
+                  return (
+                    <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <div className="text-sm">
+                        <span className="font-medium">Portal Account Active</span>
+                        <span className="text-muted-foreground ml-2">({acct.email})</span>
+                      </div>
+                    </div>
+                  );
+                }
+                if (!showCreateAccount) {
+                  return (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowCreateAccount(true)}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Create Portal Account
+                    </Button>
+                  );
+                }
+                return (
+                  <div className="space-y-3 p-3 border rounded-lg">
+                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" /> Create Portal Account for {selectedDonor.name}
+                    </h4>
+                    <div className="space-y-2">
+                      <div>
+                        <Label className="text-xs">Email *</Label>
+                        <Input
+                          type="email"
+                          placeholder="donor@example.com"
+                          value={accountEmail}
+                          onChange={e => setAccountEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Password *</Label>
+                        <Input
+                          type="password"
+                          placeholder="Minimum 6 characters"
+                          value={accountPassword}
+                          onChange={e => setAccountPassword(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Phone (optional)</Label>
+                        <Input
+                          type="tel"
+                          placeholder="+254..."
+                          value={accountPhone}
+                          onChange={e => setAccountPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleCreateDonorAccount}
+                        disabled={creatingAccount || !accountEmail || !accountPassword}
+                      >
+                        {creatingAccount && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                        Create Account
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setShowCreateAccount(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <Separator />
 
