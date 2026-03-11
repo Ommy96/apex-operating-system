@@ -52,7 +52,12 @@ export default function DonorManagement() {
   const [sortField, setSortField] = useState<'name' | 'totalAmount' | 'donationCount' | 'lastDonation'>('totalAmount');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedDonor, setSelectedDonor] = useState<AggregatedDonor | null>(null);
-
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountPassword, setAccountPassword] = useState('');
+  const [accountPhone, setAccountPhone] = useState('');
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
 
   const { data: donorRecords, isLoading } = useQuery({
