@@ -411,8 +411,8 @@ export default function DonorManagement() {
       </Card>
 
       {/* Donor Detail Dialog */}
-      <Dialog open={!!selectedDonor} onOpenChange={() => setSelectedDonor(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={!!selectedDonor} onOpenChange={(open) => { if (!open) { setSelectedDonor(null); setShowCreateAccount(false); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-rose-500" />
