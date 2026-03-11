@@ -399,6 +399,7 @@ export function ProgramFunding({ programId }: Props) {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );
