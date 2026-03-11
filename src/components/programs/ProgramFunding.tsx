@@ -333,15 +333,16 @@ export function ProgramFunding({ programId }: Props) {
       )}
 
       {/* Records Table */}
-      <Card>
-        <Table>
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Donor / Funder</TableHead>
-              <TableHead>Allocated To</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead className="hidden sm:table-cell">Allocated To</TableHead>
+              <TableHead className="hidden md:table-cell">Description</TableHead>
+              <TableHead className="hidden sm:table-cell">Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               {isAdmin && <TableHead className="w-10" />}
             </TableRow>
