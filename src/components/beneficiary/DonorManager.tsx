@@ -47,16 +47,23 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
         if (data) setPrograms(data);
       });
 
-    supabase
-      .from('beneficiary_donors')
-      .select('donor_name')
-      .eq('organization_id', currentOrganization.organization_id)
-      .then(({ data }) => {
-        if (data) {
-          const unique = [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
-          setExistingDonors(unique);
-        }
-      });
+    // Fetch donor names from both donor_accounts (registered) and beneficiary_donors (historical)
+    Promise.all([
+      supabase
+        .from('donor_accounts')
+        .select('donor_name')
+        .eq('organization_id', currentOrganization.organization_id)
+        .eq('is_active', true),
+      supabase
+        .from('beneficiary_donors')
+        .select('donor_name')
+        .eq('organization_id', currentOrganization.organization_id),
+    ]).then(([accountsRes, donorsRes]) => {
+      const names = new Set<string>();
+      accountsRes.data?.forEach(d => { if (d.donor_name) names.add(d.donor_name); });
+      donorsRes.data?.forEach(d => { if (d.donor_name) names.add(d.donor_name); });
+      setExistingDonors([...names].sort());
+    });
   }, [currentOrganization?.organization_id]);
 
   const addDonor = () => {
