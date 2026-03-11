@@ -60,7 +60,56 @@ export default function DonorManagement() {
   const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
 
-  const { data: donorRecords, isLoading } = useQuery({
+  // Fetch existing donor accounts to show status
+  const { data: donorAccounts } = useQuery({
+    queryKey: ['donor-accounts-list', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('donor_accounts')
+        .select('id, donor_name, email, is_active')
+        .eq('organization_id', orgId!);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  const donorAccountMap = useMemo(() => {
+    const map = new Map<string, { email: string; isActive: boolean }>();
+    donorAccounts?.forEach(a => {
+      map.set(a.donor_name.trim().toLowerCase(), { email: a.email, isActive: a.is_active });
+    });
+    return map;
+  }, [donorAccounts]);
+
+  const handleCreateDonorAccount = async () => {
+    if (!selectedDonor || !orgId || !accountEmail || !accountPassword) return;
+    setCreatingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-donor-account', {
+        body: {
+          email: accountEmail,
+          password: accountPassword,
+          donor_name: selectedDonor.name,
+          phone: accountPhone || undefined,
+          organization_id: orgId,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Portal account created for ${selectedDonor.name}`);
+      setShowCreateAccount(false);
+      setAccountEmail('');
+      setAccountPassword('');
+      setAccountPhone('');
+      queryClient.invalidateQueries({ queryKey: ['donor-accounts-list'] });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create donor account');
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
     queryKey: ['all-donors', orgId],
     queryFn: async () => {
       const { data, error } = await supabase
