@@ -350,7 +350,7 @@ export default function ReportsAnalytics() {
         <TabsContent value="custom">
           <div className="space-y-6">
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Total Templates</CardDescription>
