@@ -339,13 +339,13 @@ export default function DonorManagement() {
                     <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort('totalAmount')}>
                       <span className="flex items-center justify-end">Total (KES) <SortIcon field="totalAmount" /></span>
                     </TableHead>
-                    <TableHead className="cursor-pointer select-none text-center" onClick={() => toggleSort('donationCount')}>
+                    <TableHead className="cursor-pointer select-none text-center hidden sm:table-cell" onClick={() => toggleSort('donationCount')}>
                       <span className="flex items-center justify-center">Contributions <SortIcon field="donationCount" /></span>
                     </TableHead>
-                    <TableHead className="text-center">Beneficiaries</TableHead>
-                    <TableHead>Programs</TableHead>
-                    <TableHead className="text-center">Portal</TableHead>
-                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lastDonation')}>
+                    <TableHead className="text-center hidden md:table-cell">Beneficiaries</TableHead>
+                    <TableHead className="hidden lg:table-cell">Programs</TableHead>
+                    <TableHead className="text-center hidden sm:table-cell">Portal</TableHead>
+                    <TableHead className="cursor-pointer select-none hidden md:table-cell" onClick={() => toggleSort('lastDonation')}>
                       <span className="flex items-center">Last Donation <SortIcon field="lastDonation" /></span>
                     </TableHead>
                   </TableRow>
@@ -357,11 +357,11 @@ export default function DonorManagement() {
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => setSelectedDonor(donor)}
                     >
-                      <TableCell className="font-medium">{donor.name}</TableCell>
-                      <TableCell className="text-right font-semibold">{donor.totalAmount.toLocaleString()}</TableCell>
-                      <TableCell className="text-center">{donor.donationCount}</TableCell>
-                      <TableCell className="text-center">{donor.beneficiaryCount}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium max-w-[160px] truncate">{donor.name}</TableCell>
+                      <TableCell className="text-right font-semibold whitespace-nowrap">{donor.totalAmount.toLocaleString()}</TableCell>
+                      <TableCell className="text-center hidden sm:table-cell">{donor.donationCount}</TableCell>
+                      <TableCell className="text-center hidden md:table-cell">{donor.beneficiaryCount}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1">
                           {donor.programs.slice(0, 2).map(p => (
                             <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
@@ -372,10 +372,7 @@ export default function DonorManagement() {
                           {donor.programs.length === 0 && <span className="text-xs text-muted-foreground">General</span>}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {donor.lastDonation ? format(new Date(donor.lastDonation), 'MMM dd, yyyy') : '—'}
-                      </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center hidden sm:table-cell">
                         {donorAccountMap.has(donor.name.trim().toLowerCase()) ? (
                           <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600">
                             <CheckCircle2 className="h-3 w-3 mr-1" /> Active
@@ -383,6 +380,9 @@ export default function DonorManagement() {
                         ) : (
                           <Badge variant="outline" className="text-xs text-muted-foreground">No Account</Badge>
                         )}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden md:table-cell">
+                        {donor.lastDonation ? format(new Date(donor.lastDonation), 'MMM dd, yyyy') : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
