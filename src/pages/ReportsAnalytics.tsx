@@ -432,7 +432,7 @@ export default function ReportsAnalytics() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredTemplates.map((template, index) => (
                       <Card key={template.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale overflow-hidden`}>
                         <CardHeader className="pb-2 space-y-3">

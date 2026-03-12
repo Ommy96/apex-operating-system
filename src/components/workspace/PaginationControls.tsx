@@ -82,33 +82,39 @@ export function PaginationControls({
 
       {/* Right: page navigation */}
       <div className="flex items-center gap-1">
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={onFirst} disabled={!canGoPrevious}>
+        <Button variant="outline" size="icon" className="h-8 w-8 hidden sm:inline-flex" onClick={onFirst} disabled={!canGoPrevious}>
           <ChevronsLeft className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPrevious} disabled={!canGoPrevious}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        {getPageNumbers().map((page, i) =>
-          page === 'ellipsis' ? (
-            <span key={`e-${i}`} className="px-1 text-muted-foreground">…</span>
-          ) : (
-            <Button
-              key={page}
-              variant={page === currentPage ? 'default' : 'outline'}
-              size="icon"
-              className="h-8 w-8 text-xs"
-              onClick={() => onPageChange(page)}
-            >
-              {page}
-            </Button>
-          )
-        )}
+        <span className="text-xs text-muted-foreground px-2 sm:hidden">
+          {currentPage}/{totalPages}
+        </span>
+
+        <div className="hidden sm:flex items-center gap-1">
+          {getPageNumbers().map((page, i) =>
+            page === 'ellipsis' ? (
+              <span key={`e-${i}`} className="px-1 text-muted-foreground">…</span>
+            ) : (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'default' : 'outline'}
+                size="icon"
+                className="h-8 w-8 text-xs"
+                onClick={() => onPageChange(page)}
+              >
+                {page}
+              </Button>
+            )
+          )}
+        </div>
 
         <Button variant="outline" size="icon" className="h-8 w-8" onClick={onNext} disabled={!canGoNext}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={onLast} disabled={!canGoNext}>
+        <Button variant="outline" size="icon" className="h-8 w-8 hidden sm:inline-flex" onClick={onLast} disabled={!canGoNext}>
           <ChevronsRight className="h-4 w-4" />
         </Button>
       </div>

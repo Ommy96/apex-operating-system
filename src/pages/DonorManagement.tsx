@@ -557,6 +557,7 @@ export default function DonorManagement() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 </ScrollArea>
               </div>
             </div>
