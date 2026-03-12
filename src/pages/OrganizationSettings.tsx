@@ -78,7 +78,7 @@ export default function OrganizationSettings() {
         icon={Settings}
       />
 
-      <div className="flex border rounded-xl bg-card overflow-hidden shadow-sm" style={{ minHeight: 'calc(100vh - 260px)' }}>
+      <div className="flex flex-col md:flex-row border rounded-xl bg-card overflow-hidden shadow-sm" style={{ minHeight: 'calc(100vh - 260px)' }}>
         {/* Sidebar - desktop */}
         {!isMobile && (
           <SettingsSidebar
