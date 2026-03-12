@@ -350,17 +350,17 @@ export default function ReportsAnalytics() {
         <TabsContent value="custom">
           <div className="space-y-6">
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Total Templates</CardDescription>
-                  <CardTitle className="text-2xl text-foreground">{templates?.length || 0}</CardTitle>
+                  <CardTitle className="text-lg sm:text-2xl text-foreground">{templates?.length || 0}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Active Templates</CardDescription>
-                  <CardTitle className="text-2xl text-foreground">
+                  <CardTitle className="text-lg sm:text-2xl text-foreground">
                     {templates?.filter(t => t.is_active).length || 0}
                   </CardTitle>
                 </CardHeader>
@@ -368,13 +368,13 @@ export default function ReportsAnalytics() {
               <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Total Reports</CardDescription>
-                  <CardTitle className="text-2xl text-foreground">{entries?.length || 0}</CardTitle>
+                  <CardTitle className="text-lg sm:text-2xl text-foreground">{entries?.length || 0}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Submitted</CardDescription>
-                  <CardTitle className="text-2xl text-foreground">
+                  <CardTitle className="text-lg sm:text-2xl text-foreground">
                     {entries?.filter(e => e.status === 'submitted').length || 0}
                   </CardTitle>
                 </CardHeader>
@@ -432,7 +432,7 @@ export default function ReportsAnalytics() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredTemplates.map((template, index) => (
                       <Card key={template.id} className={`${getCardStyles((index % 6) as CardVariant)} hover-scale overflow-hidden`}>
                         <CardHeader className="pb-2 space-y-3">
