@@ -421,17 +421,17 @@ export default function DonorManagement() {
           </DialogHeader>
           {selectedDonor && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <p className="text-lg font-bold">KES {selectedDonor.totalAmount.toLocaleString()}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="text-center p-2 sm:p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm sm:text-lg font-bold truncate">KES {selectedDonor.totalAmount.toLocaleString()}</p>
                   <p className="text-xs text-muted-foreground">Total Given</p>
                 </div>
-                <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <p className="text-lg font-bold">{selectedDonor.beneficiaryCount}</p>
+                <div className="text-center p-2 sm:p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm sm:text-lg font-bold">{selectedDonor.beneficiaryCount}</p>
                   <p className="text-xs text-muted-foreground">Beneficiaries</p>
                 </div>
-                <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <p className="text-lg font-bold">{selectedDonor.programCount}</p>
+                <div className="text-center p-2 sm:p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm sm:text-lg font-bold">{selectedDonor.programCount}</p>
                   <p className="text-xs text-muted-foreground">Programs</p>
                 </div>
               </div>
