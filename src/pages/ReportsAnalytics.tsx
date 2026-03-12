@@ -368,7 +368,7 @@ export default function ReportsAnalytics() {
               <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
                 <CardHeader className="py-3 px-4">
                   <CardDescription className="text-muted-foreground text-xs">Total Reports</CardDescription>
-                  <CardTitle className="text-2xl text-foreground">{entries?.length || 0}</CardTitle>
+                  <CardTitle className="text-lg sm:text-2xl text-foreground">{entries?.length || 0}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
