@@ -520,12 +520,13 @@ export default function DonorManagement() {
               <div>
                 <h4 className="text-sm font-semibold mb-2">Contribution History</h4>
                 <ScrollArea className="max-h-[300px]">
-                  <Table>
+                  <div className="overflow-x-auto">
+                  <Table className="min-w-[400px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Beneficiary</TableHead>
-                        <TableHead>Program</TableHead>
+                        <TableHead className="hidden sm:table-cell">Program</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                       </TableRow>
                     </TableHeader>
