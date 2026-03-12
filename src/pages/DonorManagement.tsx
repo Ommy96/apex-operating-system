@@ -547,7 +547,7 @@ export default function DonorManagement() {
                               {r.beneficiaries?.display_name || 'Unknown'}
                             </button>
                           </TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm hidden sm:table-cell">
                             {r.programs?.name || <span className="text-muted-foreground">General</span>}
                           </TableCell>
                           <TableCell className="text-right font-medium">
