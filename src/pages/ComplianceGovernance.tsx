@@ -188,9 +188,9 @@ export default function ComplianceGovernance() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold">{activePolicies}</p>
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{activePolicies}</p>
               <p className="text-xs text-muted-foreground">Active Policies</p>
             </div>
           </CardContent>
