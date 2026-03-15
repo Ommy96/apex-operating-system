@@ -159,8 +159,8 @@ export default function BoardReporting() {
               <Users className="h-5 w-5 text-info" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.members}</p>
-              <p className="text-xs text-muted-foreground">Board Members</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.members}</p>
+              <p className="text-xs text-muted-foreground truncate">Members</p>
             </div>
           </CardContent>
         </Card>
