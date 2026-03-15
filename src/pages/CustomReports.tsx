@@ -225,7 +225,7 @@ const CustomReports = () => {
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Active Templates</CardDescription>
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-lg sm:text-2xl text-foreground">
               {templates?.filter(t => t.is_active).length || 0}
             </CardTitle>
           </CardHeader>
