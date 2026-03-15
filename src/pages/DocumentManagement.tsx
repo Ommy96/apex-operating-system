@@ -208,9 +208,9 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <History className="h-8 w-8 text-blue-500" />
-            <div>
-              <p className="text-2xl font-bold">
+            <History className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">
                 {documents.reduce((s, d) => s + d.current_version, 0)}
               </p>
               <p className="text-xs text-muted-foreground">Total Versions</p>
