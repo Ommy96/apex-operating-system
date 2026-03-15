@@ -170,9 +170,9 @@ export default function ComplianceGovernance() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <ShieldCheck className="h-8 w-8 text-green-500" />
-            <div>
-              <p className="text-2xl font-bold">{activeConsents}</p>
+            <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{activeConsents}</p>
               <p className="text-xs text-muted-foreground">Active Consents</p>
             </div>
           </CardContent>
