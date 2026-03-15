@@ -124,17 +124,19 @@ export default function AIInsights() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
       <Tabs defaultValue="insights" className="flex flex-col flex-1 overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/40">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
-            <Bot className="h-5 w-5 text-primary-foreground" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 border-b border-border/40">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md shrink-0">
+              <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-bold text-foreground truncate">AI Intelligence Center</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Smart recommendations & conversational analytics</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h1 className="text-lg font-bold text-foreground">AI Intelligence Center</h1>
-            <p className="text-xs text-muted-foreground">Smart recommendations & conversational analytics</p>
-          </div>
-          <TabsList>
-            <TabsTrigger value="insights" className="gap-1.5"><BarChart3 className="h-4 w-4" /> Smart Insights</TabsTrigger>
-            <TabsTrigger value="chat" className="gap-1.5"><MessageSquare className="h-4 w-4" /> Ask AI</TabsTrigger>
+          <TabsList className="shrink-0 self-start sm:self-auto">
+            <TabsTrigger value="insights" className="gap-1.5 text-xs sm:text-sm"><BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Smart </span>Insights</TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1.5 text-xs sm:text-sm"><MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Ask </span>AI</TabsTrigger>
           </TabsList>
         </div>
 
