@@ -148,8 +148,8 @@ export default function BoardReporting() {
               <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.drafts}</p>
-              <p className="text-xs text-muted-foreground">Drafts</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.drafts}</p>
+              <p className="text-xs text-muted-foreground truncate">Drafts</p>
             </div>
           </CardContent>
         </Card>
