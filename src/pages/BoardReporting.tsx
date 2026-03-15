@@ -137,8 +137,8 @@ export default function BoardReporting() {
               <CheckCircle2 className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.published}</p>
-              <p className="text-xs text-muted-foreground">Published</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.published}</p>
+              <p className="text-xs text-muted-foreground truncate">Published</p>
             </div>
           </CardContent>
         </Card>
