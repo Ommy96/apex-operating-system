@@ -179,9 +179,9 @@ export default function ComplianceGovernance() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <AlertTriangle className="h-8 w-8 text-amber-500" />
-            <div>
-              <p className="text-2xl font-bold">{pendingRequests}</p>
+            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{pendingRequests}</p>
               <p className="text-xs text-muted-foreground">Pending Requests</p>
             </div>
           </CardContent>
