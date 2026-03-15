@@ -197,9 +197,9 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-green-500" />
-            <div>
-              <p className="text-2xl font-bold">
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">
                 {documents.filter((d) => d.category === "policy").length}
               </p>
               <p className="text-xs text-muted-foreground">Policies</p>
