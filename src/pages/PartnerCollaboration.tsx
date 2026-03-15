@@ -75,7 +75,7 @@ export default function PartnerCollaboration() {
           <Card key={s.label} className="workspace-card">
             <CardContent className="p-4 flex items-center gap-3">
               <div className={`h-10 w-10 rounded-xl bg-${s.color}/10 flex items-center justify-center`}><s.icon className={`h-5 w-5 text-${s.color}`} /></div>
-              <div><p className="text-2xl font-bold text-foreground">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
+              <div className="min-w-0"><p className="text-lg sm:text-2xl font-bold text-foreground truncate">{s.value}</p><p className="text-xs text-muted-foreground truncate">{s.label}</p></div>
             </CardContent>
           </Card>
         ))}

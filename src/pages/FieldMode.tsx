@@ -221,7 +221,7 @@ export default function FieldMode() {
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <Database className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
                 <p className="text-xs text-muted-foreground">Total Records</p>
               </CardContent></Card>
             </div>

@@ -239,7 +239,7 @@ const CustomReports = () => {
         <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Submitted</CardDescription>
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-lg sm:text-2xl text-foreground">
               {entries?.filter(e => e.status === 'submitted').length || 0}
             </CardTitle>
           </CardHeader>

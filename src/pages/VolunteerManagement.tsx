@@ -78,8 +78,8 @@ export default function VolunteerManagement() {
                 <s.icon className={`h-5 w-5 text-${s.color}`} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{s.value}</p>
+                <p className="text-xs text-muted-foreground truncate">{s.label}</p>
               </div>
             </CardContent>
           </Card>

@@ -63,7 +63,7 @@ export default function BranchManagement() {
                 <s.icon className={`h-5 w-5 text-${s.color}`} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{s.value}</p>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             </CardContent>

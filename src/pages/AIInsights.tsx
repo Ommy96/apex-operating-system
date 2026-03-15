@@ -229,7 +229,7 @@ export default function AIInsights() {
           </div>
 
           {/* Chat Input */}
-          <div className="border-t border-border/40 px-4 py-3">
+          <div className="border-t border-border/40 px-3 sm:px-4 py-3">
             <div className="flex items-center justify-between mb-2">
               {messages.length > 0 && (
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => setMessages([])}>

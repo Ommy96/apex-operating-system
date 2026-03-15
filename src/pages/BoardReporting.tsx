@@ -392,13 +392,13 @@ function ReportDetail({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={onBack}>← Back to Reports</Button>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <div className="flex flex-wrap gap-2">
           {report.status === "draft" && (
             <Button variant="outline" size="sm" onClick={() => onUpdateReport({ id: report.id, status: "in_review" })}>
               <Send className="h-4 w-4 mr-1.5" />
-              Submit for Review
+              <span className="hidden sm:inline">Submit for </span>Review
             </Button>
           )}
           {report.status === "in_review" && (
