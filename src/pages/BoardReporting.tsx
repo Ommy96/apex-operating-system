@@ -126,8 +126,8 @@ export default function BoardReporting() {
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.totalReports}</p>
-              <p className="text-xs text-muted-foreground">Total Reports</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.totalReports}</p>
+              <p className="text-xs text-muted-foreground truncate">Total Reports</p>
             </div>
           </CardContent>
         </Card>
