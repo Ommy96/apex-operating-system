@@ -140,7 +140,7 @@ export default function AIInsights() {
           </TabsList>
         </div>
 
-        <TabsContent value="insights" className="flex-1 overflow-y-auto p-6 mt-0">
+        <TabsContent value="insights" className="flex-1 overflow-y-auto p-3 sm:p-6 mt-0">
           <SmartInsightsDashboard />
         </TabsContent>
 
