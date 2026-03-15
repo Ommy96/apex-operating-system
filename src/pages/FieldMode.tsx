@@ -211,7 +211,7 @@ export default function FieldMode() {
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.synced}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.synced}</p>
                 <p className="text-xs text-muted-foreground">Synced</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
