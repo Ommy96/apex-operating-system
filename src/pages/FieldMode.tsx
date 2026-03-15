@@ -216,7 +216,7 @@ export default function FieldMode() {
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <AlertCircle className="h-5 w-5 text-destructive mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.failed}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.failed}</p>
                 <p className="text-xs text-muted-foreground">Failed</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
