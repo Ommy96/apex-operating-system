@@ -206,22 +206,22 @@ export default function FieldMode() {
             <div className="grid grid-cols-2 gap-3">
               <Card><CardContent className="p-4 text-center">
                 <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.pending}</p>
                 <p className="text-xs text-muted-foreground">Pending Sync</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.synced}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.synced}</p>
                 <p className="text-xs text-muted-foreground">Synced</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <AlertCircle className="h-5 w-5 text-destructive mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.failed}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.failed}</p>
                 <p className="text-xs text-muted-foreground">Failed</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
                 <Database className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
                 <p className="text-xs text-muted-foreground">Total Records</p>
               </CardContent></Card>
             </div>

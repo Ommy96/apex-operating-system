@@ -63,8 +63,8 @@ const SparklineCard = ({
     <CardContent className="p-4">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <p className="text-sm text-muted-foreground truncate">{title}</p>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">{title}</p>
+          <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{value}</p>
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
           trend === 'up' ? 'bg-green-500/10 text-green-600 dark:text-green-400' 

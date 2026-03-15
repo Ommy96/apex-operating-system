@@ -51,7 +51,7 @@ export function StatsCard({
           children
         ) : (
           <>
-            <div className="text-3xl font-bold">{value}</div>
+            <div className="text-xl sm:text-3xl font-bold truncate">{value}</div>
             {subtitle && (
               <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
             )}

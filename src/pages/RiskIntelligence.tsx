@@ -56,28 +56,28 @@ export default function RiskIntelligence() {
         <Card className="border-destructive/20">
           <CardContent className="p-4 text-center">
             <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
-            <p className="text-3xl font-bold text-destructive">{highRisk}</p>
+            <p className="text-xl sm:text-3xl font-bold text-destructive">{highRisk}</p>
             <p className="text-xs text-muted-foreground">High Risk</p>
           </CardContent>
         </Card>
         <Card className="border-warning/20">
           <CardContent className="p-4 text-center">
-            <ShieldAlert className="h-6 w-6 text-warning mx-auto mb-2" />
-            <p className="text-3xl font-bold text-warning">{mediumRisk}</p>
+            <ShieldAlert className="h-5 w-5 sm:h-6 sm:w-6 text-warning mx-auto mb-2" />
+            <p className="text-xl sm:text-3xl font-bold text-warning">{mediumRisk}</p>
             <p className="text-xs text-muted-foreground">Medium Risk</p>
           </CardContent>
         </Card>
         <Card className="border-success/20">
           <CardContent className="p-4 text-center">
-            <ShieldCheck className="h-6 w-6 text-success mx-auto mb-2" />
-            <p className="text-3xl font-bold text-success">{lowRisk}</p>
+            <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6 text-success mx-auto mb-2" />
+            <p className="text-xl sm:text-3xl font-bold text-success">{lowRisk}</p>
             <p className="text-xs text-muted-foreground">Low Risk</p>
           </CardContent>
         </Card>
         <Card className="border-info/20">
           <CardContent className="p-4 text-center">
-            <DollarSign className="h-6 w-6 text-info mx-auto mb-2" />
-            <p className="text-3xl font-bold text-info">{fundingAtRisk}</p>
+            <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-info mx-auto mb-2" />
+            <p className="text-xl sm:text-3xl font-bold text-info">{fundingAtRisk}</p>
             <p className="text-xs text-muted-foreground">Unfunded</p>
           </CardContent>
         </Card>

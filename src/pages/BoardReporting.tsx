@@ -126,8 +126,8 @@ export default function BoardReporting() {
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.totalReports}</p>
-              <p className="text-xs text-muted-foreground">Total Reports</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.totalReports}</p>
+              <p className="text-xs text-muted-foreground truncate">Total Reports</p>
             </div>
           </CardContent>
         </Card>
@@ -137,8 +137,8 @@ export default function BoardReporting() {
               <CheckCircle2 className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.published}</p>
-              <p className="text-xs text-muted-foreground">Published</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.published}</p>
+              <p className="text-xs text-muted-foreground truncate">Published</p>
             </div>
           </CardContent>
         </Card>
@@ -148,8 +148,8 @@ export default function BoardReporting() {
               <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.drafts}</p>
-              <p className="text-xs text-muted-foreground">Drafts</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.drafts}</p>
+              <p className="text-xs text-muted-foreground truncate">Drafts</p>
             </div>
           </CardContent>
         </Card>
@@ -159,8 +159,8 @@ export default function BoardReporting() {
               <Users className="h-5 w-5 text-info" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.members}</p>
-              <p className="text-xs text-muted-foreground">Board Members</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.members}</p>
+              <p className="text-xs text-muted-foreground truncate">Members</p>
             </div>
           </CardContent>
         </Card>
@@ -392,13 +392,13 @@ function ReportDetail({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={onBack}>← Back to Reports</Button>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <div className="flex flex-wrap gap-2">
           {report.status === "draft" && (
             <Button variant="outline" size="sm" onClick={() => onUpdateReport({ id: report.id, status: "in_review" })}>
               <Send className="h-4 w-4 mr-1.5" />
-              Submit for Review
+              <span className="hidden sm:inline">Submit for </span>Review
             </Button>
           )}
           {report.status === "in_review" && (

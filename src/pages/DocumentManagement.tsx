@@ -170,7 +170,7 @@ export default function DocumentManagement() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -188,18 +188,18 @@ export default function DocumentManagement() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <FileText className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold">{documents.length}</p>
+            <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{documents.length}</p>
               <p className="text-xs text-muted-foreground">Total Documents</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-green-500" />
-            <div>
-              <p className="text-2xl font-bold">
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">
                 {documents.filter((d) => d.category === "policy").length}
               </p>
               <p className="text-xs text-muted-foreground">Policies</p>
@@ -208,9 +208,9 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <History className="h-8 w-8 text-blue-500" />
-            <div>
-              <p className="text-2xl font-bold">
+            <History className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">
                 {documents.reduce((s, d) => s + d.current_version, 0)}
               </p>
               <p className="text-xs text-muted-foreground">Total Versions</p>
@@ -219,9 +219,9 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <FolderOpen className="h-8 w-8 text-amber-500" />
-            <div>
-              <p className="text-2xl font-bold">
+            <FolderOpen className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">
                 {new Set(documents.map((d) => d.category)).size}
               </p>
               <p className="text-xs text-muted-foreground">Categories</p>

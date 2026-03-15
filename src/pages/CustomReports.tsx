@@ -219,13 +219,13 @@ const CustomReports = () => {
         <Card className={`${getCardStyles(0 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Total Templates</CardDescription>
-            <CardTitle className="text-2xl text-foreground">{templates?.length || 0}</CardTitle>
+            <CardTitle className="text-lg sm:text-2xl text-foreground">{templates?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(1 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Active Templates</CardDescription>
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-lg sm:text-2xl text-foreground">
               {templates?.filter(t => t.is_active).length || 0}
             </CardTitle>
           </CardHeader>
@@ -233,13 +233,13 @@ const CustomReports = () => {
         <Card className={`${getCardStyles(2 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Total Reports</CardDescription>
-            <CardTitle className="text-2xl text-foreground">{entries?.length || 0}</CardTitle>
+            <CardTitle className="text-lg sm:text-2xl text-foreground">{entries?.length || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card className={`${getCardStyles(3 as CardVariant)} hover-scale`}>
           <CardHeader className="py-3 px-4">
             <CardDescription className="text-muted-foreground text-xs">Submitted</CardDescription>
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-lg sm:text-2xl text-foreground">
               {entries?.filter(e => e.status === 'submitted').length || 0}
             </CardTitle>
           </CardHeader>
