@@ -115,18 +115,22 @@ export function useOfflineSync() {
 
         // Also save a beneficiary visitation record if there's a beneficiary
         if (observationData.beneficiary_id) {
-          await supabase.from('beneficiary_visitations').insert({
-            beneficiary_id: observationData.beneficiary_id,
-            visit_type: _visit_type || 'field_visit',
-            visit_date: observationData.observation_date,
-            observation_findings: observationData.narrative_notes || null,
-            challenges_identified: _challenges_identified || null,
-            recommendations: observationData.recommended_action || null,
-            reason_for_visit: _reason_for_visit || null,
-            location: _location || null,
-            organization_id: record.organizationId,
-            created_by: record.userId,
-          }).then(() => {}).catch(() => {}); // Non-fatal if visitation insert fails
+          try {
+            await supabase.from('beneficiary_visitations').insert({
+              beneficiary_id: observationData.beneficiary_id,
+              visit_type: _visit_type || 'field_visit',
+              visit_date: observationData.observation_date,
+              observation_findings: observationData.narrative_notes || null,
+              challenges_identified: _challenges_identified || null,
+              recommendations: observationData.recommended_action || null,
+              reason_for_visit: _reason_for_visit || null,
+              location: _location || null,
+              organization_id: record.organizationId,
+              created_by: record.userId,
+            });
+          } catch {
+            // Non-fatal if visitation insert fails
+          }
         }
       } else if (record.type === 'attachment') {
         // Upload file blob to storage
