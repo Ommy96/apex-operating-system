@@ -115,26 +115,32 @@ export default function FieldMode() {
 
   // ── Observation Form ──
   const [obsForm, setObsForm] = useState({
-    beneficiary_id: '', visit_type: 'home_visit' as string, visit_date: new Date().toISOString().split('T')[0],
+    beneficiary_id: '', program_id: '', observation_category: 'progress' as string,
+    visit_type: 'home_visit' as string, visit_date: new Date().toISOString().split('T')[0],
     observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '',
   });
   const [obsGPS, setObsGPS] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const handleSaveObservation = async () => {
+    // Save as program_observation (syncs to program_observations table)
     await addRecord('observation', {
-      beneficiary_id: obsForm.beneficiary_id,
-      visit_type: obsForm.visit_type,
-      visit_date: obsForm.visit_date,
-      observation_findings: obsForm.observation_findings || null,
-      challenges_identified: obsForm.challenges_identified || null,
-      recommendations: obsForm.recommendations || null,
-      reason_for_visit: obsForm.reason_for_visit || null,
-      location: obsGPS ? `${obsGPS.latitude}, ${obsGPS.longitude}` : null,
+      beneficiary_id: obsForm.beneficiary_id || null,
+      program_id: obsForm.program_id || null,
+      observation_date: obsForm.visit_date,
+      observation_category: obsForm.observation_category || 'progress',
+      narrative_notes: obsForm.observation_findings || '',
+      recommended_action: obsForm.recommendations || null,
+      status: 'open',
+      // Extra fields for visitation record
+      _visit_type: obsForm.visit_type,
+      _reason_for_visit: obsForm.reason_for_visit || null,
+      _challenges_identified: obsForm.challenges_identified || null,
+      _location: obsGPS ? `${obsGPS.latitude}, ${obsGPS.longitude}` : null,
     });
 
     toast.success("Observation saved offline");
     setObservationFormOpen(false);
-    setObsForm({ beneficiary_id: '', visit_type: 'home_visit', visit_date: new Date().toISOString().split('T')[0], observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '' });
+    setObsForm({ beneficiary_id: '', program_id: '', observation_category: 'progress', visit_type: 'home_visit', visit_date: new Date().toISOString().split('T')[0], observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '' });
     setObsGPS(null);
   };
 
