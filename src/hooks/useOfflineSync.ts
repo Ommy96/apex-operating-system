@@ -96,13 +96,42 @@ export function useOfflineSync() {
         });
         if (error) throw error;
       } else if (record.type === 'observation') {
-        // Store as a beneficiary visitation
-        const { error } = await supabase.from('beneficiary_visitations').insert({
-          ...record.data,
+        // Extract visitation-specific fields prefixed with _
+        const { _visit_type, _reason_for_visit, _challenges_identified, _location, ...observationData } = record.data;
+
+        // Save to program_observations (displayed in Program Dashboard & Beneficiary Profile)
+        const { error: obsError } = await supabase.from('program_observations').insert({
+          beneficiary_id: observationData.beneficiary_id || null,
+          program_id: observationData.program_id || null,
+          observation_date: observationData.observation_date,
+          observation_category: observationData.observation_category || 'progress',
+          narrative_notes: observationData.narrative_notes || '',
+          recommended_action: observationData.recommended_action || null,
+          status: observationData.status || 'open',
           organization_id: record.organizationId,
           created_by: record.userId,
         });
-        if (error) throw error;
+        if (obsError) throw obsError;
+
+        // Also save a beneficiary visitation record if there's a beneficiary
+        if (observationData.beneficiary_id) {
+          try {
+            await supabase.from('beneficiary_visitations').insert({
+              beneficiary_id: observationData.beneficiary_id,
+              visit_type: _visit_type || 'field_visit',
+              visit_date: observationData.observation_date,
+              observation_findings: observationData.narrative_notes || null,
+              challenges_identified: _challenges_identified || null,
+              recommendations: observationData.recommended_action || null,
+              reason_for_visit: _reason_for_visit || null,
+              location: _location || null,
+              organization_id: record.organizationId,
+              created_by: record.userId,
+            });
+          } catch {
+            // Non-fatal if visitation insert fails
+          }
+        }
       } else if (record.type === 'attachment') {
         // Upload file blob to storage
         const { fileData, fileName, bucket, path } = record.data;

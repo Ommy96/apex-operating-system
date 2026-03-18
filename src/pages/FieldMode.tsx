@@ -115,26 +115,32 @@ export default function FieldMode() {
 
   // ── Observation Form ──
   const [obsForm, setObsForm] = useState({
-    beneficiary_id: '', visit_type: 'home_visit' as string, visit_date: new Date().toISOString().split('T')[0],
+    beneficiary_id: '', program_id: '', observation_category: 'progress' as string,
+    visit_type: 'home_visit' as string, visit_date: new Date().toISOString().split('T')[0],
     observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '',
   });
   const [obsGPS, setObsGPS] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const handleSaveObservation = async () => {
+    // Save as program_observation (syncs to program_observations table)
     await addRecord('observation', {
-      beneficiary_id: obsForm.beneficiary_id,
-      visit_type: obsForm.visit_type,
-      visit_date: obsForm.visit_date,
-      observation_findings: obsForm.observation_findings || null,
-      challenges_identified: obsForm.challenges_identified || null,
-      recommendations: obsForm.recommendations || null,
-      reason_for_visit: obsForm.reason_for_visit || null,
-      location: obsGPS ? `${obsGPS.latitude}, ${obsGPS.longitude}` : null,
+      beneficiary_id: obsForm.beneficiary_id || null,
+      program_id: obsForm.program_id || null,
+      observation_date: obsForm.visit_date,
+      observation_category: obsForm.observation_category || 'progress',
+      narrative_notes: obsForm.observation_findings || '',
+      recommended_action: obsForm.recommendations || null,
+      status: 'open',
+      // Extra fields for visitation record
+      _visit_type: obsForm.visit_type,
+      _reason_for_visit: obsForm.reason_for_visit || null,
+      _challenges_identified: obsForm.challenges_identified || null,
+      _location: obsGPS ? `${obsGPS.latitude}, ${obsGPS.longitude}` : null,
     });
 
     toast.success("Observation saved offline");
     setObservationFormOpen(false);
-    setObsForm({ beneficiary_id: '', visit_type: 'home_visit', visit_date: new Date().toISOString().split('T')[0], observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '' });
+    setObsForm({ beneficiary_id: '', program_id: '', observation_category: 'progress', visit_type: 'home_visit', visit_date: new Date().toISOString().split('T')[0], observation_findings: '', challenges_identified: '', recommendations: '', reason_for_visit: '' });
     setObsGPS(null);
   };
 
@@ -420,15 +426,38 @@ export default function FieldMode() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><ClipboardList className="h-5 w-5" /> Record Observation</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div><Label>Beneficiary *</Label>
+            <div><Label>Program</Label>
+              <Select value={obsForm.program_id} onValueChange={v => setObsForm(p => ({ ...p, program_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select program (optional)" /></SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {programs?.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Beneficiary</Label>
               <Select value={obsForm.beneficiary_id} onValueChange={v => setObsForm(p => ({ ...p, beneficiary_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select beneficiary" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select beneficiary (optional)" /></SelectTrigger>
                 <SelectContent className="max-h-60">
                   {beneficiaries?.map(b => <SelectItem key={b.id} value={b.id}>{b.display_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div><Label>Category</Label>
+                <Select value={obsForm.observation_category} onValueChange={v => setObsForm(p => ({ ...p, observation_category: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="progress">Progress</SelectItem>
+                    <SelectItem value="concern">Concern</SelectItem>
+                    <SelectItem value="achievement">Achievement</SelectItem>
+                    <SelectItem value="health">Health</SelectItem>
+                    <SelectItem value="behavioral">Behavioral</SelectItem>
+                    <SelectItem value="academic">Academic</SelectItem>
+                    <SelectItem value="family">Family</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>Visit Type</Label>
                 <Select value={obsForm.visit_type} onValueChange={v => setObsForm(p => ({ ...p, visit_type: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -441,10 +470,10 @@ export default function FieldMode() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Visit Date</Label><Input type="date" value={obsForm.visit_date} onChange={e => setObsForm(p => ({ ...p, visit_date: e.target.value }))} /></div>
             </div>
+            <div><Label>Date</Label><Input type="date" value={obsForm.visit_date} onChange={e => setObsForm(p => ({ ...p, visit_date: e.target.value }))} /></div>
             <div><Label>Reason for Visit</Label><Input value={obsForm.reason_for_visit} onChange={e => setObsForm(p => ({ ...p, reason_for_visit: e.target.value }))} placeholder="Why the visit was conducted" /></div>
-            <div><Label>Findings / Observations</Label><Textarea value={obsForm.observation_findings} onChange={e => setObsForm(p => ({ ...p, observation_findings: e.target.value }))} placeholder="What did you observe?" rows={3} /></div>
+            <div><Label>Findings / Observations *</Label><Textarea value={obsForm.observation_findings} onChange={e => setObsForm(p => ({ ...p, observation_findings: e.target.value }))} placeholder="What did you observe?" rows={3} /></div>
             <div><Label>Challenges Identified</Label><Textarea value={obsForm.challenges_identified} onChange={e => setObsForm(p => ({ ...p, challenges_identified: e.target.value }))} placeholder="Any challenges?" rows={2} /></div>
             <div><Label>Recommendations</Label><Textarea value={obsForm.recommendations} onChange={e => setObsForm(p => ({ ...p, recommendations: e.target.value }))} placeholder="Suggested actions" rows={2} /></div>
 
@@ -457,7 +486,7 @@ export default function FieldMode() {
               </Button>
             </div>
 
-            <Button onClick={handleSaveObservation} disabled={!obsForm.beneficiary_id} className="w-full h-12 text-base">
+            <Button onClick={handleSaveObservation} disabled={!obsForm.observation_findings.trim()} className="w-full h-12 text-base">
               Save Observation
             </Button>
           </div>
