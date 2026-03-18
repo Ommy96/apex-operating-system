@@ -486,7 +486,7 @@ export default function FieldMode() {
               </Button>
             </div>
 
-            <Button onClick={handleSaveObservation} disabled={!obsForm.beneficiary_id} className="w-full h-12 text-base">
+            <Button onClick={handleSaveObservation} disabled={!obsForm.observation_findings.trim()} className="w-full h-12 text-base">
               Save Observation
             </Button>
           </div>
