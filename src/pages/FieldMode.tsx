@@ -426,15 +426,38 @@ export default function FieldMode() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><ClipboardList className="h-5 w-5" /> Record Observation</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div><Label>Beneficiary *</Label>
+            <div><Label>Program</Label>
+              <Select value={obsForm.program_id} onValueChange={v => setObsForm(p => ({ ...p, program_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select program (optional)" /></SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {programs?.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Beneficiary</Label>
               <Select value={obsForm.beneficiary_id} onValueChange={v => setObsForm(p => ({ ...p, beneficiary_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select beneficiary" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select beneficiary (optional)" /></SelectTrigger>
                 <SelectContent className="max-h-60">
                   {beneficiaries?.map(b => <SelectItem key={b.id} value={b.id}>{b.display_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div><Label>Category</Label>
+                <Select value={obsForm.observation_category} onValueChange={v => setObsForm(p => ({ ...p, observation_category: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="progress">Progress</SelectItem>
+                    <SelectItem value="concern">Concern</SelectItem>
+                    <SelectItem value="achievement">Achievement</SelectItem>
+                    <SelectItem value="health">Health</SelectItem>
+                    <SelectItem value="behavioral">Behavioral</SelectItem>
+                    <SelectItem value="academic">Academic</SelectItem>
+                    <SelectItem value="family">Family</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>Visit Type</Label>
                 <Select value={obsForm.visit_type} onValueChange={v => setObsForm(p => ({ ...p, visit_type: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -447,10 +470,10 @@ export default function FieldMode() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Visit Date</Label><Input type="date" value={obsForm.visit_date} onChange={e => setObsForm(p => ({ ...p, visit_date: e.target.value }))} /></div>
             </div>
+            <div><Label>Date</Label><Input type="date" value={obsForm.visit_date} onChange={e => setObsForm(p => ({ ...p, visit_date: e.target.value }))} /></div>
             <div><Label>Reason for Visit</Label><Input value={obsForm.reason_for_visit} onChange={e => setObsForm(p => ({ ...p, reason_for_visit: e.target.value }))} placeholder="Why the visit was conducted" /></div>
-            <div><Label>Findings / Observations</Label><Textarea value={obsForm.observation_findings} onChange={e => setObsForm(p => ({ ...p, observation_findings: e.target.value }))} placeholder="What did you observe?" rows={3} /></div>
+            <div><Label>Findings / Observations *</Label><Textarea value={obsForm.observation_findings} onChange={e => setObsForm(p => ({ ...p, observation_findings: e.target.value }))} placeholder="What did you observe?" rows={3} /></div>
             <div><Label>Challenges Identified</Label><Textarea value={obsForm.challenges_identified} onChange={e => setObsForm(p => ({ ...p, challenges_identified: e.target.value }))} placeholder="Any challenges?" rows={2} /></div>
             <div><Label>Recommendations</Label><Textarea value={obsForm.recommendations} onChange={e => setObsForm(p => ({ ...p, recommendations: e.target.value }))} placeholder="Suggested actions" rows={2} /></div>
 
