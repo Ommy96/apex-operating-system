@@ -214,7 +214,7 @@ export function GrantManagement() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
             <TabsList className="inline-flex w-max gap-1 bg-muted/50 p-1 rounded-xl">
               <TabsTrigger value="overview" className="text-xs rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="budget" className="text-xs rounded-lg">Budget</TabsTrigger>

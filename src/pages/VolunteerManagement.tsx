@@ -87,7 +87,7 @@ export default function VolunteerManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto">
             <TabsTrigger value="volunteers"><Users className="h-4 w-4 mr-1.5" />Volunteers</TabsTrigger>
             <TabsTrigger value="assignments"><Briefcase className="h-4 w-4 mr-1.5" />Assignments</TabsTrigger>

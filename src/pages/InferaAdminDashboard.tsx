@@ -124,7 +124,7 @@ export default function InferaAdminDashboard() {
       {/* Main Content */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
             <TabsList className="inline-flex w-max md:w-auto bg-slate-800/50 border border-slate-700/50">
               <TabsTrigger value="overview" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <BarChart3 className="h-4 w-4" />

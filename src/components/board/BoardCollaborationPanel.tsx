@@ -190,7 +190,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
 
   return (
     <Tabs defaultValue="comments" className="space-y-4">
-      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+      <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
         <TabsList className="inline-flex w-max md:w-auto">
           <TabsTrigger value="comments">
             <MessageSquare className="h-4 w-4 mr-1.5" />

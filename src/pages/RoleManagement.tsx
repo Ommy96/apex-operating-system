@@ -261,7 +261,7 @@ export default function RoleManagement() {
       />
 
       <Tabs defaultValue="roles" className="space-y-6">
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto bg-muted/60 p-1.5 rounded-xl">
             <TabsTrigger value="roles" className="rounded-lg px-4 py-2.5 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
               <Shield className="h-4 w-4 mr-2" />

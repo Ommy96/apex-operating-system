@@ -82,7 +82,7 @@ export default function PartnerCollaboration() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto">
             <TabsTrigger value="partners"><Building className="h-4 w-4 mr-1.5" />Partners</TabsTrigger>
             <TabsTrigger value="resources"><Package className="h-4 w-4 mr-1.5" />Shared Resources</TabsTrigger>

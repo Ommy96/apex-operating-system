@@ -232,7 +232,7 @@ export default function ReportsAnalytics() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto md:flex-wrap h-auto gap-1 p-1 bg-muted/50">
             {tabs.map((tab) => (
               <TabsTrigger 
