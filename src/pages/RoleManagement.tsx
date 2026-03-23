@@ -263,17 +263,19 @@ export default function RoleManagement() {
       <Tabs defaultValue="roles" className="space-y-6">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto bg-muted/60 p-1.5 rounded-xl">
-            <TabsTrigger value="roles" className="rounded-lg px-4 py-2.5 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
-              <Shield className="h-4 w-4 mr-2" />
+            <TabsTrigger value="roles" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
+              <Shield className="h-4 w-4 mr-1.5" />
               Roles
             </TabsTrigger>
-            <TabsTrigger value="permissions" className="rounded-lg px-4 py-2.5 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
-              <Lock className="h-4 w-4 mr-2" />
-              Permissions
+            <TabsTrigger value="permissions" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
+              <Lock className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Permissions</span>
+              <span className="sm:hidden">Perms</span>
             </TabsTrigger>
-            <TabsTrigger value="assignments" className="rounded-lg px-4 py-2.5 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
-              <Users className="h-4 w-4 mr-2" />
-              User Assignments
+            <TabsTrigger value="assignments" className="rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">
+              <Users className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">User Assignments</span>
+              <span className="sm:hidden">Users</span>
             </TabsTrigger>
           </TabsList>
         </div>
