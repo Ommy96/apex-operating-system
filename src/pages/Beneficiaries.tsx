@@ -384,16 +384,16 @@ export default function Beneficiaries() {
                 </DialogHeader>
                 <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as any)} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 mb-4">
-                    <TabsTrigger value="student" className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4" />
+                    <TabsTrigger value="student" className="flex items-center gap-1 text-xs sm:text-sm">
+                      <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Student
                     </TabsTrigger>
-                    <TabsTrigger value="adult" className="flex items-center gap-2">
-                      <UserCheck className="h-4 w-4" />
+                    <TabsTrigger value="adult" className="flex items-center gap-1 text-xs sm:text-sm">
+                      <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Adult
                     </TabsTrigger>
-                    <TabsTrigger value="group" className="flex items-center gap-2">
-                      <UsersRound className="h-4 w-4" />
+                    <TabsTrigger value="group" className="flex items-center gap-1 text-xs sm:text-sm">
+                      <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Group
                     </TabsTrigger>
                   </TabsList>

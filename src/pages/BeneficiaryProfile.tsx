@@ -407,7 +407,7 @@ export default function BeneficiaryProfile() {
       {/* Tabbed Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-          <TabsList className="inline-flex w-max md:w-auto md:flex-wrap bg-muted/50 p-1 min-w-full md:min-w-0">
+          <TabsList className="inline-flex w-max md:w-auto md:flex-wrap bg-muted/50 p-1">
             <TabsTrigger value="overview" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
               <Activity className="h-3.5 w-3.5 mr-1" />
               <span className="hidden sm:inline">Overview</span>
