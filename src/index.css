@@ -280,6 +280,15 @@
   .workspace-scroll::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/15 rounded-full;
   }
+
+  /* Hide scrollbar utility for horizontal tab scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @layer components {

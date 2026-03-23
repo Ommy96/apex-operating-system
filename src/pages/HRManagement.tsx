@@ -11,7 +11,7 @@ export default function HRManagement() {
       </div>
 
       <Tabs defaultValue="performance" className="space-y-4">
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto bg-muted/50">
             <TabsTrigger value="performance" className="gap-1.5 text-xs">
               <FileText className="h-3.5 w-3.5" />

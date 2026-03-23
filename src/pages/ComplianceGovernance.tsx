@@ -208,7 +208,7 @@ export default function ComplianceGovernance() {
 
       {/* Tabs */}
       <Tabs defaultValue="consent" className="space-y-4">
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto md:grid md:grid-cols-4">
             <TabsTrigger value="consent" className="text-xs sm:text-sm whitespace-nowrap">Consent</TabsTrigger>
             <TabsTrigger value="retention" className="text-xs sm:text-sm whitespace-nowrap">Retention</TabsTrigger>
