@@ -189,8 +189,8 @@ export function DonorManager({ donors, onChange }: DonorManagerProps) {
                                     <CommandItem
                                       key={name}
                                       value={name}
-                                      onSelect={(val) => {
-                                        updateDonor(index, 'donor_name', val);
+                                      onSelect={() => {
+                                        updateDonor(index, 'donor_name', name);
                                         setOpenPopover(null);
                                       }}
                                     >
