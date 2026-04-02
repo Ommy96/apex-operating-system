@@ -428,7 +428,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
             </p>
           </div>
         ) : (
-          <Input
+          <div className="space-y-2">
             <Popover open={open} onOpenChange={onOpenChange}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
