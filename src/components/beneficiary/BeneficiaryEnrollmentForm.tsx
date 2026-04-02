@@ -55,6 +55,8 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [donationProgramId, setDonationProgramId] = useState('');
   const [donationNotes, setDonationNotes] = useState('');
   const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
+  const [donorMode, setDonorMode] = useState<'select' | 'new'>('select');
+  const [donorSearch, setDonorSearch] = useState('');
 
   // Add donor for specific program (shortcut from enrollment card)
   const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
@@ -66,6 +68,8 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [editDonorDate, setEditDonorDate] = useState('');
   const [editDonorNotes, setEditDonorNotes] = useState('');
   const [editDonorPopoverOpen, setEditDonorPopoverOpen] = useState(false);
+  const [editDonorMode, setEditDonorMode] = useState<'select' | 'new'>('select');
+  const [editDonorSearch, setEditDonorSearch] = useState('');
 
   // Delete confirmations
   const [deleteEnrollmentId, setDeleteEnrollmentId] = useState<string | null>(null);
@@ -79,14 +83,30 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     queryKey: ['existing-donor-names', currentOrganization?.organization_id],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return [];
-      const { data } = await supabase
-        .from('beneficiary_donors')
-        .select('donor_name')
-        .eq('organization_id', currentOrganization.organization_id);
-      if (data) {
-        return [...new Set(data.map(d => d.donor_name).filter(Boolean))].sort();
-      }
-      return [];
+
+      const [beneficiaryDonorsResult, donorAccountsResult] = await Promise.all([
+        supabase
+          .from('beneficiary_donors')
+          .select('donor_name')
+          .eq('organization_id', currentOrganization.organization_id),
+        supabase
+          .from('donor_accounts')
+          .select('donor_name')
+          .eq('organization_id', currentOrganization.organization_id)
+          .eq('is_active', true),
+      ]);
+
+      const donorNames = new Set<string>();
+
+      beneficiaryDonorsResult.data?.forEach((donor) => {
+        if (donor.donor_name) donorNames.add(donor.donor_name);
+      });
+
+      donorAccountsResult.data?.forEach((donor) => {
+        if (donor.donor_name) donorNames.add(donor.donor_name);
+      });
+
+      return [...donorNames].sort((a, b) => a.localeCompare(b));
     },
     enabled: !!currentOrganization?.organization_id,
   });
@@ -223,6 +243,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      queryClient.invalidateQueries({ queryKey: ['existing-donor-names'] });
       toast.success('Donation recorded');
       resetDonationForm();
     },
@@ -285,6 +306,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-donors'] });
+      queryClient.invalidateQueries({ queryKey: ['existing-donor-names'] });
       toast.success('Donation updated');
       setEditDonorId(null);
     },
@@ -304,6 +326,9 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId('');
     setDonationNotes('');
+    setDonorMode('select');
+    setDonorSearch('');
+    setDonorPopoverOpen(false);
     setIsDonationOpen(false);
   };
 
@@ -319,6 +344,9 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     setEditDonorAmount(donor.amount_received?.toString() || '');
     setEditDonorDate(donor.donation_date || '');
     setEditDonorNotes(donor.notes || '');
+    setEditDonorMode('select');
+    setEditDonorSearch(donor.donor_name || '');
+    setEditDonorPopoverOpen(false);
   };
 
   const getStatusBadge = (status: string | null) => {
@@ -332,40 +360,134 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   };
 
   // Donor name combobox component
-  const DonorNameCombobox = ({ value, onChange, open, onOpenChange }: {
-    value: string; onChange: (v: string) => void; open: boolean; onOpenChange: (o: boolean) => void;
-  }) => (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-          {value || "Select or type donor name"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+  const DonorNameField = ({
+    value,
+    onChange,
+    mode,
+    onModeChange,
+    open,
+    onOpenChange,
+    searchValue,
+    onSearchChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+    mode: 'select' | 'new';
+    onModeChange: (mode: 'select' | 'new') => void;
+    open: boolean;
+    onOpenChange: (o: boolean) => void;
+    searchValue: string;
+    onSearchChange: (value: string) => void;
+  }) => {
+    const switchMode = (nextMode: 'select' | 'new') => {
+      onModeChange(nextMode);
+      onOpenChange(false);
+      onSearchChange(nextMode === 'new' ? value : '');
+    };
+
+    if (mode === 'new') {
+      return (
+        <div className="space-y-2">
+          <Input
+            placeholder="Enter new donor name"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-0 text-xs text-primary"
+            onClick={() => switchMode('select')}
+          >
+            Choose from existing donors instead
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        <Popover open={open} onOpenChange={onOpenChange}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+              <span className="truncate">{value || 'Select donor'}</span>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+            <Command>
+              <CommandInput
+                placeholder="Search donors..."
+                value={searchValue}
+                onValueChange={onSearchChange}
+              />
+              <CommandList>
+                <CommandEmpty className="p-2">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">No matching donors found.</p>
+                    {searchValue.trim() ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          onChange(searchValue.trim());
+                          onSearchChange(searchValue.trim());
+                          switchMode('new');
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add “{searchValue.trim()}” as new donor
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => switchMode('new')}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add a new donor
+                      </Button>
+                    )}
+                  </div>
+                </CommandEmpty>
+                <CommandGroup>
+                  {existingDonors.map((name) => (
+                    <CommandItem
+                      key={name}
+                      value={name}
+                      onSelect={() => {
+                        onChange(name);
+                        onSearchChange(name);
+                        onOpenChange(false);
+                      }}
+                    >
+                      <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
+                      {name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 px-0 text-xs text-primary"
+          onClick={() => switchMode('new')}
+        >
+          Add a new donor instead
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-        <Command>
-          <CommandInput placeholder="Search or type new donor..." onValueChange={onChange} />
-          <CommandList>
-            <CommandEmpty>
-              {value ? (
-                <button type="button" className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded" onClick={() => onOpenChange(false)}>
-                  Use "<span className="font-medium">{value}</span>"
-                </button>
-              ) : "Type a donor name"}
-            </CommandEmpty>
-            <CommandGroup>
-              {existingDonors.map((name) => (
-                <CommandItem key={name} value={name} onSelect={(val) => { onChange(val); onOpenChange(false); }}>
-                  <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
-                  {name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
+      </div>
+    );
+  };
 
   // Aggregate donation totals
   const totalDonations = donors.reduce((sum, d) => sum + (d.amount_received || 0), 0);
@@ -402,6 +524,8 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   // When opening donation dialog from a program card, pre-select the program
   const openDonationForProgram = (programId: string) => {
     setDonationProgramId(programId);
+    setDonorMode('select');
+    setDonorSearch('');
     setIsDonationOpen(true);
   };
 
@@ -716,7 +840,16 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
           <form onSubmit={(e) => { e.preventDefault(); addDonationMutation.mutate(); }} className="space-y-4">
             <div className="space-y-2">
               <Label>Donor Name *</Label>
-              <DonorNameCombobox value={donorName} onChange={setDonorName} open={donorPopoverOpen} onOpenChange={setDonorPopoverOpen} />
+              <DonorNameField
+                value={donorName}
+                onChange={setDonorName}
+                mode={donorMode}
+                onModeChange={setDonorMode}
+                open={donorPopoverOpen}
+                onOpenChange={setDonorPopoverOpen}
+                searchValue={donorSearch}
+                onSearchChange={setDonorSearch}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -754,7 +887,14 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
       </Dialog>
 
       {/* ===== EDIT DONATION DIALOG ===== */}
-      <Dialog open={!!editDonorId} onOpenChange={(open) => { if (!open) setEditDonorId(null); }}>
+      <Dialog open={!!editDonorId} onOpenChange={(open) => {
+        if (!open) {
+          setEditDonorId(null);
+          setEditDonorMode('select');
+          setEditDonorSearch('');
+          setEditDonorPopoverOpen(false);
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Donation</DialogTitle>
@@ -762,7 +902,16 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
           <form onSubmit={(e) => { e.preventDefault(); updateDonorMutation.mutate(); }} className="space-y-4">
             <div className="space-y-2">
               <Label>Donor Name *</Label>
-              <DonorNameCombobox value={editDonorName} onChange={setEditDonorName} open={editDonorPopoverOpen} onOpenChange={setEditDonorPopoverOpen} />
+              <DonorNameField
+                value={editDonorName}
+                onChange={setEditDonorName}
+                mode={editDonorMode}
+                onModeChange={setEditDonorMode}
+                open={editDonorPopoverOpen}
+                onOpenChange={setEditDonorPopoverOpen}
+                searchValue={editDonorSearch}
+                onSearchChange={setEditDonorSearch}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
