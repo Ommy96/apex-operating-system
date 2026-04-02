@@ -10,8 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -54,10 +52,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
   const [donationProgramId, setDonationProgramId] = useState('');
   const [donationNotes, setDonationNotes] = useState('');
-  const [donorPopoverOpen, setDonorPopoverOpen] = useState(false);
-  const [donorMode, setDonorMode] = useState<'select' | 'new'>('select');
-  const [donorSearch, setDonorSearch] = useState('');
-
   // Add donor for specific program (shortcut from enrollment card)
   const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
 
@@ -67,10 +61,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const [editDonorAmount, setEditDonorAmount] = useState('');
   const [editDonorDate, setEditDonorDate] = useState('');
   const [editDonorNotes, setEditDonorNotes] = useState('');
-  const [editDonorPopoverOpen, setEditDonorPopoverOpen] = useState(false);
-  const [editDonorMode, setEditDonorMode] = useState<'select' | 'new'>('select');
-  const [editDonorSearch, setEditDonorSearch] = useState('');
-
   // Delete confirmations
   const [deleteEnrollmentId, setDeleteEnrollmentId] = useState<string | null>(null);
   const [deleteDonorId, setDeleteDonorId] = useState<string | null>(null);
@@ -326,9 +316,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId('');
     setDonationNotes('');
-    setDonorMode('select');
-    setDonorSearch('');
-    setDonorPopoverOpen(false);
     setIsDonationOpen(false);
   };
 
@@ -344,9 +331,15 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     setEditDonorAmount(donor.amount_received?.toString() || '');
     setEditDonorDate(donor.donation_date || '');
     setEditDonorNotes(donor.notes || '');
-    setEditDonorMode('select');
-    setEditDonorSearch(donor.donor_name || '');
-    setEditDonorPopoverOpen(false);
+  };
+
+  const openDonationDialog = (programId?: string) => {
+    setDonorName('');
+    setDonationAmount('');
+    setDonationDate(new Date().toISOString().split('T')[0]);
+    setDonationProgramId(programId || '');
+    setDonationNotes('');
+    setIsDonationOpen(true);
   };
 
   const getStatusBadge = (status: string | null) => {
@@ -363,129 +356,58 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
   const DonorNameField = ({
     value,
     onChange,
-    mode,
-    onModeChange,
-    open,
-    onOpenChange,
-    searchValue,
-    onSearchChange,
   }: {
     value: string;
     onChange: (v: string) => void;
-    mode: 'select' | 'new';
-    onModeChange: (mode: 'select' | 'new') => void;
-    open: boolean;
-    onOpenChange: (o: boolean) => void;
-    searchValue: string;
-    onSearchChange: (value: string) => void;
   }) => {
-    const switchMode = (nextMode: 'select' | 'new') => {
-      const nextValue = nextMode === 'new'
-        ? (value.trim() || searchValue.trim())
-        : value.trim();
-
-      onModeChange(nextMode);
-      onOpenChange(false);
-      onSearchChange(nextValue);
-
-      if (nextMode === 'new' && nextValue && nextValue !== value) {
-        onChange(nextValue);
-      }
-    };
+    const normalizedValue = value.trim().toLowerCase();
+    const filteredDonors = existingDonors
+      .filter((name) => !value.trim() || name.toLowerCase().includes(normalizedValue))
+      .slice(0, 8);
+    const matchesExistingDonor = existingDonors.some(
+      (name) => name.toLowerCase() === normalizedValue
+    );
 
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant={mode === 'select' ? 'default' : 'outline'}
-            size="sm"
-            className="w-full"
-            onClick={() => switchMode('select')}
-          >
-            Existing donor
-          </Button>
-          <Button
-            type="button"
-            variant={mode === 'new' ? 'default' : 'outline'}
-            size="sm"
-            className="w-full"
-            onClick={() => switchMode('new')}
-          >
-            New donor
-          </Button>
-        </div>
+        <Input
+          placeholder="Type a donor name or search existing donors"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
 
-        {mode === 'new' ? (
-          <div className="space-y-2">
-            <Input
-              placeholder="Enter new donor name"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Type any donor or sponsor name even if it is not yet in the donor list.
-            </p>
+        <p className="text-xs text-muted-foreground">
+          Enter any new donor name directly, or tap an existing donor below.
+        </p>
+
+        {filteredDonors.length > 0 && (
+          <div className="rounded-2xl border border-border/60 bg-muted/20 p-2">
+            <p className="px-2 pb-2 text-xs text-muted-foreground">Existing donors</p>
+            <div className="max-h-44 space-y-1 overflow-y-auto">
+              {filteredDonors.map((name) => {
+                const isSelected = normalizedValue === name.toLowerCase();
+
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    className={cn(
+                      'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-background',
+                      isSelected && 'bg-background shadow-soft'
+                    )}
+                    onClick={() => onChange(name)}
+                  >
+                    <span className="truncate">{name}</span>
+                    <Check className={cn('h-4 w-4 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')} />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <Popover open={open} onOpenChange={onOpenChange}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-                  <span className="truncate">{value || 'Select donor'}</span>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder="Search donors..."
-                    value={searchValue}
-                    onValueChange={onSearchChange}
-                  />
-                  <CommandList>
-                    <CommandEmpty className="p-2">
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">No matching donors found.</p>
-                        {searchValue.trim() ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start"
-                            onClick={() => {
-                              onChange(searchValue.trim());
-                              onSearchChange(searchValue.trim());
-                              switchMode('new');
-                            }}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add “{searchValue.trim()}” as new donor
-                          </Button>
-                        ) : null}
-                      </div>
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {existingDonors.map((name) => (
-                        <CommandItem
-                          key={name}
-                          value={name}
-                          onSelect={() => {
-                            onChange(name);
-                            onSearchChange(name);
-                            onOpenChange(false);
-                          }}
-                        >
-                          <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
-                          {name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+        )}
+
+        {value.trim() && !matchesExistingDonor && (
+          <p className="text-xs text-success">“{value.trim()}” will be saved as a new donor.</p>
         )}
       </div>
     );
@@ -525,10 +447,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
 
   // When opening donation dialog from a program card, pre-select the program
   const openDonationForProgram = (programId: string) => {
-    setDonationProgramId(programId);
-    setDonorMode('select');
-    setDonorSearch('');
-    setIsDonationOpen(true);
+    openDonationDialog(programId);
   };
 
   return (
@@ -541,7 +460,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
             <p className="text-sm text-muted-foreground">Manage enrollments and record donations</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setIsDonationOpen(true)}>
+             <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openDonationDialog()}>
               <DollarSign className="h-4 w-4" />
               Record Donation
             </Button>
@@ -845,12 +764,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
               <DonorNameField
                 value={donorName}
                 onChange={setDonorName}
-                mode={donorMode}
-                onModeChange={setDonorMode}
-                open={donorPopoverOpen}
-                onOpenChange={setDonorPopoverOpen}
-                searchValue={donorSearch}
-                onSearchChange={setDonorSearch}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -892,9 +805,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
       <Dialog open={!!editDonorId} onOpenChange={(open) => {
         if (!open) {
           setEditDonorId(null);
-          setEditDonorMode('select');
-          setEditDonorSearch('');
-          setEditDonorPopoverOpen(false);
         }
       }}>
         <DialogContent className="max-w-md">
@@ -907,12 +817,6 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
               <DonorNameField
                 value={editDonorName}
                 onChange={setEditDonorName}
-                mode={editDonorMode}
-                onModeChange={setEditDonorMode}
-                open={editDonorPopoverOpen}
-                onOpenChange={setEditDonorPopoverOpen}
-                searchValue={editDonorSearch}
-                onSearchChange={setEditDonorSearch}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
