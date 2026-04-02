@@ -380,111 +380,113 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     onSearchChange: (value: string) => void;
   }) => {
     const switchMode = (nextMode: 'select' | 'new') => {
+      const nextValue = nextMode === 'new'
+        ? (value.trim() || searchValue.trim())
+        : value.trim();
+
       onModeChange(nextMode);
       onOpenChange(false);
-      onSearchChange(nextMode === 'new' ? value : '');
+      onSearchChange(nextValue);
+
+      if (nextMode === 'new' && nextValue && nextValue !== value) {
+        onChange(nextValue);
+      }
     };
 
-    if (mode === 'new') {
-      return (
-        <div className="space-y-2">
-          <Input
-            placeholder="Enter new donor name"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
+    return (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant={mode === 'select' ? 'default' : 'outline'}
             size="sm"
-            className="h-7 px-0 text-xs text-primary"
+            className="w-full"
             onClick={() => switchMode('select')}
           >
-            Choose from existing donors instead
+            Existing donor
+          </Button>
+          <Button
+            type="button"
+            variant={mode === 'new' ? 'default' : 'outline'}
+            size="sm"
+            className="w-full"
+            onClick={() => switchMode('new')}
+          >
+            New donor
           </Button>
         </div>
-      );
-    }
 
-    return (
-      <div className="space-y-2">
-        <Popover open={open} onOpenChange={onOpenChange}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-              <span className="truncate">{value || 'Select donor'}</span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
-            <Command>
-              <CommandInput
-                placeholder="Search donors..."
-                value={searchValue}
-                onValueChange={onSearchChange}
-              />
-              <CommandList>
-                <CommandEmpty className="p-2">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">No matching donors found.</p>
-                    {searchValue.trim() ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          onChange(searchValue.trim());
-                          onSearchChange(searchValue.trim());
-                          switchMode('new');
-                        }}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add “{searchValue.trim()}” as new donor
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        onClick={() => switchMode('new')}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add a new donor
-                      </Button>
-                    )}
-                  </div>
-                </CommandEmpty>
-                <CommandGroup>
-                  {existingDonors.map((name) => (
-                    <CommandItem
-                      key={name}
-                      value={name}
-                      onSelect={() => {
-                        onChange(name);
-                        onSearchChange(name);
-                        onOpenChange(false);
-                      }}
-                    >
-                      <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
-                      {name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-7 px-0 text-xs text-primary"
-          onClick={() => switchMode('new')}
-        >
-          Add a new donor instead
-        </Button>
+        {mode === 'new' ? (
+          <div className="space-y-2">
+            <Input
+              placeholder="Enter new donor name"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Type any donor or sponsor name even if it is not yet in the donor list.
+            </p>
+          </div>
+        ) : (
+          <Input
+            <Popover open={open} onOpenChange={onOpenChange}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                  <span className="truncate">{value || 'Select donor'}</span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                <Command>
+                  <CommandInput
+                    placeholder="Search donors..."
+                    value={searchValue}
+                    onValueChange={onSearchChange}
+                  />
+                  <CommandList>
+                    <CommandEmpty className="p-2">
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">No matching donors found.</p>
+                        {searchValue.trim() ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              onChange(searchValue.trim());
+                              onSearchChange(searchValue.trim());
+                              switchMode('new');
+                            }}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add “{searchValue.trim()}” as new donor
+                          </Button>
+                        ) : null}
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {existingDonors.map((name) => (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => {
+                            onChange(name);
+                            onSearchChange(name);
+                            onOpenChange(false);
+                          }}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", value === name ? "opacity-100" : "opacity-0")} />
+                          {name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
     );
   };
