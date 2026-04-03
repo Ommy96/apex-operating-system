@@ -145,8 +145,11 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
   };
 
   const handleSaveDraft = async () => {
-    const { error } = await supabase.from("grant_reports").upsert({
+    const orgId = currentOrganization?.organization_id;
+    if (!orgId) return;
+    const { error } = await supabase.from("grant_reports").insert({
       grant_id: grantId,
+      organization_id: orgId,
       report_title: `Progress Report ${reportingPeriodStart} to ${reportingPeriodEnd}`,
       report_type: "narrative",
       due_date: reportingPeriodEnd,
@@ -154,7 +157,7 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
       reporting_period_end: reportingPeriodEnd,
       status: "draft",
       notes: JSON.stringify({ challenges, nextSteps, generated_at: new Date().toISOString() }),
-    }, { onConflict: "id" });
+    });
     if (error) toast.error(error.message);
     else toast.success("Draft saved");
   };
