@@ -51,8 +51,38 @@ interface MenuItemProps {
   isLocked?: boolean;
 }
 
-function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
-  const active = isActive(item.url);
+function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemProps) {
+  const active = !isLocked && isActive(item.url);
+
+  if (isLocked) {
+    const lockedContent = (
+      <div
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed",
+          "text-sidebar-foreground/70"
+        )}
+      >
+        <item.icon className="h-4 w-4 flex-shrink-0" />
+        {!isCollapsed && (
+          <>
+            <span className="truncate flex-1">{item.title}</span>
+            <Lock className="h-4 w-4 flex-shrink-0 text-sidebar-foreground/40" />
+          </>
+        )}
+      </div>
+    );
+
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          {lockedContent}
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          Upgrade to Professional or Enterprise to access {item.title}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
   
   const content = (
     <NavLink
