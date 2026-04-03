@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen, MoreHorizontal } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
