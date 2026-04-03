@@ -252,12 +252,13 @@ export default function ExpenseClaims() {
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
-                  </TableRow>
+                    <TableHead className="w-10" />
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(myClaims.data || []).map(c => (
