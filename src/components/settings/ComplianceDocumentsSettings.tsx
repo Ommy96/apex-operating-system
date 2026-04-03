@@ -203,10 +203,9 @@ export function ComplianceDocumentsSettings() {
                 <span className="text-sm">ngo-board-cert.pdf</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={org.ngo_board_cert_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="h-3.5 w-3.5 mr-1" /> Download
-                  </a>
+                <Button variant="outline" size="sm" onClick={() => handleDownload('ngo')} disabled={downloading === 'ngo'}>
+                  {downloading === 'ngo' ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1" />}
+                  {downloading === 'ngo' ? 'Generating link...' : 'Download'}
                 </Button>
                 <label>
                   <input

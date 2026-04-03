@@ -80,6 +80,7 @@ export function LogFrameBuilder() {
       {level.children?.map((child: any) => renderLevel(child, depth + 1))}
     </div>
   );
+  };
 
   return (
     <div className="space-y-4">
