@@ -191,7 +191,7 @@ export function BudgetPlanning() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><DollarSign className="h-5 w-5 text-primary" /></div>
-          <div><p className="text-xs text-muted-foreground">Total Budgeted</p><p className="text-lg font-bold text-foreground">KES {totalBudgeted.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Total Budgeted</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalBudgeted} currency="KES" /></p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10"><TrendingUp className="h-5 w-5 text-success" /></div>

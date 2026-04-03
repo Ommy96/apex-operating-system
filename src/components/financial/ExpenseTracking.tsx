@@ -177,7 +177,7 @@ export function ExpenseTracking() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(exp.expense_date), "dd MMM yyyy")}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{(exp as any).programs?.name || "—"}</TableCell>
-                  <TableCell className="text-right font-medium">{exp.currency} {Number(exp.amount).toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-medium"><CurrencyAmount amount={Number(exp.amount)} currency={exp.currency} showOriginal={exp.currency !== 'KES'} /></TableCell>
                   <TableCell>{getStatusBadge(exp.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
