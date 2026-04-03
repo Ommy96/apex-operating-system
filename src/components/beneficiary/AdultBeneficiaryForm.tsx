@@ -117,6 +117,10 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
     },
   });
 
+  const watchedFirstName = form.watch('first_name');
+  const watchedLastName = form.watch('last_name');
+  const watchedDob = form.watch('date_of_birth');
+
   const onSubmit = async (data: AdultFormData) => {
     if (!currentOrganization?.organization_id) {
       toast({
