@@ -130,6 +130,11 @@ export function usePermissions() {
 
     // Financial
     viewFinancials: superAdmin || permissions.includes('financial.view.financials'),
+    manageFinancials: superAdmin || permissions.includes('financial.manage.financials') || permissions.includes('financial.manage.expense_claims'),
+    manageCashTransfers: superAdmin || permissions.includes('financial.manage.cash_transfers'),
+    approveCashTransfers: superAdmin || permissions.includes('financial.approve.cash_transfers'),
+    manageExpenseClaims: superAdmin || permissions.includes('financial.manage.expense_claims'),
+    managePettyCash: superAdmin || permissions.includes('financial.manage.petty_cash'),
 
     // HR
     viewHR: superAdmin || permissions.includes('hr.view.staff'),
