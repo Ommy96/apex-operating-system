@@ -11,8 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Plus, Search, BookOpen, Lightbulb, AlertTriangle, ArrowRight } from "lucide-react";
+import { Plus, Search, BookOpen, Lightbulb, AlertTriangle, ArrowRight, Download } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 const CATEGORIES = ["programme_delivery", "partnership", "financial_management", "community_engagement", "other"];
 
