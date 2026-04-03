@@ -268,16 +268,20 @@ export function AppSidebar() {
                 )}
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-0.5">
-                    {visibleItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <MenuItem 
-                          item={item} 
-                          isCollapsed={isCollapsed} 
-                          isActive={isActive} 
-                          onClick={handleNavClick} 
-                        />
-                      </SidebarMenuItem>
-                    ))}
+                    {group.items.filter(i => i.show !== false).map((item) => {
+                      const locked = item.featureFlag ? !isFeatureEnabled(item.featureFlag) : false;
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <MenuItem 
+                            item={item} 
+                            isCollapsed={isCollapsed} 
+                            isActive={isActive} 
+                            onClick={handleNavClick}
+                            isLocked={locked}
+                          />
+                        </SidebarMenuItem>
+                      );
+                    })}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
