@@ -363,6 +363,8 @@ const ProjectDashboard = () => {
             <TabsTrigger value="beneficiaries" className="text-xs sm:text-sm">Beneficiaries</TabsTrigger>
             <TabsTrigger value="funding" className="text-xs sm:text-sm">Funding</TabsTrigger>
             <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
+            <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
+            <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
           </TabsList>
         </div>
 
