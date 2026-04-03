@@ -193,11 +193,11 @@ export function AppSidebar() {
       items: [
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
-        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches },
-        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation },
+        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
+        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
         { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
-        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
-        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries },
+        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries, featureFlag: 'field_mode' },
       ],
     },
     {
