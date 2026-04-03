@@ -63,6 +63,10 @@ const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
 const CashTransfers = lazy(() => import("./pages/CashTransfers"));
 const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
 
+// Sprint 4 pages
+const LessonsLearned = lazy(() => import("./pages/LessonsLearned"));
+const ImpactStories = lazy(() => import("./pages/ImpactStories"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
