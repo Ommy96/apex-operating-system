@@ -1,1 +1,1 @@
-/// <reference types="react-map-gl" />
+/// <reference types="react-map-gl/mapbox" />

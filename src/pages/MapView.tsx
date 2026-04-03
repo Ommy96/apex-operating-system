@@ -73,7 +73,7 @@ function FieldCheckInsMap({ checkIns }: { checkIns: any[] }) {
     );
   }
 
-  import('react-map-gl').then(mod => { if (!MapModule) setMapModule(mod); });
+  import('react-map-gl/mapbox').then(mod => { if (!MapModule) setMapModule(mod); });
 
   if (!MapModule) return <div className="h-[calc(100vh-200px)] bg-muted animate-pulse rounded-lg" />;
 
