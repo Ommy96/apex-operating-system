@@ -59,6 +59,10 @@ const WhistleblowerManagement = lazy(() => import("./pages/WhistleblowerManageme
 const SafeguardingDashboard = lazy(() => import("./pages/SafeguardingDashboard"));
 const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
 
+// Sprint 3 pages
+const CashTransfers = lazy(() => import("./pages/CashTransfers"));
+const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
