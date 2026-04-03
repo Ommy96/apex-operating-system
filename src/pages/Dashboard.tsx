@@ -30,6 +30,7 @@ const Dashboard = () => {
   
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
+  const { can } = usePermissions();
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
   const {
