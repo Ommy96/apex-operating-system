@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateBurnRate, type BurnRateResult } from "@/lib/burnRate";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface BurnRateGaugeProps {
   grantId: string;
@@ -31,18 +31,30 @@ const STATUS_BADGE_VARIANT: Record<BurnRateResult['status'], 'default' | 'second
 
 export function BurnRateGauge({ grantId, grantName, totalBudget, currency, startDate, endDate }: BurnRateGaugeProps) {
   const { formatAmount } = useCurrency();
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
 
   const { data: totalSpent, isLoading } = useQuery({
-    queryKey: ["grant-expenses-total", grantId],
+    queryKey: ["grant-burn-rate-spent", grantId, orgId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get linked programs for this grant
+      const { data: linkedProgs } = await supabase
+        .from("grant_programs")
+        .select("program_id")
+        .eq("grant_id", grantId);
+      const programIds = (linkedProgs || []).map((p: any) => p.program_id);
+      if (programIds.length === 0) return 0;
+
+      // Sum expenses for those programs
+      const { data: expenses } = await supabase
         .from("expenses")
         .select("amount")
-        .eq("grant_id", grantId);
-      if (error) throw error;
-      return (data || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        .eq("organization_id", orgId!)
+        .in("program_id", programIds);
+
+      return (expenses || []).reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
     },
-    enabled: !!grantId,
+    enabled: !!grantId && !!orgId,
   });
 
   if (isLoading || totalSpent === undefined) {
@@ -88,7 +100,7 @@ export function BurnRateGauge({ grantId, grantName, totalBudget, currency, start
       )}
 
       {result.status === 'underspending' && (
-        <p className="text-[11px] text-amber-600">
+        <p className="text-[11px] text-amber-600 dark:text-amber-400">
           Spending is behind schedule — risk of underspending
         </p>
       )}
