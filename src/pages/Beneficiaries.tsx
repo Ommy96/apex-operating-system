@@ -584,6 +584,7 @@ export default function Beneficiaries() {
         </WorkspacePanel>
       )}
       {viewMode === 'table' && !loading && (
+        <WorkspacePanel padding="none" className="overflow-hidden">
           <div className="overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
