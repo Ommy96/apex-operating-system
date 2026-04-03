@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Check, X, Receipt, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { CurrencyAmount } from "@/components/finance/CurrencyAmount";
 
 export function ExpenseTracking() {
   const { expenses, createExpense, updateExpense, deleteExpense, programs, budgets } = useFinancials();
