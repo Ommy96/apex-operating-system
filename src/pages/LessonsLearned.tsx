@@ -227,6 +227,7 @@ export default function LessonsLearned() {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
       </div>
 
       {/* Filters */}
