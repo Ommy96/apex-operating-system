@@ -148,6 +148,10 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
     },
   });
 
+  const watchedFirstName = form.watch('first_name');
+  const watchedLastName = form.watch('last_name');
+  const watchedDob = form.watch('date_of_birth');
+
   const watchedLevel = form.watch('academic_level');
   const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
     ? ACADEMIC_LEVEL_GRADE_MAP[watchedLevel].grades 
