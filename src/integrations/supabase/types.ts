@@ -155,6 +155,7 @@ export type Database = {
           child_id: string
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           description: string | null
           expected_participants: number | null
           id: string
@@ -171,6 +172,7 @@ export type Database = {
           term: string | null
           title: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           activity_date?: string
@@ -181,6 +183,7 @@ export type Database = {
           child_id: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           expected_participants?: number | null
           id?: string
@@ -197,6 +200,7 @@ export type Database = {
           term?: string | null
           title: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           activity_date?: string
@@ -207,6 +211,7 @@ export type Database = {
           child_id?: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           expected_participants?: number | null
           id?: string
@@ -223,6 +228,7 @@ export type Database = {
           term?: string | null
           title?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -813,6 +819,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_of_birth: string | null
+          deleted_at: string | null
           display_name: string
           estate_village: string | null
           first_name: string | null
@@ -849,6 +856,7 @@ export type Database = {
           student_id_number: string | null
           sub_county: string | null
           updated_at: string
+          updated_by: string | null
           year_enrolled: number | null
         }
         Insert: {
@@ -865,6 +873,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           display_name: string
           estate_village?: string | null
           first_name?: string | null
@@ -901,6 +910,7 @@ export type Database = {
           student_id_number?: string | null
           sub_county?: string | null
           updated_at?: string
+          updated_by?: string | null
           year_enrolled?: number | null
         }
         Update: {
@@ -917,6 +927,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           display_name?: string
           estate_village?: string | null
           first_name?: string | null
@@ -953,6 +964,7 @@ export type Database = {
           student_id_number?: string | null
           sub_county?: string | null
           updated_at?: string
+          updated_by?: string | null
           year_enrolled?: number | null
         }
         Relationships: [
@@ -3650,6 +3662,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          deleted_at: string | null
           description: string | null
           expense_date: string
           id: string
@@ -3667,6 +3680,7 @@ export type Database = {
           submitted_by: string | null
           title: string
           updated_at: string
+          updated_by: string | null
           vendor: string | null
         }
         Insert: {
@@ -3680,6 +3694,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          deleted_at?: string | null
           description?: string | null
           expense_date?: string
           id?: string
@@ -3697,6 +3712,7 @@ export type Database = {
           submitted_by?: string | null
           title: string
           updated_at?: string
+          updated_by?: string | null
           vendor?: string | null
         }
         Update: {
@@ -3710,6 +3726,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          deleted_at?: string | null
           description?: string | null
           expense_date?: string
           id?: string
@@ -3727,6 +3744,7 @@ export type Database = {
           submitted_by?: string | null
           title?: string
           updated_at?: string
+          updated_by?: string | null
           vendor?: string | null
         }
         Relationships: [
@@ -5132,6 +5150,7 @@ export type Database = {
           current_file_type: string | null
           current_file_url: string | null
           current_version: number
+          deleted_at: string | null
           description: string | null
           document_type: string | null
           donor_visible: boolean | null
@@ -5153,6 +5172,7 @@ export type Database = {
           current_file_type?: string | null
           current_file_url?: string | null
           current_version?: number
+          deleted_at?: string | null
           description?: string | null
           document_type?: string | null
           donor_visible?: boolean | null
@@ -5174,6 +5194,7 @@ export type Database = {
           current_file_type?: string | null
           current_file_url?: string | null
           current_version?: number
+          deleted_at?: string | null
           description?: string | null
           document_type?: string | null
           donor_visible?: boolean | null
@@ -6428,6 +6449,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           custom_fields: Json | null
+          deleted_at: string | null
           description: string | null
           end_date: string | null
           geographic_coverage: Json | null
@@ -6448,6 +6470,7 @@ export type Database = {
           start_date: string | null
           status: string | null
           target_population: string[] | null
+          updated_by: string | null
         }
         Insert: {
           annual_funding_required?: number | null
@@ -6456,6 +6479,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_fields?: Json | null
+          deleted_at?: string | null
           description?: string | null
           end_date?: string | null
           geographic_coverage?: Json | null
@@ -6476,6 +6500,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           target_population?: string[] | null
+          updated_by?: string | null
         }
         Update: {
           annual_funding_required?: number | null
@@ -6484,6 +6509,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_fields?: Json | null
+          deleted_at?: string | null
           description?: string | null
           end_date?: string | null
           geographic_coverage?: Json | null
@@ -6504,6 +6530,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           target_population?: string[] | null
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -6529,6 +6556,7 @@ export type Database = {
           created_by: string | null
           custom_data: Json | null
           custom_fields: Json | null
+          deleted_at: string | null
           description: string | null
           end_date: string | null
           estimated_cost: number | null
@@ -6547,6 +6575,7 @@ export type Database = {
           status: string | null
           target_beneficiary_types: string[] | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           budget?: number | null
@@ -6554,6 +6583,7 @@ export type Database = {
           created_by?: string | null
           custom_data?: Json | null
           custom_fields?: Json | null
+          deleted_at?: string | null
           description?: string | null
           end_date?: string | null
           estimated_cost?: number | null
@@ -6572,6 +6602,7 @@ export type Database = {
           status?: string | null
           target_beneficiary_types?: string[] | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           budget?: number | null
@@ -6579,6 +6610,7 @@ export type Database = {
           created_by?: string | null
           custom_data?: Json | null
           custom_fields?: Json | null
+          deleted_at?: string | null
           description?: string | null
           end_date?: string | null
           estimated_cost?: number | null
@@ -6597,6 +6629,7 @@ export type Database = {
           status?: string | null
           target_beneficiary_types?: string[] | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -7905,6 +7938,7 @@ export type Database = {
           availability: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -7919,11 +7953,13 @@ export type Database = {
           start_date: string | null
           status: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           availability?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -7938,11 +7974,13 @@ export type Database = {
           start_date?: string | null
           status?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           availability?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -7957,6 +7995,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
