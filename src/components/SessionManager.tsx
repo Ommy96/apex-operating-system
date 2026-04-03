@@ -59,7 +59,7 @@ export function SessionManager({ children }: SessionManagerProps) {
       variant: "destructive",
     });
     await signOut();
-    navigate('/auth');
+    window.location.href = '/auth';
   }, [signOut, navigate]);
 
   // Start warning countdown
