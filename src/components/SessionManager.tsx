@@ -60,7 +60,7 @@ export function SessionManager({ children }: SessionManagerProps) {
     });
     await signOut();
     window.location.href = '/auth';
-  }, [signOut, navigate]);
+  }, [signOut]);
 
   // Start warning countdown
   const startWarning = useCallback(() => {
