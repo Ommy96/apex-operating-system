@@ -255,8 +255,9 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pb-4 overflow-y-auto">
           {menuGroups.map((group) => {
-            const visibleItems = group.items.filter(i => i.show);
-            if (visibleItems.length === 0) return null;
+            const visibleItems = group.items.filter(i => i.show !== false || i.featureFlag);
+            const actualVisible = group.items.filter(i => i.show !== false);
+            if (actualVisible.length === 0 && visibleItems.length === 0) return null;
 
             return (
               <SidebarGroup key={group.label} className="mt-4 first:mt-0">
