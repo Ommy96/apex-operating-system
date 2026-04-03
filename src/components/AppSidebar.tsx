@@ -35,11 +35,20 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
 
+interface MenuItemType {
+  title: string;
+  url: string;
+  icon: any;
+  show: boolean;
+  featureFlag?: string;
+}
+
 interface MenuItemProps {
-  item: { title: string; url: string; icon: any };
+  item: MenuItemType;
   isCollapsed: boolean;
   isActive: (path: string) => boolean;
   onClick: () => void;
+  isLocked?: boolean;
 }
 
 function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
