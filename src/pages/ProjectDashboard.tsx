@@ -721,6 +721,16 @@ const ProjectDashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Team Tab */}
+        <TabsContent value="team" className="mt-4">
+          <ProjectTeamTab projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        {/* Workplan Tab */}
+        <TabsContent value="workplan" className="mt-4">
+          <ProjectWorkplanTab projectId={projectId!} />
+        </TabsContent>
       </Tabs>
     </div>
   );
