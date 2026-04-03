@@ -2792,6 +2792,82 @@ export type Database = {
           },
         ]
       }
+      complaints: {
+        Row: {
+          assigned_to: string | null
+          beneficiary_id: string | null
+          category: string
+          created_at: string | null
+          deleted_at: string | null
+          description: string
+          id: string
+          is_anonymous: boolean | null
+          organization_id: string
+          priority: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          submitted_by_contact: string | null
+          submitted_by_name: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          beneficiary_id?: string | null
+          category: string
+          created_at?: string | null
+          deleted_at?: string | null
+          description: string
+          id?: string
+          is_anonymous?: boolean | null
+          organization_id: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by_contact?: string | null
+          submitted_by_name?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          beneficiary_id?: string | null
+          category?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string
+          id?: string
+          is_anonymous?: boolean | null
+          organization_id?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by_contact?: string | null
+          submitted_by_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_exports: {
         Row: {
           created_at: string
@@ -3075,6 +3151,65 @@ export type Database = {
           },
           {
             foreignKeyName: "data_retention_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dedup_decisions: {
+        Row: {
+          beneficiary_id_a: string
+          beneficiary_id_b: string
+          created_at: string | null
+          decided_by: string | null
+          decision: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          beneficiary_id_a: string
+          beneficiary_id_b: string
+          created_at?: string | null
+          decided_by?: string | null
+          decision: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          beneficiary_id_a?: string
+          beneficiary_id_b?: string
+          created_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dedup_decisions_beneficiary_id_a_fkey"
+            columns: ["beneficiary_id_a"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dedup_decisions_beneficiary_id_b_fkey"
+            columns: ["beneficiary_id_b"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dedup_decisions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dedup_decisions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
@@ -5457,11 +5592,17 @@ export type Database = {
           features_enabled: Json | null
           id: string
           is_active: boolean
+          kra_exemption_cert_url: string | null
+          kra_exemption_expiry: string | null
           logo_url: string | null
           name: string
+          ngo_board_cert_expiry: string | null
+          ngo_board_cert_url: string | null
           onboarding_completed: boolean
           onboarding_completed_at: string | null
           organization_type: string | null
+          pbo_expiry: string | null
+          pbo_number: string | null
           phone: string | null
           registration_number: string | null
           settings: Json | null
@@ -5489,11 +5630,17 @@ export type Database = {
           features_enabled?: Json | null
           id?: string
           is_active?: boolean
+          kra_exemption_cert_url?: string | null
+          kra_exemption_expiry?: string | null
           logo_url?: string | null
           name: string
+          ngo_board_cert_expiry?: string | null
+          ngo_board_cert_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          pbo_expiry?: string | null
+          pbo_number?: string | null
           phone?: string | null
           registration_number?: string | null
           settings?: Json | null
@@ -5521,11 +5668,17 @@ export type Database = {
           features_enabled?: Json | null
           id?: string
           is_active?: boolean
+          kra_exemption_cert_url?: string | null
+          kra_exemption_expiry?: string | null
           logo_url?: string | null
           name?: string
+          ngo_board_cert_expiry?: string | null
+          ngo_board_cert_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          pbo_expiry?: string | null
+          pbo_number?: string | null
           phone?: string | null
           registration_number?: string | null
           settings?: Json | null
@@ -7028,6 +7181,81 @@ export type Database = {
         }
         Relationships: []
       }
+      safeguarding_incidents: {
+        Row: {
+          assigned_to: string | null
+          closed_at: string | null
+          created_at: string | null
+          deleted_at: string | null
+          description: string
+          escalated_at: string | null
+          id: string
+          immediate_action_taken: string | null
+          incident_date: string
+          incident_type: string
+          is_confidential: boolean | null
+          location: string | null
+          organization_id: string
+          persons_involved: string | null
+          reporter_id: string | null
+          severity: string | null
+          status: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description: string
+          escalated_at?: string | null
+          id?: string
+          immediate_action_taken?: string | null
+          incident_date: string
+          incident_type: string
+          is_confidential?: boolean | null
+          location?: string | null
+          organization_id: string
+          persons_involved?: string | null
+          reporter_id?: string | null
+          severity?: string | null
+          status?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string
+          escalated_at?: string | null
+          id?: string
+          immediate_action_taken?: string | null
+          incident_date?: string
+          incident_type?: string
+          is_confidential?: boolean | null
+          location?: string | null
+          organization_id?: string
+          persons_involved?: string | null
+          reporter_id?: string | null
+          severity?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safeguarding_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safeguarding_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_contract_objectives: {
         Row: {
           actual_value: number | null
@@ -8014,6 +8242,63 @@ export type Database = {
           },
         ]
       }
+      whistleblower_reports: {
+        Row: {
+          assigned_to: string | null
+          contact_info: string | null
+          created_at: string | null
+          description: string
+          evidence_description: string | null
+          id: string
+          is_anonymous: boolean | null
+          organization_id: string
+          report_type: string
+          response_notes: string | null
+          status: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description: string
+          evidence_description?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          organization_id: string
+          report_type: string
+          response_notes?: string | null
+          status?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string
+          evidence_description?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          organization_id?: string
+          report_type?: string
+          response_notes?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whistleblower_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whistleblower_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       children_safe_view: {
@@ -8247,6 +8532,18 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      find_potential_duplicates: {
+        Args: { _org_id: string }
+        Returns: {
+          dob_a: string
+          dob_b: string
+          id_a: string
+          id_b: string
+          match_type: string
+          name_a: string
+          name_b: string
+        }[]
       }
       get_org_member_role: {
         Args: { _org_id: string; _user_id: string }

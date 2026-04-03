@@ -166,6 +166,12 @@ export function usePermissions() {
 
     // AI
     viewAI: superAdmin || permissions.includes('ai.view.insights'),
+
+    // Accountability
+    viewAccountability: superAdmin || permissions.includes('accountability.view.accountability'),
+    manageComplaints: superAdmin || permissions.includes('accountability.manage.complaints'),
+    viewSafeguarding: superAdmin || permissions.includes('accountability.view.safeguarding'),
+    manageSafeguarding: superAdmin || permissions.includes('accountability.manage.safeguarding'),
   }), [permissions, superAdmin]);
 
   const isLoading = permissionsLoading || rolesLoading;

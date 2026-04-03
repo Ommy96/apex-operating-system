@@ -22,6 +22,7 @@ import {
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation, UserCheck,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
+  MessageSquare, ShieldCheck, AlertTriangle,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -154,6 +155,14 @@ export function AppSidebar() {
         { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
         { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries },
+      ],
+    },
+    {
+      label: "Accountability",
+      items: [
+        { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
+        { title: "Safeguarding", url: "/safeguarding", icon: ShieldCheck, show: can.viewSafeguarding },
+        { title: "Whistleblower", url: "/whistleblower", icon: AlertTriangle, show: superAdmin || can.viewAccountability },
       ],
     },
     {
