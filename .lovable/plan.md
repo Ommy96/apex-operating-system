@@ -1,35 +1,42 @@
+## Sprint 3 Plan
 
-## Sprint 2 Plan — Compliance & Accountability
+### Phase 1: Database Migration (all tables at once)
+- `currency_rates` — exchange rate storage
+- `cash_transfers` + `cash_transfer_batches` — M-Pesa cash transfers
+- `grant_reminder_logs` — deadline reminder tracking
+- `expense_claims` — staff expense claims
+- `petty_cash_funds` + `petty_cash_transactions` — petty cash with balance trigger
+- Add `base_currency` column to `organizations`
+- RLS policies for all new tables
+- RBAC permissions for new modules
 
-### Phase 1: Database Migrations (all tables + columns at once)
-1. Create `complaints` table with RLS
-2. Create `safeguarding_incidents` table with RLS
-3. Create `whistleblower_reports` table with RLS (no deleted_at)
-4. Add KRA/NGO Board columns to organizations
-5. Create `dedup_decisions` table
-6. Create `find_potential_duplicates` PostgreSQL function
-7. Add new RBAC permissions: viewAccountability, manageComplaints, viewSafeguarding, manageSafeguarding
-8. Assign permissions to default roles
-9. Create `policy-documents` and `compliance-docs` storage buckets
+### Phase 2: Core Utilities & Hooks
+- `src/lib/burnRate.ts` — burn rate calculation engine
+- `src/lib/mpesa.ts` — phone formatting utility
+- `src/hooks/useCurrency.ts` — currency conversion hook
 
-### Phase 2: Edge Functions
-1. `create-complaint` — public intake, no auth
-2. `submit-whistleblower-report` — public intake, no auth, no IP logging for anonymous
+### Phase 3: Edge Functions
+- `fetch-exchange-rates` — daily currency rate fetch
+- `mpesa-b2c-transfer` — Safaricom B2C payment
+- `mpesa-b2c-callback` — Safaricom async result handler
+- `grant-deadline-reminders` — daily deadline check + email
 
-### Phase 3: UI Components & Pages
-1. ComplaintIntake.tsx (public /feedback/:orgSlug)
-2. ComplaintManagement.tsx + ComplaintDetail drawer
-3. SafeguardingReportForm.tsx
-4. SafeguardingDashboard.tsx + IncidentDetail drawer
-5. WhistleblowerForm.tsx (public /report/:orgSlug)
-6. WhistleblowerManagement.tsx
-7. useFeatureFlag hook + FeatureFlagGuard + UpgradePrompt
-8. KRA compliance section in settings + ComplianceAlertBanner
-9. Deduplication warning in registration + DeduplicationReview page
-10. Indicator traffic light in IndicatorsDashboard + LogFrameBuilder
+### Phase 4: UI Components
+- `BurnRateGauge` — progress bar with projections
+- `CurrencyAmount` — formatted multi-currency display
+- `GrantFinancialReport` — donor-format budget vs actuals
+- Petty Cash tab in FinancialSuite
+- CashTransfers page
+- ExpenseClaims page
+- Grant Calendar tab
 
-### Phase 4: Integration
-1. Add Accountability section to AppSidebar
-2. Add all new routes to App.tsx
-3. Apply FeatureFlagGuard to specified routes
-4. Grey out disabled features in sidebar
+### Phase 5: Wiring & Backlog Fixes
+- Wire components into existing pages
+- Fix LogFrameBuilder indicator data
+- Fix IndicatorsDashboard target values
+- Fix ComplianceDocumentsSettings signed URLs
+- Add routes and sidebar items
+- Build verification
+
+### Secrets Required (user must add)
+- MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_B2C_SHORTCODE, MPESA_B2C_INITIATOR_NAME, MPESA_B2C_SECURITY_CREDENTIAL, MPESA_B2C_RESULT_URL, MPESA_B2C_QUEUE_TIMEOUT_URL, MPESA_ENV
