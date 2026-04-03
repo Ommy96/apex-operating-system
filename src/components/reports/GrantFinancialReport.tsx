@@ -126,8 +126,79 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
     return 'text-emerald-600';
   };
 
-  const exportToPdf = () => {
-    toast.info("PDF export coming in next sprint");
+  const exportToPdf = async () => {
+    if (!reportRef.current) return;
+    setExportingPdf(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Header
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(orgName, 10, 10);
+      pdf.setFontSize(14);
+      pdf.setTextColor(0);
+      pdf.text(`${grantData?.grant_name || 'Grant'} — Financial Report`, 10, 18);
+      pdf.setFontSize(9);
+      pdf.setTextColor(100);
+      pdf.text(`Period: ${new Date(reportingPeriodStart).toLocaleDateString('en-KE')} – ${new Date(reportingPeriodEnd).toLocaleDateString('en-KE')}`, 10, 24);
+      pdf.text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, 10, 29);
+
+      let yPos = 35;
+      let pageNum = 1;
+
+      // Add content pages
+      if (imgHeight <= pdfHeight - 45) {
+        pdf.addImage(imgData, 'PNG', 10, yPos, imgWidth, imgHeight);
+      } else {
+        // Multi-page
+        let remaining = imgHeight;
+        let srcY = 0;
+        const pageContentH = pdfHeight - 45;
+        while (remaining > 0) {
+          if (pageNum > 1) {
+            pdf.addPage();
+            yPos = 15;
+          }
+          const sliceH = Math.min(remaining, pageContentH);
+          const sliceRatio = sliceH / imgHeight;
+          const srcH = canvas.height * sliceRatio;
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = srcH;
+          const ctx = tempCanvas.getContext('2d')!;
+          ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+          pdf.addImage(tempCanvas.toDataURL('image/png'), 'PNG', 10, yPos, imgWidth, sliceH);
+          srcY += srcH;
+          remaining -= sliceH;
+          // Footer
+          pdf.setFontSize(7);
+          pdf.setTextColor(150);
+          pdf.text('CONFIDENTIAL', pdfWidth / 2, pdfHeight - 5, { align: 'center' });
+          pdf.text(`Page ${pageNum}`, pdfWidth - 15, pdfHeight - 5);
+          pageNum++;
+        }
+      }
+      // Footer on last/only page
+      pdf.setFontSize(7);
+      pdf.setTextColor(150);
+      pdf.text('CONFIDENTIAL', pdfWidth / 2, pdfHeight - 5, { align: 'center' });
+      pdf.text(`Page ${pageNum}`, pdfWidth - 15, pdfHeight - 5);
+
+      pdf.save(`financial-report-${grantData?.grant_name || 'grant'}.pdf`);
+      toast.success("PDF exported successfully");
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error("Failed to export PDF");
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   const exportToExcel = () => {
