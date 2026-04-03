@@ -221,6 +221,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else if (data.user) {
       supabase.from('profiles').update({ last_login_at: new Date().toISOString() })
         .eq('user_id', data.user.id).then(() => {});
+
+      // Check 2FA requirement for org_admin roles
+      try {
+        const role = await fetchUserRole(data.user.id);
+        if (role === 'admin') {
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const totpFactors = factorsData?.totp || [];
+          if (totpFactors.length === 0) {
+            sessionStorage.setItem('requires_2fa_setup', 'true');
+          } else {
+            sessionStorage.removeItem('requires_2fa_setup');
+          }
+        }
+      } catch (e) {
+        logger.error('MFA check failed:', e);
+      }
     }
     
     return { error };

@@ -82,6 +82,111 @@ export default function LessonsLearned() {
     return matchSearch && matchCat;
   });
 
+  const exportPDF = () => {
+    const year = new Date().getFullYear();
+    const yearLessons = lessons.filter((l: any) => new Date(l.created_at).getFullYear() === year);
+    if (yearLessons.length === 0) { toast.error("No lessons for this year"); return; }
+
+    const grouped: Record<string, any[]> = {};
+    yearLessons.forEach((l: any) => {
+      const cat = l.category || "other";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(l);
+    });
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageW = 210;
+    const margin = 20;
+    const maxW = pageW - margin * 2;
+    let y = 0;
+    const orgLabel = currentOrganization?.organization_name || "Ufanisi";
+
+    const addFooter = (pg: number) => {
+      pdf.setFontSize(8);
+      pdf.setTextColor(150);
+      pdf.text("CONFIDENTIAL", pageW / 2, 287, { align: "center" });
+      pdf.text(`Page ${pg}`, pageW - margin, 287, { align: "right" });
+    };
+
+    const checkPage = (needed: number, pg: { val: number }) => {
+      if (y + needed > 270) {
+        addFooter(pg.val);
+        pdf.addPage();
+        pg.val++;
+        y = margin;
+      }
+    };
+
+    // Cover page
+    pdf.setFontSize(24);
+    pdf.setTextColor(30);
+    pdf.text(orgLabel, pageW / 2, 80, { align: "center" });
+    pdf.setFontSize(18);
+    pdf.text(`Organisational Learning Report ${year}`, pageW / 2, 100, { align: "center" });
+    pdf.setFontSize(11);
+    pdf.setTextColor(100);
+    pdf.text(`Generated: ${new Date().toLocaleDateString("en-KE")}`, pageW / 2, 115, { align: "center" });
+    addFooter(1);
+
+    let pageNum = { val: 2 };
+    pdf.addPage();
+    y = margin;
+
+    Object.entries(grouped).forEach(([cat, items]) => {
+      checkPage(20, pageNum);
+      pdf.setFontSize(14);
+      pdf.setTextColor(30);
+      pdf.text(cat.replace(/_/g, " ").toUpperCase(), margin, y);
+      y += 8;
+      pdf.setDrawColor(200);
+      pdf.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      items.forEach((lesson: any) => {
+        checkPage(40, pageNum);
+        pdf.setFontSize(11);
+        pdf.setTextColor(30);
+        const titleLines = pdf.splitTextToSize(lesson.title, maxW);
+        pdf.text(titleLines, margin, y);
+        y += titleLines.length * 5 + 2;
+
+        const fields = [
+          { label: "Context", val: lesson.context },
+          { label: "What worked", val: lesson.what_worked },
+          { label: "What didn't work", val: lesson.what_didnt_work },
+          { label: "Recommendation", val: lesson.recommendation },
+        ];
+        fields.forEach(f => {
+          if (f.val) {
+            checkPage(12, pageNum);
+            pdf.setFontSize(9);
+            pdf.setTextColor(80);
+            pdf.text(`${f.label}:`, margin, y);
+            y += 4;
+            pdf.setTextColor(50);
+            const lines = pdf.splitTextToSize(f.val, maxW);
+            pdf.text(lines, margin, y);
+            y += lines.length * 4 + 2;
+          }
+        });
+
+        checkPage(8, pageNum);
+        pdf.setFontSize(8);
+        pdf.setTextColor(130);
+        const meta = `${lesson.projects?.name ? `Project: ${lesson.projects.name} | ` : ""}Date: ${new Date(lesson.created_at).toLocaleDateString("en-KE")}`;
+        pdf.text(meta, margin, y);
+        y += 4;
+        pdf.setDrawColor(220);
+        pdf.line(margin, y, pageW - margin, y);
+        y += 6;
+      });
+    });
+
+    addFooter(pageNum.val);
+    pdf.save(`learning-report-${year}.pdf`);
+    toast.success("PDF exported");
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -89,10 +194,14 @@ export default function LessonsLearned() {
           <h1 className="text-2xl font-bold text-foreground">Learning Log</h1>
           <p className="text-sm text-muted-foreground">Document what works and what doesn't</p>
         </div>
-        <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Lesson</Button>
-          </SheetTrigger>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={exportPDF} className="gap-1">
+            <Download className="h-4 w-4" /> Export Report
+          </Button>
+          <Sheet open={createOpen} onOpenChange={setCreateOpen}>
+            <SheetTrigger asChild>
+              <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Lesson</Button>
+            </SheetTrigger>
           <SheetContent className="overflow-y-auto">
             <SheetHeader><SheetTitle>New Lesson Learned</SheetTitle></SheetHeader>
             <div className="space-y-4 mt-4">
