@@ -291,6 +291,12 @@ const App = () => (
                 <DashboardLayout><LazyRoute><ImpactStories /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/me-calendar" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><MECalendar /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
 
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>

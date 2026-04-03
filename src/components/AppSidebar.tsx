@@ -24,6 +24,7 @@ import {
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart,
+  BookOpen, BookHeart, CalendarCheck,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
