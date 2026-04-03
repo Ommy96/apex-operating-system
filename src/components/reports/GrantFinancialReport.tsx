@@ -25,8 +25,11 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
   const { currentOrganization } = useOrganization();
   const { formatAmount } = useCurrency();
   const orgId = currentOrganization?.organization_id;
+  const orgName = (currentOrganization as any)?.organization_name || 'Organization';
   const [highlights, setHighlights] = useState("");
   const [varianceExplanation, setVarianceExplanation] = useState("");
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   const grant = useQuery({
     queryKey: ["grant-detail-report", grantId],
