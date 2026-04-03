@@ -263,6 +263,20 @@ export function IndicatorsDashboard() {
         </Card>
       </div>
 
+      {/* Traffic Light Summary */}
+      {filteredIndicators.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <TrafficLightSummaryBar
+              indicators={filteredIndicators.map((ind) => {
+                const computed = computedValues.get(ind.id);
+                return { actual: computed?.current.value ?? null, target: null };
+              })}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Indicators Grid/List */}
       {loadingIndicators ? (
         <div className={cn(
