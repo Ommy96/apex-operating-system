@@ -6300,6 +6300,7 @@ export type Database = {
           pbo_expiry: string | null
           pbo_number: string | null
           phone: string | null
+          primary_color: string | null
           registration_number: string | null
           settings: Json | null
           slug: string
@@ -6339,6 +6340,7 @@ export type Database = {
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          primary_color?: string | null
           registration_number?: string | null
           settings?: Json | null
           slug: string
@@ -6378,6 +6380,7 @@ export type Database = {
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          primary_color?: string | null
           registration_number?: string | null
           settings?: Json | null
           slug?: string
