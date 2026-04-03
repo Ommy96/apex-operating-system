@@ -85,7 +85,7 @@ export function ExpenseTracking() {
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><Receipt className="h-5 w-5 text-primary" /></div>
-          <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-foreground">KES {totalAll.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalAll} currency="KES" /></p></div>
         </CardContent></Card>
       </div>
 
