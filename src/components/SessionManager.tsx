@@ -16,7 +16,6 @@ const WARNING_SECONDS = 120; // 2-minute warning
 
 export function SessionManager({ children }: SessionManagerProps) {
   const { user, userRole, forceSessionRefresh, signOut } = useAuth();
-  const navigate = useNavigate();
   const [privilegeDialog, setPrivilegeDialog] = useState<{
     isOpen: boolean;
     type: 'escalation' | 'reduction' | null;
