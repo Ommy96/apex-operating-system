@@ -249,12 +249,16 @@ export function AppSidebar() {
             "flex items-center gap-3 transition-all duration-200 mb-3",
             isCollapsed && "justify-center"
           )}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
-              <Target className="h-4.5 w-4.5 text-white" />
-            </div>
+            {logoUrl ? (
+              <img src={logoUrl} alt={orgName} className="h-9 w-9 rounded-xl object-contain" />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
+                <Target className="h-4.5 w-4.5 text-white" />
+              </div>
+            )}
             {!isCollapsed && (
               <div className="flex flex-col animate-fade-in">
-                <span className="font-bold text-sidebar-foreground tracking-tight text-sm">Ufanisi</span>
+                <span className="font-bold text-sidebar-foreground tracking-tight text-sm">{orgName}</span>
                 <span className="text-[11px] text-sidebar-foreground/60">Data Platform</span>
               </div>
             )}
