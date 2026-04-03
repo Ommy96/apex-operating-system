@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Eye, DollarSign, TrendingUp, AlertTriangle, Wallet } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CurrencyAmount } from "@/components/finance/CurrencyAmount";
 
 export function BudgetPlanning() {
   const { budgets, createBudget, deleteBudget, programs, useBudgetLineItems, createLineItem, deleteLineItem } = useFinancials();
