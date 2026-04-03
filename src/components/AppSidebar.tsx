@@ -39,7 +39,7 @@ interface MenuItemType {
   title: string;
   url: string;
   icon: any;
-  show: boolean;
+  show?: boolean;
   featureFlag?: string;
 }
 
