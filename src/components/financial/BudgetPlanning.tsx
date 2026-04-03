@@ -104,7 +104,7 @@ export function BudgetPlanning() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Total Budget</p>
-            <p className="text-lg font-bold text-foreground">{budget.currency} {Number(budget.total_amount).toLocaleString()}</p>
+            <p className="text-lg font-bold text-foreground"><CurrencyAmount amount={Number(budget.total_amount)} currency={budget.currency} /></p>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Line Items Total</p>
