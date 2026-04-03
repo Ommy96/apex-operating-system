@@ -227,7 +227,7 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
   const totalPctUsed = bd.totals.budget > 0 ? Math.round((bd.totals.cumulative / bd.totals.budget) * 1000) / 10 : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={reportRef}>
       {/* Header */}
       <Card>
         <CardContent className="py-4 space-y-1">
