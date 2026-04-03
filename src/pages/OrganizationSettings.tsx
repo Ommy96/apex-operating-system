@@ -18,6 +18,7 @@ import { IntegrationSettings } from '@/components/settings/IntegrationSettings';
 import { AISettings } from '@/components/settings/AISettings';
 import { AcademicSettings } from '@/components/settings/AcademicSettings';
 import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
+import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDocumentsSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ export default function OrganizationSettings() {
       case 'comp-data': return <ComplianceSettings section="comp-data" />;
       case 'comp-audit': return <ComplianceSettings section="comp-audit" />;
       case 'comp-docs': return <ComplianceSettings section="comp-docs" />;
+      case 'comp-certs': return <ComplianceDocumentsSettings />;
       case 'partner-access': return <PartnerVolunteerSettings section="partner-access" />;
       case 'volunteer-settings': return <PartnerVolunteerSettings section="volunteer-settings" />;
       case 'exec-dashboard': return <ExecutiveSettings section="exec-dashboard" />;

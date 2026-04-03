@@ -27,6 +27,7 @@ import { useIndicators, useIndicatorCategories, useIndicatorTargets, Indicator, 
 import { useOrganization } from '@/hooks/useOrganization';
 import { computeAllIndicators } from '@/lib/indicatorComputation';
 import { IndicatorCard } from './IndicatorCard';
+import { IndicatorTrafficLight, TrafficLightSummaryBar } from './IndicatorTrafficLight';
 import { IndicatorForm } from './IndicatorForm';
 import { IndicatorTargetForm } from './IndicatorTargetForm';
 import { TemplateLibrary } from './TemplateLibrary';
@@ -261,6 +262,20 @@ export function IndicatorsDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Traffic Light Summary */}
+      {filteredIndicators.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <TrafficLightSummaryBar
+              indicators={filteredIndicators.map((ind) => {
+                const computed = computedValues.get(ind.id);
+                return { actual: computed?.current.value ?? null, target: null };
+              })}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Indicators Grid/List */}
       {loadingIndicators ? (

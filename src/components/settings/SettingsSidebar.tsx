@@ -42,6 +42,7 @@ const settingsSections: SettingsSection[] = [
   { id: 'comp-data', label: 'Data Protection', icon: FileCheck, description: 'Consent, retention, GDPR', category: 'Compliance' },
   { id: 'comp-audit', label: 'Audit Settings', icon: FileText, description: 'Log retention, export permissions', category: 'Compliance' },
   { id: 'comp-docs', label: 'Document Management', icon: FileText, description: 'Folder rules, version control', category: 'Compliance' },
+  { id: 'comp-certs', label: 'Compliance Documents', icon: FileCheck, description: 'KRA, NGO Board, PBO certificates', category: 'Compliance' },
   // Partners & Volunteers
   { id: 'partner-access', label: 'Partner Access', icon: Handshake, description: 'Data sharing scope, visibility', category: 'Partners & Volunteers' },
   { id: 'volunteer-settings', label: 'Volunteer Settings', icon: UserCheck, description: 'Onboarding, roles, tracking', category: 'Partners & Volunteers' },

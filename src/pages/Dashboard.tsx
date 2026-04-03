@@ -9,6 +9,8 @@ import {
   Users, TrendingUp, Target, Clock, Sparkles, Zap, Activity, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
+import { usePermissions } from "@/hooks/usePermissions";
 import { 
   StatCard, WorkspacePanel, WorkspacePanelHeader,
 } from "@/components/workspace";
@@ -28,6 +30,7 @@ const Dashboard = () => {
   
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
+  const { can } = usePermissions();
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
   const {
@@ -95,6 +98,9 @@ const Dashboard = () => {
           <span>Updated {lastUpdated.toLocaleTimeString()}</span>
         </div>
       </div>
+
+      {/* Compliance Alerts for admins */}
+      {can.manageSettings && <ComplianceAlertBanner />}
 
       {/* Section 1 — Global Search */}
       <GlobalSearchBar />

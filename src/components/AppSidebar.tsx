@@ -35,15 +35,54 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
 
+interface MenuItemType {
+  title: string;
+  url: string;
+  icon: any;
+  show?: boolean;
+  featureFlag?: string;
+}
+
 interface MenuItemProps {
-  item: { title: string; url: string; icon: any };
+  item: MenuItemType;
   isCollapsed: boolean;
   isActive: (path: string) => boolean;
   onClick: () => void;
+  isLocked?: boolean;
 }
 
-function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
-  const active = isActive(item.url);
+function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemProps) {
+  const active = !isLocked && isActive(item.url);
+
+  if (isLocked) {
+    const lockedContent = (
+      <div
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed",
+          "text-sidebar-foreground/70"
+        )}
+      >
+        <item.icon className="h-4 w-4 flex-shrink-0" />
+        {!isCollapsed && (
+          <>
+            <span className="truncate flex-1">{item.title}</span>
+            <Lock className="h-4 w-4 flex-shrink-0 text-sidebar-foreground/40" />
+          </>
+        )}
+      </div>
+    );
+
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          {lockedContent}
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          Upgrade to Professional or Enterprise to access {item.title}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
   
   const content = (
     <NavLink
@@ -82,17 +121,21 @@ function MenuItem({ item, isCollapsed, isActive, onClick }: MenuItemProps) {
 
 interface MenuGroup {
   label: string;
-  items: Array<{ title: string; url: string; icon: any; show: boolean }>;
+  items: Array<MenuItemType>;
 }
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, user } = useAuth();
   const { can, isSuperAdmin: superAdmin } = usePermissions();
+  const { currentOrganization } = useOrganization();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+
+  const orgFeatures = (currentOrganization as any)?.features_enabled || {};
+  const isFeatureEnabled = (flagName: string) => orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
@@ -150,11 +193,11 @@ export function AppSidebar() {
       items: [
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
-        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches },
-        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation },
+        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
+        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
         { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
-        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
-        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries },
+        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries, featureFlag: 'field_mode' },
       ],
     },
     {
@@ -212,8 +255,9 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pb-4 overflow-y-auto">
           {menuGroups.map((group) => {
-            const visibleItems = group.items.filter(i => i.show);
-            if (visibleItems.length === 0) return null;
+            const visibleItems = group.items.filter(i => i.show !== false || i.featureFlag);
+            const actualVisible = group.items.filter(i => i.show !== false);
+            if (actualVisible.length === 0 && visibleItems.length === 0) return null;
 
             return (
               <SidebarGroup key={group.label} className="mt-4 first:mt-0">
@@ -224,16 +268,20 @@ export function AppSidebar() {
                 )}
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-0.5">
-                    {visibleItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <MenuItem 
-                          item={item} 
-                          isCollapsed={isCollapsed} 
-                          isActive={isActive} 
-                          onClick={handleNavClick} 
-                        />
-                      </SidebarMenuItem>
-                    ))}
+                    {group.items.filter(i => i.show !== false).map((item) => {
+                      const locked = item.featureFlag ? !isFeatureEnabled(item.featureFlag) : false;
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <MenuItem 
+                            item={item} 
+                            isCollapsed={isCollapsed} 
+                            isActive={isActive} 
+                            onClick={handleNavClick}
+                            isLocked={locked}
+                          />
+                        </SidebarMenuItem>
+                      );
+                    })}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>

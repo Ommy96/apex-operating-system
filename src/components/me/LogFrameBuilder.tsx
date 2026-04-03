@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, ChevronDown, ChevronRight, Target, GitBranch } from "lucide-react";
 import { useME } from "@/hooks/useME";
+import { IndicatorTrafficLight } from "@/components/indicators/IndicatorTrafficLight";
 
 const LEVEL_COLORS: Record<string, string> = {
   goal: "bg-primary/10 text-primary border-primary/20",
@@ -55,10 +56,13 @@ export function LogFrameBuilder() {
   const renderLevel = (level: any, depth = 0) => (
     <div key={level.id} className={`ml-${Math.min(depth * 4, 16)} border-l-2 border-muted pl-4 py-2`} style={{ marginLeft: depth * 16 }}>
       <div className="flex items-center gap-2">
-        <Badge variant="outline" className={LEVEL_COLORS[level.level_type]}>
+      <Badge variant="outline" className={LEVEL_COLORS[level.level_type]}>
           {level.level_type}
         </Badge>
         <span className="text-sm font-medium text-foreground">{level.title}</span>
+        {level.level_type === 'output' && (
+          <IndicatorTrafficLight actual={null} target={null} size="sm" />
+        )}
       </div>
       {level.description && <p className="text-xs text-muted-foreground mt-1">{level.description}</p>}
       {level.assumptions && <p className="text-xs text-muted-foreground mt-1"><strong>Assumptions:</strong> {level.assumptions}</p>}

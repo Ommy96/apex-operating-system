@@ -17,6 +17,7 @@ import { SiblingSelector } from './SiblingSelector';
 
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
+import { DuplicateWarning } from './DuplicateWarning';
 import { User, Users, Heart, FileText, Loader2 } from 'lucide-react';
 import { ACADEMIC_LEVEL_GRADE_MAP, ACADEMIC_LEVELS } from '@/lib/academicGradeMapping';
 
@@ -146,6 +147,10 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
       funding_required: beneficiary?.funding_required || undefined,
     },
   });
+
+  const watchedFirstName = form.watch('first_name');
+  const watchedLastName = form.watch('last_name');
+  const watchedDob = form.watch('date_of_birth');
 
   const watchedLevel = form.watch('academic_level');
   const gradeOptions = watchedLevel && ACADEMIC_LEVEL_GRADE_MAP[watchedLevel] 
@@ -411,6 +416,14 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                         )}
                       />
                     </div>
+
+                    {!beneficiary && (
+                      <DuplicateWarning
+                        firstName={watchedFirstName}
+                        lastName={watchedLastName}
+                        dateOfBirth={watchedDob}
+                      />
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField

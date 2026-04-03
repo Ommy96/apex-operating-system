@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { CountySelector } from './CountySelector';
-
+import { DuplicateWarning } from './DuplicateWarning';
 import { DependantSelector } from './DependantSelector';
 import { User, Briefcase, Heart, Users, Loader2 } from 'lucide-react';
 
@@ -116,6 +116,10 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
       funding_required: beneficiary?.funding_required || undefined,
     },
   });
+
+  const watchedFirstName = form.watch('first_name');
+  const watchedLastName = form.watch('last_name');
+  const watchedDob = form.watch('date_of_birth');
 
   const onSubmit = async (data: AdultFormData) => {
     if (!currentOrganization?.organization_id) {
@@ -292,6 +296,14 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                         )}
                       />
                     </div>
+
+                    {!beneficiary && (
+                      <DuplicateWarning
+                        firstName={watchedFirstName}
+                        lastName={watchedLastName}
+                        dateOfBirth={watchedDob}
+                      />
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FormField
