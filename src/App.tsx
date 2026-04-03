@@ -11,6 +11,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SuperAdminRoute } from "./components/SuperAdminRoute";
 import { SessionManager } from "./components/SessionManager";
 import { DashboardLayout } from "./components/DashboardLayout";
+import { FeatureFlagGuard } from "./components/FeatureFlagGuard";
 
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
@@ -50,6 +51,14 @@ const DonorAuth = lazy(() => import("./pages/DonorAuth"));
 const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 const BoardPortal = lazy(() => import("./pages/BoardPortal"));
 
+// Sprint 2 pages
+const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
+const ComplaintManagement = lazy(() => import("./pages/ComplaintManagement"));
+const WhistleblowerForm = lazy(() => import("./pages/WhistleblowerForm"));
+const WhistleblowerManagement = lazy(() => import("./pages/WhistleblowerManagement"));
+const SafeguardingDashboard = lazy(() => import("./pages/SafeguardingDashboard"));
+const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
@@ -84,197 +93,180 @@ const App = () => (
             <Route path="/register-organization" element={<LazyRoute><RegisterOrganization /></LazyRoute>} />
             <Route path="/reset-password" element={<LazyRoute><ResetPassword /></LazyRoute>} />
             <Route path="/super-admin" element={<LazyRoute><SuperAdminLogin /></LazyRoute>} />
+
+            {/* Public intake forms (no auth) */}
+            <Route path="/feedback/:orgSlug" element={<LazyRoute><ComplaintIntake /></LazyRoute>} />
+            <Route path="/report/:orgSlug" element={<LazyRoute><WhistleblowerForm /></LazyRoute>} />
+
             <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <LazyRoute><Dashboard /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><LazyRoute><Dashboard /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/programs-management" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout>
-                  <LazyRoute><ProgramsManagement /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><ProgramsManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/entities/:slug" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <LazyRoute><EntityDataPage /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
+              <ProtectedRoute><DashboardLayout><LazyRoute><EntityDataPage /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/beneficiaries" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
-                <DashboardLayout>
-                  <LazyRoute><Beneficiaries /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><Beneficiaries /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/donors" element={
               <ProtectedRoute requirePermission={{ module: 'donors', action: 'view', resource: 'donors' }}>
-                <DashboardLayout>
-                  <LazyRoute><DonorManagement /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><DonorManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/beneficiaries/:id" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
-                <DashboardLayout>
-                  <LazyRoute><BeneficiaryProfile /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><BeneficiaryProfile /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dynamic/:programId" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout>
-                  <LazyRoute><DynamicProgramPage /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><DynamicProgramPage /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dashboard/:programId" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout>
-                  <LazyRoute><ProgramDashboard /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><ProgramDashboard /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/projects/dashboard/:projectId" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout>
-                  <LazyRoute><ProjectDashboard /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><ProjectDashboard /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/financial" element={
               <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
-                <DashboardLayout>
-                  <LazyRoute><FinancialSuite /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><FinancialSuite /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/me-suite" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout>
-                  <LazyRoute><MESuite /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><MESuite /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
               <ProtectedRoute requirePermission={{ module: 'hr', action: 'view', resource: 'staff' }}>
-                <DashboardLayout>
-                  <LazyRoute><HRManagement /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><HRManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+
+            {/* Feature-flagged routes */}
             <Route path="/automation" element={
               <ProtectedRoute requirePermission={{ module: 'automation', action: 'view', resource: 'automation' }}>
-                <DashboardLayout>
-                  <LazyRoute><AutomationEngine /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/communications" element={
-              <ProtectedRoute requirePermission={{ module: 'communications', action: 'view', resource: 'communications' }}>
-                <DashboardLayout>
-                  <LazyRoute><CommunicationsHub /></LazyRoute>
-                </DashboardLayout>
+                <FeatureFlagGuard flag="automation" moduleName="Automation Engine">
+                  <DashboardLayout><LazyRoute><AutomationEngine /></LazyRoute></DashboardLayout>
+                </FeatureFlagGuard>
               </ProtectedRoute>
             } />
             <Route path="/ai-insights" element={
               <ProtectedRoute requirePermission={{ module: 'ai', action: 'view', resource: 'insights' }}>
-                <DashboardLayout>
-                  <LazyRoute><AIInsights /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/document-management" element={
-              <ProtectedRoute requirePermission={{ module: 'documents', action: 'view', resource: 'documents' }}>
-                <DashboardLayout>
-                  <LazyRoute><DocumentManagement /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/compliance" element={
-              <ProtectedRoute requirePermission={{ module: 'compliance', action: 'view', resource: 'compliance' }}>
-                <DashboardLayout>
-                  <LazyRoute><ComplianceGovernance /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/board-reporting" element={
-              <ProtectedRoute requirePermission={{ module: 'board', action: 'view', resource: 'reports' }}>
-                <DashboardLayout>
-                  <LazyRoute><BoardReporting /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/volunteers" element={
-              <ProtectedRoute requirePermission={{ module: 'volunteers', action: 'view', resource: 'volunteers' }}>
-                <DashboardLayout>
-                  <LazyRoute><VolunteerManagement /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/branches" element={
-              <ProtectedRoute requirePermission={{ module: 'branches', action: 'view', resource: 'branches' }}>
-                <DashboardLayout>
-                  <LazyRoute><BranchManagement /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/partners" element={
-              <ProtectedRoute requirePermission={{ module: 'partners', action: 'view', resource: 'partners' }}>
-                <DashboardLayout>
-                  <LazyRoute><PartnerCollaboration /></LazyRoute>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/risk-intelligence" element={
-              <ProtectedRoute requirePermission={{ module: 'risk', action: 'view', resource: 'risk' }}>
-                <DashboardLayout>
-                  <LazyRoute><RiskIntelligence /></LazyRoute>
-                </DashboardLayout>
+                <FeatureFlagGuard flag="ai_insights" moduleName="AI Insights">
+                  <DashboardLayout><LazyRoute><AIInsights /></LazyRoute></DashboardLayout>
+                </FeatureFlagGuard>
               </ProtectedRoute>
             } />
             <Route path="/field-mode" element={
               <ProtectedRoute>
-                <LazyRoute><FieldMode /></LazyRoute>
+                <FeatureFlagGuard flag="field_mode" moduleName="Field Mode">
+                  <LazyRoute><FieldMode /></LazyRoute>
+                </FeatureFlagGuard>
+              </ProtectedRoute>
+            } />
+            <Route path="/branches" element={
+              <ProtectedRoute requirePermission={{ module: 'branches', action: 'view', resource: 'branches' }}>
+                <FeatureFlagGuard flag="multi_branch" moduleName="Branch Management">
+                  <DashboardLayout><LazyRoute><BranchManagement /></LazyRoute></DashboardLayout>
+                </FeatureFlagGuard>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/communications" element={
+              <ProtectedRoute requirePermission={{ module: 'communications', action: 'view', resource: 'communications' }}>
+                <DashboardLayout><LazyRoute><CommunicationsHub /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/document-management" element={
+              <ProtectedRoute requirePermission={{ module: 'documents', action: 'view', resource: 'documents' }}>
+                <DashboardLayout><LazyRoute><DocumentManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance" element={
+              <ProtectedRoute requirePermission={{ module: 'compliance', action: 'view', resource: 'compliance' }}>
+                <DashboardLayout><LazyRoute><ComplianceGovernance /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/board-reporting" element={
+              <ProtectedRoute requirePermission={{ module: 'board', action: 'view', resource: 'reports' }}>
+                <DashboardLayout><LazyRoute><BoardReporting /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/volunteers" element={
+              <ProtectedRoute requirePermission={{ module: 'volunteers', action: 'view', resource: 'volunteers' }}>
+                <DashboardLayout><LazyRoute><VolunteerManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/partners" element={
+              <ProtectedRoute requirePermission={{ module: 'partners', action: 'view', resource: 'partners' }}>
+                <DashboardLayout><LazyRoute><PartnerCollaboration /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/risk-intelligence" element={
+              <ProtectedRoute requirePermission={{ module: 'risk', action: 'view', resource: 'risk' }}>
+                <DashboardLayout><LazyRoute><RiskIntelligence /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
-                <DashboardLayout>
-                  <LazyRoute><ReportsAnalytics /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><ReportsAnalytics /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/role-management" element={
               <ProtectedRoute requirePermission={{ module: 'users', action: 'manage', resource: 'roles' }}>
-                <DashboardLayout>
-                  <LazyRoute><RoleManagement /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><RoleManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/organization-settings" element={
               <ProtectedRoute requirePermission={{ module: 'settings', action: 'manage', resource: 'org_settings' }}>
-                <DashboardLayout>
-                  <LazyRoute><OrganizationSettings /></LazyRoute>
-                </DashboardLayout>
+                <DashboardLayout><LazyRoute><OrganizationSettings /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/infera" element={
-              <SuperAdminRoute>
-                <LazyRoute><InferaAdminDashboard /></LazyRoute>
-              </SuperAdminRoute>
+
+            {/* Accountability routes */}
+            <Route path="/complaints" element={
+              <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'accountability' }}>
+                <LazyRoute><ComplaintManagement /></LazyRoute>
+              </ProtectedRoute>
             } />
-            {/* Donor Portal (standalone, no DashboardLayout) */}
+            <Route path="/safeguarding" element={
+              <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'safeguarding' }}>
+                <LazyRoute><SafeguardingDashboard /></LazyRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/whistleblower" element={
+              <ProtectedRoute>
+                <LazyRoute><WhistleblowerManagement /></LazyRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/deduplication" element={
+              <ProtectedRoute>
+                <LazyRoute><DeduplicationReview /></LazyRoute>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/infera" element={
+              <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
+            } />
+            {/* Donor Portal */}
             <Route path="/donor/login" element={<LazyRoute><DonorAuth /></LazyRoute>} />
             <Route path="/donor/dashboard" element={<LazyRoute><DonorPortal /></LazyRoute>} />
-            {/* Board Portal (standalone, no DashboardLayout) */}
+            {/* Board Portal */}
             <Route path="/board-portal" element={<LazyRoute><BoardPortal /></LazyRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Catch-all */}
             <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
           </Routes>
         </BrowserRouter>
