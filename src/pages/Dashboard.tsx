@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   StatCard, WorkspacePanel, WorkspacePanelHeader,
 } from "@/components/workspace";
