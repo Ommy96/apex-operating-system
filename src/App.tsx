@@ -278,6 +278,18 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            {/* Sprint 4 routes */}
+            <Route path="/lessons-learned" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><LessonsLearned /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/impact-stories" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><ImpactStories /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
             } />
