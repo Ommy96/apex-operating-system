@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -27,20 +28,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleChangeChannel, setRoleChangeChannel] = useState<any>(null);
 
-  // Function to fetch user role — reads from user_roles table (never profiles)
-  // to avoid privilege escalation attacks
   const fetchUserRole = useCallback(async (userId: string) => {
     try {
       const { data } = await supabase
         .rpc('get_user_role', { user_id: userId });
       return (data as string) || 'staff';
     } catch (error) {
-      console.error('Error fetching user role:', error);
+      logger.error('Error fetching user role:', error);
       return 'staff';
     }
   }, []);
 
-  // Function to refresh user role
   const refreshUserRole = useCallback(async () => {
     if (!user?.id) return;
     
@@ -50,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (newRole !== previousRole) {
       setUserRole(newRole);
       
-      // Show notification about role change
       if (previousRole) {
         const isEscalation = getRoleLevel(newRole) > getRoleLevel(previousRole);
         toast({
@@ -59,7 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: isEscalation ? "default" : "destructive",
         });
         
-        // Force page reload for significant privilege changes
         if (Math.abs(getRoleLevel(newRole) - getRoleLevel(previousRole)) > 1) {
           setTimeout(() => {
             window.location.reload();
@@ -69,17 +65,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user?.id, userRole, fetchUserRole]);
 
-  // Function to force session refresh
   const forceSessionRefresh = useCallback(async () => {
     try {
       await supabase.auth.refreshSession();
       await refreshUserRole();
     } catch (error) {
-      console.error('Error refreshing session:', error);
+      logger.error('Error refreshing session:', error);
     }
   }, [refreshUserRole]);
 
-  // Helper function to get role hierarchy level
   const getRoleLevel = (role: string) => {
     switch (role) {
       case 'staff': return 1;
@@ -89,11 +83,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Set up real-time subscriptions
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to role changes — watch user_roles table (not profiles)
     const channel = supabase
       .channel('role-changes')
       .on(
@@ -105,9 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           filter: `user_id=eq.${user.id}`
         },
         async (payload) => {
-          console.log('Role change detected:', payload);
-          
-          // Small delay to ensure database consistency
+          logger.log('Role change detected:', payload);
           setTimeout(async () => {
             await refreshUserRole();
           }, 500);
@@ -125,14 +115,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id, refreshUserRole]);
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile to get role
           setTimeout(() => {
             fetchUserRole(session.user!.id)
               .then((role) => setUserRole(role))
@@ -140,7 +128,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setUserRole(null);
-          // Clean up real-time subscription
           if (roleChangeChannel) {
             supabase.removeChannel(roleChangeChannel);
             setRoleChangeChannel(null);
@@ -151,13 +138,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Fetch user profile for existing session
         setTimeout(async () => {
           const role = await fetchUserRole(session.user.id);
           setUserRole(role);
@@ -201,6 +186,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    // Check rate limit before attempting login
+    try {
+      const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+        user_id_param: '00000000-0000-0000-0000-000000000000', // anonymous UUID for pre-auth
+        action_type_param: `login:${email.toLowerCase()}`,
+        max_attempts: 5,
+        window_minutes: 15,
+      });
+
+      if (rlError) {
+        logger.error('Rate limit check failed:', rlError);
+        // Proceed anyway if rate limit check itself fails (don't lock users out due to infra issue)
+      } else if (allowed === false) {
+        const msg = 'Too many login attempts. Please wait 15 minutes before trying again.';
+        toast({ title: "Login blocked", description: msg, variant: "destructive" });
+        return { error: { message: msg } };
+      }
+    } catch (err) {
+      logger.error('Rate limit RPC error:', err);
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -213,7 +219,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
     } else if (data.user) {
-      // Track last login time (fire-and-forget, non-blocking)
       supabase.from('profiles').update({ last_login_at: new Date().toISOString() })
         .eq('user_id', data.user.id).then(() => {});
     }
@@ -222,17 +227,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clean up real-time subscription before signing out
     if (roleChangeChannel) {
       supabase.removeChannel(roleChangeChannel);
       setRoleChangeChannel(null);
     }
 
     try {
-      // Use local scope to ensure sign-out works even if the network request fails.
       await supabase.auth.signOut({ scope: 'local' });
     } finally {
-      // Force local UI state reset immediately (onAuthStateChange should also fire).
       setSession(null);
       setUser(null);
       setUserRole(null);

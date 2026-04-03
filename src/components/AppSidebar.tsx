@@ -119,16 +119,7 @@ export function AppSidebar() {
     await signOut();
   };
 
-  // Build menu groups - updated 2026-03-08
-  const peopleItems = [
-    { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-    { title: "Donors", url: "/donors", icon: HandCoins, show: true },
-    { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: true },
-    { title: "Partners", url: "/partners", icon: Handshake, show: true },
-  ];
-  
-  console.log("[Sidebar] People items:", peopleItems.map(i => `${i.title}:${i.show}`));
-
+  // Build menu groups — all items respect RBAC permissions
   const menuGroups: MenuGroup[] = [
     {
       label: "Overview",
@@ -138,35 +129,40 @@ export function AppSidebar() {
     },
     {
       label: "People",
-      items: peopleItems,
+      items: [
+        { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
+        { title: "Volunteers", url: "/volunteers", icon: UserCheck, show: can.viewVolunteers },
+        { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
+      ],
     },
     {
       label: "Programs & M&E",
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
-        { title: "M&E Suite", url: "/me-suite", icon: Activity, show: true },
+        { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],
     },
     {
       label: "Operations",
       items: [
-        { title: "Financial", url: "/financial", icon: Wallet, show: true },
-        { title: "HR & Staff", url: "/hr", icon: UserPlus, show: true },
-        { title: "Branches", url: "/branches", icon: Building2, show: true },
-        { title: "Automation", url: "/automation", icon: Zap, show: true },
-        { title: "Communications", url: "/communications", icon: Megaphone, show: true },
-        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: true },
-        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+        { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
+        { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
+        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches },
+        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation },
+        { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
+        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries },
       ],
     },
     {
       label: "Governance",
       items: [
-        { title: "Documents", url: "/document-management", icon: FileText, show: true },
-        { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: true },
-        { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: true },
-        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: true },
+        { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
+        { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: can.viewCompliance },
+        { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
+        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
       ],
     },
     {
