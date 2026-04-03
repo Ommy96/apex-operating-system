@@ -2587,6 +2587,192 @@ export type Database = {
           },
         ]
       }
+      cash_transfer_batches: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          batch_name: string
+          created_at: string | null
+          created_by: string | null
+          grant_id: string | null
+          id: string
+          org_id: string
+          project_id: string | null
+          status: string | null
+          total_amount_kes: number | null
+          total_recipients: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_name: string
+          created_at?: string | null
+          created_by?: string | null
+          grant_id?: string | null
+          id?: string
+          org_id: string
+          project_id?: string | null
+          status?: string | null
+          total_amount_kes?: number | null
+          total_recipients?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_name?: string
+          created_at?: string | null
+          created_by?: string | null
+          grant_id?: string | null
+          id?: string
+          org_id?: string
+          project_id?: string | null
+          status?: string | null
+          total_amount_kes?: number | null
+          total_recipients?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_transfer_batches_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfer_batches_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfer_batches_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfer_batches_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_transfers: {
+        Row: {
+          amount_kes: number
+          batch_id: string | null
+          batch_name: string | null
+          beneficiary_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          failure_reason: string | null
+          grant_id: string | null
+          id: string
+          initiated_at: string | null
+          initiated_by: string | null
+          mpesa_result_code: string | null
+          mpesa_result_desc: string | null
+          mpesa_transaction_id: string | null
+          org_id: string
+          phone_number: string
+          project_id: string | null
+          purpose: string | null
+          recipient_name: string
+          status: string | null
+        }
+        Insert: {
+          amount_kes: number
+          batch_id?: string | null
+          batch_name?: string | null
+          beneficiary_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          failure_reason?: string | null
+          grant_id?: string | null
+          id?: string
+          initiated_at?: string | null
+          initiated_by?: string | null
+          mpesa_result_code?: string | null
+          mpesa_result_desc?: string | null
+          mpesa_transaction_id?: string | null
+          org_id: string
+          phone_number: string
+          project_id?: string | null
+          purpose?: string | null
+          recipient_name: string
+          status?: string | null
+        }
+        Update: {
+          amount_kes?: number
+          batch_id?: string | null
+          batch_name?: string | null
+          beneficiary_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          failure_reason?: string | null
+          grant_id?: string | null
+          id?: string
+          initiated_at?: string | null
+          initiated_by?: string | null
+          mpesa_result_code?: string | null
+          mpesa_result_desc?: string | null
+          mpesa_transaction_id?: string | null
+          org_id?: string
+          phone_number?: string
+          project_id?: string | null
+          purpose?: string | null
+          recipient_name?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_transfers_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "cash_transfer_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfers_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfers_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transfers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_programs: {
         Row: {
           child_id: string
@@ -3000,6 +3186,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      currency_rates: {
+        Row: {
+          base_currency: string
+          fetched_at: string | null
+          id: string
+          rate: number
+          target_currency: string
+        }
+        Insert: {
+          base_currency: string
+          fetched_at?: string | null
+          id?: string
+          rate: number
+          target_currency: string
+        }
+        Update: {
+          base_currency?: string
+          fetched_at?: string | null
+          id?: string
+          rate?: number
+          target_currency?: string
+        }
+        Relationships: []
       }
       data_access_requests: {
         Row: {
@@ -3785,6 +3995,104 @@ export type Database = {
           },
         ]
       }
+      expense_claims: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          claim_date: string
+          claim_title: string
+          created_at: string | null
+          currency: string | null
+          deleted_at: string | null
+          grant_id: string | null
+          id: string
+          items: Json | null
+          notes: string | null
+          org_id: string
+          paid_at: string | null
+          project_id: string | null
+          receipt_urls: string[] | null
+          rejection_reason: string | null
+          staff_id: string
+          status: string | null
+          submitted_at: string | null
+          total_amount: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          claim_date?: string
+          claim_title: string
+          created_at?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          grant_id?: string | null
+          id?: string
+          items?: Json | null
+          notes?: string | null
+          org_id: string
+          paid_at?: string | null
+          project_id?: string | null
+          receipt_urls?: string[] | null
+          rejection_reason?: string | null
+          staff_id: string
+          status?: string | null
+          submitted_at?: string | null
+          total_amount?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          claim_date?: string
+          claim_title?: string
+          created_at?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          grant_id?: string | null
+          id?: string
+          items?: Json | null
+          notes?: string | null
+          org_id?: string
+          paid_at?: string | null
+          project_id?: string | null
+          receipt_urls?: string[] | null
+          rejection_reason?: string | null
+          staff_id?: string
+          status?: string | null
+          submitted_at?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_claims_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           activity_id: string | null
@@ -4338,6 +4646,41 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grant_reminder_logs: {
+        Row: {
+          channel: string | null
+          grant_report_id: string
+          id: string
+          reminder_type: string
+          sent_at: string | null
+          sent_to: string[] | null
+        }
+        Insert: {
+          channel?: string | null
+          grant_report_id: string
+          id?: string
+          reminder_type: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+        }
+        Update: {
+          channel?: string | null
+          grant_report_id?: string
+          id?: string
+          reminder_type?: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_reminder_logs_grant_report_id_fkey"
+            columns: ["grant_report_id"]
+            isOneToOne: false
+            referencedRelation: "grant_reports"
             referencedColumns: ["id"]
           },
         ]
@@ -5584,6 +5927,7 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          base_currency: string | null
           country: string | null
           county: string | null
           created_at: string
@@ -5622,6 +5966,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          base_currency?: string | null
           country?: string | null
           county?: string | null
           created_at?: string
@@ -5660,6 +6005,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          base_currency?: string | null
           country?: string | null
           county?: string | null
           created_at?: string
@@ -5931,6 +6277,111 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partner_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      petty_cash_funds: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          current_balance: number
+          custodian_id: string | null
+          fund_name: string
+          id: string
+          is_active: boolean | null
+          opening_balance: number
+          org_id: string
+          project_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          current_balance?: number
+          custodian_id?: string | null
+          fund_name: string
+          id?: string
+          is_active?: boolean | null
+          opening_balance?: number
+          org_id: string
+          project_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          current_balance?: number
+          custodian_id?: string | null
+          fund_name?: string
+          id?: string
+          is_active?: boolean | null
+          opening_balance?: number
+          org_id?: string
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petty_cash_funds_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_funds_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_funds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      petty_cash_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string
+          fund_id: string
+          id: string
+          receipt_url: string | null
+          recorded_by: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description: string
+          fund_id: string
+          id?: string
+          receipt_url?: string | null
+          recorded_by?: string | null
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string
+          fund_id?: string
+          id?: string
+          receipt_url?: string | null
+          recorded_by?: string | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petty_cash_transactions_fund_id_fkey"
+            columns: ["fund_id"]
+            isOneToOne: false
+            referencedRelation: "petty_cash_funds"
             referencedColumns: ["id"]
           },
         ]
