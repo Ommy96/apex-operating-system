@@ -236,6 +236,7 @@ export function GrantManagement() {
               <TabsTrigger value="budget" className="text-xs rounded-lg">Budget</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs rounded-lg">Reports</TabsTrigger>
               <TabsTrigger value="financial-report" className="text-xs rounded-lg">Financial Report</TabsTrigger>
+              <TabsTrigger value="progress-report" className="text-xs rounded-lg">Progress Report</TabsTrigger>
               <TabsTrigger value="calendar" className="text-xs rounded-lg">Calendar</TabsTrigger>
               <TabsTrigger value="compliance" className="text-xs rounded-lg">Compliance</TabsTrigger>
               <TabsTrigger value="documents" className="text-xs rounded-lg">Documents</TabsTrigger>
