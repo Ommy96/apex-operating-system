@@ -77,7 +77,7 @@ export function ExpenseTracking() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10"><Clock className="h-5 w-5 text-warning" /></div>
-          <div><p className="text-xs text-muted-foreground">Pending Approval</p><p className="text-lg font-bold text-foreground">KES {totalPending.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Pending Approval</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalPending} currency="KES" /></p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10"><CheckCircle className="h-5 w-5 text-success" /></div>
