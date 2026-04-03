@@ -133,10 +133,9 @@ export function ComplianceDocumentsSettings() {
                 <span className="text-sm">kra-exemption.pdf</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={org.kra_exemption_cert_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="h-3.5 w-3.5 mr-1" /> Download
-                  </a>
+                <Button variant="outline" size="sm" onClick={() => handleDownload('kra')} disabled={downloading === 'kra'}>
+                  {downloading === 'kra' ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1" />}
+                  {downloading === 'kra' ? 'Generating link...' : 'Download'}
                 </Button>
                 <label>
                   <input
