@@ -568,7 +568,7 @@ export default function Beneficiaries() {
       {/* Results Count is shown in pagination controls */}
 
       {/* Table View */}
-      {viewMode === 'table' && loading ? (
+      {viewMode === 'table' && loading && (
         <WorkspacePanel padding="none" className="overflow-hidden">
           <div className="p-4 space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -582,7 +582,8 @@ export default function Beneficiaries() {
             ))}
           </div>
         </WorkspacePanel>
-      ) : viewMode === 'table' && (
+      )}
+      {viewMode === 'table' && !loading && (
           <div className="overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
