@@ -6,7 +6,7 @@ import {
   TrendingUp, CreditCard, Plug, Brain, Search, ChevronRight,
   Shield, Lock, Bell, Globe, GitBranch, Target, ClipboardList,
   DollarSign, Settings, FileCheck, UserCheck, LayoutDashboard,
-  Key, Webhook, GraduationCap, Heart,
+  Key, Webhook, GraduationCap, Heart, Palette,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ScrollArea } from '@/components/ui/scroll-area';

@@ -43,6 +43,7 @@ export default function OrganizationSettings() {
   const renderContent = () => {
     switch (activeSection) {
       case 'org-profile': return <OrganizationProfileSettings />;
+      case 'org-branding': return <BrandingSettings />;
       case 'org-branches': return <BranchSettings />;
       case 'user-roles': return <UserAccessSettings section="user-roles" />;
       case 'user-settings': return <UserAccessSettings section="user-settings" />;
