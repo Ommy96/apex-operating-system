@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { CountySelector } from './CountySelector';
-
+import { DuplicateWarning } from './DuplicateWarning';
 import { DependantSelector } from './DependantSelector';
 import { User, Briefcase, Heart, Users, Loader2 } from 'lucide-react';
 
