@@ -17,6 +17,7 @@ import { SiblingSelector } from './SiblingSelector';
 
 import { MedicalInfoSection } from './MedicalInfoSection';
 import { BackgroundSection } from './BackgroundSection';
+import { DuplicateWarning } from './DuplicateWarning';
 import { User, Users, Heart, FileText, Loader2 } from 'lucide-react';
 import { ACADEMIC_LEVEL_GRADE_MAP, ACADEMIC_LEVELS } from '@/lib/academicGradeMapping';
 
