@@ -69,6 +69,10 @@ const ImpactStories = lazy(() => import("./pages/ImpactStories"));
 const MECalendar = lazy(() => import("./pages/MECalendar"));
 const Setup2FA = lazy(() => import("./pages/Setup2FA"));
 
+// Sprint 6 pages
+const MapView = lazy(() => import("./pages/MapView"));
+const Procurement = lazy(() => import("./pages/Procurement"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
@@ -297,6 +301,18 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
+
+            {/* Sprint 6 routes */}
+            <Route path="/map" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><MapView /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/procurement" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><Procurement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
 
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>

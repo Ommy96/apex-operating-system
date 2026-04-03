@@ -135,6 +135,7 @@ export function usePermissions() {
     approveCashTransfers: superAdmin || permissions.includes('financial.approve.cash_transfers'),
     manageExpenseClaims: superAdmin || permissions.includes('financial.manage.expense_claims'),
     managePettyCash: superAdmin || permissions.includes('financial.manage.petty_cash'),
+    manageProcurement: superAdmin || permissions.includes('financial.manage.procurement'),
 
     // HR
     viewHR: superAdmin || permissions.includes('hr.view.staff'),

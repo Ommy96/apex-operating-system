@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
@@ -568,7 +569,22 @@ export default function Beneficiaries() {
       {/* Results Count is shown in pagination controls */}
 
       {/* Table View */}
-      {viewMode === 'table' && (
+      {viewMode === 'table' && loading && (
+        <WorkspacePanel padding="none" className="overflow-hidden">
+          <div className="p-4 space-y-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 py-2 border-b">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </WorkspacePanel>
+      )}
+      {viewMode === 'table' && !loading && (
         <WorkspacePanel padding="none" className="overflow-hidden">
           <div className="overflow-x-auto">
           <Table className="min-w-[700px]">

@@ -23,7 +23,7 @@ import {
   FileText, ClipboardCheck, Presentation, UserCheck,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
-  BookOpen, BookHeart, CalendarCheck,
+  BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -189,6 +189,7 @@ export function AppSidebar() {
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME },
+        { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],
     },
@@ -198,6 +199,7 @@ export function AppSidebar() {
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
         { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
+        { title: "Procurement", url: "/procurement", icon: ShoppingCart, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },

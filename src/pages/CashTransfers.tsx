@@ -332,11 +332,12 @@ export default function CashTransfers() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Batch</TableHead>
+                     <TableHead>Batch</TableHead>
                     <TableHead>Recipients</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead className="w-16" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
