@@ -66,6 +66,8 @@ const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
 // Sprint 4 pages
 const LessonsLearned = lazy(() => import("./pages/LessonsLearned"));
 const ImpactStories = lazy(() => import("./pages/ImpactStories"));
+const MECalendar = lazy(() => import("./pages/MECalendar"));
+const Setup2FA = lazy(() => import("./pages/Setup2FA"));
 
 const queryClient = new QueryClient();
 
