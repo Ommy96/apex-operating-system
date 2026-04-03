@@ -121,13 +121,21 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
 
 interface MenuGroup {
   label: string;
-  items: Array<{ title: string; url: string; icon: any; show: boolean }>;
+  items: Array<MenuItemType>;
 }
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, user } = useAuth();
   const { can, isSuperAdmin: superAdmin } = usePermissions();
+  const { currentOrganization } = useOrganization();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const isCollapsed = state === "collapsed";
+  const isMobile = useIsMobile();
+
+  const orgFeatures = (currentOrganization as any)?.features_enabled || {};
+  const isFeatureEnabled = (flagName: string) => orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
