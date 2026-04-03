@@ -132,6 +132,7 @@ export function AppSidebar() {
   const { signOut, user } = useAuth();
   const { can, isSuperAdmin: superAdmin } = usePermissions();
   const { currentOrganization } = useOrganization();
+  const { logoUrl, orgName } = useBranding();
   const location = useLocation();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
