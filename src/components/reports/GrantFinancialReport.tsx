@@ -246,7 +246,9 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
           <CardTitle className="text-base">Budget vs Actuals</CardTitle>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={exportToExcel}><FileDown className="h-4 w-4 mr-1" /> Excel</Button>
-            <Button size="sm" variant="outline" onClick={exportToPdf}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
+            <Button size="sm" variant="outline" onClick={exportToPdf} disabled={exportingPdf}>
+              {exportingPdf ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />} PDF
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
