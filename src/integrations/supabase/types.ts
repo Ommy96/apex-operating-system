@@ -846,10 +846,12 @@ export type Database = {
           inactive_reason: string | null
           institution_name: string | null
           last_name: string | null
+          latitude: number | null
           leader_name: string | null
           leader_phone: string | null
           legacy_child_id: string | null
           location: string | null
+          longitude: number | null
           member_count: number | null
           middle_name: string | null
           organization_id: string
@@ -900,10 +902,12 @@ export type Database = {
           inactive_reason?: string | null
           institution_name?: string | null
           last_name?: string | null
+          latitude?: number | null
           leader_name?: string | null
           leader_phone?: string | null
           legacy_child_id?: string | null
           location?: string | null
+          longitude?: number | null
           member_count?: number | null
           middle_name?: string | null
           organization_id: string
@@ -954,10 +958,12 @@ export type Database = {
           inactive_reason?: string | null
           institution_name?: string | null
           last_name?: string | null
+          latitude?: number | null
           leader_name?: string | null
           leader_phone?: string | null
           legacy_child_id?: string | null
           location?: string | null
+          longitude?: number | null
           member_count?: number | null
           middle_name?: string | null
           organization_id?: string
@@ -6741,6 +6747,71 @@ export type Database = {
           },
         ]
       }
+      platform_announcement_reads: {
+        Row: {
+          announcement_id: string | null
+          id: string
+          read_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          announcement_id?: string | null
+          id?: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          announcement_id?: string | null
+          id?: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "platform_announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_announcements: {
+        Row: {
+          body: string
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          published_at: string | null
+          target: string | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          published_at?: string | null
+          target?: string | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          published_at?: string | null
+          target?: string | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -7567,7 +7638,9 @@ export type Database = {
           expected_outputs: string | null
           funding_cycle: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
           organization_id: string
           program_id: string | null
@@ -7594,7 +7667,9 @@ export type Database = {
           expected_outputs?: string | null
           funding_cycle?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name: string
           organization_id: string
           program_id?: string | null
@@ -7621,7 +7696,9 @@ export type Database = {
           expected_outputs?: string | null
           funding_cycle?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string
           organization_id?: string
           program_id?: string | null
@@ -7656,6 +7733,192 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          budget_line_item_id: string | null
+          created_at: string | null
+          currency: string | null
+          delivered_at: string | null
+          delivery_date: string | null
+          delivery_location: string | null
+          id: string
+          issued_at: string | null
+          items: Json | null
+          notes: string | null
+          org_id: string
+          po_number: string | null
+          requisition_id: string | null
+          status: string | null
+          total_amount: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          budget_line_item_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivered_at?: string | null
+          delivery_date?: string | null
+          delivery_location?: string | null
+          id?: string
+          issued_at?: string | null
+          items?: Json | null
+          notes?: string | null
+          org_id: string
+          po_number?: string | null
+          requisition_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          budget_line_item_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivered_at?: string | null
+          delivery_date?: string | null
+          delivery_location?: string | null
+          id?: string
+          issued_at?: string | null
+          items?: Json | null
+          notes?: string | null
+          org_id?: string
+          po_number?: string | null
+          requisition_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_requisition_id_fkey"
+            columns: ["requisition_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requisitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_requisitions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          currency: string | null
+          deleted_at: string | null
+          grant_id: string | null
+          id: string
+          items: Json | null
+          justification: string | null
+          org_id: string
+          project_id: string | null
+          rejection_reason: string | null
+          requested_by: string | null
+          status: string | null
+          title: string
+          total_amount: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          grant_id?: string | null
+          id?: string
+          items?: Json | null
+          justification?: string | null
+          org_id: string
+          project_id?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          title: string
+          total_amount?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          grant_id?: string | null
+          id?: string
+          items?: Json | null
+          justification?: string | null
+          org_id?: string
+          project_id?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          title?: string
+          total_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_requisitions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -8859,6 +9122,69 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vendors: {
+        Row: {
+          category: string | null
+          contact_person: string | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string
+          kra_pin: string | null
+          name: string
+          notes: string | null
+          org_id: string
+          phone: string | null
+          registration_number: string | null
+          status: string | null
+        }
+        Insert: {
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          kra_pin?: string | null
+          name: string
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          registration_number?: string | null
+          status?: string | null
+        }
+        Update: {
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          kra_pin?: string | null
+          name?: string
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          registration_number?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendors_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       volunteer_assignments: {
         Row: {
