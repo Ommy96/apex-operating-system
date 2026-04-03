@@ -69,6 +69,10 @@ const ImpactStories = lazy(() => import("./pages/ImpactStories"));
 const MECalendar = lazy(() => import("./pages/MECalendar"));
 const Setup2FA = lazy(() => import("./pages/Setup2FA"));
 
+// Sprint 6 pages
+const MapView = lazy(() => import("./pages/MapView"));
+const Procurement = lazy(() => import("./pages/Procurement"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
