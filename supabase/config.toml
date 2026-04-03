@@ -32,3 +32,15 @@ verify_jwt = false
 
 [functions.board-portal]
 verify_jwt = false
+
+[functions.fetch-exchange-rates]
+verify_jwt = false
+
+[functions.mpesa-b2c-transfer]
+verify_jwt = false
+
+[functions.mpesa-b2c-callback]
+verify_jwt = false
+
+[functions.grant-deadline-reminders]
+verify_jwt = false

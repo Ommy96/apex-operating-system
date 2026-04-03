@@ -339,6 +339,21 @@ export function GrantManagement() {
             )}
           </TabsContent>
 
+          {/* Financial Report Tab */}
+          <TabsContent value="financial-report" className="mt-4">
+            {grant.start_date && grant.end_date ? (
+              <GrantFinancialReport
+                grantId={grant.id}
+                reportingPeriodStart={grant.start_date}
+                reportingPeriodEnd={grant.end_date}
+              />
+            ) : (
+              <Card><CardContent className="py-12 text-center text-muted-foreground">
+                Set grant start and end dates to generate financial reports.
+              </CardContent></Card>
+            )}
+          </TabsContent>
+
           {/* Reports Tab */}
           <TabsContent value="reports" className="mt-4 space-y-4">
             <div className="flex justify-end">
