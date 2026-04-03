@@ -19,6 +19,7 @@ import { AISettings } from '@/components/settings/AISettings';
 import { AcademicSettings } from '@/components/settings/AcademicSettings';
 import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
 import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDocumentsSettings';
+import { BrandingSettings } from '@/components/settings/BrandingSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
