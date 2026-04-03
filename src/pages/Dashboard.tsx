@@ -9,6 +9,8 @@ import {
   Users, TrendingUp, Target, Clock, Sparkles, Zap, Activity, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
+import { usePermissions } from "@/hooks/usePermissions";
 import { 
   StatCard, WorkspacePanel, WorkspacePanelHeader,
 } from "@/components/workspace";
