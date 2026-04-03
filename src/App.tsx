@@ -302,6 +302,18 @@ const App = () => (
             } />
             <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
 
+            {/* Sprint 6 routes */}
+            <Route path="/map" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><MapView /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/procurement" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><Procurement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
             } />

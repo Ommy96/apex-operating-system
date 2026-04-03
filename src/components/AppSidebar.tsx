@@ -199,6 +199,7 @@ export function AppSidebar() {
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
         { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
+        { title: "Procurement", url: "/procurement", icon: ShoppingCart, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
