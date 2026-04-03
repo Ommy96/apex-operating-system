@@ -5,7 +5,6 @@ import { toast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Shield, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 interface SessionManagerProps {
   children: React.ReactNode;
@@ -17,7 +16,6 @@ const WARNING_SECONDS = 120; // 2-minute warning
 
 export function SessionManager({ children }: SessionManagerProps) {
   const { user, userRole, forceSessionRefresh, signOut } = useAuth();
-  const navigate = useNavigate();
   const [privilegeDialog, setPrivilegeDialog] = useState<{
     isOpen: boolean;
     type: 'escalation' | 'reduction' | null;
@@ -61,8 +59,8 @@ export function SessionManager({ children }: SessionManagerProps) {
       variant: "destructive",
     });
     await signOut();
-    navigate('/auth');
-  }, [signOut, navigate]);
+    window.location.href = '/auth';
+  }, [signOut]);
 
   // Start warning countdown
   const startWarning = useCallback(() => {
