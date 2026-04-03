@@ -30,6 +30,28 @@ export function ComplianceDocumentsSettings() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const handleDownload = async (docType: 'kra' | 'ngo') => {
+    if (!orgId) return;
+    setDownloading(docType);
+    try {
+      const path = docType === 'kra' 
+        ? `${orgId}/kra-exemption.pdf`
+        : `${orgId}/ngo-board-cert.pdf`;
+      const { data, error } = await supabase.storage
+        .from('compliance-docs')
+        .createSignedUrl(path, 3600);
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank');
+    } catch (err) {
+      console.error('Download error:', err);
+      toast.error('Failed to generate download link');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   const handleFileUpload = async (file: File, docType: 'kra' | 'ngo') => {
     if (!orgId) return;
     setUploading(docType);
@@ -44,13 +66,10 @@ export function ComplianceDocumentsSettings() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('compliance-docs')
-        .getPublicUrl(path);
-
+      // Store the path reference (not public URL) - downloads use signed URLs
       const updateField = docType === 'kra' 
-        ? { kra_exemption_cert_url: publicUrl }
-        : { ngo_board_cert_url: publicUrl };
+        ? { kra_exemption_cert_url: path }
+        : { ngo_board_cert_url: path };
 
       const { error: updateError } = await supabase
         .from('organizations')
@@ -114,10 +133,9 @@ export function ComplianceDocumentsSettings() {
                 <span className="text-sm">kra-exemption.pdf</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={org.kra_exemption_cert_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="h-3.5 w-3.5 mr-1" /> Download
-                  </a>
+                <Button variant="outline" size="sm" onClick={() => handleDownload('kra')} disabled={downloading === 'kra'}>
+                  {downloading === 'kra' ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1" />}
+                  {downloading === 'kra' ? 'Generating link...' : 'Download'}
                 </Button>
                 <label>
                   <input
@@ -185,10 +203,9 @@ export function ComplianceDocumentsSettings() {
                 <span className="text-sm">ngo-board-cert.pdf</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={org.ngo_board_cert_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="h-3.5 w-3.5 mr-1" /> Download
-                  </a>
+                <Button variant="outline" size="sm" onClick={() => handleDownload('ngo')} disabled={downloading === 'ngo'}>
+                  {downloading === 'ngo' ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1" />}
+                  {downloading === 'ngo' ? 'Generating link...' : 'Download'}
                 </Button>
                 <label>
                   <input

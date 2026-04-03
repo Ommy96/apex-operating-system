@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Check, X, Receipt, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { CurrencyAmount } from "@/components/finance/CurrencyAmount";
 
 export function ExpenseTracking() {
   const { expenses, createExpense, updateExpense, deleteExpense, programs, budgets } = useFinancials();
@@ -76,15 +77,15 @@ export function ExpenseTracking() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10"><Clock className="h-5 w-5 text-warning" /></div>
-          <div><p className="text-xs text-muted-foreground">Pending Approval</p><p className="text-lg font-bold text-foreground">KES {totalPending.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Pending Approval</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalPending} currency="KES" /></p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10"><CheckCircle className="h-5 w-5 text-success" /></div>
-          <div><p className="text-xs text-muted-foreground">Approved</p><p className="text-lg font-bold text-foreground">KES {totalApproved.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Approved</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalApproved} currency="KES" /></p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><Receipt className="h-5 w-5 text-primary" /></div>
-          <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-foreground">KES {totalAll.toLocaleString()}</p></div>
+          <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalAll} currency="KES" /></p></div>
         </CardContent></Card>
       </div>
 
@@ -176,7 +177,7 @@ export function ExpenseTracking() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{format(new Date(exp.expense_date), "dd MMM yyyy")}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{(exp as any).programs?.name || "—"}</TableCell>
-                  <TableCell className="text-right font-medium">{exp.currency} {Number(exp.amount).toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-medium"><CurrencyAmount amount={Number(exp.amount)} currency={exp.currency} showOriginal={exp.currency !== 'KES'} /></TableCell>
                   <TableCell>{getStatusBadge(exp.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

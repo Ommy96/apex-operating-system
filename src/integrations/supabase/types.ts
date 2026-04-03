@@ -165,6 +165,8 @@ export type Database = {
           organization_id: string | null
           outcome: string | null
           planned_date: string | null
+          planned_end_date: string | null
+          planned_start_date: string | null
           program_id: string
           project_id: string | null
           responsible_staff_id: string | null
@@ -193,6 +195,8 @@ export type Database = {
           organization_id?: string | null
           outcome?: string | null
           planned_date?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
           program_id: string
           project_id?: string | null
           responsible_staff_id?: string | null
@@ -221,6 +225,8 @@ export type Database = {
           organization_id?: string | null
           outcome?: string | null
           planned_date?: string | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
           program_id?: string
           project_id?: string | null
           responsible_staff_id?: string | null
@@ -3427,6 +3433,45 @@ export type Database = {
           },
         ]
       }
+      disaggregation_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          org_id: string
+          values: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          org_id: string
+          values?: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disaggregation_categories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disaggregation_categories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_access_logs: {
         Row: {
           action: string
@@ -4923,6 +4968,93 @@ export type Database = {
           },
         ]
       }
+      impact_stories: {
+        Row: {
+          author_id: string | null
+          beneficiary_id: string | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          org_id: string
+          photo_urls: string[] | null
+          project_id: string | null
+          published_at: string | null
+          status: string | null
+          story_text: string | null
+          tags: string[] | null
+          theme: string | null
+          title: string
+        }
+        Insert: {
+          author_id?: string | null
+          beneficiary_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          org_id: string
+          photo_urls?: string[] | null
+          project_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          story_text?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          title: string
+        }
+        Update: {
+          author_id?: string | null
+          beneficiary_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          org_id?: string
+          photo_urls?: string[] | null
+          project_id?: string | null
+          published_at?: string | null
+          status?: string | null
+          story_text?: string | null
+          tags?: string[] | null
+          theme?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impact_stories_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impact_stories_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impact_stories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impact_stories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impact_stories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicator_categories: {
         Row: {
           color: string | null
@@ -4976,6 +5108,39 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicator_disaggregations: {
+        Row: {
+          disaggregation_category_id: string
+          id: string
+          indicator_id: string
+        }
+        Insert: {
+          disaggregation_category_id: string
+          id?: string
+          indicator_id: string
+        }
+        Update: {
+          disaggregation_category_id?: string
+          id?: string
+          indicator_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_disaggregations_disaggregation_category_id_fkey"
+            columns: ["disaggregation_category_id"]
+            isOneToOne: false
+            referencedRelation: "disaggregation_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_disaggregations_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
             referencedColumns: ["id"]
           },
         ]
@@ -5087,6 +5252,38 @@ export type Database = {
         }
         Relationships: []
       }
+      indicator_validation_rules: {
+        Row: {
+          created_at: string | null
+          id: string
+          indicator_id: string
+          rule_type: string
+          rule_value: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          indicator_id: string
+          rule_type: string
+          rule_value?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          indicator_id?: string
+          rule_type?: string
+          rule_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_validation_rules_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicator_values: {
         Row: {
           actual_value: number
@@ -5095,9 +5292,12 @@ export type Database = {
           created_by: string | null
           dimension_key: string | null
           dimension_value: string | null
+          disaggregation_category_id: string | null
+          disaggregation_value: string | null
           id: string
           indicator_id: string
           is_manual_override: boolean | null
+          notes: string | null
           period_end: string
           period_start: string
           updated_at: string
@@ -5109,9 +5309,12 @@ export type Database = {
           created_by?: string | null
           dimension_key?: string | null
           dimension_value?: string | null
+          disaggregation_category_id?: string | null
+          disaggregation_value?: string | null
           id?: string
           indicator_id: string
           is_manual_override?: boolean | null
+          notes?: string | null
           period_end: string
           period_start: string
           updated_at?: string
@@ -5123,14 +5326,24 @@ export type Database = {
           created_by?: string | null
           dimension_key?: string | null
           dimension_value?: string | null
+          disaggregation_category_id?: string | null
+          disaggregation_value?: string | null
           id?: string
           indicator_id?: string
           is_manual_override?: boolean | null
+          notes?: string | null
           period_end?: string
           period_start?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "indicator_values_disaggregation_category_id_fkey"
+            columns: ["disaggregation_category_id"]
+            isOneToOne: false
+            referencedRelation: "disaggregation_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "indicator_values_indicator_id_fkey"
             columns: ["indicator_id"]
@@ -5432,6 +5645,83 @@ export type Database = {
           },
         ]
       }
+      lessons_learned: {
+        Row: {
+          author_id: string | null
+          category: string | null
+          context: string | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          org_id: string
+          project_id: string | null
+          recommendation: string | null
+          tags: string[] | null
+          title: string
+          what_didnt_work: string | null
+          what_worked: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string | null
+          context?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          org_id: string
+          project_id?: string | null
+          recommendation?: string | null
+          tags?: string[] | null
+          title: string
+          what_didnt_work?: string | null
+          what_worked?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          category?: string | null
+          context?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          org_id?: string
+          project_id?: string | null
+          recommendation?: string | null
+          tags?: string[] | null
+          title?: string
+          what_didnt_work?: string | null
+          what_worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_learned_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "lessons_learned_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_learned_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_learned_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       logframe_indicators: {
         Row: {
           actual_value: number | null
@@ -5695,6 +5985,68 @@ export type Database = {
           {
             foreignKeyName: "managed_documents_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      me_data_schedule: {
+        Row: {
+          assigned_to: string | null
+          collection_frequency: string
+          created_at: string | null
+          id: string
+          indicator_id: string
+          last_collected_at: string | null
+          next_due_date: string
+          org_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          collection_frequency: string
+          created_at?: string | null
+          id?: string
+          indicator_id: string
+          last_collected_at?: string | null
+          next_due_date: string
+          org_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          collection_frequency?: string
+          created_at?: string | null
+          id?: string
+          indicator_id?: string
+          last_collected_at?: string | null
+          next_due_date?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "me_data_schedule_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
@@ -7150,6 +7502,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_team_members: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          project_id: string
+          role_on_project: string | null
+          start_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          project_id: string
+          role_on_project?: string | null
+          start_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          project_id?: string
+          role_on_project?: string | null
+          start_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_team_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }

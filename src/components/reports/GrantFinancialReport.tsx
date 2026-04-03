@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { FileDown, FileText } from "lucide-react";
+import { FileDown, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface GrantFinancialReportProps {
   grantId: string;
@@ -23,8 +25,11 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
   const { currentOrganization } = useOrganization();
   const { formatAmount } = useCurrency();
   const orgId = currentOrganization?.organization_id;
+  const orgName = (currentOrganization as any)?.organization_name || 'Organization';
   const [highlights, setHighlights] = useState("");
   const [varianceExplanation, setVarianceExplanation] = useState("");
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   const grant = useQuery({
     queryKey: ["grant-detail-report", grantId],
@@ -121,8 +126,79 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
     return 'text-emerald-600';
   };
 
-  const exportToPdf = () => {
-    toast.info("PDF export coming in next sprint");
+  const exportToPdf = async () => {
+    if (!reportRef.current) return;
+    setExportingPdf(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Header
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(orgName, 10, 10);
+      pdf.setFontSize(14);
+      pdf.setTextColor(0);
+      pdf.text(`${grantData?.grant_name || 'Grant'} — Financial Report`, 10, 18);
+      pdf.setFontSize(9);
+      pdf.setTextColor(100);
+      pdf.text(`Period: ${new Date(reportingPeriodStart).toLocaleDateString('en-KE')} – ${new Date(reportingPeriodEnd).toLocaleDateString('en-KE')}`, 10, 24);
+      pdf.text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, 10, 29);
+
+      let yPos = 35;
+      let pageNum = 1;
+
+      // Add content pages
+      if (imgHeight <= pdfHeight - 45) {
+        pdf.addImage(imgData, 'PNG', 10, yPos, imgWidth, imgHeight);
+      } else {
+        // Multi-page
+        let remaining = imgHeight;
+        let srcY = 0;
+        const pageContentH = pdfHeight - 45;
+        while (remaining > 0) {
+          if (pageNum > 1) {
+            pdf.addPage();
+            yPos = 15;
+          }
+          const sliceH = Math.min(remaining, pageContentH);
+          const sliceRatio = sliceH / imgHeight;
+          const srcH = canvas.height * sliceRatio;
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = srcH;
+          const ctx = tempCanvas.getContext('2d')!;
+          ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+          pdf.addImage(tempCanvas.toDataURL('image/png'), 'PNG', 10, yPos, imgWidth, sliceH);
+          srcY += srcH;
+          remaining -= sliceH;
+          // Footer
+          pdf.setFontSize(7);
+          pdf.setTextColor(150);
+          pdf.text('CONFIDENTIAL', pdfWidth / 2, pdfHeight - 5, { align: 'center' });
+          pdf.text(`Page ${pageNum}`, pdfWidth - 15, pdfHeight - 5);
+          pageNum++;
+        }
+      }
+      // Footer on last/only page
+      pdf.setFontSize(7);
+      pdf.setTextColor(150);
+      pdf.text('CONFIDENTIAL', pdfWidth / 2, pdfHeight - 5, { align: 'center' });
+      pdf.text(`Page ${pageNum}`, pdfWidth - 15, pdfHeight - 5);
+
+      pdf.save(`financial-report-${grantData?.grant_name || 'grant'}.pdf`);
+      toast.success("PDF exported successfully");
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error("Failed to export PDF");
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   const exportToExcel = () => {
@@ -151,7 +227,7 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
   const totalPctUsed = bd.totals.budget > 0 ? Math.round((bd.totals.cumulative / bd.totals.budget) * 1000) / 10 : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={reportRef}>
       {/* Header */}
       <Card>
         <CardContent className="py-4 space-y-1">
@@ -170,7 +246,9 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
           <CardTitle className="text-base">Budget vs Actuals</CardTitle>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={exportToExcel}><FileDown className="h-4 w-4 mr-1" /> Excel</Button>
-            <Button size="sm" variant="outline" onClick={exportToPdf}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
+            <Button size="sm" variant="outline" onClick={exportToPdf} disabled={exportingPdf}>
+              {exportingPdf ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />} PDF
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">

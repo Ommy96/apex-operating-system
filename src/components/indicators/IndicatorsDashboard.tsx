@@ -270,7 +270,7 @@ export function IndicatorsDashboard() {
             <TrafficLightSummaryBar
               indicators={filteredIndicators.map((ind) => {
                 const computed = computedValues.get(ind.id);
-                return { actual: computed?.current.value ?? null, target: null };
+                return { actual: computed?.current.value ?? null, target: (ind as any).currentTarget ?? null };
               })}
             />
           </CardContent>

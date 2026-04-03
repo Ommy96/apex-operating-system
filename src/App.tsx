@@ -63,6 +63,10 @@ const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
 const CashTransfers = lazy(() => import("./pages/CashTransfers"));
 const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
 
+// Sprint 4 pages
+const LessonsLearned = lazy(() => import("./pages/LessonsLearned"));
+const ImpactStories = lazy(() => import("./pages/ImpactStories"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
@@ -271,6 +275,18 @@ const App = () => (
             <Route path="/expense-claims" element={
               <ProtectedRoute>
                 <DashboardLayout><LazyRoute><ExpenseClaims /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Sprint 4 routes */}
+            <Route path="/lessons-learned" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><LessonsLearned /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/impact-stories" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><ImpactStories /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
 

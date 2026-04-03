@@ -23,6 +23,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { BurnRateGauge } from "@/components/finance/BurnRateGauge";
 import { GrantFinancialReport } from "@/components/reports/GrantFinancialReport";
+import { GrantCalendar } from "@/components/financial/GrantCalendar";
 
 const GRANT_STATUSES = ["pipeline", "application", "submitted", "under_review", "approved", "active", "completed", "rejected", "expired"] as const;
 const REPORT_TYPES = ["narrative", "financial", "impact", "compliance", "m_and_e", "annual"] as const;
@@ -234,6 +235,7 @@ export function GrantManagement() {
               <TabsTrigger value="budget" className="text-xs rounded-lg">Budget</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs rounded-lg">Reports</TabsTrigger>
               <TabsTrigger value="financial-report" className="text-xs rounded-lg">Financial Report</TabsTrigger>
+              <TabsTrigger value="calendar" className="text-xs rounded-lg">Calendar</TabsTrigger>
               <TabsTrigger value="compliance" className="text-xs rounded-lg">Compliance</TabsTrigger>
               <TabsTrigger value="documents" className="text-xs rounded-lg">Documents</TabsTrigger>
             </TabsList>
@@ -352,6 +354,11 @@ export function GrantManagement() {
                 Set grant start and end dates to generate financial reports.
               </CardContent></Card>
             )}
+          </TabsContent>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="mt-4">
+            <GrantCalendar />
           </TabsContent>
 
           {/* Reports Tab */}

@@ -23,6 +23,7 @@ import {
   FileText, ClipboardCheck, Presentation, UserCheck,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
+  BookOpen, BookHeart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -217,6 +218,8 @@ export function AppSidebar() {
         { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: can.viewCompliance },
         { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
         { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Learning Log", url: "/lessons-learned", icon: BookOpen, show: can.viewPrograms },
+        { title: "Impact Stories", url: "/impact-stories", icon: BookHeart, show: can.viewPrograms },
       ],
     },
     {
