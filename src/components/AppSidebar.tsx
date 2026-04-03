@@ -158,6 +158,14 @@ export function AppSidebar() {
       ],
     },
     {
+      label: "Accountability",
+      items: [
+        { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
+        { title: "Safeguarding", url: "/safeguarding", icon: ShieldCheck, show: can.viewSafeguarding },
+        { title: "Whistleblower", url: "/whistleblower", icon: AlertTriangle, show: superAdmin || can.viewAccountability },
+      ],
+    },
+    {
       label: "Governance",
       items: [
         { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
