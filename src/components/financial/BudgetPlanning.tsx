@@ -108,7 +108,7 @@ export function BudgetPlanning() {
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Line Items Total</p>
-            <p className="text-lg font-bold text-foreground">{budget.currency} {totalLineItems.toLocaleString()}</p>
+            <p className="text-lg font-bold text-foreground"><CurrencyAmount amount={totalLineItems} currency={budget.currency} /></p>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Total Spent</p>
