@@ -23,6 +23,7 @@ export interface SettingsSection {
 const settingsSections: SettingsSection[] = [
   // Organization
   { id: 'org-profile', label: 'Organization Profile', icon: Building2, description: 'Name, logo, contact info', category: 'Organization' },
+  { id: 'org-branding', label: 'Branding', icon: Palette, description: 'Logo, accent colour, preview', category: 'Organization' },
   { id: 'org-branches', label: 'Branches & Regions', icon: GitBranch, description: 'Multi-branch configuration', category: 'Organization' },
   // User & Access
   { id: 'user-roles', label: 'Role Management', icon: Shield, description: 'Roles & permission matrix', category: 'User & Access' },
