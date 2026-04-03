@@ -360,6 +360,34 @@ export function GrantManagement() {
             )}
           </TabsContent>
 
+          {/* Progress Report Tab */}
+          <TabsContent value="progress-report" className="mt-4 space-y-4">
+            <Card><CardContent className="p-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <Label className="text-xs">Period Start</Label>
+                  <Input type="date" value={progressReportStart} onChange={e => setProgressReportStart(e.target.value)} className="max-w-[160px]" />
+                </div>
+                <div>
+                  <Label className="text-xs">Period End</Label>
+                  <Input type="date" value={progressReportEnd} onChange={e => setProgressReportEnd(e.target.value)} className="max-w-[160px]" />
+                </div>
+              </div>
+            </CardContent></Card>
+            {progressReportStart && progressReportEnd ? (
+              <DonorProgressReport
+                projectId={linkedPrograms[0]?.program_id || ""}
+                grantId={grant.id}
+                reportingPeriodStart={progressReportStart}
+                reportingPeriodEnd={progressReportEnd}
+              />
+            ) : (
+              <Card><CardContent className="py-12 text-center text-muted-foreground">
+                Select a reporting period above. The grant must be linked to a project.
+              </CardContent></Card>
+            )}
+          </TabsContent>
+
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="mt-4">
             <GrantCalendar />
