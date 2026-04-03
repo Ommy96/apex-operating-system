@@ -46,6 +46,8 @@ export function GrantManagement() {
   const [addComplianceOpen, setAddComplianceOpen] = useState(false);
   const [addReportOpen, setAddReportOpen] = useState(false);
   const [uploadDocOpen, setUploadDocOpen] = useState(false);
+  const [progressReportStart, setProgressReportStart] = useState("");
+  const [progressReportEnd, setProgressReportEnd] = useState("");
 
   const grantPrograms = useGrantPrograms(detailGrantId);
   const compliance = useGrantCompliance(detailGrantId);
