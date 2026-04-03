@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, ChevronDown, ChevronRight, Target, GitBranch } from "lucide-react";
 import { useME } from "@/hooks/useME";
+import { IndicatorTrafficLight } from "@/components/indicators/IndicatorTrafficLight";
 
 const LEVEL_COLORS: Record<string, string> = {
   goal: "bg-primary/10 text-primary border-primary/20",
