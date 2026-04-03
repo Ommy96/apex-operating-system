@@ -229,10 +229,11 @@ export function GrantManagement() {
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-            <TabsList className="inline-flex w-max gap-1 bg-muted/50 p-1 rounded-xl">
+             <TabsList className="inline-flex w-max gap-1 bg-muted/50 p-1 rounded-xl">
               <TabsTrigger value="overview" className="text-xs rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="budget" className="text-xs rounded-lg">Budget</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs rounded-lg">Reports</TabsTrigger>
+              <TabsTrigger value="financial-report" className="text-xs rounded-lg">Financial Report</TabsTrigger>
               <TabsTrigger value="compliance" className="text-xs rounded-lg">Compliance</TabsTrigger>
               <TabsTrigger value="documents" className="text-xs rounded-lg">Documents</TabsTrigger>
             </TabsList>
