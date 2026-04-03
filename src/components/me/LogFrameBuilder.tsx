@@ -53,14 +53,25 @@ export function LogFrameBuilder() {
     return roots.map(r => ({ ...r, children: getChildren(r.id) }));
   };
 
-  const renderLevel = (level: any, depth = 0) => (
-    <div key={level.id} className={`ml-${Math.min(depth * 4, 16)} border-l-2 border-muted pl-4 py-2`} style={{ marginLeft: depth * 16 }}>
+  const renderLevel = (level: any, depth = 0) => {
+    // Get traffic light data from logframe_indicators
+    const indicators = level.logframe_indicators || [];
+    return (
+    <div key={level.id} className={`border-l-2 border-muted pl-4 py-2`} style={{ marginLeft: depth * 16 }}>
       <div className="flex items-center gap-2">
       <Badge variant="outline" className={LEVEL_COLORS[level.level_type]}>
           {level.level_type}
         </Badge>
         <span className="text-sm font-medium text-foreground">{level.title}</span>
-        {level.level_type === 'output' && (
+        {level.level_type === 'output' && indicators.map((li: any) => (
+          <IndicatorTrafficLight
+            key={li.id}
+            actual={li.indicator?.latest_value ?? null}
+            target={li.indicator?.current_target ?? null}
+            size="sm"
+          />
+        ))}
+        {level.level_type === 'output' && indicators.length === 0 && (
           <IndicatorTrafficLight actual={null} target={null} size="sm" />
         )}
       </div>
