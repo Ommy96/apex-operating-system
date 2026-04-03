@@ -59,6 +59,10 @@ const WhistleblowerManagement = lazy(() => import("./pages/WhistleblowerManageme
 const SafeguardingDashboard = lazy(() => import("./pages/SafeguardingDashboard"));
 const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
 
+// Sprint 3 pages
+const CashTransfers = lazy(() => import("./pages/CashTransfers"));
+const ExpenseClaims = lazy(() => import("./pages/ExpenseClaims"));
+
 const queryClient = new QueryClient();
 
 function PageLoader() {
@@ -255,6 +259,18 @@ const App = () => (
             <Route path="/deduplication" element={
               <ProtectedRoute>
                 <LazyRoute><DeduplicationReview /></LazyRoute>
+              </ProtectedRoute>
+            } />
+
+            {/* Sprint 3: Financial routes */}
+            <Route path="/cash-transfers" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><CashTransfers /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/expense-claims" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><ExpenseClaims /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
 

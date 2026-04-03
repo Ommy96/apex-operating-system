@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, Trash2, Eye, Landmark, ArrowLeft, CheckSquare, Link2,
-  FileText, Upload, Calendar, AlertTriangle, BarChart3, Clock
+  FileText, Upload, Calendar, AlertTriangle, BarChart3, Clock, DollarSign
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +21,8 @@ import { format, differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { BurnRateGauge } from "@/components/finance/BurnRateGauge";
+import { GrantFinancialReport } from "@/components/reports/GrantFinancialReport";
 
 const GRANT_STATUSES = ["pipeline", "application", "submitted", "under_review", "approved", "active", "completed", "rejected", "expired"] as const;
 const REPORT_TYPES = ["narrative", "financial", "impact", "compliance", "m_and_e", "annual"] as const;
@@ -212,13 +214,26 @@ export function GrantManagement() {
           <Progress value={Math.min(receivedPct, 100)} className="h-3" />
         </CardContent></Card>
 
+        {/* Burn Rate */}
+        {grant.start_date && grant.end_date && (
+          <BurnRateGauge
+            grantId={grant.id}
+            grantName={grant.grant_name}
+            totalBudget={Number(grant.grant_amount)}
+            currency={grant.currency}
+            startDate={grant.start_date}
+            endDate={grant.end_date}
+          />
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-            <TabsList className="inline-flex w-max gap-1 bg-muted/50 p-1 rounded-xl">
+             <TabsList className="inline-flex w-max gap-1 bg-muted/50 p-1 rounded-xl">
               <TabsTrigger value="overview" className="text-xs rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="budget" className="text-xs rounded-lg">Budget</TabsTrigger>
               <TabsTrigger value="reports" className="text-xs rounded-lg">Reports</TabsTrigger>
+              <TabsTrigger value="financial-report" className="text-xs rounded-lg">Financial Report</TabsTrigger>
               <TabsTrigger value="compliance" className="text-xs rounded-lg">Compliance</TabsTrigger>
               <TabsTrigger value="documents" className="text-xs rounded-lg">Documents</TabsTrigger>
             </TabsList>
@@ -320,6 +335,21 @@ export function GrantManagement() {
             ) : (
               <Card><CardContent className="py-12 text-center text-muted-foreground">
                 Link programs to this grant to track budget utilization.
+              </CardContent></Card>
+            )}
+          </TabsContent>
+
+          {/* Financial Report Tab */}
+          <TabsContent value="financial-report" className="mt-4">
+            {grant.start_date && grant.end_date ? (
+              <GrantFinancialReport
+                grantId={grant.id}
+                reportingPeriodStart={grant.start_date}
+                reportingPeriodEnd={grant.end_date}
+              />
+            ) : (
+              <Card><CardContent className="py-12 text-center text-muted-foreground">
+                Set grant start and end dates to generate financial reports.
               </CardContent></Card>
             )}
           </TabsContent>

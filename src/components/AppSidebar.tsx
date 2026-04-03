@@ -22,7 +22,7 @@ import {
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation, UserCheck,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
-  MessageSquare, ShieldCheck, AlertTriangle,
+  MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -192,6 +192,8 @@ export function AppSidebar() {
       label: "Operations",
       items: [
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
+        { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
+        { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
