@@ -136,10 +136,6 @@ export function AppSidebar() {
 
   const orgFeatures = (currentOrganization as any)?.features_enabled || {};
   const isFeatureEnabled = (flagName: string) => orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const isCollapsed = state === "collapsed";
-  const isMobile = useIsMobile();
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
