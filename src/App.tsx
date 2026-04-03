@@ -262,6 +262,18 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            {/* Sprint 3: Financial routes */}
+            <Route path="/cash-transfers" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><CashTransfers /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/expense-claims" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><ExpenseClaims /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
             } />

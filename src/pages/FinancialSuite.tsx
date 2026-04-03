@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target } from "lucide-react";
+import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target, Banknote } from "lucide-react";
 import { BudgetPlanning } from "@/components/financial/BudgetPlanning";
 import { ExpenseTracking } from "@/components/financial/ExpenseTracking";
 import { GrantManagement } from "@/components/financial/GrantManagement";
 import { CostAnalytics } from "@/components/financial/CostAnalytics";
 import { DonorSupport } from "@/components/financial/DonorSupport";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
+import { PettyCashTab } from "@/components/finance/PettyCashTab";
 
 export default function FinancialSuite() {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Financial Suite</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -44,6 +44,10 @@ export default function FinancialSuite() {
               <Landmark className="h-4 w-4" />
               <span className="hidden sm:inline">Grants</span>
             </TabsTrigger>
+            <TabsTrigger value="petty-cash" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Banknote className="h-4 w-4" />
+              <span className="hidden sm:inline">Petty Cash</span>
+            </TabsTrigger>
             <TabsTrigger value="cost-analytics" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Cost Analytics</span>
@@ -66,6 +70,9 @@ export default function FinancialSuite() {
         </TabsContent>
         <TabsContent value="grants" className="mt-6">
           <GrantManagement />
+        </TabsContent>
+        <TabsContent value="petty-cash" className="mt-6">
+          <PettyCashTab />
         </TabsContent>
         <TabsContent value="cost-analytics" className="mt-6">
           <CostAnalytics />
