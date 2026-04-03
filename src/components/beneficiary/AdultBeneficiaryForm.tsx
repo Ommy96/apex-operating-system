@@ -297,6 +297,14 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
                       />
                     </div>
 
+                    {!beneficiary && (
+                      <DuplicateWarning
+                        firstName={watchedFirstName}
+                        lastName={watchedLastName}
+                        dateOfBirth={watchedDob}
+                      />
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FormField
                         control={form.control}

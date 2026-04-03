@@ -417,6 +417,14 @@ export function StudentBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Stu
                       />
                     </div>
 
+                    {!beneficiary && (
+                      <DuplicateWarning
+                        firstName={watchedFirstName}
+                        lastName={watchedLastName}
+                        dateOfBirth={watchedDob}
+                      />
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}

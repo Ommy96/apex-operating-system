@@ -99,6 +99,9 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Compliance Alerts for admins */}
+      {can.manageSettings && <ComplianceAlertBanner />}
+
       {/* Section 1 — Global Search */}
       <GlobalSearchBar />
 
