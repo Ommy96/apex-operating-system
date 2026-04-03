@@ -1,4 +1,4 @@
-declare module 'react-map-gl' {
+declare module 'react-map-gl/mapbox' {
   import { ComponentType, ReactNode } from 'react';
   
   interface MapProps {

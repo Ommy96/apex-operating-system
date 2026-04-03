@@ -78,7 +78,7 @@ function MapboxRenderer({ token, beneficiaries }: { token: string; beneficiaries
   const [MapModule, setMapModule] = useState<any>(null);
 
   useMemo(() => {
-    import('react-map-gl').then(mod => setMapModule(mod));
+    import('react-map-gl/mapbox').then(mod => setMapModule(mod));
   }, []);
 
   if (!MapModule) return <div className="h-[calc(100vh-200px)] bg-muted animate-pulse rounded-lg" />;
