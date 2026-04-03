@@ -356,6 +356,11 @@ export function GrantManagement() {
             )}
           </TabsContent>
 
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="mt-4">
+            <GrantCalendar />
+          </TabsContent>
+
           {/* Reports Tab */}
           <TabsContent value="reports" className="mt-4 space-y-4">
             <div className="flex justify-end">
