@@ -214,6 +214,18 @@ export function GrantManagement() {
           <Progress value={Math.min(receivedPct, 100)} className="h-3" />
         </CardContent></Card>
 
+        {/* Burn Rate */}
+        {grant.start_date && grant.end_date && (
+          <BurnRateGauge
+            grantId={grant.id}
+            grantName={grant.grant_name}
+            totalBudget={Number(grant.grant_amount)}
+            currency={grant.currency}
+            startDate={grant.start_date}
+            endDate={grant.end_date}
+          />
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
