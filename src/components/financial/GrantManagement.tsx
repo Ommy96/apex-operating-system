@@ -23,6 +23,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { BurnRateGauge } from "@/components/finance/BurnRateGauge";
 import { GrantFinancialReport } from "@/components/reports/GrantFinancialReport";
+import { DonorProgressReport } from "@/components/reports/DonorProgressReport";
 import { GrantCalendar } from "@/components/financial/GrantCalendar";
 
 const GRANT_STATUSES = ["pipeline", "application", "submitted", "under_review", "approved", "active", "completed", "rejected", "expired"] as const;
