@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
-  TrendingUp, BarChart3, Eye, Loader2
+  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X
 } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { GanttChart } from "@/components/projects/GanttChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { format } from "date-fns";
@@ -43,6 +52,135 @@ function getStatusBadgeClass(status: string | null) {
     cancelled: "bg-destructive/10 text-destructive border-destructive/20",
   };
   return styles[status || "planning"] || styles.planning;
+}
+
+function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: string }) {
+  const queryClient = useQueryClient();
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignForm, setAssignForm] = useState({ user_id: "", role_on_project: "team_member", start_date: "" });
+
+  const { data: teamMembers = [], isLoading } = useQuery({
+    queryKey: ["project-team", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("project_team_members").select("*, profiles(full_name, email, avatar_url)").eq("project_id", projectId).is("end_date", null);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: orgMembers = [] } = useQuery({
+    queryKey: ["org-members-for-team", orgId],
+    queryFn: async () => {
+      const { data } = await supabase.from("organization_members").select("user_id, profiles(full_name, email)").eq("organization_id", orgId!);
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("project_team_members").insert({ project_id: projectId, user_id: assignForm.user_id, role_on_project: assignForm.role_on_project, start_date: assignForm.start_date || null });
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Staff assigned"); setAssignOpen(false); setAssignForm({ user_id: "", role_on_project: "team_member", start_date: "" }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("project_team_members").update({ end_date: new Date().toISOString().split("T")[0] }).eq("id", id); if (error) throw error; },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Removed"); },
+  });
+
+  const getInitials = (name: string) => name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+  const roleLabels: Record<string, string> = { lead: "Lead", coordinator: "Coordinator", field_officer: "Field Officer", me_officer: "M&E Officer", finance: "Finance", team_member: "Team Member" };
+  const sorted = [...teamMembers].sort((a: any, b: any) => (a.role_on_project === "lead" ? -1 : b.role_on_project === "lead" ? 1 : 0));
+
+  return (
+    <Card><CardContent className="p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-foreground">Project Team</h3>
+        <Sheet open={assignOpen} onOpenChange={setAssignOpen}>
+          <SheetTrigger asChild><Button size="sm" variant="outline"><UserPlus className="h-4 w-4 mr-1" /> Assign Staff</Button></SheetTrigger>
+          <SheetContent>
+            <SheetHeader><SheetTitle>Assign Staff</SheetTitle></SheetHeader>
+            <div className="space-y-4 mt-4">
+              <div><Label>Staff *</Label>
+                <Select value={assignForm.user_id} onValueChange={v => setAssignForm(p => ({ ...p, user_id: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
+                  <SelectContent>{orgMembers.map((m: any) => <SelectItem key={m.user_id} value={m.user_id}>{(m.profiles as any)?.full_name || (m.profiles as any)?.email}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Role</Label>
+                <Select value={assignForm.role_on_project} onValueChange={v => setAssignForm(p => ({ ...p, role_on_project: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{Object.entries(roleLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Start Date</Label><Input type="date" value={assignForm.start_date} onChange={e => setAssignForm(p => ({ ...p, start_date: e.target.value }))} /></div>
+              <Button onClick={() => assignMutation.mutate()} disabled={!assignForm.user_id || assignMutation.isPending} className="w-full">Assign</Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+      {isLoading ? <div className="text-center py-6 text-muted-foreground">Loading...</div> : sorted.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">No team members assigned yet.</div>
+      ) : (
+        <div className="space-y-2">{sorted.map((m: any) => (
+          <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
+            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials((m.profiles as any)?.full_name || "")}</AvatarFallback></Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{(m.profiles as any)?.full_name}</p>
+              <div className="flex items-center gap-2">
+                {m.role_on_project === "lead" && <Star className="h-3 w-3 text-amber-500" />}
+                <Badge variant="outline" className="text-[10px]">{roleLabels[m.role_on_project] || m.role_on_project}</Badge>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeMutation.mutate(m.id)}><X className="h-3 w-3" /></Button>
+          </div>
+        ))}</div>
+      )}
+    </CardContent></Card>
+  );
+}
+
+function ProjectWorkplanTab({ projectId }: { projectId: string }) {
+  const ganttRef = useRef<HTMLDivElement>(null);
+  const [rangeMonths, setRangeMonths] = useState(3);
+  const { data: activities = [], isLoading } = useQuery({
+    queryKey: ["project-gantt-activities", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("activities").select("id, title, name, planned_start_date, planned_end_date, status, responsible_staff_id").eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+  const hasPlannedDates = activities.some((a: any) => a.planned_start_date && a.planned_end_date);
+  const exportPdf = async () => {
+    if (!ganttRef.current) return;
+    try {
+      const canvas = await html2canvas(ganttRef.current, { scale: 2 });
+      const pdf = new jsPDF("l", "mm", "a4");
+      const w = pdf.internal.pageSize.getWidth() - 20;
+      const h = (canvas.height * w) / canvas.width;
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, w, Math.min(h, pdf.internal.pageSize.getHeight() - 20));
+      pdf.save("workplan.pdf");
+      toast.success("Workplan exported");
+    } catch { toast.error("Export failed"); }
+  };
+  if (isLoading) return <div className="text-center py-6 text-muted-foreground">Loading...</div>;
+  return (
+    <Card><CardContent className="p-4 space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex gap-1">{[1, 3, 6, 0].map(m => (
+          <Button key={m} variant={rangeMonths === m ? "default" : "outline"} size="sm" className="text-xs" onClick={() => setRangeMonths(m)}>{m === 0 ? "Full" : `${m}m`}</Button>
+        ))}</div>
+        {hasPlannedDates && <Button variant="outline" size="sm" onClick={exportPdf} className="text-xs">Export PDF</Button>}
+      </div>
+      <div ref={ganttRef}><GanttChart activities={activities} rangeMonths={rangeMonths || undefined} /></div>
+    </CardContent></Card>
+  );
 }
 
 const ProjectDashboard = () => {
@@ -354,6 +492,8 @@ const ProjectDashboard = () => {
             <TabsTrigger value="beneficiaries" className="text-xs sm:text-sm">Beneficiaries</TabsTrigger>
             <TabsTrigger value="funding" className="text-xs sm:text-sm">Funding</TabsTrigger>
             <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
+            <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
+            <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
           </TabsList>
         </div>
 
@@ -709,6 +849,16 @@ const ProjectDashboard = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Team Tab */}
+        <TabsContent value="team" className="mt-4">
+          <ProjectTeamTab projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        {/* Workplan Tab */}
+        <TabsContent value="workplan" className="mt-4">
+          <ProjectWorkplanTab projectId={projectId!} />
         </TabsContent>
       </Tabs>
     </div>
