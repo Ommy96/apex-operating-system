@@ -27,6 +27,7 @@ import { useIndicators, useIndicatorCategories, useIndicatorTargets, Indicator, 
 import { useOrganization } from '@/hooks/useOrganization';
 import { computeAllIndicators } from '@/lib/indicatorComputation';
 import { IndicatorCard } from './IndicatorCard';
+import { IndicatorTrafficLight, TrafficLightSummaryBar } from './IndicatorTrafficLight';
 import { IndicatorForm } from './IndicatorForm';
 import { IndicatorTargetForm } from './IndicatorTargetForm';
 import { TemplateLibrary } from './TemplateLibrary';
