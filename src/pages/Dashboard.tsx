@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   StatCard, WorkspacePanel, WorkspacePanelHeader,
 } from "@/components/workspace";
@@ -119,23 +121,35 @@ const Dashboard = () => {
 
       {/* Section 3 — Key Metrics Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Beneficiaries"
-          value={statsLoading ? "..." : totalBeneficiaries.toString()}
-          description="Active individuals served"
-          icon={Users}
-          variant="primary"
-        />
-        {programStats.slice(0, 3).map((ps, idx) => (
-          <StatCard
-            key={ps.programId}
-            title={ps.programName}
-            value={statsLoading ? "..." : ps.count.toString()}
-            description="Enrolled beneficiaries"
-            icon={Target}
-            variant={variants[(idx + 1) % variants.length]}
-          />
-        ))}
+        {statsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}><CardContent className="p-4 space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-28" />
+            </CardContent></Card>
+          ))
+        ) : (
+          <>
+            <StatCard
+              title="Total Beneficiaries"
+              value={totalBeneficiaries.toString()}
+              description="Active individuals served"
+              icon={Users}
+              variant="primary"
+            />
+            {programStats.slice(0, 3).map((ps, idx) => (
+              <StatCard
+                key={ps.programId}
+                title={ps.programName}
+                value={ps.count.toString()}
+                description="Enrolled beneficiaries"
+                icon={Target}
+                variant={variants[(idx + 1) % variants.length]}
+              />
+            ))}
+          </>
+        )}
       </div>
 
       {programStats.length > 3 && (

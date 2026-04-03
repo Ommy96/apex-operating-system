@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen, MoreHorizontal } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
@@ -364,12 +365,18 @@ const ProgramsManagement = () => {
 
       {/* Programs Table */}
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-            <p className="text-sm text-muted-foreground">Loading programs...</p>
+        <Card className="overflow-hidden">
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))}
           </div>
-        </div>
+        </Card>
       ) : filteredPrograms.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-16 text-center">

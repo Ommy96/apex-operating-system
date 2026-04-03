@@ -6,7 +6,7 @@ import {
   TrendingUp, CreditCard, Plug, Brain, Search, ChevronRight,
   Shield, Lock, Bell, Globe, GitBranch, Target, ClipboardList,
   DollarSign, Settings, FileCheck, UserCheck, LayoutDashboard,
-  Key, Webhook, GraduationCap, Heart,
+  Key, Webhook, GraduationCap, Heart, Palette,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,6 +23,7 @@ export interface SettingsSection {
 const settingsSections: SettingsSection[] = [
   // Organization
   { id: 'org-profile', label: 'Organization Profile', icon: Building2, description: 'Name, logo, contact info', category: 'Organization' },
+  { id: 'org-branding', label: 'Branding', icon: Palette, description: 'Logo, accent colour, preview', category: 'Organization' },
   { id: 'org-branches', label: 'Branches & Regions', icon: GitBranch, description: 'Multi-branch configuration', category: 'Organization' },
   // User & Access
   { id: 'user-roles', label: 'Role Management', icon: Shield, description: 'Roles & permission matrix', category: 'User & Access' },

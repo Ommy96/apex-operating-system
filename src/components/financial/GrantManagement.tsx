@@ -46,6 +46,8 @@ export function GrantManagement() {
   const [addComplianceOpen, setAddComplianceOpen] = useState(false);
   const [addReportOpen, setAddReportOpen] = useState(false);
   const [uploadDocOpen, setUploadDocOpen] = useState(false);
+  const [progressReportStart, setProgressReportStart] = useState("");
+  const [progressReportEnd, setProgressReportEnd] = useState("");
 
   const grantPrograms = useGrantPrograms(detailGrantId);
   const compliance = useGrantCompliance(detailGrantId);
@@ -354,6 +356,34 @@ export function GrantManagement() {
             ) : (
               <Card><CardContent className="py-12 text-center text-muted-foreground">
                 Set grant start and end dates to generate financial reports.
+              </CardContent></Card>
+            )}
+          </TabsContent>
+
+          {/* Progress Report Tab */}
+          <TabsContent value="progress-report" className="mt-4 space-y-4">
+            <Card><CardContent className="p-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <Label className="text-xs">Period Start</Label>
+                  <Input type="date" value={progressReportStart} onChange={e => setProgressReportStart(e.target.value)} className="max-w-[160px]" />
+                </div>
+                <div>
+                  <Label className="text-xs">Period End</Label>
+                  <Input type="date" value={progressReportEnd} onChange={e => setProgressReportEnd(e.target.value)} className="max-w-[160px]" />
+                </div>
+              </div>
+            </CardContent></Card>
+            {progressReportStart && progressReportEnd ? (
+              <DonorProgressReport
+                projectId={linkedPrograms[0]?.program_id || ""}
+                grantId={grant.id}
+                reportingPeriodStart={progressReportStart}
+                reportingPeriodEnd={progressReportEnd}
+              />
+            ) : (
+              <Card><CardContent className="py-12 text-center text-muted-foreground">
+                Select a reporting period above. The grant must be linked to a project.
               </CardContent></Card>
             )}
           </TabsContent>

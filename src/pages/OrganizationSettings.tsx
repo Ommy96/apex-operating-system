@@ -19,6 +19,7 @@ import { AISettings } from '@/components/settings/AISettings';
 import { AcademicSettings } from '@/components/settings/AcademicSettings';
 import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
 import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDocumentsSettings';
+import { BrandingSettings } from '@/components/settings/BrandingSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ export default function OrganizationSettings() {
   const renderContent = () => {
     switch (activeSection) {
       case 'org-profile': return <OrganizationProfileSettings />;
+      case 'org-branding': return <BrandingSettings />;
       case 'org-branches': return <BranchSettings />;
       case 'user-roles': return <UserAccessSettings section="user-roles" />;
       case 'user-settings': return <UserAccessSettings section="user-settings" />;
