@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, Trash2, Eye, Landmark, ArrowLeft, CheckSquare, Link2,
-  FileText, Upload, Calendar, AlertTriangle, BarChart3, Clock
+  FileText, Upload, Calendar, AlertTriangle, BarChart3, Clock, DollarSign
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +21,8 @@ import { format, differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { BurnRateGauge } from "@/components/finance/BurnRateGauge";
+import { GrantFinancialReport } from "@/components/reports/GrantFinancialReport";
 
 const GRANT_STATUSES = ["pipeline", "application", "submitted", "under_review", "approved", "active", "completed", "rejected", "expired"] as const;
 const REPORT_TYPES = ["narrative", "financial", "impact", "compliance", "m_and_e", "annual"] as const;
