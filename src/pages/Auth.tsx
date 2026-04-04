@@ -274,15 +274,15 @@ export default function Auth() {
   // Invitation-based signup view
   if (inviteToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
         {/* Decorative background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
         </div>
 
-        <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
-          <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500" />
+        <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
+            <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
           
           <CardHeader className="text-center pt-8 pb-4">
             <Button
@@ -297,14 +297,14 @@ export default function Auth() {
             
             <div className="flex justify-center mb-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
+                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
                   <Building2 className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
               Accept Invitation
             </CardTitle>
             <CardDescription className="text-muted-foreground">
@@ -400,7 +400,8 @@ export default function Auth() {
                     
                     <Button 
                       type="submit" 
-                      className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 transition-opacity font-semibold shadow-lg" 
+                      className="w-full h-12 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
+                      style={{ background: 'var(--accent-brand)' }}
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -421,25 +422,24 @@ export default function Auth() {
             ) : null}
           </CardContent>
           
-          <div className="h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+          <div className="h-px" style={{ background: 'var(--brand-border)' }} />
         </Card>
       </div>
     );
   }
 
-  // Default sign-in view (no tabs, just sign in)
+  // Default sign-in view
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
+      <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
         <div className="relative">
-          <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500" />
+          <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
           
           <CardHeader className="text-center pt-8 pb-6">
             <Button
@@ -454,14 +454,14 @@ export default function Auth() {
             
             <div className="flex justify-center mb-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
+                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
                   <Sparkles className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
               Ufanisi
             </CardTitle>
             <CardDescription className="text-muted-foreground">
@@ -519,7 +519,8 @@ export default function Auth() {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 transition-opacity font-semibold shadow-lg" 
+                className="w-full h-12 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
+                style={{ background: 'var(--accent-brand)' }}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -538,15 +539,15 @@ export default function Auth() {
               <div className="text-center pt-2">
                 <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="link" className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
+                    <Button variant="link" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                       Forgot your password?
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md border-0 shadow-2xl bg-background/95 backdrop-blur-xl">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-emerald-500/10">
-                          <Mail className="h-5 w-5 text-emerald-600" />
+                     <div className="p-2 rounded-lg" style={{ background: 'var(--accent-lt)' }}>
+                           <Mail className="h-5 w-5" style={{ color: 'var(--accent-brand)' }} />
                         </div>
                         Reset Password
                       </DialogTitle>
@@ -556,9 +557,9 @@ export default function Auth() {
                     </DialogHeader>
                     
                     {forgotPasswordSuccess ? (
-                      <Alert className="border-green-500/30 bg-green-500/10">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <AlertDescription className="text-green-600 dark:text-green-400">
+                    <Alert style={{ borderColor: 'var(--status-success)', background: 'var(--status-success-bg)' }}>
+                         <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--status-success)' }} />
+                         <AlertDescription style={{ color: 'var(--status-success)' }}>
                           Password reset email sent! Check your inbox and follow the instructions to reset your password.
                         </AlertDescription>
                       </Alert>
@@ -602,7 +603,8 @@ export default function Auth() {
                             </Button>
                             <Button 
                               type="submit" 
-                              className="flex-1 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600" 
+                              className="flex-1 h-12 rounded-xl text-white" 
+                              style={{ background: 'var(--accent-brand)' }}
                               disabled={isForgotPasswordLoading}
                             >
                               {isForgotPasswordLoading ? 'Sending...' : 'Send Reset Email'}
@@ -626,7 +628,8 @@ export default function Auth() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="w-full h-12 rounded-xl border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 dark:hover:bg-emerald-950"
+                className="w-full h-12 rounded-xl hover:bg-primary/5"
+                style={{ borderColor: 'rgba(15,123,108,0.3)', color: 'var(--accent-brand)' }}
               >
                 <Building2 className="h-4 w-4 mr-2" />
                 Register Your Organization
@@ -638,7 +641,7 @@ export default function Auth() {
           </div>
         </CardContent>
         
-        <div className="h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+        <div className="h-px" style={{ background: 'var(--brand-border)' }} />
       </Card>
     </div>
   );
