@@ -274,11 +274,11 @@ export default function Auth() {
   // Invitation-based signup view
   if (inviteToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
         {/* Decorative background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
         </div>
 
         <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
