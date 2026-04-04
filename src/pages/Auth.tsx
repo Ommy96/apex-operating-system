@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -198,7 +199,7 @@ export default function Auth() {
           });
 
         if (profileError) {
-          console.error('Profile creation error:', profileError);
+          logger.error('Profile creation error:', profileError);
         }
 
         // Add to organization members
@@ -212,7 +213,7 @@ export default function Auth() {
           });
 
         if (memberError) {
-          console.error('Member creation error:', memberError);
+          logger.error('Member creation error:', memberError);
         }
 
         // Create user role
@@ -224,7 +225,7 @@ export default function Auth() {
           });
 
         if (roleError) {
-          console.error('Role creation error:', roleError);
+          logger.error('Role creation error:', roleError);
         }
 
         // Mark invitation as accepted
@@ -240,7 +241,7 @@ export default function Auth() {
         navigate('/auth');
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
+      logger.error('Signup error:', error);
       toast.error(error.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
@@ -259,7 +260,7 @@ export default function Auth() {
     setIsForgotPasswordLoading(false);
     
     if (error) {
-      console.error('Error sending password reset email:', error);
+      logger.error('Error sending password reset email:', error);
     } else {
       setForgotPasswordSuccess(true);
       forgotPasswordForm.reset();

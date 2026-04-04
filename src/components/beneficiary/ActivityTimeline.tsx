@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,7 +131,7 @@ export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
       allEvents.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
       setEvents(allEvents);
     } catch (err) {
-      console.error('Timeline fetch error:', err);
+      logger.error('Timeline fetch error:', err);
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -85,7 +86,7 @@ export function ProgramEnrollmentForm({ childId, onSuccess, onCancel }: ProgramE
       toast({ title: "Success", description: "Child enrolled in program successfully" });
       onSuccess();
     } catch (error) {
-      console.error('Error enrolling in program:', error);
+      logger.error('Error enrolling in program:', error);
       toast({ title: "Error", description: "Failed to enroll child in program", variant: "destructive" });
     } finally {
       setLoading(false);

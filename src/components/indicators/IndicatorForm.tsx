@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -115,7 +116,7 @@ export function IndicatorForm({ open, onOpenChange, indicator, categories }: Ind
       reset();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving indicator:', error);
+      logger.error('Error saving indicator:', error);
     }
   };
 

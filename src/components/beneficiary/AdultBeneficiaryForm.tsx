@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -209,7 +210,7 @@ export function AdultBeneficiaryForm({ beneficiary, onSuccess, onCancel }: Adult
 
       onSuccess();
     } catch (error) {
-      console.error('Error saving beneficiary:', error);
+      logger.error('Error saving beneficiary:', error);
       toast({
         title: "Error",
         description: "Failed to save beneficiary. Please try again.",

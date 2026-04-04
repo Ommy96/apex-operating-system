@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,7 +46,7 @@ export function ComplianceDocumentsSettings() {
       if (error) throw error;
       window.open(data.signedUrl, '_blank');
     } catch (err) {
-      console.error('Download error:', err);
+      logger.error('Download error:', err);
       toast.error('Failed to generate download link');
     } finally {
       setDownloading(null);
@@ -79,7 +80,7 @@ export function ComplianceDocumentsSettings() {
       if (updateError) throw updateError;
       toast.success(`${docType === 'kra' ? 'KRA Certificate' : 'NGO Board Certificate'} uploaded successfully`);
     } catch (err) {
-      console.error('Upload error:', err);
+      logger.error('Upload error:', err);
       toast.error('Failed to upload document');
     } finally {
       setUploading(null);
@@ -103,7 +104,7 @@ export function ComplianceDocumentsSettings() {
       if (error) throw error;
       toast.success('Compliance details saved successfully');
     } catch (err) {
-      console.error('Save error:', err);
+      logger.error('Save error:', err);
       toast.error('Failed to save compliance details');
     } finally {
       setSaving(false);

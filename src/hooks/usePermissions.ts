@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +31,7 @@ export function usePermissions() {
         _org_id: orgId,
       });
       if (error) {
-        console.error('Error fetching permissions:', error);
+        logger.error('Error fetching permissions:', error);
         return [];
       }
       return (data as string[]) || [];
@@ -49,7 +50,7 @@ export function usePermissions() {
         _org_id: orgId,
       });
       if (error) {
-        console.error('Error fetching RBAC roles:', error);
+        logger.error('Error fetching RBAC roles:', error);
         return [];
       }
       return (data as RbacRole[]) || [];

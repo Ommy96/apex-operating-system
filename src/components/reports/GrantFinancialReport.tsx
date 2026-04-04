@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,7 +195,7 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
       pdf.save(`financial-report-${grantData?.grant_name || 'grant'}.pdf`);
       toast.success("PDF exported successfully");
     } catch (err) {
-      console.error('PDF export error:', err);
+      logger.error('PDF export error:', err);
       toast.error("Failed to export PDF");
     } finally {
       setExportingPdf(false);

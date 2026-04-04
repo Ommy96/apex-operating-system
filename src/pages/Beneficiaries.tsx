@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -199,7 +200,7 @@ export default function Beneficiaries() {
         active: allData.filter(b => b.status === 'active').length,
       });
     } catch (error) {
-      console.error('Error fetching beneficiaries:', error);
+      logger.error('Error fetching beneficiaries:', error);
       toast({
         title: "Error",
         description: "Failed to load beneficiaries",
@@ -229,7 +230,7 @@ export default function Beneficiaries() {
       });
       setEnrollmentMap(map);
     } catch (error) {
-      console.error('Error fetching programs:', error);
+      logger.error('Error fetching programs:', error);
     }
   };
 
@@ -251,7 +252,7 @@ export default function Beneficiaries() {
       setDeleteId(null);
       fetchBeneficiaries();
     } catch (error) {
-      console.error('Error deleting beneficiary:', error);
+      logger.error('Error deleting beneficiary:', error);
       toast({
         title: "Error",
         description: "Failed to delete beneficiary",

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -169,7 +170,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Error saving project:', error);
+      logger.error('Error saving project:', error);
       toast.error(error.message || "Failed to save project");
     } finally {
       setIsSubmitting(false);

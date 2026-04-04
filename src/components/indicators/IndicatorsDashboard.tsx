@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ export function IndicatorsDashboard() {
       );
       setComputedValues(results);
     } catch (error) {
-      console.error('Error computing indicator values:', error);
+      logger.error('Error computing indicator values:', error);
     } finally {
       setIsComputing(false);
     }

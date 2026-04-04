@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -50,7 +51,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         .eq('user_id', user.id);
 
       if (fetchError) {
-        console.error('Error fetching user organizations:', fetchError);
+        logger.error('Error fetching user organizations:', fetchError);
         return;
       }
 
@@ -64,7 +65,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         setUserOrganizations(orgs);
       }
     } catch (err) {
-      console.error('Error in fetchUserOrganizations:', err);
+      logger.error('Error in fetchUserOrganizations:', err);
     }
   }, [user?.id]);
 
@@ -83,7 +84,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         .rpc('get_user_current_organization', { _user_id: user.id });
 
       if (fetchError) {
-        console.error('Error fetching organization:', fetchError);
+        logger.error('Error fetching organization:', fetchError);
         setError(fetchError.message);
         return;
       }
@@ -94,7 +95,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         setCurrentOrganization(null);
       }
     } catch (err) {
-      console.error('Error in fetchCurrentOrganization:', err);
+      logger.error('Error in fetchCurrentOrganization:', err);
       setError('Failed to fetch organization');
     } finally {
       setIsLoading(false);
@@ -115,7 +116,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         });
 
       if (switchError) {
-        console.error('Error switching organization:', switchError);
+        logger.error('Error switching organization:', switchError);
         toast.error('Failed to switch organization');
         return false;
       }
@@ -131,7 +132,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
     } catch (err) {
-      console.error('Error in switchOrganization:', err);
+      logger.error('Error in switchOrganization:', err);
       toast.error('Failed to switch organization');
       return false;
     }

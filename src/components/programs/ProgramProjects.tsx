@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -92,7 +93,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
       toast.success("Project deleted successfully");
       queryClient.invalidateQueries({ queryKey: ['program-projects', programId] });
     } catch (error: any) {
-      console.error('Error deleting project:', error);
+      logger.error('Error deleting project:', error);
       toast.error(error.message || "Failed to delete project");
     } finally {
       setDeleteProject(null);

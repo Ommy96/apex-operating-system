@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, User, Target, DollarSign, FileText, X, Loader2 } from "lucide-react";
@@ -109,7 +110,7 @@ export function GlobalSearchBar() {
 
       setResults(mapped);
     } catch (err) {
-      console.error("Search error:", err);
+      logger.error("Search error:", err);
     } finally {
       setIsSearching(false);
     }

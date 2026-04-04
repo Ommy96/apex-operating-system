@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -94,7 +95,7 @@ export function IndicatorTargetForm({
       reset();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving target:', error);
+      logger.error('Error saving target:', error);
     }
   };
 

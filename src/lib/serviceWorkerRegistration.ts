@@ -2,6 +2,7 @@
  * Service Worker registration and background sync utilities.
  * Integrates with vite-plugin-pwa's auto-update strategy.
  */
+import { logger } from '@/lib/logger';
 
 export async function registerBackgroundSync(tag: string = 'offline-sync'): Promise<boolean> {
   if (!('serviceWorker' in navigator)) return false;
@@ -12,11 +13,11 @@ export async function registerBackgroundSync(tag: string = 'offline-sync'): Prom
     // Use Background Sync API if available
     if ('sync' in registration) {
       await (registration as any).sync.register(tag);
-      console.log(`[SW] Background sync registered: ${tag}`);
+      logger.log(`[SW] Background sync registered: ${tag}`);
       return true;
     }
   } catch (err) {
-    console.warn('[SW] Background sync registration failed:', err);
+    logger.warn('[SW] Background sync registration failed:', err);
   }
   return false;
 }
@@ -38,12 +39,12 @@ export async function registerPeriodicSync(
         await (registration as any).periodicSync.register(tag, {
           minInterval: minIntervalMs,
         });
-        console.log(`[SW] Periodic sync registered: ${tag}`);
+        logger.log(`[SW] Periodic sync registered: ${tag}`);
         return true;
       }
     }
   } catch (err) {
-    console.warn('[SW] Periodic sync registration failed:', err);
+    logger.warn('[SW] Periodic sync registration failed:', err);
   }
   return false;
 }
@@ -59,7 +60,7 @@ export async function isOfflineReady(): Promise<boolean> {
 export async function requestPersistentStorage(): Promise<boolean> {
   if (navigator.storage && navigator.storage.persist) {
     const granted = await navigator.storage.persist();
-    console.log(`[Storage] Persistent storage ${granted ? 'granted' : 'denied'}`);
+    logger.log(`[Storage] Persistent storage ${granted ? 'granted' : 'denied'}`);
     return granted;
   }
   return false;

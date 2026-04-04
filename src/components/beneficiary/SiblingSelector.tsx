@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +54,7 @@ export function SiblingSelector({ selectedSiblings, onChange, excludeId }: Sibli
         );
         setSearchResults(filtered);
       } catch (error) {
-        console.error('Error searching beneficiaries:', error);
+        logger.error('Error searching beneficiaries:', error);
       } finally {
         setIsSearching(false);
       }
