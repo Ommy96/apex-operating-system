@@ -2,6 +2,7 @@
  * Service Worker registration and background sync utilities.
  * Integrates with vite-plugin-pwa's auto-update strategy.
  */
+import { logger } from '@/lib/logger';
 
 export async function registerBackgroundSync(tag: string = 'offline-sync'): Promise<boolean> {
   if (!('serviceWorker' in navigator)) return false;
