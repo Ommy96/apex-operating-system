@@ -1,7 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { WorkspaceLayout } from "@/components/workspace";
 import { useBranding } from "@/hooks/useBranding";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, X, Megaphone, AlertTriangle, Info, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -13,11 +12,11 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const ANNOUNCEMENT_STYLES: Record<string, { border: string; bg: string; icon: any; iconColor: string }> = {
-  critical: { border: 'border-destructive/50', bg: 'bg-destructive/10', icon: AlertTriangle, iconColor: 'text-destructive' },
-  warning: { border: 'border-amber-500/50', bg: 'bg-amber-500/10', icon: AlertTriangle, iconColor: 'text-amber-600' },
-  feature: { border: 'border-blue-500/50', bg: 'bg-blue-500/10', icon: Sparkles, iconColor: 'text-blue-600' },
-  info: { border: 'border-border', bg: 'bg-muted/50', icon: Info, iconColor: 'text-muted-foreground' },
+const ANNOUNCEMENT_STYLES: Record<string, { borderColor: string; bg: string; icon: any; iconColor: string }> = {
+  critical: { borderColor: 'var(--status-danger)', bg: 'var(--status-danger-bg)', icon: AlertTriangle, iconColor: 'var(--status-danger)' },
+  warning: { borderColor: 'var(--status-warning)', bg: 'var(--status-warning-bg)', icon: AlertTriangle, iconColor: 'var(--status-warning)' },
+  feature: { borderColor: 'var(--status-info)', bg: 'var(--status-info-bg)', icon: Sparkles, iconColor: 'var(--status-info)' },
+  info: { borderColor: 'var(--brand-border)', bg: 'var(--status-neutral-bg)', icon: Info, iconColor: 'var(--status-neutral)' },
 };
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -28,7 +27,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const queryClient = useQueryClient();
   const [showBanner, setShowBanner] = useState(false);
 
-  // Impersonation banner
   const impersonating = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem('impersonating_org') || 'null') : null;
 
   useEffect(() => {
@@ -36,7 +34,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     setShowBanner(needs2fa && location.pathname !== "/setup-2fa");
   }, [location.pathname]);
 
-  // Log impersonation on each page load
   useEffect(() => {
     if (impersonating && user) {
       supabase.from('audit_logs').insert({
@@ -49,7 +46,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname, impersonating, user]);
 
-  // Platform announcements
   const { data: announcements = [] } = useQuery({
     queryKey: ['platform-announcements', user?.id],
     queryFn: async () => {
@@ -60,7 +56,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         .lte('published_at', new Date().toISOString())
         .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString());
       if (!data || data.length === 0) return [];
-      // Filter out read ones
       const { data: reads } = await supabase
         .from('platform_announcement_reads')
         .select('announcement_id')
@@ -80,41 +75,57 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['platform-announcements'] }),
   });
 
+  const BannerAlert = ({ borderColor, bg, icon: IconComp, iconColor, children, onDismiss }: { borderColor: string; bg: string; icon: any; iconColor: string; children: ReactNode; onDismiss?: () => void }) => (
+    <div
+      className="mb-3 rounded-r-[10px] flex items-center gap-3 px-4 py-3 no-print"
+      style={{
+        borderLeft: `3px solid ${borderColor}`,
+        background: bg,
+        borderRadius: '0 10px 10px 0',
+      }}
+    >
+      <IconComp className="h-4 w-4 flex-shrink-0" style={{ color: iconColor }} />
+      <div className="flex-1 flex items-center justify-between flex-wrap gap-2 text-[13px]">
+        {children}
+      </div>
+      {onDismiss && (
+        <Button size="icon" variant="ghost" onClick={onDismiss} className="h-6 w-6" aria-label="Dismiss">
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <WorkspaceLayout>
       {/* Impersonation banner */}
       {impersonating && (
-        <Alert className="mb-2 border-orange-500/50 bg-orange-500/10 no-print">
-          <Megaphone className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-sm text-orange-800 dark:text-orange-300">
-              You are impersonating <strong>{impersonating.orgName}</strong>. All actions are logged.
-            </span>
-            <Button size="sm" variant="outline" className="text-xs" onClick={() => {
-              sessionStorage.removeItem('impersonating_org');
-              navigate('/admin/infera');
-              window.location.reload();
-            }}>Exit Impersonation</Button>
-          </AlertDescription>
-        </Alert>
+        <BannerAlert borderColor="var(--status-warning)" bg="var(--status-warning-bg)" icon={Megaphone} iconColor="var(--status-warning)">
+          <span style={{ color: 'var(--brand-ink-2)' }}>
+            You are impersonating <strong>{impersonating.orgName}</strong>. All actions are logged.
+          </span>
+          <Button size="sm" variant="outline" className="text-[12px]" onClick={() => {
+            sessionStorage.removeItem('impersonating_org');
+            navigate('/admin/infera');
+            window.location.reload();
+          }}>Exit Impersonation</Button>
+        </BannerAlert>
       )}
 
       {/* 2FA banner */}
       {showBanner && (
-        <Alert className="mb-2 border-amber-500/50 bg-amber-500/10 no-print">
-          <ShieldAlert className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-sm text-amber-800 dark:text-amber-300">
-              Your role requires two-factor authentication. Set it up now to maintain access.
-            </span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate("/setup-2fa")} className="text-xs">Set up 2FA</Button>
-              <Button size="sm" variant="ghost" onClick={() => { setShowBanner(false); sessionStorage.removeItem("requires_2fa_setup"); }}>
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <BannerAlert 
+          borderColor="var(--status-warning)" 
+          bg="var(--status-warning-bg)" 
+          icon={ShieldAlert} 
+          iconColor="var(--status-warning)"
+          onDismiss={() => { setShowBanner(false); sessionStorage.removeItem("requires_2fa_setup"); }}
+        >
+          <span style={{ color: 'var(--brand-ink-2)' }}>
+            Your role requires two-factor authentication. Set it up now to maintain access.
+          </span>
+          <Button size="sm" variant="outline" onClick={() => navigate("/setup-2fa")} className="text-[12px]">Set up 2FA</Button>
+        </BannerAlert>
       )}
 
       {/* Platform announcements */}
@@ -122,18 +133,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         const style = ANNOUNCEMENT_STYLES[a.type] || ANNOUNCEMENT_STYLES.info;
         const IconComp = style.icon;
         return (
-          <Alert key={a.id} className={`mb-2 ${style.border} ${style.bg} no-print`}>
-            <IconComp className={`h-4 w-4 ${style.iconColor}`} />
-            <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
-              <div>
-                <span className="text-sm font-medium">{a.title}</span>
-                <span className="text-sm text-muted-foreground ml-2">{a.body}</span>
-              </div>
-              <Button size="sm" variant="ghost" onClick={() => dismissAnnouncement.mutate(a.id)}>
-                <X className="h-3 w-3" />
-              </Button>
-            </AlertDescription>
-          </Alert>
+          <BannerAlert 
+            key={a.id} 
+            borderColor={style.borderColor} 
+            bg={style.bg} 
+            icon={IconComp} 
+            iconColor={style.iconColor}
+            onDismiss={() => dismissAnnouncement.mutate(a.id)}
+          >
+            <div>
+              <span className="text-[13px] font-medium" style={{ color: 'var(--brand-ink)' }}>{a.title}</span>
+              <span className="text-[13px] ml-2" style={{ color: 'var(--brand-ink-2)' }}>{a.body}</span>
+            </div>
+          </BannerAlert>
         );
       })}
 

@@ -6,13 +6,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useProgramEnrollmentStats } from "@/hooks/useProgramEnrollmentStats";
 import { supabase } from "@/integrations/supabase/client";
 import { 
-  Users, TrendingUp, Target, Clock, Sparkles, Zap, Activity, Bell,
+  Users, Target, Clock, Zap, Activity, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   StatCard, WorkspacePanel, WorkspacePanelHeader,
 } from "@/components/workspace";
@@ -34,6 +33,7 @@ const Dashboard = () => {
   
   const { can } = usePermissions();
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const firstName = userName.split(' ')[0];
 
   const {
     programStats,
@@ -44,7 +44,6 @@ const Dashboard = () => {
     refetch,
   } = useProgramEnrollmentStats();
 
-  // Real-time subscriptions
   useEffect(() => {
     if (!user) return;
 
@@ -87,47 +86,55 @@ const Dashboard = () => {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Welcome back, {userName}
+          <h1 className="text-[20px] font-semibold" style={{ letterSpacing: '-0.5px', color: 'var(--brand-ink)' }}>
+            Good morning, {firstName}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Here's what's happening with your organization today.
+          <p className="text-[13px] mt-1" style={{ color: 'var(--brand-ink-3)' }}>
+            Here's what's happening across your programmes today
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="w-2 h-2 bg-success rounded-full animate-pulse-soft" />
-          <Clock className="h-3.5 w-3.5" />
-          <span>Updated {lastUpdated.toLocaleTimeString()}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--brand-ink-3)' }}>
+            <div className="w-2 h-2 rounded-full animate-pulse-soft" style={{ background: 'var(--status-success)' }} />
+            <Clock className="h-3.5 w-3.5" />
+            <span>Updated {lastUpdated.toLocaleTimeString()}</span>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => navigate('/reports-analytics')}>
+            Export report
+          </Button>
+          <Button size="sm">
+            New activity
+          </Button>
         </div>
       </div>
 
       {/* Compliance Alerts for admins */}
       {can.manageSettings && <ComplianceAlertBanner />}
 
-      {/* Section 1 — Global Search */}
+      {/* Global Search */}
       <GlobalSearchBar />
 
-      {/* Section 2 — Quick Actions */}
+      {/* Quick Actions */}
       <WorkspacePanel padding="md">
         <WorkspacePanelHeader 
           title="Quick Actions" 
           description="Perform common tasks without navigating away"
-          actions={<Zap className="h-4 w-4 text-warning" />}
+          actions={<Zap className="h-4 w-4" style={{ color: 'var(--status-warning)' }} />}
         />
         <div className="mt-4">
           <QuickActionsPanel />
         </div>
       </WorkspacePanel>
 
-      {/* Section 3 — Key Metrics Overview */}
+      {/* Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}><CardContent className="p-4 space-y-2">
+            <div key={i} className="rounded-[14px] border border-border bg-card p-4 space-y-3">
               <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-7 w-16" />
               <Skeleton className="h-3 w-28" />
-            </CardContent></Card>
+            </div>
           ))
         ) : (
           <>
@@ -167,7 +174,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Section 4 — Quick Navigation Cards */}
+      {/* Quick Navigation Cards */}
       <WorkspacePanel padding="md">
         <WorkspacePanelHeader title="Quick Navigation" description="Jump to any module" />
         <div className="mt-4">
@@ -175,7 +182,7 @@ const Dashboard = () => {
         </div>
       </WorkspacePanel>
 
-      {/* Section 5 & 6 — Activity Feed & Alerts side by side */}
+      {/* Activity Feed & Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <WorkspacePanel padding="md">
           <WorkspacePanelHeader 
@@ -220,7 +227,6 @@ const Dashboard = () => {
         </div>
       </WorkspacePanel>
 
-      {/* Floating Create Button */}
       <FloatingCreateButton />
     </div>
   );
