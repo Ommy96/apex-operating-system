@@ -7,6 +7,11 @@ declare module 'react-map-gl/mapbox' {
     mapboxAccessToken?: string;
     style?: React.CSSProperties;
     children?: ReactNode;
+    interactiveLayerIds?: string[];
+    onClick?: (e: any) => void;
+    onMouseEnter?: (e: any) => void;
+    onMouseLeave?: (e: any) => void;
+    ref?: any;
     [key: string]: any;
   }
   interface MarkerProps {
@@ -25,10 +30,31 @@ declare module 'react-map-gl/mapbox' {
     children?: ReactNode;
     [key: string]: any;
   }
+  interface SourceProps {
+    id: string;
+    type: string;
+    data?: any;
+    cluster?: boolean;
+    clusterMaxZoom?: number;
+    clusterRadius?: number;
+    children?: ReactNode;
+    [key: string]: any;
+  }
+  interface LayerProps {
+    id: string;
+    type: string;
+    source?: string;
+    filter?: any[];
+    layout?: Record<string, any>;
+    paint?: Record<string, any>;
+    [key: string]: any;
+  }
 
   const Map: ComponentType<MapProps>;
   export const Marker: ComponentType<MarkerProps>;
   export const Popup: ComponentType<PopupProps>;
+  export const Source: ComponentType<SourceProps>;
+  export const Layer: ComponentType<LayerProps>;
   export default Map;
 }
 
