@@ -603,7 +603,8 @@ export default function Auth() {
                             </Button>
                             <Button 
                               type="submit" 
-                              className="flex-1 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600" 
+                              className="flex-1 h-12 rounded-xl text-white" 
+                              style={{ background: 'var(--accent-brand)' }}
                               disabled={isForgotPasswordLoading}
                             >
                               {isForgotPasswordLoading ? 'Sending...' : 'Send Reset Email'}
