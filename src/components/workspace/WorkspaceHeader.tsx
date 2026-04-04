@@ -1,4 +1,4 @@
-import { Search, User, LogOut, Settings, ChevronRight, Command } from "lucide-react";
+import { Search, User, LogOut, Settings, ChevronRight, Command, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,12 +22,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { NotificationBell } from "@/components/communications/NotificationBell";
 
 interface WorkspaceHeaderProps {
   onCommandOpen: () => void;
 }
 
-// Route to breadcrumb mapping
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   beneficiaries: "Beneficiaries",
@@ -42,14 +42,11 @@ const routeLabels: Record<string, string> = {
   entities: "Entities",
 };
 
-// UUID pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
   const segmentIndex = segments.indexOf(segment);
   const previousSegment = segmentIndex > 0 ? segments[segmentIndex - 1] : null;
-
-  // Determine if this UUID is a program or beneficiary
   const isProgram = previousSegment === "dynamic" || previousSegment === "dashboard";
   const isBeneficiary = previousSegment === "beneficiaries";
 
@@ -91,7 +88,7 @@ function BreadcrumbEntry({ segment, segments, navigateTo, isLast }: { segment: s
       {!isLast ? (
         <>
           <BreadcrumbLink
-            className="text-muted-foreground hover:text-foreground text-sm cursor-pointer"
+            className="text-[12px] text-muted-foreground hover:text-foreground cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               navigate(navigateTo);
@@ -100,11 +97,11 @@ function BreadcrumbEntry({ segment, segments, navigateTo, isLast }: { segment: s
             {label}
           </BreadcrumbLink>
           <BreadcrumbSeparator>
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3 w-3 text-muted-foreground" />
           </BreadcrumbSeparator>
         </>
       ) : (
-        <BreadcrumbPage className="text-foreground font-medium text-sm">
+        <BreadcrumbPage className="text-foreground font-medium text-[12px]">
           {label}
         </BreadcrumbPage>
       )}
@@ -124,33 +121,43 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
   };
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
-  // Generate breadcrumbs from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
   return (
-    <header role="banner" aria-label="Application header" className="h-14 border-b border-border/40 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 gap-4 sticky top-0 z-40">
+    <header 
+      role="banner" 
+      aria-label="Application header" 
+      className="h-14 flex items-center justify-between px-6 gap-4 sticky top-0 z-40"
+      style={{ 
+        background: 'var(--brand-surface)', 
+        borderBottom: '1px solid var(--brand-border)' 
+      }}
+    >
       {/* Left Section */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <SidebarTrigger className="p-2 hover:bg-muted rounded-lg transition-colors shrink-0" />
+        <SidebarTrigger className="p-2 hover:bg-muted rounded-lg transition-colors duration-150 shrink-0" aria-label="Toggle sidebar" />
         
-        {/* Breadcrumb Navigation */}
+        {/* Breadcrumb */}
         <Breadcrumb aria-label="Breadcrumb navigation" className="hidden md:flex">
           <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="text-[12px] text-muted-foreground hover:text-foreground cursor-pointer" onClick={() => navigate('/dashboard')}>
+                Ufanisi
+              </BreadcrumbLink>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+              </BreadcrumbSeparator>
+            </BreadcrumbItem>
             {pathSegments.map((segment, index) => {
               const fullPath = '/' + pathSegments.slice(0, index + 1).join('/');
               const isLast = index === pathSegments.length - 1;
-              // Skip "dynamic" and "dashboard" route prefixes under /programs/
               if ((segment === "dynamic" || segment === "dashboard") && pathSegments[index - 1] === "programs") return null;
 
-              // Build correct navigateTo path
               let navigateTo = fullPath;
-              // If this is "programs" and the next segment is "dynamic" or "dashboard", link to /programs-management
-              if (segment === "programs") {
-                navigateTo = "/programs-management";
-              }
+              if (segment === "programs") navigateTo = "/programs-management";
 
-              // Recalculate isLast: if next visible segments are all skipped
               const remainingVisible = pathSegments.slice(index + 1).filter(
                 (s, i) => !((s === "dynamic" || s === "dashboard") && pathSegments[index + 1 + i - 1] === "programs")
               );
@@ -171,46 +178,56 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
       </div>
 
       {/* Center - Search */}
-      <Button
-        variant="outline"
+      <button
         onClick={onCommandOpen}
         aria-label="Open search (Ctrl+K)"
-        className="hidden sm:flex items-center gap-2 px-3 py-2 h-9 text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/50 border-border/50 rounded-lg min-w-[200px] lg:min-w-[280px]"
+        className="hidden sm:flex items-center gap-2 px-3 h-8 text-muted-foreground hover:text-foreground rounded-lg transition-colors duration-150"
+        style={{ 
+          background: 'var(--brand-canvas)', 
+          border: '1px solid var(--brand-border)',
+          minWidth: '220px',
+        }}
       >
-        <Search className="h-4 w-4" aria-hidden="true" />
-        <span className="text-sm">Search...</span>
-        <kbd aria-hidden="true" className="ml-auto pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+        <Search className="h-3.5 w-3.5" />
+        <span className="text-[13px]">Search beneficiaries, grants…</span>
+        <kbd className="ml-auto hidden lg:inline-flex h-5 items-center gap-0.5 rounded px-1.5 font-mono text-[10px] text-muted-foreground" style={{ border: '1px solid var(--brand-border)', background: 'var(--brand-surface)' }}>
           <Command className="h-3 w-3" />K
         </kbd>
-      </Button>
+      </button>
 
       {/* Right Section */}
       <div className="flex items-center gap-2 shrink-0">
+        {/* Notification Bell */}
+        <NotificationBell />
+
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 px-2 h-9 hover:bg-muted rounded-lg"
+            <button 
+              className="flex items-center gap-2 px-2 h-9 hover:bg-muted rounded-lg transition-colors duration-150"
+              aria-label="User menu"
             >
-              <div className="h-7 w-7 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
+              <div 
+                className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-white"
+                style={{ background: 'linear-gradient(135deg, var(--accent-mid), #1B5FBB)' }}
+              >
+                {initials}
               </div>
               <div className="hidden lg:flex flex-col items-start">
-                <span className="text-sm font-medium text-foreground leading-none">{userName}</span>
+                <span className="text-[13px] font-medium text-foreground leading-none">{userName}</span>
                 <RoleIndicator />
               </div>
-            </Button>
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-xl">
-            <DropdownMenuItem className="text-xs text-muted-foreground px-3 py-2 rounded-lg">
+          <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-[10px]">
+            <DropdownMenuItem className="text-[12px] text-muted-foreground px-3 py-2 rounded-lg">
               {user?.email}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="my-1" />
             {isAdmin && (
               <DropdownMenuItem
                 onClick={() => navigate('/organization-settings')}
-                className="px-3 py-2 rounded-lg"
+                className="px-3 py-2 rounded-lg text-[13px]"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -218,7 +235,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
             )}
             <DropdownMenuItem
               onClick={() => void handleLogout()}
-              className="px-3 py-2 rounded-lg text-destructive focus:text-destructive"
+              className="px-3 py-2 rounded-lg text-[13px] text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout
