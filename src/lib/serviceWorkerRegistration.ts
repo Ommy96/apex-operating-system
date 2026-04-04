@@ -44,7 +44,7 @@ export async function registerPeriodicSync(
       }
     }
   } catch (err) {
-    console.warn('[SW] Periodic sync registration failed:', err);
+    logger.warn('[SW] Periodic sync registration failed:', err);
   }
   return false;
 }
