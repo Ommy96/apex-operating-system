@@ -192,7 +192,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
 
       if (uploadError) {
         // If bucket doesn't exist, use a placeholder URL
-        console.warn('Storage upload failed, using placeholder:', uploadError);
+        logger.warn('Storage upload failed, using placeholder:', uploadError);
       }
 
       // Get public URL or use placeholder

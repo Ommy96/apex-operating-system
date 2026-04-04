@@ -225,7 +225,7 @@ export async function computeIndicatorValue(
       value = await computePercentage(config, organizationId, start, end);
       break;
     default:
-      console.warn(`Unknown formula type: ${indicator.formula_type}`);
+      logger.warn(`Unknown formula type: ${indicator.formula_type}`);
   }
   
   // Round to specified decimal places
