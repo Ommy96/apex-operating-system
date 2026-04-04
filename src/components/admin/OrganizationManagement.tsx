@@ -22,7 +22,7 @@ import {
 import { 
   Building2, Search, MoreHorizontal, Ban, CheckCircle2, Users, Heart, Loader2, 
   Settings2, ChevronDown, ChevronUp, Globe, MapPin, Calendar, Activity,
-  AlertTriangle, TrendingUp, Layers, Shield, X, SlidersHorizontal,
+  AlertTriangle, TrendingUp, Layers, Shield, X, SlidersHorizontal, UserCheck,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
