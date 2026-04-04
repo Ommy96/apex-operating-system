@@ -92,6 +92,27 @@ const ProgramsManagement = () => {
     enabled: !!currentOrganization?.organization_id,
   });
 
+  // Fetch project team members for avatar stacks
+  const projectIds = programs?.map(p => p.id) || [];
+  const { data: teamMembersMap } = useQuery({
+    queryKey: ['program-team-avatars', projectIds],
+    queryFn: async () => {
+      if (projectIds.length === 0) return {} as Record<string, Array<{ user_id: string; full_name: string }>>;
+      const { data } = await supabase
+        .from('project_team_members')
+        .select('project_id, user_id, profiles(full_name)')
+        .in('project_id', projectIds)
+        .is('end_date', null);
+      const map: Record<string, Array<{ user_id: string; full_name: string }>> = {};
+      (data || []).forEach((m: any) => {
+        if (!map[m.project_id]) map[m.project_id] = [];
+        map[m.project_id].push({ user_id: m.user_id, full_name: (m.profiles as any)?.full_name || 'Unknown' });
+      });
+      return map;
+    },
+    enabled: projectIds.length > 0,
+  });
+
   // Real-time: auto-refresh programs
   useRealtimeTable("programs", [["programs-management", currentOrganization?.organization_id || ""], ["programs"], ["dynamic-programs"]], currentOrganization?.organization_id);
 
