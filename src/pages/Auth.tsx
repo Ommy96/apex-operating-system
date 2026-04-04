@@ -519,7 +519,8 @@ export default function Auth() {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 transition-opacity font-semibold shadow-lg" 
+                className="w-full h-12 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
+                style={{ background: 'var(--accent-brand)' }}
                 disabled={isLoading}
               >
                 {isLoading ? (
