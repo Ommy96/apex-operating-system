@@ -628,7 +628,8 @@ export default function Auth() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="w-full h-12 rounded-xl border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 dark:hover:bg-emerald-950"
+                className="w-full h-12 rounded-xl hover:bg-primary/5"
+                style={{ borderColor: 'rgba(15,123,108,0.3)', color: 'var(--accent-brand)' }}
               >
                 <Building2 className="h-4 w-4 mr-2" />
                 Register Your Organization
