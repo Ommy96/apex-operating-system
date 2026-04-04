@@ -17,7 +17,7 @@ export async function registerBackgroundSync(tag: string = 'offline-sync'): Prom
       return true;
     }
   } catch (err) {
-    console.warn('[SW] Background sync registration failed:', err);
+    logger.warn('[SW] Background sync registration failed:', err);
   }
   return false;
 }
