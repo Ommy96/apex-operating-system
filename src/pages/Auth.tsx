@@ -422,25 +422,24 @@ export default function Auth() {
             ) : null}
           </CardContent>
           
-          <div className="h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+          <div className="h-px" style={{ background: 'var(--brand-border)' }} />
         </Card>
       </div>
     );
   }
 
-  // Default sign-in view (no tabs, just sign in)
+  // Default sign-in view
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
+      <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
         <div className="relative">
-          <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500" />
+          <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
           
           <CardHeader className="text-center pt-8 pb-6">
             <Button
@@ -455,14 +454,14 @@ export default function Auth() {
             
             <div className="flex justify-center mb-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
+                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
                   <Sparkles className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
               Ufanisi
             </CardTitle>
             <CardDescription className="text-muted-foreground">
