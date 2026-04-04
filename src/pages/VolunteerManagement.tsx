@@ -120,8 +120,15 @@ export default function VolunteerManagement() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {loadingVolunteers ? (
-              <p className="col-span-full text-center py-8 text-muted-foreground">Loading...</p>
+          {loadingVolunteers ? (
+              <>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Card key={i} className="workspace-card"><CardContent className="p-4 space-y-3">
+                    <div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full bg-muted animate-pulse" /><div className="flex-1 space-y-1.5"><div className="h-4 w-32 bg-muted animate-pulse rounded" /><div className="h-3 w-24 bg-muted animate-pulse rounded" /></div></div>
+                    <div className="flex gap-1"><div className="h-5 w-16 bg-muted animate-pulse rounded" /><div className="h-5 w-14 bg-muted animate-pulse rounded" /></div>
+                  </CardContent></Card>
+                ))}
+              </>
             ) : volunteers.length === 0 ? (
               <Card className="workspace-card col-span-full"><CardContent className="p-8 text-center text-muted-foreground">No volunteers yet.</CardContent></Card>
             ) : (

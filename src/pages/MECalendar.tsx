@@ -153,7 +153,14 @@ export default function MECalendar() {
   };
 
   if (isLoading) {
-    return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-7 gap-1 mt-2">
+          {Array.from({ length: 35 }).map((_, i) => <Skeleton key={i} className="h-16 rounded" />)}
+        </div>
+      </div>
+    );
   }
 
   return (
