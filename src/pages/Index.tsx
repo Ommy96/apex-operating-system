@@ -21,12 +21,12 @@ const Index = () => {
   const { user } = useAuth();
 
   const coreFeatures = [
-    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation", accent: "text-violet-400", accentBg: "bg-violet-500/10", accentBorder: "border-violet-500/20" },
-    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking", accent: "text-emerald-400", accentBg: "bg-emerald-500/10", accentBorder: "border-emerald-500/20" },
-    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data", accent: "text-amber-400", accentBg: "bg-amber-500/10", accentBorder: "border-amber-500/20" },
-    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports", accent: "text-rose-400", accentBg: "bg-rose-500/10", accentBorder: "border-rose-500/20" },
-    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click", accent: "text-cyan-400", accentBg: "bg-cyan-500/10", accentBorder: "border-cyan-500/20" },
-    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team", accent: "text-orange-400", accentBg: "bg-orange-500/10", accentBorder: "border-orange-500/20" }
+    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation" },
+    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking" },
+    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data" },
+    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports" },
+    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click" },
+    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team" }
   ];
 
   const benefits = [
@@ -42,16 +42,16 @@ const Index = () => {
         Skip to main content
       </a>
       {/* Header */}
-      <header role="banner" aria-label="Site header" className="bg-primary-foreground/5 backdrop-blur-md border-b border-primary-foreground/10 sticky top-0 z-50">
+      <header role="banner" aria-label="Site header" className="backdrop-blur-md border-b sticky top-0 z-50" style={{ background: 'rgba(10,15,30,0.7)', borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-accent/20 rounded-xl border border-accent/30">
-                <Target className="w-7 h-7 text-accent-light" />
+              <div className="p-2 rounded-xl" style={{ background: 'rgba(29,158,138,0.15)', border: '1px solid rgba(29,158,138,0.25)' }}>
+                <Target className="w-7 h-7" style={{ color: 'var(--accent-mid)' }} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary-foreground tracking-tight">Ufanisi</h1>
-                <p className="text-xs text-accent-light/80">Data that drives real impact</p>
+                <h1 className="text-xl font-semibold text-white tracking-tight" style={{ letterSpacing: '-0.3px' }}>Ufanisi</h1>
+                <p className="text-[11px]" style={{ color: 'var(--accent-mid)' }}>Data that drives real impact</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -59,14 +59,15 @@ const Index = () => {
                 onClick={() => navigate('/donor/login')}
                 variant="outline"
                 size="sm"
-                className="border-accent/30 text-accent-light hover:bg-accent/10"
+                className="border-white/15 text-white/80 hover:bg-white/5 hover:text-white"
               >
                 Donor Portal
               </Button>
               <Button 
                 onClick={() => navigate(user ? '/dashboard' : '/auth')}
-                className="bg-accent hover:bg-accent-dark text-accent-foreground border-0"
                 size="sm"
+                className="text-white border-0"
+                style={{ background: 'var(--accent-brand)' }}
               >
                 {user ? 'Dashboard' : 'Sign In'}
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -80,18 +81,18 @@ const Index = () => {
       <main id="landing-main" role="main">
       <section aria-labelledby="hero-heading" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div className="text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] mb-6" style={{ background: 'rgba(29,158,138,0.12)', border: '1px solid rgba(29,158,138,0.25)', color: 'var(--accent-mid)' }}>
             <Zap className="w-4 h-4" />
             One platform. Many organizations. Measurable impact.
           </div>
-          <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight tracking-tight">
+          <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white mb-6 leading-tight" style={{ letterSpacing: '-1px' }}>
             Empower Your NGO with
             <br />
-            <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
+            <span style={{ color: 'var(--accent-mid)' }}>
               Data-Driven Impact
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-primary-foreground/70 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl mb-10 max-w-3xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
             Ufanisi helps NGOs, CBOs, and social impact organizations manage programs, donors, 
             indicators, and reports — all in one secure system built for real-world field work.
           </p>
@@ -99,7 +100,8 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate('/auth')}
-              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 px-8 border-0"
+              className="text-white shadow-lg px-8 border-0"
+              style={{ background: 'var(--accent-brand)', boxShadow: '0 8px 24px rgba(15,123,108,0.3)' }}
             >
               Request a Demo
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -107,7 +109,8 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8"
+              className="text-white hover:bg-white/5 px-8"
+              style={{ borderColor: 'rgba(255,255,255,0.15)' }}
             >
               See How It Works
             </Button>
@@ -116,25 +119,25 @@ const Index = () => {
       </section>
 
       {/* Core Features */}
-      <section aria-labelledby="features-heading" className="bg-primary-foreground/5 backdrop-blur-sm border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="features-heading" className="backdrop-blur-sm py-16" style={{ background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 id="features-heading" className="text-3xl font-bold text-primary-foreground mb-2">Core Features</h2>
-            <p className="text-primary-foreground/60">Everything you need to manage programs effectively</p>
+            <h2 id="features-heading" className="text-3xl font-semibold text-white mb-2">Core Features</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)' }}>Everything you need to manage programs effectively</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coreFeatures.map((feature, index) => (
-              <Card key={index} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-primary-foreground/20 transition-colors">
+              <Card key={index} className="border-0 transition-colors" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 ${feature.accentBg} rounded-lg border ${feature.accentBorder}`}>
-                      <feature.icon className={`w-5 h-5 ${feature.accent}`} />
+                    <div className="p-2 rounded-lg" style={{ background: 'rgba(29,158,138,0.12)', border: '1px solid rgba(29,158,138,0.2)' }}>
+                      <feature.icon className="w-5 h-5" style={{ color: 'var(--accent-mid)' }} />
                     </div>
-                    <CardTitle className="text-primary-foreground text-lg">{feature.title}</CardTitle>
+                    <CardTitle className="text-white text-[15px] font-semibold">{feature.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-primary-foreground/60">{feature.description}</CardDescription>
+                  <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>{feature.description}</CardDescription>
                 </CardContent>
               </Card>
             ))}
@@ -146,55 +149,56 @@ const Index = () => {
       <section className="py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-primary-foreground mb-6">Why Choose Ufanisi?</h3>
+            <div className="rounded-2xl p-8" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <h3 className="text-2xl font-semibold text-white mb-6">Why Choose Ufanisi?</h3>
               <div className="space-y-3">
                 {benefits.map((item, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    <span className="text-primary-foreground/80">{item}</span>
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--accent-mid)' }} />
+                    <span style={{ color: 'rgba(255,255,255,0.7)' }}>{item}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-emerald-400 mt-6 text-sm italic">
+              <p className="mt-6 text-[13px] italic" style={{ color: 'var(--accent-mid)' }}>
                 Built by practitioners, for practitioners.
               </p>
             </div>
-            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl p-8">
+            <div className="rounded-2xl p-8" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3 mb-6">
-                <Lock className="w-6 h-6 text-amber-400" />
-                <h3 className="text-2xl font-bold text-primary-foreground">Data Security</h3>
+                <Lock className="w-6 h-6" style={{ color: 'var(--status-warning)' }} />
+                <h3 className="text-2xl font-semibold text-white">Data Security</h3>
               </div>
               <div className="space-y-3">
                 {["Organization-level data isolation", "Role-based access control", "Secure authentication", "Your data stays yours"].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <Shield className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                    <span className="text-primary-foreground/80">{item}</span>
+                    <Shield className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--status-warning)' }} />
+                    <span style={{ color: 'rgba(255,255,255,0.7)' }}>{item}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-amber-400 mt-6 font-medium">Your data. Your impact. Your control.</p>
+              <p className="mt-6 font-medium" style={{ color: 'var(--status-warning)' }}>Your data. Your impact. Your control.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section aria-labelledby="cta-heading" className="bg-accent/10 border-y border-primary-foreground/10 py-16">
+      <section aria-labelledby="cta-heading" className="py-16" style={{ background: 'rgba(15,123,108,0.08)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 id="cta-heading" className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-6">
+          <h2 id="cta-heading" className="text-2xl sm:text-3xl font-semibold text-white mb-6">
             Ready to strengthen your monitoring, reporting, and impact?
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
               onClick={() => navigate('/auth')}
-              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 px-8 border-0"
+              className="text-white shadow-lg px-8 border-0"
+              style={{ background: 'var(--accent-brand)', boxShadow: '0 8px 24px rgba(15,123,108,0.3)' }}
             >
               Request a Demo
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8">
+            <Button size="lg" variant="outline" className="text-white hover:bg-white/5 px-8" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
               Join the Pilot Program
             </Button>
           </div>
@@ -203,16 +207,16 @@ const Index = () => {
 
       {/* Footer */}
       </main>
-      <footer role="contentinfo" className="bg-primary-dark/50 border-t border-primary-foreground/10 py-8">
+      <footer role="contentinfo" className="py-8" style={{ background: 'rgba(10,15,30,0.5)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
-              <Target className="w-5 h-5 text-accent-light" />
-              <span className="text-primary-foreground font-semibold">Ufanisi</span>
-              <span className="text-primary-foreground/40">•</span>
-              <span className="text-primary-foreground/60 text-sm">A product of Infera Tech Solutions</span>
+              <Target className="w-5 h-5" style={{ color: 'var(--accent-mid)' }} />
+              <span className="text-white font-semibold">Ufanisi</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
+              <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.5)' }}>A product of Infera Tech Solutions</span>
             </div>
-            <p className="text-primary-foreground/40 text-sm">© 2026 — Empowering measurable impact</p>
+            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>© 2026 — Empowering measurable impact</p>
           </div>
         </div>
       </footer>

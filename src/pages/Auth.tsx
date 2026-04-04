@@ -641,7 +641,7 @@ export default function Auth() {
           </div>
         </CardContent>
         
-        <div className="h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+        <div className="h-px" style={{ background: 'var(--brand-border)' }} />
       </Card>
     </div>
   );

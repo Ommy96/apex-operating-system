@@ -11,21 +11,12 @@ interface StatsCardProps {
 }
 
 const colorVariants = {
-  blue: 'from-blue-500/10 to-cyan-500/10 border-blue-200 dark:border-blue-800',
-  emerald: 'from-emerald-500/10 to-green-500/10 border-emerald-200 dark:border-emerald-800',
-  purple: 'from-purple-500/10 to-pink-500/10 border-purple-200 dark:border-purple-800',
-  orange: 'from-orange-500/10 to-amber-500/10 border-orange-200 dark:border-orange-800',
-  rose: 'from-rose-500/10 to-red-500/10 border-rose-200 dark:border-rose-800',
-  cyan: 'from-cyan-500/10 to-teal-500/10 border-cyan-200 dark:border-cyan-800',
-};
-
-const iconColors = {
-  blue: 'text-blue-500 bg-blue-500/10',
-  emerald: 'text-emerald-500 bg-emerald-500/10',
-  purple: 'text-purple-500 bg-purple-500/10',
-  orange: 'text-orange-500 bg-orange-500/10',
-  rose: 'text-rose-500 bg-rose-500/10',
-  cyan: 'text-cyan-500 bg-cyan-500/10',
+  blue: { bg: 'var(--status-info-bg)', border: 'var(--status-info)', iconBg: 'var(--status-info-bg)', iconColor: 'var(--status-info)' },
+  emerald: { bg: 'var(--status-success-bg)', border: 'var(--status-success)', iconBg: 'var(--status-success-bg)', iconColor: 'var(--status-success)' },
+  purple: { bg: 'var(--status-info-bg)', border: 'var(--status-info)', iconBg: 'var(--status-info-bg)', iconColor: 'var(--status-info)' },
+  orange: { bg: 'var(--status-warning-bg)', border: 'var(--status-warning)', iconBg: 'var(--status-warning-bg)', iconColor: 'var(--status-warning)' },
+  rose: { bg: 'var(--status-danger-bg)', border: 'var(--status-danger)', iconBg: 'var(--status-danger-bg)', iconColor: 'var(--status-danger)' },
+  cyan: { bg: 'var(--accent-lt)', border: 'var(--accent-brand)', iconBg: 'var(--accent-lt)', iconColor: 'var(--accent-brand)' },
 };
 
 export function StatsCard({ 
@@ -36,28 +27,35 @@ export function StatsCard({
   colorVariant = 'blue',
   children 
 }: StatsCardProps) {
+  const colors = colorVariants[colorVariant];
+  
   return (
-    <Card className={`bg-gradient-to-br ${colorVariants[colorVariant]} border shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5`}>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">{title}</span>
-          <div className={`p-2 rounded-lg ${iconColors[colorVariant]}`}>
-            <Icon className="h-4 w-4" />
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {children ? (
-          children
-        ) : (
-          <>
-            <div className="text-xl sm:text-3xl font-bold truncate">{value}</div>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-[14px] p-4 transition-shadow duration-150 hover:shadow-elevation-2"
+      style={{
+        background: 'var(--brand-surface)',
+        border: '1px solid var(--brand-border)',
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-medium uppercase tracking-[0.5px]" style={{ color: 'var(--brand-ink-3)' }}>{title}</span>
+        <div
+          className="p-2 rounded-lg"
+          style={{ background: colors.iconBg }}
+        >
+          <Icon className="h-4 w-4" style={{ color: colors.iconColor }} />
+        </div>
+      </div>
+      {children ? (
+        children
+      ) : (
+        <>
+          <div className="text-[24px] font-semibold truncate tabular-nums" style={{ color: 'var(--brand-ink)', letterSpacing: '-0.8px' }}>{value}</div>
+          {subtitle && (
+            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-ink-3)' }}>{subtitle}</p>
+          )}
+        </>
+      )}
+    </div>
   );
 }

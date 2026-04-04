@@ -25,26 +25,26 @@ export function PageHeroHeader({
   stats,
   variant = 'default',
 }: PageHeroHeaderProps) {
-  // Gradient variant (legacy support)
+  // Gradient variant
   if (variant === 'gradient') {
     return (
-      <div className="relative overflow-hidden rounded-xl bg-gradient-hero p-6 animate-fade-in">
+      <div className="relative overflow-hidden rounded-[14px] p-6 animate-fade-in" style={{ background: 'var(--gradient-hero)' }}>
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[size:20px_20px]"></div>
         
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {Icon && (
-                <div className="p-3 rounded-xl bg-white/10 backdrop-blur-sm shadow-lg shrink-0">
+                <div className="p-3 rounded-xl shrink-0" style={{ background: 'rgba(29,158,138,0.2)', border: '1px solid rgba(29,158,138,0.3)' }}>
                   <Icon className="h-6 w-6 text-white" />
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold text-white mb-0.5 truncate">
+                <h1 className="text-xl sm:text-2xl font-semibold text-white mb-0.5 truncate" style={{ letterSpacing: '-0.5px' }}>
                   {title}
                 </h1>
                 {description && (
-                  <p className="text-white/80 text-sm truncate">{description}</p>
+                  <p className="text-[13px] truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{description}</p>
                 )}
               </div>
             </div>
@@ -59,13 +59,14 @@ export function PageHeroHeader({
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10"
+                  className="rounded-[10px] p-3"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
-                  <div className="flex items-center gap-1.5 text-white/70 text-xs mb-0.5">
+                  <div className="flex items-center gap-1.5 text-[11px] mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {stat.icon && <stat.icon className="h-3.5 w-3.5 shrink-0" />}
-                    <span className="truncate">{stat.label}</span>
+                    <span className="truncate uppercase tracking-[0.5px] font-medium">{stat.label}</span>
                   </div>
-                  <div className="text-xl font-bold text-white">
+                  <div className="text-xl font-semibold text-white tabular-nums">
                     {stat.value}
                   </div>
                 </div>
@@ -77,24 +78,24 @@ export function PageHeroHeader({
     );
   }
 
-  // Default minimal variant (ClickUp-style)
+  // Default minimal variant
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-3 min-w-0">
         {Icon && (
           <div className={cn(
-            "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+            "h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0",
             "bg-primary/10"
           )}>
             <Icon className={cn("h-5 w-5", iconColorClass)} />
           </div>
         )}
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+          <h1 className="text-[20px] font-semibold truncate" style={{ color: 'var(--brand-ink)', letterSpacing: '-0.5px' }}>
             {title}
           </h1>
           {description && (
-            <p className="text-sm text-muted-foreground truncate">{description}</p>
+            <p className="text-[13px] truncate" style={{ color: 'var(--brand-ink-3)' }}>{description}</p>
           )}
         </div>
       </div>
