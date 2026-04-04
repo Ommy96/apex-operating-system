@@ -13,7 +13,7 @@ export async function registerBackgroundSync(tag: string = 'offline-sync'): Prom
     // Use Background Sync API if available
     if ('sync' in registration) {
       await (registration as any).sync.register(tag);
-      console.log(`[SW] Background sync registered: ${tag}`);
+      logger.log(`[SW] Background sync registered: ${tag}`);
       return true;
     }
   } catch (err) {
