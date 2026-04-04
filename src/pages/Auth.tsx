@@ -281,7 +281,7 @@ export default function Auth() {
           <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
         </div>
 
-        <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
+        <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
             <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
           
           <CardHeader className="text-center pt-8 pb-4">
