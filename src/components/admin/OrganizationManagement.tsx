@@ -289,6 +289,14 @@ export function OrganizationManagement() {
                             <SlidersHorizontal className="h-4 w-4 mr-2" />Adjust Limits
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-slate-700" />
+                          <DropdownMenuItem className="text-amber-400 focus:bg-slate-700 focus:text-amber-300" onClick={(e) => {
+                            e.stopPropagation();
+                            sessionStorage.setItem('impersonating_org', JSON.stringify({ orgId: org.id, orgName: org.name }));
+                            navigate('/dashboard');
+                          }}>
+                            <UserCheck className="h-4 w-4 mr-2" />Impersonate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-slate-700" />
                           {org.suspended_at ? (
                             <DropdownMenuItem className="text-emerald-400 focus:bg-slate-700 focus:text-emerald-300" onClick={(e) => { e.stopPropagation(); handleActivate(org); }}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />Reactivate
