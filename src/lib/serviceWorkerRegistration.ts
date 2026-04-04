@@ -60,7 +60,7 @@ export async function isOfflineReady(): Promise<boolean> {
 export async function requestPersistentStorage(): Promise<boolean> {
   if (navigator.storage && navigator.storage.persist) {
     const granted = await navigator.storage.persist();
-    console.log(`[Storage] Persistent storage ${granted ? 'granted' : 'denied'}`);
+    logger.log(`[Storage] Persistent storage ${granted ? 'granted' : 'denied'}`);
     return granted;
   }
   return false;
