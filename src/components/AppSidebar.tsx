@@ -26,7 +26,6 @@ import {
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
@@ -59,16 +58,14 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
   if (isLocked) {
     const lockedContent = (
       <div
-        className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed",
-          "text-sidebar-foreground/70"
-        )}
+        className="flex items-center gap-[10px] px-[10px] py-2 rounded-[10px] text-[13px] opacity-40 cursor-not-allowed"
+        style={{ color: 'var(--sidebar-text)' }}
       >
-        <item.icon className="h-4 w-4 flex-shrink-0" />
+        <item.icon className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
         {!isCollapsed && (
           <>
             <span className="truncate flex-1">{item.title}</span>
-            <Lock className="h-4 w-4 flex-shrink-0 text-sidebar-foreground/40" />
+            <Lock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }} strokeWidth={1.5} />
           </>
         )}
       </div>
@@ -79,8 +76,8 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
         <TooltipTrigger asChild>
           {lockedContent}
         </TooltipTrigger>
-        <TooltipContent side="right" className="font-medium">
-          Upgrade to Professional or Enterprise to access {item.title}
+        <TooltipContent side="right" className="text-[12px]">
+          Available on Professional plan
         </TooltipContent>
       </Tooltip>
     );
@@ -92,13 +89,28 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
       end
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+        "flex items-center gap-[10px] px-[10px] py-2 rounded-[10px] text-[13px] transition-colors duration-150",
         active
-          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/25"
-          : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+          ? "font-medium"
+          : "font-normal"
       )}
+      style={{
+        background: active ? 'var(--sidebar-active-bg)' : undefined,
+        border: active ? '1px solid var(--sidebar-active-border)' : '1px solid transparent',
+        color: active ? '#fff' : 'var(--sidebar-text)',
+      }}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+      }}
+      onMouseLeave={(e) => {
+        if (!active) e.currentTarget.style.background = 'transparent';
+      }}
     >
-      <item.icon className={cn("h-4 w-4 flex-shrink-0", active && "text-sidebar-primary-foreground")} />
+      <item.icon 
+        className="h-4 w-4 flex-shrink-0" 
+        strokeWidth={1.5}
+        style={{ color: active ? 'var(--accent-mid)' : undefined, opacity: active ? 1 : 0.4 }}
+      />
       {!isCollapsed && (
         <span className="truncate">{item.title}</span>
       )}
@@ -111,7 +123,7 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
         <TooltipTrigger asChild>
           {content}
         </TooltipTrigger>
-        <TooltipContent side="right" className="font-medium">
+        <TooltipContent side="right" className="text-[12px] font-medium">
           {item.title}
         </TooltipContent>
       </Tooltip>
@@ -166,7 +178,9 @@ export function AppSidebar() {
     await signOut();
   };
 
-  // Build menu groups — all items respect RBAC permissions
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+
   const menuGroups: MenuGroup[] = [
     {
       label: "Overview",
@@ -240,43 +254,60 @@ export function AppSidebar() {
     <TooltipProvider>
       <Sidebar 
         className={cn(
-          "border-r-0 bg-sidebar",
-          isCollapsed ? "w-[70px]" : "w-[250px]"
+          "border-r-0",
+          isCollapsed ? "w-[56px]" : "w-[220px]"
         )} 
         collapsible="icon"
+        style={{ background: 'var(--sidebar-bg)' }}
       >
-        <SidebarHeader className="p-4 pb-2">
-          <div className={cn(
-            "flex items-center gap-3 transition-all duration-200 mb-3",
-            isCollapsed && "justify-center"
-          )}>
+        {/* Logo Section */}
+        <SidebarHeader className="p-0">
+          <div 
+            className={cn(
+              "flex items-center gap-3 transition-all duration-200",
+              isCollapsed ? "justify-center px-2 py-5" : "px-5 pt-5 pb-4"
+            )}
+            style={{ borderBottom: '1px solid var(--sidebar-divider)' }}
+          >
             {logoUrl ? (
-              <img src={logoUrl} alt={orgName} className="h-9 w-9 rounded-xl object-contain" />
+              <img src={logoUrl} alt={orgName} className="h-8 w-8 rounded-lg object-contain" />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
-                <Target className="h-4.5 w-4.5 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0" style={{ background: 'var(--accent-mid)' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 1L14.5 5V11L8 15L1.5 11V5L8 1Z" stroke="white" strokeWidth="1.5" fill="none" />
+                  <path d="M8 5L11 7V11L8 13L5 11V7L8 5Z" fill="white" fillOpacity="0.6" />
+                </svg>
               </div>
             )}
             {!isCollapsed && (
-              <div className="flex flex-col animate-fade-in">
-                <span className="font-bold text-sidebar-foreground tracking-tight text-sm">{orgName}</span>
-                <span className="text-[11px] text-sidebar-foreground/60">Data Platform</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[14px] font-semibold text-white" style={{ letterSpacing: '-0.3px' }}>
+                  Ufanisi
+                </span>
+                <span className="text-[10px] uppercase" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.6px' }}>
+                  NGO Platform
+                </span>
               </div>
             )}
           </div>
-          <OrganizationSwitcher collapsed={isCollapsed} />
+          <div className={cn("px-3 pt-3 pb-1", isCollapsed && "px-1")}>
+            <OrganizationSwitcher collapsed={isCollapsed} />
+          </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3 pb-4 overflow-y-auto">
+        <SidebarContent className="px-2 pb-4 overflow-y-auto workspace-scroll">
           {menuGroups.map((group) => {
             const visibleItems = group.items.filter(i => i.show !== false || i.featureFlag);
             const actualVisible = group.items.filter(i => i.show !== false);
             if (actualVisible.length === 0 && visibleItems.length === 0) return null;
 
             return (
-              <SidebarGroup key={group.label} className="mt-4 first:mt-0">
+              <SidebarGroup key={group.label} className="mt-4 first:mt-2">
                 {!isCollapsed && (
-                  <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 mb-1">
+                  <SidebarGroupLabel 
+                    className="px-[10px] mb-1.5 text-[10px] font-medium uppercase"
+                    style={{ color: 'var(--sidebar-label)', letterSpacing: '0.8px' }}
+                  >
                     {group.label}
                   </SidebarGroupLabel>
                 )}
@@ -305,7 +336,10 @@ export function AppSidebar() {
           {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
-                <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 mb-1">
+                <SidebarGroupLabel 
+                  className="px-[10px] mb-1.5 text-[10px] font-medium uppercase"
+                  style={{ color: 'var(--sidebar-label)', letterSpacing: '0.8px' }}
+                >
                   Program Spaces
                 </SidebarGroupLabel>
               )}
@@ -329,7 +363,10 @@ export function AppSidebar() {
           {isSuperAdmin(user?.email) && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
-                <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 mb-1 flex items-center gap-1">
+                <SidebarGroupLabel 
+                  className="px-[10px] mb-1.5 text-[10px] font-medium uppercase flex items-center gap-1"
+                  style={{ color: 'var(--sidebar-label)', letterSpacing: '0.8px' }}
+                >
                   <Shield className="h-3 w-3" />
                   Platform
                 </SidebarGroupLabel>
@@ -350,32 +387,57 @@ export function AppSidebar() {
           )}
         </SidebarContent>
 
-        <SidebarFooter className="p-3 mt-auto border-t border-sidebar-border/30">
+        {/* User Footer */}
+        <SidebarFooter className="p-3 mt-auto" style={{ borderTop: '1px solid var(--sidebar-divider)' }}>
           {isCollapsed ? (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
                   onClick={handleLogout}
-                  className="w-full h-9 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                  className="w-full h-8 flex items-center justify-center rounded-lg transition-colors duration-150"
+                  style={{ color: 'var(--sidebar-text)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  aria-label="Logout"
                 >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                  <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                </button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="font-medium">
+              <TooltipContent side="right" className="text-[12px]">
                 Logout
               </TooltipContent>
             </Tooltip>
           ) : (
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="w-full justify-start gap-3 px-3 py-2 h-auto text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 rounded-lg font-medium text-sm"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
+            <div className="space-y-2">
+              {/* User Pill */}
+              <div 
+                className="flex items-center gap-[10px] p-2 rounded-lg"
+                style={{ background: 'rgba(255,255,255,0.05)' }}
+              >
+                <div 
+                  className="h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-semibold text-white"
+                  style={{ background: 'linear-gradient(135deg, var(--accent-mid), #1B5FBB)' }}
+                >
+                  {initials}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] font-medium text-white truncate">{userName}</div>
+                  <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    {user?.email?.split('@')[0]}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-[10px] px-[10px] py-2 rounded-lg text-[13px] transition-colors duration-150"
+                style={{ color: 'var(--sidebar-text)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#E05C8A'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-text)'; }}
+              >
+                <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                <span>Logout</span>
+              </button>
+            </div>
           )}
         </SidebarFooter>
       </Sidebar>

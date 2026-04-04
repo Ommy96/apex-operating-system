@@ -16,18 +16,18 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
-      <div className="min-h-screen min-h-[100dvh] flex w-full bg-background">
+      <div className="min-h-screen min-h-[100dvh] flex w-full" style={{ background: 'var(--brand-canvas)' }}>
         <WorkspaceSidebar />
         
         <div className="flex-1 flex flex-col min-w-0 w-full">
           <WorkspaceHeader onCommandOpen={() => setCommandOpen(true)} />
           
-          {/* Main Workspace Content */}
           <main
             id="main-content"
             role="main"
             aria-label="Page content"
-            className="flex-1 overflow-auto p-4 md:p-6 workspace-scroll"
+            className="flex-1 overflow-auto p-6 workspace-scroll"
+            style={{ background: 'var(--brand-canvas)' }}
           >
             <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
               {children}

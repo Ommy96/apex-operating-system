@@ -16,7 +16,7 @@ interface StatCardProps {
 }
 
 const variantStyles = {
-  default: "bg-card border-border/50",
+  default: "",
   primary: "bg-gradient-card-navy border-card-navy",
   success: "bg-gradient-card-sky border-card-sky",
   warning: "bg-gradient-card-amber border-card-amber",
@@ -26,9 +26,9 @@ const variantStyles = {
 const iconStyles = {
   default: "bg-muted text-muted-foreground",
   primary: "bg-primary/10 text-primary",
-  success: "bg-accent/10 text-accent",
-  warning: "bg-warning/10 text-warning",
-  info: "bg-info/10 text-info",
+  success: "text-[var(--status-success)] bg-[var(--status-success-bg)]",
+  warning: "text-[var(--status-warning)] bg-[var(--status-warning-bg)]",
+  info: "text-[var(--status-info)] bg-[var(--status-info-bg)]",
 };
 
 export function StatCard({
@@ -50,35 +50,37 @@ export function StatCard({
 
   const trendColor = trend
     ? trend.value > 0
-      ? "text-success"
+      ? "text-[var(--status-success)]"
       : trend.value < 0
-      ? "text-destructive"
+      ? "text-[var(--status-danger)]"
       : "text-muted-foreground"
     : "";
 
   return (
     <div
       className={cn(
-        "rounded-xl border p-4 transition-all duration-200 hover:shadow-md",
+        "rounded-[14px] border bg-card p-4 transition-shadow duration-150 hover:shadow-elevation-2",
         variantStyles[variant],
         className
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 truncate">
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.5px] mb-2 truncate">
             {title}
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{value}</p>
+          <p className="text-[24px] font-semibold text-foreground truncate tabular-nums" style={{ letterSpacing: '-0.8px' }}>
+            {value}
+          </p>
           {description && (
-            <p className="text-xs text-muted-foreground mt-1 truncate">
+            <p className="text-[11px] text-muted-foreground mt-1 truncate">
               {description}
             </p>
           )}
           {trend && TrendIcon && (
-            <div className={cn("flex items-center gap-1 mt-2 text-xs", trendColor)}>
+            <div className={cn("flex items-center gap-1 mt-2 text-[11px]", trendColor)}>
               <TrendIcon className="h-3 w-3" />
-              <span className="font-medium">
+              <span className="font-medium tabular-nums">
                 {trend.value > 0 ? "+" : ""}
                 {trend.value}%
               </span>
@@ -91,11 +93,11 @@ export function StatCard({
         {Icon && (
           <div
             className={cn(
-              "h-10 w-10 rounded-lg flex items-center justify-center shrink-0",
+              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
               iconStyles[variant]
             )}
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </div>
         )}
       </div>
