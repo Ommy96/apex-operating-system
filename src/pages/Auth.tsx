@@ -557,9 +557,9 @@ export default function Auth() {
                     </DialogHeader>
                     
                     {forgotPasswordSuccess ? (
-                      <Alert className="border-green-500/30 bg-green-500/10">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <AlertDescription className="text-green-600 dark:text-green-400">
+                    <Alert style={{ borderColor: 'var(--status-success)', background: 'var(--status-success-bg)' }}>
+                         <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--status-success)' }} />
+                         <AlertDescription style={{ color: 'var(--status-success)' }}>
                           Password reset email sent! Check your inbox and follow the instructions to reset your password.
                         </AlertDescription>
                       </Alert>
