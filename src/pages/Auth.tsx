@@ -546,8 +546,8 @@ export default function Auth() {
                   <DialogContent className="sm:max-w-md border-0 shadow-2xl bg-background/95 backdrop-blur-xl">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-emerald-500/10">
-                          <Mail className="h-5 w-5 text-emerald-600" />
+                     <div className="p-2 rounded-lg" style={{ background: 'var(--accent-lt)' }}>
+                           <Mail className="h-5 w-5" style={{ color: 'var(--accent-brand)' }} />
                         </div>
                         Reset Password
                       </DialogTitle>
