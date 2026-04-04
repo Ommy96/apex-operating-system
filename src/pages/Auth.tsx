@@ -282,7 +282,7 @@ export default function Auth() {
         </div>
 
         <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-background/80 backdrop-blur-xl overflow-hidden">
-          <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500" />
+            <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
           
           <CardHeader className="text-center pt-8 pb-4">
             <Button
@@ -297,14 +297,14 @@ export default function Auth() {
             
             <div className="flex justify-center mb-4">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg">
+                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
+                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
                   <Building2 className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
               Accept Invitation
             </CardTitle>
             <CardDescription className="text-muted-foreground">
