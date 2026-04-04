@@ -66,6 +66,7 @@ function HealthBar({ score }: { score: number }) {
 export function OrganizationManagement() {
   const { data: organizations, isLoading } = useAllOrganizations();
   const { suspendOrganization, activateOrganization, updateSubscription, updateFeatureLimits } = useOrganizationManagement();
+  const navigate = useNavigate();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTier, setFilterTier] = useState<string>('all');
