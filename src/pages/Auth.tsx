@@ -539,7 +539,7 @@ export default function Auth() {
               <div className="text-center pt-2">
                 <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="link" className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
+                    <Button variant="link" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                       Forgot your password?
                     </Button>
                   </DialogTrigger>
