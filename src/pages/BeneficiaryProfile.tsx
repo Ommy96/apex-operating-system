@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, DollarSign, Clock, Activity, ShieldAlert } from 'lucide-react';
@@ -180,7 +181,7 @@ export default function BeneficiaryProfile() {
         }
       }
     } catch (error) {
-      console.error('Error fetching beneficiary:', error);
+      logger.error('Error fetching beneficiary:', error);
       toast({ title: "Error", description: "Failed to load beneficiary details", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -195,7 +196,7 @@ export default function BeneficiaryProfile() {
       toast({ title: "Success", description: "Beneficiary deleted successfully" });
       navigate('/beneficiaries');
     } catch (error) {
-      console.error('Error deleting beneficiary:', error);
+      logger.error('Error deleting beneficiary:', error);
       toast({ title: "Error", description: "Failed to delete beneficiary", variant: "destructive" });
     }
   };
@@ -215,7 +216,7 @@ export default function BeneficiaryProfile() {
       });
       toast({ title: "Success", description: "Report downloaded successfully" });
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error('Error generating report:', error);
       toast({ title: "Error", description: "Failed to generate report", variant: "destructive" });
     } finally {
       setGeneratingReport(false);

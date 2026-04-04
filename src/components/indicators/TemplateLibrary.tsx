@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,7 +66,7 @@ export function TemplateLibrary({ open, onOpenChange }: TemplateLibraryProps) {
     try {
       await importTemplate.mutateAsync(template);
     } catch (error) {
-      console.error('Error importing template:', error);
+      logger.error('Error importing template:', error);
     }
   };
 

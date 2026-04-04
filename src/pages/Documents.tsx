@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,7 +147,7 @@ export default function Documents() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Download failed:', error);
+      logger.error('Download failed:', error);
       window.open(url, '_blank');
     }
   };

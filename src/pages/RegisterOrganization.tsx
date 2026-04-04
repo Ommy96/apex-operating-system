@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -215,7 +216,7 @@ export default function RegisterOrganization() {
       setRegistrationComplete(true);
       toast.success('Organization registered successfully!');
     } catch (error: any) {
-      console.error('Registration error:', error);
+      logger.error('Registration error:', error);
       toast.error(error.message || 'Failed to register organization');
     } finally { setIsLoading(false); }
   };

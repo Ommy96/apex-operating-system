@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -71,7 +72,7 @@ export function PasswordConfirmationModal({
       onConfirm(password);
       setPassword(''); // Clear password for security
     } catch (error: any) {
-      console.error('Password verification error:', error);
+      logger.error('Password verification error:', error);
       toast({
         title: "Verification Failed",
         description: error.message || "Unable to verify password",

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,7 +170,7 @@ export function GroupBeneficiaryForm({ onSuccess, onCancel }: GroupBeneficiaryFo
       toast.success("Group beneficiary registered successfully!");
       onSuccess?.();
     } catch (error: any) {
-      console.error("Error creating group beneficiary:", error);
+      logger.error("Error creating group beneficiary:", error);
       toast.error(error.message || "Failed to register group beneficiary");
     } finally {
       setIsSubmitting(false);
