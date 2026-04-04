@@ -39,7 +39,7 @@ export async function registerPeriodicSync(
         await (registration as any).periodicSync.register(tag, {
           minInterval: minIntervalMs,
         });
-        console.log(`[SW] Periodic sync registered: ${tag}`);
+        logger.log(`[SW] Periodic sync registered: ${tag}`);
         return true;
       }
     }
