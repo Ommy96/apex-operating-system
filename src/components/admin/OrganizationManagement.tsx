@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +22,7 @@ import {
 import { 
   Building2, Search, MoreHorizontal, Ban, CheckCircle2, Users, Heart, Loader2, 
   Settings2, ChevronDown, ChevronUp, Globe, MapPin, Calendar, Activity,
-  AlertTriangle, TrendingUp, Layers, Shield, X, SlidersHorizontal,
+  AlertTriangle, TrendingUp, Layers, Shield, X, SlidersHorizontal, UserCheck,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
@@ -65,6 +66,7 @@ function HealthBar({ score }: { score: number }) {
 export function OrganizationManagement() {
   const { data: organizations, isLoading } = useAllOrganizations();
   const { suspendOrganization, activateOrganization, updateSubscription, updateFeatureLimits } = useOrganizationManagement();
+  const navigate = useNavigate();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTier, setFilterTier] = useState<string>('all');
@@ -285,6 +287,14 @@ export function OrganizationManagement() {
                             setLimitsDialogOpen(true); 
                           }}>
                             <SlidersHorizontal className="h-4 w-4 mr-2" />Adjust Limits
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-slate-700" />
+                          <DropdownMenuItem className="text-amber-400 focus:bg-slate-700 focus:text-amber-300" onClick={(e) => {
+                            e.stopPropagation();
+                            sessionStorage.setItem('impersonating_org', JSON.stringify({ orgId: org.id, orgName: org.name }));
+                            navigate('/dashboard');
+                          }}>
+                            <UserCheck className="h-4 w-4 mr-2" />Impersonate
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-slate-700" />
                           {org.suspended_at ? (

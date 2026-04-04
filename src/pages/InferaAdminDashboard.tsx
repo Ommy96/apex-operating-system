@@ -90,8 +90,20 @@ export default function InferaAdminDashboard() {
     color: TIER_COLORS[item.tier] || '#64748b',
   })) || [];
 
+  const impersonating = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem('impersonating_org') || 'null') : null;
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200">
+      {/* Impersonation Banner */}
+      {impersonating && (
+        <div className="bg-amber-600 text-white px-4 py-2 text-sm flex items-center justify-between">
+          <span>⚠️ You are impersonating <strong>{impersonating.orgName}</strong></span>
+          <Button size="sm" variant="ghost" className="text-white hover:bg-amber-700 h-7" onClick={() => { sessionStorage.removeItem('impersonating_org'); window.location.reload(); }}>
+            Exit Impersonation
+          </Button>
+        </div>
+      )}
+
       {/* Top Bar */}
       <div className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50">
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">

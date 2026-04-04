@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -18,10 +21,15 @@ import {
   Settings, 
   Calendar,
   BarChart3,
-  AlertCircle,
+  ChevronDown,
+  Plus,
+  Trash2,
+  ShieldAlert,
 } from 'lucide-react';
 import { Indicator, useIndicatorTargets, useIndicatorValues } from '@/hooks/useIndicators';
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format, subMonths } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
   LineChart,
@@ -32,6 +40,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  BarChart,
+  Bar,
+  Legend,
 } from 'recharts';
 
 interface ComputedValue {
@@ -49,6 +60,15 @@ interface IndicatorDetailViewProps {
   onEdit: () => void;
 }
 
+const RULE_LABELS: Record<string, string> = {
+  min_value: 'Minimum value',
+  max_value: 'Maximum value',
+  max_change_pct: 'Max % change between periods',
+  require_comment_if_zero: 'Require comment when zero',
+};
+
+const DISAGG_COLORS = ['#14b8a6', '#a855f7', '#f59e0b', '#3b82f6', '#ef4444', '#6366f1'];
+
 export function IndicatorDetailView({
   open,
   onOpenChange,
@@ -58,8 +78,78 @@ export function IndicatorDetailView({
   onEdit,
 }: IndicatorDetailViewProps) {
   const currentYear = new Date().getFullYear();
+  const queryClient = useQueryClient();
   const { data: targets = [] } = useIndicatorTargets(indicator.id);
   const { data: historicalValues = [] } = useIndicatorValues(indicator.id);
+
+  // Validation rules
+  const { data: validationRules = [] } = useQuery({
+    queryKey: ['indicator-validation-rules', indicator.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('indicator_validation_rules')
+        .select('*')
+        .eq('indicator_id', indicator.id);
+      return data || [];
+    },
+    enabled: !!indicator.id,
+  });
+
+  const [newRuleType, setNewRuleType] = useState('min_value');
+  const [newRuleValue, setNewRuleValue] = useState('');
+  const [rulesOpen, setRulesOpen] = useState(false);
+
+  const addRule = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('indicator_validation_rules').insert({
+        indicator_id: indicator.id,
+        rule_type: newRuleType,
+        rule_value: newRuleType === 'require_comment_if_zero' ? 0 : parseFloat(newRuleValue),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['indicator-validation-rules', indicator.id] });
+      setNewRuleValue('');
+    },
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: async (ruleId: string) => {
+      const { error } = await supabase.from('indicator_validation_rules').delete().eq('id', ruleId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['indicator-validation-rules', indicator.id] });
+    },
+  });
+
+  // Disaggregated data
+  const disaggregatedValues = useMemo(() => {
+    return historicalValues.filter((v: any) => v.disaggregation_value != null && v.disaggregation_category_id != null);
+  }, [historicalValues]);
+
+  const hasDisaggregation = disaggregatedValues.length > 0;
+
+  // Get available periods for disaggregated view
+  const disaggPeriods = useMemo(() => {
+    const periods = new Set<string>();
+    disaggregatedValues.forEach((v: any) => periods.add(v.period_start));
+    return Array.from(periods).sort().reverse();
+  }, [disaggregatedValues]);
+
+  const [selectedDisaggPeriod, setSelectedDisaggPeriod] = useState<string>('');
+  const activePeriod = selectedDisaggPeriod || disaggPeriods[0] || '';
+
+  const disaggChartData = useMemo(() => {
+    if (!activePeriod) return [];
+    return disaggregatedValues
+      .filter((v: any) => v.period_start === activePeriod)
+      .map((v: any) => ({
+        name: v.disaggregation_value,
+        value: v.actual_value,
+      }));
+  }, [disaggregatedValues, activePeriod]);
 
   const currentTarget = targets.find(t => 
     t.period_year === currentYear && 
@@ -80,7 +170,6 @@ export function IndicatorDetailView({
       ? isNegativeTrend 
       : true;
 
-  // Format value based on unit
   const formatValue = (value: number) => {
     if (indicator.unit === 'percentage') {
       return `${value.toFixed(indicator.decimal_places)}%`;
@@ -99,16 +188,15 @@ export function IndicatorDetailView({
     });
   };
 
-  // Generate chart data from historical values or mock data
   const chartData = useMemo(() => {
     if (historicalValues.length > 0) {
-      return historicalValues.slice(0, 12).reverse().map(v => ({
-        period: format(new Date(v.period_start), 'MMM yy'),
-        value: v.actual_value,
-      }));
+      return historicalValues
+        .filter((v: any) => !v.disaggregation_value)
+        .slice(0, 12).reverse().map((v: any) => ({
+          period: format(new Date(v.period_start), 'MMM yy'),
+          value: v.actual_value,
+        }));
     }
-    
-    // Generate mock data for demo
     const months = [];
     for (let i = 11; i >= 0; i--) {
       const date = subMonths(new Date(), i);
@@ -117,10 +205,7 @@ export function IndicatorDetailView({
         value: Math.round(currentValue * (0.7 + Math.random() * 0.6)),
       });
     }
-    // Set last month to actual current value
-    if (months.length > 0) {
-      months[months.length - 1].value = currentValue;
-    }
+    if (months.length > 0) months[months.length - 1].value = currentValue;
     return months;
   }, [historicalValues, currentValue]);
 
@@ -185,7 +270,6 @@ export function IndicatorDetailView({
                   )}
                 </div>
                 
-                {/* Target Progress */}
                 {currentTarget && (
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground mb-1">Target</p>
@@ -224,16 +308,8 @@ export function IndicatorDetailView({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis 
-                      dataKey="period" 
-                      tick={{ fontSize: 11 }}
-                      tickLine={false}
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
+                    <XAxis dataKey="period" tick={{ fontSize: 11 }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                     <Tooltip 
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
@@ -247,27 +323,60 @@ export function IndicatorDetailView({
                         y={currentTarget.target_value} 
                         stroke="hsl(var(--accent))"
                         strokeDasharray="5 5"
-                        label={{ 
-                          value: 'Target', 
-                          position: 'right',
-                          fill: 'hsl(var(--muted-foreground))',
-                          fontSize: 10,
-                        }}
+                        label={{ value: 'Target', position: 'right', fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                       />
                     )}
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
+                    <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }} activeDot={{ r: 5 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
+
+          {/* Disaggregated View */}
+          {hasDisaggregation && (
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Disaggregated View
+                  </CardTitle>
+                  {disaggPeriods.length > 1 && (
+                    <Select value={activePeriod} onValueChange={setSelectedDisaggPeriod}>
+                      <SelectTrigger className="w-[160px] h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {disaggPeriods.map(p => (
+                          <SelectItem key={p} value={p}>{format(new Date(p), 'MMM yyyy')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={disaggChartData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Configuration Details */}
           <Card>
@@ -297,7 +406,6 @@ export function IndicatorDetailView({
                 </div>
               </div>
 
-              {/* Formula Config Preview */}
               <Separator className="my-4" />
               <div>
                 <p className="text-muted-foreground text-sm mb-2">Data Source</p>
@@ -307,6 +415,76 @@ export function IndicatorDetailView({
               </div>
             </CardContent>
           </Card>
+
+          {/* Validation Rules */}
+          <Collapsible open={rulesOpen} onOpenChange={setRulesOpen}>
+            <Card>
+              <CollapsibleTrigger className="w-full">
+                <CardHeader className="pb-2 cursor-pointer hover:bg-muted/50 rounded-t-lg transition-colors">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4" />
+                    Validation Rules ({validationRules.length})
+                    <ChevronDown className={cn("h-4 w-4 ml-auto transition-transform", rulesOpen && "rotate-180")} />
+                  </CardTitle>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="space-y-3">
+                  {validationRules.length > 0 && (
+                    <div className="space-y-2">
+                      {validationRules.map((rule: any) => (
+                        <div key={rule.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">{RULE_LABELS[rule.rule_type] || rule.rule_type}</Badge>
+                            {rule.rule_type !== 'require_comment_if_zero' && (
+                              <span className="font-mono text-xs">{rule.rule_value}</span>
+                            )}
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteRule.mutate(rule.id)} aria-label="Delete rule">
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Select value={newRuleType} onValueChange={setNewRuleType}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="min_value">Minimum value</SelectItem>
+                          <SelectItem value="max_value">Maximum value</SelectItem>
+                          <SelectItem value="max_change_pct">Max % change</SelectItem>
+                          <SelectItem value="require_comment_if_zero">Require comment if zero</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {newRuleType !== 'require_comment_if_zero' && (
+                      <Input
+                        type="number"
+                        value={newRuleValue}
+                        onChange={e => setNewRuleValue(e.target.value)}
+                        placeholder="Value"
+                        className="w-24 h-8 text-xs"
+                      />
+                    )}
+                    <Button
+                      size="sm"
+                      className="h-8"
+                      onClick={() => addRule.mutate()}
+                      disabled={addRule.isPending || (newRuleType !== 'require_comment_if_zero' && !newRuleValue)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Targets List */}
           {targets.length > 0 && (

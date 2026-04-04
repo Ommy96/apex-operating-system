@@ -92,6 +92,27 @@ const ProgramsManagement = () => {
     enabled: !!currentOrganization?.organization_id,
   });
 
+  // Fetch project team members for avatar stacks
+  const projectIds = programs?.map(p => p.id) || [];
+  const { data: teamMembersMap } = useQuery({
+    queryKey: ['program-team-avatars', projectIds],
+    queryFn: async () => {
+      if (projectIds.length === 0) return {} as Record<string, Array<{ user_id: string; full_name: string }>>;
+      const { data } = await supabase
+        .from('project_team_members')
+        .select('project_id, user_id, profiles(full_name)')
+        .in('project_id', projectIds)
+        .is('end_date', null);
+      const map: Record<string, Array<{ user_id: string; full_name: string }>> = {};
+      (data || []).forEach((m: any) => {
+        if (!map[m.project_id]) map[m.project_id] = [];
+        map[m.project_id].push({ user_id: m.user_id, full_name: (m.profiles as any)?.full_name || 'Unknown' });
+      });
+      return map;
+    },
+    enabled: projectIds.length > 0,
+  });
+
   // Real-time: auto-refresh programs
   useRealtimeTable("programs", [["programs-management", currentOrganization?.organization_id || ""], ["programs"], ["dynamic-programs"]], currentOrganization?.organization_id);
 
@@ -433,6 +454,32 @@ const ProgramsManagement = () => {
                         {program.description && (
                           <p className="text-xs text-muted-foreground line-clamp-1">{program.description}</p>
                         )}
+                        {/* Avatar Stack */}
+                        {(() => {
+                          const AVATAR_COLORS = ['bg-teal-100 text-teal-700','bg-purple-100 text-purple-700','bg-amber-100 text-amber-700','bg-orange-100 text-orange-700','bg-blue-100 text-blue-700'];
+                          const members = teamMembersMap?.[program.id] || [];
+                          if (members.length === 0) return null;
+                          const shown = members.slice(0, 3);
+                          const extra = members.length - 3;
+                          return (
+                            <div className="flex items-center mt-1">
+                              {shown.map((m, idx) => {
+                                const initials = m.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                                const colorIdx = m.user_id.charCodeAt(0) % 5;
+                                return (
+                                  <div key={m.user_id} className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-medium ${AVATAR_COLORS[colorIdx]} ${idx > 0 ? '-ml-2' : ''} border-2 border-background`} title={m.full_name}>
+                                    {initials}
+                                  </div>
+                                );
+                              })}
+                              {extra > 0 && (
+                                <div className="-ml-2 h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-medium bg-muted text-muted-foreground border-2 border-background">
+                                  +{extra}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
