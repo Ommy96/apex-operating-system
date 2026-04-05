@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
-  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X
+  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
