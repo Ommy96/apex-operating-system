@@ -410,11 +410,6 @@ export default function BeneficiaryProfile() {
               <FolderKanban className="h-3.5 w-3.5 mr-1" />
               Programs
             </TabsTrigger>
-            <TabsTrigger value="funding" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <DollarSign className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Sponsorship</span>
-              <span className="sm:hidden">Funds</span>
-            </TabsTrigger>
             <TabsTrigger value="observations" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
               <MessageSquare className="h-3.5 w-3.5 mr-1" />
               <span className="hidden sm:inline">Observations</span>
@@ -432,29 +427,17 @@ export default function BeneficiaryProfile() {
               <span className="hidden sm:inline">Documents</span>
               <span className="sm:hidden">Docs</span>
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+            <TabsTrigger value="history-risk" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
               <Clock className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Timeline</span>
-              <span className="sm:hidden">Time</span>
-            </TabsTrigger>
-            <TabsTrigger value="risk" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <ShieldAlert className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Risk</span>
-              <span className="sm:hidden">Risk</span>
+              <span className="hidden sm:inline">History & Risk</span>
+              <span className="sm:hidden">Hist</span>
             </TabsTrigger>
             {beneficiary.beneficiary_type === 'student' && (
-              <>
-                <TabsTrigger value="guardians" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                  <Heart className="h-3.5 w-3.5 mr-1" />
-                  <span className="hidden sm:inline">Guardians ({guardians.length})</span>
-                  <span className="sm:hidden">Guard</span>
-                </TabsTrigger>
-                <TabsTrigger value="siblings" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                  <Users className="h-3.5 w-3.5 mr-1" />
-                  <span className="hidden sm:inline">Siblings ({siblings.length})</span>
-                  <span className="sm:hidden">Sibs</span>
-                </TabsTrigger>
-              </>
+              <TabsTrigger value="family" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                <Heart className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Family ({guardians.length + siblings.length})</span>
+                <span className="sm:hidden">Family</span>
+              </TabsTrigger>
             )}
             {beneficiary.beneficiary_type === 'adult' && (
               <TabsTrigger value="dependants" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
