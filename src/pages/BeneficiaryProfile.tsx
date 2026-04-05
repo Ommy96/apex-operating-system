@@ -395,13 +395,7 @@ export default function BeneficiaryProfile() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <ProfileQuickActions
-        onAddObservation={() => setActiveTab('observations')}
-        onAddFunding={() => setActiveTab('funding')}
-        onEnrollProgram={() => setActiveTab('programs')}
-        onUploadDocument={() => setActiveTab('documents')}
-      />
+      {/* Quick Actions removed — actions moved into contextual tabs */}
 
       {/* Tabbed Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
