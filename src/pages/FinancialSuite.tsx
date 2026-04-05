@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target, Banknote } from "lucide-react";
+import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target, Banknote, CalendarDays } from "lucide-react";
 import { BudgetPlanning } from "@/components/financial/BudgetPlanning";
 import { ExpenseTracking } from "@/components/financial/ExpenseTracking";
 import { GrantManagement } from "@/components/financial/GrantManagement";
