@@ -463,11 +463,6 @@ export default function BeneficiaryProfile() {
           <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
         </TabsContent>
 
-        {/* Sponsorship & Funding Tab */}
-        <TabsContent value="funding" className="space-y-4">
-          <SponsorshipCoverageSection beneficiaryId={beneficiary.id} />
-          <SponsorshipFundingTab donors={donors} fundingRequired={(beneficiary as any).funding_required} />
-        </TabsContent>
 
         {/* Observations Tab */}
         <TabsContent value="observations" className="space-y-4">
@@ -492,14 +487,17 @@ export default function BeneficiaryProfile() {
           <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
         </TabsContent>
 
-        {/* Activity Timeline Tab */}
-        <TabsContent value="timeline" className="space-y-4">
+        {/* History & Risk Tab (merged) */}
+        <TabsContent value="history-risk" className="space-y-4">
           <ActivityTimeline beneficiaryId={beneficiary.id} />
-        </TabsContent>
-
-        {/* Risk Intelligence Tab */}
-        <TabsContent value="risk" className="space-y-4">
-          <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
+          <Separator className="my-6" />
+          <div>
+            <h3 className="text-[13px] font-semibold text-brand-ink mb-3 flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4" />
+              Risk Assessment
+            </h3>
+            <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
+          </div>
         </TabsContent>
 
         {/* Siblings Tab (Students Only) */}
