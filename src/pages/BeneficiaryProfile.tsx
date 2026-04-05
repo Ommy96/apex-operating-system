@@ -500,85 +500,71 @@ export default function BeneficiaryProfile() {
           </div>
         </TabsContent>
 
-        {/* Siblings Tab (Students Only) */}
+        {/* Family Tab — merged Guardians + Siblings (Students Only) */}
         {beneficiary.beneficiary_type === 'student' && (
-          <TabsContent value="siblings" className="space-y-4">
-            {siblings.length === 0 ? (
-              <Card className="border-muted">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No siblings linked to this beneficiary
-                </CardContent>
-              </Card>
-            ) : (
-              siblings.map((sibling) => (
-                <Card key={sibling.id} className="border-primary/10 hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${sibling.id}`)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-10 w-10 border-2 border-primary/20">
-                        {sibling.photo_url ? <AvatarImage src={sibling.photo_url} /> : null}
-                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                          {getInitials(sibling.display_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-foreground truncate">{sibling.display_name}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs capitalize">{sibling.relationship}</Badge>
-                          {sibling.institution_name && <span className="text-xs text-muted-foreground truncate">{sibling.institution_name}</span>}
+          <TabsContent value="family" className="space-y-6">
+            <div>
+              <h3 className="text-[13px] font-semibold mb-3 flex items-center gap-2">
+                <Heart className="h-4 w-4" /> Guardians ({guardians.length})
+              </h3>
+              {guardians.length === 0 ? (
+                <Card className="border-muted"><CardContent className="py-6 text-center text-muted-foreground text-[13px]">No guardians linked</CardContent></Card>
+              ) : (
+                <div className="space-y-3">
+                  {guardians.map((guardian) => (
+                    <Card key={guardian.id} className="border-primary/10 hover:border-primary/30 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-medium text-foreground">{guardian.full_name}</h4>
+                            <Badge variant="secondary" className="mt-1 capitalize bg-primary/10 text-primary">{guardian.guardian_type} ({guardian.relationship})</Badge>
+                          </div>
+                          <Badge className={guardian.is_alive ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'}>{guardian.is_alive ? 'Alive' : 'Deceased'}</Badge>
                         </div>
-                      </div>
-                      <Badge className={getStatusBadgeColor(sibling.status || 'active')}>{sibling.status}</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-        )}
-
-        {/* Guardians Tab (Students Only) */}
-        {beneficiary.beneficiary_type === 'student' && (
-          <TabsContent value="guardians" className="space-y-4">
-            {guardians.length === 0 ? (
-              <Card className="border-muted">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No guardians linked to this beneficiary
-                </CardContent>
-              </Card>
-            ) : (
-              guardians.map((guardian) => (
-                <Card key={guardian.id} className="border-primary/10 hover:border-primary/30 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium text-foreground">{guardian.full_name}</h4>
-                        <Badge variant="secondary" className="mt-1 capitalize bg-primary/10 text-primary">
-                          {guardian.guardian_type} ({guardian.relationship})
-                        </Badge>
-                      </div>
-                      <Badge className={guardian.is_alive ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'}>
-                        {guardian.is_alive ? 'Alive' : 'Deceased'}
-                      </Badge>
-                    </div>
-                    <Separator className="my-3" />
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      {guardian.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-primary" />
-                          {guardian.phone}
+                        <Separator className="my-3" />
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          {guardian.phone && (<div className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" />{guardian.phone}</div>)}
+                          {guardian.employment_type && (<div><span className="text-muted-foreground">Employment:</span> {guardian.employment_type}</div>)}
+                          {guardian.source_of_income && (<div><span className="text-muted-foreground">Income:</span> {guardian.source_of_income}</div>)}
                         </div>
-                      )}
-                      {guardian.employment_type && (
-                        <div><span className="text-muted-foreground">Employment:</span> {guardian.employment_type}</div>
-                      )}
-                      {guardian.source_of_income && (
-                        <div><span className="text-muted-foreground">Income:</span> {guardian.source_of_income}</div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Separator />
+            <div>
+              <h3 className="text-[13px] font-semibold mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4" /> Siblings ({siblings.length})
+              </h3>
+              {siblings.length === 0 ? (
+                <Card className="border-muted"><CardContent className="py-6 text-center text-muted-foreground text-[13px]">No siblings linked</CardContent></Card>
+              ) : (
+                <div className="space-y-3">
+                  {siblings.map((sibling) => (
+                    <Card key={sibling.id} className="border-primary/10 hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${sibling.id}`)}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-10 w-10 border-2 border-primary/20">
+                            {sibling.photo_url ? <AvatarImage src={sibling.photo_url} /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">{getInitials(sibling.display_name)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-foreground truncate">{sibling.display_name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="text-xs capitalize">{sibling.relationship}</Badge>
+                              {sibling.institution_name && <span className="text-xs text-muted-foreground truncate">{sibling.institution_name}</span>}
+                            </div>
+                          </div>
+                          <Badge className={getStatusBadgeColor(sibling.status || 'active')}>{sibling.status}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
         )}
 
