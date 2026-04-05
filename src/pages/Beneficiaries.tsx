@@ -592,8 +592,8 @@ export default function Beneficiaries() {
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
                 <TableHead className="min-w-[200px]">Beneficiary</TableHead>
-                <TableHead className="min-w-[90px]">Type</TableHead>
-                <TableHead className="min-w-[90px]">Status</TableHead>
+                <TableHead className="min-w-[90px] hidden md:table-cell">Type</TableHead>
+                <TableHead className="min-w-[90px] hidden md:table-cell">Status</TableHead>
                 <TableHead className="min-w-[140px] hidden md:table-cell">Details</TableHead>
                 <TableHead className="min-w-[160px] hidden lg:table-cell">Village / Sub-County</TableHead>
                 <TableHead className="w-[120px] text-right sticky right-0 bg-muted/30 z-10">Actions</TableHead>
