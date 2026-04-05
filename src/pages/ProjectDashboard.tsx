@@ -494,6 +494,7 @@ const ProjectDashboard = () => {
             <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
             <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
             <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
           </TabsList>
         </div>
 
