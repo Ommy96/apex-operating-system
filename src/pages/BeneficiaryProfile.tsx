@@ -18,8 +18,6 @@ import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploa
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
-import { ProfileQuickActions } from '@/components/beneficiary/ProfileQuickActions';
-import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
 import { OverviewTab } from '@/components/beneficiary/OverviewTab';
 import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
