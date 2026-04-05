@@ -641,13 +641,13 @@ export default function Beneficiaries() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <TypeIcon className="h-3.5 w-3.5" />
                           <span className="capitalize">{beneficiary.beneficiary_type}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <StatusBadge variant={getStatusVariant(beneficiary.status)} dot>
                           {beneficiary.status}
                         </StatusBadge>
