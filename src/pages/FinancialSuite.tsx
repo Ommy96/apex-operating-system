@@ -81,6 +81,15 @@ export default function FinancialSuite() {
         <TabsContent value="cost-analytics" className="mt-6">
           <CostAnalytics />
         </TabsContent>
+        <TabsContent value="funding-schedules" className="mt-6">
+          <Card className="workspace-card">
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-medium">Funding Schedules</p>
+              <p className="text-sm mt-1">Track recurring donor contributions and sponsorship payments.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
