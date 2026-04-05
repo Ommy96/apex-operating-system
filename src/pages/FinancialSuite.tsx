@@ -52,6 +52,10 @@ export default function FinancialSuite() {
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Cost Analytics</span>
             </TabsTrigger>
+            <TabsTrigger value="funding-schedules" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <CalendarDays className="h-4 w-4" />
+              <span className="hidden sm:inline">Funding Schedules</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
