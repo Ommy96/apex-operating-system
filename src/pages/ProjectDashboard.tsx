@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
-  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X
+  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -494,6 +494,7 @@ const ProjectDashboard = () => {
             <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
             <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
             <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
           </TabsList>
         </div>
 
@@ -859,6 +860,20 @@ const ProjectDashboard = () => {
         {/* Workplan Tab */}
         <TabsContent value="workplan" className="mt-4">
           <ProjectWorkplanTab projectId={projectId!} />
+        </TabsContent>
+
+        {/* Reports Tab */}
+        <TabsContent value="reports" className="mt-4">
+          <Card className="workspace-card">
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-medium">Narrative Reports</p>
+              <p className="text-sm mt-1">Submit project narrative reports with achievements, challenges, and lessons learned.</p>
+              <Button size="sm" className="mt-4" onClick={() => toast.info("Narrative report form coming soon")}>
+                <Plus className="h-4 w-4 mr-1.5" />New Report
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

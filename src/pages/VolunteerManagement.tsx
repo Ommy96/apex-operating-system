@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useVolunteers } from "@/hooks/useVolunteers";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
-import { Heart, Plus, Users, Clock, Briefcase, CalendarDays } from "lucide-react";
+import { Heart, Plus, Users, Clock, Briefcase, CalendarDays, UserCheck, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VolunteerManagement() {
   const {
@@ -21,8 +25,10 @@ export default function VolunteerManagement() {
     createVolunteer, createAssignment, logHours,
     totalHours,
   } = useVolunteers();
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
 
-  const [activeTab, setActiveTab] = useState("volunteers");
+  const [activeTab, setActiveTab] = useState("staff");
   const [showNewVol, setShowNewVol] = useState(false);
   const [showNewAssign, setShowNewAssign] = useState(false);
   const [showLogHours, setShowLogHours] = useState(false);
@@ -30,6 +36,36 @@ export default function VolunteerManagement() {
   const [volForm, setVolForm] = useState({ full_name: "", email: "", phone: "", skills: "", availability: "", start_date: "", notes: "" });
   const [assignForm, setAssignForm] = useState({ volunteer_id: "", role_title: "", start_date: "", description: "", supervisor_name: "" });
   const [hoursForm, setHoursForm] = useState({ volunteer_id: "", log_date: "", hours: "", description: "" });
+
+  // Fetch staff (organization members)
+  const { data: staffMembers = [], isLoading: loadingStaff } = useQuery({
+    queryKey: ['org-staff', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id, user_id, role, joined_at, branch_id, profiles!inner(full_name, email)')
+        .eq('organization_id', orgId);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  // Fetch active project count for utilisation
+  const { data: activeProjectStaff = 0 } = useQuery({
+    queryKey: ['staff-utilisation', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const { count } = await supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .eq('status', 'active');
+      return count || 0;
+    },
+    enabled: !!orgId,
+  });
 
   const handleCreateVol = () => {
     if (!volForm.full_name) return;
@@ -55,22 +91,23 @@ export default function VolunteerManagement() {
   };
 
   const activeVols = volunteers.filter((v) => v.status === "active").length;
+  const staffUtilisation = staffMembers.length > 0 ? Math.round((activeProjectStaff / staffMembers.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
       <PageHeroHeader
-        title="Volunteer Management"
-        description="Track volunteers, manage assignments, and log service hours across programs."
-        icon={Heart}
+        title="People"
+        description="Manage staff members and volunteers across your organization."
+        icon={Users}
       />
 
-      {/* Stats */}
+      {/* Unified Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Volunteers", value: volunteers.length, icon: Users, color: "primary" },
-          { label: "Active", value: activeVols, icon: Heart, color: "success" },
-          { label: "Assignments", value: assignments.length, icon: Briefcase, color: "info" },
-          { label: "Total Hours", value: totalHours.toFixed(0), icon: Clock, color: "warning" },
+          { label: "Total Staff", value: staffMembers.length, icon: Building2, color: "primary" },
+          { label: "Active Volunteers", value: activeVols, icon: Heart, color: "success" },
+          { label: "Volunteer Hours", value: totalHours.toFixed(0), icon: Clock, color: "warning" },
+          { label: "Staff Utilisation", value: `${staffUtilisation}%`, icon: Briefcase, color: "info" },
         ].map((s) => (
           <Card key={s.label} className="workspace-card">
             <CardContent className="p-4 flex items-center gap-3">
@@ -78,7 +115,7 @@ export default function VolunteerManagement() {
                 <s.icon className={`h-5 w-5 text-${s.color}`} />
               </div>
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{s.value}</p>
+                <p className="text-lg sm:text-2xl font-semibold text-foreground truncate">{s.value}</p>
                 <p className="text-xs text-muted-foreground truncate">{s.label}</p>
               </div>
             </CardContent>
@@ -89,11 +126,56 @@ export default function VolunteerManagement() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <TabsList className="inline-flex w-max md:w-auto">
+            <TabsTrigger value="staff"><Building2 className="h-4 w-4 mr-1.5" />Staff</TabsTrigger>
             <TabsTrigger value="volunteers"><Users className="h-4 w-4 mr-1.5" />Volunteers</TabsTrigger>
             <TabsTrigger value="assignments"><Briefcase className="h-4 w-4 mr-1.5" />Assignments</TabsTrigger>
             <TabsTrigger value="hours"><Clock className="h-4 w-4 mr-1.5" />Hours Log</TabsTrigger>
           </TabsList>
         </div>
+
+        {/* Staff Tab */}
+        <TabsContent value="staff" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[15px] font-semibold text-foreground">Staff Members</h3>
+          </div>
+          <Card className="workspace-card">
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[500px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead className="hidden md:table-cell">Joined</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loadingStaff ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-40" /></TableCell>
+                        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : staffMembers.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No staff members found.</TableCell></TableRow>
+                  ) : (
+                    staffMembers.map((m: any) => (
+                      <TableRow key={m.id}>
+                        <TableCell className="font-medium">{m.profiles?.full_name || '—'}</TableCell>
+                        <TableCell><Badge variant="secondary" className="capitalize text-xs">{m.role}</Badge></TableCell>
+                        <TableCell className="hidden sm:table-cell text-muted-foreground text-[13px]">{m.profiles?.email || '—'}</TableCell>
+                        <TableCell className="hidden md:table-cell text-muted-foreground text-[13px]">{m.joined_at ? format(new Date(m.joined_at), "MMM d, yyyy") : '—'}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Volunteers Tab */}
         <TabsContent value="volunteers" className="space-y-4">

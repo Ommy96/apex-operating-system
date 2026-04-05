@@ -224,6 +224,11 @@ const App = () => (
                 <DashboardLayout><LazyRoute><VolunteerManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/people" element={
+              <ProtectedRoute requirePermission={{ module: 'volunteers', action: 'view', resource: 'volunteers' }}>
+                <DashboardLayout><LazyRoute><VolunteerManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/partners" element={
               <ProtectedRoute requirePermission={{ module: 'partners', action: 'view', resource: 'partners' }}>
                 <DashboardLayout><LazyRoute><PartnerCollaboration /></LazyRoute></DashboardLayout>

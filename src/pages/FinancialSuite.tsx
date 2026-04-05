@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target, Banknote } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Wallet, Receipt, Landmark, TrendingUp, Heart, Target, Banknote, CalendarDays } from "lucide-react";
 import { BudgetPlanning } from "@/components/financial/BudgetPlanning";
 import { ExpenseTracking } from "@/components/financial/ExpenseTracking";
 import { GrantManagement } from "@/components/financial/GrantManagement";
@@ -52,6 +53,10 @@ export default function FinancialSuite() {
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Cost Analytics</span>
             </TabsTrigger>
+            <TabsTrigger value="funding-schedules" className="flex items-center gap-2 text-xs md:text-sm py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <CalendarDays className="h-4 w-4" />
+              <span className="hidden sm:inline">Funding Schedules</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -76,6 +81,15 @@ export default function FinancialSuite() {
         </TabsContent>
         <TabsContent value="cost-analytics" className="mt-6">
           <CostAnalytics />
+        </TabsContent>
+        <TabsContent value="funding-schedules" className="mt-6">
+          <Card className="workspace-card">
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-medium">Funding Schedules</p>
+              <p className="text-sm mt-1">Track recurring donor contributions and sponsorship payments.</p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
