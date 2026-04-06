@@ -519,6 +519,7 @@ function ReportDetail({
       {/* Collaboration Panel */}
       <Separator className="my-6" />
       <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
+      )}
     </div>
   );
 }
