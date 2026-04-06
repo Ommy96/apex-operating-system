@@ -444,81 +444,68 @@ function ReportDetail({
           </CardContent>
         </Card>
       ) : (
-
-      <Card className="workspace-card">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle>{report.title}</CardTitle>
-            <Badge variant={statusConfig[report.status]?.variant || "secondary"}>
-              {statusConfig[report.status]?.label || report.status}
-            </Badge>
-          </div>
-          {report.description && <CardDescription>{report.description}</CardDescription>}
-          <div className="flex gap-4 text-xs text-muted-foreground pt-1">
-            <span>Period: {format(new Date(report.report_period_start), "MMM d")} – {format(new Date(report.report_period_end), "MMM d, yyyy")}</span>
-            {report.meeting_date && <span>Meeting: {format(new Date(report.meeting_date), "MMM d, yyyy")}</span>}
-          </div>
-        </CardHeader>
-        {report.executive_summary && (
-          <CardContent>
-            <h4 className="text-sm font-semibold text-foreground mb-2">Executive Summary</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.executive_summary}</p>
-          </CardContent>
-        )}
-      </Card>
-
-      <h3 className="text-lg font-semibold text-foreground">Report Sections</h3>
-      <div className="space-y-3">
-        {sections.map((section) => (
-          <Card key={section.id} className="workspace-card">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{section.title}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs capitalize">{section.section_type.replace(/_/g, " ")}</Badge>
-                  {report.status === "draft" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => {
-                        setEditingSectionId(section.id);
-                        setNarrative(section.narrative || "");
-                      }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                </div>
+        <>
+          <Card className="workspace-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle>{report.title}</CardTitle>
+                <Badge variant={statusConfig[report.status]?.variant || "secondary"}>
+                  {statusConfig[report.status]?.label || report.status}
+                </Badge>
+              </div>
+              {report.description && <CardDescription>{report.description}</CardDescription>}
+              <div className="flex gap-4 text-xs text-muted-foreground pt-1">
+                <span>Period: {format(new Date(report.report_period_start), "MMM d")} – {format(new Date(report.report_period_end), "MMM d, yyyy")}</span>
+                {report.meeting_date && <span>Meeting: {format(new Date(report.meeting_date), "MMM d, yyyy")}</span>}
               </div>
             </CardHeader>
-            <CardContent>
-              {editingSectionId === section.id ? (
-                <div className="space-y-3">
-                  <Textarea
-                    value={narrative}
-                    onChange={(e) => setNarrative(e.target.value)}
-                    placeholder="Add narrative for this section..."
-                    rows={4}
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSaveSection(section.id)}>Save</Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingSectionId(null)}>Cancel</Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {section.narrative || "No content yet. Click edit to add narrative."}
-                </p>
-              )}
-            </CardContent>
+            {report.executive_summary && (
+              <CardContent>
+                <h4 className="text-sm font-semibold text-foreground mb-2">Executive Summary</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.executive_summary}</p>
+              </CardContent>
+            )}
           </Card>
-        ))}
-      </div>
 
-      {/* Collaboration Panel */}
-      <Separator className="my-6" />
-      <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
+          <h3 className="text-lg font-semibold text-foreground">Report Sections</h3>
+          <div className="space-y-3">
+            {sections.map((section) => (
+              <Card key={section.id} className="workspace-card">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{section.title}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs capitalize">{section.section_type.replace(/_/g, " ")}</Badge>
+                      {report.status === "draft" && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingSectionId(section.id); setNarrative(section.narrative || ""); }}>
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {editingSectionId === section.id ? (
+                    <div className="space-y-3">
+                      <Textarea value={narrative} onChange={(e) => setNarrative(e.target.value)} placeholder="Add narrative for this section..." rows={4} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleSaveSection(section.id)}>Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingSectionId(null)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {section.narrative || "No content yet. Click edit to add narrative."}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Separator className="my-6" />
+          <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
+        </>
       )}
     </div>
   );
