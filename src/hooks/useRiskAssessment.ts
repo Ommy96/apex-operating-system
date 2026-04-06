@@ -27,7 +27,7 @@ export function useRiskAssessment() {
       const [
         { data: grants },
         { data: activities },
-        { data: complaints },
+        { data: complaints = [] },
         { data: beneficiaries },
         { data: enrollments },
       ] = await Promise.all([
