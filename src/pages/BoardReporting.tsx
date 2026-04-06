@@ -403,26 +403,47 @@ function ReportDetail({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
         <div className="flex flex-wrap gap-2">
+          {report.status === "draft" && !isEditing && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Edit className="h-4 w-4 mr-1.5" />Edit Report
+            </Button>
+          )}
           {report.status === "draft" && (
             <Button variant="outline" size="sm" onClick={() => onUpdateReport({ id: report.id, status: "in_review" })}>
-              <Send className="h-4 w-4 mr-1.5" />
-              <span className="hidden sm:inline">Submit for </span>Review
+              <Send className="h-4 w-4 mr-1.5" /><span className="hidden sm:inline">Submit for </span>Review
             </Button>
           )}
           {report.status === "in_review" && (
             <Button variant="outline" size="sm" onClick={handleApprove}>
-              <CheckCircle2 className="h-4 w-4 mr-1.5" />
-              Approve
+              <CheckCircle2 className="h-4 w-4 mr-1.5" />Approve
             </Button>
           )}
           {report.status === "approved" && (
             <Button size="sm" onClick={handlePublish}>
-              <Eye className="h-4 w-4 mr-1.5" />
-              Publish
+              <Eye className="h-4 w-4 mr-1.5" />Publish
             </Button>
           )}
         </div>
       </div>
+
+      {isEditing ? (
+        <Card className="workspace-card">
+          <CardHeader><CardTitle>Edit Report</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Title</Label><Input value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} /></div>
+            <div><Label>Description</Label><Textarea value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} rows={2} /></div>
+            <div><Label>Executive Summary</Label><Textarea value={editForm.executive_summary} onChange={e => setEditForm(p => ({ ...p, executive_summary: e.target.value }))} rows={3} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Meeting Date</Label><Input type="date" value={editForm.meeting_date} onChange={e => setEditForm(p => ({ ...p, meeting_date: e.target.value }))} /></div>
+              <div><Label>Meeting Agenda</Label><Input value={editForm.meeting_agenda} onChange={e => setEditForm(p => ({ ...p, meeting_agenda: e.target.value }))} /></div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => { onUpdateReport({ id: report.id, ...editForm }); setIsEditing(false); }}>Save Changes</Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
 
       <Card className="workspace-card">
         <CardHeader>
