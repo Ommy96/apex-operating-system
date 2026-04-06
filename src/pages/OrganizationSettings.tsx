@@ -49,7 +49,8 @@ export default function OrganizationSettings() {
       case 'org-branches': return <BranchSettings />;
       case 'user-roles': return <UserAccessSettings section="user-roles" />;
       case 'user-settings': return <UserAccessSettings section="user-settings" />;
-      case 'user-security': return <UserAccessSettings section="user-security" />;
+      case 'user-security': return <SecuritySettings />;
+      case 'user-notifications': return <NotificationSettings />;
       case 'me-logframe': return <MESettings section="me-logframe" />;
       case 'me-surveys': return <MESettings section="me-surveys" />;
       case 'fin-currency': return <FinancialSettings section="fin-currency" />;
