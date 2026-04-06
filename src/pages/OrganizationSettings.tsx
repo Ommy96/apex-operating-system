@@ -20,6 +20,8 @@ import { AcademicSettings } from '@/components/settings/AcademicSettings';
 import { DonorPortalSettings } from '@/components/settings/DonorPortalSettings';
 import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDocumentsSettings';
 import { BrandingSettings } from '@/components/settings/BrandingSettings';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
+import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -47,7 +49,8 @@ export default function OrganizationSettings() {
       case 'org-branches': return <BranchSettings />;
       case 'user-roles': return <UserAccessSettings section="user-roles" />;
       case 'user-settings': return <UserAccessSettings section="user-settings" />;
-      case 'user-security': return <UserAccessSettings section="user-security" />;
+      case 'user-security': return <SecuritySettings />;
+      case 'user-notifications': return <NotificationSettings />;
       case 'me-logframe': return <MESettings section="me-logframe" />;
       case 'me-surveys': return <MESettings section="me-surveys" />;
       case 'fin-currency': return <FinancialSettings section="fin-currency" />;

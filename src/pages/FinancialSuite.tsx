@@ -9,6 +9,7 @@ import { CostAnalytics } from "@/components/financial/CostAnalytics";
 import { DonorSupport } from "@/components/financial/DonorSupport";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { PettyCashTab } from "@/components/finance/PettyCashTab";
+import { FundingSchedulesTab } from "@/components/financial/FundingSchedulesTab";
 
 export default function FinancialSuite() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -83,13 +84,7 @@ export default function FinancialSuite() {
           <CostAnalytics />
         </TabsContent>
         <TabsContent value="funding-schedules" className="mt-6">
-          <Card className="workspace-card">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p className="font-medium">Funding Schedules</p>
-              <p className="text-sm mt-1">Track recurring donor contributions and sponsorship payments.</p>
-            </CardContent>
-          </Card>
+          <FundingSchedulesTab />
         </TabsContent>
       </Tabs>
     </div>

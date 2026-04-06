@@ -376,6 +376,14 @@ function ReportDetail({
 }) {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [narrative, setNarrative] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: report.title,
+    description: report.description || "",
+    executive_summary: report.executive_summary || "",
+    meeting_date: report.meeting_date || "",
+    meeting_agenda: report.meeting_agenda || "",
+  });
 
   const handlePublish = () => {
     onUpdateReport({ id: report.id, status: "published", published_at: new Date().toISOString() });
@@ -395,101 +403,110 @@ function ReportDetail({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
         <div className="flex flex-wrap gap-2">
+          {report.status === "draft" && !isEditing && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Edit className="h-4 w-4 mr-1.5" />Edit Report
+            </Button>
+          )}
           {report.status === "draft" && (
             <Button variant="outline" size="sm" onClick={() => onUpdateReport({ id: report.id, status: "in_review" })}>
-              <Send className="h-4 w-4 mr-1.5" />
-              <span className="hidden sm:inline">Submit for </span>Review
+              <Send className="h-4 w-4 mr-1.5" /><span className="hidden sm:inline">Submit for </span>Review
             </Button>
           )}
           {report.status === "in_review" && (
             <Button variant="outline" size="sm" onClick={handleApprove}>
-              <CheckCircle2 className="h-4 w-4 mr-1.5" />
-              Approve
+              <CheckCircle2 className="h-4 w-4 mr-1.5" />Approve
             </Button>
           )}
           {report.status === "approved" && (
             <Button size="sm" onClick={handlePublish}>
-              <Eye className="h-4 w-4 mr-1.5" />
-              Publish
+              <Eye className="h-4 w-4 mr-1.5" />Publish
             </Button>
           )}
         </div>
       </div>
 
-      <Card className="workspace-card">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle>{report.title}</CardTitle>
-            <Badge variant={statusConfig[report.status]?.variant || "secondary"}>
-              {statusConfig[report.status]?.label || report.status}
-            </Badge>
-          </div>
-          {report.description && <CardDescription>{report.description}</CardDescription>}
-          <div className="flex gap-4 text-xs text-muted-foreground pt-1">
-            <span>Period: {format(new Date(report.report_period_start), "MMM d")} – {format(new Date(report.report_period_end), "MMM d, yyyy")}</span>
-            {report.meeting_date && <span>Meeting: {format(new Date(report.meeting_date), "MMM d, yyyy")}</span>}
-          </div>
-        </CardHeader>
-        {report.executive_summary && (
-          <CardContent>
-            <h4 className="text-sm font-semibold text-foreground mb-2">Executive Summary</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.executive_summary}</p>
+      {isEditing ? (
+        <Card className="workspace-card">
+          <CardHeader><CardTitle>Edit Report</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Title</Label><Input value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} /></div>
+            <div><Label>Description</Label><Textarea value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} rows={2} /></div>
+            <div><Label>Executive Summary</Label><Textarea value={editForm.executive_summary} onChange={e => setEditForm(p => ({ ...p, executive_summary: e.target.value }))} rows={3} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Meeting Date</Label><Input type="date" value={editForm.meeting_date} onChange={e => setEditForm(p => ({ ...p, meeting_date: e.target.value }))} /></div>
+              <div><Label>Meeting Agenda</Label><Input value={editForm.meeting_agenda} onChange={e => setEditForm(p => ({ ...p, meeting_agenda: e.target.value }))} /></div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => { onUpdateReport({ id: report.id, ...editForm }); setIsEditing(false); }}>Save Changes</Button>
+              <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+            </div>
           </CardContent>
-        )}
-      </Card>
-
-      <h3 className="text-lg font-semibold text-foreground">Report Sections</h3>
-      <div className="space-y-3">
-        {sections.map((section) => (
-          <Card key={section.id} className="workspace-card">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{section.title}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs capitalize">{section.section_type.replace(/_/g, " ")}</Badge>
-                  {report.status === "draft" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => {
-                        setEditingSectionId(section.id);
-                        setNarrative(section.narrative || "");
-                      }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                </div>
+        </Card>
+      ) : (
+        <>
+          <Card className="workspace-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle>{report.title}</CardTitle>
+                <Badge variant={statusConfig[report.status]?.variant || "secondary"}>
+                  {statusConfig[report.status]?.label || report.status}
+                </Badge>
+              </div>
+              {report.description && <CardDescription>{report.description}</CardDescription>}
+              <div className="flex gap-4 text-xs text-muted-foreground pt-1">
+                <span>Period: {format(new Date(report.report_period_start), "MMM d")} – {format(new Date(report.report_period_end), "MMM d, yyyy")}</span>
+                {report.meeting_date && <span>Meeting: {format(new Date(report.meeting_date), "MMM d, yyyy")}</span>}
               </div>
             </CardHeader>
-            <CardContent>
-              {editingSectionId === section.id ? (
-                <div className="space-y-3">
-                  <Textarea
-                    value={narrative}
-                    onChange={(e) => setNarrative(e.target.value)}
-                    placeholder="Add narrative for this section..."
-                    rows={4}
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSaveSection(section.id)}>Save</Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingSectionId(null)}>Cancel</Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {section.narrative || "No content yet. Click edit to add narrative."}
-                </p>
-              )}
-            </CardContent>
+            {report.executive_summary && (
+              <CardContent>
+                <h4 className="text-sm font-semibold text-foreground mb-2">Executive Summary</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.executive_summary}</p>
+              </CardContent>
+            )}
           </Card>
-        ))}
-      </div>
 
-      {/* Collaboration Panel */}
-      <Separator className="my-6" />
-      <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
+          <h3 className="text-lg font-semibold text-foreground">Report Sections</h3>
+          <div className="space-y-3">
+            {sections.map((section) => (
+              <Card key={section.id} className="workspace-card">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{section.title}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs capitalize">{section.section_type.replace(/_/g, " ")}</Badge>
+                      {report.status === "draft" && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingSectionId(section.id); setNarrative(section.narrative || ""); }}>
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {editingSectionId === section.id ? (
+                    <div className="space-y-3">
+                      <Textarea value={narrative} onChange={(e) => setNarrative(e.target.value)} placeholder="Add narrative for this section..." rows={4} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleSaveSection(section.id)}>Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingSectionId(null)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {section.narrative || "No content yet. Click edit to add narrative."}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Separator className="my-6" />
+          <BoardCollaborationPanel reportId={report.id} reportStatus={report.status} />
+        </>
+      )}
     </div>
   );
 }

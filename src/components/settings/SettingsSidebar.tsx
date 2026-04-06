@@ -28,7 +28,8 @@ const settingsSections: SettingsSection[] = [
   // User & Access
   { id: 'user-roles', label: 'Role Management', icon: Shield, description: 'Roles & permission matrix', category: 'User & Access' },
   { id: 'user-settings', label: 'User Settings', icon: Users, description: 'Invitations, 2FA, sessions', category: 'User & Access' },
-  { id: 'user-security', label: 'Security Controls', icon: Lock, description: 'Password policies, API keys', category: 'User & Access' },
+  { id: 'user-security', label: 'Security Controls', icon: Lock, description: 'Session timeout, 2FA, sign out', category: 'User & Access' },
+  { id: 'user-notifications', label: 'Notifications', icon: Bell, description: 'Email alerts & preferences', category: 'User & Access' },
   // M&E
   { id: 'me-logframe', label: 'LogFrame & Indicators', icon: Target, description: 'Templates, formulas, frequency', category: 'Monitoring & Evaluation' },
   { id: 'me-surveys', label: 'Surveys & Scoring', icon: ClipboardList, description: 'Survey templates, risk weights', category: 'Monitoring & Evaluation' },

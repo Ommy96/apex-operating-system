@@ -7,6 +7,7 @@ import {
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { GanttChart } from "@/components/projects/GanttChart";
+import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -864,16 +865,7 @@ const ProjectDashboard = () => {
 
         {/* Reports Tab */}
         <TabsContent value="reports" className="mt-4">
-          <Card className="workspace-card">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p className="font-medium">Narrative Reports</p>
-              <p className="text-sm mt-1">Submit project narrative reports with achievements, challenges, and lessons learned.</p>
-              <Button size="sm" className="mt-4" onClick={() => toast.info("Narrative report form coming soon")}>
-                <Plus className="h-4 w-4 mr-1.5" />New Report
-              </Button>
-            </CardContent>
-          </Card>
+          <NarrativeReportsTab projectId={projectId!} projectName={project?.name} />
         </TabsContent>
       </Tabs>
     </div>
