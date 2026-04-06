@@ -33,7 +33,7 @@ export function useRiskAssessment() {
       ] = await Promise.all([
         supabase.from("grants").select("id, grant_name, status, end_date, grant_amount").eq("organization_id", orgId),
         supabase.from("activities").select("id, title, status, planned_date, organization_id").eq("organization_id", orgId).is("deleted_at", null),
-        supabase.from("complaints").select("id, subject, status, created_at").eq("organization_id", orgId),
+        supabase.from("complaints").select("id, description, status, created_at").eq("organization_id", orgId),
         supabase.from("beneficiaries").select("id, display_name").eq("organization_id", orgId).is("deleted_at", null),
         supabase.from("beneficiary_services").select("beneficiary_id").eq("organization_id", orgId),
       ]);
