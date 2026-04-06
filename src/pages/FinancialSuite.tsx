@@ -9,6 +9,7 @@ import { CostAnalytics } from "@/components/financial/CostAnalytics";
 import { DonorSupport } from "@/components/financial/DonorSupport";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { PettyCashTab } from "@/components/finance/PettyCashTab";
+import { FundingSchedulesTab } from "@/components/financial/FundingSchedulesTab";
 
 export default function FinancialSuite() {
   const [activeTab, setActiveTab] = useState("overview");
