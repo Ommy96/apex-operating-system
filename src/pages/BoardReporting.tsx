@@ -376,6 +376,14 @@ function ReportDetail({
 }) {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [narrative, setNarrative] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: report.title,
+    description: report.description || "",
+    executive_summary: report.executive_summary || "",
+    meeting_date: report.meeting_date || "",
+    meeting_agenda: report.meeting_agenda || "",
+  });
 
   const handlePublish = () => {
     onUpdateReport({ id: report.id, status: "published", published_at: new Date().toISOString() });
