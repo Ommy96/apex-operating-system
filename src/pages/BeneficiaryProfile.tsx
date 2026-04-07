@@ -163,6 +163,16 @@ export default function BeneficiaryProfile() {
     return () => { supabase.removeChannel(channel); };
   }, [id, fetchQuickStats]);
 
+  useEffect(() => {
+    if (id && currentOrganization?.organization_id) {
+      fetchBeneficiaryData();
+    }
+  }, [id, currentOrganization?.organization_id]);
+
+  useEffect(() => {
+    if (id) fetchQuickStats();
+  }, [id, fetchQuickStats]);
+
   const fetchBeneficiaryData = async () => {
     if (!id) return;
     setLoading(true);
