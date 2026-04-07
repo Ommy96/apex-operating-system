@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, Clock, Activity, ShieldAlert, Printer, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
