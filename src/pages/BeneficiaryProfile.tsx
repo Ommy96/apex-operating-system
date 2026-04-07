@@ -433,8 +433,8 @@ export default function BeneficiaryProfile() {
                 <div className="text-[11px] text-[#8B93A8] mt-[2px]">Time enrolled</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-[#1D9E8A] tracking-tight">
-                  {beneficiary.status === 'active' ? 'Good' : 'Review'}
+                <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-[#1D9E8A]' : overallStatus === 'Review' ? 'text-amber-500' : 'text-rose-500'}`}>
+                  {overallStatus}
                 </div>
                 <div className="text-[11px] text-[#8B93A8] mt-[2px]">Overall status</div>
               </div>
