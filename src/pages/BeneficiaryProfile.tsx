@@ -1,13 +1,10 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Mail, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, DollarSign, Clock, Activity, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, Clock, Activity, ShieldAlert, Printer, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,11 +15,8 @@ import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploa
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
-import { OverviewTab } from '@/components/beneficiary/OverviewTab';
-import { SponsorshipFundingTab } from '@/components/beneficiary/SponsorshipFundingTab';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
-import { SponsorshipCoverageSection } from '@/components/beneficiary/SponsorshipCoverageSection';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,13 +109,34 @@ export default function BeneficiaryProfile() {
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('programmes');
+
+  // Quick stats
+  const [enrollmentCount, setEnrollmentCount] = useState(0);
+  const [attendanceCount, setAttendanceCount] = useState(0);
+  const [earliestEnrollDate, setEarliestEnrollDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (id && currentOrganization?.organization_id) {
       fetchBeneficiaryData();
     }
   }, [id, currentOrganization?.organization_id]);
+
+  useEffect(() => {
+    if (id) fetchQuickStats();
+  }, [id]);
+
+  const fetchQuickStats = async () => {
+    if (!id) return;
+    const [{ count: enroll }, { count: attend }, { data: earliest }] = await Promise.all([
+      supabase.from('beneficiary_services').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id).eq('status', 'active'),
+      supabase.from('activity_attendance').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id),
+      supabase.from('beneficiary_services').select('enrolled_date').eq('beneficiary_id', id).order('enrolled_date', { ascending: true }).limit(1),
+    ]);
+    setEnrollmentCount(enroll || 0);
+    setAttendanceCount(attend || 0);
+    setEarliestEnrollDate(earliest?.[0]?.enrolled_date || null);
+  };
 
   const fetchBeneficiaryData = async () => {
     if (!id) return;
@@ -137,7 +152,6 @@ export default function BeneficiaryProfile() {
       if (beneficiaryError) throw beneficiaryError;
       setBeneficiary(beneficiaryData as Beneficiary);
 
-      // Fetch guardians
       const { data: guardiansData } = await supabase
         .from('beneficiary_guardians')
         .select(`id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income)`)
@@ -147,7 +161,6 @@ export default function BeneficiaryProfile() {
         setGuardians(guardiansData.map((g: any) => ({ ...g.guardians, relationship: g.relationship })));
       }
 
-      // Fetch donors
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
         .select('*, program:programs(name)')
@@ -155,7 +168,6 @@ export default function BeneficiaryProfile() {
 
       if (donorsData) setDonors(donorsData);
 
-      // Fetch siblings (students)
       if (beneficiaryData.beneficiary_type === 'student') {
         const { data: siblingsData } = await supabase
           .from('beneficiary_siblings')
@@ -167,7 +179,6 @@ export default function BeneficiaryProfile() {
         }
       }
 
-      // Fetch dependants (adults)
       if (beneficiaryData.beneficiary_type === 'adult') {
         const { data: dependantsData } = await supabase
           .from('adult_dependants')
@@ -231,48 +242,21 @@ export default function BeneficiaryProfile() {
     return age;
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'student': return GraduationCap;
-      case 'adult': return UserCheck;
-      case 'group': return UsersRound;
-      default: return Users;
-    }
-  };
-
-  const getTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case 'student': return 'bg-primary/20 text-primary border-primary/30';
-      case 'adult': return 'bg-info/20 text-info border-info/30';
-      case 'group': return 'bg-warning/20 text-warning border-warning/30';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active': return 'bg-success/20 text-success border-success/30';
-      case 'inactive': return 'bg-destructive/20 text-destructive border-destructive/30';
-      case 'graduated': return 'bg-info/20 text-info border-info/30';
-      case 'dropped': return 'bg-warning/20 text-warning border-warning/30';
-      case 'replaced': return 'bg-muted text-muted-foreground border-border';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
   const getInitials = (name: string) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
 
-  const getFundingStatus = () => {
-    const total = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
-    if (total === 0 && donors.length === 0) return { label: '🔴 Unfunded', color: 'bg-destructive/10 text-destructive' };
-    if (donors.length > 0 && total > 0) return { label: '🟢 Funded', color: 'bg-success/10 text-success' };
-    return { label: '🟡 Partial', color: 'bg-warning/10 text-warning' };
+  const getTimeEnrolled = () => {
+    if (!earliestEnrollDate) return '—';
+    const start = new Date(earliestEnrollDate);
+    const now = new Date();
+    const months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+    if (months >= 12) return `${(months / 12).toFixed(1)} yrs`;
+    return `${months} mo`;
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1D9E8A]" />
       </div>
     );
   }
@@ -280,8 +264,8 @@ export default function BeneficiaryProfile() {
   if (!beneficiary) {
     return (
       <div className="text-center py-12">
-        <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium">Beneficiary not found</h3>
+        <Users className="h-12 w-12 mx-auto text-[#8B93A8] mb-4" />
+        <h3 className="text-lg font-medium text-[#1A1F2E]">Beneficiary not found</h3>
         <Button variant="outline" onClick={() => navigate('/beneficiaries')} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Beneficiaries
@@ -290,360 +274,340 @@ export default function BeneficiaryProfile() {
     );
   }
 
-  const TypeIcon = getTypeIcon(beneficiary.beneficiary_type);
   const age = calculateAge(beneficiary.date_of_birth);
-  const fundingStatus = getFundingStatus();
+  const familyMembers = [...guardians.map(g => ({ ...g, _type: 'guardian' as const })), ...siblings.map(s => ({ ...s, _type: 'sibling' as const })), ...dependants.map(d => ({ ...d, _type: 'dependant' as const }))];
 
   return (
-    <div className="space-y-4">
-      {/* Navigation & Actions Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <Button variant="ghost" onClick={() => navigate('/beneficiaries')} className="hover:bg-primary/10 self-start">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={generatingReport} className="border-primary/30 text-primary hover:bg-primary/10">
-            {generatingReport ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
-            <span className="hidden sm:inline">Download</span> Report
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleEdit} className="border-info/30 text-info hover:bg-info/10">
-            <Edit2 className="h-4 w-4 mr-1" />Edit
-          </Button>
-          {isAdmin && (
-            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-              <Trash2 className="h-4 w-4 mr-1" />Delete
-            </Button>
-          )}
+    <div className="min-h-screen" style={{ backgroundColor: '#FBF9F6' }}>
+      <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-5">
+        {/* Back nav */}
+        <button onClick={() => navigate('/beneficiaries')} className="inline-flex items-center gap-1.5 text-[13px] text-[#8B93A8] hover:text-[#1A1F2E] transition-colors">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Beneficiaries
+        </button>
+
+        {/* ─── HERO CARD ─── */}
+        <div className="bg-white rounded-[20px] border border-[#E8EAF0] overflow-hidden">
+          {/* Decorative band */}
+          <div
+            className="h-[80px]"
+            style={{
+              backgroundColor: '#F5F0E8',
+              backgroundImage: 'radial-gradient(circle, rgba(201,123,26,0.3) 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+
+          {/* Hero body */}
+          <div className="px-5 sm:px-7 pb-6">
+            {/* Avatar + Identity row */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-9">
+              <div className="flex items-end gap-4">
+                {/* Avatar */}
+                <div className="relative shrink-0">
+                  <div className="h-[72px] w-[72px] rounded-full border-[4px] border-white overflow-hidden" style={{ boxShadow: '0 0 0 4px white' }}>
+                    {beneficiary.photo_url ? (
+                      <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-white text-lg font-semibold" style={{ background: 'linear-gradient(135deg, #C97B1A, #1D9E8A)' }}>
+                        {getInitials(beneficiary.display_name)}
+                      </div>
+                    )}
+                  </div>
+                  {/* Status dot */}
+                  <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white" style={{ backgroundColor: beneficiary.status === 'active' ? '#1D9E8A' : '#8B93A8' }} />
+                </div>
+
+                {/* Name block */}
+                <div className="pb-1">
+                  <h1 className="text-[22px] font-semibold text-[#1A1F2E] tracking-tight leading-tight">{beneficiary.display_name}</h1>
+                  <p className="text-[12px] text-[#8B93A8] font-mono mt-0.5">
+                    {beneficiary.student_id_number ? `ID: ${beneficiary.student_id_number}` : `ID: ${beneficiary.id.slice(0, 8).toUpperCase()}`}
+                    {' · '}Registered {new Date(beneficiary.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-2 pb-1">
+                <button
+                  onClick={handleDownloadReport}
+                  disabled={generatingReport}
+                  className="inline-flex items-center gap-1.5 bg-white border border-[#D4D7E3] text-[#4A5168] rounded-[8px] px-4 py-[7px] text-[13px] hover:bg-[#F5F0E8] transition-colors disabled:opacity-50"
+                >
+                  {generatingReport ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
+                  Print record
+                </button>
+                <button
+                  onClick={handleEdit}
+                  className="inline-flex items-center gap-1.5 bg-[#1D9E8A] text-white rounded-[8px] px-4 py-[7px] text-[13px] font-medium hover:bg-[#178a78] transition-colors"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                  Edit profile
+                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="inline-flex items-center gap-1.5 bg-white border border-[#E8EAF0] text-[#8B93A8] rounded-[8px] px-3 py-[7px] text-[13px] hover:text-red-600 hover:border-red-200 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Pills row */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#E0F4F1] text-[#0A5449]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#1D9E8A]" />
+                {beneficiary.status}
+              </span>
+              {beneficiary.gender && (
+                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#F5F0E8] text-[#6B5A3E]">
+                  {beneficiary.gender}{age ? ` · Age ${age}` : ''}
+                </span>
+              )}
+              {beneficiary.county && (
+                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#FEF3E2] text-[#7A4A0A]">
+                  <MapPin className="h-3 w-3" />
+                  {beneficiary.county}
+                </span>
+              )}
+              {enrollmentCount > 0 && (
+                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#E8EFFC] text-[#0C3A7A]">
+                  {enrollmentCount} programme{enrollmentCount !== 1 ? 's' : ''} enrolled
+                </span>
+              )}
+              <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#F5F0E8] text-[#6B5A3E] capitalize">
+                {beneficiary.beneficiary_type === 'student' ? 'Child' : beneficiary.beneficiary_type}
+              </span>
+            </div>
+
+            {/* Quick stats row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 py-4 border-t border-b border-[#E8EAF0]">
+              <div className="text-center">
+                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{enrollmentCount}</div>
+                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Programmes</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{attendanceCount}</div>
+                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Activities attended</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{getTimeEnrolled()}</div>
+                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Time enrolled</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[20px] font-semibold text-[#1D9E8A] tracking-tight">
+                  {beneficiary.status === 'active' ? 'Good' : 'Review'}
+                </div>
+                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Overall status</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── TWO-COLUMN LAYOUT ─── */}
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 items-start">
+          
+          {/* ─── SIDEBAR ─── */}
+          <div className="flex flex-col gap-3 order-2 md:order-1">
+            {/* Card A: Personal Details */}
+            <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+              <div className="px-[18px] py-[14px] border-b border-[#E8EAF0] flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-[#1A1F2E]">Personal Details</span>
+                <button onClick={handleEdit} className="text-[11px] text-[#1D9E8A] hover:underline">Edit</button>
+              </div>
+              <div className="px-[18px] py-[14px]">
+                {[
+                  ['Full name', beneficiary.display_name],
+                  ['Date of birth', beneficiary.date_of_birth ? new Date(beneficiary.date_of_birth).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null],
+                  ['Gender', beneficiary.gender],
+                  ['County', beneficiary.county],
+                  ['Sub-county', beneficiary.sub_county],
+                  ['Institution', beneficiary.institution_name],
+                  ['Grade / Level', beneficiary.grade ? `${beneficiary.academic_level ? beneficiary.academic_level + ' — ' : ''}${beneficiary.grade}` : null],
+                  ['Disability', beneficiary.has_special_needs ? (beneficiary.special_needs_details || 'Yes') : 'None'],
+                  ['Religion', beneficiary.religion],
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-[#E8EAF0] last:border-0">
+                    <span className="text-[12px] text-[#8B93A8]">{label}</span>
+                    <span className="text-[13px] font-medium text-[#1A1F2E] text-right max-w-[150px] truncate">{value || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Card B: Health Notes (non-group) */}
+            {beneficiary.beneficiary_type !== 'group' && (
+              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0]">
+                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Health Notes</span>
+                </div>
+                <div className="px-[18px] py-[14px] space-y-3">
+                  {/* Medical conditions as chips */}
+                  <div>
+                    <p className="text-[12px] text-[#8B93A8] mb-[6px]">Conditions</p>
+                    {beneficiary.other_medical_conditions ? (
+                      <div className="flex flex-wrap gap-1">
+                        {beneficiary.other_medical_conditions.split(',').map((c, i) => (
+                          <span key={i} className="bg-[#FDE8F0] text-[#7A1A3E] px-[9px] py-[3px] rounded-[6px] text-[11px] font-medium">{c.trim()}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-[12px] text-[#8B93A8]">None recorded</span>
+                    )}
+                  </div>
+                  {[
+                    ['HIV Status', beneficiary.hiv_status || '—'],
+                    ['Special needs', beneficiary.has_special_needs ? 'Yes' : 'No'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex justify-between items-baseline py-[4px] border-b border-[#E8EAF0] last:border-0">
+                      <span className="text-[12px] text-[#8B93A8]">{label}</span>
+                      <span className="text-[13px] font-medium text-[#1A1F2E]">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Card C: Family */}
+            {familyMembers.length > 0 && (
+              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0] flex items-center justify-between">
+                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Family</span>
+                  <span className="text-[11px] text-[#8B93A8]">{familyMembers.length} member{familyMembers.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div className="px-[18px] py-[10px]">
+                  {familyMembers.map((member, i) => {
+                    const isGuardian = member._type === 'guardian';
+                    const name = isGuardian ? (member as Guardian).full_name : (member as any).display_name || '—';
+                    const initials = getInitials(name);
+                    const relation = isGuardian
+                      ? `${(member as Guardian).relationship} · ${(member as Guardian).guardian_type}`
+                      : member._type === 'sibling' ? `Sibling · ${(member as any).relationship || ''}` : 'Dependant';
+                    const phone = isGuardian ? (member as Guardian).phone : null;
+
+                    return (
+                      <div key={`${member._type}-${member.id}-${i}`} className={`flex items-center gap-3 py-[10px] ${i < familyMembers.length - 1 ? 'border-b border-[#E8EAF0]' : ''}`}>
+                        <div className="h-9 w-9 rounded-full bg-[#EDE5D8] text-[#6B5A3E] flex items-center justify-center text-[12px] font-semibold shrink-0">
+                          {initials}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium text-[#1A1F2E] truncate">{name}</p>
+                          <p className="text-[11px] text-[#8B93A8] capitalize">{relation}</p>
+                          {phone && <p className="text-[12px] text-[#1D9E8A] font-mono">{phone}</p>}
+                        </div>
+                        {!isGuardian && (
+                          <button onClick={() => navigate(`/beneficiaries/${member.id}`)} className="text-[#8B93A8] hover:text-[#1D9E8A]">
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Background narrative */}
+            {beneficiary.background_narrative && (
+              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0]">
+                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Background</span>
+                </div>
+                <div className="px-[18px] py-[14px]">
+                  <p className="text-[12px] text-[#4A5168] leading-relaxed whitespace-pre-wrap">{beneficiary.background_narrative}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ─── MAIN CONTENT (Tabs) ─── */}
+          <div className="order-1 md:order-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              {/* Warm tab bar */}
+              <div className="bg-[#F5F0E8] rounded-[10px] p-[3px] flex gap-[2px] mb-4 overflow-x-auto no-scrollbar">
+                {[
+                  { value: 'programmes', label: 'Programmes', icon: FolderKanban },
+                  { value: 'history-risk', label: 'History & Risk', icon: Clock },
+                  { value: 'documents', label: 'Documents', icon: FileText },
+                  { value: 'observations', label: 'Observations', icon: MessageSquare },
+                  ...(beneficiary.beneficiary_type === 'student' ? [{ value: 'academics', label: 'Academics', icon: GraduationCap }] : []),
+                ].map(tab => (
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-[7px] px-[8px] rounded-[8px] text-[12px] font-medium whitespace-nowrap transition-all ${
+                      activeTab === tab.value
+                        ? 'bg-white text-[#1A1F2E]'
+                        : 'text-[#8B93A8] hover:text-[#4A5168]'
+                    }`}
+                    style={activeTab === tab.value ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } : {}}
+                  >
+                    <tab.icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* TAB: Programmes */}
+              <TabsContent value="programmes" className="mt-0 space-y-3">
+                <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
+              </TabsContent>
+
+              {/* TAB: History & Risk */}
+              <TabsContent value="history-risk" className="mt-0 space-y-0">
+                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+                  <div className="p-5">
+                    <ActivityTimeline beneficiaryId={beneficiary.id} />
+                  </div>
+                  {/* Divider with label */}
+                  <div className="flex items-center gap-3 px-5">
+                    <div className="flex-1 h-px bg-[#E8EAF0]" />
+                    <span className="text-[11px] uppercase text-[#8B93A8] tracking-[0.5px] font-medium">Risk Assessment</span>
+                    <div className="flex-1 h-px bg-[#E8EAF0]" />
+                  </div>
+                  <div className="p-5">
+                    <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* TAB: Documents */}
+              <TabsContent value="documents" className="mt-0">
+                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                  <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
+                </div>
+              </TabsContent>
+
+              {/* TAB: Observations */}
+              <TabsContent value="observations" className="mt-0">
+                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                  <ProgramObservations beneficiaryId={beneficiary.id} />
+                </div>
+              </TabsContent>
+
+              {/* TAB: Academics (students only) */}
+              {beneficiary.beneficiary_type === 'student' && (
+                <TabsContent value="academics" className="mt-0 space-y-3">
+                  <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                    <AcademicProgressionInfo 
+                      beneficiaryId={beneficiary.id}
+                      currentGrade={beneficiary.grade}
+                      currentLevel={beneficiary.academic_level}
+                      status={beneficiary.status}
+                    />
+                  </div>
+                  <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                    <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
+                  </div>
+                </TabsContent>
+              )}
+            </Tabs>
+          </div>
         </div>
       </div>
-
-      {/* Profile Header Card */}
-      <Card className="overflow-hidden border-primary/20">
-        <div className="h-2 bg-gradient-to-r from-primary via-info to-primary" />
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col md:flex-row gap-5">
-            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-primary/20 shadow-lg shrink-0">
-              {beneficiary.photo_url ? <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} /> : null}
-              <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-info/20 text-primary">
-                {getInitials(beneficiary.display_name)}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{beneficiary.display_name}</h1>
-                  {beneficiary.student_id_number && (
-                    <p className="text-xs text-muted-foreground font-mono mt-0.5">ID: {beneficiary.student_id_number}</p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    <Badge className={`capitalize ${getTypeBadgeColor(beneficiary.beneficiary_type)}`}>
-                      <TypeIcon className="h-3 w-3 mr-1" />
-                      {beneficiary.beneficiary_type}
-                    </Badge>
-                    <Badge className={getStatusBadgeColor(beneficiary.status)}>
-                      {beneficiary.status}
-                    </Badge>
-                    <Badge className={fundingStatus.color}>
-                      {fundingStatus.label}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                {beneficiary.beneficiary_type !== 'group' && age && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 text-primary shrink-0" />
-                    <span>{age} yrs</span>
-                  </div>
-                )}
-                {beneficiary.gender && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-info shrink-0" />
-                    <span className="capitalize">{beneficiary.gender}</span>
-                  </div>
-                )}
-                {beneficiary.institution_name && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground truncate">
-                    <Building2 className="h-4 w-4 text-warning shrink-0" />
-                    <span className="truncate">{beneficiary.institution_name}</span>
-                  </div>
-                )}
-                {beneficiary.grade && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <GraduationCap className="h-4 w-4 text-success shrink-0" />
-                    <span>{beneficiary.academic_level ? `${beneficiary.academic_level} — ` : ''}{beneficiary.grade}</span>
-                  </div>
-                )}
-                {beneficiary.county && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <span>{beneficiary.county}{beneficiary.sub_county ? `, ${beneficiary.sub_county}` : ''}</span>
-                  </div>
-                )}
-                {beneficiary.member_count && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-primary shrink-0" />
-                    <span>{beneficiary.member_count} members</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions removed — actions moved into contextual tabs */}
-
-      {/* Tabbed Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-          <TabsList className="inline-flex w-max md:w-auto md:flex-wrap bg-muted/50 p-1">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <Activity className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Overview</span>
-              <span className="sm:hidden">Info</span>
-            </TabsTrigger>
-            <TabsTrigger value="programs" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <FolderKanban className="h-3.5 w-3.5 mr-1" />
-              Programs
-            </TabsTrigger>
-            <TabsTrigger value="observations" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <MessageSquare className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Observations</span>
-              <span className="sm:hidden">Obs</span>
-            </TabsTrigger>
-            {beneficiary.beneficiary_type === 'student' && (
-              <TabsTrigger value="academics" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <GraduationCap className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden sm:inline">Academics</span>
-                <span className="sm:hidden">Acad</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="documents" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <Upload className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Documents</span>
-              <span className="sm:hidden">Docs</span>
-            </TabsTrigger>
-            <TabsTrigger value="history-risk" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-              <Clock className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">History & Risk</span>
-              <span className="sm:hidden">Hist</span>
-            </TabsTrigger>
-            {beneficiary.beneficiary_type === 'student' && (
-              <TabsTrigger value="family" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <Heart className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden sm:inline">Family ({guardians.length + siblings.length})</span>
-                <span className="sm:hidden">Family</span>
-              </TabsTrigger>
-            )}
-            {beneficiary.beneficiary_type === 'adult' && (
-              <TabsTrigger value="dependants" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                <Users className="h-3.5 w-3.5 mr-1" />
-                Dependants ({dependants.length})
-              </TabsTrigger>
-            )}
-            {beneficiary.beneficiary_type !== 'group' && (
-              <TabsTrigger value="medical" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
-                Medical
-              </TabsTrigger>
-            )}
-          </TabsList>
-        </div>
-
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
-          <OverviewTab beneficiaryId={beneficiary.id} beneficiary={beneficiary} guardians={guardians} donors={donors} />
-        </TabsContent>
-
-        {/* Programs Tab */}
-        <TabsContent value="programs" className="space-y-4">
-          <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
-        </TabsContent>
-
-
-        {/* Observations Tab */}
-        <TabsContent value="observations" className="space-y-4">
-          <ProgramObservations beneficiaryId={beneficiary.id} />
-        </TabsContent>
-
-        {/* Academics Tab (Students Only) */}
-        {beneficiary.beneficiary_type === 'student' && (
-          <TabsContent value="academics" className="space-y-4">
-            <AcademicProgressionInfo 
-              beneficiaryId={beneficiary.id}
-              currentGrade={beneficiary.grade}
-              currentLevel={beneficiary.academic_level}
-              status={beneficiary.status}
-            />
-            <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
-          </TabsContent>
-        )}
-
-        {/* Documents Tab (All types) */}
-        <TabsContent value="documents" className="space-y-4">
-          <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
-        </TabsContent>
-
-        {/* History & Risk Tab (merged) */}
-        <TabsContent value="history-risk" className="space-y-4">
-          <ActivityTimeline beneficiaryId={beneficiary.id} />
-          <Separator className="my-6" />
-          <div>
-            <h3 className="text-[13px] font-semibold text-brand-ink mb-3 flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4" />
-              Risk Assessment
-            </h3>
-            <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
-          </div>
-        </TabsContent>
-
-        {/* Family Tab — merged Guardians + Siblings (Students Only) */}
-        {beneficiary.beneficiary_type === 'student' && (
-          <TabsContent value="family" className="space-y-6">
-            <div>
-              <h3 className="text-[13px] font-semibold mb-3 flex items-center gap-2">
-                <Heart className="h-4 w-4" /> Guardians ({guardians.length})
-              </h3>
-              {guardians.length === 0 ? (
-                <Card className="border-muted"><CardContent className="py-6 text-center text-muted-foreground text-[13px]">No guardians linked</CardContent></Card>
-              ) : (
-                <div className="space-y-3">
-                  {guardians.map((guardian) => (
-                    <Card key={guardian.id} className="border-primary/10 hover:border-primary/30 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium text-foreground">{guardian.full_name}</h4>
-                            <Badge variant="secondary" className="mt-1 capitalize bg-primary/10 text-primary">{guardian.guardian_type} ({guardian.relationship})</Badge>
-                          </div>
-                          <Badge className={guardian.is_alive ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'}>{guardian.is_alive ? 'Alive' : 'Deceased'}</Badge>
-                        </div>
-                        <Separator className="my-3" />
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          {guardian.phone && (<div className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" />{guardian.phone}</div>)}
-                          {guardian.employment_type && (<div><span className="text-muted-foreground">Employment:</span> {guardian.employment_type}</div>)}
-                          {guardian.source_of_income && (<div><span className="text-muted-foreground">Income:</span> {guardian.source_of_income}</div>)}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Separator />
-            <div>
-              <h3 className="text-[13px] font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" /> Siblings ({siblings.length})
-              </h3>
-              {siblings.length === 0 ? (
-                <Card className="border-muted"><CardContent className="py-6 text-center text-muted-foreground text-[13px]">No siblings linked</CardContent></Card>
-              ) : (
-                <div className="space-y-3">
-                  {siblings.map((sibling) => (
-                    <Card key={sibling.id} className="border-primary/10 hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${sibling.id}`)}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10 border-2 border-primary/20">
-                            {sibling.photo_url ? <AvatarImage src={sibling.photo_url} /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary text-sm">{getInitials(sibling.display_name)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-foreground truncate">{sibling.display_name}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary" className="text-xs capitalize">{sibling.relationship}</Badge>
-                              {sibling.institution_name && <span className="text-xs text-muted-foreground truncate">{sibling.institution_name}</span>}
-                            </div>
-                          </div>
-                          <Badge className={getStatusBadgeColor(sibling.status || 'active')}>{sibling.status}</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        )}
-
-        {/* Dependants Tab (Adults Only) */}
-        {beneficiary.beneficiary_type === 'adult' && (
-          <TabsContent value="dependants" className="space-y-4">
-            {dependants.length === 0 ? (
-              <Card className="border-muted">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No dependants linked to this beneficiary
-                </CardContent>
-              </Card>
-            ) : (
-              dependants.map((dep) => (
-                <Card key={dep.id} className="border-info/10 hover:border-info/30 transition-colors cursor-pointer" onClick={() => navigate(`/beneficiaries/${dep.id}`)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-10 w-10 border-2 border-info/20">
-                        {dep.photo_url ? <AvatarImage src={dep.photo_url} /> : null}
-                        <AvatarFallback className="bg-info/10 text-info text-sm">
-                          {getInitials(dep.display_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-foreground truncate">{dep.display_name}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          {dep.institution_name && <span className="text-xs text-muted-foreground">{dep.institution_name}</span>}
-                          {dep.grade && <span className="text-xs text-muted-foreground">Grade {dep.grade}</span>}
-                        </div>
-                      </div>
-                      <Badge className={getStatusBadgeColor(dep.status || 'active')}>{dep.status}</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-        )}
-
-        {/* Medical Tab */}
-        {beneficiary.beneficiary_type !== 'group' && (
-          <TabsContent value="medical" className="space-y-4">
-            <Card className="border-destructive/20">
-              <CardHeader className="bg-gradient-to-r from-destructive/5 to-transparent">
-                <CardTitle className="text-lg text-destructive">Medical Information</CardTitle>
-                <CardDescription>Confidential health records</CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">HIV Status</p>
-                  <p className="font-medium">{beneficiary.hiv_status || '-'}</p>
-                </div>
-                {beneficiary.hiv_positive_since && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">HIV Positive Since</p>
-                    <p className="font-medium">{beneficiary.hiv_positive_since}</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm text-muted-foreground">Special Needs</p>
-                  <p className="font-medium">{beneficiary.has_special_needs ? 'Yes' : 'No'}</p>
-                </div>
-                {beneficiary.special_needs_details && (
-                  <div className="col-span-2">
-                    <p className="text-sm text-muted-foreground">Special Needs Details</p>
-                    <p className="font-medium">{beneficiary.special_needs_details}</p>
-                  </div>
-                )}
-                {beneficiary.other_medical_conditions && (
-                  <div className="col-span-2">
-                    <p className="text-sm text-muted-foreground">Other Medical Conditions</p>
-                    <p className="font-medium">{beneficiary.other_medical_conditions}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        )}
-      </Tabs>
 
       {/* Delete Confirmation */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
