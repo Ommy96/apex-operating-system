@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, Clock, Activity, ShieldAlert, Printer, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -115,6 +115,53 @@ export default function BeneficiaryProfile() {
   const [enrollmentCount, setEnrollmentCount] = useState(0);
   const [attendanceCount, setAttendanceCount] = useState(0);
   const [earliestEnrollDate, setEarliestEnrollDate] = useState<string | null>(null);
+  const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
+
+  const fetchQuickStats = useCallback(async () => {
+    if (!id) return;
+    const [
+      { count: enroll },
+      { count: attend },
+      { data: earliest },
+      { data: riskData },
+      { data: recentVisits },
+    ] = await Promise.all([
+      supabase.from('beneficiary_services').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id).eq('status', 'active'),
+      supabase.from('activity_attendance').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id),
+      supabase.from('beneficiary_services').select('enrolled_date').eq('beneficiary_id', id).order('enrolled_date', { ascending: true }).limit(1),
+      supabase.from('beneficiary_risk_scores').select('overall_risk_level').eq('beneficiary_id', id).order('assessment_date', { ascending: false }).limit(1),
+      supabase.from('beneficiary_visitations').select('visit_date').eq('beneficiary_id', id).order('visit_date', { ascending: false }).limit(1),
+    ]);
+    setEnrollmentCount(enroll || 0);
+    setAttendanceCount(attend || 0);
+    setEarliestEnrollDate(earliest?.[0]?.enrolled_date || null);
+
+    // Derive overall status from risk score + visitation recency + beneficiary status
+    const riskLevel = riskData?.[0]?.overall_risk_level;
+    const lastVisitDate = recentVisits?.[0]?.visit_date;
+    const daysSinceVisit = lastVisitDate ? Math.floor((Date.now() - new Date(lastVisitDate).getTime()) / 86400000) : null;
+
+    if (beneficiary?.status !== 'active' || riskLevel === 'high' || riskLevel === 'critical') {
+      setOverallStatus('Critical');
+    } else if (riskLevel === 'medium' || (daysSinceVisit !== null && daysSinceVisit > 90) || (enroll || 0) === 0) {
+      setOverallStatus('Review');
+    } else {
+      setOverallStatus('Good');
+    }
+  }, [id, beneficiary?.status]);
+
+  // Real-time subscription for live stat updates
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`profile-stats-${id}`)
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_services', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'activity_attendance', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_risk_scores', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_visitations', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, fetchQuickStats]);
 
   useEffect(() => {
     if (id && currentOrganization?.organization_id) {
@@ -124,19 +171,7 @@ export default function BeneficiaryProfile() {
 
   useEffect(() => {
     if (id) fetchQuickStats();
-  }, [id]);
-
-  const fetchQuickStats = async () => {
-    if (!id) return;
-    const [{ count: enroll }, { count: attend }, { data: earliest }] = await Promise.all([
-      supabase.from('beneficiary_services').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id).eq('status', 'active'),
-      supabase.from('activity_attendance').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id),
-      supabase.from('beneficiary_services').select('enrolled_date').eq('beneficiary_id', id).order('enrolled_date', { ascending: true }).limit(1),
-    ]);
-    setEnrollmentCount(enroll || 0);
-    setAttendanceCount(attend || 0);
-    setEarliestEnrollDate(earliest?.[0]?.enrolled_date || null);
-  };
+  }, [id, fetchQuickStats]);
 
   const fetchBeneficiaryData = async () => {
     if (!id) return;
@@ -398,8 +433,8 @@ export default function BeneficiaryProfile() {
                 <div className="text-[11px] text-[#8B93A8] mt-[2px]">Time enrolled</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-[#1D9E8A] tracking-tight">
-                  {beneficiary.status === 'active' ? 'Good' : 'Review'}
+                <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-[#1D9E8A]' : overallStatus === 'Review' ? 'text-amber-500' : 'text-rose-500'}`}>
+                  {overallStatus}
                 </div>
                 <div className="text-[11px] text-[#8B93A8] mt-[2px]">Overall status</div>
               </div>
