@@ -190,13 +190,13 @@ const Dashboard = () => {
       if (!orgId) return [];
       const { data } = await supabase
         .from('grants')
-        .select('id, name, amount, spent_amount, start_date, end_date')
+        .select('id, grant_name, grant_amount, amount_received, start_date, end_date')
         .eq('organization_id', orgId)
         .eq('status', 'active')
         .limit(3);
       return (data || []).map(g => {
-        const spent = g.spent_amount || 0;
-        const total = g.amount || 1;
+        const spent = g.amount_received || 0;
+        const total = g.grant_amount || 1;
         const pct = Math.round((spent / total) * 100);
         const now = Date.now();
         const start = new Date(g.start_date || now).getTime();
@@ -206,7 +206,7 @@ const Dashboard = () => {
         if (pct > timePct + 15) status = 'overspending';
         else if (pct < timePct - 25) status = 'underspending';
         else if (Math.abs(pct - timePct) > 10) status = 'at_risk';
-        return { name: g.name, pct: Math.min(pct, 100), status };
+        return { name: g.grant_name, pct: Math.min(pct, 100), status };
       });
     },
     enabled: !!orgId,
