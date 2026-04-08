@@ -72,13 +72,13 @@ const Dashboard = () => {
       if (!orgId) return { count: 0, totalAmount: 0 };
       const { data } = await supabase
         .from('grants')
-        .select('id, amount')
+        .select('id, grant_amount')
         .eq('organization_id', orgId)
         .eq('status', 'active');
       const grants = data || [];
       return {
         count: grants.length,
-        totalAmount: grants.reduce((s, g) => s + (g.amount || 0), 0),
+        totalAmount: grants.reduce((s, g) => s + (g.grant_amount || 0), 0),
       };
     },
     enabled: !!orgId,
