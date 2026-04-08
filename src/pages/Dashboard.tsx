@@ -153,7 +153,7 @@ const Dashboard = () => {
       if (!orgId) return { onTrack: 0, atRisk: 0, offTrack: 0, indicators: [] as any[] };
       const { data } = await supabase
         .from('indicators')
-        .select('id, name, target_value, updated_at')
+        .select('id, name, updated_at')
         .eq('organization_id', orgId)
         .eq('is_active', true)
         .order('updated_at', { ascending: false })
@@ -161,17 +161,15 @@ const Dashboard = () => {
 
       const indicators = data || [];
       const withValues = await Promise.all(indicators.map(async (ind) => {
-        const { data: vals } = await supabase
-          .from('indicator_values')
-          .select('actual_value')
-          .eq('indicator_id', ind.id)
-          .order('date_collected', { ascending: false })
-          .limit(1);
-        const actual = vals?.[0]?.actual_value || 0;
-        const target = ind.target_value || 1;
+        const [valRes, targetRes] = await Promise.all([
+          supabase.from('indicator_values').select('actual_value').eq('indicator_id', ind.id).order('period_end', { ascending: false }).limit(1),
+          supabase.from('indicator_targets').select('target_value').eq('indicator_id', ind.id).order('period_year', { ascending: false }).limit(1),
+        ]);
+        const actual = valRes.data?.[0]?.actual_value || 0;
+        const target = targetRes.data?.[0]?.target_value || 1;
         const pct = Math.round((actual / target) * 100);
         const status = pct >= 80 ? 'on_track' : pct >= 50 ? 'at_risk' : 'off_track';
-        return { ...ind, actual, pct: Math.min(pct, 100), status };
+        return { id: ind.id, name: ind.name, actual, pct: Math.min(pct, 100), status };
       }));
 
       return {
