@@ -244,7 +244,7 @@ const Dashboard = () => {
         supabase.from('beneficiaries').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active'),
         supabase.from('programs').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('is_active', true),
         supabase.from('projects').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
-        supabase.from('grants').select('amount').eq('organization_id', orgId).eq('status', 'active'),
+        supabase.from('grants').select('grant_amount').eq('organization_id', orgId).eq('status', 'active'),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
         supabase.from('complaints').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'open'),
       ]);
@@ -252,7 +252,7 @@ const Dashboard = () => {
         beneficiaries: ben.count || 0,
         programmes: prog.count || 0,
         projects: proj.count || 0,
-        grantPortfolio: (grants.data || []).reduce((s, g) => s + (g.amount || 0), 0),
+        grantPortfolio: (grants.data || []).reduce((s, g) => s + (g.grant_amount || 0), 0),
         staff: staff.count || 0,
         complaints: complaints.count || 0,
       };
