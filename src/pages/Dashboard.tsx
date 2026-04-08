@@ -220,7 +220,7 @@ const Dashboard = () => {
       if (!orgId) return [];
       const { data } = await supabase
         .from('grant_reports')
-        .select('id, title, due_date, grants(name)')
+        .select('id, report_title, due_date, grants(grant_name)')
         .eq('organization_id', orgId)
         .not('status', 'in', '("submitted","approved")')
         .not('due_date', 'is', null)
@@ -228,7 +228,7 @@ const Dashboard = () => {
         .limit(3);
       return (data || []).map((r: any) => {
         const days = Math.ceil((new Date(r.due_date).getTime() - Date.now()) / 86400000);
-        return { id: r.id, title: r.title, grantName: r.grants?.name, dueDate: r.due_date, daysLeft: days };
+        return { id: r.id, title: r.report_title, grantName: r.grants?.grant_name, dueDate: r.due_date, daysLeft: days };
       });
     },
     enabled: !!orgId,
