@@ -7003,35 +7003,68 @@ export type Database = {
       }
       profiles: {
         Row: {
+          county: string | null
           created_at: string
+          date_of_birth: string | null
+          department: string | null
           email: string
+          employment_type: string | null
           full_name: string
+          gender: string | null
           id: string
+          job_title: string | null
           last_login_at: string | null
+          national_id: string | null
+          notes: string | null
           organization_id: string | null
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"]
+          staff_id: string | null
+          start_date: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          county?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
           email: string
+          employment_type?: string | null
           full_name: string
+          gender?: string | null
           id?: string
+          job_title?: string | null
           last_login_at?: string | null
+          national_id?: string | null
+          notes?: string | null
           organization_id?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          staff_id?: string | null
+          start_date?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          county?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
           email?: string
+          employment_type?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
+          job_title?: string | null
           last_login_at?: string | null
+          national_id?: string | null
+          notes?: string | null
           organization_id?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          staff_id?: string | null
+          start_date?: string | null
           updated_at?: string
           user_id?: string
         }
