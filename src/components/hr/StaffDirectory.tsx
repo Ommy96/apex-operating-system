@@ -70,7 +70,7 @@ export function StaffDirectory() {
   const [isSaving, setIsSaving] = useState(false);
   const [resendingFor, setResendingFor] = useState<string | null>(null);
 
-  const canManageStaff = isSuperAdmin || can.manageSettings || can.createUsers || can.manageRoles;
+  const canManageStaff = isSuperAdmin || can.manageStaff;
 
   // Fetch staff members by joining profiles + organization_members
   const { data: staffMembers, isLoading } = useQuery({
