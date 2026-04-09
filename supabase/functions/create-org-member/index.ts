@@ -37,7 +37,13 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { email, password, full_name, role, organization_id } = body;
+    const { email, password, full_name, role, organization_id,
+      // New staff detail fields
+      phone, national_id, date_of_birth, gender, county,
+      job_title, department, employment_type, start_date, staff_id, notes,
+      // RBAC role assignment
+      rbac_role_id
+    } = body;
 
     if (!email || !password || !full_name || !organization_id) {
       return new Response(
@@ -92,6 +98,7 @@ Deno.serve(async (req) => {
       organization_id,
       role: memberRole,
       is_primary: true,
+      invited_by: callerUser.id,
     });
 
     if (memberError) {
@@ -103,11 +110,35 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update their profile with org id
-    await adminClient.from("profiles").update({
+    // Update their profile with org id and staff details
+    const profileUpdate: Record<string, unknown> = {
       organization_id,
       role: memberRole,
-    }).eq("user_id", newUser.user.id);
+    };
+    if (phone) profileUpdate.phone = phone;
+    if (national_id) profileUpdate.national_id = national_id;
+    if (date_of_birth) profileUpdate.date_of_birth = date_of_birth;
+    if (gender) profileUpdate.gender = gender;
+    if (county) profileUpdate.county = county;
+    if (job_title) profileUpdate.job_title = job_title;
+    if (department) profileUpdate.department = department;
+    if (employment_type) profileUpdate.employment_type = employment_type;
+    if (start_date) profileUpdate.start_date = start_date;
+    if (staff_id) profileUpdate.staff_id = staff_id;
+    if (notes) profileUpdate.notes = notes;
+
+    await adminClient.from("profiles").update(profileUpdate).eq("user_id", newUser.user.id);
+
+    // Assign RBAC role if provided
+    if (rbac_role_id) {
+      await adminClient.from("rbac_user_role_assignments").insert({
+        user_id: newUser.user.id,
+        organization_id,
+        role_id: rbac_role_id,
+        assigned_by: callerUser.id,
+        is_active: true,
+      });
+    }
 
     return new Response(
       JSON.stringify({ success: true, user_id: newUser.user.id }),

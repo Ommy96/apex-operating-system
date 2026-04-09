@@ -140,6 +140,7 @@ export function usePermissions() {
 
     // HR
     viewHR: superAdmin || permissions.includes('hr.view.staff'),
+    manageStaff: superAdmin || permissions.includes('users.manage.members') || permissions.includes('users.manage.staff') || permissions.includes('settings.manage.org_settings'),
 
     // Communications
     viewCommunications: superAdmin || permissions.includes('communications.view.communications'),
