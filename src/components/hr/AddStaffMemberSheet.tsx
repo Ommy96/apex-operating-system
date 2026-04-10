@@ -61,7 +61,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
         .eq('organization_id', orgId!)
         .eq('is_active', true)
         .neq('name', 'org_admin')
-        .order('sort_order');
+        .order('display_name');
       if (error) throw error;
       return data || [];
     },
