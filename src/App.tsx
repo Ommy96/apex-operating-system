@@ -42,7 +42,7 @@ const AIInsights = lazy(() => import("./pages/AIInsights"));
 const DocumentManagement = lazy(() => import("./pages/DocumentManagement"));
 const ComplianceGovernance = lazy(() => import("./pages/ComplianceGovernance"));
 const BoardReporting = lazy(() => import("./pages/BoardReporting"));
-const VolunteerManagement = lazy(() => import("./pages/VolunteerManagement"));
+
 const BranchManagement = lazy(() => import("./pages/BranchManagement"));
 const PartnerCollaboration = lazy(() => import("./pages/PartnerCollaboration"));
 const RiskIntelligence = lazy(() => import("./pages/RiskIntelligence"));
