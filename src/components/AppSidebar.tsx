@@ -20,7 +20,7 @@ import {
 import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
-  FileText, ClipboardCheck, Presentation, UserCheck,
+  FileText, ClipboardCheck, Presentation,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
