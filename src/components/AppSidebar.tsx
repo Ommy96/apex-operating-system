@@ -193,7 +193,7 @@ export function AppSidebar() {
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
         { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
-        { title: "People", url: "/people", icon: UserCheck, show: can.viewVolunteers },
+        
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],
     },
