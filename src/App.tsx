@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -42,7 +42,7 @@ const AIInsights = lazy(() => import("./pages/AIInsights"));
 const DocumentManagement = lazy(() => import("./pages/DocumentManagement"));
 const ComplianceGovernance = lazy(() => import("./pages/ComplianceGovernance"));
 const BoardReporting = lazy(() => import("./pages/BoardReporting"));
-const VolunteerManagement = lazy(() => import("./pages/VolunteerManagement"));
+
 const BranchManagement = lazy(() => import("./pages/BranchManagement"));
 const PartnerCollaboration = lazy(() => import("./pages/PartnerCollaboration"));
 const RiskIntelligence = lazy(() => import("./pages/RiskIntelligence"));
@@ -219,16 +219,8 @@ const App = () => (
                 <DashboardLayout><LazyRoute><BoardReporting /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/volunteers" element={
-              <ProtectedRoute requirePermission={{ module: 'volunteers', action: 'view', resource: 'volunteers' }}>
-                <DashboardLayout><LazyRoute><VolunteerManagement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/people" element={
-              <ProtectedRoute requirePermission={{ module: 'volunteers', action: 'view', resource: 'volunteers' }}>
-                <DashboardLayout><LazyRoute><VolunteerManagement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/volunteers" element={<Navigate to="/hr" replace />} />
+            <Route path="/people" element={<Navigate to="/hr" replace />} />
             <Route path="/partners" element={
               <ProtectedRoute requirePermission={{ module: 'partners', action: 'view', resource: 'partners' }}>
                 <DashboardLayout><LazyRoute><PartnerCollaboration /></LazyRoute></DashboardLayout>
