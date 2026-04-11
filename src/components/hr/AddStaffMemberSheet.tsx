@@ -22,7 +22,7 @@ interface AddStaffMemberSheetProps {
 }
 
 export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetProps) {
-  const { currentOrganization } = useOrganization();
+  const { currentOrganization, isLoading: isOrganizationLoading } = useOrganization();
   const orgId = currentOrganization?.organization_id;
   const orgName = currentOrganization?.organization_name || '';
   const queryClient = useQueryClient();
@@ -52,21 +52,33 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
   const [tempPasswordName, setTempPasswordName] = useState('');
 
   // Fetch RBAC roles for dropdown
-  const { data: rbacRoles } = useQuery({
+  const {
+    data: rbacRoles = [],
+    isLoading: isRolesLoading,
+    error: rolesError,
+  } = useQuery({
     queryKey: ['rbac-roles-list', orgId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('rbac_roles')
-        .select('id, name, display_name, color')
-        .eq('organization_id', orgId!)
+        .select('id, name, display_name, color, is_system_role')
         .eq('is_active', true)
-        .neq('name', 'org_admin')
+        .or(`is_system_role.eq.true,organization_id.eq.${orgId}`)
+        .neq('name', 'super_admin')
         .order('display_name');
       if (error) throw error;
       return data || [];
     },
-    enabled: !!orgId,
+    enabled: !!orgId && !isOrganizationLoading,
   });
+
+  const roleHelperText = isOrganizationLoading || isRolesLoading
+    ? 'Loading roles...'
+    : rolesError
+      ? 'Could not load roles. Please try again.'
+      : rbacRoles.length === 0
+        ? 'No active roles available for this organization.'
+        : null;
 
   const generateTempPassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
@@ -143,7 +155,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
         setTempPassword(password);
       }
 
-      const selectedRole = rbacRoles?.find(r => r.id === rbacRoleId);
+      const selectedRole = rbacRoles.find(r => r.id === rbacRoleId);
       const roleName = selectedRole?.display_name || 'Member';
 
       queryClient.invalidateQueries({ queryKey: ['staff-members'] });
@@ -297,15 +309,20 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                   <div>
                     <Label htmlFor="role">Role *</Label>
                     <Select value={rbacRoleId} onValueChange={setRbacRoleId}>
-                      <SelectTrigger id="role"><SelectValue placeholder="Select a role" /></SelectTrigger>
+                      <SelectTrigger id="role" disabled={isOrganizationLoading || isRolesLoading || rbacRoles.length === 0}>
+                        <SelectValue placeholder={isOrganizationLoading || isRolesLoading ? 'Loading roles...' : 'Select a role'} />
+                      </SelectTrigger>
                       <SelectContent>
-                        {rbacRoles?.map(r => (
+                        {rbacRoles.map(r => (
                           <SelectItem key={r.id} value={r.id}>
                             {r.display_name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {roleHelperText && (
+                      <p className="mt-2 text-xs text-muted-foreground">{roleHelperText}</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between rounded-lg border p-3">
                     <div>
