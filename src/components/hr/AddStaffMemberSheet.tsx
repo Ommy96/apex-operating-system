@@ -61,13 +61,13 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
     queryFn: async () => {
       const { data, error } = await supabase
         .from('rbac_roles')
-        .select('id, name, display_name, color, is_system_role')
+        .select('id, name, display_name, color, is_system_role, organization_id')
         .eq('is_active', true)
-        .or(`is_system_role.eq.true,organization_id.eq.${orgId}`)
         .neq('name', 'super_admin')
+        .order('is_system_role', { ascending: false })
         .order('display_name');
       if (error) throw error;
-      return data || [];
+      return (data || []).filter(role => role.is_system_role || role.organization_id === orgId);
     },
     enabled: !!orgId && !isOrganizationLoading,
   });
@@ -312,7 +312,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                       <SelectTrigger id="role" disabled={isOrganizationLoading || isRolesLoading || rbacRoles.length === 0}>
                         <SelectValue placeholder={isOrganizationLoading || isRolesLoading ? 'Loading roles...' : 'Select a role'} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="z-[100]">
                         {rbacRoles.map(r => (
                           <SelectItem key={r.id} value={r.id}>
                             {r.display_name}
