@@ -27,6 +27,11 @@ export interface OrganizationWithSubscription {
   updated_at: string;
   onboarding_completed: boolean;
   onboarding_completed_at: string | null;
+  is_partner: boolean;
+  partner_granted_at: string | null;
+  partner_granted_by: string | null;
+  partner_notes: string | null;
+  plan_override: string | null;
   member_count: number;
   beneficiary_count: number;
   program_count: number;
@@ -141,7 +146,8 @@ export function useAllOrganizations() {
           id, name, slug, email, phone, country, county, organization_type,
           is_active, subscription_tier, subscription_status, stripe_customer_id,
           features_enabled, trial_ends_at, suspended_at, suspended_reason,
-          created_at, updated_at, onboarding_completed, onboarding_completed_at
+          created_at, updated_at, onboarding_completed, onboarding_completed_at,
+          is_partner, partner_granted_at, partner_granted_by, partner_notes, plan_override
         `)
         .order('created_at', { ascending: false });
 

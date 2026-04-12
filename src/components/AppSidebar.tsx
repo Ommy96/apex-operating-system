@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,7 @@ import {
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useOrgPlanData } from "@/hooks/useFeatureFlag";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
@@ -145,12 +146,19 @@ export function AppSidebar() {
   const { currentOrganization } = useOrganization();
   const { logoUrl, orgName } = useBranding();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+  const { planData } = useOrgPlanData();
 
-  const orgFeatures = (currentOrganization as any)?.features_enabled || {};
-  const isFeatureEnabled = (flagName: string) => orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
+  const isPartnerOrg = planData?.is_partner === true;
+  const orgTier = (planData?.subscription_tier as string) || 'free';
+  const orgFeatures = (planData?.features_enabled as Record<string, unknown>) || {};
+  const isFeatureEnabled = (flagName: string) => {
+    if (isPartnerOrg || orgTier === 'enterprise') return true;
+    return orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
+  };
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
@@ -427,6 +435,28 @@ export function AppSidebar() {
                   </div>
                 </div>
               </div>
+              {/* Plan Indicator */}
+              {(() => {
+                const planConfig = isPartnerOrg
+                  ? { dot: '#f59e0b', label: 'Partner', clickable: false }
+                  : orgTier === 'enterprise'
+                  ? { dot: '#a855f7', label: 'Enterprise', clickable: false }
+                  : orgTier === 'professional'
+                  ? { dot: '#3b82f6', label: 'Professional', clickable: false }
+                  : { dot: '#64748b', label: 'Free plan · Upgrade', clickable: true };
+
+                const content = (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 opacity-60 hover:opacity-100 transition-opacity cursor-default"
+                    onClick={planConfig.clickable ? () => navigate('/organization-settings?tab=billing') : undefined}
+                    style={{ cursor: planConfig.clickable ? 'pointer' : 'default' }}
+                  >
+                    <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: planConfig.dot }} />
+                    <span className="text-[10px]" style={{ color: planConfig.dot }}>{planConfig.label}</span>
+                  </div>
+                );
+                return content;
+              })()}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-[10px] px-[10px] py-2 rounded-lg text-[13px] transition-colors duration-150"

@@ -7,7 +7,7 @@ import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, Users, CreditCard, Activity, Shield, Loader2, BarChart3, 
   Flag, Globe, DollarSign, TrendingUp, Heart, Layers, AlertTriangle,
-  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone, LogOut,
+  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone, LogOut, Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,7 @@ import { SystemConfiguration } from '@/components/admin/SystemConfiguration';
 import { AIGatewayOversight } from '@/components/admin/AIGatewayOversight';
 import { WhiteLabelManagement } from '@/components/admin/WhiteLabelManagement';
 import { PlatformCommunications } from '@/components/admin/PlatformCommunications';
+import { PartnerAccessLog } from '@/components/admin/PartnerAccessLog';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
@@ -189,6 +190,10 @@ export default function InferaAdminDashboard() {
               <TabsTrigger value="comms" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
                 <Megaphone className="h-4 w-4" />
                 <span className="hidden sm:inline">Comms</span>
+              </TabsTrigger>
+              <TabsTrigger value="partners" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Crown className="h-4 w-4" />
+                <span className="hidden sm:inline">Partners</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -389,6 +394,10 @@ export default function InferaAdminDashboard() {
 
           <TabsContent value="comms">
             <PlatformCommunications />
+          </TabsContent>
+
+          <TabsContent value="partners">
+            <PartnerAccessLog />
           </TabsContent>
         </Tabs>
       </div>

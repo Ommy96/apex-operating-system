@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useFeatureFlag, useOrgPlanData } from '@/hooks/useFeatureFlag';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 interface FeatureFlagGuardProps {
@@ -10,6 +10,7 @@ interface FeatureFlagGuardProps {
 
 export function FeatureFlagGuard({ flag, moduleName, children }: FeatureFlagGuardProps) {
   const { enabled, loading } = useFeatureFlag(flag);
+  const { planData } = useOrgPlanData();
 
   if (loading) {
     return (
@@ -17,6 +18,11 @@ export function FeatureFlagGuard({ flag, moduleName, children }: FeatureFlagGuar
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Partners never see upgrade prompt
+  if (planData?.is_partner === true) {
+    return <>{children}</>;
   }
 
   if (!enabled) {
