@@ -146,6 +146,7 @@ export function AppSidebar() {
   const { currentOrganization } = useOrganization();
   const { logoUrl, orgName } = useBranding();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
