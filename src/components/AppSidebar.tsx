@@ -434,6 +434,28 @@ export function AppSidebar() {
                   </div>
                 </div>
               </div>
+              {/* Plan Indicator */}
+              {(() => {
+                const planConfig = isPartnerOrg
+                  ? { dot: '#f59e0b', label: 'Partner', clickable: false }
+                  : orgTier === 'enterprise'
+                  ? { dot: '#a855f7', label: 'Enterprise', clickable: false }
+                  : orgTier === 'professional'
+                  ? { dot: '#3b82f6', label: 'Professional', clickable: false }
+                  : { dot: '#64748b', label: 'Free plan · Upgrade', clickable: true };
+
+                const content = (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 opacity-60 hover:opacity-100 transition-opacity cursor-default"
+                    onClick={planConfig.clickable ? () => navigate('/organization-settings?tab=billing') : undefined}
+                    style={{ cursor: planConfig.clickable ? 'pointer' : 'default' }}
+                  >
+                    <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: planConfig.dot }} />
+                    <span className="text-[10px]" style={{ color: planConfig.dot }}>{planConfig.label}</span>
+                  </div>
+                );
+                return content;
+              })()}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-[10px] px-[10px] py-2 rounded-lg text-[13px] transition-colors duration-150"
