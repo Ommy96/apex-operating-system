@@ -395,6 +395,10 @@ export default function InferaAdminDashboard() {
           <TabsContent value="comms">
             <PlatformCommunications />
           </TabsContent>
+
+          <TabsContent value="partners">
+            <PartnerAccessLog />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
