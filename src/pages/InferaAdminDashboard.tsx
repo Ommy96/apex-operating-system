@@ -191,6 +191,10 @@ export default function InferaAdminDashboard() {
                 <Megaphone className="h-4 w-4" />
                 <span className="hidden sm:inline">Comms</span>
               </TabsTrigger>
+              <TabsTrigger value="partners" className="gap-2 data-[state=active]:bg-slate-700 data-[state=active]:text-amber-400">
+                <Crown className="h-4 w-4" />
+                <span className="hidden sm:inline">Partners</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
