@@ -149,9 +149,15 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
+  const { planData } = useOrgPlanData();
 
-  const orgFeatures = (currentOrganization as any)?.features_enabled || {};
-  const isFeatureEnabled = (flagName: string) => orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
+  const isPartnerOrg = planData?.is_partner === true;
+  const orgTier = (planData?.subscription_tier as string) || 'free';
+  const orgFeatures = (planData?.features_enabled as Record<string, unknown>) || {};
+  const isFeatureEnabled = (flagName: string) => {
+    if (isPartnerOrg || orgTier === 'enterprise') return true;
+    return orgFeatures[flagName] === true || orgFeatures[flagName] === 'true';
+  };
 
   const { data: dynamicPrograms } = useQuery({
     queryKey: ['dynamic-programs'],
