@@ -7,7 +7,7 @@ import { isSuperAdmin } from '@/lib/superAdmin';
 import { 
   Building2, Users, CreditCard, Activity, Shield, Loader2, BarChart3, 
   Flag, Globe, DollarSign, TrendingUp, Heart, Layers, AlertTriangle,
-  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone, LogOut,
+  FileText, Eye, Zap, Settings, Brain, Palette, Megaphone, LogOut, Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
