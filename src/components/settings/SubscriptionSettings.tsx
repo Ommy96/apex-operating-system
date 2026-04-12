@@ -37,6 +37,26 @@ export function SubscriptionSettings({ section }: Props) {
   if (section === 'sub-plan') {
     return (
       <div className="space-y-6">
+        {/* Partner Access Banner */}
+        {isPartner && (
+          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              <div>
+                <h3 className="font-semibold text-amber-800 dark:text-amber-300">Partner Access — Full platform access granted by Infera Tech Solutions</h3>
+                {(org as any)?.partner_granted_at && (
+                  <p className="text-sm text-amber-600 dark:text-amber-400/70 mt-0.5">
+                    Granted on {new Date((org as any).partner_granted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                )}
+                {(org as any)?.partner_notes && (
+                  <p className="text-xs text-amber-600/70 dark:text-amber-400/50 mt-1">{(org as any).partner_notes}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <Card className="border shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -45,7 +65,11 @@ export function SubscriptionSettings({ section }: Props) {
                 <CardDescription>Your subscription details and usage limits</CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className="capitalize">{tier}</Badge>
+                {isPartner ? (
+                  <Badge className="bg-amber-100 text-amber-800 border-amber-300">Partner</Badge>
+                ) : (
+                  <Badge className="capitalize">{tier}</Badge>
+                )}
                 <Badge variant={status === 'active' ? 'default' : 'destructive'}>{status}</Badge>
               </div>
             </div>
@@ -57,7 +81,7 @@ export function SubscriptionSettings({ section }: Props) {
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <Label className="text-sm font-medium">Users</Label>
                 </div>
-                <p className="text-2xl font-bold">{features.max_users || '∞'}</p>
+                <p className="text-2xl font-bold">{isPartner ? '∞' : (features.max_users || '∞')}</p>
                 <p className="text-xs text-muted-foreground">Maximum allowed users</p>
               </div>
               <div className="p-4 rounded-xl border bg-muted/20">
@@ -65,7 +89,7 @@ export function SubscriptionSettings({ section }: Props) {
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <Label className="text-sm font-medium">Beneficiaries</Label>
                 </div>
-                <p className="text-2xl font-bold">{features.max_beneficiaries || '∞'}</p>
+                <p className="text-2xl font-bold">{isPartner ? '∞' : (features.max_beneficiaries || '∞')}</p>
                 <p className="text-xs text-muted-foreground">Maximum beneficiaries</p>
               </div>
               <div className="p-4 rounded-xl border bg-muted/20">
@@ -73,11 +97,11 @@ export function SubscriptionSettings({ section }: Props) {
                   <HardDrive className="h-4 w-4 text-muted-foreground" />
                   <Label className="text-sm font-medium">Storage</Label>
                 </div>
-                <p className="text-2xl font-bold">{features.max_storage_gb || 1} GB</p>
-                <Progress value={35} className="mt-2" />
+                <p className="text-2xl font-bold">{isPartner ? '∞' : (features.max_storage_gb || 1)} {isPartner ? '' : 'GB'}</p>
+                {!isPartner && <Progress value={35} className="mt-2" />}
               </div>
             </div>
-            {isAdmin && (
+            {isAdmin && !isPartner && (
               <Button variant="outline" className="gap-2">
                 <ArrowUpRight className="h-4 w-4" /> Upgrade Plan
               </Button>
