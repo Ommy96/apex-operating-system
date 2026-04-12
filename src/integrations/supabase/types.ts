@@ -6483,6 +6483,7 @@ export type Database = {
           features_enabled: Json | null
           id: string
           is_active: boolean
+          is_partner: boolean | null
           kra_exemption_cert_url: string | null
           kra_exemption_expiry: string | null
           logo_url: string | null
@@ -6492,9 +6493,13 @@ export type Database = {
           onboarding_completed: boolean
           onboarding_completed_at: string | null
           organization_type: string | null
+          partner_granted_at: string | null
+          partner_granted_by: string | null
+          partner_notes: string | null
           pbo_expiry: string | null
           pbo_number: string | null
           phone: string | null
+          plan_override: string | null
           primary_color: string | null
           registration_number: string | null
           settings: Json | null
@@ -6523,6 +6528,7 @@ export type Database = {
           features_enabled?: Json | null
           id?: string
           is_active?: boolean
+          is_partner?: boolean | null
           kra_exemption_cert_url?: string | null
           kra_exemption_expiry?: string | null
           logo_url?: string | null
@@ -6532,9 +6538,13 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          partner_granted_at?: string | null
+          partner_granted_by?: string | null
+          partner_notes?: string | null
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          plan_override?: string | null
           primary_color?: string | null
           registration_number?: string | null
           settings?: Json | null
@@ -6563,6 +6573,7 @@ export type Database = {
           features_enabled?: Json | null
           id?: string
           is_active?: boolean
+          is_partner?: boolean | null
           kra_exemption_cert_url?: string | null
           kra_exemption_expiry?: string | null
           logo_url?: string | null
@@ -6572,9 +6583,13 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          partner_granted_at?: string | null
+          partner_granted_by?: string | null
+          partner_notes?: string | null
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          plan_override?: string | null
           primary_color?: string | null
           registration_number?: string | null
           settings?: Json | null
@@ -6593,6 +6608,48 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      partner_access_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_access_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_access_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_activities: {
         Row: {
