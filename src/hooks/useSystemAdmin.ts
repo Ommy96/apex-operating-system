@@ -27,6 +27,11 @@ export interface OrganizationWithSubscription {
   updated_at: string;
   onboarding_completed: boolean;
   onboarding_completed_at: string | null;
+  is_partner: boolean;
+  partner_granted_at: string | null;
+  partner_granted_by: string | null;
+  partner_notes: string | null;
+  plan_override: string | null;
   member_count: number;
   beneficiary_count: number;
   program_count: number;
