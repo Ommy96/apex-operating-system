@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CreditCard, Users, HardDrive, Package, ArrowUpRight } from 'lucide-react';
+import { CreditCard, Users, HardDrive, Package, ArrowUpRight, Crown } from 'lucide-react';
 import { useOrganization } from '@/hooks/useOrganization';
 import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/integrations/supabase/client';
