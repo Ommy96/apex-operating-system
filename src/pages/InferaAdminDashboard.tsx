@@ -23,6 +23,7 @@ import { SystemConfiguration } from '@/components/admin/SystemConfiguration';
 import { AIGatewayOversight } from '@/components/admin/AIGatewayOversight';
 import { WhiteLabelManagement } from '@/components/admin/WhiteLabelManagement';
 import { PlatformCommunications } from '@/components/admin/PlatformCommunications';
+import { PartnerAccessLog } from '@/components/admin/PartnerAccessLog';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
