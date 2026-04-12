@@ -26,6 +26,7 @@ import {
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useOrgPlanData } from "@/hooks/useFeatureFlag";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
