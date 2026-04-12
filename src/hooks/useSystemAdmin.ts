@@ -146,7 +146,8 @@ export function useAllOrganizations() {
           id, name, slug, email, phone, country, county, organization_type,
           is_active, subscription_tier, subscription_status, stripe_customer_id,
           features_enabled, trial_ends_at, suspended_at, suspended_reason,
-          created_at, updated_at, onboarding_completed, onboarding_completed_at
+          created_at, updated_at, onboarding_completed, onboarding_completed_at,
+          is_partner, partner_granted_at, partner_granted_by, partner_notes, plan_override
         `)
         .order('created_at', { ascending: false });
 
