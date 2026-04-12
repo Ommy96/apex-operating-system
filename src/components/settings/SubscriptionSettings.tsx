@@ -22,14 +22,15 @@ export function SubscriptionSettings({ section }: Props) {
     queryKey: ['org-subscription', currentOrganization?.organization_id],
     queryFn: async () => {
       if (!currentOrganization?.organization_id) return null;
-      const { data, error } = await supabase.from('organizations').select('subscription_tier, subscription_status, features_enabled, trial_ends_at').eq('id', currentOrganization.organization_id).single();
+      const { data, error } = await supabase.from('organizations').select('subscription_tier, subscription_status, features_enabled, trial_ends_at, is_partner, partner_granted_at, plan_override, partner_notes').eq('id', currentOrganization.organization_id).single();
       if (error) throw error;
       return data;
     },
     enabled: !!currentOrganization?.organization_id,
   });
 
-  const tier = org?.subscription_tier || 'free';
+  const isPartner = (org as any)?.is_partner === true;
+  const tier = isPartner ? 'partner' : (org?.subscription_tier || 'free');
   const status = org?.subscription_status || 'active';
   const features = (org?.features_enabled as any) || {};
 
