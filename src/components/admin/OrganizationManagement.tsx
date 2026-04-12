@@ -23,12 +23,17 @@ import {
   Building2, Search, MoreHorizontal, Ban, CheckCircle2, Users, Heart, Loader2, 
   Settings2, ChevronDown, ChevronUp, Globe, MapPin, Calendar, Activity,
   AlertTriangle, TrendingUp, Layers, Shield, X, SlidersHorizontal, UserCheck,
+  Star, Crown,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format, formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const TIER_COLORS: Record<string, string> = {
   free: 'bg-slate-700 text-slate-300 border-slate-600',
@@ -63,9 +68,28 @@ function HealthBar({ score }: { score: number }) {
   );
 }
 
+function PlanBadge({ org }: { org: OrganizationWithSubscription }) {
+  if (org.is_partner) {
+    return (
+      <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+        <Crown className="h-3 w-3 mr-1" />
+        Partner
+      </Badge>
+    );
+  }
+  const tier = org.subscription_tier || 'free';
+  return (
+    <Badge variant="outline" className={`text-xs ${TIER_COLORS[tier]}`}>
+      {tier.charAt(0).toUpperCase() + tier.slice(1)}
+    </Badge>
+  );
+}
+
 export function OrganizationManagement() {
   const { data: organizations, isLoading } = useAllOrganizations();
   const { suspendOrganization, activateOrganization, updateSubscription, updateFeatureLimits } = useOrganizationManagement();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,6 +108,12 @@ export function OrganizationManagement() {
   const [limitsDialogOpen, setLimitsDialogOpen] = useState(false);
   const [maxUsers, setMaxUsers] = useState('');
   const [maxBeneficiaries, setMaxBeneficiaries] = useState('');
+
+  // Partner access state
+  const [partnerDialogOpen, setPartnerDialogOpen] = useState(false);
+  const [partnerAction, setPartnerAction] = useState<'grant' | 'revoke'>('grant');
+  const [partnerNotes, setPartnerNotes] = useState('');
+  const [partnerLoading, setPartnerLoading] = useState(false);
 
   const filteredOrgs = organizations?.filter((org) => {
     const matchesSearch = org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -130,6 +160,57 @@ export function OrganizationManagement() {
     }
   };
 
+  const handlePartnerAccess = async () => {
+    if (!selectedOrg || !user?.id) return;
+    setPartnerLoading(true);
+    try {
+      if (partnerAction === 'grant') {
+        const { error } = await supabase.from('organizations').update({
+          is_partner: true,
+          subscription_tier: 'enterprise',
+          plan_override: 'partner',
+          partner_granted_at: new Date().toISOString(),
+          partner_granted_by: user.id,
+          partner_notes: partnerNotes || null,
+        } as any).eq('id', selectedOrg.id);
+        if (error) throw error;
+
+        await supabase.from('partner_access_log' as any).insert({
+          organization_id: selectedOrg.id,
+          action: 'granted',
+          performed_by: user.id,
+          notes: partnerNotes || 'Partner access granted',
+        });
+
+        toast.success(`Partner access granted to ${selectedOrg.name}. They now have full access to all features.`);
+      } else {
+        const { error } = await supabase.from('organizations').update({
+          is_partner: false,
+          plan_override: null,
+        } as any).eq('id', selectedOrg.id);
+        if (error) throw error;
+
+        await supabase.from('partner_access_log' as any).insert({
+          organization_id: selectedOrg.id,
+          action: 'revoked',
+          performed_by: user.id,
+          notes: partnerNotes || 'Partner access revoked',
+        });
+
+        toast.success(`Partner access revoked from ${selectedOrg.name}.`);
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-all-organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-system-stats'] });
+    } catch (err: any) {
+      toast.error(`Failed: ${err.message}`);
+    } finally {
+      setPartnerLoading(false);
+      setPartnerDialogOpen(false);
+      setPartnerNotes('');
+      setSelectedOrg(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -144,8 +225,27 @@ export function OrganizationManagement() {
     low: organizations?.filter(o => o.risk_level === 'low').length || 0,
   };
 
+  const partnerCount = organizations?.filter(o => o.is_partner).length || 0;
+
   return (
     <div className="space-y-4">
+      {/* Partner Orgs Summary */}
+      {partnerCount > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-900/20 border border-amber-700/30">
+          <Crown className="h-4 w-4 text-amber-400" />
+          <span className="text-xs text-amber-400 font-medium">
+            {partnerCount} Partner org{partnerCount !== 1 ? 's' : ''}:
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {organizations?.filter(o => o.is_partner).map(o => (
+              <Badge key={o.id} variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-[10px]">
+                {o.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Risk Summary Bar */}
       <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
         <Shield className="h-4 w-4 text-slate-400" />
@@ -230,7 +330,14 @@ export function OrganizationManagement() {
                     <div className="flex items-center gap-3">
                       <div className={`h-2 w-2 rounded-full ${org.risk_level === 'high' ? 'bg-red-500' : org.risk_level === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                       <div>
-                        <div className="font-medium text-slate-200">{org.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-200">{org.name}</span>
+                          {org.is_partner && (
+                            <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wide">
+                              Partner
+                            </Badge>
+                          )}
+                        </div>
                         <div className="text-xs text-slate-500 flex items-center gap-1">
                           {org.country && <><Globe className="h-3 w-3" />{org.country}</>}
                           {!org.country && <span>/{org.slug}</span>}
@@ -239,9 +346,7 @@ export function OrganizationManagement() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`text-xs ${TIER_COLORS[org.subscription_tier || 'free']}`}>
-                      {(org.subscription_tier || 'free').charAt(0).toUpperCase() + (org.subscription_tier || 'free').slice(1)}
-                    </Badge>
+                    <PlanBadge org={org} />
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`text-xs ${STATUS_COLORS[org.subscription_status || 'active']}`}>
@@ -275,6 +380,31 @@ export function OrganizationManagement() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
                           <DropdownMenuLabel className="text-slate-400">Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-slate-700" />
+                          
+                          {/* Partner Access */}
+                          {org.is_partner ? (
+                            <DropdownMenuItem className="text-red-400 focus:bg-slate-700 focus:text-red-300" onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrg(org);
+                              setPartnerAction('revoke');
+                              setPartnerNotes('');
+                              setPartnerDialogOpen(true);
+                            }}>
+                              <Crown className="h-4 w-4 mr-2" />Revoke Partner Access
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem className="text-amber-400 focus:bg-slate-700 focus:text-amber-300" onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrg(org);
+                              setPartnerAction('grant');
+                              setPartnerNotes('');
+                              setPartnerDialogOpen(true);
+                            }}>
+                              <Crown className="h-4 w-4 mr-2" />Grant Partner Access
+                            </DropdownMenuItem>
+                          )}
+                          
                           <DropdownMenuSeparator className="bg-slate-700" />
                           <DropdownMenuItem className="text-slate-300 focus:bg-slate-700 focus:text-slate-200" onClick={(e) => { e.stopPropagation(); setSelectedOrg(org); setNewTier(org.subscription_tier || 'free'); setTierDialogOpen(true); }}>
                             <Settings2 className="h-4 w-4 mr-2" />Change Plan
@@ -311,7 +441,6 @@ export function OrganizationManagement() {
                     </div>
                   </TableCell>
                 </TableRow>
-                {/* Expanded Detail Row */}
                 {expandedOrg === org.id && (
                   <TableRow key={`${org.id}-detail`} className="border-slate-700/50 bg-slate-800/20">
                     <TableCell colSpan={8} className="p-0">
@@ -421,6 +550,50 @@ export function OrganizationManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Partner Access Dialog */}
+      <Dialog open={partnerDialogOpen} onOpenChange={setPartnerDialogOpen}>
+        <DialogContent className="bg-slate-800 border-slate-700 text-slate-200">
+          <DialogHeader>
+            <DialogTitle className="text-slate-100 flex items-center gap-2">
+              <Crown className="h-5 w-5 text-amber-400" />
+              {partnerAction === 'grant' ? `Grant Partner Access to ${selectedOrg?.name}?` : `Revoke partner access from ${selectedOrg?.name}?`}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              {partnerAction === 'grant'
+                ? `This gives ${selectedOrg?.name} unlimited access to ALL features on the platform, regardless of their subscription plan. This is intended for design partners and pilot organisations.`
+                : `This will revert ${selectedOrg?.name} to their paid subscription plan. Features not included in their plan will be locked.`}
+            </DialogDescription>
+          </DialogHeader>
+          {partnerAction === 'grant' && (
+            <div className="space-y-2 py-2">
+              <label className="text-sm text-slate-400">Add a note about why partner access is being granted (optional)</label>
+              <Textarea
+                placeholder="e.g. Design partner — 6 month pilot"
+                value={partnerNotes}
+                onChange={(e) => setPartnerNotes(e.target.value)}
+                className="bg-slate-700/50 border-slate-600 text-slate-200"
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPartnerDialogOpen(false)} className="border-slate-600 text-slate-300">
+              Cancel
+            </Button>
+            {partnerAction === 'grant' ? (
+              <Button onClick={handlePartnerAccess} disabled={partnerLoading} className="bg-amber-600 hover:bg-amber-700 text-white">
+                {partnerLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Grant Access
+              </Button>
+            ) : (
+              <Button onClick={handlePartnerAccess} disabled={partnerLoading} variant="destructive">
+                {partnerLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Revoke Access
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -440,14 +613,30 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
           <InfoRow icon={<Calendar className="h-3.5 w-3.5" />} label="Created" value={format(new Date(org.created_at), 'MMM d, yyyy')} />
           <InfoRow icon={<Activity className="h-3.5 w-3.5" />} label="Last Activity" value={org.last_activity ? formatDistanceToNow(new Date(org.last_activity), { addSuffix: true }) : 'No activity'} />
         </div>
+
+        {/* Partner Info */}
+        {org.is_partner && (
+          <div className="mt-3 p-3 rounded-lg bg-amber-900/20 border border-amber-700/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Crown className="h-4 w-4 text-amber-400" />
+              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Partner Access</span>
+            </div>
+            {org.partner_granted_at && (
+              <p className="text-xs text-amber-300/70">Granted {format(new Date(org.partner_granted_at), 'MMM d, yyyy')}</p>
+            )}
+            {org.partner_notes && (
+              <p className="text-xs text-slate-400 mt-1">{org.partner_notes}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Usage & Limits */}
       <div className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Usage & Limits</h4>
         <div className="space-y-3">
-          <UsageRow label="Users" current={org.member_count} max={features.max_users || 5} />
-          <UsageRow label="Beneficiaries" current={org.beneficiary_count} max={features.max_beneficiaries || 100} />
+          <UsageRow label="Users" current={org.member_count} max={org.is_partner ? null : (features.max_users || 5)} />
+          <UsageRow label="Beneficiaries" current={org.beneficiary_count} max={org.is_partner ? null : (features.max_beneficiaries || 100)} />
           <UsageRow label="Programs" current={org.program_count} max={null} />
         </div>
       </div>
@@ -492,6 +681,7 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 
           {/* Feature Flags Summary */}
           <div className="mt-2 flex flex-wrap gap-1">
+            {org.is_partner && <Badge variant="outline" className="text-[10px] border-amber-600 text-amber-400">Full Access</Badge>}
             {features.reports_enabled && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Reports</Badge>}
             {features.indicators_enabled && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Indicators</Badge>}
             {features.custom_entities && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Custom Entities</Badge>}
@@ -521,7 +711,7 @@ function UsageRow({ label, current, max }: { label: string; current: number; max
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-400">{label}</span>
         <span className={`text-xs font-mono ${isOverLimit ? 'text-red-400' : 'text-slate-300'}`}>
-          {current}{max ? ` / ${max}` : ''}
+          {current}{max ? ` / ${max}` : ' (∞)'}
         </span>
       </div>
       {max && (
