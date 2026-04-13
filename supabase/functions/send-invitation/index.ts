@@ -59,6 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     // Check if there's already a pending invitation
+    // If a pending invitation already exists, reset it so we can resend
     const { data: existingInvite } = await supabaseAdmin
       .from("organization_invitations")
       .select("id, status")
@@ -67,7 +68,8 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (existingInvite && existingInvite.status === "pending") {
-      throw new Error("An invitation is already pending for this email");
+      // Update expiry and resend — don't block the user
+      console.log("Resending existing pending invitation for", email);
     }
 
     // Create the invitation
