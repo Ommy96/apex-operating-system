@@ -96,7 +96,7 @@ serve(async (req) => {
     for (const email of recipient_emails) {
       try {
         const { error: sendError } = await resend.emails.send({
-          from: `${orgName} <onboarding@resend.dev>`,
+          from: `${orgName} <noreply@ufanisi.inferatechs.com>`,
           to: [email],
           subject: subject,
           html: `

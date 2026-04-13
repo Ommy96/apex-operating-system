@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
               "X-Connection-Api-Key": resendKey,
             },
             body: JSON.stringify({
-              from: "Ufanisi <onboarding@resend.dev>",
+              from: "Ufanisi <noreply@ufanisi.inferatechs.com>",
               to: emails,
               subject: `[ACTION REQUIRED] Grant report ${daysLabel} — ${grantName}`,
               html: `<h2>Grant Report Reminder</h2>
