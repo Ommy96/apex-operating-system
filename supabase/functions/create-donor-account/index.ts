@@ -99,8 +99,9 @@ Deno.serve(async (req) => {
     if (donorError) {
       // Rollback: delete the auth user if donor record fails
       await adminClient.auth.admin.deleteUser(newUser.user.id);
+      console.error("Donor record error:", donorError.message);
       return new Response(JSON.stringify({ error: donorError.message }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
