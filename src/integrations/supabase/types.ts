@@ -10232,6 +10232,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: {
+        Args: { _invitation_id: string; _user_id: string }
+        Returns: boolean
+      }
       auto_approve_request: { Args: { request_id: string }; Returns: boolean }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
