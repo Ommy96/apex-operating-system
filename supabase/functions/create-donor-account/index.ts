@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     const { data: { user: callerUser }, error: authError } = await callerClient.auth.getUser();
     if (authError || !callerUser) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     if (!email || !password || !donor_name || !organization_id) {
       return new Response(
         JSON.stringify({ error: "Missing required fields: email, password, donor_name, organization_id" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
     if (!membership && !isSuperAdmin) {
       return new Response(JSON.stringify({ error: "You don't have access to this organization" }), {
-        status: 403,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -79,8 +79,9 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
+      console.error("Create user error:", createError.message);
       return new Response(JSON.stringify({ error: createError.message }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -98,8 +99,9 @@ Deno.serve(async (req) => {
     if (donorError) {
       // Rollback: delete the auth user if donor record fails
       await adminClient.auth.admin.deleteUser(newUser.user.id);
+      console.error("Donor record error:", donorError.message);
       return new Response(JSON.stringify({ error: donorError.message }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -109,8 +111,9 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    console.error("Unexpected error:", err.message);
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
