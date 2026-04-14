@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
     if (!membership && !isSuperAdmin) {
       return new Response(JSON.stringify({ error: "You don't have access to this organization" }), {
-        status: 403,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
