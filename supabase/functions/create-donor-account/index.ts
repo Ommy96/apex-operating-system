@@ -79,8 +79,9 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
+      console.error("Create user error:", createError.message);
       return new Response(JSON.stringify({ error: createError.message }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
