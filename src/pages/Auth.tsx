@@ -187,36 +187,31 @@ export default function Auth() {
       if (signUpError) throw signUpError;
 
       if (authData.user) {
-        // Create user profile
+        // Note: handle_new_user trigger creates the base profile.
+        // Update it with org details.
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            email: invitation.email,
+          .update({
             full_name: data.fullName,
             organization_id: invitation.organization_id,
-            role: 'staff', // Default role in profiles
-          });
+          })
+          .eq('user_id', authData.user.id);
 
         if (profileError) {
-          logger.error('Profile creation error:', profileError);
+          logger.error('Profile update error:', profileError);
         }
 
-        // Add to organization members
-        const { error: memberError } = await supabase
-          .from('organization_members')
-          .insert({
-            organization_id: invitation.organization_id,
-            user_id: authData.user.id,
-            role: invitation.role,
-            is_primary: true,
-          });
+        // Accept invitation via SECURITY DEFINER function (bypasses RLS)
+        const { error: acceptError } = await supabase.rpc('accept_invitation', {
+          _invitation_id: invitation.id,
+          _user_id: authData.user.id,
+        });
 
-        if (memberError) {
-          logger.error('Member creation error:', memberError);
+        if (acceptError) {
+          logger.error('Accept invitation error:', acceptError);
         }
 
-        // Create user role
+        // Create user role (handle_new_user trigger may already create this)
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
@@ -227,15 +222,6 @@ export default function Auth() {
         if (roleError) {
           logger.error('Role creation error:', roleError);
         }
-
-        // Mark invitation as accepted
-        await supabase
-          .from('organization_invitations')
-          .update({ 
-            status: 'accepted',
-            accepted_at: new Date().toISOString()
-          })
-          .eq('id', invitation.id);
 
         toast.success('Account created successfully! Please check your email to verify your account.');
         navigate('/auth');
