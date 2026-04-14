@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     if (!email || !password || !donor_name || !organization_id) {
       return new Response(
         JSON.stringify({ error: "Missing required fields: email, password, donor_name, organization_id" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
