@@ -818,8 +818,11 @@ export type Database = {
           amount_given: number | null
           background_image_url: string | null
           background_narrative: string | null
+          beneficiary_category: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id: string | null
+          consent_date: string | null
+          consent_given: boolean | null
           country: string | null
           county: string | null
           course_name: string | null
@@ -827,8 +830,11 @@ export type Database = {
           created_by: string | null
           date_of_birth: string | null
           deleted_at: string | null
+          disability_status: string | null
           display_name: string
           estate_village: string | null
+          exit_reason: string | null
+          family_status: string | null
           first_name: string | null
           funding_required: number | null
           future_ambition: string | null
@@ -842,10 +848,14 @@ export type Database = {
           hiv_status: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies: string | null
           home_county: string | null
+          household_id: string | null
+          household_size: number | null
           id: string
           inactive_date: string | null
           inactive_reason: string | null
+          income_level: string | null
           institution_name: string | null
+          is_active: boolean | null
           last_name: string | null
           latitude: number | null
           leader_name: string | null
@@ -853,19 +863,26 @@ export type Database = {
           legacy_child_id: string | null
           location: string | null
           longitude: number | null
+          marital_status: string | null
           member_count: number | null
           middle_name: string | null
+          occupation: string | null
           organization_id: string
           other_medical_conditions: string | null
           photo_url: string | null
+          primary_need: string | null
+          registration_source: string | null
           religion: string | null
           source_of_income: string | null
           special_needs_details: string | null
           status: string
           student_id_number: string | null
           sub_county: string | null
+          unique_id: string | null
           updated_at: string
           updated_by: string | null
+          vulnerability_level: string | null
+          vulnerability_tags: string[] | null
           year_enrolled: number | null
         }
         Insert: {
@@ -875,8 +892,11 @@ export type Database = {
           amount_given?: number | null
           background_image_url?: string | null
           background_narrative?: string | null
+          beneficiary_category?: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
+          consent_date?: string | null
+          consent_given?: boolean | null
           country?: string | null
           county?: string | null
           course_name?: string | null
@@ -884,8 +904,11 @@ export type Database = {
           created_by?: string | null
           date_of_birth?: string | null
           deleted_at?: string | null
+          disability_status?: string | null
           display_name: string
           estate_village?: string | null
+          exit_reason?: string | null
+          family_status?: string | null
           first_name?: string | null
           funding_required?: number | null
           future_ambition?: string | null
@@ -899,10 +922,14 @@ export type Database = {
           hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies?: string | null
           home_county?: string | null
+          household_id?: string | null
+          household_size?: number | null
           id?: string
           inactive_date?: string | null
           inactive_reason?: string | null
+          income_level?: string | null
           institution_name?: string | null
+          is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
           leader_name?: string | null
@@ -910,19 +937,26 @@ export type Database = {
           legacy_child_id?: string | null
           location?: string | null
           longitude?: number | null
+          marital_status?: string | null
           member_count?: number | null
           middle_name?: string | null
+          occupation?: string | null
           organization_id: string
           other_medical_conditions?: string | null
           photo_url?: string | null
+          primary_need?: string | null
+          registration_source?: string | null
           religion?: string | null
           source_of_income?: string | null
           special_needs_details?: string | null
           status?: string
           student_id_number?: string | null
           sub_county?: string | null
+          unique_id?: string | null
           updated_at?: string
           updated_by?: string | null
+          vulnerability_level?: string | null
+          vulnerability_tags?: string[] | null
           year_enrolled?: number | null
         }
         Update: {
@@ -932,8 +966,11 @@ export type Database = {
           amount_given?: number | null
           background_image_url?: string | null
           background_narrative?: string | null
+          beneficiary_category?: string | null
           beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
+          consent_date?: string | null
+          consent_given?: boolean | null
           country?: string | null
           county?: string | null
           course_name?: string | null
@@ -941,8 +978,11 @@ export type Database = {
           created_by?: string | null
           date_of_birth?: string | null
           deleted_at?: string | null
+          disability_status?: string | null
           display_name?: string
           estate_village?: string | null
+          exit_reason?: string | null
+          family_status?: string | null
           first_name?: string | null
           funding_required?: number | null
           future_ambition?: string | null
@@ -956,10 +996,14 @@ export type Database = {
           hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies?: string | null
           home_county?: string | null
+          household_id?: string | null
+          household_size?: number | null
           id?: string
           inactive_date?: string | null
           inactive_reason?: string | null
+          income_level?: string | null
           institution_name?: string | null
+          is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
           leader_name?: string | null
@@ -967,19 +1011,26 @@ export type Database = {
           legacy_child_id?: string | null
           location?: string | null
           longitude?: number | null
+          marital_status?: string | null
           member_count?: number | null
           middle_name?: string | null
+          occupation?: string | null
           organization_id?: string
           other_medical_conditions?: string | null
           photo_url?: string | null
+          primary_need?: string | null
+          registration_source?: string | null
           religion?: string | null
           source_of_income?: string | null
           special_needs_details?: string | null
           status?: string
           student_id_number?: string | null
           sub_county?: string | null
+          unique_id?: string | null
           updated_at?: string
           updated_by?: string | null
+          vulnerability_level?: string | null
+          vulnerability_tags?: string[] | null
           year_enrolled?: number | null
         }
         Relationships: [
@@ -988,6 +1039,13 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiaries_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
             referencedColumns: ["id"]
           },
           {
@@ -1157,6 +1215,65 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_field_values: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          field_config_id: string
+          id: string
+          organization_id: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          field_config_id: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          field_config_id?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_field_values_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_field_values_field_config_id_fkey"
+            columns: ["field_config_id"]
+            isOneToOne: false
+            referencedRelation: "programme_field_config"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_field_values_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_field_values_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1430,6 +1547,14 @@ export type Database = {
           program_id: string | null
           project_id: string | null
           project_name: string | null
+          sponsor_donor_id: string | null
+          sponsor_name: string | null
+          sponsorship_amount: number | null
+          sponsorship_currency: string | null
+          sponsorship_end_date: string | null
+          sponsorship_notes: string | null
+          sponsorship_start_date: string | null
+          sponsorship_status: string | null
           status: string | null
           updated_at: string
         }
@@ -1446,6 +1571,14 @@ export type Database = {
           program_id?: string | null
           project_id?: string | null
           project_name?: string | null
+          sponsor_donor_id?: string | null
+          sponsor_name?: string | null
+          sponsorship_amount?: number | null
+          sponsorship_currency?: string | null
+          sponsorship_end_date?: string | null
+          sponsorship_notes?: string | null
+          sponsorship_start_date?: string | null
+          sponsorship_status?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -1462,6 +1595,14 @@ export type Database = {
           program_id?: string | null
           project_id?: string | null
           project_name?: string | null
+          sponsor_donor_id?: string | null
+          sponsor_name?: string | null
+          sponsorship_amount?: number | null
+          sponsorship_currency?: string | null
+          sponsorship_end_date?: string | null
+          sponsorship_notes?: string | null
+          sponsorship_start_date?: string | null
+          sponsorship_status?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -4655,11 +4796,13 @@ export type Database = {
         Row: {
           amount: number
           auto_create_expense: boolean | null
+          beneficiary_service_id: string | null
           created_at: string | null
           currency: string | null
           donor_name: string
           end_date: string | null
           frequency: string
+          funding_model: string | null
           grant_id: string | null
           id: string
           is_active: boolean | null
@@ -4672,11 +4815,13 @@ export type Database = {
         Insert: {
           amount: number
           auto_create_expense?: boolean | null
+          beneficiary_service_id?: string | null
           created_at?: string | null
           currency?: string | null
           donor_name: string
           end_date?: string | null
           frequency: string
+          funding_model?: string | null
           grant_id?: string | null
           id?: string
           is_active?: boolean | null
@@ -4689,11 +4834,13 @@ export type Database = {
         Update: {
           amount?: number
           auto_create_expense?: boolean | null
+          beneficiary_service_id?: string | null
           created_at?: string | null
           currency?: string | null
           donor_name?: string
           end_date?: string | null
           frequency?: string
+          funding_model?: string | null
           grant_id?: string | null
           id?: string
           is_active?: boolean | null
@@ -4704,6 +4851,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "funding_schedules_beneficiary_service_id_fkey"
+            columns: ["beneficiary_service_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_services"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "funding_schedules_grant_id_fkey"
             columns: ["grant_id"]
@@ -5011,6 +5165,7 @@ export type Database = {
           reporting_frequency: string | null
           start_date: string | null
           status: string
+          supported_funding_model: string | null
           updated_at: string
         }
         Insert: {
@@ -5035,6 +5190,7 @@ export type Database = {
           reporting_frequency?: string | null
           start_date?: string | null
           status?: string
+          supported_funding_model?: string | null
           updated_at?: string
         }
         Update: {
@@ -5059,6 +5215,7 @@ export type Database = {
           reporting_frequency?: string | null
           start_date?: string | null
           status?: string
+          supported_funding_model?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -5146,6 +5303,85 @@ export type Database = {
           },
           {
             foreignKeyName: "guardians_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      households: {
+        Row: {
+          county: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          head_of_household_id: string | null
+          household_name: string | null
+          household_size: number | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          organization_id: string
+          sub_county: string | null
+          updated_at: string
+          village: string | null
+          vulnerability_score: number | null
+        }
+        Insert: {
+          county?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          head_of_household_id?: string | null
+          household_name?: string | null
+          household_size?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          organization_id: string
+          sub_county?: string | null
+          updated_at?: string
+          village?: string | null
+          vulnerability_score?: number | null
+        }
+        Update: {
+          county?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          head_of_household_id?: string | null
+          household_name?: string | null
+          household_size?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          organization_id?: string
+          sub_county?: string | null
+          updated_at?: string
+          village?: string | null
+          vulnerability_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "households_head_of_household_fkey"
+            columns: ["head_of_household_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "households_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "households_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
@@ -6351,6 +6587,81 @@ export type Database = {
             foreignKeyName: "notifications_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_beneficiary_config: {
+        Row: {
+          beneficiary_terminology: string
+          beneficiary_terminology_plural: string
+          collect_disability_details: boolean
+          collect_economic_data: boolean
+          collect_education_data: boolean
+          collect_health_data: boolean
+          collect_hiv_status: boolean
+          collect_household_data: boolean
+          collect_nutritional_status: boolean
+          collect_religion: boolean
+          created_at: string
+          custom_fields: Json
+          custom_vulnerability_tags: Json
+          id: string
+          org_type: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_terminology?: string
+          beneficiary_terminology_plural?: string
+          collect_disability_details?: boolean
+          collect_economic_data?: boolean
+          collect_education_data?: boolean
+          collect_health_data?: boolean
+          collect_hiv_status?: boolean
+          collect_household_data?: boolean
+          collect_nutritional_status?: boolean
+          collect_religion?: boolean
+          created_at?: string
+          custom_fields?: Json
+          custom_vulnerability_tags?: Json
+          id?: string
+          org_type?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_terminology?: string
+          beneficiary_terminology_plural?: string
+          collect_disability_details?: boolean
+          collect_economic_data?: boolean
+          collect_education_data?: boolean
+          collect_health_data?: boolean
+          collect_hiv_status?: boolean
+          collect_household_data?: boolean
+          collect_nutritional_status?: boolean
+          collect_religion?: boolean
+          created_at?: string
+          custom_fields?: Json
+          custom_vulnerability_tags?: Json
+          id?: string
+          org_type?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_beneficiary_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_beneficiary_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
@@ -7750,6 +8061,80 @@ export type Database = {
           },
         ]
       }
+      programme_field_config: {
+        Row: {
+          created_at: string
+          display_order: number
+          field_label: string
+          field_name: string
+          field_options: Json
+          field_type: string
+          id: string
+          is_required: boolean
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          field_label: string
+          field_name: string
+          field_options?: Json
+          field_type: string
+          id?: string
+          is_required?: boolean
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          field_label?: string
+          field_name?: string
+          field_options?: Json
+          field_type?: string
+          id?: string
+          is_required?: boolean
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_field_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_field_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_field_config_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_field_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           annual_funding_required: number | null
@@ -8004,6 +8389,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          allow_partial_sponsorship: boolean | null
           budget: number | null
           created_at: string
           created_by: string | null
@@ -8015,6 +8401,7 @@ export type Database = {
           estimated_cost: number | null
           expected_outputs: string | null
           funding_cycle: string | null
+          funding_model: string
           id: string
           latitude: number | null
           location: string | null
@@ -8025,7 +8412,10 @@ export type Database = {
           project_code: string | null
           project_lead_id: string | null
           slug: string
+          sponsorship_currency: string | null
+          sponsorship_frequency: string | null
           sponsorship_required: boolean | null
+          sponsorship_target_amount: number | null
           start_date: string | null
           status: string | null
           target_beneficiary_types: string[] | null
@@ -8033,6 +8423,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          allow_partial_sponsorship?: boolean | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -8044,6 +8435,7 @@ export type Database = {
           estimated_cost?: number | null
           expected_outputs?: string | null
           funding_cycle?: string | null
+          funding_model?: string
           id?: string
           latitude?: number | null
           location?: string | null
@@ -8054,7 +8446,10 @@ export type Database = {
           project_code?: string | null
           project_lead_id?: string | null
           slug: string
+          sponsorship_currency?: string | null
+          sponsorship_frequency?: string | null
           sponsorship_required?: boolean | null
+          sponsorship_target_amount?: number | null
           start_date?: string | null
           status?: string | null
           target_beneficiary_types?: string[] | null
@@ -8062,6 +8457,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          allow_partial_sponsorship?: boolean | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -8073,6 +8469,7 @@ export type Database = {
           estimated_cost?: number | null
           expected_outputs?: string | null
           funding_cycle?: string | null
+          funding_model?: string
           id?: string
           latitude?: number | null
           location?: string | null
@@ -8083,7 +8480,10 @@ export type Database = {
           project_code?: string | null
           project_lead_id?: string | null
           slug?: string
+          sponsorship_currency?: string | null
+          sponsorship_frequency?: string | null
           sponsorship_required?: boolean | null
+          sponsorship_target_amount?: number | null
           start_date?: string | null
           status?: string | null
           target_beneficiary_types?: string[] | null
@@ -10261,6 +10661,10 @@ export type Database = {
           name_a: string
           name_b: string
         }[]
+      }
+      generate_beneficiary_unique_id: {
+        Args: { _org_id: string }
+        Returns: string
       }
       get_org_member_role: {
         Args: { _org_id: string; _user_id: string }
