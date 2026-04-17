@@ -22,6 +22,7 @@ import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDoc
 import { BrandingSettings } from '@/components/settings/BrandingSettings';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
+import { BeneficiaryDataSettings } from '@/components/settings/BeneficiaryDataSettings';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,7 @@ export default function OrganizationSettings() {
       case 'ai-config': return <AISettings />;
       case 'academic-config': return <AcademicSettings />;
       case 'donor-portal': return <DonorPortalSettings />;
+      case 'beneficiary-data': return <BeneficiaryDataSettings />;
       default: return <OrganizationProfileSettings />;
     }
   };
