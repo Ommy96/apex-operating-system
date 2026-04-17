@@ -1,3 +1,4 @@
+export { BeneficiaryForm } from './BeneficiaryForm';
 export { StudentBeneficiaryForm } from './StudentBeneficiaryForm';
 export { AdultBeneficiaryForm } from './AdultBeneficiaryForm';
 export { GroupBeneficiaryForm } from './GroupBeneficiaryForm';

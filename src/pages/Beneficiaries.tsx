@@ -18,8 +18,9 @@ import { useRealtimeTable } from '@/hooks/useRealtimeSubscription';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { StudentBeneficiaryForm, AdultBeneficiaryForm, GroupBeneficiaryForm } from '@/components/beneficiary';
+import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BulkBeneficiaryUpload } from '@/components/beneficiary/BulkBeneficiaryUpload';
+import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,6 +100,7 @@ export default function Beneficiaries() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin } = useAuth();
   const { currentOrganization } = useOrganization();
+  const { term, termPlural } = useBeneficiaryTerminology();
   const organizationId = currentOrganization?.organization_id;
   
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
@@ -368,70 +370,37 @@ export default function Beneficiaries() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Beneficiaries"
-        description="Manage all beneficiary types - students, adults, and groups"
+        title={termPlural}
+        description={`Manage all ${termPlural.toLowerCase()} — individuals, households, groups and organisations`}
         icon={Users}
         actions={
           isAdmin && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) setEditingBeneficiary(null);
+            }}>
               <DialogTrigger asChild>
                 <Button className="h-9 gap-1.5">
                   <Plus className="h-4 w-4" />
-                  Add Beneficiary
+                  Add {term}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingBeneficiary ? 'Edit Beneficiary' : 'Add New Beneficiary'}</DialogTitle>
+                  <DialogTitle>{editingBeneficiary ? `Edit ${term}` : `Register new ${term.toLowerCase()}`}</DialogTitle>
                 </DialogHeader>
-                <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as any)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 mb-4">
-                    <TabsTrigger value="student" className="flex items-center gap-1 text-xs sm:text-sm">
-                      <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      Student
-                    </TabsTrigger>
-                    <TabsTrigger value="adult" className="flex items-center gap-1 text-xs sm:text-sm">
-                      <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      Adult
-                    </TabsTrigger>
-                    <TabsTrigger value="group" className="flex items-center gap-1 text-xs sm:text-sm">
-                      <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      Group
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="student">
-                    <StudentBeneficiaryForm
-                      beneficiary={editingBeneficiary?.beneficiary_type === 'student' ? editingBeneficiary : undefined}
-                      onSuccess={() => {
-                        setIsDialogOpen(false);
-                        setEditingBeneficiary(null);
-                        fetchBeneficiaries();
-                      }}
-                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="adult">
-                    <AdultBeneficiaryForm
-                      beneficiary={editingBeneficiary?.beneficiary_type === 'adult' ? editingBeneficiary : undefined}
-                      onSuccess={() => {
-                        setIsDialogOpen(false);
-                        setEditingBeneficiary(null);
-                        fetchBeneficiaries();
-                      }}
-                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="group">
-                    <GroupBeneficiaryForm
-                      onSuccess={() => {
-                        setIsDialogOpen(false);
-                        setEditingBeneficiary(null);
-                        fetchBeneficiaries();
-                      }}
-                      onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
-                    />
-                  </TabsContent>
-                </Tabs>
+                <BeneficiaryForm
+                  beneficiary={editingBeneficiary || undefined}
+                  defaultCategory={
+                    editingBeneficiary?.beneficiary_type === 'group' ? 'group' : 'individual'
+                  }
+                  onSuccess={() => {
+                    setIsDialogOpen(false);
+                    setEditingBeneficiary(null);
+                    fetchBeneficiaries();
+                  }}
+                  onCancel={() => { setIsDialogOpen(false); setEditingBeneficiary(null); }}
+                />
               </DialogContent>
             </Dialog>
           )
