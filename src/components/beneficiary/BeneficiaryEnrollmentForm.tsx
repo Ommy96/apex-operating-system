@@ -724,15 +724,24 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                 <div className="space-y-2">
                   <Label>Projects <span className="text-muted-foreground font-normal">(select one or more)</span></Label>
                   <div className="border rounded-lg divide-y max-h-[200px] overflow-y-auto">
-                    {availableProjects.map((project) => (
-                      <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
-                        <Checkbox
-                          checked={enrollProjectIds.includes(project.id)}
-                          onCheckedChange={() => toggleProject(project.id)}
-                        />
-                        <span className="text-sm">{project.name}</span>
-                      </label>
-                    ))}
+                    {availableProjects.map((project: any) => {
+                      const fm = project.funding_model;
+                      const fmBadge = fm === 'individual_sponsorship'
+                        ? <Badge variant="outline" className="text-[10px] h-5 ml-auto border-warning/40 text-warning">Sponsorship</Badge>
+                        : fm === 'mixed'
+                          ? <Badge variant="outline" className="text-[10px] h-5 ml-auto border-primary/40 text-primary">Mixed</Badge>
+                          : <Badge variant="outline" className="text-[10px] h-5 ml-auto border-success/40 text-success">Programme</Badge>;
+                      return (
+                        <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
+                          <Checkbox
+                            checked={enrollProjectIds.includes(project.id)}
+                            onCheckedChange={() => toggleProject(project.id)}
+                          />
+                          <span className="text-sm">{project.name}</span>
+                          {fmBadge}
+                        </label>
+                      );
+                    })}
                     {alreadyEnrolledProjects.map((project) => (
                       <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 opacity-50 cursor-not-allowed">
                         <Checkbox checked disabled />
