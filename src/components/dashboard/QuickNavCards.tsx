@@ -5,6 +5,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 interface NavCardData {
   title: string;
@@ -17,6 +18,7 @@ interface NavCardData {
 export function QuickNavCards() {
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
+  const { termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
 
   const { data: counts } = useQuery({
@@ -43,7 +45,7 @@ export function QuickNavCards() {
   });
 
   const cards: NavCardData[] = [
-    { title: "Beneficiaries", icon: Users, path: "/beneficiaries", count: counts?.beneficiaries ?? null, subtitle: "Active individuals" },
+    { title: termPlural, icon: Users, path: "/beneficiaries", count: counts?.beneficiaries ?? null, subtitle: "Active individuals" },
     { title: "Programs", icon: Target, path: "/programs-management", count: counts?.programs ?? null, subtitle: "Active programs" },
     { title: "Projects", icon: FolderKanban, path: "/programs-management", count: counts?.projects ?? null, subtitle: "Total projects" },
     { title: "Donors", icon: HandCoins, path: "/beneficiaries", count: counts?.donors ?? null, subtitle: "Sponsor records" },

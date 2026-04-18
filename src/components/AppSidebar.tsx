@@ -36,6 +36,7 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useBranding } from "@/hooks/useBranding";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 interface MenuItemType {
   title: string;
@@ -145,6 +146,7 @@ export function AppSidebar() {
   const { can, isSuperAdmin: superAdmin } = usePermissions();
   const { currentOrganization } = useOrganization();
   const { logoUrl, orgName } = useBranding();
+  const { termPlural } = useBeneficiaryTerminology();
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -199,7 +201,7 @@ export function AppSidebar() {
     {
       label: "People",
       items: [
-        { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
         { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
         
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },

@@ -4,6 +4,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNavigate } from "react-router-dom";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 interface QuickAction {
   id: string;
@@ -16,9 +17,10 @@ interface QuickAction {
 export function QuickActionsPanel() {
   const { can } = usePermissions();
   const navigate = useNavigate();
+  const { term } = useBeneficiaryTerminology();
 
   const actions: QuickAction[] = [
-    { id: "add-beneficiary", label: "Add Beneficiary", icon: UserPlus, url: "/beneficiaries", show: can.viewBeneficiaries },
+    { id: "add-beneficiary", label: `Add ${term}`, icon: UserPlus, url: "/beneficiaries", show: can.viewBeneficiaries },
     { id: "enroll-beneficiary", label: "Enroll in Program", icon: Users, url: "/beneficiaries", show: can.viewBeneficiaries },
     { id: "add-observation", label: "Add Observation", icon: Eye, url: "/programs-management", show: can.viewPrograms },
     { id: "add-report", label: "Add Report", icon: FileText, url: "/reports-analytics", show: can.viewReports },

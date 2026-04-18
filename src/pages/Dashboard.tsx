@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GlobalSearchBar } from "@/components/dashboard/GlobalSearchBar";
 import { FloatingCreateButton } from "@/components/dashboard/FloatingCreateButton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { formatDistanceToNow } from "date-fns";
 
 const Dashboard = () => {
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
   const { can } = usePermissions();
+  const { term, termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
@@ -54,7 +56,7 @@ const Dashboard = () => {
       .channel('dashboard_beneficiaries_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiaries' }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          toast({ title: 'New Beneficiary Added', description: 'A new beneficiary record has been created', duration: 3000 });
+          toast({ title: `New ${term} Added`, description: `A new ${term.toLowerCase()} record has been created`, duration: 3000 });
         }
         refetch();
       })
@@ -356,7 +358,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-[10px] mb-4">
         {/* Card 1: Beneficiaries */}
         <MetricCard
-          label="BENEFICIARIES"
+          label={termPlural.toUpperCase()}
           accentColor="#1D9E8A"
           isLoading={statsLoading}
           value={totalBeneficiaries}
@@ -536,7 +538,7 @@ const Dashboard = () => {
           ) : (
             <>
               <div className="grid grid-cols-3 gap-2">
-                <SnapshotTile value={snapshot?.beneficiaries || 0} label="Beneficiaries" />
+                <SnapshotTile value={snapshot?.beneficiaries || 0} label={termPlural} />
                 <SnapshotTile value={snapshot?.programmes || 0} label="Programmes" />
                 <SnapshotTile value={snapshot?.projects || 0} label="Projects" />
                 <SnapshotTile value={formatKES(snapshot?.grantPortfolio || 0)} label="Grant portfolio" />
@@ -547,7 +549,7 @@ const Dashboard = () => {
               {countyData.length > 0 && (
                 <div style={{ borderTop: '1px solid #E2E5EF', marginTop: 12, paddingTop: 10 }}>
                   <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5, color: '#8891A8', fontWeight: 500, marginBottom: 7 }}>
-                    Beneficiaries by county
+                    {termPlural} by county
                   </p>
                   {countyData.map(c => (
                     <div key={c.county} className="flex items-center gap-[9px] mb-[8px] last:mb-0">
