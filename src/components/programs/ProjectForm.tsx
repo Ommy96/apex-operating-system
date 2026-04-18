@@ -293,21 +293,25 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
             />
           </div>
 
-          {/* Sponsorship Settings */}
+          {/* Funding Model */}
           <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Sponsorship Need</Label>
-                <p className="text-xs text-muted-foreground">Mark this project as a sponsorship need for beneficiaries</p>
-              </div>
-              <Switch
-                checked={sponsorshipRequired}
-                onCheckedChange={(checked) => setValue("sponsorship_required", checked)}
-              />
+            <div>
+              <Label>Funding Model *</Label>
+              <p className="text-xs text-muted-foreground mt-1">How is this project funded?</p>
             </div>
+            <Select value={fundingModel} onValueChange={(v) => setValue("funding_model", v as any)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="programme">Programme-funded (grant / org budget)</SelectItem>
+                <SelectItem value="individual_sponsorship">Individual Sponsorship (donor per beneficiary)</SelectItem>
+                <SelectItem value="mixed">Mixed (both grant and sponsorship)</SelectItem>
+              </SelectContent>
+            </Select>
 
             {sponsorshipRequired && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-2">
                   <Label htmlFor="estimated_cost">Cost Per Beneficiary (KES) *</Label>
                   <Input
