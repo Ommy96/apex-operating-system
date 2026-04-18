@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -100,6 +101,7 @@ export default function BeneficiaryProfile() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { currentOrganization } = useOrganization();
+  const { term, termPlural } = useBeneficiaryTerminology();
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -237,11 +239,11 @@ export default function BeneficiaryProfile() {
     try {
       const { error } = await supabase.from('beneficiaries').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Success", description: "Beneficiary deleted successfully" });
+      toast({ title: "Success", description: `${term} deleted successfully` });
       navigate('/beneficiaries');
     } catch (error) {
       logger.error('Error deleting beneficiary:', error);
-      toast({ title: "Error", description: "Failed to delete beneficiary", variant: "destructive" });
+      toast({ title: "Error", description: `Failed to delete ${term.toLowerCase()}`, variant: "destructive" });
     }
   };
 
@@ -300,10 +302,10 @@ export default function BeneficiaryProfile() {
     return (
       <div className="text-center py-12">
         <Users className="h-12 w-12 mx-auto text-[#8B93A8] mb-4" />
-        <h3 className="text-lg font-medium text-[#1A1F2E]">Beneficiary not found</h3>
+        <h3 className="text-lg font-medium text-[#1A1F2E]">{term} not found</h3>
         <Button variant="outline" onClick={() => navigate('/beneficiaries')} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Beneficiaries
+          Back to {termPlural}
         </Button>
       </div>
     );
@@ -318,7 +320,7 @@ export default function BeneficiaryProfile() {
         {/* Back nav */}
         <button onClick={() => navigate('/beneficiaries')} className="inline-flex items-center gap-1.5 text-[13px] text-[#8B93A8] hover:text-[#1A1F2E] transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Beneficiaries
+          Back to {termPlural}
         </button>
 
         {/* ─── HERO CARD ─── */}
@@ -648,7 +650,7 @@ export default function BeneficiaryProfile() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
+            <AlertDialogTitle>Delete {term}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete {beneficiary.display_name}? This action cannot be undone.
             </AlertDialogDescription>
