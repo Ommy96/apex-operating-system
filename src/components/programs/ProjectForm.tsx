@@ -83,6 +83,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
   // Populate form when editing
   useEffect(() => {
     if (project) {
+      const fm = (project as any).funding_model || ((project as any).sponsorship_required ? 'individual_sponsorship' : 'programme');
       reset({
         name: project.name || "",
         project_code: project.project_code || "",
@@ -95,7 +96,8 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         expected_outputs: project.expected_outputs || "",
         estimated_cost: (project as any).estimated_cost?.toString() || "",
         funding_cycle: (project as any).funding_cycle || "annually",
-        sponsorship_required: (project as any).sponsorship_required || false,
+        funding_model: fm,
+        sponsorship_required: fm !== 'programme',
       });
     } else {
       reset({
@@ -110,6 +112,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         expected_outputs: "",
         estimated_cost: "",
         funding_cycle: "annually",
+        funding_model: "programme",
         sponsorship_required: false,
       });
     }
