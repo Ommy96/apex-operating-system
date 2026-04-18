@@ -607,6 +607,16 @@ const ProjectDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {(project as any).funding_model && (
+                  <div>
+                    <p className="text-muted-foreground">Funding Model</p>
+                    <p className="font-medium text-foreground">
+                      {(project as any).funding_model === 'programme' && 'Programme-funded (grant / org budget)'}
+                      {(project as any).funding_model === 'individual_sponsorship' && 'Individual Sponsorship'}
+                      {(project as any).funding_model === 'mixed' && 'Mixed (grant + sponsorship)'}
+                    </p>
+                  </div>
+                )}
                 {project.budget != null && (
                   <div>
                     <p className="text-muted-foreground">Budget</p>
