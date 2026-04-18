@@ -36,6 +36,7 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useBranding } from "@/hooks/useBranding";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 interface MenuItemType {
   title: string;
