@@ -25,6 +25,7 @@ interface ProjectFormData {
   expected_outputs: string;
   estimated_cost: string;
   funding_cycle: string;
+  funding_model: 'programme' | 'individual_sponsorship' | 'mixed';
   sponsorship_required: boolean;
 }
 
@@ -69,17 +70,20 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       expected_outputs: "",
       estimated_cost: "",
       funding_cycle: "annually",
+      funding_model: "programme",
       sponsorship_required: false,
     },
   });
 
   const status = watch("status");
-  const sponsorshipRequired = watch("sponsorship_required");
+  const fundingModel = watch("funding_model");
+  const sponsorshipRequired = fundingModel === "individual_sponsorship" || fundingModel === "mixed";
   const fundingCycle = watch("funding_cycle");
 
   // Populate form when editing
   useEffect(() => {
     if (project) {
+      const fm = (project as any).funding_model || ((project as any).sponsorship_required ? 'individual_sponsorship' : 'programme');
       reset({
         name: project.name || "",
         project_code: project.project_code || "",
@@ -92,7 +96,8 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         expected_outputs: project.expected_outputs || "",
         estimated_cost: (project as any).estimated_cost?.toString() || "",
         funding_cycle: (project as any).funding_cycle || "annually",
-        sponsorship_required: (project as any).sponsorship_required || false,
+        funding_model: fm,
+        sponsorship_required: fm !== 'programme',
       });
     } else {
       reset({
@@ -107,6 +112,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         expected_outputs: "",
         estimated_cost: "",
         funding_cycle: "annually",
+        funding_model: "programme",
         sponsorship_required: false,
       });
     }
@@ -142,7 +148,8 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         expected_outputs: data.expected_outputs || null,
         estimated_cost: data.estimated_cost ? parseFloat(data.estimated_cost) : 0,
         funding_cycle: data.funding_cycle || "annually",
-        sponsorship_required: data.sponsorship_required || false,
+        funding_model: data.funding_model || "programme",
+        sponsorship_required: data.funding_model !== "programme",
         program_id: programId,
         organization_id: currentOrganization.organization_id,
         slug: generateSlug(data.name),
@@ -286,21 +293,25 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
             />
           </div>
 
-          {/* Sponsorship Settings */}
+          {/* Funding Model */}
           <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Sponsorship Need</Label>
-                <p className="text-xs text-muted-foreground">Mark this project as a sponsorship need for beneficiaries</p>
-              </div>
-              <Switch
-                checked={sponsorshipRequired}
-                onCheckedChange={(checked) => setValue("sponsorship_required", checked)}
-              />
+            <div>
+              <Label>Funding Model *</Label>
+              <p className="text-xs text-muted-foreground mt-1">How is this project funded?</p>
             </div>
+            <Select value={fundingModel} onValueChange={(v) => setValue("funding_model", v as any)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="programme">Programme-funded (grant / org budget)</SelectItem>
+                <SelectItem value="individual_sponsorship">Individual Sponsorship (donor per beneficiary)</SelectItem>
+                <SelectItem value="mixed">Mixed (both grant and sponsorship)</SelectItem>
+              </SelectContent>
+            </Select>
 
             {sponsorshipRequired && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-2">
                   <Label htmlFor="estimated_cost">Cost Per Beneficiary (KES) *</Label>
                   <Input

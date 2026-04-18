@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -138,6 +139,37 @@ export default function DonorManagement() {
     },
     enabled: !!orgId,
   });
+
+  // Per-program funding mix derived from its projects (used to classify donor records)
+  const { data: programFundingMap } = useQuery({
+    queryKey: ['program-funding-mix', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('program_id, funding_model')
+        .eq('organization_id', orgId!);
+      if (error) throw error;
+      const map = new Map<string, { hasSponsorship: boolean; hasProgramme: boolean }>();
+      (data || []).forEach((p: any) => {
+        if (!p.program_id) return;
+        const cur = map.get(p.program_id) || { hasSponsorship: false, hasProgramme: false };
+        if (p.funding_model === 'individual_sponsorship' || p.funding_model === 'mixed') cur.hasSponsorship = true;
+        if (p.funding_model === 'programme' || p.funding_model === 'mixed') cur.hasProgramme = true;
+        map.set(p.program_id, cur);
+      });
+      return map;
+    },
+    enabled: !!orgId,
+  });
+
+  const classifyRecord = (r: DonorRecord): 'sponsorship' | 'grant' => {
+    if (!r.program_id) return 'sponsorship'; // direct beneficiary support
+    const mix = programFundingMap?.get(r.program_id);
+    if (!mix) return 'sponsorship';
+    // Programme-only program → grant; otherwise treat as individual sponsorship
+    if (mix.hasProgramme && !mix.hasSponsorship) return 'grant';
+    return 'sponsorship';
+  };
 
   // Aggregate donors by name
   const aggregatedDonors = useMemo(() => {
@@ -518,47 +550,86 @@ export default function DonorManagement() {
               <Separator />
 
               <div>
-                <h4 className="text-sm font-semibold mb-2">Contribution History</h4>
-                <ScrollArea className="max-h-[300px]">
-                  <div className="overflow-x-auto">
-                  <Table className="min-w-[400px]">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Beneficiary</TableHead>
-                        <TableHead className="hidden sm:table-cell">Program</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedDonor.records.map(r => (
-                        <TableRow key={r.id}>
-                          <TableCell className="text-sm">
-                            {r.donation_date ? format(new Date(r.donation_date), 'MMM dd, yyyy') : '—'}
-                          </TableCell>
-                          <TableCell>
-                            <button
-                              className="text-sm text-primary hover:underline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/beneficiaries/${r.beneficiary_id}`);
-                              }}
-                            >
-                              {r.beneficiaries?.display_name || 'Unknown'}
-                            </button>
-                          </TableCell>
-                          <TableCell className="text-sm hidden sm:table-cell">
-                            {r.programs?.name || <span className="text-muted-foreground">General</span>}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {(r.amount_received || 0).toLocaleString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  </div>
-                </ScrollArea>
+                {(() => {
+                  const sponsorships = selectedDonor.records.filter(r => classifyRecord(r) === 'sponsorship');
+                  const grants = selectedDonor.records.filter(r => classifyRecord(r) === 'grant');
+                  const sponsorshipTotal = sponsorships.reduce((s, r) => s + (r.amount_received || 0), 0);
+                  const grantTotal = grants.reduce((s, r) => s + (r.amount_received || 0), 0);
+
+                  const renderTable = (rows: typeof selectedDonor.records, emptyMsg: string) => (
+                    rows.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-6 text-center">{emptyMsg}</p>
+                    ) : (
+                      <ScrollArea className="max-h-[300px]">
+                        <div className="overflow-x-auto">
+                          <Table className="min-w-[400px]">
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Beneficiary</TableHead>
+                                <TableHead className="hidden sm:table-cell">Program</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {rows.map(r => (
+                                <TableRow key={r.id}>
+                                  <TableCell className="text-sm">
+                                    {r.donation_date ? format(new Date(r.donation_date), 'MMM dd, yyyy') : '—'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <button
+                                      className="text-sm text-primary hover:underline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/beneficiaries/${r.beneficiary_id}`);
+                                      }}
+                                    >
+                                      {r.beneficiaries?.display_name || 'Unknown'}
+                                    </button>
+                                  </TableCell>
+                                  <TableCell className="text-sm hidden sm:table-cell">
+                                    {r.programs?.name || <span className="text-muted-foreground">General</span>}
+                                  </TableCell>
+                                  <TableCell className="text-right font-medium">
+                                    {(r.amount_received || 0).toLocaleString()}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </ScrollArea>
+                    )
+                  );
+
+                  return (
+                    <Tabs defaultValue="sponsorships" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="sponsorships">
+                          Individual Sponsorships ({sponsorships.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="grants">
+                          Programme Grants ({grants.length})
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="sponsorships" className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Donations supporting specific beneficiaries</span>
+                          <Badge variant="secondary" className="font-mono">KES {sponsorshipTotal.toLocaleString()}</Badge>
+                        </div>
+                        {renderTable(sponsorships, 'No individual sponsorships from this donor')}
+                      </TabsContent>
+                      <TabsContent value="grants" className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Donations funding programme operations</span>
+                          <Badge variant="secondary" className="font-mono">KES {grantTotal.toLocaleString()}</Badge>
+                        </div>
+                        {renderTable(grants, 'No programme grants from this donor')}
+                      </TabsContent>
+                    </Tabs>
+                  );
+                })()}
               </div>
             </div>
           )}

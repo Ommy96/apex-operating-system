@@ -118,14 +118,14 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     enabled: !!currentOrganization?.organization_id,
   });
 
-  // Fetch projects for enrollment form
+  // Fetch projects for enrollment form (includes funding_model)
   const { data: enrollProjects = [] } = useQuery({
     queryKey: ['projects-for-enroll', enrollProgramId],
     queryFn: async () => {
       if (!enrollProgramId) return [];
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name')
+        .select('id, name, funding_model, sponsorship_required')
         .eq('program_id', enrollProgramId)
         .order('name');
       if (error) throw error;
@@ -143,7 +143,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         .select(`
           id, enrolled_date, exit_date, status, notes,
           programs:program_id (id, name),
-          projects:project_id (id, name)
+          projects:project_id (id, name, funding_model, sponsorship_required)
         `)
         .eq('beneficiary_id', beneficiaryId)
         .order('enrolled_date', { ascending: false });
@@ -513,6 +513,13 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                             <span className="text-sm flex items-center gap-1.5">
                               <Layers className="h-3.5 w-3.5 text-muted-foreground" />
                               {(enrollment.projects as any)?.name}
+                              {(() => {
+                                const fm = (enrollment.projects as any)?.funding_model;
+                                if (fm === 'individual_sponsorship') return <Badge variant="outline" className="text-[10px] h-5 border-warning/40 text-warning">Sponsorship</Badge>;
+                                if (fm === 'mixed') return <Badge variant="outline" className="text-[10px] h-5 border-primary/40 text-primary">Mixed</Badge>;
+                                if (fm === 'programme') return <Badge variant="outline" className="text-[10px] h-5 border-success/40 text-success">Programme-funded</Badge>;
+                                return null;
+                              })()}
                             </span>
                           ) : (
                             <span className="text-sm text-muted-foreground italic">Program-level enrollment</span>
@@ -558,10 +565,27 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                   ))}
                 </div>
 
-                {/* Sponsors/Donors for this program */}
+                {/* Sponsors/Donors for this program — only if any enrolled project requires sponsorship */}
                 {(() => {
                   const programDonors = getDonorsForProgram(progId);
                   const programDonorTotal = programDonors.reduce((sum: number, d: any) => sum + (d.amount_received || 0), 0);
+                  const needsSponsorship = group.entries.some((e: any) => {
+                    const fm = e.projects?.funding_model;
+                    // Show sponsorship section for sponsorship/mixed projects, OR program-level enrollment (unknown), OR if donors already exist
+                    return !e.projects || fm === 'individual_sponsorship' || fm === 'mixed';
+                  }) || programDonors.length > 0;
+
+                  if (!needsSponsorship) {
+                    return (
+                      <div className="border-t border-border/50 px-4 py-2 bg-muted/10">
+                        <p className="text-xs text-muted-foreground italic flex items-center gap-1.5">
+                          <Heart className="h-3 w-3" />
+                          Programme-funded — no individual sponsorship required
+                        </p>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="border-t border-border/50 px-4 py-3 bg-success/5">
                       <div className="flex items-center justify-between mb-2">
@@ -700,15 +724,24 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                 <div className="space-y-2">
                   <Label>Projects <span className="text-muted-foreground font-normal">(select one or more)</span></Label>
                   <div className="border rounded-lg divide-y max-h-[200px] overflow-y-auto">
-                    {availableProjects.map((project) => (
-                      <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
-                        <Checkbox
-                          checked={enrollProjectIds.includes(project.id)}
-                          onCheckedChange={() => toggleProject(project.id)}
-                        />
-                        <span className="text-sm">{project.name}</span>
-                      </label>
-                    ))}
+                    {availableProjects.map((project: any) => {
+                      const fm = project.funding_model;
+                      const fmBadge = fm === 'individual_sponsorship'
+                        ? <Badge variant="outline" className="text-[10px] h-5 ml-auto border-warning/40 text-warning">Sponsorship</Badge>
+                        : fm === 'mixed'
+                          ? <Badge variant="outline" className="text-[10px] h-5 ml-auto border-primary/40 text-primary">Mixed</Badge>
+                          : <Badge variant="outline" className="text-[10px] h-5 ml-auto border-success/40 text-success">Programme</Badge>;
+                      return (
+                        <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
+                          <Checkbox
+                            checked={enrollProjectIds.includes(project.id)}
+                            onCheckedChange={() => toggleProject(project.id)}
+                          />
+                          <span className="text-sm">{project.name}</span>
+                          {fmBadge}
+                        </label>
+                      );
+                    })}
                     {alreadyEnrolledProjects.map((project) => (
                       <label key={project.id} className="flex items-center gap-3 px-3 py-2.5 opacity-50 cursor-not-allowed">
                         <Checkbox checked disabled />
