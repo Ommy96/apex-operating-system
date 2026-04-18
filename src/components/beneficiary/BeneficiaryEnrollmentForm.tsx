@@ -143,7 +143,7 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
         .select(`
           id, enrolled_date, exit_date, status, notes,
           programs:program_id (id, name),
-          projects:project_id (id, name)
+          projects:project_id (id, name, funding_model, sponsorship_required)
         `)
         .eq('beneficiary_id', beneficiaryId)
         .order('enrolled_date', { ascending: false });
