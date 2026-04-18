@@ -140,6 +140,37 @@ export default function DonorManagement() {
     enabled: !!orgId,
   });
 
+  // Per-program funding mix derived from its projects (used to classify donor records)
+  const { data: programFundingMap } = useQuery({
+    queryKey: ['program-funding-mix', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('program_id, funding_model')
+        .eq('organization_id', orgId!);
+      if (error) throw error;
+      const map = new Map<string, { hasSponsorship: boolean; hasProgramme: boolean }>();
+      (data || []).forEach((p: any) => {
+        if (!p.program_id) return;
+        const cur = map.get(p.program_id) || { hasSponsorship: false, hasProgramme: false };
+        if (p.funding_model === 'individual_sponsorship' || p.funding_model === 'mixed') cur.hasSponsorship = true;
+        if (p.funding_model === 'programme' || p.funding_model === 'mixed') cur.hasProgramme = true;
+        map.set(p.program_id, cur);
+      });
+      return map;
+    },
+    enabled: !!orgId,
+  });
+
+  const classifyRecord = (r: DonorRecord): 'sponsorship' | 'grant' => {
+    if (!r.program_id) return 'sponsorship'; // direct beneficiary support
+    const mix = programFundingMap?.get(r.program_id);
+    if (!mix) return 'sponsorship';
+    // Programme-only program → grant; otherwise treat as individual sponsorship
+    if (mix.hasProgramme && !mix.hasSponsorship) return 'grant';
+    return 'sponsorship';
+  };
+
   // Aggregate donors by name
   const aggregatedDonors = useMemo(() => {
     if (!donorRecords) return [];
