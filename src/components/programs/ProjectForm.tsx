@@ -25,6 +25,7 @@ interface ProjectFormData {
   expected_outputs: string;
   estimated_cost: string;
   funding_cycle: string;
+  funding_model: 'programme' | 'individual_sponsorship' | 'mixed';
   sponsorship_required: boolean;
 }
 
