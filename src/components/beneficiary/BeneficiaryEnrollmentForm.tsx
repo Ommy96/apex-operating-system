@@ -565,10 +565,27 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                   ))}
                 </div>
 
-                {/* Sponsors/Donors for this program */}
+                {/* Sponsors/Donors for this program — only if any enrolled project requires sponsorship */}
                 {(() => {
                   const programDonors = getDonorsForProgram(progId);
                   const programDonorTotal = programDonors.reduce((sum: number, d: any) => sum + (d.amount_received || 0), 0);
+                  const needsSponsorship = group.entries.some((e: any) => {
+                    const fm = e.projects?.funding_model;
+                    // Show sponsorship section for sponsorship/mixed projects, OR program-level enrollment (unknown), OR if donors already exist
+                    return !e.projects || fm === 'individual_sponsorship' || fm === 'mixed';
+                  }) || programDonors.length > 0;
+
+                  if (!needsSponsorship) {
+                    return (
+                      <div className="border-t border-border/50 px-4 py-2 bg-muted/10">
+                        <p className="text-xs text-muted-foreground italic flex items-center gap-1.5">
+                          <Heart className="h-3 w-3" />
+                          Programme-funded — no individual sponsorship required
+                        </p>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="border-t border-border/50 px-4 py-3 bg-success/5">
                       <div className="flex items-center justify-between mb-2">
