@@ -10,21 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-
-const createActions = [
-  { label: "Create Beneficiary", icon: UserPlus, path: "/beneficiaries" },
-  { label: "Create Program", icon: Target, path: "/programs-management" },
-  { label: "Create Project", icon: FolderKanban, path: "/programs-management" },
-  { separator: true },
-  { label: "Add Observation", icon: Eye, path: "/programs-management" },
-  { label: "Add Report", icon: FileText, path: "/custom-reports" },
-  { label: "Add Donation", icon: DollarSign, path: "/financial-suite" },
-  { separator: true },
-  { label: "Enroll Beneficiary", icon: Users, path: "/beneficiaries" },
-];
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 export function FloatingCreateButton() {
   const navigate = useNavigate();
+  const { term } = useBeneficiaryTerminology();
+
+  const createActions = [
+    { label: `Create ${term}`, icon: UserPlus, path: "/beneficiaries" },
+    { label: "Create Program", icon: Target, path: "/programs-management" },
+    { label: "Create Project", icon: FolderKanban, path: "/programs-management" },
+    { separator: true },
+    { label: "Add Observation", icon: Eye, path: "/programs-management" },
+    { label: "Add Report", icon: FileText, path: "/custom-reports" },
+    { label: "Add Donation", icon: DollarSign, path: "/financial-suite" },
+    { separator: true },
+    { label: `Enroll ${term}`, icon: Users, path: "/beneficiaries" },
+  ];
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -49,7 +51,7 @@ export function FloatingCreateButton() {
                 onClick={() => navigate(action.path!)}
                 className="cursor-pointer"
               >
-                {'icon' in action && action.icon && <action.icon className="h-4 w-4 mr-2 text-muted-foreground" />}
+                <action.icon className="h-4 w-4 mr-2" />
                 {action.label}
               </DropdownMenuItem>
             )

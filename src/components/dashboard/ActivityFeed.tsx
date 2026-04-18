@@ -4,6 +4,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { formatDistanceToNow } from "date-fns";
 import { Activity, UserPlus, Target, DollarSign, FileText, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 
 interface ActivityItem {
   id: string;
@@ -15,6 +16,7 @@ interface ActivityItem {
 
 export function ActivityFeed() {
   const { currentOrganization } = useOrganization();
+  const { term, termLower } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
 
   const { data: activities = [], isLoading } = useQuery({
@@ -49,14 +51,14 @@ export function ActivityFeed() {
         items.push({
           id: `b-${b.id}`,
           icon: UserPlus,
-          message: `Beneficiary ${b.display_name} was added`,
+          message: `${term} ${b.display_name} was added`,
           time: b.created_at,
           color: "text-primary",
         });
       });
 
       (recentEnrollments.data || []).forEach((e: any) => {
-        const bName = e.beneficiaries?.display_name || "A beneficiary";
+        const bName = e.beneficiaries?.display_name || `A ${termLower}`;
         const pName = e.programs?.name || "a program";
         items.push({
           id: `e-${e.id}`,
