@@ -513,6 +513,13 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                             <span className="text-sm flex items-center gap-1.5">
                               <Layers className="h-3.5 w-3.5 text-muted-foreground" />
                               {(enrollment.projects as any)?.name}
+                              {(() => {
+                                const fm = (enrollment.projects as any)?.funding_model;
+                                if (fm === 'individual_sponsorship') return <Badge variant="outline" className="text-[10px] h-5 border-warning/40 text-warning">Sponsorship</Badge>;
+                                if (fm === 'mixed') return <Badge variant="outline" className="text-[10px] h-5 border-primary/40 text-primary">Mixed</Badge>;
+                                if (fm === 'programme') return <Badge variant="outline" className="text-[10px] h-5 border-success/40 text-success">Programme-funded</Badge>;
+                                return null;
+                              })()}
                             </span>
                           ) : (
                             <span className="text-sm text-muted-foreground italic">Program-level enrollment</span>
