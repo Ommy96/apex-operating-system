@@ -118,14 +118,14 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     enabled: !!currentOrganization?.organization_id,
   });
 
-  // Fetch projects for enrollment form
+  // Fetch projects for enrollment form (includes funding_model)
   const { data: enrollProjects = [] } = useQuery({
     queryKey: ['projects-for-enroll', enrollProgramId],
     queryFn: async () => {
       if (!enrollProgramId) return [];
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name')
+        .select('id, name, funding_model, sponsorship_required')
         .eq('program_id', enrollProgramId)
         .order('name');
       if (error) throw error;
