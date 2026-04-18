@@ -70,12 +70,14 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
       expected_outputs: "",
       estimated_cost: "",
       funding_cycle: "annually",
+      funding_model: "programme",
       sponsorship_required: false,
     },
   });
 
   const status = watch("status");
-  const sponsorshipRequired = watch("sponsorship_required");
+  const fundingModel = watch("funding_model");
+  const sponsorshipRequired = fundingModel === "individual_sponsorship" || fundingModel === "mixed";
   const fundingCycle = watch("funding_cycle");
 
   // Populate form when editing
