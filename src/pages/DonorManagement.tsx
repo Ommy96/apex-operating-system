@@ -286,6 +286,9 @@ export default function DonorManagement() {
         iconColorClass="text-rose-500"
       />
 
+      {/* Org-wide Sponsorship Coverage */}
+      <SponsorshipMetrics />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
