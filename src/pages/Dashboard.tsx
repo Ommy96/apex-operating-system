@@ -15,6 +15,7 @@ import { FloatingCreateButton } from "@/components/dashboard/FloatingCreateButto
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { formatDistanceToNow } from "date-fns";
+import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -407,6 +408,11 @@ const Dashboard = () => {
             : { bg: '#E0F4F1', color: '#0F7B6C', text: 'All clear' }
           }
         />
+      </div>
+
+      {/* SPONSORSHIP COVERAGE SNAPSHOT */}
+      <div className="mb-4">
+        <SponsorshipMetrics />
       </div>
 
       {/* SECTION 3: THREE-COLUMN GRID */}

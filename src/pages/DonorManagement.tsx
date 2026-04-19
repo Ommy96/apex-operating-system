@@ -19,6 +19,7 @@ import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, Ch
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { PageHeroHeader } from '@/components/PageHeroHeader';
+import { SponsorshipMetrics } from '@/components/financial/SponsorshipMetrics';
 import { toast } from 'sonner';
 
 interface DonorRecord {
@@ -284,6 +285,9 @@ export default function DonorManagement() {
         icon={Heart}
         iconColorClass="text-rose-500"
       />
+
+      {/* Org-wide Sponsorship Coverage */}
+      <SponsorshipMetrics />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
