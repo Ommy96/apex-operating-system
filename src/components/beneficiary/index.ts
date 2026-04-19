@@ -1,7 +1,4 @@
 export { BeneficiaryForm } from './BeneficiaryForm';
-export { StudentBeneficiaryForm } from './StudentBeneficiaryForm';
-export { AdultBeneficiaryForm } from './AdultBeneficiaryForm';
-export { GroupBeneficiaryForm } from './GroupBeneficiaryForm';
 export { GuardianForm } from './GuardianForm';
 export { SiblingSelector } from './SiblingSelector';
 export { DonorManager } from './DonorManager';

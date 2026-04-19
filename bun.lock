@@ -780,7 +780,7 @@
 
     "base64-arraybuffer": ["base64-arraybuffer@1.0.2", "", {}, "sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ=="],
 
-    "baseline-browser-mapping": ["baseline-browser-mapping@2.10.19", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/baseline-browser-mapping/-/baseline-browser-mapping-2.10.19.tgz", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-qCkNLi2sfBOn8XhZQ0FXsT1Ki/Yo5P90hrkRamVFRS7/KV9hpfA4HkoWNU152+8w0zPjnxo5psx5NL3PSGgv5g=="],
+    "baseline-browser-mapping": ["baseline-browser-mapping@2.10.20", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/baseline-browser-mapping/-/baseline-browser-mapping-2.10.20.tgz", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-1AaXxEPfXT+GvTBJFuy4yXVHWJBXa4OdbIebGN/wX5DlsIkU0+wzGnd2lOzokSk51d5LUmqjgBLRLlypLUqInQ=="],
 
     "binary-extensions": ["binary-extensions@2.3.0", "", {}, "sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw=="],
 
@@ -2002,6 +2002,8 @@
 
     "@babel/preset-env/semver": ["semver@6.3.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/semver/-/semver-6.3.1.tgz", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
+    "@babel/preset-modules/@babel/types": ["@babel/types@7.29.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/types/-/types-7.29.0.tgz", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
+
     "@babel/template/@babel/parser": ["@babel/parser@7.29.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/parser/-/parser-7.29.2.tgz", { "dependencies": { "@babel/types": "^7.29.0" }, "bin": "./bin/babel-parser.js" }, "sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA=="],
 
     "@babel/template/@babel/types": ["@babel/types@7.29.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/types/-/types-7.29.0.tgz", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
@@ -2015,10 +2017,6 @@
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
     "@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
-
-    "@jridgewell/remapping/@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
-
-    "@jridgewell/remapping/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
     "@jridgewell/source-map/@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
@@ -2196,6 +2194,10 @@
 
     "@babel/helpers/@babel/types/@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.28.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz", {}, "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q=="],
 
+    "@babel/preset-modules/@babel/types/@babel/helper-string-parser": ["@babel/helper-string-parser@7.27.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz", {}, "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA=="],
+
+    "@babel/preset-modules/@babel/types/@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.28.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz", {}, "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q=="],
+
     "@babel/template/@babel/types/@babel/helper-string-parser": ["@babel/helper-string-parser@7.27.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz", {}, "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA=="],
 
     "@babel/template/@babel/types/@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.28.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz", {}, "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q=="],
@@ -2203,10 +2205,6 @@
     "@babel/traverse/@babel/types/@babel/helper-string-parser": ["@babel/helper-string-parser@7.27.1", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz", {}, "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA=="],
 
     "@babel/traverse/@babel/types/@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.28.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz", {}, "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q=="],
-
-    "@jridgewell/remapping/@jridgewell/gen-mapping/@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
-
-    "@jridgewell/remapping/@jridgewell/trace-mapping/@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/source-map/@jridgewell/gen-mapping/@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
