@@ -410,6 +410,11 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* SPONSORSHIP COVERAGE SNAPSHOT */}
+      <div className="mb-4">
+        <SponsorshipMetrics />
+      </div>
+
       {/* SECTION 3: THREE-COLUMN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_280px] gap-3 mb-3">
         {/* CARD A: Programme Reach */}
