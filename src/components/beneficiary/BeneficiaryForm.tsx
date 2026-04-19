@@ -1140,13 +1140,14 @@ function Step4Education({
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
-              <SelectItem value="ECDE">Early Childhood</SelectItem>
-              <SelectItem value="Primary">Primary</SelectItem>
-              <SelectItem value="Junior School">Junior School</SelectItem>
+              <SelectItem value="Pre Primary">Pre Primary</SelectItem>
+              <SelectItem value="Lower Primary">Lower Primary</SelectItem>
+              <SelectItem value="Upper Primary">Upper Primary</SelectItem>
+              <SelectItem value="Junior Secondary School">Junior Secondary School</SelectItem>
               <SelectItem value="Senior School">Senior School</SelectItem>
-              <SelectItem value="Secondary">Secondary</SelectItem>
-              <SelectItem value="TVET">Vocational / TVET</SelectItem>
+              <SelectItem value="Secondary School">Secondary School</SelectItem>
               <SelectItem value="Tertiary">Tertiary</SelectItem>
+              <SelectItem value="Special School">Special School</SelectItem>
             </SelectContent>
           </Select>
         </div>
