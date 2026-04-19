@@ -15,6 +15,7 @@ import { FloatingCreateButton } from "@/components/dashboard/FloatingCreateButto
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { formatDistanceToNow } from "date-fns";
+import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 
 const Dashboard = () => {
   const navigate = useNavigate();
