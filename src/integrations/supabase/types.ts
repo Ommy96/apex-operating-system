@@ -9075,37 +9075,46 @@ export type Database = {
       }
       risk_reviews: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           notes: string | null
           organization_id: string
-          reviewed_at: string | null
+          reviewed_at: string
           reviewed_by: string | null
+          risk_category: string
           risk_description: string | null
           risk_key: string
           risk_severity: string
+          status: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           notes?: string | null
           organization_id: string
-          reviewed_at?: string | null
+          reviewed_at?: string
           reviewed_by?: string | null
+          risk_category: string
           risk_description?: string | null
           risk_key: string
           risk_severity: string
+          status?: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           notes?: string | null
           organization_id?: string
-          reviewed_at?: string | null
+          reviewed_at?: string
           reviewed_by?: string | null
+          risk_category?: string
           risk_description?: string | null
           risk_key?: string
           risk_severity?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -9121,13 +9130,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "risk_reviews_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
           },
         ]
       }
