@@ -236,15 +236,16 @@ export function useOverviewMetrics(filters: AnalyticsFilters) {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // Funding mix by programme (sum of grant amounts)
+      // Funding mix by programme: sum contribution_amount from program_donors
+      // grouped by programme name. Falls back to "Unassigned programme".
       const fundingByProgrammeMap = new Map<string, number>();
-      grants.forEach((g) => {
-        const key = g.program_id
-          ? programmeNameById.get(g.program_id) ?? "Unassigned programme"
+      programDonors.forEach((pd) => {
+        const key = pd.program_id
+          ? programmeNameById.get(pd.program_id) ?? "Unassigned programme"
           : "Unassigned programme";
         fundingByProgrammeMap.set(
           key,
-          (fundingByProgrammeMap.get(key) ?? 0) + (Number(g.amount) || 0)
+          (fundingByProgrammeMap.get(key) ?? 0) + (Number(pd.contribution_amount) || 0)
         );
       });
       const fundingByProgramme: FundingSlice[] = Array.from(
@@ -287,7 +288,7 @@ export function useOverviewMetrics(filters: AnalyticsFilters) {
           programmeFundedCount: programmeFundedIds.size,
           unsponsoredCount,
           unsponsoredCoveragePct: coveragePct,
-          totalDonors: donors.length,
+          totalDonors: donorAccounts.length,
           countiesCovered: counties.size,
           reachThisMonth,
         },
