@@ -82,10 +82,11 @@ export function useOverviewMetrics(filters: AnalyticsFilters) {
       const [
         beneficiariesRes,
         servicesRes,
-        donorsRes,
+        donorAccountsRes,
         programmesRes,
         visitationsRes,
         grantsRes,
+        programDonorsRes,
       ] = await Promise.all([
         supabase
           .from("beneficiaries")
@@ -101,8 +102,8 @@ export function useOverviewMetrics(filters: AnalyticsFilters) {
           )
           .eq("organization_id", orgId),
         supabase
-          .from("donors")
-          .select("id")
+          .from("donor_accounts")
+          .select("id, is_active")
           .eq("organization_id", orgId),
         supabase
           .from("programs")
@@ -114,16 +115,21 @@ export function useOverviewMetrics(filters: AnalyticsFilters) {
           .eq("organization_id", orgId),
         supabase
           .from("grants")
-          .select("id, title, amount, end_date, program_id, status")
+          .select("id, grant_name, grant_amount, end_date, status, donor_name")
+          .eq("organization_id", orgId),
+        supabase
+          .from("program_donors")
+          .select("id, program_id, contribution_amount")
           .eq("organization_id", orgId),
       ]);
 
       const beneficiaries = beneficiariesRes.data ?? [];
       const services = servicesRes.data ?? [];
-      const donors = donorsRes.data ?? [];
+      const donorAccounts = donorAccountsRes.data ?? [];
       const programmes = programmesRes.data ?? [];
       const visitations = visitationsRes.data ?? [];
       const grants = grantsRes.data ?? [];
+      const programDonors = programDonorsRes.data ?? [];
 
       // Apply filters (in-memory; volumes are bounded by org scope)
       const filtered = beneficiaries.filter((b) => {
