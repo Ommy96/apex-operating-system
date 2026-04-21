@@ -178,28 +178,19 @@ export default function ReportsAnalytics() {
 
         <TabsContent value="beneficiary" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <BeneficiaryImpactIntelligence
-              data={exec.beneficiaryImpact}
-              isLoading={exec.isLoading}
-            />
+            <BeneficiaryTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="programme" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <ProgramProjectIntelligence
-              data={exec.programIntelligence}
-              isLoading={exec.isLoading}
-            />
+            <ProgrammeTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="funding" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <DonorFundingIntelligence
-              data={exec.donorIntelligence}
-              isLoading={exec.isLoading}
-            />
+            <FundingTab filters={filters} />
           </Suspense>
         </TabsContent>
 
