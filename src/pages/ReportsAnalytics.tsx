@@ -30,24 +30,12 @@ import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 // Each tab is split into its own chunk so the page does not eagerly fetch all
 // nine tabs' worth of analytics on first paint.
 const OverviewTab = lazy(() => import("@/components/analytics/tabs/OverviewTab"));
+const BeneficiaryTab = lazy(() => import("@/components/analytics/tabs/BeneficiaryTab"));
+const ProgrammeTab = lazy(() => import("@/components/analytics/tabs/ProgrammeTab"));
+const FundingTab = lazy(() => import("@/components/analytics/tabs/FundingTab"));
 
 // Existing intelligence panels are reused as interim tab content until each
 // is rebuilt against the new global filter bar in subsequent phases.
-const BeneficiaryImpactIntelligence = lazy(() =>
-  import("@/components/executive/BeneficiaryImpactIntelligence").then((m) => ({
-    default: m.BeneficiaryImpactIntelligence,
-  }))
-);
-const ProgramProjectIntelligence = lazy(() =>
-  import("@/components/executive/ProgramProjectIntelligence").then((m) => ({
-    default: m.ProgramProjectIntelligence,
-  }))
-);
-const DonorFundingIntelligence = lazy(() =>
-  import("@/components/executive/DonorFundingIntelligence").then((m) => ({
-    default: m.DonorFundingIntelligence,
-  }))
-);
 const FieldActivitySection = lazy(() =>
   import("@/components/analytics/FieldActivitySection").then((m) => ({
     default: m.FieldActivitySection,
