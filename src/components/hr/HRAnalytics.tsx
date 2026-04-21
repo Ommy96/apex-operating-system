@@ -86,47 +86,53 @@ export function HRAnalytics() {
     <div className="space-y-6">
       {/* KPI grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <AnalyticsKpiCard label="Total Staff" value={data?.totalStaff ?? 0} icon={Users} />
+        <AnalyticsKpiCard label="Total Staff" value={data?.totalStaff ?? 0} icon={Users} tone="teal" />
         <AnalyticsKpiCard
           label="Active Volunteers"
           value={data?.activeVolunteers ?? 0}
-          sub={`${data?.totalVolunteers ?? 0} total`}
+          sublabel={`${data?.totalVolunteers ?? 0} total`}
           icon={Heart}
+          tone="rose"
         />
         <AnalyticsKpiCard
           label="Pending Leave"
           value={data?.pendingLeave ?? 0}
-          sub={`${data?.approvedLeaveDays ?? 0} days approved`}
+          sublabel={`${data?.approvedLeaveDays ?? 0} days approved`}
           icon={Calendar}
+          tone="amber"
         />
         <AnalyticsKpiCard
           label="Field Staff (30d)"
           value={data?.activeFieldStaff ?? 0}
           icon={MapPin}
+          tone="blue"
         />
         <AnalyticsKpiCard
           label="Volunteer Retention"
           value={`${(data?.retentionRate ?? 0).toFixed(0)}%`}
-          sub="≥6 months active"
+          sublabel="≥6 months active"
           icon={TrendingUp}
+          tone="teal"
         />
         <AnalyticsKpiCard
           label="Avg Contract Score"
           value={(data?.avgContractScore ?? 0).toFixed(1)}
-          sub="out of 100"
+          sublabel="out of 100"
           icon={Award}
+          tone="violet"
         />
         <AnalyticsKpiCard
           label="Overdue Tasks"
           value={data?.overdueTasks ?? 0}
           icon={AlertTriangle}
-          tone={data?.overdueTasks ? "warning" : "default"}
+          tone={data?.overdueTasks ? "rose" : "slate"}
         />
         <AnalyticsKpiCard
           label="Volunteer Hours"
           value={(data?.totalVolunteerHours ?? 0).toLocaleString()}
-          sub="lifetime"
+          sublabel="lifetime"
           icon={Clock}
+          tone="blue"
         />
       </div>
 
