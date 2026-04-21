@@ -33,19 +33,11 @@ const OverviewTab = lazy(() => import("@/components/analytics/tabs/OverviewTab")
 const BeneficiaryTab = lazy(() => import("@/components/analytics/tabs/BeneficiaryTab"));
 const ProgrammeTab = lazy(() => import("@/components/analytics/tabs/ProgrammeTab"));
 const FundingTab = lazy(() => import("@/components/analytics/tabs/FundingTab"));
+const VisitationTab = lazy(() => import("@/components/analytics/tabs/VisitationTab"));
+const RiskTab = lazy(() => import("@/components/analytics/tabs/RiskTab"));
 
 // Existing intelligence panels are reused as interim tab content until each
 // is rebuilt against the new global filter bar in subsequent phases.
-const FieldActivitySection = lazy(() =>
-  import("@/components/analytics/FieldActivitySection").then((m) => ({
-    default: m.FieldActivitySection,
-  }))
-);
-const RiskDashboard = lazy(() =>
-  import("@/components/executive/RiskDashboard").then((m) => ({
-    default: m.RiskDashboard,
-  }))
-);
 const DataAnalysisSection = lazy(() =>
   import("@/components/analytics/DataAnalysisSection").then((m) => ({
     default: m.DataAnalysisSection,
@@ -196,26 +188,13 @@ export default function ReportsAnalytics() {
 
         <TabsContent value="visitation" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <FieldActivitySection
-              visitations={exec.visitations}
-              beneficiaries={exec.beneficiaries}
-              dateRange={filters.dateRange}
-              isLoading={exec.isLoading}
-            />
+            <VisitationTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="risk" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <RiskDashboard
-              summary={exec.executiveSummary}
-              staffMetrics={exec.staffMetrics}
-              hrAlerts={exec.hrAlerts}
-              beneficiaryImpact={exec.beneficiaryImpact}
-              donorIntelligence={exec.donorIntelligence}
-              programIntelligence={exec.programIntelligence}
-              isLoading={exec.isLoading}
-            />
+            <RiskTab filters={filters} />
           </Suspense>
         </TabsContent>
 
