@@ -30,24 +30,12 @@ import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 // Each tab is split into its own chunk so the page does not eagerly fetch all
 // nine tabs' worth of analytics on first paint.
 const OverviewTab = lazy(() => import("@/components/analytics/tabs/OverviewTab"));
+const BeneficiaryTab = lazy(() => import("@/components/analytics/tabs/BeneficiaryTab"));
+const ProgrammeTab = lazy(() => import("@/components/analytics/tabs/ProgrammeTab"));
+const FundingTab = lazy(() => import("@/components/analytics/tabs/FundingTab"));
 
 // Existing intelligence panels are reused as interim tab content until each
 // is rebuilt against the new global filter bar in subsequent phases.
-const BeneficiaryImpactIntelligence = lazy(() =>
-  import("@/components/executive/BeneficiaryImpactIntelligence").then((m) => ({
-    default: m.BeneficiaryImpactIntelligence,
-  }))
-);
-const ProgramProjectIntelligence = lazy(() =>
-  import("@/components/executive/ProgramProjectIntelligence").then((m) => ({
-    default: m.ProgramProjectIntelligence,
-  }))
-);
-const DonorFundingIntelligence = lazy(() =>
-  import("@/components/executive/DonorFundingIntelligence").then((m) => ({
-    default: m.DonorFundingIntelligence,
-  }))
-);
 const FieldActivitySection = lazy(() =>
   import("@/components/analytics/FieldActivitySection").then((m) => ({
     default: m.FieldActivitySection,
@@ -190,28 +178,19 @@ export default function ReportsAnalytics() {
 
         <TabsContent value="beneficiary" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <BeneficiaryImpactIntelligence
-              data={exec.beneficiaryImpact}
-              isLoading={exec.isLoading}
-            />
+            <BeneficiaryTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="programme" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <ProgramProjectIntelligence
-              data={exec.programIntelligence}
-              isLoading={exec.isLoading}
-            />
+            <ProgrammeTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="funding" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <DonorFundingIntelligence
-              data={exec.donorIntelligence}
-              isLoading={exec.isLoading}
-            />
+            <FundingTab filters={filters} />
           </Suspense>
         </TabsContent>
 
