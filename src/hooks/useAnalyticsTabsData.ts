@@ -354,3 +354,286 @@ export function useFundingIntelligence(filters: AnalyticsFilters) {
     },
   });
 }
+
+/* ------------------------------------------------------------------ */
+/* Visitation intelligence                                             */
+/* ------------------------------------------------------------------ */
+
+export function useVisitationIntelligence(filters: AnalyticsFilters) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+  const fromIso = toIso(filters.dateRange?.from);
+  const toIsoStr = toIso(filters.dateRange?.to);
+
+  return useQuery({
+    queryKey: [
+      "analytics-visitation",
+      orgId,
+      fromIso,
+      toIsoStr,
+      filters.county,
+      filters.programId,
+      filters.gender,
+      filters.ageBucket,
+    ],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      // Pull beneficiaries for filter scoping (county, gender, age, program)
+      let benQ = supabase
+        .from("beneficiaries")
+        .select("id, county, gender, date_of_birth, status")
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null);
+      if (filters.county !== "all") benQ = benQ.eq("county", filters.county);
+      if (filters.gender !== "all") benQ = benQ.eq("gender", filters.gender as any);
+      const { data: benRows = [] } = await benQ;
+      const ben = (benRows ?? []).filter((b) => withinAge(b.date_of_birth, filters.ageBucket));
+
+      let programScopedIds: Set<string> | null = null;
+      if (filters.programId !== "all") {
+        const { data: svc = [] } = await supabase
+          .from("beneficiary_services")
+          .select("beneficiary_id")
+          .eq("organization_id", orgId!)
+          .eq("program_id", filters.programId);
+        programScopedIds = new Set((svc ?? []).map((s) => s.beneficiary_id));
+      }
+
+      const allowedIds = new Set(
+        ben
+          .filter((b) => !programScopedIds || programScopedIds.has(b.id))
+          .map((b) => b.id),
+      );
+
+      // Visitations within window
+      let visQ = supabase
+        .from("beneficiary_visitations")
+        .select(
+          "id, beneficiary_id, visit_date, visit_type, follow_up_required, follow_up_date, staff_name, location",
+        )
+        .eq("organization_id", orgId!);
+      if (fromIso) visQ = visQ.gte("visit_date", fromIso);
+      if (toIsoStr) visQ = visQ.lte("visit_date", toIsoStr);
+      const { data: visits = [] } = await visQ;
+
+      const scoped = (visits ?? []).filter((v) => allowedIds.size === 0 ? true : allowedIds.has(v.beneficiary_id));
+
+      // KPIs
+      const totalVisits = scoped.length;
+      const uniqueBeneficiariesVisited = new Set(scoped.map((v) => v.beneficiary_id)).size;
+      const followUpsRequired = scoped.filter((v) => v.follow_up_required).length;
+      const followUpsOverdue = scoped.filter(
+        (v) => v.follow_up_required && v.follow_up_date && new Date(v.follow_up_date).getTime() < Date.now(),
+      ).length;
+
+      // Beneficiaries with no visit in window (gap)
+      const visitedSet = new Set(scoped.map((v) => v.beneficiary_id));
+      const neverVisited = ben.filter(
+        (b) => (!programScopedIds || programScopedIds.has(b.id)) && !visitedSet.has(b.id) && b.status === "active",
+      ).length;
+
+      const coveragePct =
+        ben.length > 0
+          ? (uniqueBeneficiariesVisited /
+              ben.filter((b) => !programScopedIds || programScopedIds.has(b.id)).length) *
+            100
+          : 0;
+
+      // Type mix
+      const typeMix = scoped.reduce<Record<string, number>>((acc, v) => {
+        const k = v.visit_type ?? "unspecified";
+        acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+      }, {});
+
+      // Monthly trend
+      const monthly: Record<string, number> = {};
+      scoped.forEach((v) => {
+        const d = new Date(v.visit_date);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        monthly[k] = (monthly[k] ?? 0) + 1;
+      });
+      const visitTrend = Object.entries(monthly)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([month, count]) => ({ month, count }));
+
+      // Top staff by visit count
+      const staffMap: Record<string, number> = {};
+      scoped.forEach((v) => {
+        const k = v.staff_name ?? "Unassigned";
+        staffMap[k] = (staffMap[k] ?? 0) + 1;
+      });
+      const topStaff = Object.entries(staffMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name, count]) => ({ name, count }));
+
+      // Upcoming follow-ups (next 14 days)
+      const horizon = Date.now() + 14 * 86400_000;
+      const upcomingFollowUps = scoped
+        .filter(
+          (v) =>
+            v.follow_up_required &&
+            v.follow_up_date &&
+            new Date(v.follow_up_date).getTime() >= Date.now() &&
+            new Date(v.follow_up_date).getTime() <= horizon,
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.follow_up_date!).getTime() - new Date(b.follow_up_date!).getTime(),
+        )
+        .slice(0, 8);
+
+      return {
+        totalVisits,
+        uniqueBeneficiariesVisited,
+        followUpsRequired,
+        followUpsOverdue,
+        neverVisited,
+        coveragePct,
+        typeMix,
+        visitTrend,
+        topStaff,
+        upcomingFollowUps,
+      };
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Risk intelligence                                                   */
+/* ------------------------------------------------------------------ */
+
+export function useRiskIntelligence(filters: AnalyticsFilters) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  return useQuery({
+    queryKey: [
+      "analytics-risk",
+      orgId,
+      filters.county,
+      filters.programId,
+      filters.gender,
+      filters.ageBucket,
+    ],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      // Beneficiary scoping
+      let benQ = supabase
+        .from("beneficiaries")
+        .select("id, display_name, county, gender, date_of_birth, status, vulnerability_level")
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null);
+      if (filters.county !== "all") benQ = benQ.eq("county", filters.county);
+      if (filters.gender !== "all") benQ = benQ.eq("gender", filters.gender as any);
+      const { data: benRows = [] } = await benQ;
+      const ben = (benRows ?? []).filter((b) => withinAge(b.date_of_birth, filters.ageBucket));
+
+      let programScopedIds: Set<string> | null = null;
+      if (filters.programId !== "all") {
+        const { data: svc = [] } = await supabase
+          .from("beneficiary_services")
+          .select("beneficiary_id")
+          .eq("organization_id", orgId!)
+          .eq("program_id", filters.programId);
+        programScopedIds = new Set((svc ?? []).map((s) => s.beneficiary_id));
+      }
+      const scopedBen = ben.filter((b) => !programScopedIds || programScopedIds.has(b.id));
+      const scopedIds = new Set(scopedBen.map((b) => b.id));
+
+      // Risk scores - latest per beneficiary
+      const { data: scoreRows = [] } = await supabase
+        .from("beneficiary_risk_scores")
+        .select(
+          "beneficiary_id, assessment_date, dropout_risk_score, engagement_score, academic_trend_score, followup_compliance_score, vulnerability_index, overall_risk_level, risk_flags",
+        )
+        .eq("organization_id", orgId!)
+        .order("assessment_date", { ascending: false });
+
+      const latestByBen = new Map<string, (typeof scoreRows)[number]>();
+      (scoreRows ?? []).forEach((row) => {
+        if (!latestByBen.has(row.beneficiary_id)) latestByBen.set(row.beneficiary_id, row);
+      });
+      const scoped = Array.from(latestByBen.values()).filter((r) =>
+        scopedIds.size === 0 ? true : scopedIds.has(r.beneficiary_id),
+      );
+
+      // KPIs
+      const assessed = scoped.length;
+      const unassessed = Math.max(scopedBen.length - assessed, 0);
+      const high = scoped.filter((r) => r.overall_risk_level === "high" || r.overall_risk_level === "critical").length;
+      const medium = scoped.filter((r) => r.overall_risk_level === "medium").length;
+      const low = scoped.filter((r) => r.overall_risk_level === "low").length;
+
+      const avg = (key: keyof typeof scoped[number]) => {
+        const vals = scoped
+          .map((r) => Number(r[key] ?? 0))
+          .filter((n) => !Number.isNaN(n));
+        if (!vals.length) return 0;
+        return vals.reduce((s, v) => s + v, 0) / vals.length;
+      };
+
+      const avgDropout = avg("dropout_risk_score");
+      const avgEngagement = avg("engagement_score");
+      const avgAcademic = avg("academic_trend_score");
+      const avgFollowup = avg("followup_compliance_score");
+      const avgVulnerability = avg("vulnerability_index");
+
+      // Vulnerability tier mix from beneficiaries (separate from risk score)
+      const vulnerabilityMix = scopedBen.reduce<Record<string, number>>((acc, b) => {
+        const k = b.vulnerability_level ?? "unassessed";
+        acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+      }, {});
+
+      // Top at-risk beneficiaries (highest dropout score)
+      const benIndex = new Map(scopedBen.map((b) => [b.id, b]));
+      const topAtRisk = scoped
+        .filter((r) => benIndex.has(r.beneficiary_id))
+        .sort((a, b) => Number(b.dropout_risk_score ?? 0) - Number(a.dropout_risk_score ?? 0))
+        .slice(0, 8)
+        .map((r) => {
+          const b = benIndex.get(r.beneficiary_id)!;
+          return {
+            id: r.beneficiary_id,
+            name: b.display_name,
+            county: b.county ?? "—",
+            level: r.overall_risk_level ?? "unknown",
+            dropout: Number(r.dropout_risk_score ?? 0),
+            engagement: Number(r.engagement_score ?? 0),
+          };
+        });
+
+      // Risk-level radar data
+      const radarMetrics = [
+        { metric: "Dropout", value: Math.round(avgDropout) },
+        { metric: "Engagement", value: Math.round(avgEngagement) },
+        { metric: "Academic", value: Math.round(avgAcademic) },
+        { metric: "Follow-up", value: Math.round(avgFollowup) },
+        { metric: "Vulnerability", value: Math.round(avgVulnerability) },
+      ];
+
+      const coveragePct = scopedBen.length > 0 ? (assessed / scopedBen.length) * 100 : 0;
+
+      return {
+        assessed,
+        unassessed,
+        coveragePct,
+        high,
+        medium,
+        low,
+        avgDropout,
+        avgEngagement,
+        avgAcademic,
+        avgFollowup,
+        avgVulnerability,
+        vulnerabilityMix,
+        topAtRisk,
+        radarMetrics,
+      };
+    },
+  });
+}
