@@ -5,3 +5,4 @@ export { TaskManagement } from "./TaskManagement";
 export { VolunteerDirectory } from "./VolunteerDirectory";
 export { VolunteerAssignments } from "./VolunteerAssignments";
 export { VolunteerHoursLog } from "./VolunteerHoursLog";
+export { HRAnalytics } from "./HRAnalytics";

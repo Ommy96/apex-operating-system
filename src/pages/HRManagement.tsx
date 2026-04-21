@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Calendar, MapPin, CheckSquare, Users, Heart, Briefcase, Clock } from "lucide-react";
-import { PerformanceContracts, LeaveManagement, FieldCheckIns, TaskManagement } from "@/components/hr";
+import { FileText, Calendar, MapPin, CheckSquare, Users, Heart, Briefcase, Clock, BarChart3 } from "lucide-react";
+import { PerformanceContracts, LeaveManagement, FieldCheckIns, TaskManagement, HRAnalytics } from "@/components/hr";
 import { StaffDirectory } from "@/components/hr/StaffDirectory";
 import { VolunteerDirectory } from "@/components/hr/VolunteerDirectory";
 import { VolunteerAssignments } from "@/components/hr/VolunteerAssignments";
@@ -49,6 +49,9 @@ export default function HRManagement() {
             <TabsTrigger value="tasks" className="gap-1.5 text-xs">
               <CheckSquare className="h-3.5 w-3.5" /> Tasks
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-1.5 text-xs">
+              <BarChart3 className="h-3.5 w-3.5" /> Analytics
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -60,6 +63,7 @@ export default function HRManagement() {
         <TabsContent value="leave"><LeaveManagement /></TabsContent>
         <TabsContent value="gps"><FieldCheckIns /></TabsContent>
         <TabsContent value="tasks"><TaskManagement /></TabsContent>
+        <TabsContent value="analytics"><HRAnalytics /></TabsContent>
       </Tabs>
     </div>
   );
