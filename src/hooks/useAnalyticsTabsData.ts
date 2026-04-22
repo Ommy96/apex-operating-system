@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import { forecastLinear, averageGrowthRate } from "@/lib/forecasting";
 
 /**
  * Date helpers.  All filter dates are inclusive on the user-facing side,
@@ -633,6 +634,387 @@ export function useRiskIntelligence(filters: AnalyticsFilters) {
         vulnerabilityMix,
         topAtRisk,
         radarMetrics,
+      };
+    },
+  });
+}
+/* ------------------------------------------------------------------ */
+/* Demographics deep-dive                                              */
+/* ------------------------------------------------------------------ */
+
+export function useDemographicsIntelligence(filters: AnalyticsFilters) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  return useQuery({
+    queryKey: [
+      "analytics-demographics",
+      orgId,
+      filters.county,
+      filters.programId,
+      filters.gender,
+      filters.ageBucket,
+    ],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      let benQ = supabase
+        .from("beneficiaries")
+        .select(
+          "id, gender, date_of_birth, county, sub_county, beneficiary_type, disability_status, has_special_needs, religion, marital_status, household_size, income_level",
+        )
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null);
+      if (filters.county !== "all") benQ = benQ.eq("county", filters.county);
+      if (filters.gender !== "all") benQ = benQ.eq("gender", filters.gender as any);
+      const { data: rows = [] } = await benQ;
+      let ben = (rows ?? []).filter((b) => withinAge(b.date_of_birth, filters.ageBucket));
+
+      if (filters.programId !== "all") {
+        const { data: svc = [] } = await supabase
+          .from("beneficiary_services")
+          .select("beneficiary_id")
+          .eq("organization_id", orgId!)
+          .eq("program_id", filters.programId);
+        const ids = new Set((svc ?? []).map((s) => s.beneficiary_id));
+        ben = ben.filter((b) => ids.has(b.id));
+      }
+
+      // Age bucket distribution
+      const buckets = { "0-5": 0, "6-12": 0, "13-17": 0, "18-35": 0, "36-60": 0, "60+": 0, unknown: 0 };
+      ben.forEach((b) => {
+        if (!b.date_of_birth) return (buckets.unknown += 1);
+        const age = Math.floor((Date.now() - new Date(b.date_of_birth).getTime()) / (365.25 * 86400_000));
+        if (age <= 5) buckets["0-5"] += 1;
+        else if (age <= 12) buckets["6-12"] += 1;
+        else if (age <= 17) buckets["13-17"] += 1;
+        else if (age <= 35) buckets["18-35"] += 1;
+        else if (age <= 60) buckets["36-60"] += 1;
+        else buckets["60+"] += 1;
+      });
+      const ageDistribution = Object.entries(buckets).map(([bucket, count]) => ({ bucket, count }));
+
+      // Gender × age cross-tab
+      const crossKey = (b: any) => {
+        if (!b.date_of_birth) return "unknown";
+        const age = Math.floor((Date.now() - new Date(b.date_of_birth).getTime()) / (365.25 * 86400_000));
+        if (age <= 5) return "0-5";
+        if (age <= 12) return "6-12";
+        if (age <= 17) return "13-17";
+        if (age <= 35) return "18-35";
+        if (age <= 60) return "36-60";
+        return "60+";
+      };
+      const cross: Record<string, { bucket: string; male: number; female: number; other: number }> = {};
+      ben.forEach((b) => {
+        const k = crossKey(b);
+        cross[k] ||= { bucket: k, male: 0, female: 0, other: 0 };
+        const g = (b.gender ?? "other").toString().toLowerCase();
+        if (g === "male") cross[k].male += 1;
+        else if (g === "female") cross[k].female += 1;
+        else cross[k].other += 1;
+      });
+      const order = ["0-5", "6-12", "13-17", "18-35", "36-60", "60+", "unknown"];
+      const ageGenderCross = order.filter((k) => cross[k]).map((k) => cross[k]);
+
+      // Sub-county top 8
+      const subCountyTop = Object.entries(
+        ben.reduce<Record<string, number>>((acc, b) => {
+          const k = b.sub_county ?? "Unknown";
+          acc[k] = (acc[k] ?? 0) + 1;
+          return acc;
+        }, {}),
+      )
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([name, count]) => ({ name, count }));
+
+      // Disability + special needs
+      const disabilityCount = ben.filter((b) => b.disability_status && b.disability_status !== "none").length;
+      const specialNeedsCount = ben.filter((b) => b.has_special_needs).length;
+
+      // Religion mix
+      const religionMix = Object.entries(
+        ben.reduce<Record<string, number>>((acc, b) => {
+          const k = b.religion ?? "Unspecified";
+          acc[k] = (acc[k] ?? 0) + 1;
+          return acc;
+        }, {}),
+      )
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 6);
+
+      // Income level distribution
+      const incomeMix = Object.entries(
+        ben.reduce<Record<string, number>>((acc, b) => {
+          const k = b.income_level ?? "Unspecified";
+          acc[k] = (acc[k] ?? 0) + 1;
+          return acc;
+        }, {}),
+      ).map(([name, value]) => ({ name, value }));
+
+      // Household size: average + distribution buckets
+      const sizes = ben.map((b) => Number(b.household_size ?? 0)).filter((n) => n > 0);
+      const avgHouseholdSize = sizes.length ? sizes.reduce((s, v) => s + v, 0) / sizes.length : 0;
+      const householdBuckets = { "1-2": 0, "3-4": 0, "5-6": 0, "7+": 0 };
+      sizes.forEach((n) => {
+        if (n <= 2) householdBuckets["1-2"] += 1;
+        else if (n <= 4) householdBuckets["3-4"] += 1;
+        else if (n <= 6) householdBuckets["5-6"] += 1;
+        else householdBuckets["7+"] += 1;
+      });
+      const householdDistribution = Object.entries(householdBuckets).map(([bucket, count]) => ({ bucket, count }));
+
+      return {
+        total: ben.length,
+        ageDistribution,
+        ageGenderCross,
+        subCountyTop,
+        disabilityCount,
+        specialNeedsCount,
+        religionMix,
+        incomeMix,
+        avgHouseholdSize,
+        householdDistribution,
+      };
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Forecasting intelligence                                            */
+/* ------------------------------------------------------------------ */
+
+export function useForecastIntelligence(filters: AnalyticsFilters) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  return useQuery({
+    queryKey: ["analytics-forecast", orgId, filters.programId],
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      // Last 12 months window
+      const end = new Date();
+      const start = new Date(end.getFullYear(), end.getMonth() - 11, 1);
+      const startIso = start.toISOString();
+
+      // Beneficiary growth (created_at)
+      let benQ = supabase
+        .from("beneficiaries")
+        .select("created_at")
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null)
+        .gte("created_at", startIso);
+      const { data: ben = [] } = await benQ;
+
+      // Income (program donors + beneficiary donors)
+      let progDonQ = supabase
+        .from("program_donors")
+        .select("contribution_amount, contribution_date, program_id")
+        .eq("organization_id", orgId!)
+        .gte("contribution_date", startIso);
+      if (filters.programId !== "all") progDonQ = progDonQ.eq("program_id", filters.programId);
+      const { data: progDonors = [] } = await progDonQ;
+
+      let benDonQ = supabase
+        .from("beneficiary_donors")
+        .select("amount_received, donation_date, program_id")
+        .eq("organization_id", orgId!)
+        .gte("donation_date", startIso);
+      if (filters.programId !== "all") benDonQ = benDonQ.eq("program_id", filters.programId);
+      const { data: benDonors = [] } = await benDonQ;
+
+      // Expenses
+      let expQ = supabase
+        .from("expenses")
+        .select("amount, expense_date, program_id")
+        .eq("organization_id", orgId!)
+        .gte("expense_date", startIso);
+      if (filters.programId !== "all") expQ = expQ.eq("program_id", filters.programId);
+      const { data: expenses = [] } = await expQ;
+
+      // Build month buckets (last 12)
+      const months: string[] = [];
+      const labels: string[] = [];
+      const cursor = new Date(start);
+      while (cursor <= end) {
+        const k = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`;
+        months.push(k);
+        labels.push(cursor.toLocaleDateString("en-US", { month: "short", year: "2-digit" }));
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+      const monthIdx = (iso: string | null) => {
+        if (!iso) return -1;
+        const d = new Date(iso);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        return months.indexOf(k);
+      };
+
+      const benSeries = new Array(months.length).fill(0) as number[];
+      ben.forEach((b: any) => {
+        const i = monthIdx(b.created_at);
+        if (i >= 0) benSeries[i] += 1;
+      });
+
+      const incomeSeries = new Array(months.length).fill(0) as number[];
+      progDonors.forEach((d: any) => {
+        const i = monthIdx(d.contribution_date);
+        if (i >= 0) incomeSeries[i] += Number(d.contribution_amount ?? 0);
+      });
+      benDonors.forEach((d: any) => {
+        const i = monthIdx(d.donation_date);
+        if (i >= 0) incomeSeries[i] += Number(d.amount_received ?? 0);
+      });
+
+      const expenseSeries = new Array(months.length).fill(0) as number[];
+      expenses.forEach((e: any) => {
+        const i = monthIdx(e.expense_date);
+        if (i >= 0) expenseSeries[i] += Number(e.amount ?? 0);
+      });
+
+      const PROJECT = 6;
+      const benForecast = forecastLinear(benSeries, PROJECT);
+      const incomeForecast = forecastLinear(incomeSeries, PROJECT);
+      const expenseForecast = forecastLinear(expenseSeries, PROJECT);
+
+      const futureLabels: string[] = [];
+      const f = new Date(end.getFullYear(), end.getMonth() + 1, 1);
+      for (let i = 0; i < PROJECT; i++) {
+        futureLabels.push(f.toLocaleDateString("en-US", { month: "short", year: "2-digit" }));
+        f.setMonth(f.getMonth() + 1);
+      }
+
+      const buildSeries = (
+        actuals: number[],
+        forecast: number[],
+      ) => {
+        const out: { label: string; actual: number | null; forecast: number | null }[] = [];
+        actuals.forEach((v, i) => {
+          out.push({ label: labels[i], actual: v, forecast: i === actuals.length - 1 ? v : null });
+        });
+        forecast.forEach((v, i) => {
+          out.push({ label: futureLabels[i], actual: null, forecast: v });
+        });
+        return out;
+      };
+
+      return {
+        beneficiaryGrowthSeries: buildSeries(benSeries, benForecast),
+        incomeSeries: buildSeries(incomeSeries, incomeForecast),
+        expenseSeries: buildSeries(expenseSeries, expenseForecast),
+        beneficiaryAvgGrowth: averageGrowthRate(benSeries),
+        incomeAvgGrowth: averageGrowthRate(incomeSeries),
+        expenseAvgGrowth: averageGrowthRate(expenseSeries),
+        projectedBeneficiaries6Mo: benForecast.reduce((s, v) => s + v, 0),
+        projectedIncome6Mo: incomeForecast.reduce((s, v) => s + v, 0),
+        projectedExpense6Mo: expenseForecast.reduce((s, v) => s + v, 0),
+      };
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Data quality intelligence                                           */
+/* ------------------------------------------------------------------ */
+
+export function useDataQualityIntelligence(filters: AnalyticsFilters) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  return useQuery({
+    queryKey: ["analytics-quality", orgId, filters.programId],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data: ben = [] } = await supabase
+        .from("beneficiaries")
+        .select(
+          "id, display_name, date_of_birth, gender, county, photo_url, consent_given, status, beneficiary_type",
+        )
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null);
+
+      const total = ben.length;
+      const checks = [
+        { key: "Date of Birth", missing: ben.filter((b) => !b.date_of_birth).length },
+        { key: "Gender", missing: ben.filter((b) => !b.gender).length },
+        { key: "County", missing: ben.filter((b) => !b.county).length },
+        { key: "Photo", missing: ben.filter((b) => !b.photo_url).length },
+        { key: "Consent", missing: ben.filter((b) => !b.consent_given).length },
+      ];
+      const completenessByField = checks.map((c) => ({
+        field: c.key,
+        missing: c.missing,
+        complete: total - c.missing,
+        completePct: total > 0 ? ((total - c.missing) / total) * 100 : 0,
+      }));
+      const overallCompleteness =
+        total > 0
+          ? completenessByField.reduce((s, c) => s + c.completePct, 0) / completenessByField.length
+          : 0;
+
+      // Duplicate display_name detection
+      const nameMap: Record<string, string[]> = {};
+      ben.forEach((b) => {
+        const k = (b.display_name ?? "").trim().toLowerCase();
+        if (!k) return;
+        nameMap[k] ||= [];
+        nameMap[k].push(b.id);
+      });
+      const duplicateGroups = Object.entries(nameMap).filter(([, ids]) => ids.length > 1);
+      const duplicateCount = duplicateGroups.reduce((s, [, ids]) => s + ids.length, 0);
+
+      // Orphans: beneficiaries with no enrolment
+      const { data: services = [] } = await supabase
+        .from("beneficiary_services")
+        .select("beneficiary_id")
+        .eq("organization_id", orgId!);
+      const enrolled = new Set((services ?? []).map((s) => s.beneficiary_id));
+      const orphanBeneficiaries = ben.filter((b) => !enrolled.has(b.id) && b.status === "active").length;
+
+      // Stale records: active but no update in >180 days — cheap proxy via separate fetch
+      const { data: stale = [] } = await supabase
+        .from("beneficiaries")
+        .select("id, updated_at")
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null)
+        .eq("status", "active")
+        .lt("updated_at", new Date(Date.now() - 180 * 86400_000).toISOString())
+        .limit(500);
+      const staleCount = (stale ?? []).length;
+
+      // Activities & visitations missing details
+      const { data: acts = [] } = await supabase
+        .from("activities")
+        .select("id, outcome, status")
+        .eq("organization_id", orgId!)
+        .is("deleted_at", null);
+      const activitiesMissingOutcome = (acts ?? []).filter(
+        (a) => a.status === "completed" && !a.outcome,
+      ).length;
+
+      const { data: visits = [] } = await supabase
+        .from("beneficiary_visitations")
+        .select("id, observation_findings, follow_up_required, follow_up_date")
+        .eq("organization_id", orgId!);
+      const visitsMissingFindings = (visits ?? []).filter((v) => !v.observation_findings).length;
+      const visitsMissingFollowupDate = (visits ?? []).filter(
+        (v) => v.follow_up_required && !v.follow_up_date,
+      ).length;
+
+      return {
+        total,
+        overallCompleteness,
+        completenessByField,
+        duplicateGroupsCount: duplicateGroups.length,
+        duplicateCount,
+        orphanBeneficiaries,
+        staleCount,
+        activitiesMissingOutcome,
+        visitsMissingFindings,
+        visitsMissingFollowupDate,
       };
     },
   });
