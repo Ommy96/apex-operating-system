@@ -162,7 +162,11 @@ export default function DataQualityTab({ filters }: { filters: AnalyticsFilters 
 }
 
 function IssueRow({ label, value }: { label: string; value: number }) {
-  const tone = value === 0 ? "text-emerald-600" : value < 5 ? "text-amber-600" : "text-rose-600";
+  const tone = value === 0
+    ? "text-emerald-600 dark:text-emerald-400"
+    : value < 5
+      ? "text-amber-600 dark:text-amber-400"
+      : "text-rose-600 dark:text-rose-400";
   return (
     <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
       <span className="text-muted-foreground">{label}</span>
