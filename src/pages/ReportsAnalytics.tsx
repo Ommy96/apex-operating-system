@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useMemo } from "react";
+import { useState, lazy, Suspense, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
@@ -21,6 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { PrivacyBanner } from "@/components/analytics/PrivacyBanner";
 import { AnalyticsGlobalFilterBar } from "@/components/analytics/AnalyticsGlobalFilterBar";
+import { AnalyticsExportMenu } from "@/components/analytics/AnalyticsExportMenu";
+import { ScheduleReportsDialog } from "@/components/analytics/ScheduleReportsDialog";
 import { useAnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +58,7 @@ export default function ReportsAnalytics() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
+  const tabContentRef = useRef<HTMLDivElement>(null);
 
   const {
     filters,
@@ -116,15 +119,22 @@ export default function ReportsAnalytics() {
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Last updated · {lastUpdatedLabel}</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => window.location.reload()}
-          className="h-7 gap-1.5 text-xs"
-        >
-          <RefreshCw className="h-3 w-3" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <AnalyticsExportMenu
+            captureRef={tabContentRef}
+            tabLabel={TABS.find((t) => t.id === activeTab)?.label ?? activeTab}
+          />
+          <ScheduleReportsDialog defaultTab={activeTab} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="h-7 gap-1.5 text-xs"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)}>
@@ -143,6 +153,7 @@ export default function ReportsAnalytics() {
           </TabsList>
         </div>
 
+        <div ref={tabContentRef}>
         <TabsContent value="overview" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
             <OverviewTab filters={filters} />
