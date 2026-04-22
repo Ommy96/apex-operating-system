@@ -207,6 +207,7 @@ export default function ReportsAnalytics() {
             <DataQualityTab filters={filters} />
           </Suspense>
         </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
