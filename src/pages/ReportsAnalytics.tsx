@@ -24,7 +24,6 @@ import { AnalyticsGlobalFilterBar } from "@/components/analytics/AnalyticsGlobal
 import { useAnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
-import { useExecutiveAnalytics } from "@/hooks/useExecutiveAnalytics";
 
 // === Lazy-loaded tab content ===
 // Each tab is split into its own chunk so the page does not eagerly fetch all
@@ -35,24 +34,9 @@ const ProgrammeTab = lazy(() => import("@/components/analytics/tabs/ProgrammeTab
 const FundingTab = lazy(() => import("@/components/analytics/tabs/FundingTab"));
 const VisitationTab = lazy(() => import("@/components/analytics/tabs/VisitationTab"));
 const RiskTab = lazy(() => import("@/components/analytics/tabs/RiskTab"));
-
-// Existing intelligence panels are reused as interim tab content until each
-// is rebuilt against the new global filter bar in subsequent phases.
-const DataAnalysisSection = lazy(() =>
-  import("@/components/analytics/DataAnalysisSection").then((m) => ({
-    default: m.DataAnalysisSection,
-  }))
-);
-const ForecastingEngine = lazy(() =>
-  import("@/components/executive/ForecastingEngine").then((m) => ({
-    default: m.ForecastingEngine,
-  }))
-);
-const SystemIntelligenceSection = lazy(() =>
-  import("@/components/analytics/SystemIntelligenceSection").then((m) => ({
-    default: m.SystemIntelligenceSection,
-  }))
-);
+const DemographicsTab = lazy(() => import("@/components/analytics/tabs/DemographicsTab"));
+const ForecastTab = lazy(() => import("@/components/analytics/tabs/ForecastTab"));
+const DataQualityTab = lazy(() => import("@/components/analytics/tabs/DataQualityTab"));
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -99,9 +83,6 @@ export default function ReportsAnalytics() {
     enabled: !!orgId,
     staleTime: 5 * 60 * 1000,
   });
-
-  // Legacy executive analytics still powers tabs 2-8 until each is rebuilt.
-  const exec = useExecutiveAnalytics(filters.dateRange, filters.programId);
 
   const lastUpdatedLabel = useMemo(
     () =>
@@ -200,36 +181,19 @@ export default function ReportsAnalytics() {
 
         <TabsContent value="demographics" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <DataAnalysisSection
-              beneficiaries={exec.beneficiaries}
-              donors={exec.donors}
-              isLoading={exec.isLoading}
-            />
+            <DemographicsTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="forecast" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <ForecastingEngine
-              programIntelligence={exec.programIntelligence}
-              donorIntelligence={exec.donorIntelligence}
-              monthlyStaffTrends={exec.monthlyStaffTrends}
-              summary={exec.executiveSummary}
-              isLoading={exec.isLoading}
-            />
+            <ForecastTab filters={filters} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
           <Suspense fallback={<TabSkeleton />}>
-            <SystemIntelligenceSection
-              beneficiaries={exec.beneficiaries}
-              enrollments={exec.enrollments}
-              programs={exec.programs}
-              reportsData={null}
-              uploads={exec.uploads}
-              isLoading={exec.isLoading}
-            />
+            <DataQualityTab filters={filters} />
           </Suspense>
         </TabsContent>
       </Tabs>
