@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnalyticsKpiCard } from "@/components/analytics/AnalyticsKpiCard";
 import { useForecastIntelligence } from "@/hooks/useAnalyticsTabsData";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useOrganization } from "@/hooks/useOrganization";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 
 const tooltipStyle = {
@@ -32,7 +33,10 @@ function fmt(n: number) {
 
 export default function ForecastTab({ filters }: { filters: AnalyticsFilters }) {
   const { data, isLoading } = useForecastIntelligence(filters);
-  const { format } = useCurrency();
+  const { currentOrganization } = useOrganization();
+  const baseCurrency = (currentOrganization as any)?.base_currency ?? "KES";
+  const { formatAmount } = useCurrency(baseCurrency);
+  const format = (v: number) => formatAmount(v, baseCurrency);
 
   if (isLoading) {
     return (
