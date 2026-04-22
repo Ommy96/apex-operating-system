@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import { forecastLinear, averageGrowthRate } from "@/lib/forecasting";
 
 /**
  * Date helpers.  All filter dates are inclusive on the user-facing side,
