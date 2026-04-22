@@ -524,6 +524,118 @@ export type Database = {
           },
         ]
       }
+      analytics_report_runs: {
+        Row: {
+          error_message: string | null
+          id: string
+          organization_id: string
+          recipients_count: number
+          sent_at: string
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          organization_id: string
+          recipients_count?: number
+          sent_at?: string
+          status?: string
+          subscription_id: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          organization_id?: string
+          recipients_count?: number
+          sent_at?: string
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_report_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_report_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_report_runs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_report_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_report_subscriptions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          last_sent_at: string | null
+          name: string
+          next_send_at: string | null
+          organization_id: string
+          recipients: string[]
+          tab: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          name: string
+          next_send_at?: string | null
+          organization_id: string
+          recipients?: string[]
+          tab?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_sent_at?: string | null
+          name?: string
+          next_send_at?: string | null
+          organization_id?: string
+          recipients?: string[]
+          tab?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_report_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_report_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_usage_logs: {
         Row: {
           created_at: string
