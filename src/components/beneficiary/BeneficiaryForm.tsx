@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -276,6 +277,7 @@ export function BeneficiaryForm({
   const [isLoading, setIsLoading] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [form, setForm] = useState<FormState>(() =>
     beneficiary
       ? createFormStateFromBeneficiary(beneficiary, defaultCategory)
@@ -304,6 +306,32 @@ export function BeneficiaryForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const initialForm = useMemo(() =>
+    beneficiary
+      ? createFormStateFromBeneficiary(beneficiary, defaultCategory)
+      : { ...EMPTY_STATE, beneficiary_category: defaultCategory },
+    [beneficiary, defaultCategory],
+  );
+  const hasChanges = JSON.stringify(form) !== JSON.stringify(initialForm);
+
+  useEffect(() => {
+    if (!hasChanges) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [hasChanges]);
+
+  const requestCancel = () => {
+    if (hasChanges) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+    onCancel?.();
+  };
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -565,7 +593,7 @@ export function BeneficiaryForm({
           )}
         </div>
         <div className="flex justify-center gap-2 pt-2">
-          <Button variant="outline" onClick={() => onCancel?.()}>
+          <Button variant="outline" onClick={requestCancel}>
             Close
           </Button>
           <Button
@@ -646,11 +674,24 @@ export function BeneficiaryForm({
         {step === 6 && <Step7Notes form={form} update={update} />}
       </Card>
 
+      <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>You have unsaved changes. Discard them?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay and save</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onCancel?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <div className="flex gap-2">
           {onCancel && (
-            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            <Button type="button" variant="ghost" size="sm" onClick={requestCancel}>
               <X className="h-4 w-4 mr-1" /> Cancel
             </Button>
           )}
