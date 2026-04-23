@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { TagInput } from '@/components/ui/TagInput';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,6 +34,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toDateInputValue } from '@/lib/dateUtils';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
 
@@ -97,8 +99,8 @@ interface FormState {
   out_of_school_reason: string;
 
   // Step 5 — health
-  allergies: string;
-  chronic_conditions: string;
+  allergies: string[];
+  chronic_conditions: string[];
   blood_group: string;
   nutritional_status: string;
   hiv_status: string;
@@ -155,8 +157,8 @@ const EMPTY_STATE: FormState = {
   grade: '',
   is_enrolled: 'yes',
   out_of_school_reason: '',
-  allergies: '',
-  chronic_conditions: '',
+  allergies: [],
+  chronic_conditions: [],
   blood_group: '',
   nutritional_status: '',
   hiv_status: '',
@@ -198,6 +200,65 @@ const STEP_LABELS = [
   'Vulnerability',
   'Notes',
 ];
+const parseTagArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') {
+    return value.split(/[;,]/).map((item) => item.trim()).filter(Boolean);
+  }
+  return [];
+};
+
+const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: BeneficiaryCategory): FormState => ({
+  ...EMPTY_STATE,
+  beneficiary_category: (beneficiary?.beneficiary_category as BeneficiaryCategory) || defaultCategory,
+  display_name: beneficiary?.display_name ?? '',
+  first_name: beneficiary?.first_name ?? '',
+  middle_name: beneficiary?.middle_name ?? '',
+  last_name: beneficiary?.last_name ?? '',
+  date_of_birth: toDateInputValue(beneficiary?.date_of_birth),
+  gender: beneficiary?.gender ?? '',
+  phone: beneficiary?.phone ?? '',
+  national_id: beneficiary?.national_id ?? '',
+  county: beneficiary?.county ?? '',
+  sub_county: beneficiary?.sub_county ?? '',
+  estate_village: beneficiary?.estate_village ?? '',
+  consent_given: !!beneficiary?.consent_given,
+  consent_date: toDateInputValue(beneficiary?.consent_date),
+  registration_source: beneficiary?.registration_source ?? 'admin',
+  religion: beneficiary?.religion ?? '',
+  marital_status: beneficiary?.marital_status ?? '',
+  disability_status: beneficiary?.disability_status ?? '',
+  occupation: beneficiary?.occupation ?? '',
+  income_level: beneficiary?.income_level ?? '',
+  household_size: beneficiary?.household_size?.toString() ?? '',
+  household_income_source: beneficiary?.source_of_income ?? '',
+  group_name: beneficiary?.group_name ?? '',
+  member_count: beneficiary?.member_count?.toString() ?? '',
+  leader_name: beneficiary?.leader_name ?? '',
+  leader_phone: beneficiary?.leader_phone ?? '',
+  meeting_frequency: beneficiary?.group_schedule ?? '',
+  family_status: beneficiary?.family_status ?? '',
+  academic_level: beneficiary?.academic_level ?? '',
+  institution_name: beneficiary?.institution_name ?? '',
+  grade: beneficiary?.grade ?? '',
+  allergies: parseTagArray(beneficiary?.allergies),
+  chronic_conditions: parseTagArray(beneficiary?.chronic_conditions ?? beneficiary?.other_medical_conditions),
+  blood_group: beneficiary?.blood_group ?? '',
+  nutritional_status: beneficiary?.nutritional_status ?? '',
+  hiv_status: beneficiary?.hiv_status ?? '',
+  last_medical_check: toDateInputValue(beneficiary?.last_medical_check),
+  primary_need: beneficiary?.primary_need ?? '',
+  vulnerability_tags: parseTagArray(beneficiary?.vulnerability_tags),
+  vulnerability_level: beneficiary?.vulnerability_level ?? '',
+  notes: beneficiary?.background_narrative ?? beneficiary?.notes ?? '',
+  photo_url: beneficiary?.photo_url ?? '',
+});
+
+const compactPayload = (payload: Record<string, any>) =>
+  Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => value !== undefined),
+  );
+
 
 export function BeneficiaryForm({
   beneficiary,
@@ -215,45 +276,17 @@ export function BeneficiaryForm({
   const [isLoading, setIsLoading] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>(() => {
+  const [form, setForm] = useState<FormState>(() =>
+    beneficiary
+      ? createFormStateFromBeneficiary(beneficiary, defaultCategory)
+      : { ...EMPTY_STATE, beneficiary_category: defaultCategory },
+  );
+
+  useEffect(() => {
     if (beneficiary) {
-      return {
-        ...EMPTY_STATE,
-        beneficiary_category:
-          (beneficiary.beneficiary_category as BeneficiaryCategory) || defaultCategory,
-        display_name: beneficiary.display_name || '',
-        first_name: beneficiary.first_name || '',
-        middle_name: beneficiary.middle_name || '',
-        last_name: beneficiary.last_name || '',
-        date_of_birth: beneficiary.date_of_birth || '',
-        gender: beneficiary.gender || '',
-        county: beneficiary.county || '',
-        sub_county: beneficiary.sub_county || '',
-        estate_village: beneficiary.estate_village || '',
-        consent_given: !!beneficiary.consent_given,
-        consent_date: beneficiary.consent_date || '',
-        registration_source: beneficiary.registration_source || 'admin',
-        religion: beneficiary.religion || '',
-        marital_status: beneficiary.marital_status || '',
-        disability_status: beneficiary.disability_status || '',
-        occupation: beneficiary.occupation || '',
-        income_level: beneficiary.income_level || '',
-        household_size: beneficiary.household_size?.toString() || '',
-        group_name: beneficiary.group_name || '',
-        member_count: beneficiary.member_count?.toString() || '',
-        leader_name: beneficiary.leader_name || '',
-        leader_phone: beneficiary.leader_phone || '',
-        meeting_frequency: beneficiary.group_schedule || '',
-        academic_level: beneficiary.academic_level || '',
-        institution_name: beneficiary.institution_name || '',
-        grade: beneficiary.grade || '',
-        primary_need: beneficiary.primary_need || '',
-        vulnerability_tags: beneficiary.vulnerability_tags || [],
-        vulnerability_level: beneficiary.vulnerability_level || '',
-      };
+      setForm(createFormStateFromBeneficiary(beneficiary, defaultCategory));
     }
-    return { ...EMPTY_STATE, beneficiary_category: defaultCategory };
-  });
+  }, [beneficiary?.id, beneficiary?.updated_at, defaultCategory]);
 
   const draftKey = `beneficiary-form-draft-${orgId ?? 'none'}-${beneficiary?.id ?? 'new'}`;
 
@@ -377,7 +410,7 @@ export function BeneficiaryForm({
         ? 'student'
         : 'adult';
 
-      const payload: any = {
+      const payload: any = compactPayload({
         organization_id: orgId,
         beneficiary_category: form.beneficiary_category,
         beneficiary_type: legacyType,
@@ -420,7 +453,7 @@ export function BeneficiaryForm({
             : null,
         other_medical_conditions:
           config.collect_health_data
-            ? [form.allergies, form.chronic_conditions].filter(Boolean).join('; ') || null
+            ? [...form.allergies, ...form.chronic_conditions].filter(Boolean).join('; ') || null
             : null,
         primary_need: form.primary_need || null,
         vulnerability_tags: form.vulnerability_tags.length ? form.vulnerability_tags : null,
@@ -429,7 +462,7 @@ export function BeneficiaryForm({
         photo_url: form.photo_url || null,
         status: 'active',
         is_active: true,
-      };
+      });
 
       let beneficiaryId = beneficiary?.id;
       let uniqueId = beneficiary?.unique_id;
@@ -437,8 +470,9 @@ export function BeneficiaryForm({
       if (beneficiary?.id) {
         const { error } = await supabase
           .from('beneficiaries')
-          .update(payload)
-          .eq('id', beneficiary.id);
+          .update({ ...payload, updated_at: new Date().toISOString() })
+          .eq('id', beneficiary.id)
+          .eq('organization_id', orgId);
         if (error) throw error;
       } else {
         // Generate unique_id via RPC
@@ -736,7 +770,7 @@ function Step1Identity({
             <Label>Date of birth</Label>
             <Input
               type="date"
-              value={form.date_of_birth}
+              value={toDateInputValue(form.date_of_birth)}
               onChange={(e) => update('date_of_birth', e.target.value)}
             />
           </div>
@@ -848,7 +882,7 @@ function Step1Identity({
             <Label className="text-xs">Consent date</Label>
             <Input
               type="date"
-              value={form.consent_date}
+              value={toDateInputValue(form.consent_date)}
               onChange={(e) => update('consent_date', e.target.value)}
               className="max-w-xs"
             />
@@ -1210,14 +1244,14 @@ function Step5Health({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="sm:col-span-2">
           <Label>Allergies</Label>
-          <Input value={form.allergies} onChange={(e) => update('allergies', e.target.value)} placeholder="Comma-separated" />
+          <TagInput value={form.allergies} onChange={(tags) => update('allergies', tags)} placeholder="Add allergy" />
         </div>
         <div className="sm:col-span-2">
           <Label>Chronic conditions</Label>
-          <Input
+          <TagInput
             value={form.chronic_conditions}
-            onChange={(e) => update('chronic_conditions', e.target.value)}
-            placeholder="Comma-separated"
+            onChange={(tags) => update('chronic_conditions', tags)}
+            placeholder="Add chronic condition"
           />
         </div>
         <div>
@@ -1235,7 +1269,7 @@ function Step5Health({
           <Label>Last medical check</Label>
           <Input
             type="date"
-            value={form.last_medical_check}
+            value={toDateInputValue(form.last_medical_check)}
             onChange={(e) => update('last_medical_check', e.target.value)}
           />
         </div>
