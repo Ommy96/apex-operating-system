@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { FolderKanban, ChevronRight, Calendar, CheckCircle2, XCircle, Clock, ArrowUpRight } from 'lucide-react';
+import { FolderKanban, ChevronRight, Calendar, CheckCircle2, XCircle, Clock, ArrowUpRight, HandHeart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,13 @@ interface ProgramEnrollment {
   exit_date: string | null;
   status: string;
   notes: string | null;
+  sponsor_donor_id?: string | null;
+  sponsor_name?: string | null;
+  sponsorship_amount?: number | null;
+  sponsorship_currency?: string | null;
+  sponsorship_start_date?: string | null;
+  sponsorship_end_date?: string | null;
+  sponsorship_status?: string | null;
   programs: {
     id: string;
     name: string;
@@ -94,6 +101,15 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
     }
   };
 
+
+  const getFundingBadge = (enrollment: ProgramEnrollment) => {
+    const hasSponsor = !!(enrollment.sponsor_donor_id || enrollment.sponsor_name);
+    const hasProgramme = !!enrollment.program_id;
+    if (hasSponsor && hasProgramme) return { label: 'Mixed', variant: 'warning' as const };
+    if (hasSponsor) return { label: 'Individually sponsored', variant: 'success' as const };
+    return { label: 'Programme funded', variant: 'info' as const };
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -129,7 +145,9 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
         <Badge variant="secondary">{enrollments.length} program(s)</Badge>
       </div>
 
-      {enrollments.map((enrollment) => (
+      {enrollments.map((enrollment) => {
+        const funding = getFundingBadge(enrollment);
+        return (
         <Card key={enrollment.id} className="hover:border-primary/50 transition-colors">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
@@ -139,6 +157,7 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
                   <h4 className="font-medium">
                     {enrollment.programs?.name || 'Unknown Program'}
                   </h4>
+                  <Badge variant={funding.variant}>{funding.label}</Badge>
                 </div>
                 
                 {enrollment.projects && (
@@ -163,6 +182,13 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
                   )}
                 </div>
 
+                {(enrollment.sponsor_donor_id || enrollment.sponsor_name) && (
+                  <div className="mt-2 rounded-lg bg-secondary/60 p-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 font-medium text-foreground"><HandHeart className="h-3.5 w-3.5 text-primary" />{enrollment.sponsor_name || 'Individual sponsor'}</div>
+                    <div>{[enrollment.sponsorship_amount ? `${enrollment.sponsorship_currency || ''} ${enrollment.sponsorship_amount}`.trim() : null, enrollment.sponsorship_start_date ? `Start ${new Date(enrollment.sponsorship_start_date).toLocaleDateString()}` : null, enrollment.sponsorship_status || null].filter(Boolean).join(' · ')}</div>
+                  </div>
+                )}
+
                 {enrollment.notes && (
                   <p className="text-sm text-muted-foreground mt-2">{enrollment.notes}</p>
                 )}
@@ -174,7 +200,9 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
             </div>
           </CardContent>
         </Card>
-      ))}
+        </Card>
+        );
+      })}
     </div>
   );
 }
