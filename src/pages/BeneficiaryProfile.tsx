@@ -390,7 +390,7 @@ export default function BeneficiaryProfile() {
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white text-lg font-semibold" style={{ background: 'var(--gradient-accent)' }}>
+                      <div className="h-full w-full flex items-center justify-center text-primary-foreground text-lg font-semibold" style={{ background: 'var(--gradient-accent)' }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
@@ -638,7 +638,7 @@ export default function BeneficiaryProfile() {
                         ? 'bg-card text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
-                    style={activeTab === tab.value ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } : {}}
+                    style={activeTab === tab.value ? { boxShadow: 'var(--shadow-sm)' } : {}}
                   >
                     <tab.icon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{tab.label}</span>

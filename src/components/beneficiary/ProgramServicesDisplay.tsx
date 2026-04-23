@@ -54,6 +54,13 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
           exit_date,
           status,
           notes,
+          sponsor_donor_id,
+          sponsor_name,
+          sponsorship_amount,
+          sponsorship_currency,
+          sponsorship_start_date,
+          sponsorship_end_date,
+          sponsorship_status,
           programs:program_id (
             id,
             name,
@@ -199,7 +206,6 @@ export function ProgramServicesDisplay({ beneficiaryId }: ProgramServicesDisplay
               </Badge>
             </div>
           </CardContent>
-        </Card>
         </Card>
         );
       })}

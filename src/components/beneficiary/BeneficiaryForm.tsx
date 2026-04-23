@@ -426,13 +426,13 @@ export function BeneficiaryForm({
         consent_given: form.consent_given,
         consent_date: form.consent_date || null,
         registration_source: form.registration_source || 'admin',
-        religion: config.collect_religion ? form.religion || null : null,
+        religion: config.collect_religion ? form.religion || null : beneficiary?.id ? undefined : null,
         marital_status: form.marital_status || null,
         disability_status: config.collect_disability_details
           ? form.disability_status || null
-          : null,
-        occupation: config.collect_economic_data ? form.occupation || null : null,
-        income_level: config.collect_economic_data ? form.income_level || null : null,
+          : beneficiary?.id ? undefined : null,
+        occupation: config.collect_economic_data ? form.occupation || null : beneficiary?.id ? undefined : null,
+        income_level: config.collect_economic_data ? form.income_level || null : beneficiary?.id ? undefined : null,
         household_size: form.household_size ? Number(form.household_size) : null,
         group_name: isGroup || isOrganisation ? form.group_name || null : null,
         member_count: form.member_count ? Number(form.member_count) : null,
@@ -441,20 +441,20 @@ export function BeneficiaryForm({
         group_schedule: isGroup ? form.meeting_frequency || null : null,
         academic_level: config.collect_education_data
           ? (form.academic_level as any) || null
-          : null,
+          : beneficiary?.id ? undefined : null,
         institution_name: config.collect_education_data
           ? form.institution_name || null
-          : null,
-        grade: config.collect_education_data ? form.grade || null : null,
+          : beneficiary?.id ? undefined : null,
+        grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
         family_status: form.family_status || null,
         hiv_status:
           config.collect_health_data && config.collect_hiv_status && (can as any)?.viewHIVData !== false
             ? (form.hiv_status as any) || null
-            : null,
+            : beneficiary?.id ? undefined : null,
         other_medical_conditions:
           config.collect_health_data
             ? [...form.allergies, ...form.chronic_conditions].filter(Boolean).join('; ') || null
-            : null,
+            : beneficiary?.id ? undefined : null,
         primary_need: form.primary_need || null,
         vulnerability_tags: form.vulnerability_tags.length ? form.vulnerability_tags : null,
         vulnerability_level: form.vulnerability_level || null,
