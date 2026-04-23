@@ -1,20 +1,24 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, UserCheck, UsersRound, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Download, Upload, Clock, Activity, ShieldAlert, Printer, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
+import { useOrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { BeneficiaryEnrollmentForm } from '@/components/beneficiary/BeneficiaryEnrollmentForm';
+import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BeneficiaryAcademicsTab } from '@/components/beneficiary/BeneficiaryAcademicsTab';
 import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploadsTab';
 import { ProgramObservations } from '@/components/programs/ProgramObservations';
 import { generateBeneficiaryReport } from '@/lib/beneficiaryReportGenerator';
+import { formatDisplayDate } from '@/lib/dateUtils';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
@@ -41,6 +45,19 @@ interface Beneficiary {
   gender: string | null;
   photo_url: string | null;
   status: string;
+  is_active?: boolean | null;
+  beneficiary_category?: 'individual' | 'household' | 'group' | 'organisation' | null;
+  primary_need?: string | null;
+  vulnerability_level?: string | null;
+  vulnerability_tags?: string[] | null;
+  registration_source?: string | null;
+  consent_given?: boolean | null;
+  consent_date?: string | null;
+  household_size?: number | null;
+  occupation?: string | null;
+  income_level?: string | null;
+  marital_status?: string | null;
+  disability_status?: string | null;
   location: string | null;
   county: string | null;
   sub_county: string | null;
@@ -71,6 +88,7 @@ interface Beneficiary {
   background_image_url: string | null;
   inactive_date: string | null;
   inactive_reason: string | null;
+  updated_at?: string | null;
   created_at: string;
 }
 
@@ -102,6 +120,7 @@ export default function BeneficiaryProfile() {
   const { isAdmin } = useAuth();
   const { currentOrganization } = useOrganization();
   const { term, termPlural } = useBeneficiaryTerminology();
+  const { config: orgConfig } = useOrgBeneficiaryConfig();
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -112,6 +131,8 @@ export default function BeneficiaryProfile() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('programmes');
+  const [editOpen, setEditOpen] = useState(false);
+  const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
 
   // Quick stats
   const [enrollmentCount, setEnrollmentCount] = useState(0);
@@ -184,6 +205,7 @@ export default function BeneficiaryProfile() {
         .from('beneficiaries')
         .select('*')
         .eq('id', id)
+        .eq('organization_id', currentOrganization?.organization_id)
         .single();
 
       if (beneficiaryError) throw beneficiaryError;
@@ -237,7 +259,7 @@ export default function BeneficiaryProfile() {
   const handleDelete = async () => {
     if (!id) return;
     try {
-      const { error } = await supabase.from('beneficiaries').delete().eq('id', id);
+      const { error } = await supabase.from('beneficiaries').update({ deleted_at: new Date().toISOString() } as any).eq('id', id).eq('organization_id', currentOrganization?.organization_id);
       if (error) throw error;
       toast({ title: "Success", description: `${term} deleted successfully` });
       navigate('/beneficiaries');
@@ -249,7 +271,12 @@ export default function BeneficiaryProfile() {
 
   const handleEdit = () => {
     if (!beneficiary) return;
-    navigate(`/beneficiaries?edit=${beneficiary.id}&type=${beneficiary.beneficiary_type}`);
+    setEditOpen(true);
+  };
+
+  const handleEditSuccess = async () => {
+    await fetchBeneficiaryData();
+    setEditOpen(false);
   };
 
   const handleDownloadReport = async () => {
@@ -293,7 +320,7 @@ export default function BeneficiaryProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1D9E8A]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -301,8 +328,8 @@ export default function BeneficiaryProfile() {
   if (!beneficiary) {
     return (
       <div className="text-center py-12">
-        <Users className="h-12 w-12 mx-auto text-[#8B93A8] mb-4" />
-        <h3 className="text-lg font-medium text-[#1A1F2E]">{term} not found</h3>
+        <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium text-foreground">{term} not found</h3>
         <Button variant="outline" onClick={() => navigate('/beneficiaries')} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to {termPlural}
@@ -312,25 +339,42 @@ export default function BeneficiaryProfile() {
   }
 
   const age = calculateAge(beneficiary.date_of_birth);
+  const category = beneficiary.beneficiary_category || (beneficiary.beneficiary_type === 'group' ? 'group' : 'individual');
+  const CategoryIcon = category === 'household' ? Home : category === 'group' ? Users : category === 'organisation' ? Building2 : User;
+  const statusLabel = beneficiary.inactive_date ? 'Exited' : beneficiary.is_active === false || beneficiary.status !== 'active' ? 'Inactive' : 'Active';
+  const vulnerabilityTags = beneficiary.vulnerability_tags || [];
+  const visibleVulnerabilityTags = showAllVulnerabilityTags ? vulnerabilityTags : vulnerabilityTags.slice(0, 4);
   const familyMembers = [...guardians.map(g => ({ ...g, _type: 'guardian' as const })), ...siblings.map(s => ({ ...s, _type: 'sibling' as const })), ...dependants.map(d => ({ ...d, _type: 'dependant' as const }))];
+  const hasEducationData = !!(beneficiary.academic_level || beneficiary.grade || beneficiary.institution_name);
+  const hasHealthData = !!(beneficiary.hiv_status || beneficiary.other_medical_conditions || beneficiary.has_special_needs);
+  const hasEconomicData = !!(beneficiary.occupation || beneficiary.income_level || beneficiary.household_size || beneficiary.source_of_income);
+  const tabs = [
+    { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
+    { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
+    { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
+    { value: 'observations', label: 'Observations', icon: MessageSquare, show: true, legacy: false },
+    { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data || hasEducationData, legacy: !orgConfig.collect_education_data && hasEducationData },
+    { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
+    { value: 'economic', label: 'Economic', icon: Building2, show: orgConfig.collect_economic_data || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
+  ].filter(tab => tab.show);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FBF9F6' }}>
+    <div className="min-h-screen bg-background">
       <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-5">
         {/* Back nav */}
-        <button onClick={() => navigate('/beneficiaries')} className="inline-flex items-center gap-1.5 text-[13px] text-[#8B93A8] hover:text-[#1A1F2E] transition-colors">
+        <button onClick={() => navigate('/beneficiaries')} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {termPlural}
         </button>
 
         {/* ─── HERO CARD ─── */}
-        <div className="bg-white rounded-[20px] border border-[#E8EAF0] overflow-hidden">
+        <div className="bg-card rounded-[20px] border border-border overflow-hidden">
           {/* Decorative band */}
           <div
             className="h-[80px]"
             style={{
-              backgroundColor: '#F5F0E8',
-              backgroundImage: 'radial-gradient(circle, rgba(201,123,26,0.3) 1px, transparent 1px)',
+              backgroundColor: 'hsl(var(--secondary))',
+              backgroundImage: 'radial-gradient(circle, hsl(var(--warning) / 0.28) 1px, transparent 1px)',
               backgroundSize: '20px 20px',
             }}
           />
@@ -342,23 +386,26 @@ export default function BeneficiaryProfile() {
               <div className="flex items-end gap-4">
                 {/* Avatar */}
                 <div className="relative shrink-0">
-                  <div className="h-[72px] w-[72px] rounded-full border-[4px] border-white overflow-hidden" style={{ boxShadow: '0 0 0 4px white' }}>
+                  <div className="h-[72px] w-[72px] rounded-full border-[4px] border-card overflow-hidden" style={{ boxShadow: '0 0 0 4px hsl(var(--card))' }}>
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white text-lg font-semibold" style={{ background: 'linear-gradient(135deg, #C97B1A, #1D9E8A)' }}>
+                      <div className="h-full w-full flex items-center justify-center text-white text-lg font-semibold" style={{ background: 'var(--gradient-accent)' }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
                   </div>
                   {/* Status dot */}
-                  <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white" style={{ backgroundColor: beneficiary.status === 'active' ? '#1D9E8A' : '#8B93A8' }} />
+                  <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card" className={statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'} />
                 </div>
 
                 {/* Name block */}
                 <div className="pb-1">
-                  <h1 className="text-[22px] font-semibold text-[#1A1F2E] tracking-tight leading-tight">{beneficiary.display_name}</h1>
-                  <p className="text-[12px] text-[#8B93A8] font-mono mt-0.5">
+                  <div className="flex items-center gap-2"><h1 className="text-[22px] font-semibold text-foreground tracking-tight leading-tight">{beneficiary.display_name}</h1><CategoryIcon className="h-4 w-4 text-primary" /></div>
+                  {beneficiary.inactive_date && (
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}</p>
+                  )}
+                  <p className="text-[12px] text-muted-foreground font-mono mt-0.5">
                     {beneficiary.student_id_number ? `ID: ${beneficiary.student_id_number}` : `ID: ${beneficiary.id.slice(0, 8).toUpperCase()}`}
                     {' · '}Registered {new Date(beneficiary.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
@@ -370,14 +417,14 @@ export default function BeneficiaryProfile() {
                 <button
                   onClick={handleDownloadReport}
                   disabled={generatingReport}
-                  className="inline-flex items-center gap-1.5 bg-white border border-[#D4D7E3] text-[#4A5168] rounded-[8px] px-4 py-[7px] text-[13px] hover:bg-[#F5F0E8] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 bg-card border border-border text-foreground rounded-[8px] px-4 py-[7px] text-[13px] hover:bg-secondary transition-colors disabled:opacity-50"
                 >
                   {generatingReport ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
                   Print record
                 </button>
                 <button
                   onClick={handleEdit}
-                  className="inline-flex items-center gap-1.5 bg-[#1D9E8A] text-white rounded-[8px] px-4 py-[7px] text-[13px] font-medium hover:bg-[#178a78] transition-colors"
+                  className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground rounded-[8px] px-4 py-[7px] text-[13px] font-medium hover:bg-primary/90 transition-colors"
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   Edit profile
@@ -385,7 +432,7 @@ export default function BeneficiaryProfile() {
                 {isAdmin && (
                   <button
                     onClick={() => setShowDeleteDialog(true)}
-                    className="inline-flex items-center gap-1.5 bg-white border border-[#E8EAF0] text-[#8B93A8] rounded-[8px] px-3 py-[7px] text-[13px] hover:text-red-600 hover:border-red-200 transition-colors"
+                    className="inline-flex items-center gap-1.5 bg-card border border-border text-muted-foreground rounded-[8px] px-3 py-[7px] text-[13px] hover:text-destructive hover:border-destructive/30 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -395,50 +442,40 @@ export default function BeneficiaryProfile() {
 
             {/* Pills row */}
             <div className="flex flex-wrap gap-2 mt-4">
-              <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#E0F4F1] text-[#0A5449]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#1D9E8A]" />
-                {beneficiary.status}
-              </span>
-              {beneficiary.gender && (
-                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#F5F0E8] text-[#6B5A3E]">
-                  {beneficiary.gender}{age ? ` · Age ${age}` : ''}
-                </span>
-              )}
-              {beneficiary.county && (
-                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#FEF3E2] text-[#7A4A0A]">
-                  <MapPin className="h-3 w-3" />
-                  {beneficiary.county}
-                </span>
-              )}
-              {enrollmentCount > 0 && (
-                <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#E8EFFC] text-[#0C3A7A]">
-                  {enrollmentCount} programme{enrollmentCount !== 1 ? 's' : ''} enrolled
-                </span>
-              )}
-              <span className="inline-flex items-center gap-[5px] px-[10px] py-[4px] rounded-full text-[12px] font-medium bg-[#F5F0E8] text-[#6B5A3E] capitalize">
-                {beneficiary.beneficiary_type === 'student' ? 'Child' : beneficiary.beneficiary_type}
-              </span>
+              <Badge variant={statusLabel === 'Active' ? 'success' : 'secondary'}>{statusLabel}</Badge>
+              <Badge variant="outline" className="capitalize"><CategoryIcon className="h-3 w-3 mr-1" />{category}</Badge>
+              {beneficiary.county && <Badge variant="warning"><MapPin className="h-3 w-3 mr-1" />{beneficiary.county}</Badge>}
+              {beneficiary.primary_need && <Badge variant="info">{beneficiary.primary_need}</Badge>}
+              {beneficiary.vulnerability_level && <Badge variant={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? 'destructive' : beneficiary.vulnerability_level === 'medium' ? 'warning' : 'success'} className="capitalize">{beneficiary.vulnerability_level}</Badge>}
             </div>
+            {vulnerabilityTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {visibleVulnerabilityTags.map(tag => <Badge key={tag} variant="destructive" className="bg-destructive/10 text-destructive border-transparent">{tag}</Badge>)}
+                {!showAllVulnerabilityTags && vulnerabilityTags.length > 4 && (
+                  <button type="button" onClick={() => setShowAllVulnerabilityTags(true)} className="text-[11px] text-primary hover:underline">+{vulnerabilityTags.length - 4} more</button>
+                )}
+              </div>
+            )}
 
             {/* Quick stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 py-4 border-t border-b border-[#E8EAF0]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 py-4 border-t border-b border-border">
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{enrollmentCount}</div>
-                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Programmes</div>
+                <div className="text-[20px] font-semibold text-foreground tracking-tight">{category === 'group' ? (beneficiary.member_count || '—') : category === 'household' ? (beneficiary.household_size || '—') : enrollmentCount}</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'group' ? 'Group members' : category === 'household' ? 'Household members' : 'Programmes'}</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{attendanceCount}</div>
-                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Activities attended</div>
+                <div className="text-[20px] font-semibold text-foreground tracking-tight">{category === 'individual' || category === 'group' ? attendanceCount : enrollmentCount}</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'individual' || category === 'group' ? 'Activities attended' : 'Programmes'}</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-[#1A1F2E] tracking-tight">{getTimeEnrolled()}</div>
-                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Time enrolled</div>
+                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getTimeEnrolled()}</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">Time enrolled</div>
               </div>
               <div className="text-center">
-                <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-[#1D9E8A]' : overallStatus === 'Review' ? 'text-amber-500' : 'text-rose-500'}`}>
-                  {overallStatus}
+                <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-primary' : overallStatus === 'Review' ? 'text-warning' : 'text-destructive'}`}>
+                  {beneficiary.vulnerability_level || overallStatus}
                 </div>
-                <div className="text-[11px] text-[#8B93A8] mt-[2px]">Overall status</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">{beneficiary.vulnerability_level ? 'Vulnerability' : 'Overall status'}</div>
               </div>
             </div>
           </div>
@@ -450,58 +487,85 @@ export default function BeneficiaryProfile() {
           {/* ─── SIDEBAR ─── */}
           <div className="flex flex-col gap-3 order-2 md:order-1">
             {/* Card A: Personal Details */}
-            <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
-              <div className="px-[18px] py-[14px] border-b border-[#E8EAF0] flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-[#1A1F2E]">Personal Details</span>
-                <button onClick={handleEdit} className="text-[11px] text-[#1D9E8A] hover:underline">Edit</button>
+            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-foreground">Personal Details</span>
+                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
               </div>
               <div className="px-[18px] py-[14px]">
                 {[
                   ['Full name', beneficiary.display_name],
-                  ['Date of birth', beneficiary.date_of_birth ? new Date(beneficiary.date_of_birth).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null],
+                  ['Date of birth', formatDisplayDate(beneficiary.date_of_birth)],
                   ['Gender', beneficiary.gender],
                   ['County', beneficiary.county],
                   ['Sub-county', beneficiary.sub_county],
-                  ['Institution', beneficiary.institution_name],
-                  ['Grade / Level', beneficiary.grade ? `${beneficiary.academic_level ? beneficiary.academic_level + ' — ' : ''}${beneficiary.grade}` : null],
-                  ['Disability', beneficiary.has_special_needs ? (beneficiary.special_needs_details || 'Yes') : 'None'],
-                  ['Religion', beneficiary.religion],
+                  ['Village', beneficiary.estate_village],
+                  ['Consent', beneficiary.consent_given ? `✓ ${formatDisplayDate(beneficiary.consent_date)}` : '✗'],
+                  ...(category === 'individual' ? [['Occupation', orgConfig.collect_economic_data ? beneficiary.occupation : null], ['Income level', beneficiary.income_level], ['Marital status', beneficiary.marital_status], ['Religion', beneficiary.religion]] : []),
+                  ...(category === 'household' ? [['Household size', beneficiary.household_size], ['Primary income source', beneficiary.source_of_income]] : []),
+                  ...(category === 'group' ? [['Members', beneficiary.member_count], ['Meeting frequency', beneficiary.group_schedule], ['Leader', beneficiary.leader_name]] : []),
                 ].map(([label, value]) => (
-                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-[#E8EAF0] last:border-0">
-                    <span className="text-[12px] text-[#8B93A8]">{label}</span>
-                    <span className="text-[13px] font-medium text-[#1A1F2E] text-right max-w-[150px] truncate">{value || '—'}</span>
+                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
+                    <span className="text-[12px] text-muted-foreground">{label}</span>
+                    <span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span>
                   </div>
                 ))}
               </div>
             </div>
 
+            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-foreground">Vulnerability profile</span>
+                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
+              </div>
+              <div className="px-[18px] py-[14px] space-y-3">
+                {beneficiary.primary_need && <Badge variant="info">{beneficiary.primary_need}</Badge>}
+                {beneficiary.vulnerability_level && <Badge variant={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? 'destructive' : beneficiary.vulnerability_level === 'medium' ? 'warning' : 'success'} className="capitalize">{beneficiary.vulnerability_level}</Badge>}
+                <div className="flex flex-wrap gap-1.5">
+                  {vulnerabilityTags.length ? vulnerabilityTags.map(tag => <Badge key={tag} variant="destructive" className="bg-destructive/10 text-destructive border-transparent">{tag}</Badge>) : <span className="text-[12px] text-muted-foreground">No tags recorded</span>}
+                </div>
+                <div className="text-[12px] text-muted-foreground">Source: <span className="text-foreground">{beneficiary.registration_source || '—'}</span></div>
+              </div>
+            </div>
+
+            {orgConfig.collect_economic_data && (
+              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-border"><span className="text-[13px] font-semibold text-foreground">Economic profile</span></div>
+                <div className="px-[18px] py-[14px]">
+                  {[["Occupation", beneficiary.occupation], ["Income level", beneficiary.income_level], ["Household size", beneficiary.household_size], ["Income source", beneficiary.source_of_income]].map(([label, value]) => (
+                    <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0"><span className="text-[12px] text-muted-foreground">{label}</span><span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Card B: Health Notes (non-group) */}
             {beneficiary.beneficiary_type !== 'group' && (
-              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0]">
-                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Health Notes</span>
+              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-border">
+                  <span className="text-[13px] font-semibold text-foreground">Health Notes</span>
                 </div>
                 <div className="px-[18px] py-[14px] space-y-3">
                   {/* Medical conditions as chips */}
                   <div>
-                    <p className="text-[12px] text-[#8B93A8] mb-[6px]">Conditions</p>
+                    <p className="text-[12px] text-muted-foreground mb-[6px]">Conditions</p>
                     {beneficiary.other_medical_conditions ? (
                       <div className="flex flex-wrap gap-1">
                         {beneficiary.other_medical_conditions.split(',').map((c, i) => (
-                          <span key={i} className="bg-[#FDE8F0] text-[#7A1A3E] px-[9px] py-[3px] rounded-[6px] text-[11px] font-medium">{c.trim()}</span>
+                          <span key={i} className="bg-destructive/10 text-destructive px-[9px] py-[3px] rounded-[6px] text-[11px] font-medium">{c.trim()}</span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[12px] text-[#8B93A8]">None recorded</span>
+                      <span className="text-[12px] text-muted-foreground">None recorded</span>
                     )}
                   </div>
                   {[
                     ['HIV Status', beneficiary.hiv_status || '—'],
                     ['Special needs', beneficiary.has_special_needs ? 'Yes' : 'No'],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between items-baseline py-[4px] border-b border-[#E8EAF0] last:border-0">
-                      <span className="text-[12px] text-[#8B93A8]">{label}</span>
-                      <span className="text-[13px] font-medium text-[#1A1F2E]">{value}</span>
+                    <div key={label} className="flex justify-between items-baseline py-[4px] border-b border-border last:border-0">
+                      <span className="text-[12px] text-muted-foreground">{label}</span>
+                      <span className="text-[13px] font-medium text-foreground">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -510,10 +574,10 @@ export default function BeneficiaryProfile() {
 
             {/* Card C: Family */}
             {familyMembers.length > 0 && (
-              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0] flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Family</span>
-                  <span className="text-[11px] text-[#8B93A8]">{familyMembers.length} member{familyMembers.length !== 1 ? 's' : ''}</span>
+              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
+                  <span className="text-[13px] font-semibold text-foreground">Family</span>
+                  <span className="text-[11px] text-muted-foreground">{familyMembers.length} member{familyMembers.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div className="px-[18px] py-[10px]">
                   {familyMembers.map((member, i) => {
@@ -526,17 +590,17 @@ export default function BeneficiaryProfile() {
                     const phone = isGuardian ? (member as Guardian).phone : null;
 
                     return (
-                      <div key={`${member._type}-${member.id}-${i}`} className={`flex items-center gap-3 py-[10px] ${i < familyMembers.length - 1 ? 'border-b border-[#E8EAF0]' : ''}`}>
-                        <div className="h-9 w-9 rounded-full bg-[#EDE5D8] text-[#6B5A3E] flex items-center justify-center text-[12px] font-semibold shrink-0">
+                      <div key={`${member._type}-${member.id}-${i}`} className={`flex items-center gap-3 py-[10px] ${i < familyMembers.length - 1 ? 'border-b border-border' : ''}`}>
+                        <div className="h-9 w-9 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-[12px] font-semibold shrink-0">
                           {initials}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium text-[#1A1F2E] truncate">{name}</p>
-                          <p className="text-[11px] text-[#8B93A8] capitalize">{relation}</p>
-                          {phone && <p className="text-[12px] text-[#1D9E8A] font-mono">{phone}</p>}
+                          <p className="text-[13px] font-medium text-foreground truncate">{name}</p>
+                          <p className="text-[11px] text-muted-foreground capitalize">{relation}</p>
+                          {phone && <p className="text-[12px] text-primary font-mono">{phone}</p>}
                         </div>
                         {!isGuardian && (
-                          <button onClick={() => navigate(`/beneficiaries/${member.id}`)} className="text-[#8B93A8] hover:text-[#1D9E8A]">
+                          <button onClick={() => navigate(`/beneficiaries/${member.id}`)} className="text-muted-foreground hover:text-primary">
                             <ChevronRight className="h-3.5 w-3.5" />
                           </button>
                         )}
@@ -549,12 +613,12 @@ export default function BeneficiaryProfile() {
 
             {/* Background narrative */}
             {beneficiary.background_narrative && (
-              <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-[#E8EAF0]">
-                  <span className="text-[13px] font-semibold text-[#1A1F2E]">Background</span>
+              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+                <div className="px-[18px] py-[14px] border-b border-border">
+                  <span className="text-[13px] font-semibold text-foreground">Background</span>
                 </div>
                 <div className="px-[18px] py-[14px]">
-                  <p className="text-[12px] text-[#4A5168] leading-relaxed whitespace-pre-wrap">{beneficiary.background_narrative}</p>
+                  <p className="text-[12px] text-foreground leading-relaxed whitespace-pre-wrap">{beneficiary.background_narrative}</p>
                 </div>
               </div>
             )}
@@ -564,21 +628,15 @@ export default function BeneficiaryProfile() {
           <div className="order-1 md:order-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Warm tab bar */}
-              <div className="bg-[#F5F0E8] rounded-[10px] p-[3px] flex gap-[2px] mb-4 overflow-x-auto no-scrollbar">
-                {[
-                  { value: 'programmes', label: 'Programmes', icon: FolderKanban },
-                  { value: 'history-risk', label: 'History & Risk', icon: Clock },
-                  { value: 'documents', label: 'Documents', icon: FileText },
-                  { value: 'observations', label: 'Observations', icon: MessageSquare },
-                  ...(beneficiary.beneficiary_type === 'student' ? [{ value: 'academics', label: 'Academics', icon: GraduationCap }] : []),
-                ].map(tab => (
+              <div className="bg-secondary rounded-[10px] p-[3px] flex gap-[2px] mb-4 overflow-x-auto no-scrollbar">
+                {tabs.map(tab => (
                   <button
                     key={tab.value}
                     onClick={() => setActiveTab(tab.value)}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-[7px] px-[8px] rounded-[8px] text-[12px] font-medium whitespace-nowrap transition-all ${
                       activeTab === tab.value
-                        ? 'bg-white text-[#1A1F2E]'
-                        : 'text-[#8B93A8] hover:text-[#4A5168]'
+                        ? 'bg-card text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                     style={activeTab === tab.value ? { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } : {}}
                   >
@@ -595,14 +653,14 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: History & Risk */}
               <TabsContent value="history-risk" className="mt-0 space-y-0">
-                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden">
+                <div className="bg-card rounded-[16px] border border-border overflow-hidden">
                   <div className="p-5">
                     <ActivityTimeline beneficiaryId={beneficiary.id} />
                   </div>
                   {/* Divider with label */}
                   <div className="flex items-center gap-3 px-5">
                     <div className="flex-1 h-px bg-[#E8EAF0]" />
-                    <span className="text-[11px] uppercase text-[#8B93A8] tracking-[0.5px] font-medium">Risk Assessment</span>
+                    <span className="text-[11px] uppercase text-muted-foreground tracking-[0.5px] font-medium">Risk Assessment</span>
                     <div className="flex-1 h-px bg-[#E8EAF0]" />
                   </div>
                   <div className="p-5">
@@ -613,22 +671,23 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: Documents */}
               <TabsContent value="documents" className="mt-0">
-                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
                   <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
                 </div>
               </TabsContent>
 
               {/* TAB: Observations */}
               <TabsContent value="observations" className="mt-0">
-                <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
                   <ProgramObservations beneficiaryId={beneficiary.id} />
                 </div>
               </TabsContent>
 
-              {/* TAB: Academics (students only) */}
-              {beneficiary.beneficiary_type === 'student' && (
+              {/* TAB: Education */}
+              {tabs.some(t => t.value === 'academics') && (
                 <TabsContent value="academics" className="mt-0 space-y-3">
-                  <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                  {tabs.find(t => t.value === 'academics')?.legacy && <div className="rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
+                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
                     <AcademicProgressionInfo 
                       beneficiaryId={beneficiary.id}
                       currentGrade={beneficiary.grade}
@@ -636,7 +695,7 @@ export default function BeneficiaryProfile() {
                       status={beneficiary.status}
                     />
                   </div>
-                  <div className="bg-white rounded-[16px] border border-[#E8EAF0] overflow-hidden p-5">
+                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
                     <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
                   </div>
                 </TabsContent>
@@ -645,6 +704,19 @@ export default function BeneficiaryProfile() {
           </div>
         </div>
       </div>
+
+
+      <Sheet open={editOpen} onOpenChange={setEditOpen}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-3xl">
+          <SheetHeader>
+            <SheetTitle>Edit {beneficiary.display_name}</SheetTitle>
+            <SheetDescription>Existing values are prefilled and untouched fields are preserved.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-5 pb-6">
+            <BeneficiaryForm beneficiary={beneficiary} onSuccess={handleEditSuccess} onCancel={() => setEditOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
