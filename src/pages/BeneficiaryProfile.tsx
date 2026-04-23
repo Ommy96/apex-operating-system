@@ -1,10 +1,10 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, Calendar, MapPin, Phone, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import { useOrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
@@ -396,7 +396,7 @@ export default function BeneficiaryProfile() {
                     )}
                   </div>
                   {/* Status dot */}
-                  <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card" className={statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'} />
+                  <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card ${statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'}`} />
                 </div>
 
                 {/* Name block */}
@@ -659,9 +659,9 @@ export default function BeneficiaryProfile() {
                   </div>
                   {/* Divider with label */}
                   <div className="flex items-center gap-3 px-5">
-                    <div className="flex-1 h-px bg-[#E8EAF0]" />
+                    <div className="flex-1 h-px bg-border" />
                     <span className="text-[11px] uppercase text-muted-foreground tracking-[0.5px] font-medium">Risk Assessment</span>
-                    <div className="flex-1 h-px bg-[#E8EAF0]" />
+                    <div className="flex-1 h-px bg-border" />
                   </div>
                   <div className="p-5">
                     <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
@@ -682,6 +682,36 @@ export default function BeneficiaryProfile() {
                   <ProgramObservations beneficiaryId={beneficiary.id} />
                 </div>
               </TabsContent>
+
+
+              {tabs.some(t => t.value === 'health') && (
+                <TabsContent value="health" className="mt-0">
+                  {tabs.find(t => t.value === 'health')?.legacy && <div className="mb-3 rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
+                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5 space-y-3">
+                    <div className="flex items-center justify-between"><h3 className="font-semibold">Health</h3><Button variant="ghost" size="sm" onClick={handleEdit}><Pencil className="h-3.5 w-3.5" /></Button></div>
+                    <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                      <div><span className="text-muted-foreground">Medical notes</span><p>{beneficiary.other_medical_conditions || '—'}</p></div>
+                      <div><span className="text-muted-foreground">HIV status</span><p>{beneficiary.hiv_status || '—'}</p></div>
+                      <div><span className="text-muted-foreground">Special needs</span><p>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'No'}</p></div>
+                    </div>
+                  </div>
+                </TabsContent>
+              )}
+
+              {tabs.some(t => t.value === 'economic') && (
+                <TabsContent value="economic" className="mt-0">
+                  {tabs.find(t => t.value === 'economic')?.legacy && <div className="mb-3 rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
+                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5 space-y-3">
+                    <div className="flex items-center justify-between"><h3 className="font-semibold">Economic profile</h3><Button variant="ghost" size="sm" onClick={handleEdit}><Pencil className="h-3.5 w-3.5" /></Button></div>
+                    <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                      <div><span className="text-muted-foreground">Occupation</span><p>{beneficiary.occupation || '—'}</p></div>
+                      <div><span className="text-muted-foreground">Income level</span><p>{beneficiary.income_level || '—'}</p></div>
+                      <div><span className="text-muted-foreground">Household size</span><p>{beneficiary.household_size || '—'}</p></div>
+                      <div><span className="text-muted-foreground">Income source</span><p>{beneficiary.source_of_income || '—'}</p></div>
+                    </div>
+                  </div>
+                </TabsContent>
+              )}
 
               {/* TAB: Education */}
               {tabs.some(t => t.value === 'academics') && (
