@@ -1569,6 +1569,81 @@ export type Database = {
           },
         ]
       }
+      beneficiary_relationships: {
+        Row: {
+          beneficiary_a_id: string
+          beneficiary_b_id: string
+          created_at: string | null
+          created_by: string | null
+          household_id: string | null
+          id: string
+          is_primary_household_link: boolean | null
+          organization_id: string
+          relationship_label: string | null
+          relationship_type: string
+        }
+        Insert: {
+          beneficiary_a_id: string
+          beneficiary_b_id: string
+          created_at?: string | null
+          created_by?: string | null
+          household_id?: string | null
+          id?: string
+          is_primary_household_link?: boolean | null
+          organization_id: string
+          relationship_label?: string | null
+          relationship_type: string
+        }
+        Update: {
+          beneficiary_a_id?: string
+          beneficiary_b_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          household_id?: string | null
+          id?: string
+          is_primary_household_link?: boolean | null
+          organization_id?: string
+          relationship_label?: string | null
+          relationship_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_relationships_beneficiary_a_id_fkey"
+            columns: ["beneficiary_a_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_relationships_beneficiary_b_id_fkey"
+            columns: ["beneficiary_b_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_relationships_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiary_risk_scores: {
         Row: {
           academic_trend_score: number | null
@@ -3783,6 +3858,62 @@ export type Database = {
           },
         ]
       }
+      dismissed_household_suggestions: {
+        Row: {
+          beneficiary_a_id: string
+          beneficiary_b_id: string
+          created_at: string | null
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          beneficiary_a_id: string
+          beneficiary_b_id: string
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          beneficiary_a_id?: string
+          beneficiary_b_id?: string
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dismissed_household_suggestions_beneficiary_a_id_fkey"
+            columns: ["beneficiary_a_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dismissed_household_suggestions_beneficiary_b_id_fkey"
+            columns: ["beneficiary_b_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dismissed_household_suggestions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dismissed_household_suggestions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_access_logs: {
         Row: {
           action: string
@@ -5428,14 +5559,17 @@ export type Database = {
           created_at: string
           created_by: string | null
           deleted_at: string | null
+          formed_from_relationship_id: string | null
           head_of_household_id: string | null
           household_name: string | null
           household_size: number | null
           id: string
           latitude: number | null
           longitude: number | null
+          member_count: number | null
           notes: string | null
           organization_id: string
+          relationship_formed: boolean | null
           sub_county: string | null
           updated_at: string
           village: string | null
@@ -5446,14 +5580,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          formed_from_relationship_id?: string | null
           head_of_household_id?: string | null
           household_name?: string | null
           household_size?: number | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          member_count?: number | null
           notes?: string | null
           organization_id: string
+          relationship_formed?: boolean | null
           sub_county?: string | null
           updated_at?: string
           village?: string | null
@@ -5464,20 +5601,30 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          formed_from_relationship_id?: string | null
           head_of_household_id?: string | null
           household_name?: string | null
           household_size?: number | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          member_count?: number | null
           notes?: string | null
           organization_id?: string
+          relationship_formed?: boolean | null
           sub_county?: string | null
           updated_at?: string
           village?: string | null
           vulnerability_score?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "households_formed_from_relationship_id_fkey"
+            columns: ["formed_from_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "households_head_of_household_fkey"
             columns: ["head_of_household_id"]
