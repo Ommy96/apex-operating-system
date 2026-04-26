@@ -50,6 +50,7 @@ const FieldMode = lazy(() => import("./pages/FieldMode"));
 const DonorAuth = lazy(() => import("./pages/DonorAuth"));
 const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 const BoardPortal = lazy(() => import("./pages/BoardPortal"));
+const HouseholdProfile = lazy(() => import("./pages/HouseholdProfile"));
 
 // Sprint 2 pages
 const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
@@ -136,6 +137,11 @@ const App = () => (
             <Route path="/beneficiaries/:id" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><BeneficiaryProfile /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/households/:householdId" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><HouseholdProfile /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dynamic/:programId" element={
