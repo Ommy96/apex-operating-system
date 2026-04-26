@@ -1184,7 +1184,9 @@ function Step3Family({
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
 }) {
-  const needsGuardian = ['Single orphan', 'Double orphan', 'Child-headed household', 'Single parent', 'Both parents present'].includes(form.family_status);
+  // Show guardian fields for any family status (or whenever DOB is present so minors are covered)
+  const needsGuardian =
+    !!form.family_status || !!form.date_of_birth;
 
   return (
     <div className="space-y-4">
