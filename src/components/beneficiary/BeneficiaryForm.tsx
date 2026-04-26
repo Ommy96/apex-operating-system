@@ -641,6 +641,20 @@ export function BeneficiaryForm({
 
   return (
     <div className="space-y-5">
+      {/* Age indicator pill */}
+      {(isIndividual || isHousehold) && form.date_of_birth && visibility.age !== null && (
+        <div className="flex items-center gap-2 px-1 text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-1 font-medium">
+            {visibility.age} years old · {visibility.ageGroup.replace('_', ' ')}
+          </span>
+          {visibility.isMinor && (
+            <span className="text-muted-foreground">
+              Minor — guardian information required
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Stepper */}
       <div className="flex items-center justify-between gap-2 px-1">
         <div className="text-xs text-muted-foreground">
