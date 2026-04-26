@@ -1007,6 +1007,48 @@ export default function Beneficiaries() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <RegisterFamilySheet
+        open={registerFamilyOpen}
+        onOpenChange={setRegisterFamilyOpen}
+      />
+
+      <Dialog open={householdsOpen} onOpenChange={setHouseholdsOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Households ({households.length})</DialogTitle>
+          </DialogHeader>
+          {households.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              No households yet. Use "Register family" to create one.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {households.map((h) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  onClick={() => {
+                    setHouseholdsOpen(false);
+                    navigate(`/households/${h.id}`);
+                  }}
+                  className="w-full text-left p-3 rounded-lg border hover:border-primary/40 hover:bg-secondary/30 flex items-center gap-3 transition-colors"
+                >
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Home className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{h.household_name || 'Household'}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {h.member_count ?? 0} members{h.county ? ` · ${h.county}` : ''}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
