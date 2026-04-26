@@ -1233,18 +1233,25 @@ function Step3Family({
 function Step4Education({
   form,
   update,
+  ageLabels,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  ageLabels?: import('@/lib/ageUtils').EducationLabels | null;
 }) {
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-base font-semibold">Education</h3>
+        {ageLabels && (
+          <p className="text-xs text-muted-foreground">
+            Age-appropriate level: <span className="font-medium text-foreground">{ageLabels.levelLabel}</span>
+          </p>
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <Label>Education level</Label>
+          <Label>{ageLabels?.levelLabel || 'Education level'}</Label>
           <Select value={form.academic_level} onValueChange={(v) => update('academic_level', v)}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
