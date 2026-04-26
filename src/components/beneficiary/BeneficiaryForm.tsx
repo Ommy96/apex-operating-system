@@ -431,6 +431,16 @@ export function BeneficiaryForm({
       setStep(0);
       return;
     }
+    if (isIndividual && visibility.isMinor && !form.guardian_name.trim()) {
+      toast({
+        title: 'Guardian required',
+        description: 'Minors must have a guardian name on file.',
+        variant: 'destructive',
+      });
+      const familyStep = visibleSteps.indexOf(2);
+      if (familyStep >= 0) setStep(2);
+      return;
+    }
 
     setIsLoading(true);
     try {
