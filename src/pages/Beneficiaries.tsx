@@ -380,6 +380,25 @@ export default function Beneficiaries() {
         icon={Users}
         actions={
           isAdmin && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5"
+                onClick={() => setHouseholdsOpen(true)}
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Households ({households.length})</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5"
+                onClick={() => setRegisterFamilyOpen(true)}
+              >
+                <UsersRound className="h-4 w-4" />
+                <span className="hidden sm:inline">Register family</span>
+              </Button>
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open) setEditingBeneficiary(null);
@@ -408,6 +427,7 @@ export default function Beneficiaries() {
                 />
               </DialogContent>
             </Dialog>
+            </div>
           )
         }
       />
