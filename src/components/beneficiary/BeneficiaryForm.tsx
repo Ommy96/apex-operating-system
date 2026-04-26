@@ -693,7 +693,7 @@ export function BeneficiaryForm({
           />
         )}
         {step === 2 && <Step3Family form={form} update={update} />}
-        {step === 3 && <Step4Education form={form} update={update} />}
+        {step === 3 && <Step4Education form={form} update={update} ageLabels={visibility.educationLabels} />}
         {step === 4 && (
           <Step5Health form={form} update={update} config={config} can={can} />
         )}
