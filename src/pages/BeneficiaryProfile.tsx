@@ -686,6 +686,11 @@ export default function BeneficiaryProfile() {
                 </div>
               </TabsContent>
 
+              {tabs.some(t => t.value === 'health') && (
+              {/* TAB: Relationships / Family */}
+              <TabsContent value="relationships" className="mt-0">
+                <RelationshipsTab beneficiary={beneficiary as any} />
+              </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
                 <TabsContent value="health" className="mt-0">
