@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
+import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
 
@@ -284,6 +286,9 @@ export function BeneficiaryForm({
       : { ...EMPTY_STATE, beneficiary_category: defaultCategory },
   );
 
+  // Age-aware field visibility
+  const visibility = useFieldVisibility(form.date_of_birth, config);
+
   useEffect(() => {
     if (beneficiary) {
       setForm(createFormStateFromBeneficiary(beneficiary, defaultCategory));
@@ -346,12 +351,12 @@ export function BeneficiaryForm({
     const steps: number[] = [0]; // Identity always
     steps.push(1); // Demographics — always (but body adapts per category)
     if (isIndividual && (config?.collect_household_data || true)) steps.push(2); // Family
-    if (config?.collect_education_data && (isIndividual || isHousehold)) steps.push(3);
-    if (config?.collect_health_data && (isIndividual || isHousehold)) steps.push(4);
+    if (config?.collect_education_data && (isIndividual || isHousehold) && (visibility.showEducation && (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3)))) steps.push(3);
+    if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
     return steps;
-  }, [config, isIndividual, isHousehold]);
+  }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
 
   const currentStepIndex = visibleSteps.indexOf(step);
   const totalSteps = visibleSteps.length;
@@ -592,6 +597,21 @@ export function BeneficiaryForm({
             </p>
           )}
         </div>
+        {isIndividual && (
+          <div className="text-left">
+            <HouseholdSuggestionAlert
+              beneficiary={{
+                id: createdId,
+                display_name: buildDisplayName(),
+                last_name: form.last_name || null,
+                county: form.county || null,
+                sub_county: form.sub_county || null,
+                date_of_birth: form.date_of_birth || null,
+                household_id: null,
+              }}
+            />
+          </div>
+        )}
         <div className="flex justify-center gap-2 pt-2">
           <Button variant="outline" onClick={requestCancel}>
             Close
