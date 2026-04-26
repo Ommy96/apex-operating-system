@@ -1,7 +1,7 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
+import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +55,7 @@ interface Beneficiary {
   consent_given?: boolean | null;
   consent_date?: string | null;
   household_size?: number | null;
+  household_id?: string | null;
   occupation?: string | null;
   income_level?: string | null;
   marital_status?: string | null;
@@ -351,6 +353,7 @@ export default function BeneficiaryProfile() {
   const tabs = [
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
     { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
+    { value: 'relationships', label: 'Family', icon: UsersRound, show: true, legacy: false },
     { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
     { value: 'observations', label: 'Observations', icon: MessageSquare, show: true, legacy: false },
     { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data || hasEducationData, legacy: !orgConfig.collect_education_data && hasEducationData },
@@ -683,6 +686,10 @@ export default function BeneficiaryProfile() {
                 </div>
               </TabsContent>
 
+              {/* TAB: Relationships / Family */}
+              <TabsContent value="relationships" className="mt-0">
+                <RelationshipsTab beneficiary={beneficiary as any} />
+              </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
                 <TabsContent value="health" className="mt-0">

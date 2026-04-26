@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
+import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
 
@@ -284,6 +286,9 @@ export function BeneficiaryForm({
       : { ...EMPTY_STATE, beneficiary_category: defaultCategory },
   );
 
+  // Age-aware field visibility
+  const visibility = useFieldVisibility(form.date_of_birth, config);
+
   useEffect(() => {
     if (beneficiary) {
       setForm(createFormStateFromBeneficiary(beneficiary, defaultCategory));
@@ -346,12 +351,12 @@ export function BeneficiaryForm({
     const steps: number[] = [0]; // Identity always
     steps.push(1); // Demographics — always (but body adapts per category)
     if (isIndividual && (config?.collect_household_data || true)) steps.push(2); // Family
-    if (config?.collect_education_data && (isIndividual || isHousehold)) steps.push(3);
-    if (config?.collect_health_data && (isIndividual || isHousehold)) steps.push(4);
+    if (config?.collect_education_data && (isIndividual || isHousehold) && (visibility.showEducation && (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3)))) steps.push(3);
+    if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
     return steps;
-  }, [config, isIndividual, isHousehold]);
+  }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
 
   const currentStepIndex = visibleSteps.indexOf(step);
   const totalSteps = visibleSteps.length;
@@ -424,6 +429,16 @@ export function BeneficiaryForm({
     }
     if (!validateStep1()) {
       setStep(0);
+      return;
+    }
+    if (isIndividual && visibility.isMinor && !form.guardian_name.trim()) {
+      toast({
+        title: 'Guardian required',
+        description: 'Minors must have a guardian name on file.',
+        variant: 'destructive',
+      });
+      const familyStep = visibleSteps.indexOf(2);
+      if (familyStep >= 0) setStep(2);
       return;
     }
 
@@ -592,6 +607,21 @@ export function BeneficiaryForm({
             </p>
           )}
         </div>
+        {isIndividual && (
+          <div className="text-left">
+            <HouseholdSuggestionAlert
+              beneficiary={{
+                id: createdId,
+                display_name: buildDisplayName(),
+                last_name: form.last_name || null,
+                county: form.county || null,
+                sub_county: form.sub_county || null,
+                date_of_birth: form.date_of_birth || null,
+                household_id: null,
+              }}
+            />
+          </div>
+        )}
         <div className="flex justify-center gap-2 pt-2">
           <Button variant="outline" onClick={requestCancel}>
             Close
@@ -621,6 +651,20 @@ export function BeneficiaryForm({
 
   return (
     <div className="space-y-5">
+      {/* Age indicator pill */}
+      {(isIndividual || isHousehold) && form.date_of_birth && visibility.age !== null && (
+        <div className="flex items-center gap-2 px-1 text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-1 font-medium">
+            {visibility.age} years old · {visibility.ageGroup.replace('_', ' ')}
+          </span>
+          {visibility.isMinor && (
+            <span className="text-muted-foreground">
+              Minor — guardian information required
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Stepper */}
       <div className="flex items-center justify-between gap-2 px-1">
         <div className="text-xs text-muted-foreground">
@@ -659,7 +703,7 @@ export function BeneficiaryForm({
           />
         )}
         {step === 2 && <Step3Family form={form} update={update} />}
-        {step === 3 && <Step4Education form={form} update={update} />}
+        {step === 3 && <Step4Education form={form} update={update} ageLabels={visibility.educationLabels} />}
         {step === 4 && (
           <Step5Health form={form} update={update} config={config} can={can} />
         )}
@@ -1140,7 +1184,9 @@ function Step3Family({
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
 }) {
-  const needsGuardian = ['Single orphan', 'Double orphan', 'Child-headed household', 'Single parent', 'Both parents present'].includes(form.family_status);
+  // Show guardian fields for any family status (or whenever DOB is present so minors are covered)
+  const needsGuardian =
+    !!form.family_status || !!form.date_of_birth;
 
   return (
     <div className="space-y-4">
@@ -1199,18 +1245,25 @@ function Step3Family({
 function Step4Education({
   form,
   update,
+  ageLabels,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  ageLabels?: import('@/lib/ageUtils').EducationLabels | null;
 }) {
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-base font-semibold">Education</h3>
+        {ageLabels && (
+          <p className="text-xs text-muted-foreground">
+            Age-appropriate level: <span className="font-medium text-foreground">{ageLabels.levelLabel}</span>
+          </p>
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <Label>Education level</Label>
+          <Label>{ageLabels?.levelLabel || 'Education level'}</Label>
           <Select value={form.academic_level} onValueChange={(v) => update('academic_level', v)}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>

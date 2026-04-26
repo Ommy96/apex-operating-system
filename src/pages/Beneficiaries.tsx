@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
-  List, LayoutGrid, Download
+  List, LayoutGrid, Download, Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BulkBeneficiaryUpload } from '@/components/beneficiary/BulkBeneficiaryUpload';
+import { RegisterFamilySheet } from '@/components/beneficiary/RegisterFamilySheet';
+import { useHouseholds } from '@/hooks/useBeneficiaryRelationships';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import {
   AlertDialog,
@@ -112,7 +114,10 @@ export default function Beneficiaries() {
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
   const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [registerFamilyOpen, setRegisterFamilyOpen] = useState(false);
+  const [householdsOpen, setHouseholdsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const { data: households = [] } = useHouseholds();
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [programFilter, setProgramFilter] = useState('all');
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -375,6 +380,25 @@ export default function Beneficiaries() {
         icon={Users}
         actions={
           isAdmin && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5"
+                onClick={() => setHouseholdsOpen(true)}
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Households ({households.length})</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5"
+                onClick={() => setRegisterFamilyOpen(true)}
+              >
+                <UsersRound className="h-4 w-4" />
+                <span className="hidden sm:inline">Register family</span>
+              </Button>
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open) setEditingBeneficiary(null);
@@ -403,6 +427,7 @@ export default function Beneficiaries() {
                 />
               </DialogContent>
             </Dialog>
+            </div>
           )
         }
       />
@@ -982,6 +1007,48 @@ export default function Beneficiaries() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <RegisterFamilySheet
+        open={registerFamilyOpen}
+        onOpenChange={setRegisterFamilyOpen}
+      />
+
+      <Dialog open={householdsOpen} onOpenChange={setHouseholdsOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Households ({households.length})</DialogTitle>
+          </DialogHeader>
+          {households.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              No households yet. Use "Register family" to create one.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {households.map((h) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  onClick={() => {
+                    setHouseholdsOpen(false);
+                    navigate(`/households/${h.id}`);
+                  }}
+                  className="w-full text-left p-3 rounded-lg border hover:border-primary/40 hover:bg-secondary/30 flex items-center gap-3 transition-colors"
+                >
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Home className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{h.household_name || 'Household'}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {h.member_count ?? 0} members{h.county ? ` · ${h.county}` : ''}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
