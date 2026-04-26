@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
-  List, LayoutGrid, Download
+  List, LayoutGrid, Download, Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BulkBeneficiaryUpload } from '@/components/beneficiary/BulkBeneficiaryUpload';
+import { RegisterFamilySheet } from '@/components/beneficiary/RegisterFamilySheet';
+import { useHouseholds } from '@/hooks/useBeneficiaryRelationships';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import {
   AlertDialog,
@@ -112,7 +114,10 @@ export default function Beneficiaries() {
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
   const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [registerFamilyOpen, setRegisterFamilyOpen] = useState(false);
+  const [householdsOpen, setHouseholdsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const { data: households = [] } = useHouseholds();
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [programFilter, setProgramFilter] = useState('all');
   const [programs, setPrograms] = useState<Program[]>([]);
