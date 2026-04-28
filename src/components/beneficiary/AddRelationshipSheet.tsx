@@ -15,6 +15,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
+import { searchBeneficiaries } from '@/hooks/useBeneficiarySearch';
 import {
   RELATIONSHIP_PICKER,
   RELATIONSHIP_LABELS,
