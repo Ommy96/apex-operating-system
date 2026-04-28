@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnalyticsKpiCard } from "@/components/analytics/AnalyticsKpiCard";
 import { useBeneficiaryIntelligence } from "@/hooks/useAnalyticsTabsData";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import AcademicPerformanceSection from "@/components/analytics/AcademicPerformanceSection";
 
 const PALETTE = [
   "hsl(var(--primary))",
