@@ -989,6 +989,7 @@ function Step2Demographics({
   config: OrgBeneficiaryConfig;
 }) {
   const cat = form.beneficiary_category;
+  const visibility = useFieldVisibility(form.date_of_birth, config);
 
   return (
     <div className="space-y-4">
