@@ -27,6 +27,7 @@ import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useCreateHousehold, useAddRelationship } from '@/hooks/useBeneficiaryRelationships';
+import { searchBeneficiaries } from '@/hooks/useBeneficiarySearch';
 import { calculateAge } from '@/lib/ageUtils';
 import { toast } from '@/hooks/use-toast';
 import {
