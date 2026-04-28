@@ -148,6 +148,8 @@ export default function BeneficiaryTab({ filters }: { filters: AnalyticsFilters 
           </Card>
         ))}
       </div>
+
+      <AcademicPerformanceSection />
     </div>
   );
 }
