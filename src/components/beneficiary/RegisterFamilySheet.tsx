@@ -201,26 +201,17 @@ export function RegisterFamilySheet({ open, onOpenChange, onSuccess }: RegisterF
     let cancelled = false;
     setSearching(true);
     (async () => {
-      const term = debouncedSearch.replace(/[%,]/g, '');
-      const { data, error } = await supabase
-        .from('beneficiaries')
-        .select(
-          'id, display_name, first_name, last_name, date_of_birth, gender, county, sub_county, household_id, unique_id, photo_url, guardian_phone',
-        )
-        .eq('organization_id', orgId)
-        .is('deleted_at', null)
-        .or(
-          `display_name.ilike.%${term}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%,unique_id.ilike.%${term}%,guardian_phone.ilike.%${term}%`,
-        )
-        .limit(8);
-      if (cancelled) return;
-      if (error) {
+      try {
+        const data = await searchBeneficiaries(debouncedSearch, orgId, [], 10);
+        if (cancelled) return;
+        setSearchResults(data);
+      } catch (error) {
+        if (cancelled) return;
         logger.error('Search failed', error);
         setSearchResults([]);
-      } else {
-        setSearchResults(data || []);
+      } finally {
+        if (!cancelled) setSearching(false);
       }
-      setSearching(false);
     })();
     return () => {
       cancelled = true;
