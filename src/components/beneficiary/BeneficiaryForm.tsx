@@ -989,6 +989,7 @@ function Step2Demographics({
   config: OrgBeneficiaryConfig;
 }) {
   const cat = form.beneficiary_category;
+  const visibility = useFieldVisibility(form.date_of_birth, config);
 
   return (
     <div className="space-y-4">
@@ -1014,19 +1015,21 @@ function Step2Demographics({
               </Select>
             </div>
           )}
-          <div>
-            <Label>Marital status</Label>
-            <Select value={form.marital_status} onValueChange={(v) => update('marital_status', v)}>
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Single">Single</SelectItem>
-                <SelectItem value="Married">Married</SelectItem>
-                <SelectItem value="Widowed">Widowed</SelectItem>
-                <SelectItem value="Divorced">Divorced</SelectItem>
-                <SelectItem value="Separated">Separated</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {visibility.showMaritalStatus && (
+            <div>
+              <Label>Marital status</Label>
+              <Select value={form.marital_status} onValueChange={(v) => update('marital_status', v)}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Married">Married</SelectItem>
+                  <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value="Divorced">Divorced</SelectItem>
+                  <SelectItem value="Separated">Separated</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {config.collect_disability_details && (
             <div>
               <Label>Disability status</Label>

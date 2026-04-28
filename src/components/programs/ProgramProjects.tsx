@@ -14,6 +14,9 @@ import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, B
 import { ProjectForm } from "./ProjectForm";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProjectBeneficiaryCounts } from "@/hooks/useProjectBeneficiaryCount";
+import { Users } from "lucide-react";
 
 interface Project {
   id: string;
@@ -58,6 +61,10 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
     },
     enabled: !!programId,
   });
+
+  const projectIds = (projects || []).map((p) => p.id);
+  const { data: beneficiaryCounts = {}, isLoading: countsLoading } =
+    useProjectBeneficiaryCounts(projectIds);
 
   const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
@@ -158,6 +165,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden sm:table-cell">Location</TableHead>
                   <TableHead className="hidden sm:table-cell">Budget</TableHead>
+                  <TableHead className="hidden lg:table-cell">Beneficiaries</TableHead>
                   <TableHead className="hidden md:table-cell">Timeline</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -201,6 +209,19 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                         </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {countsLoading ? (
+                        <Skeleton className="h-4 w-10" />
+                      ) : (
+                        <div className="flex items-center gap-1 text-sm">
+                          <Users className="h-3 w-3 text-muted-foreground" />
+                          <span className="font-medium">
+                            {beneficiaryCounts[project.id] ?? 0}
+                          </span>
+                          <span className="text-muted-foreground">enrolled</span>
+                        </div>
                       )}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">

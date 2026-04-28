@@ -15,6 +15,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
+import { searchBeneficiaries } from '@/hooks/useBeneficiarySearch';
 import {
   RELATIONSHIP_PICKER,
   RELATIONSHIP_LABELS,
@@ -77,22 +78,27 @@ export function AddRelationshipSheet({
     queryKey: ['beneficiary-search', orgId, searchTerm],
     queryFn: async () => {
       if (!orgId) return [];
-      const q = supabase
-        .from('beneficiaries')
-        .select('id, display_name, photo_url, county, date_of_birth, household_id, last_name')
-        .eq('organization_id', orgId)
-        .neq('id', currentBeneficiary.id)
-        .is('deleted_at', null)
-        .limit(15);
       const term = searchTerm.trim();
-      if (term) {
-        q.ilike('display_name', `%${term}%`);
-      } else {
-        q.order('created_at', { ascending: false });
+      if (term.length < 2) {
+        // Show recent beneficiaries when no search term entered
+        const { data, error } = await supabase
+          .from('beneficiaries')
+          .select('id, display_name, photo_url, county, date_of_birth, household_id, last_name, unique_id, first_name')
+          .eq('organization_id', orgId)
+          .neq('id', currentBeneficiary.id)
+          .is('deleted_at', null)
+          .or('is_active.is.null,is_active.eq.true')
+          .order('created_at', { ascending: false })
+          .limit(15);
+        if (error) return [];
+        return data || [];
       }
-      const { data, error } = await q;
-      if (error) return [];
-      return data || [];
+      try {
+        const data = await searchBeneficiaries(term, orgId, [currentBeneficiary.id], 15);
+        return data;
+      } catch {
+        return [];
+      }
     },
     enabled: open && !!orgId && !prefilledTargetId,
   });

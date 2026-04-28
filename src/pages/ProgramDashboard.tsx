@@ -67,13 +67,16 @@ const ProgramDashboard = () => {
     queryKey: ['program-beneficiaries-count', programId],
     queryFn: async () => {
       if (!programId || !currentOrganization?.organization_id) return 0;
-      const { count, error } = await supabase
+      // Distinct beneficiaries enrolled in this program (any of its projects)
+      const { data, error } = await supabase
         .from('beneficiary_services')
-        .select('id', { count: 'exact' })
+        .select('beneficiary_id')
         .eq('program_id', programId)
-        .eq('organization_id', currentOrganization.organization_id);
+        .eq('organization_id', currentOrganization.organization_id)
+        .eq('status', 'active');
       if (error) throw error;
-      return count || 0;
+      const unique = new Set((data || []).map((r: any) => r.beneficiary_id));
+      return unique.size;
     },
     enabled: !!programId && !!currentOrganization?.organization_id,
   });
