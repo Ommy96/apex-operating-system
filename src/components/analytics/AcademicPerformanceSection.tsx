@@ -1,322 +1,526 @@
-import { useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
-import { 
-  GraduationCap, 
-  TrendingUp, 
-  AlertTriangle,
-  Download,
-  Award,
-  BookOpen,
-  Target,
-  Users
-} from "lucide-react";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { getCardStyles, CardVariant } from "@/lib/cardStyles";
-import { downloadExcel } from "@/lib/downloadUtils";
-import { toast } from "sonner";
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { GraduationCap, Download, Loader2, AlertTriangle, School } from 'lucide-react';
 
-interface AcademicPerformanceSectionProps {
-  academicRecords: any[];
-  beneficiaries: any[];
-  // Keep backward compatibility
-  children?: any[];
-  isLoading: boolean;
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+
+import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useOrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
+import { downloadExcel } from '@/lib/downloadUtils';
+import { calculateAge } from '@/lib/ageUtils';
+import { toast } from '@/hooks/use-toast';
+
+const LEVEL_ORDER = [
+  'Pre Primary',
+  'Lower Primary',
+  'Upper Primary',
+  'Junior Secondary School',
+  'Secondary School',
+  'Senior School',
+  'Special School',
+  'Tertiary',
+];
+
+type Row = {
+  id: string;
+  unique_id: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  display_name: string | null;
+  gender: string | null;
+  date_of_birth: string | null;
+  county: string | null;
+  sub_county: string | null;
+  academic_level: string | null;
+  grade: string | null;
+  institution_name: string | null;
+};
+
+function useAcademicData() {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+  return useQuery({
+    queryKey: ['analytics-academic', orgId],
+    queryFn: async () => {
+      if (!orgId) return [] as Row[];
+      const all: Row[] = [];
+      const batch = 1000;
+      let offset = 0;
+      while (true) {
+        const { data, error } = await supabase
+          .from('beneficiaries')
+          .select(
+            'id, unique_id, first_name, last_name, display_name, gender, date_of_birth, county, sub_county, academic_level, grade, institution_name',
+          )
+          .eq('organization_id', orgId)
+          .is('deleted_at', null)
+          .or('is_active.is.null,is_active.eq.true')
+          .range(offset, offset + batch - 1);
+        if (error) throw error;
+        const rows = (data || []) as Row[];
+        all.push(...rows);
+        if (rows.length < batch) break;
+        offset += batch;
+      }
+      return all;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60 * 1000,
+  });
 }
 
-const CHART_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#ef4444'];
+export default function AcademicPerformanceSection() {
+  const { config } = useOrgBeneficiaryConfig();
+  const { data: rows = [], isLoading } = useAcademicData();
+  const [exportOpen, setExportOpen] = useState(false);
 
-export function AcademicPerformanceSection({ academicRecords, beneficiaries, children, isLoading }: AcademicPerformanceSectionProps) {
-  const people = beneficiaries || children || [];
+  if (config && config.collect_education_data === false) return null;
 
-  // Performance by term (beneficiary_academics uses total_marks/out_of)
-  const termPerformance = useMemo(() => {
-    if (!academicRecords.length) return [];
-    const termStats: Record<string, { totalMarks: number; totalOutOf: number; count: number }> = {};
-    academicRecords.forEach(record => {
-      const term = record.term || 'Unknown';
-      if (!termStats[term]) termStats[term] = { totalMarks: 0, totalOutOf: 0, count: 0 };
-      if (record.total_marks != null) {
-        termStats[term].totalMarks += record.total_marks;
-        termStats[term].totalOutOf += (record.out_of || 100);
-        termStats[term].count++;
-      }
+  // Derived metrics
+  const stats = useMemo(() => {
+    const enrolled = rows.filter((r) => !!r.academic_level).length;
+    const notEnrolled = rows.filter((r) => r.academic_level === null && (r.grade === null || r.grade === '')).length;
+    const unknown = rows.filter((r) => r.academic_level === null && r.grade === null).length;
+    return { enrolled, notEnrolled, unknown, total: rows.length };
+  }, [rows]);
+
+  const levelData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    rows.forEach((r) => {
+      if (!r.academic_level) return;
+      counts[r.academic_level] = (counts[r.academic_level] || 0) + 1;
     });
-    return Object.entries(termStats)
-      .map(([term, stats]) => ({
-        term,
-        average: stats.totalOutOf > 0 ? Math.round((stats.totalMarks / stats.totalOutOf) * 100) : 0,
-        count: stats.count
+    const ordered = LEVEL_ORDER.filter((l) => counts[l]).map((l) => ({ name: l, value: counts[l] }));
+    Object.keys(counts).filter((l) => !LEVEL_ORDER.includes(l)).forEach((l) =>
+      ordered.push({ name: l, value: counts[l] }),
+    );
+    return ordered;
+  }, [rows]);
+
+  const topSchools = useMemo(() => {
+    const map: Record<string, { name: string; count: number; ages: number[] }> = {};
+    rows.forEach((r) => {
+      if (!r.institution_name) return;
+      if (!map[r.institution_name]) map[r.institution_name] = { name: r.institution_name, count: 0, ages: [] };
+      map[r.institution_name].count += 1;
+      const age = calculateAge(r.date_of_birth);
+      if (age !== null) map[r.institution_name].ages.push(age);
+    });
+    return Object.values(map)
+      .map((s) => ({
+        name: s.name,
+        count: s.count,
+        avgAge: s.ages.length ? Math.round(s.ages.reduce((a, b) => a + b, 0) / s.ages.length) : null,
       }))
-      .sort((a, b) => a.term.localeCompare(b.term));
-  }, [academicRecords]);
-
-  // Top performers by average marks
-  const topPerformers = useMemo(() => {
-    if (!academicRecords.length || !people.length) return [];
-    const scores: Record<string, { totalMarks: number; totalOutOf: number; count: number }> = {};
-    academicRecords.forEach(record => {
-      const id = record.beneficiary_id;
-      if (!scores[id]) scores[id] = { totalMarks: 0, totalOutOf: 0, count: 0 };
-      if (record.total_marks != null) {
-        scores[id].totalMarks += record.total_marks;
-        scores[id].totalOutOf += (record.out_of || 100);
-        scores[id].count++;
-      }
-    });
-    return Object.entries(scores)
-      .map(([id, stats]) => {
-        const person = people.find(p => p.id === id);
-        const name = person?.display_name || (person ? `${person.first_name} ${person.last_name}` : 'Unknown');
-        return {
-          id, name,
-          average: stats.totalOutOf > 0 ? Math.round((stats.totalMarks / stats.totalOutOf) * 100) : 0,
-          recordCount: stats.count
-        };
-      })
-      .sort((a, b) => b.average - a.average)
+      .sort((a, b) => b.count - a.count)
       .slice(0, 10);
-  }, [academicRecords, people]);
+  }, [rows]);
 
-  // At-risk (below 40%)
-  const atRiskStudents = useMemo(() => {
-    if (!academicRecords.length || !people.length) return [];
-    const scores: Record<string, { totalMarks: number; totalOutOf: number; count: number }> = {};
-    academicRecords.forEach(record => {
-      const id = record.beneficiary_id;
-      if (!scores[id]) scores[id] = { totalMarks: 0, totalOutOf: 0, count: 0 };
-      if (record.total_marks != null) {
-        scores[id].totalMarks += record.total_marks;
-        scores[id].totalOutOf += (record.out_of || 100);
-        scores[id].count++;
-      }
-    });
-    return Object.entries(scores)
-      .map(([id, stats]) => {
-        const person = people.find(p => p.id === id);
-        return {
-          id,
-          name: person?.display_name || 'Unknown',
-          institution: person?.institution_name || 'N/A',
-          average: stats.totalOutOf > 0 ? Math.round((stats.totalMarks / stats.totalOutOf) * 100) : 0,
-          recordCount: stats.count
-        };
-      })
-      .filter(s => s.average < 40 && s.recordCount > 0)
-      .sort((a, b) => a.average - b.average)
-      .slice(0, 10);
-  }, [academicRecords, people]);
-
-  // Grade distribution
-  const gradeDistribution = useMemo(() => {
+  const gradeData = useMemo(() => {
     const counts: Record<string, number> = {};
-    academicRecords.forEach(r => {
-      const grade = r.overall_grade || 'Ungraded';
-      counts[grade] = (counts[grade] || 0) + 1;
+    rows.forEach((r) => {
+      if (!r.grade) return;
+      counts[r.grade] = (counts[r.grade] || 0) + 1;
     });
-    return Object.entries(counts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [academicRecords]);
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }, [rows]);
 
-  // Academic level distribution from beneficiaries
-  const academicLevelDist = useMemo(() => {
-    const counts: Record<string, number> = {};
-    people.filter(p => p.beneficiary_type === 'student').forEach(p => {
-      const level = p.academic_level || 'Not Specified';
-      counts[level] = (counts[level] || 0) + 1;
+  const genderGapData = useMemo(() => {
+    const buckets: Record<string, { name: string; Female: number; Male: number; Other: number }> = {};
+    rows.forEach((r) => {
+      if (!r.academic_level) return;
+      const lvl = r.academic_level;
+      if (!buckets[lvl]) buckets[lvl] = { name: lvl, Female: 0, Male: 0, Other: 0 };
+      const g = (r.gender || '').toLowerCase();
+      if (g === 'female') buckets[lvl].Female += 1;
+      else if (g === 'male') buckets[lvl].Male += 1;
+      else buckets[lvl].Other += 1;
     });
-    return Object.entries(counts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [people]);
+    return LEVEL_ORDER.filter((l) => buckets[l]).map((l) => buckets[l]);
+  }, [rows]);
 
-  const handleExport = () => {
-    if (!academicRecords.length) { toast.error("No academic records to export"); return; }
-    const exportData = academicRecords.map(record => {
-      const person = people.find(p => p.id === record.beneficiary_id);
-      return {
-        "Name": person?.display_name || 'Unknown',
-        "Institution": person?.institution_name || 'N/A',
-        "Academic Year": record.academic_year,
-        "Term": record.term,
-        "Total Marks": record.total_marks,
-        "Out Of": record.out_of,
-        "Position": record.position || 'N/A',
-        "Overall Grade": record.overall_grade || 'N/A',
-        "Remarks": record.remarks || ''
-      };
-    });
-    downloadExcel(exportData, 'academic_performance_report', 'Academic Performance');
-    toast.success("Academic performance report exported");
-  };
+  // Gender gap warning: Female% in Secondary < Female% in Upper Primary by >15pp
+  const genderAlert = useMemo(() => {
+    const upperPri = genderGapData.find((d) => d.name === 'Upper Primary');
+    const sec = genderGapData.find((d) => d.name === 'Secondary School');
+    if (!upperPri || !sec) return null;
+    const upTotal = upperPri.Female + upperPri.Male;
+    const secTotal = sec.Female + sec.Male;
+    if (!upTotal || !secTotal) return null;
+    const upPct = (upperPri.Female / upTotal) * 100;
+    const secPct = (sec.Female / secTotal) * 100;
+    if (upPct - secPct > 15) {
+      return `Girls' secondary enrollment (${secPct.toFixed(0)}%) is significantly lower than upper primary (${upPct.toFixed(0)}%). Consider targeted retention support.`;
+    }
+    return null;
+  }, [genderGapData]);
 
   if (isLoading) {
-    return (<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>);
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <GraduationCap className="h-4 w-4" /> Academic Performance Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-48 w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
-  const totalRecords = academicRecords.length;
-  const uniqueStudents = new Set(academicRecords.map(r => r.beneficiary_id)).size;
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-primary" />
+          <h2 className="text-base font-semibold">Academic Performance Analysis</h2>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
+          <Download className="mr-2 h-4 w-4" /> Export Academic Results
+        </Button>
+      </div>
+
+      {/* Enrollment overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatTile label="In a level" value={stats.enrolled} tone="primary" />
+        <StatTile label="Total beneficiaries" value={stats.total} tone="muted" />
+        <StatTile label="Unknown level" value={stats.unknown} tone="warning" />
+        <StatTile
+          label="% with level recorded"
+          value={stats.total ? `${Math.round((stats.enrolled / stats.total) * 100)}%` : '—'}
+          tone="muted"
+        />
+      </div>
+
+      {/* Level distribution */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Level distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {levelData.length === 0 ? (
+            <p className="py-10 text-center text-xs text-muted-foreground">No academic-level data recorded.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={levelData} layout="vertical" margin={{ left: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={150} />
+                <Tooltip />
+                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Schools + grades */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <School className="h-4 w-4" /> Top institutions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topSchools.length === 0 ? (
+              <p className="py-10 text-center text-xs text-muted-foreground">No institutions recorded.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-xs text-muted-foreground">
+                      <th className="text-left py-2 pr-2">#</th>
+                      <th className="text-left py-2 pr-2">School</th>
+                      <th className="text-right py-2 pr-2">Enrolled</th>
+                      <th className="text-right py-2">Avg age</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topSchools.map((s, i) => (
+                      <tr key={s.name} className="border-b last:border-0">
+                        <td className="py-2 pr-2 text-muted-foreground">{i + 1}</td>
+                        <td className="py-2 pr-2">{s.name}</td>
+                        <td className="py-2 pr-2 text-right font-medium">{s.count}</td>
+                        <td className="py-2 text-right">{s.avgAge ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Grade / class distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {gradeData.length === 0 ? (
+              <p className="py-10 text-center text-xs text-muted-foreground">No grade data recorded.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={gradeData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gender education gap */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Gender gap by academic level</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {genderGapData.length === 0 ? (
+            <p className="py-10 text-center text-xs text-muted-foreground">Not enough data to compare.</p>
+          ) : (
+            <>
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={genderGapData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="Female" fill="hsl(var(--primary))" />
+                  <Bar dataKey="Male" fill="hsl(var(--accent))" />
+                  <Bar dataKey="Other" fill="hsl(var(--muted-foreground))" />
+                </BarChart>
+              </ResponsiveContainer>
+              {genderAlert && (
+                <div className="mt-3 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>{genderAlert}</span>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} rows={rows} />
+    </div>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  tone = 'muted',
+}: {
+  label: string;
+  value: number | string;
+  tone?: 'primary' | 'warning' | 'muted';
+}) {
+  const toneClasses =
+    tone === 'primary'
+      ? 'border-primary/30 bg-primary/5'
+      : tone === 'warning'
+        ? 'border-amber-300/40 bg-amber-50 dark:bg-amber-950/20'
+        : 'border-border bg-card';
+  return (
+    <div className={`rounded-lg border ${toneClasses} p-3`}>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function ExportDialog({
+  open,
+  onOpenChange,
+  rows,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  rows: Row[];
+}) {
+  const [format, setFormat] = useState<'excel' | 'csv' | 'pdf'>('excel');
+  const [includeIndividual, setIncludeIndividual] = useState(true);
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const requiresConsent = includeIndividual && format !== 'pdf';
+
+  async function handleExport() {
+    if (requiresConsent && !consent) {
+      toast({ title: 'Consent required', description: 'Please confirm secure handling.', variant: 'destructive' });
+      return;
+    }
+    setBusy(true);
+    try {
+      if (format === 'pdf') {
+        // Lightweight PDF export via window.print on the analytics container.
+        // Avoids pulling jsPDF/html2canvas into this bundle.
+        window.print();
+      } else if (includeIndividual) {
+        const data = rows.map((r) => ({
+          unique_id: r.unique_id,
+          first_name: r.first_name,
+          last_name: r.last_name,
+          gender: r.gender,
+          date_of_birth: r.date_of_birth,
+          county: r.county,
+          sub_county: r.sub_county,
+          institution_name: r.institution_name,
+          academic_level: r.academic_level,
+          grade: r.grade,
+        }));
+        if (format === 'excel') {
+          downloadExcel(data, `academic-performance-${new Date().toISOString().slice(0, 10)}.xlsx`, 'Beneficiaries');
+        } else {
+          // CSV
+          const headers = Object.keys(data[0] || { unique_id: '' });
+          const csv = [
+            headers.join(','),
+            ...data.map((row) =>
+              headers
+                .map((h) => {
+                  const v = (row as any)[h];
+                  if (v === null || v === undefined) return '';
+                  const s = String(v).replace(/"/g, '""');
+                  return /[,"\n]/.test(s) ? `"${s}"` : s;
+                })
+                .join(','),
+            ),
+          ].join('\n');
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `academic-performance-${new Date().toISOString().slice(0, 10)}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } else {
+        // Aggregate-only export
+        const agg = Object.values(
+          rows.reduce<Record<string, { academic_level: string; count: number }>>((acc, r) => {
+            const key = r.academic_level || 'Unknown';
+            if (!acc[key]) acc[key] = { academic_level: key, count: 0 };
+            acc[key].count += 1;
+            return acc;
+          }, {}),
+        );
+        downloadExcel(agg, `academic-summary-${new Date().toISOString().slice(0, 10)}.xlsx`, 'Summary');
+      }
+      toast({ title: 'Export ready', description: 'Your file has started downloading.' });
+      onOpenChange(false);
+      setConsent(false);
+    } catch (err) {
+      toast({ title: 'Export failed', description: String(err), variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className={`${getCardStyles(0 as CardVariant)} border-l-4 border-l-blue-500`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Total Records</p>
-                <p className="text-2xl font-bold mt-1">{totalRecords}</p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Export Academic Results</DialogTitle>
+          <DialogDescription>Choose a format and what to include.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Format</Label>
+            <RadioGroup value={format} onValueChange={(v) => setFormat(v as any)} className="mt-2 space-y-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="excel" id="fmt-xlsx" />
+                <Label htmlFor="fmt-xlsx" className="font-normal">Excel spreadsheet (raw data)</Label>
               </div>
-              <div className="p-2 rounded-lg bg-blue-500/10"><BookOpen className="h-5 w-5 text-blue-500" /></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={`${getCardStyles(1 as CardVariant)} border-l-4 border-l-emerald-500`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Students Tracked</p>
-                <p className="text-2xl font-bold mt-1">{uniqueStudents}</p>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="csv" id="fmt-csv" />
+                <Label htmlFor="fmt-csv" className="font-normal">CSV (raw data)</Label>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-500/10"><Users className="h-5 w-5 text-emerald-500" /></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={`${getCardStyles(2 as CardVariant)} border-l-4 border-l-amber-500`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Top Performers</p>
-                <p className="text-2xl font-bold mt-1">{topPerformers.filter(s => s.average >= 70).length}</p>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pdf" id="fmt-pdf" />
+                <Label htmlFor="fmt-pdf" className="font-normal">PDF (printable summary)</Label>
               </div>
-              <div className="p-2 rounded-lg bg-amber-500/10"><Award className="h-5 w-5 text-amber-500" /></div>
+            </RadioGroup>
+          </div>
+
+          {format !== 'pdf' && (
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="include-ind"
+                checked={includeIndividual}
+                onCheckedChange={(c) => setIncludeIndividual(!!c)}
+              />
+              <Label htmlFor="include-ind" className="font-normal text-sm leading-snug">
+                Include individual beneficiary list (name, school, grade, level)
+              </Label>
             </div>
-          </CardContent>
-        </Card>
-        <Card className={`${getCardStyles(3 as CardVariant)} border-l-4 border-l-red-500`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">At-Risk Students</p>
-                <p className="text-2xl font-bold mt-1">{atRiskStudents.length}</p>
+          )}
+
+          {requiresConsent && (
+            <div className="rounded-md border border-amber-300/40 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
+              <p className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <span>
+                  This export contains individual beneficiary data. Handle securely and in line with the Kenya Data
+                  Protection Act 2019. Only share with authorised staff.
+                </span>
+              </p>
+              <div className="mt-3 flex items-start gap-2">
+                <Checkbox id="consent" checked={consent} onCheckedChange={(c) => setConsent(!!c)} />
+                <Label htmlFor="consent" className="font-normal text-xs leading-snug">
+                  I confirm this export will be handled securely.
+                </Label>
               </div>
-              <div className="p-2 rounded-lg bg-red-500/10"><AlertTriangle className="h-5 w-5 text-red-500" /></div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleExport} variant="outline"><Download className="h-4 w-4 mr-2" />Export Academic Results</Button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Term Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" />Performance by Term</CardTitle>
-            <CardDescription>Average scores across terms</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {termPerformance.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={termPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="term" className="text-xs" />
-                  <YAxis domain={[0, 100]} className="text-xs" />
-                  <Tooltip />
-                  <Bar dataKey="average" radius={[4, 4, 0, 0]}>
-                    {termPerformance.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground"><BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No academic records available</p></div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Academic Level Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5 text-primary" />Academic Level Distribution</CardTitle>
-            <CardDescription>Students by academic level</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {academicLevelDist.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={academicLevelDist}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" className="text-xs" angle={-45} textAnchor="end" height={80} />
-                  <YAxis className="text-xs" />
-                  <Tooltip />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {academicLevelDist.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground"><p>No student data available</p></div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top Performers */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5 text-amber-500" />Top Performers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px]">
-              {topPerformers.length > 0 ? (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Rank</TableHead><TableHead>Name</TableHead><TableHead className="text-right">Average</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {topPerformers.map((s, i) => (
-                      <TableRow key={s.id}>
-                        <TableCell>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</TableCell>
-                        <TableCell className="font-medium">{s.name}</TableCell>
-                        <TableCell className="text-right"><Badge variant={s.average >= 80 ? "default" : "secondary"}>{s.average}%</Badge></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground"><p>No performance data available</p></div>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        {/* At-Risk */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-red-500" />At-Risk Students</CardTitle>
-            <CardDescription>Below 40% average performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px]">
-              {atRiskStudents.length > 0 ? (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Institution</TableHead><TableHead className="text-right">Average</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {atRiskStudents.map(s => (
-                      <TableRow key={s.id}>
-                        <TableCell className="font-medium">{s.name}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{s.institution}</TableCell>
-                        <TableCell className="text-right"><Badge variant="destructive">{s.average}%</Badge></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground"><Award className="h-12 w-12 mx-auto mb-4 opacity-50" /><p>No at-risk students identified</p></div>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+            Cancel
+          </Button>
+          <Button onClick={handleExport} disabled={busy || (requiresConsent && !consent)}>
+            {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Generate export
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
