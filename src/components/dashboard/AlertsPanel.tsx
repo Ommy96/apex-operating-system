@@ -30,7 +30,8 @@ export function AlertsPanel() {
         .from("beneficiaries")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
-        .eq("status", "active");
+        .eq("status", "active")
+        .is("deleted_at", null);
 
       const { count: fundedCount } = await supabase
         .from("beneficiary_donors")
