@@ -268,7 +268,7 @@ export function useAutomation() {
     }) => {
       // Generate report data by aggregating org stats
       const [beneficiaries, programs, expenses] = await Promise.all([
-        supabase.from("beneficiaries").select("id, display_name, status, beneficiary_type", { count: "exact" }).eq("organization_id", orgId!),
+        supabase.from("beneficiaries").select("id, display_name, status, beneficiary_type", { count: "exact" }).eq("organization_id", orgId!).is("deleted_at", null),
         supabase.from("programs").select("id, name, is_active", { count: "exact" }).eq("organization_id", orgId!),
         supabase.from("expenses").select("amount, status, expense_date").eq("organization_id", orgId!).gte("expense_date", values.report_period_start).lte("expense_date", values.report_period_end),
       ]);
