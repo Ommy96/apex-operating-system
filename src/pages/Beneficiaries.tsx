@@ -183,6 +183,7 @@ export default function Beneficiaries() {
           .from('beneficiaries')
           .select('*')
           .eq('organization_id', organizationId)
+          .is('deleted_at', null)
           .order('display_name', { ascending: true })
           .range(offset, offset + batchSize - 1);
 
