@@ -26,7 +26,7 @@ export function QuickNavCards() {
     queryFn: async () => {
       if (!orgId) return null;
       const [beneficiaries, programs, projects, donors, expenses] = await Promise.all([
-        supabase.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("status", "active"),
+        supabase.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("status", "active").is("deleted_at", null),
         supabase.from("programs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true),
         supabase.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
         supabase.from("beneficiary_donors").select("id", { count: "exact", head: true }).eq("organization_id", orgId),

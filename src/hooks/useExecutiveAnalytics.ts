@@ -61,7 +61,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       const { data } = await supabase
         .from('beneficiaries')
         .select('id, display_name, first_name, last_name, beneficiary_type, gender, date_of_birth, county, sub_county, location, estate_village, status, created_at, created_by, has_special_needs, hiv_status, other_medical_conditions, academic_level, grade, institution_name')
-        .eq('organization_id', orgId);
+        .eq('organization_id', orgId)
+        .is('deleted_at', null);
       return data || [];
     },
     enabled: !!orgId,

@@ -39,7 +39,8 @@ export function useIndicatorComputation(programId?: string, projectId?: string) 
         .from('beneficiaries')
         .select('id', { count: 'exact' })
         .eq('organization_id', orgId)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .is('deleted_at', null);
       const { count: totalBeneficiaries } = await beneficiaryQuery;
 
       computedValues.push({
@@ -57,7 +58,8 @@ export function useIndicatorComputation(programId?: string, projectId?: string) 
           .select('id', { count: 'exact' })
           .eq('organization_id', orgId)
           .eq('beneficiary_type', type)
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .is('deleted_at', null);
         
         computedValues.push({
           indicatorId: `beneficiaries_${type}`,
@@ -141,7 +143,8 @@ export function useIndicatorComputation(programId?: string, projectId?: string) 
           .select('id', { count: 'exact' })
           .eq('organization_id', orgId)
           .eq('gender', gender)
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .is('deleted_at', null);
         
         computedValues.push({
           indicatorId: `beneficiaries_${gender.toLowerCase()}`,

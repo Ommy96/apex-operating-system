@@ -29,6 +29,7 @@ export function ActivityFeed() {
           .from("beneficiaries")
           .select("id, display_name, created_at")
           .eq("organization_id", orgId)
+          .is("deleted_at", null)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase

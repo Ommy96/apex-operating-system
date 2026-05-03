@@ -131,6 +131,7 @@ const Dashboard = () => {
         .from('beneficiaries')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', orgId)
+        .is('deleted_at', null)
         .gte('created_at', startOfMonth);
       return count || 0;
     },
@@ -244,7 +245,7 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!orgId) return { beneficiaries: 0, programmes: 0, projects: 0, grantPortfolio: 0, staff: 0, complaints: 0 };
       const [ben, prog, proj, grants, staff, complaints] = await Promise.all([
-        supabase.from('beneficiaries').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active'),
+        supabase.from('beneficiaries').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').is('deleted_at', null),
         supabase.from('programs').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('is_active', true),
         supabase.from('projects').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
         supabase.from('grants').select('grant_amount').eq('organization_id', orgId).eq('status', 'active'),
@@ -274,6 +275,7 @@ const Dashboard = () => {
         .select('county')
         .eq('organization_id', orgId)
         .eq('status', 'active')
+        .is('deleted_at', null)
         .not('county', 'is', null);
       const counts: Record<string, number> = {};
       (data || []).forEach(b => { if (b.county) counts[b.county] = (counts[b.county] || 0) + 1; });
