@@ -55,11 +55,11 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
+              <Button
                 onClick={() => navigate('/donor/login')}
                 variant="outline"
                 size="sm"
-                className="border-white/15 text-white/80 hover:bg-white/5 hover:text-white"
+                className="bg-transparent border-white/20 text-white/80 hover:bg-white/10 hover:text-white whitespace-nowrap"
               >
                 Donor Portal
               </Button>
