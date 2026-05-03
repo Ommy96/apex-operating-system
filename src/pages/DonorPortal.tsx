@@ -43,6 +43,11 @@ export default function DonorPortal() {
   // Not signed in at all → send to donor login
   if (!user) return <Navigate to="/donor/login" replace />;
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/donor/login');
+  };
+
   // Signed in but no linked donor account → show a friendly explanation
   // instead of silently bouncing to the login screen.
   if (!isDonor) {
@@ -77,11 +82,6 @@ export default function DonorPortal() {
       </div>
     );
   }
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/donor/login');
-  };
 
   const handleViewBeneficiary = async (beneficiaryId: string) => {
     setSelectedBeneficiary(beneficiaryId);
