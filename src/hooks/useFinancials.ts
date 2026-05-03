@@ -506,7 +506,8 @@ export function useFinancials() {
         .from("beneficiaries")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId!)
-        .eq("status", "active");
+        .eq("status", "active")
+        .is("deleted_at", null);
       if (e3) throw e3;
 
       // Calculate per-program costs
