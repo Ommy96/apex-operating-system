@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Heart, Users, FileText, Download, GraduationCap, MapPin,
   Calendar, LogOut, User, ChevronRight, School, Building2,
-  BookOpen, TrendingUp, Eye,
+  BookOpen, TrendingUp, Eye, ArrowLeft, ShieldAlert,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,13 +40,48 @@ export default function DonorPortal() {
     );
   }
 
+  // Not signed in at all → send to donor login
   if (!user) return <Navigate to="/donor/login" replace />;
-  if (!isDonor) return <Navigate to="/donor/login" replace />;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/donor/login');
   };
+
+  // Signed in but no linked donor account → show a friendly explanation
+  // instead of silently bouncing to the login screen.
+  if (!isDonor) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
+        <Card className="max-w-md w-full border-border/50 shadow-lg">
+          <CardContent className="p-8 text-center space-y-5">
+            <div className="h-14 w-14 rounded-2xl bg-warning/10 flex items-center justify-center mx-auto">
+              <ShieldAlert className="h-7 w-7 text-warning" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-xl font-bold text-foreground">No donor account linked</h1>
+              <p className="text-sm text-muted-foreground">
+                You're signed in as <span className="font-medium text-foreground">{user.email}</span>,
+                but this email isn't linked to a donor account in this organization.
+              </p>
+              <p className="text-xs text-muted-foreground pt-2">
+                If you're a donor, ask the organization admin to provision your portal access.
+                If you're a staff member, use the main app instead.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={() => navigate('/')} className="w-full">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Go to main app
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" /> Sign out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleViewBeneficiary = async (beneficiaryId: string) => {
     setSelectedBeneficiary(beneficiaryId);
