@@ -90,7 +90,8 @@ export function useProgramEnrollmentStats() {
         .from('beneficiaries')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .is('deleted_at', null);
       if (error) throw error;
       return count || 0;
     },
