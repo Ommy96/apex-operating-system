@@ -160,7 +160,7 @@ export function useOrgRiskSummary() {
         { data: allVisitations },
         { data: programs },
       ] = await Promise.all([
-        supabase.from("beneficiaries").select("id, display_name, status, photo_url, beneficiary_type").eq("organization_id", orgId).eq("status", "active"),
+        supabase.from("beneficiaries").select("id, display_name, status, photo_url, beneficiary_type").eq("organization_id", orgId).eq("status", "active").is("deleted_at", null),
         supabase.from("beneficiary_donors").select("beneficiary_id, amount_received").eq("organization_id", orgId),
         supabase.from("beneficiary_services").select("beneficiary_id, status").eq("organization_id", orgId),
         supabase.from("beneficiary_progression_history").select("beneficiary_id, is_repeating").eq("organization_id", orgId),
