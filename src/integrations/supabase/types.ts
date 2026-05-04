@@ -6867,8 +6867,11 @@ export type Database = {
           custom_fields: Json
           custom_vulnerability_tags: Json
           id: string
+          id_prefix: string | null
+          minor_age_threshold: number | null
           org_type: string
           organization_id: string
+          require_guardian_for_minors: boolean | null
           updated_at: string
         }
         Insert: {
@@ -6886,8 +6889,11 @@ export type Database = {
           custom_fields?: Json
           custom_vulnerability_tags?: Json
           id?: string
+          id_prefix?: string | null
+          minor_age_threshold?: number | null
           org_type?: string
           organization_id: string
+          require_guardian_for_minors?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -6905,8 +6911,11 @@ export type Database = {
           custom_fields?: Json
           custom_vulnerability_tags?: Json
           id?: string
+          id_prefix?: string | null
+          minor_age_threshold?: number | null
           org_type?: string
           organization_id?: string
+          require_guardian_for_minors?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -6921,6 +6930,51 @@ export type Database = {
             foreignKeyName: "org_beneficiary_config_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: true
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_notification_prefs: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          organization_id: string
+          preference_key: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          organization_id: string
+          preference_key: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          organization_id?: string
+          preference_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_notification_prefs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_notification_prefs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
           },
@@ -7044,38 +7098,78 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          allow_export_non_admin: boolean | null
+          annual_returns_uploaded_at: string | null
+          annual_returns_url: string | null
           base_currency: string | null
+          budget_approval_threshold: number | null
           country: string | null
           county: string | null
           created_at: string
+          data_protection_policy_uploaded_at: string | null
+          data_protection_policy_url: string | null
+          default_indicator_frequency: string | null
+          default_narrative_sections: Json | null
+          default_new_staff_role: string | null
           description: string | null
+          dpo_email: string | null
+          dpo_name: string | null
           email: string | null
+          email_from_name: string | null
+          email_reply_to: string | null
+          expense_approval_threshold: number | null
           features_enabled: Json | null
+          field_officer_sees_all: boolean | null
+          financial_audit_uploaded_at: string | null
+          financial_audit_url: string | null
+          fiscal_year_start_month: number | null
           id: string
+          incorporation_cert_uploaded_at: string | null
+          incorporation_cert_url: string | null
+          indicator_at_risk_threshold: number | null
+          indicator_on_track_threshold: number | null
           is_active: boolean
           is_partner: boolean | null
+          kra_cert_uploaded_at: string | null
           kra_exemption_cert_url: string | null
           kra_exemption_expiry: string | null
           logo_url: string | null
+          moa_uploaded_at: string | null
+          moa_url: string | null
           name: string
           ngo_board_cert_expiry: string | null
+          ngo_board_cert_uploaded_at: string | null
           ngo_board_cert_url: string | null
           onboarding_completed: boolean
           onboarding_completed_at: string | null
           organization_type: string | null
+          overdue_visit_days: number | null
+          ownership_type: string | null
           partner_granted_at: string | null
           partner_granted_by: string | null
           partner_notes: string | null
+          pbo_cert_uploaded_at: string | null
+          pbo_cert_url: string | null
           pbo_expiry: string | null
           pbo_number: string | null
           phone: string | null
+          physical_address: string | null
           plan_override: string | null
           primary_color: string | null
           registration_number: string | null
+          require_2fa_admins: boolean | null
+          require_2fa_all: boolean | null
+          require_gps_checkin: boolean | null
+          require_indicator_justification: boolean | null
+          safeguarding_policy_uploaded_at: string | null
+          safeguarding_policy_url: string | null
+          session_timeout_minutes: number | null
           settings: Json | null
+          show_name_in_sidebar: boolean | null
           slug: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          sub_county: string | null
           subscription_ends_at: string | null
           subscription_started_at: string | null
           subscription_status: string | null
@@ -7086,41 +7180,82 @@ export type Database = {
           updated_at: string
           usage_stats: Json | null
           website: string | null
+          year_founded: number | null
         }
         Insert: {
           address?: string | null
+          allow_export_non_admin?: boolean | null
+          annual_returns_uploaded_at?: string | null
+          annual_returns_url?: string | null
           base_currency?: string | null
+          budget_approval_threshold?: number | null
           country?: string | null
           county?: string | null
           created_at?: string
+          data_protection_policy_uploaded_at?: string | null
+          data_protection_policy_url?: string | null
+          default_indicator_frequency?: string | null
+          default_narrative_sections?: Json | null
+          default_new_staff_role?: string | null
           description?: string | null
+          dpo_email?: string | null
+          dpo_name?: string | null
           email?: string | null
+          email_from_name?: string | null
+          email_reply_to?: string | null
+          expense_approval_threshold?: number | null
           features_enabled?: Json | null
+          field_officer_sees_all?: boolean | null
+          financial_audit_uploaded_at?: string | null
+          financial_audit_url?: string | null
+          fiscal_year_start_month?: number | null
           id?: string
+          incorporation_cert_uploaded_at?: string | null
+          incorporation_cert_url?: string | null
+          indicator_at_risk_threshold?: number | null
+          indicator_on_track_threshold?: number | null
           is_active?: boolean
           is_partner?: boolean | null
+          kra_cert_uploaded_at?: string | null
           kra_exemption_cert_url?: string | null
           kra_exemption_expiry?: string | null
           logo_url?: string | null
+          moa_uploaded_at?: string | null
+          moa_url?: string | null
           name: string
           ngo_board_cert_expiry?: string | null
+          ngo_board_cert_uploaded_at?: string | null
           ngo_board_cert_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          overdue_visit_days?: number | null
+          ownership_type?: string | null
           partner_granted_at?: string | null
           partner_granted_by?: string | null
           partner_notes?: string | null
+          pbo_cert_uploaded_at?: string | null
+          pbo_cert_url?: string | null
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          physical_address?: string | null
           plan_override?: string | null
           primary_color?: string | null
           registration_number?: string | null
+          require_2fa_admins?: boolean | null
+          require_2fa_all?: boolean | null
+          require_gps_checkin?: boolean | null
+          require_indicator_justification?: boolean | null
+          safeguarding_policy_uploaded_at?: string | null
+          safeguarding_policy_url?: string | null
+          session_timeout_minutes?: number | null
           settings?: Json | null
+          show_name_in_sidebar?: boolean | null
           slug: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          sub_county?: string | null
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
@@ -7131,41 +7266,82 @@ export type Database = {
           updated_at?: string
           usage_stats?: Json | null
           website?: string | null
+          year_founded?: number | null
         }
         Update: {
           address?: string | null
+          allow_export_non_admin?: boolean | null
+          annual_returns_uploaded_at?: string | null
+          annual_returns_url?: string | null
           base_currency?: string | null
+          budget_approval_threshold?: number | null
           country?: string | null
           county?: string | null
           created_at?: string
+          data_protection_policy_uploaded_at?: string | null
+          data_protection_policy_url?: string | null
+          default_indicator_frequency?: string | null
+          default_narrative_sections?: Json | null
+          default_new_staff_role?: string | null
           description?: string | null
+          dpo_email?: string | null
+          dpo_name?: string | null
           email?: string | null
+          email_from_name?: string | null
+          email_reply_to?: string | null
+          expense_approval_threshold?: number | null
           features_enabled?: Json | null
+          field_officer_sees_all?: boolean | null
+          financial_audit_uploaded_at?: string | null
+          financial_audit_url?: string | null
+          fiscal_year_start_month?: number | null
           id?: string
+          incorporation_cert_uploaded_at?: string | null
+          incorporation_cert_url?: string | null
+          indicator_at_risk_threshold?: number | null
+          indicator_on_track_threshold?: number | null
           is_active?: boolean
           is_partner?: boolean | null
+          kra_cert_uploaded_at?: string | null
           kra_exemption_cert_url?: string | null
           kra_exemption_expiry?: string | null
           logo_url?: string | null
+          moa_uploaded_at?: string | null
+          moa_url?: string | null
           name?: string
           ngo_board_cert_expiry?: string | null
+          ngo_board_cert_uploaded_at?: string | null
           ngo_board_cert_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
           organization_type?: string | null
+          overdue_visit_days?: number | null
+          ownership_type?: string | null
           partner_granted_at?: string | null
           partner_granted_by?: string | null
           partner_notes?: string | null
+          pbo_cert_uploaded_at?: string | null
+          pbo_cert_url?: string | null
           pbo_expiry?: string | null
           pbo_number?: string | null
           phone?: string | null
+          physical_address?: string | null
           plan_override?: string | null
           primary_color?: string | null
           registration_number?: string | null
+          require_2fa_admins?: boolean | null
+          require_2fa_all?: boolean | null
+          require_gps_checkin?: boolean | null
+          require_indicator_justification?: boolean | null
+          safeguarding_policy_uploaded_at?: string | null
+          safeguarding_policy_url?: string | null
+          session_timeout_minutes?: number | null
           settings?: Json | null
+          show_name_in_sidebar?: boolean | null
           slug?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          sub_county?: string | null
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
@@ -7176,6 +7352,7 @@ export type Database = {
           updated_at?: string
           usage_stats?: Json | null
           website?: string | null
+          year_founded?: number | null
         }
         Relationships: []
       }
