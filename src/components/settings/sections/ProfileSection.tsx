@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { UnsavedBar } from '../UnsavedBar';
 import { Upload, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { kenyaCounties } from '@/lib/kenyaCounties';
+import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
 
 const TERMINOLOGIES = ['Beneficiary','Child','Client','Patient','Participant','Member','Student','Resident','Custom'];
 const ORG_TYPES: Array<{ value: string; label: string; desc: string }> = [
@@ -189,7 +189,7 @@ export function ProfileSection() {
   }
 
   const v = form.values;
-  const counties = (kenyaCounties as any) || [];
+  const counties = (KENYA_COUNTIES as any) || [];
 
   return (
     <div className="space-y-6">
