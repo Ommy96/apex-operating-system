@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Target, TrendingUp, Edit, Trash2, BarChart3, Percent, Hash } from "lucide-react";
+import { Plus, Target, TrendingUp, Edit, Trash2, BarChart3, Percent, Hash, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { IndicatorDataEntrySheet } from "@/components/me/IndicatorDataEntrySheet";
 
 interface IndicatorFormData {
   name: string;
