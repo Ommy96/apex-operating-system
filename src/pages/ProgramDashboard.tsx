@@ -3,8 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
-  ChevronRight, Activity, Layers, Flag
-  ,Network
+  ChevronRight, Activity, Layers, Flag, Network, CalendarClock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +21,7 @@ import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponso
 import { ProgramTeam } from "@/components/programs/ProgramTeam";
 import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { ProgramLogframe } from "@/components/programs/ProgramLogframe";
+import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -276,6 +276,7 @@ const ProgramDashboard = () => {
               { value: "logframe", icon: Network, label: "Logframe" },
               { value: "funding", icon: DollarSign, label: "Funding" },
               { value: "indicators", icon: Target, label: "Indicators" },
+              { value: "me_schedule", icon: CalendarClock, label: "M&E Schedule" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
               { value: "sponsorship", icon: Heart, label: "Sponsorship" },
             ].map(tab => (
@@ -430,6 +431,11 @@ const ProgramDashboard = () => {
         {activeTab === "indicators" && (
           <TabsContent value="indicators" forceMount className="mt-6">
             <ProgramIndicators programId={programId} />
+          </TabsContent>
+        )}
+        {activeTab === "me_schedule" && (
+          <TabsContent value="me_schedule" forceMount className="mt-6">
+            <ProgramMESchedule programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
         {activeTab === "observations" && (
