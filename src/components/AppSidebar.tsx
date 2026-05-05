@@ -442,6 +442,59 @@ export function AppSidebar() {
             );
           })}
 
+          {/* Context-sensitive secondary nav */}
+          {!isCollapsed && (contextProgram || contextProject) && (
+            <SidebarGroup className="mt-4">
+              <SidebarGroupLabel
+                className="px-[10px] mb-1.5 text-[10px] font-medium uppercase"
+                style={{ color: 'var(--sidebar-label)', letterSpacing: '0.8px' }}
+              >
+                {contextProject ? 'Current Project' : 'Current Programme'}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <div className="px-[10px] space-y-1">
+                  {contextProject ? (
+                    <>
+                      <button
+                        onClick={() => contextProject.programs && navigate(`/programs/dashboard/${contextProject.programs.id}`)}
+                        className="text-[11px] flex items-center gap-1 hover:underline truncate w-full text-left"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                      >
+                        ← {contextProject.programs?.name || 'Programme'}
+                      </button>
+                      <div className="text-[12px] font-medium text-white truncate" title={contextProject.name}>
+                        {contextProject.name}
+                      </div>
+                    </>
+                  ) : contextProgram ? (
+                    <>
+                      <button
+                        onClick={() => navigate('/programs-management')}
+                        className="text-[11px] flex items-center gap-1 hover:underline truncate w-full text-left"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                      >
+                        ← All programmes
+                      </button>
+                      <div className="text-[12px] font-medium text-white truncate" title={contextProgram.name}>
+                        {contextProgram.name}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* Programme stats strip */}
+          {!isCollapsed && progCounts && (progCounts.programmes > 0 || progCounts.projects > 0) && (
+            <div
+              className="mt-3 mx-[10px] text-[10px] tabular-nums"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
+              {progCounts.programmes} programme{progCounts.programmes === 1 ? '' : 's'} · {progCounts.projects} project{progCounts.projects === 1 ? '' : 's'}
+            </div>
+          )}
+
           {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-4">
               {!isCollapsed && (
