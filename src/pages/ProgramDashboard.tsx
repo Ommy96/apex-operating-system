@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
-  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake, Package
+  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake, Package, Megaphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
