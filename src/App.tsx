@@ -24,6 +24,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ProgramsManagement = lazy(() => import("./pages/ProgramsManagement"));
 const ProgramDashboard = lazy(() => import("./pages/ProgramDashboard"));
 const ProjectDashboard = lazy(() => import("./pages/ProjectDashboard"));
+const ProgramsPortfolio = lazy(() => import("./pages/ProgramsPortfolio"));
 const Beneficiaries = lazy(() => import("./pages/Beneficiaries"));
 const BeneficiaryProfile = lazy(() => import("./pages/BeneficiaryProfile"));
 const DonorManagement = lazy(() => import("./pages/DonorManagement"));
@@ -119,6 +120,11 @@ const App = () => (
             <Route path="/programs-management" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
                 <DashboardLayout><LazyRoute><ProgramsManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/programs/portfolio" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><ProgramsPortfolio /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/entities/:slug" element={

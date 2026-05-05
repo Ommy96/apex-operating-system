@@ -24,6 +24,7 @@ import {
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
+  Layers,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
@@ -211,6 +212,7 @@ export function AppSidebar() {
       label: "Programs & M&E",
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "Portfolio", url: "/programs/portfolio", icon: Layers, show: can.viewPrograms },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME },
         { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
