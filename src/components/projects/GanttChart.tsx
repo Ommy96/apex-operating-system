@@ -12,11 +12,13 @@ interface Activity {
   planned_end_date?: string | null;
   status?: string | null;
   responsible_staff_id?: string | null;
+  completion_percentage?: number | null;
 }
 
 interface GanttChartProps {
   activities: Activity[];
   rangeMonths?: number;
+  onActivityClick?: (activity: Activity) => void;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -26,7 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
   delayed: "bg-destructive",
 };
 
-export function GanttChart({ activities, rangeMonths = 3 }: GanttChartProps) {
+export function GanttChart({ activities, rangeMonths = 3, onActivityClick }: GanttChartProps) {
   const validActivities = activities.filter(a => a.planned_start_date && a.planned_end_date);
 
   const { weeks, timelineStart, timelineEnd, totalDays } = useMemo(() => {
@@ -113,14 +115,22 @@ export function GanttChart({ activities, rangeMonths = 3 }: GanttChartProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className={`absolute top-2 h-6 rounded ${STATUS_COLORS[status]} opacity-80 hover:opacity-100 cursor-pointer transition-opacity`}
+                        onClick={() => onActivityClick?.(activity)}
+                        className={`absolute top-2 h-6 rounded ${STATUS_COLORS[status]} opacity-80 hover:opacity-100 cursor-pointer transition-opacity overflow-hidden`}
                         style={barStyle}
-                      />
+                      >
+                        {typeof activity.completion_percentage === "number" && activity.completion_percentage > 0 && (
+                          <div className="h-full bg-foreground/30" style={{ width: `${Math.min(100, activity.completion_percentage)}%` }} />
+                        )}
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="font-medium">{activity.title || activity.name}</p>
                       <p className="text-xs">{format(new Date(activity.planned_start_date!), "dd MMM yyyy")} – {format(new Date(activity.planned_end_date!), "dd MMM yyyy")}</p>
                       <Badge variant="outline" className="text-[10px] mt-1">{status.replace("_", " ")}</Badge>
+                      {typeof activity.completion_percentage === "number" && (
+                        <p className="text-[10px] mt-1 text-muted-foreground">{activity.completion_percentage}% complete</p>
+                      )}
                     </TooltipContent>
                   </Tooltip>
                 </div>

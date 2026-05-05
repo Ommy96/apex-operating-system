@@ -8,6 +8,8 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { GanttChart } from "@/components/projects/GanttChart";
 import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
+import { NewActivitySheet } from "@/components/projects/NewActivitySheet";
+import { ActivityDetailSheet } from "@/components/projects/ActivityDetailSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -145,13 +147,15 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
   );
 }
 
-function ProjectWorkplanTab({ projectId }: { projectId: string }) {
+function ProjectWorkplanTab({ projectId, programId, orgId }: { projectId: string; programId?: string | null; orgId?: string }) {
   const ganttRef = useRef<HTMLDivElement>(null);
   const [rangeMonths, setRangeMonths] = useState(3);
+  const [newOpen, setNewOpen] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
   const { data: activities = [], isLoading } = useQuery({
     queryKey: ["project-gantt-activities", projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("activities").select("id, title, name, planned_start_date, planned_end_date, status, responsible_staff_id").eq("project_id", projectId);
+      const { data, error } = await supabase.from("activities").select("id, title, name, description, planned_start_date, planned_end_date, actual_start_date, actual_end_date, status, responsible_staff_id, completion_percentage, milestone_id").eq("project_id", projectId);
       if (error) throw error;
       return data;
     },
@@ -177,9 +181,14 @@ function ProjectWorkplanTab({ projectId }: { projectId: string }) {
         <div className="flex gap-1">{[1, 3, 6, 0].map(m => (
           <Button key={m} variant={rangeMonths === m ? "default" : "outline"} size="sm" className="text-xs" onClick={() => setRangeMonths(m)}>{m === 0 ? "Full" : `${m}m`}</Button>
         ))}</div>
-        {hasPlannedDates && <Button variant="outline" size="sm" onClick={exportPdf} className="text-xs">Export PDF</Button>}
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => setNewOpen(true)} className="text-xs"><Plus className="h-3.5 w-3.5 mr-1" /> Activity</Button>
+          {hasPlannedDates && <Button variant="outline" size="sm" onClick={exportPdf} className="text-xs">Export PDF</Button>}
+        </div>
       </div>
-      <div ref={ganttRef}><GanttChart activities={activities} rangeMonths={rangeMonths || undefined} /></div>
+      <div ref={ganttRef}><GanttChart activities={activities as any} rangeMonths={rangeMonths || undefined} onActivityClick={setSelected} /></div>
+      <NewActivitySheet open={newOpen} onOpenChange={setNewOpen} projectId={projectId} programId={programId} orgId={orgId} />
+      <ActivityDetailSheet activity={selected} onClose={() => setSelected(null)} />
     </CardContent></Card>
   );
 }
@@ -870,7 +879,7 @@ const ProjectDashboard = () => {
 
         {/* Workplan Tab */}
         <TabsContent value="workplan" className="mt-4">
-          <ProjectWorkplanTab projectId={projectId!} />
+          <ProjectWorkplanTab projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
         {/* Reports Tab */}
