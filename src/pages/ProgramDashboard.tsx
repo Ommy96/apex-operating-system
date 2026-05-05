@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
-  ChevronRight, Activity, Layers
+  ChevronRight, Activity, Layers, Flag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { ProgramFunding } from "@/components/programs/ProgramFunding";
 import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponsorshipDashboard";
+import { ProgramTeam } from "@/components/programs/ProgramTeam";
+import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -267,6 +269,8 @@ const ProgramDashboard = () => {
             {[
               { value: "overview", icon: BarChart3, label: "Overview" },
               { value: "projects", icon: FolderKanban, label: "Projects" },
+            { value: "team", icon: Users, label: "Team" },
+            { value: "milestones", icon: Flag, label: "Milestones" },
               { value: "funding", icon: DollarSign, label: "Funding" },
               { value: "indicators", icon: Target, label: "Indicators" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
@@ -398,6 +402,16 @@ const ProgramDashboard = () => {
         {activeTab === "projects" && (
           <TabsContent value="projects" forceMount className="mt-6">
             <ProgramProjects programId={programId} />
+          </TabsContent>
+        )}
+        {activeTab === "team" && (
+          <TabsContent value="team" forceMount className="mt-6">
+            <ProgramTeam programId={programId} />
+          </TabsContent>
+        )}
+        {activeTab === "milestones" && (
+          <TabsContent value="milestones" forceMount className="mt-6">
+            <ProgramMilestones programId={programId} />
           </TabsContent>
         )}
         {activeTab === "funding" && (
