@@ -150,16 +150,24 @@ export type Database = {
           activity_date: string
           activity_type: string | null
           actual_date: string | null
+          actual_end_date: string | null
           actual_participants: number | null
+          actual_start_date: string | null
+          assigned_to: string | null
           attachments: Json | null
           child_id: string
+          completion_percentage: number
           created_at: string
           created_by: string | null
           deleted_at: string | null
+          depends_on: string | null
           description: string | null
           expected_participants: number | null
           id: string
           location: string | null
+          location_county: string | null
+          location_sub_county: string | null
+          milestone_id: string | null
           name: string | null
           notes: string | null
           organization_id: string | null
@@ -180,16 +188,24 @@ export type Database = {
           activity_date?: string
           activity_type?: string | null
           actual_date?: string | null
+          actual_end_date?: string | null
           actual_participants?: number | null
+          actual_start_date?: string | null
+          assigned_to?: string | null
           attachments?: Json | null
           child_id: string
+          completion_percentage?: number
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          depends_on?: string | null
           description?: string | null
           expected_participants?: number | null
           id?: string
           location?: string | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          milestone_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id?: string | null
@@ -210,16 +226,24 @@ export type Database = {
           activity_date?: string
           activity_type?: string | null
           actual_date?: string | null
+          actual_end_date?: string | null
           actual_participants?: number | null
+          actual_start_date?: string | null
+          assigned_to?: string | null
           attachments?: Json | null
           child_id?: string
+          completion_percentage?: number
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          depends_on?: string | null
           description?: string | null
           expected_participants?: number | null
           id?: string
           location?: string | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          milestone_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id?: string | null
@@ -249,6 +273,20 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children_safe_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_depends_on_fkey"
+            columns: ["depends_on"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "programme_milestones"
             referencedColumns: ["id"]
           },
           {
@@ -6402,6 +6440,86 @@ export type Database = {
           },
         ]
       }
+      logframe_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          indicator_ids: string[] | null
+          level: string
+          org_id: string
+          parent_id: string | null
+          program_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          indicator_ids?: string[] | null
+          level: string
+          org_id: string
+          parent_id?: string | null
+          program_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          indicator_ids?: string[] | null
+          level?: string
+          org_id?: string
+          parent_id?: string | null
+          program_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logframe_entries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_entries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_entries_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "logframe_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_entries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       logframe_indicators: {
         Row: {
           actual_value: number | null
@@ -6675,32 +6793,68 @@ export type Database = {
         Row: {
           assigned_to: string | null
           collection_frequency: string
+          collection_method: string | null
           created_at: string | null
+          created_by: string | null
+          frequency: string | null
           id: string
           indicator_id: string
+          is_active: boolean
           last_collected_at: string | null
+          last_collected_date: string | null
+          next_collection_date: string | null
           next_due_date: string
+          notes: string | null
           org_id: string
+          program_id: string | null
+          project_id: string | null
+          responsible_staff_id: string | null
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
           assigned_to?: string | null
           collection_frequency: string
+          collection_method?: string | null
           created_at?: string | null
+          created_by?: string | null
+          frequency?: string | null
           id?: string
           indicator_id: string
+          is_active?: boolean
           last_collected_at?: string | null
+          last_collected_date?: string | null
+          next_collection_date?: string | null
           next_due_date: string
+          notes?: string | null
           org_id: string
+          program_id?: string | null
+          project_id?: string | null
+          responsible_staff_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           assigned_to?: string | null
           collection_frequency?: string
+          collection_method?: string | null
           created_at?: string | null
+          created_by?: string | null
+          frequency?: string | null
           id?: string
           indicator_id?: string
+          is_active?: boolean
           last_collected_at?: string | null
+          last_collected_date?: string | null
+          next_collection_date?: string | null
           next_due_date?: string
+          notes?: string | null
           org_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          responsible_staff_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -6729,6 +6883,20 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -8571,6 +8739,230 @@ export type Database = {
           },
         ]
       }
+      programme_logframes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          goal: string | null
+          goal_indicator: string | null
+          id: string
+          org_id: string
+          program_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          goal?: string | null
+          goal_indicator?: string | null
+          id?: string
+          org_id: string
+          program_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          goal?: string | null
+          goal_indicator?: string | null
+          id?: string
+          org_id?: string
+          program_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_logframes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_logframes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_logframes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programme_milestones: {
+        Row: {
+          assigned_to: string | null
+          completed_date: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          milestone_type: string
+          org_id: string
+          program_id: string | null
+          project_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          milestone_type?: string
+          org_id: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          milestone_type?: string
+          org_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_milestones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_milestones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_milestones_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programme_team: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          is_lead: boolean
+          org_id: string
+          program_id: string | null
+          project_id: string | null
+          role: string
+          role_label: string | null
+          staff_id: string
+          start_date: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_lead?: boolean
+          org_id: string
+          program_id?: string | null
+          project_id?: string | null
+          role: string
+          role_label?: string | null
+          staff_id: string
+          start_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_lead?: boolean
+          org_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          role?: string
+          role_label?: string | null
+          staff_id?: string
+          start_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_team_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_team_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_team_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_team_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           annual_funding_required: number | null
@@ -8578,6 +8970,7 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string | null
+          currency: string
           custom_fields: Json | null
           deleted_at: string | null
           description: string | null
@@ -8587,12 +8980,15 @@ export type Database = {
           id: string
           is_active: boolean
           location: string | null
+          logframe_status: string
           module_config: Json | null
           name: string
           objectives: string | null
           organization_id: string
+          primary_sector: string | null
           program_id: string | null
           program_manager_id: string | null
+          secondary_sectors: string[] | null
           settings: Json | null
           show_in_navigation: boolean | null
           slug: string | null
@@ -8600,6 +8996,7 @@ export type Database = {
           start_date: string | null
           status: string | null
           target_population: string[] | null
+          total_budget: number | null
           updated_by: string | null
         }
         Insert: {
@@ -8608,6 +9005,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           custom_fields?: Json | null
           deleted_at?: string | null
           description?: string | null
@@ -8617,12 +9015,15 @@ export type Database = {
           id?: string
           is_active?: boolean
           location?: string | null
+          logframe_status?: string
           module_config?: Json | null
           name: string
           objectives?: string | null
           organization_id?: string
+          primary_sector?: string | null
           program_id?: string | null
           program_manager_id?: string | null
+          secondary_sectors?: string[] | null
           settings?: Json | null
           show_in_navigation?: boolean | null
           slug?: string | null
@@ -8630,6 +9031,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           target_population?: string[] | null
+          total_budget?: number | null
           updated_by?: string | null
         }
         Update: {
@@ -8638,6 +9040,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string
           custom_fields?: Json | null
           deleted_at?: string | null
           description?: string | null
@@ -8647,12 +9050,15 @@ export type Database = {
           id?: string
           is_active?: boolean
           location?: string | null
+          logframe_status?: string
           module_config?: Json | null
           name?: string
           objectives?: string | null
           organization_id?: string
+          primary_sector?: string | null
           program_id?: string | null
           program_manager_id?: string | null
+          secondary_sectors?: string[] | null
           settings?: Json | null
           show_in_navigation?: boolean | null
           slug?: string | null
@@ -8660,6 +9066,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           target_population?: string[] | null
+          total_budget?: number | null
           updated_by?: string | null
         }
         Relationships: [
@@ -8833,11 +9240,13 @@ export type Database = {
           custom_fields: Json | null
           deleted_at: string | null
           description: string | null
+          donor_visibility: string
           end_date: string | null
           estimated_cost: number | null
           expected_outputs: string | null
           funding_cycle: string | null
           funding_model: string
+          geographic_focus: string[] | null
           id: string
           latitude: number | null
           location: string | null
@@ -8847,6 +9256,7 @@ export type Database = {
           program_id: string | null
           project_code: string | null
           project_lead_id: string | null
+          project_manager_id: string | null
           slug: string
           sponsorship_currency: string | null
           sponsorship_frequency: string | null
@@ -8854,7 +9264,9 @@ export type Database = {
           sponsorship_target_amount: number | null
           start_date: string | null
           status: string | null
+          target_beneficiaries: number | null
           target_beneficiary_types: string[] | null
+          theory_of_change: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -8867,11 +9279,13 @@ export type Database = {
           custom_fields?: Json | null
           deleted_at?: string | null
           description?: string | null
+          donor_visibility?: string
           end_date?: string | null
           estimated_cost?: number | null
           expected_outputs?: string | null
           funding_cycle?: string | null
           funding_model?: string
+          geographic_focus?: string[] | null
           id?: string
           latitude?: number | null
           location?: string | null
@@ -8881,6 +9295,7 @@ export type Database = {
           program_id?: string | null
           project_code?: string | null
           project_lead_id?: string | null
+          project_manager_id?: string | null
           slug: string
           sponsorship_currency?: string | null
           sponsorship_frequency?: string | null
@@ -8888,7 +9303,9 @@ export type Database = {
           sponsorship_target_amount?: number | null
           start_date?: string | null
           status?: string | null
+          target_beneficiaries?: number | null
           target_beneficiary_types?: string[] | null
+          theory_of_change?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -8901,11 +9318,13 @@ export type Database = {
           custom_fields?: Json | null
           deleted_at?: string | null
           description?: string | null
+          donor_visibility?: string
           end_date?: string | null
           estimated_cost?: number | null
           expected_outputs?: string | null
           funding_cycle?: string | null
           funding_model?: string
+          geographic_focus?: string[] | null
           id?: string
           latitude?: number | null
           location?: string | null
@@ -8915,6 +9334,7 @@ export type Database = {
           program_id?: string | null
           project_code?: string | null
           project_lead_id?: string | null
+          project_manager_id?: string | null
           slug?: string
           sponsorship_currency?: string | null
           sponsorship_frequency?: string | null
@@ -8922,7 +9342,9 @@ export type Database = {
           sponsorship_target_amount?: number | null
           start_date?: string | null
           status?: string | null
+          target_beneficiaries?: number | null
           target_beneficiary_types?: string[] | null
+          theory_of_change?: string | null
           updated_at?: string
           updated_by?: string | null
         }
