@@ -6440,6 +6440,69 @@ export type Database = {
           },
         ]
       }
+      logframe_assumptions: {
+        Row: {
+          assumption: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          linked_risk_id: string | null
+          logframe_entry_id: string | null
+          notes: string | null
+          org_id: string
+          program_id: string | null
+          updated_at: string
+          updated_by: string | null
+          validity: string
+        }
+        Insert: {
+          assumption: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          linked_risk_id?: string | null
+          logframe_entry_id?: string | null
+          notes?: string | null
+          org_id: string
+          program_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validity?: string
+        }
+        Update: {
+          assumption?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          linked_risk_id?: string | null
+          logframe_entry_id?: string | null
+          notes?: string | null
+          org_id?: string
+          program_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logframe_assumptions_linked_risk_id_fkey"
+            columns: ["linked_risk_id"]
+            isOneToOne: false
+            referencedRelation: "program_risks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_assumptions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       logframe_entries: {
         Row: {
           created_at: string
@@ -8522,6 +8585,93 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_risks: {
+        Row: {
+          category: string
+          contingency_plan: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          impact: number
+          likelihood: number
+          mitigation_plan: string | null
+          org_id: string
+          owner_id: string | null
+          program_id: string | null
+          project_id: string | null
+          reviewed_at: string | null
+          risk_score: number | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          contingency_plan?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: number
+          likelihood?: number
+          mitigation_plan?: string | null
+          org_id: string
+          owner_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          reviewed_at?: string | null
+          risk_score?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          contingency_plan?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: number
+          likelihood?: number
+          mitigation_plan?: string | null
+          org_id?: string
+          owner_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          reviewed_at?: string | null
+          risk_score?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_risks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
