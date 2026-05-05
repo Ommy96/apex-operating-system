@@ -239,6 +239,36 @@ const Dashboard = () => {
     staleTime: 60000,
   });
 
+  // Upcoming programme milestones (next 30 days)
+  const { data: upcomingMilestones = [], isLoading: milestonesLoading } = useQuery({
+    queryKey: ['dashboard-upcoming-milestones', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const today = new Date().toISOString().slice(0, 10);
+      const horizon = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from('programme_milestones')
+        .select('id, title, due_date, milestone_type, status, program_id, project_id, programs(name), projects(name)')
+        .eq('org_id', orgId)
+        .is('deleted_at', null)
+        .neq('status', 'completed')
+        .neq('status', 'cancelled')
+        .lte('due_date', horizon)
+        .order('due_date', { ascending: true })
+        .limit(5);
+      return (data || []).map((m: any) => {
+        const days = Math.ceil((new Date(m.due_date).getTime() - Date.now()) / 86400000);
+        return {
+          id: m.id, title: m.title, type: m.milestone_type, dueDate: m.due_date, daysLeft: days,
+          programName: m.programs?.name, projectName: m.projects?.name,
+          programId: m.program_id, projectId: m.project_id,
+        };
+      });
+    },
+    enabled: !!orgId,
+    staleTime: 60_000,
+  });
+
   // Org snapshot: counts
   const { data: snapshot, isLoading: snapshotLoading } = useQuery({
     queryKey: ['dashboard-org-snapshot', orgId],
