@@ -14,7 +14,8 @@ import { format, isBefore, isAfter, addDays } from "date-fns";
 import { toast } from "sonner";
 
 interface Props {
-  programId: string;
+  programId?: string;
+  projectId?: string;
   orgId?: string;
 }
 
@@ -34,7 +35,7 @@ const METHODS = [
   { value: "focus_group", label: "Focus group" },
 ];
 
-export function ProgramMESchedule({ programId, orgId }: Props) {
+export function ProgramMESchedule({ programId, projectId, orgId }: Props) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -45,18 +46,20 @@ export function ProgramMESchedule({ programId, orgId }: Props) {
   });
 
   const { data: schedules = [], isLoading } = useQuery({
-    queryKey: ["me-schedule", programId],
+    queryKey: ["me-schedule", programId, projectId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("me_data_schedule")
+      let q = supabase.from("me_data_schedule")
         .select("*, indicator:indicators(id, name, code, unit)")
-        .eq("program_id", programId)
         .eq("is_active", true)
         .order("next_due_date", { ascending: true });
+      if (projectId) q = q.eq("project_id", projectId);
+      else if (programId) q = q.eq("program_id", programId);
+      else return [];
+      const { data, error } = await q;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!programId,
+    enabled: !!programId || !!projectId,
   });
 
   const { data: indicators = [] } = useQuery({
@@ -76,8 +79,7 @@ export function ProgramMESchedule({ programId, orgId }: Props) {
   const create = useMutation({
     mutationFn: async () => {
       if (!form.indicator_id || !form.next_due_date) throw new Error("Indicator & date required");
-      const { error } = await supabase.from("me_data_schedule").insert({
-        program_id: programId,
+      const payload: any = {
         org_id: orgId!,
         indicator_id: form.indicator_id,
         collection_frequency: form.collection_frequency,
@@ -86,11 +88,14 @@ export function ProgramMESchedule({ programId, orgId }: Props) {
         next_due_date: form.next_due_date,
         next_collection_date: form.next_due_date,
         is_active: true,
-      } as any);
+      };
+      if (projectId) payload.project_id = projectId;
+      if (programId) payload.program_id = programId;
+      const { error } = await supabase.from("me_data_schedule").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["me-schedule", programId] });
+      qc.invalidateQueries({ queryKey: ["me-schedule"] });
       toast.success("Schedule added");
       setOpen(false);
       setForm({ indicator_id: "", collection_frequency: "monthly", collection_method: "survey", next_due_date: "" });
@@ -113,7 +118,7 @@ export function ProgramMESchedule({ programId, orgId }: Props) {
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["me-schedule", programId] });
+      qc.invalidateQueries({ queryKey: ["me-schedule"] });
       toast.success("Marked collected");
     },
     onError: (e: any) => toast.error(e.message),
@@ -124,7 +129,7 @@ export function ProgramMESchedule({ programId, orgId }: Props) {
       const { error } = await supabase.from("me_data_schedule").update({ is_active: false }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["me-schedule", programId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["me-schedule"] }),
   });
 
   if (isLoading) return <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-20" />)}</div>;
