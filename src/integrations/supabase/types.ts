@@ -9073,6 +9073,159 @@ export type Database = {
           },
         ]
       }
+      program_sustainability_milestones: {
+        Row: {
+          category: string
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          program_id: string | null
+          progress_percent: number
+          project_id: string | null
+          responsible_party: string | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          program_id?: string | null
+          progress_percent?: number
+          project_id?: string | null
+          responsible_party?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          program_id?: string | null
+          progress_percent?: number
+          project_id?: string | null
+          responsible_party?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_sustainability_milestones_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_sustainability_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_sustainability_plans: {
+        Row: {
+          capacity_transfer_notes: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          exit_strategy_summary: string | null
+          financial_sustainability_notes: string | null
+          id: string
+          organization_id: string
+          ownership_model: string | null
+          post_exit_owner: string | null
+          program_id: string | null
+          project_id: string | null
+          risks_to_continuity: string | null
+          target_handover_date: string | null
+          updated_at: string
+          updated_by: string | null
+          vision: string | null
+        }
+        Insert: {
+          capacity_transfer_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          exit_strategy_summary?: string | null
+          financial_sustainability_notes?: string | null
+          id?: string
+          organization_id: string
+          ownership_model?: string | null
+          post_exit_owner?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          risks_to_continuity?: string | null
+          target_handover_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vision?: string | null
+        }
+        Update: {
+          capacity_transfer_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          exit_strategy_summary?: string | null
+          financial_sustainability_notes?: string | null
+          id?: string
+          organization_id?: string
+          ownership_model?: string | null
+          post_exit_owner?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          risks_to_continuity?: string | null
+          target_handover_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vision?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_sustainability_plans_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_sustainability_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_visit_types: {
         Row: {
           created_at: string
