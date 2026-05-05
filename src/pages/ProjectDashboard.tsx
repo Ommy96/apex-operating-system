@@ -13,6 +13,7 @@ import { ActivityDetailSheet } from "@/components/projects/ActivityDetailSheet";
 import { ProjectSettingsSheet } from "@/components/projects/ProjectSettingsSheet";
 import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
+import { ProgramRiskRegister } from "@/components/programs/ProgramRiskRegister";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -513,6 +514,7 @@ const ProjectDashboard = () => {
             <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
             <TabsTrigger value="milestones" className="text-xs sm:text-sm">Milestones</TabsTrigger>
             <TabsTrigger value="me_schedule" className="text-xs sm:text-sm">M&E Schedule</TabsTrigger>
+           <TabsTrigger value="risks" className="text-xs sm:text-sm">Risks</TabsTrigger>
             <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
           </TabsList>
         </div>
@@ -897,6 +899,10 @@ const ProjectDashboard = () => {
 
         <TabsContent value="me_schedule" className="mt-4">
           <ProgramMESchedule projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        <TabsContent value="risks" className="mt-4">
+          <ProgramRiskRegister programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
         {/* Reports Tab */}
