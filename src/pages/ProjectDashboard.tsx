@@ -18,6 +18,7 @@ import { ProgramPartners } from "@/components/programs/ProgramPartners";
 import { ProgramReachTargets } from "@/components/programs/ProgramReachTargets";
 import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { ProgramCommsPlan } from "@/components/programs/ProgramCommsPlan";
+import { SustainabilityPlan } from "@/components/programs/SustainabilityPlan";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -524,6 +525,7 @@ const ProjectDashboard = () => {
             <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
             <TabsTrigger value="donor_packs" className="text-xs sm:text-sm">Donor Packs</TabsTrigger>
             <TabsTrigger value="comms" className="text-xs sm:text-sm">Comms</TabsTrigger>
+            <TabsTrigger value="sustainability" className="text-xs sm:text-sm">Sustainability</TabsTrigger>
           </TabsList>
         </div>
 
@@ -932,6 +934,10 @@ const ProjectDashboard = () => {
 
         <TabsContent value="comms" className="mt-4">
           <ProgramCommsPlan projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        <TabsContent value="sustainability" className="mt-4">
+          <SustainabilityPlan projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
       </Tabs>
       <ProjectSettingsSheet
