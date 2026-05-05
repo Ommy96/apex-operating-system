@@ -188,6 +188,61 @@ export function AppSidebar() {
     },
   });
 
+  const orgId = currentOrganization?.organization_id;
+
+  // Badge: overdue programme milestones
+  const { data: overdueMilestones = 0 } = useQuery({
+    queryKey: ['sidebar-overdue-milestones', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from('programme_milestones')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .is('deleted_at', null)
+        .neq('status', 'completed')
+        .neq('status', 'cancelled')
+        .lt('due_date', today);
+      return count || 0;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+  });
+
+  // Badge: overdue M&E data collections
+  const { data: overdueCollections = 0 } = useQuery({
+    queryKey: ['sidebar-overdue-collections', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from('me_data_schedule')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('is_active', true)
+        .lt('next_collection_date', today);
+      return count || 0;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+  });
+
+  // Programme/project counts (for sub-strip)
+  const { data: progCounts } = useQuery({
+    queryKey: ['sidebar-prog-counts', orgId],
+    queryFn: async () => {
+      if (!orgId) return { programmes: 0, projects: 0 };
+      const [p, pr] = await Promise.all([
+        supabase.from('programs').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('is_active', true),
+        supabase.from('projects').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).is('deleted_at', null),
+      ]);
+      return { programmes: p.count || 0, projects: pr.count || 0 };
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+  });
+
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
 
   const handleNavClick = () => {
@@ -222,10 +277,12 @@ export function AppSidebar() {
     {
       label: "Programs & M&E",
       items: [
-        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms, badgeCount: overdueMilestones },
+        { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: "Workplans", url: "/workplans", icon: GanttIcon, show: can.viewPrograms },
         { title: "Portfolio", url: "/programs/portfolio", icon: Layers, show: can.viewPrograms },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
-        { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME },
+        { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME, badgeCount: overdueCollections },
         { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],
