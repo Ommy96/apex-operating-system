@@ -4,6 +4,7 @@ import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
   ChevronRight, Activity, Layers, Flag
+  ,Network
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { ProgramFunding } from "@/components/programs/ProgramFunding";
 import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponsorshipDashboard";
 import { ProgramTeam } from "@/components/programs/ProgramTeam";
 import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
+import { ProgramLogframe } from "@/components/programs/ProgramLogframe";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -271,6 +273,7 @@ const ProgramDashboard = () => {
               { value: "projects", icon: FolderKanban, label: "Projects" },
             { value: "team", icon: Users, label: "Team" },
             { value: "milestones", icon: Flag, label: "Milestones" },
+              { value: "logframe", icon: Network, label: "Logframe" },
               { value: "funding", icon: DollarSign, label: "Funding" },
               { value: "indicators", icon: Target, label: "Indicators" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
@@ -412,6 +415,11 @@ const ProgramDashboard = () => {
         {activeTab === "milestones" && (
           <TabsContent value="milestones" forceMount className="mt-6">
             <ProgramMilestones programId={programId} />
+          </TabsContent>
+        )}
+        {activeTab === "logframe" && (
+          <TabsContent value="logframe" forceMount className="mt-6">
+            <ProgramLogframe programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
         {activeTab === "funding" && (
