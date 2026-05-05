@@ -45,7 +45,7 @@ const statusStyle = (m: Milestone) => {
   return { dot: "bg-amber-500", text: "text-amber-700", label: "Upcoming" };
 };
 
-export function ProgramMilestones({ programId }: { programId?: string }) {
+export function ProgramMilestones({ programId, projectId }: { programId?: string; projectId?: string }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const orgId = currentOrganization?.organization_id;
@@ -55,19 +55,17 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
   const [form, setForm] = useState({ title: "", description: "", due_date: "", milestone_type: "general", project_id: "__program__" });
 
   const { data: milestones, isLoading } = useQuery({
-    queryKey: ["programme-milestones", programId],
+    queryKey: ["programme-milestones", programId, projectId],
     queryFn: async () => {
-      if (!programId) return [];
-      const { data, error } = await supabase
-        .from("programme_milestones")
-        .select("*")
-        .eq("program_id", programId)
-        .is("deleted_at", null)
-        .order("due_date", { ascending: true });
+      let q = supabase.from("programme_milestones").select("*").is("deleted_at", null).order("due_date", { ascending: true });
+      if (projectId) q = q.eq("project_id", projectId);
+      else if (programId) q = q.eq("program_id", programId);
+      else return [];
+      const { data, error } = await q;
       if (error) throw error;
       return (data || []) as Milestone[];
     },
-    enabled: !!programId,
+    enabled: !!programId || !!projectId,
   });
 
   const { data: projects } = useQuery({
@@ -77,7 +75,7 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
       const { data } = await supabase.from("projects").select("id, name").eq("program_id", programId);
       return data || [];
     },
-    enabled: !!programId,
+    enabled: !!programId && !projectId,
   });
   const projectsMap = Object.fromEntries((projects || []).map(p => [p.id, p.name]));
 
@@ -100,21 +98,27 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
 
   const addMutation = useMutation({
     mutationFn: async () => {
-      if (!orgId || !programId || !form.title || !form.due_date) throw new Error("Missing fields");
-      const { error } = await supabase.from("programme_milestones").insert({
+      if (!orgId || !form.title || !form.due_date) throw new Error("Missing fields");
+      if (!programId && !projectId) throw new Error("Missing context");
+      const payload: any = {
         org_id: orgId,
-        program_id: programId,
-        project_id: form.project_id === "__program__" ? null : form.project_id,
         title: form.title,
         description: form.description || null,
         due_date: form.due_date,
         milestone_type: form.milestone_type,
         created_by: user?.id,
-      });
+      };
+      if (projectId) {
+        payload.project_id = projectId;
+      } else {
+        payload.program_id = programId;
+        payload.project_id = form.project_id === "__program__" ? null : form.project_id;
+      }
+      const { error } = await supabase.from("programme_milestones").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["programme-milestones", programId] });
+      qc.invalidateQueries({ queryKey: ["programme-milestones"] });
       toast.success("Milestone added");
       setOpen(false);
       setForm({ title: "", description: "", due_date: "", milestone_type: "general", project_id: "__program__" });
@@ -132,7 +136,7 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["programme-milestones", programId] });
+      qc.invalidateQueries({ queryKey: ["programme-milestones"] });
       toast.success("Marked complete");
     },
   });
@@ -180,7 +184,7 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
                 <div className="space-y-1.5"><Label>Due date *</Label>
                   <Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
                 </div>
-                <div className="space-y-1.5"><Label>Linked project (optional)</Label>
+                {!projectId && (<div className="space-y-1.5"><Label>Linked project (optional)</Label>
                   <Select value={form.project_id} onValueChange={v => setForm(f => ({ ...f, project_id: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -188,7 +192,7 @@ export function ProgramMilestones({ programId }: { programId?: string }) {
                       {(projects || []).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
+                </div>)}
               </div>
               <SheetFooter>
                 <Button onClick={() => addMutation.mutate()} disabled={!form.title || !form.due_date || addMutation.isPending}>
