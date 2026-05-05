@@ -162,6 +162,12 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+
+  // Detect context (program/project dashboards)
+  const programDashMatch = currentPath.match(/^\/programs\/dashboard\/([^/]+)/);
+  const projectDashMatch = currentPath.match(/^\/projects\/dashboard\/([^/]+)/);
+  const contextProgramId = programDashMatch?.[1];
+  const contextProjectId = projectDashMatch?.[1];
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
   const { planData } = useOrgPlanData();
@@ -186,6 +192,29 @@ export function AppSidebar() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Context: program name (for secondary nav)
+  const { data: contextProgram } = useQuery({
+    queryKey: ['sidebar-context-program', contextProgramId],
+    queryFn: async () => {
+      if (!contextProgramId) return null;
+      const { data } = await supabase.from('programs').select('id, name').eq('id', contextProgramId).maybeSingle();
+      return data;
+    },
+    enabled: !!contextProgramId,
+    staleTime: 60_000,
+  });
+
+  const { data: contextProject } = useQuery({
+    queryKey: ['sidebar-context-project', contextProjectId],
+    queryFn: async () => {
+      if (!contextProjectId) return null;
+      const { data } = await supabase.from('projects').select('id, name, program_id, programs(id, name)').eq('id', contextProjectId).maybeSingle();
+      return data as any;
+    },
+    enabled: !!contextProjectId,
+    staleTime: 60_000,
   });
 
   const orgId = currentOrganization?.organization_id;
