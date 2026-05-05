@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
-  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert
+  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { ProgramLogframe } from "@/components/programs/ProgramLogframe";
 import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { ProgramRiskRegister } from "@/components/programs/ProgramRiskRegister";
+import { ProgramPartners } from "@/components/programs/ProgramPartners";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -279,6 +280,7 @@ const ProgramDashboard = () => {
               { value: "indicators", icon: Target, label: "Indicators" },
               { value: "me_schedule", icon: CalendarClock, label: "M&E Schedule" },
               { value: "risks", icon: ShieldAlert, label: "Risks" },
+              { value: "partners", icon: Handshake, label: "Partners" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
               { value: "sponsorship", icon: Heart, label: "Sponsorship" },
             ].map(tab => (
@@ -443,6 +445,11 @@ const ProgramDashboard = () => {
         {activeTab === "risks" && (
           <TabsContent value="risks" forceMount className="mt-6">
             <ProgramRiskRegister programId={programId!} orgId={currentOrganization?.organization_id} />
+          </TabsContent>
+        )}
+        {activeTab === "partners" && (
+          <TabsContent value="partners" forceMount className="mt-6">
+            <ProgramPartners programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
         {activeTab === "observations" && (
