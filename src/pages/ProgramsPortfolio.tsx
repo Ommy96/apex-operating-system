@@ -28,7 +28,7 @@ const ProgramsPortfolio = () => {
     queryFn: async () => {
       const [programsRes, projectsRes, indicatorsRes, milestonesRes, risksRes, servicesRes, expensesRes] = await Promise.all([
         supabase.from("programs").select("id,name,status,total_budget,annual_funding_required,currency,start_date,end_date,primary_sector").eq("organization_id", orgId!).is("deleted_at", null),
-        supabase.from("projects").select("id,program_id,status,budget_amount").eq("organization_id", orgId!).is("deleted_at", null),
+        supabase.from("projects").select("id,program_id,status,budget").eq("organization_id", orgId!).is("deleted_at", null),
         supabase.from("program_indicators").select("id,program_id,target_value,current_value,is_active").eq("organization_id", orgId!),
         supabase.from("programme_milestones").select("id,program_id,status,due_date").eq("org_id", orgId!).is("deleted_at", null),
         supabase.from("program_risks").select("id,program_id,status,risk_score,impact,likelihood").eq("org_id", orgId!).is("deleted_at", null),
