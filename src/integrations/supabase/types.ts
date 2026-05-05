@@ -8635,6 +8635,63 @@ export type Database = {
           },
         ]
       }
+      program_reach_targets: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          organization_id: string
+          period_end: string | null
+          period_start: string | null
+          program_id: string
+          project_id: string | null
+          segment: string
+          target_count: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          organization_id: string
+          period_end?: string | null
+          period_start?: string | null
+          program_id: string
+          project_id?: string | null
+          segment: string
+          target_count?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          organization_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          program_id?: string
+          project_id?: string | null
+          segment?: string
+          target_count?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       program_report_types: {
         Row: {
           created_at: string
