@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
-  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus
+  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus, Settings, Flag, CalendarClock
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -10,6 +10,9 @@ import { GanttChart } from "@/components/projects/GanttChart";
 import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
 import { NewActivitySheet } from "@/components/projects/NewActivitySheet";
 import { ActivityDetailSheet } from "@/components/projects/ActivityDetailSheet";
+import { ProjectSettingsSheet } from "@/components/projects/ProjectSettingsSheet";
+import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
+import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -198,6 +201,7 @@ const ProjectDashboard = () => {
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
   const [activeTab, setActiveTab] = useState("overview");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Fetch project details with program name
   const { data: project, isLoading } = useQuery({
