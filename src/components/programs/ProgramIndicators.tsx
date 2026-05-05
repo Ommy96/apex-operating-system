@@ -74,6 +74,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [dataEntryFor, setDataEntryFor] = useState<{ id: string; name: string; measurement_unit?: string | null } | null>(null);
   const [formData, setFormData] = useState<IndicatorFormData>({
     ...emptyFormData,
     program_id: programId || "",
