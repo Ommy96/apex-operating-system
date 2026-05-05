@@ -532,6 +532,13 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
           })}
         </div>
       )}
+      <IndicatorDataEntrySheet
+        open={!!dataEntryFor}
+        onOpenChange={(v) => { if (!v) setDataEntryFor(null); }}
+        indicator={dataEntryFor}
+        programId={programId}
+        projectId={projectId}
+      />
     </div>
   );
 };
