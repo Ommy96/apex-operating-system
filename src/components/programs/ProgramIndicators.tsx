@@ -496,6 +496,19 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">{progress}% achieved</span>
                     <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1"
+                        onClick={() => setDataEntryFor({
+                          id: indicator.id,
+                          name: indicator.name,
+                          measurement_unit: indicator.measurement_unit,
+                        })}
+                      >
+                        <FileBarChart className="h-3.5 w-3.5" />
+                        Record
+                      </Button>
                       <Input
                         type="number"
                         className="h-8 w-24 text-sm"
