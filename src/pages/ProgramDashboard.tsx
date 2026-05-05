@@ -440,6 +440,11 @@ const ProgramDashboard = () => {
             <ProgramMESchedule programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
+        {activeTab === "risks" && (
+          <TabsContent value="risks" forceMount className="mt-6">
+            <ProgramRiskRegister programId={programId!} orgId={currentOrganization?.organization_id} />
+          </TabsContent>
+        )}
         {activeTab === "observations" && (
           <TabsContent value="observations" forceMount className="mt-6">
             <ProgramObservations programId={programId} />
