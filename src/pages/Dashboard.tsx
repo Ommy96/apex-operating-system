@@ -561,10 +561,42 @@ const Dashboard = () => {
       </div>
 
       {/* SECTION 4: BOTTOM TWO-COLUMN GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* CARD E: Recent Activity */}
         <DashCard title="Recent activity" subtitle="Latest events">
           <ActivityFeed />
+        </DashCard>
+
+        {/* CARD G: Upcoming Milestones */}
+        <DashCard title="Upcoming milestones" subtitle="Next 30 days">
+          {milestonesLoading ? (
+            Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[14px] w-full mb-3" />)
+          ) : upcomingMilestones.length === 0 ? (
+            <EmptyState text="No milestones due in the next 30 days" />
+          ) : (
+            upcomingMilestones.map((m: any) => {
+              const badge = deadlineBadge(m.daysLeft);
+              const target = m.projectId ? `/projects/dashboard/${m.projectId}` : m.programId ? `/programs/dashboard/${m.programId}` : '/programs-management';
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => navigate(target)}
+                  className="flex items-center gap-[10px] py-[8px] cursor-pointer hover:bg-muted/30"
+                  style={{ borderBottom: '1px solid #E2E5EF' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p style={{ fontSize: 12, fontWeight: 500, color: '#0A0F1E' }} className="truncate">{m.title}</p>
+                    <p style={{ fontSize: 10, color: '#8891A8' }} className="truncate">
+                      {m.projectName || m.programName || m.type || 'Milestone'}
+                    </p>
+                  </div>
+                  <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: badge.bg, color: badge.color, whiteSpace: 'nowrap' }}>
+                    {m.daysLeft < 0 ? `${Math.abs(m.daysLeft)}d late` : badge.label}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </DashCard>
 
         {/* CARD F: Organisation Snapshot */}
