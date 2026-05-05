@@ -879,7 +879,7 @@ const ProjectDashboard = () => {
 
         {/* Workplan Tab */}
         <TabsContent value="workplan" className="mt-4">
-          <ProjectWorkplanTab projectId={projectId!} />
+          <ProjectWorkplanTab projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.id} />
         </TabsContent>
 
         {/* Reports Tab */}
