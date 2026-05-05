@@ -453,7 +453,8 @@ const ProgramDashboard = () => {
           <TabsContent value="partners" forceMount className="mt-6">
             <ProgramPartners programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
-
+        )}
+        {activeTab === "reach" && (
           <TabsContent value="reach" forceMount className="mt-6">
             <ProgramReachTargets programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
