@@ -24,6 +24,7 @@ import { ProgramLogframe } from "@/components/programs/ProgramLogframe";
 import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { ProgramRiskRegister } from "@/components/programs/ProgramRiskRegister";
 import { ProgramPartners } from "@/components/programs/ProgramPartners";
+import { ProgramReachTargets } from "@/components/programs/ProgramReachTargets";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -281,6 +282,7 @@ const ProgramDashboard = () => {
               { value: "me_schedule", icon: CalendarClock, label: "M&E Schedule" },
               { value: "risks", icon: ShieldAlert, label: "Risks" },
               { value: "partners", icon: Handshake, label: "Partners" },
+              { value: "reach", icon: Target, label: "Reach" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
               { value: "sponsorship", icon: Heart, label: "Sponsorship" },
             ].map(tab => (
@@ -450,6 +452,11 @@ const ProgramDashboard = () => {
         {activeTab === "partners" && (
           <TabsContent value="partners" forceMount className="mt-6">
             <ProgramPartners programId={programId!} orgId={currentOrganization?.organization_id} />
+          </TabsContent>
+        )}
+        {activeTab === "reach" && (
+          <TabsContent value="reach" forceMount className="mt-6">
+            <ProgramReachTargets programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
         {activeTab === "observations" && (
