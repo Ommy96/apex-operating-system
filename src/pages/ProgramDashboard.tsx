@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
-  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake
+  ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake, Package
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { ProgramRiskRegister } from "@/components/programs/ProgramRiskRegister";
 import { ProgramPartners } from "@/components/programs/ProgramPartners";
 import { ProgramReachTargets } from "@/components/programs/ProgramReachTargets";
+import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -285,6 +286,7 @@ const ProgramDashboard = () => {
               { value: "reach", icon: Target, label: "Reach" },
               { value: "observations", icon: MessageSquare, label: "Observations" },
               { value: "sponsorship", icon: Heart, label: "Sponsorship" },
+              { value: "donor_packs", icon: Package, label: "Donor Packs" },
             ].map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <tab.icon className="h-4 w-4" />
@@ -467,6 +469,11 @@ const ProgramDashboard = () => {
         {activeTab === "sponsorship" && (
           <TabsContent value="sponsorship" forceMount className="mt-6">
             <ProgramSponsorshipDashboard programId={programId} />
+          </TabsContent>
+        )}
+        {activeTab === "donor_packs" && (
+          <TabsContent value="donor_packs" forceMount className="mt-6">
+            <DonorReportPacks programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
       </Tabs>

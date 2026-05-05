@@ -4165,6 +4165,93 @@ export type Database = {
           },
         ]
       }
+      donor_report_packs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          donor_name: string | null
+          grant_id: string | null
+          id: string
+          narrative_challenges: string | null
+          narrative_executive_summary: string | null
+          narrative_lessons: string | null
+          narrative_next_steps: string | null
+          organization_id: string
+          pdf_url: string | null
+          period_end: string
+          period_start: string
+          program_id: string | null
+          project_id: string | null
+          snapshot_json: Json | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          donor_name?: string | null
+          grant_id?: string | null
+          id?: string
+          narrative_challenges?: string | null
+          narrative_executive_summary?: string | null
+          narrative_lessons?: string | null
+          narrative_next_steps?: string | null
+          organization_id: string
+          pdf_url?: string | null
+          period_end: string
+          period_start: string
+          program_id?: string | null
+          project_id?: string | null
+          snapshot_json?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          donor_name?: string | null
+          grant_id?: string | null
+          id?: string
+          narrative_challenges?: string | null
+          narrative_executive_summary?: string | null
+          narrative_lessons?: string | null
+          narrative_next_steps?: string | null
+          organization_id?: string
+          pdf_url?: string | null
+          period_end?: string
+          period_start?: string
+          program_id?: string | null
+          project_id?: string | null
+          snapshot_json?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_report_packs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_packs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donor_report_runs: {
         Row: {
           created_at: string
