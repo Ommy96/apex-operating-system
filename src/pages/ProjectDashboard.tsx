@@ -913,6 +913,10 @@ const ProjectDashboard = () => {
           <ProgramPartners programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
+        <TabsContent value="reach" className="mt-4">
+          <ProgramReachTargets programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
         {/* Reports Tab */}
         <TabsContent value="reports" className="mt-4">
           <NarrativeReportsTab projectId={projectId!} projectName={project?.name} />
