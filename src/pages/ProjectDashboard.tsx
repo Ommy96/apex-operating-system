@@ -891,11 +891,25 @@ const ProjectDashboard = () => {
           <ProjectWorkplanTab projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
+        <TabsContent value="milestones" className="mt-4">
+          <ProgramMilestones projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="me_schedule" className="mt-4">
+          <ProgramMESchedule projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
         {/* Reports Tab */}
         <TabsContent value="reports" className="mt-4">
           <NarrativeReportsTab projectId={projectId!} projectName={project?.name} />
         </TabsContent>
       </Tabs>
+      <ProjectSettingsSheet
+        projectId={projectId!}
+        orgId={currentOrganization?.organization_id}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
     </div>
   );
 };
