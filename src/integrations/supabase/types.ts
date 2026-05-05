@@ -8547,6 +8547,94 @@ export type Database = {
           },
         ]
       }
+      program_partners: {
+        Row: {
+          contribution_currency: string | null
+          contribution_type: string | null
+          contribution_value: number | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          mou_end_date: string | null
+          mou_reference: string | null
+          mou_start_date: string | null
+          notes: string | null
+          org_id: string
+          partner_id: string
+          program_id: string | null
+          project_id: string | null
+          role: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          contribution_currency?: string | null
+          contribution_type?: string | null
+          contribution_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          mou_end_date?: string | null
+          mou_reference?: string | null
+          mou_start_date?: string | null
+          notes?: string | null
+          org_id: string
+          partner_id: string
+          program_id?: string | null
+          project_id?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          contribution_currency?: string | null
+          contribution_type?: string | null
+          contribution_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          mou_end_date?: string | null
+          mou_reference?: string | null
+          mou_start_date?: string | null
+          notes?: string | null
+          org_id?: string
+          partner_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_partners_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_partners_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_report_types: {
         Row: {
           created_at: string
@@ -8669,6 +8757,87 @@ export type Database = {
           },
           {
             foreignKeyName: "program_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_stakeholders: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          engagement_strategy: string | null
+          id: string
+          influence: number
+          interest: number
+          name: string
+          notes: string | null
+          org_id: string
+          organization_name: string | null
+          program_id: string | null
+          project_id: string | null
+          role_title: string | null
+          stakeholder_type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          engagement_strategy?: string | null
+          id?: string
+          influence?: number
+          interest?: number
+          name: string
+          notes?: string | null
+          org_id: string
+          organization_name?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          role_title?: string | null
+          stakeholder_type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          engagement_strategy?: string | null
+          id?: string
+          influence?: number
+          interest?: number
+          name?: string
+          notes?: string | null
+          org_id?: string
+          organization_name?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          role_title?: string | null
+          stakeholder_type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_stakeholders_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_stakeholders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
