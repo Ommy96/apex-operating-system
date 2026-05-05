@@ -8285,6 +8285,90 @@ export type Database = {
           },
         ]
       }
+      program_comms_outputs: {
+        Row: {
+          audience_reach: number | null
+          channel: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          donor_name: string | null
+          id: string
+          organization_id: string
+          output_type: string
+          planned_date: string | null
+          program_id: string | null
+          project_id: string | null
+          published_date: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+        }
+        Insert: {
+          audience_reach?: number | null
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          donor_name?: string | null
+          id?: string
+          organization_id: string
+          output_type?: string
+          planned_date?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          published_date?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          audience_reach?: number | null
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          donor_name?: string | null
+          id?: string
+          organization_id?: string
+          output_type?: string
+          planned_date?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          published_date?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_comms_outputs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_comms_outputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_donors: {
         Row: {
           contribution_amount: number | null
