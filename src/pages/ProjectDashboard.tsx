@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
-  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus
+  TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus, Settings, Flag, CalendarClock
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -10,6 +10,9 @@ import { GanttChart } from "@/components/projects/GanttChart";
 import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
 import { NewActivitySheet } from "@/components/projects/NewActivitySheet";
 import { ActivityDetailSheet } from "@/components/projects/ActivityDetailSheet";
+import { ProjectSettingsSheet } from "@/components/projects/ProjectSettingsSheet";
+import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
+import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -198,6 +201,7 @@ const ProjectDashboard = () => {
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
   const [activeTab, setActiveTab] = useState("overview");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Fetch project details with program name
   const { data: project, isLoading } = useQuery({
@@ -397,6 +401,9 @@ const ProjectDashboard = () => {
             <Badge variant="outline" className={getStatusBadgeClass(project.status)}>
               {project.status?.replace('_', ' ') || 'Planning'}
             </Badge>
+            <Button variant="outline" size="sm" className="ml-auto gap-1.5" onClick={() => setSettingsOpen(true)}>
+              <Settings className="h-3.5 w-3.5" /> Settings
+            </Button>
           </div>
           {project.program && (
             <button
@@ -504,6 +511,8 @@ const ProjectDashboard = () => {
             <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
             <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
             <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
+            <TabsTrigger value="milestones" className="text-xs sm:text-sm">Milestones</TabsTrigger>
+            <TabsTrigger value="me_schedule" className="text-xs sm:text-sm">M&E Schedule</TabsTrigger>
             <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
           </TabsList>
         </div>
@@ -882,11 +891,25 @@ const ProjectDashboard = () => {
           <ProjectWorkplanTab projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
+        <TabsContent value="milestones" className="mt-4">
+          <ProgramMilestones projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="me_schedule" className="mt-4">
+          <ProgramMESchedule projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
         {/* Reports Tab */}
         <TabsContent value="reports" className="mt-4">
           <NarrativeReportsTab projectId={projectId!} projectName={project?.name} />
         </TabsContent>
       </Tabs>
+      <ProjectSettingsSheet
+        projectId={projectId!}
+        orgId={currentOrganization?.organization_id}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
     </div>
   );
 };
