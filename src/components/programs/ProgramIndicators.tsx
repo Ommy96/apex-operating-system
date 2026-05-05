@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Target, TrendingUp, Edit, Trash2, BarChart3, Percent, Hash } from "lucide-react";
+import { Plus, Target, TrendingUp, Edit, Trash2, BarChart3, Percent, Hash, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { IndicatorDataEntrySheet } from "@/components/me/IndicatorDataEntrySheet";
 
 interface IndicatorFormData {
   name: string;
@@ -73,6 +74,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [dataEntryFor, setDataEntryFor] = useState<{ id: string; name: string; measurement_unit?: string | null } | null>(null);
   const [formData, setFormData] = useState<IndicatorFormData>({
     ...emptyFormData,
     program_id: programId || "",
@@ -494,6 +496,19 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">{progress}% achieved</span>
                     <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1"
+                        onClick={() => setDataEntryFor({
+                          id: indicator.id,
+                          name: indicator.name,
+                          measurement_unit: indicator.measurement_unit,
+                        })}
+                      >
+                        <FileBarChart className="h-3.5 w-3.5" />
+                        Record
+                      </Button>
                       <Input
                         type="number"
                         className="h-8 w-24 text-sm"
@@ -517,6 +532,13 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
           })}
         </div>
       )}
+      <IndicatorDataEntrySheet
+        open={!!dataEntryFor}
+        onOpenChange={(v) => { if (!v) setDataEntryFor(null); }}
+        indicator={dataEntryFor}
+        programId={programId}
+        projectId={projectId}
+      />
     </div>
   );
 };

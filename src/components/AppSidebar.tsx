@@ -24,7 +24,7 @@ import {
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
-  Layers,
+  Layers, FolderKanban, GanttChart as GanttIcon,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
@@ -45,6 +45,7 @@ interface MenuItemType {
   icon: any;
   show?: boolean;
   featureFlag?: string;
+  badgeCount?: number;
 }
 
 interface MenuItemProps {
@@ -115,7 +116,17 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
         style={{ color: active ? 'var(--accent-mid)' : undefined, opacity: active ? 1 : 0.4 }}
       />
       {!isCollapsed && (
-        <span className="truncate">{item.title}</span>
+        <>
+          <span className="truncate flex-1">{item.title}</span>
+          {item.badgeCount && item.badgeCount > 0 ? (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full tabular-nums"
+              style={{ background: 'rgba(201,123,26,0.18)', color: '#F5B068', minWidth: 18, textAlign: 'center' }}
+            >
+              {item.badgeCount > 99 ? '99+' : item.badgeCount}
+            </span>
+          ) : null}
+        </>
       )}
     </NavLink>
   );
@@ -151,6 +162,12 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+
+  // Detect context (program/project dashboards)
+  const programDashMatch = currentPath.match(/^\/programs\/dashboard\/([^/]+)/);
+  const projectDashMatch = currentPath.match(/^\/projects\/dashboard\/([^/]+)/);
+  const contextProgramId = programDashMatch?.[1];
+  const contextProjectId = projectDashMatch?.[1];
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
   const { planData } = useOrgPlanData();
@@ -175,6 +192,84 @@ export function AppSidebar() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Context: program name (for secondary nav)
+  const { data: contextProgram } = useQuery({
+    queryKey: ['sidebar-context-program', contextProgramId],
+    queryFn: async () => {
+      if (!contextProgramId) return null;
+      const { data } = await supabase.from('programs').select('id, name').eq('id', contextProgramId).maybeSingle();
+      return data;
+    },
+    enabled: !!contextProgramId,
+    staleTime: 60_000,
+  });
+
+  const { data: contextProject } = useQuery({
+    queryKey: ['sidebar-context-project', contextProjectId],
+    queryFn: async () => {
+      if (!contextProjectId) return null;
+      const { data } = await supabase.from('projects').select('id, name, program_id, programs(id, name)').eq('id', contextProjectId).maybeSingle();
+      return data as any;
+    },
+    enabled: !!contextProjectId,
+    staleTime: 60_000,
+  });
+
+  const orgId = currentOrganization?.organization_id;
+
+  // Badge: overdue programme milestones
+  const { data: overdueMilestones = 0 } = useQuery({
+    queryKey: ['sidebar-overdue-milestones', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from('programme_milestones')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .is('deleted_at', null)
+        .neq('status', 'completed')
+        .neq('status', 'cancelled')
+        .lt('due_date', today);
+      return count || 0;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+  });
+
+  // Badge: overdue M&E data collections
+  const { data: overdueCollections = 0 } = useQuery({
+    queryKey: ['sidebar-overdue-collections', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const { count } = await supabase
+        .from('me_data_schedule')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('is_active', true)
+        .lt('next_collection_date', today);
+      return count || 0;
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
+  });
+
+  // Programme/project counts (for sub-strip)
+  const { data: progCounts } = useQuery({
+    queryKey: ['sidebar-prog-counts', orgId],
+    queryFn: async () => {
+      if (!orgId) return { programmes: 0, projects: 0 };
+      const [p, pr] = await Promise.all([
+        supabase.from('programs').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('is_active', true),
+        supabase.from('projects').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).is('deleted_at', null),
+      ]);
+      return { programmes: p.count || 0, projects: pr.count || 0 };
+    },
+    enabled: !!orgId,
+    staleTime: 5 * 60_000,
   });
 
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
@@ -211,10 +306,12 @@ export function AppSidebar() {
     {
       label: "Programs & M&E",
       items: [
-        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms, badgeCount: overdueMilestones },
+        { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: "Workplans", url: "/workplans", icon: GanttIcon, show: can.viewPrograms },
         { title: "Portfolio", url: "/programs/portfolio", icon: Layers, show: can.viewPrograms },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
-        { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME },
+        { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME, badgeCount: overdueCollections },
         { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],
@@ -344,6 +441,59 @@ export function AppSidebar() {
               </SidebarGroup>
             );
           })}
+
+          {/* Context-sensitive secondary nav */}
+          {!isCollapsed && (contextProgram || contextProject) && (
+            <SidebarGroup className="mt-4">
+              <SidebarGroupLabel
+                className="px-[10px] mb-1.5 text-[10px] font-medium uppercase"
+                style={{ color: 'var(--sidebar-label)', letterSpacing: '0.8px' }}
+              >
+                {contextProject ? 'Current Project' : 'Current Programme'}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <div className="px-[10px] space-y-1">
+                  {contextProject ? (
+                    <>
+                      <button
+                        onClick={() => contextProject.programs && navigate(`/programs/dashboard/${contextProject.programs.id}`)}
+                        className="text-[11px] flex items-center gap-1 hover:underline truncate w-full text-left"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                      >
+                        ← {contextProject.programs?.name || 'Programme'}
+                      </button>
+                      <div className="text-[12px] font-medium text-white truncate" title={contextProject.name}>
+                        {contextProject.name}
+                      </div>
+                    </>
+                  ) : contextProgram ? (
+                    <>
+                      <button
+                        onClick={() => navigate('/programs-management')}
+                        className="text-[11px] flex items-center gap-1 hover:underline truncate w-full text-left"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                      >
+                        ← All programmes
+                      </button>
+                      <div className="text-[12px] font-medium text-white truncate" title={contextProgram.name}>
+                        {contextProgram.name}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* Programme stats strip */}
+          {!isCollapsed && progCounts && (progCounts.programmes > 0 || progCounts.projects > 0) && (
+            <div
+              className="mt-3 mx-[10px] text-[10px] tabular-nums"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
+              {progCounts.programmes} programme{progCounts.programmes === 1 ? '' : 's'} · {progCounts.projects} project{progCounts.projects === 1 ? '' : 's'}
+            </div>
+          )}
 
           {dynamicPrograms && dynamicPrograms.length > 0 && can.viewPrograms && (
             <SidebarGroup className="mt-4">
