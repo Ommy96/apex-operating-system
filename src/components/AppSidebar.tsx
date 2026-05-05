@@ -24,7 +24,7 @@ import {
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
-  Layers,
+  Layers, FolderKanban, GanttChart as GanttIcon,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
@@ -45,6 +45,7 @@ interface MenuItemType {
   icon: any;
   show?: boolean;
   featureFlag?: string;
+  badgeCount?: number;
 }
 
 interface MenuItemProps {
@@ -115,7 +116,17 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
         style={{ color: active ? 'var(--accent-mid)' : undefined, opacity: active ? 1 : 0.4 }}
       />
       {!isCollapsed && (
-        <span className="truncate">{item.title}</span>
+        <>
+          <span className="truncate flex-1">{item.title}</span>
+          {item.badgeCount && item.badgeCount > 0 ? (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full tabular-nums"
+              style={{ background: 'rgba(201,123,26,0.18)', color: '#F5B068', minWidth: 18, textAlign: 'center' }}
+            >
+              {item.badgeCount > 99 ? '99+' : item.badgeCount}
+            </span>
+          ) : null}
+        </>
       )}
     </NavLink>
   );
