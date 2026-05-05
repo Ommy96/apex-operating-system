@@ -417,6 +417,11 @@ const ProgramDashboard = () => {
             <ProgramMilestones programId={programId} />
           </TabsContent>
         )}
+        {activeTab === "logframe" && (
+          <TabsContent value="logframe" forceMount className="mt-6">
+            <ProgramLogframe programId={programId!} orgId={currentOrganization?.organization_id} />
+          </TabsContent>
+        )}
         {activeTab === "funding" && (
           <TabsContent value="funding" forceMount className="mt-6">
             <ProgramFunding programId={programId} />
