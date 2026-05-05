@@ -401,6 +401,9 @@ const ProjectDashboard = () => {
             <Badge variant="outline" className={getStatusBadgeClass(project.status)}>
               {project.status?.replace('_', ' ') || 'Planning'}
             </Badge>
+            <Button variant="outline" size="sm" className="ml-auto gap-1.5" onClick={() => setSettingsOpen(true)}>
+              <Settings className="h-3.5 w-3.5" /> Settings
+            </Button>
           </div>
           {project.program && (
             <button
