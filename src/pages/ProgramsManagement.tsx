@@ -69,6 +69,13 @@ const ProgramsManagement = () => {
   const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") === "calendar" ? "calendar" : "programmes";
+  const setActiveTab = (t: "programmes" | "calendar") => {
+    const next = new URLSearchParams(searchParams);
+    if (t === "programmes") next.delete("tab"); else next.set("tab", "calendar");
+    setSearchParams(next, { replace: true });
+  };
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
