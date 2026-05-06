@@ -614,6 +614,8 @@ const ProgramsManagement = () => {
           </div>
         </Card>
       )}
+      </>
+      )}
     </div>
   );
 };
