@@ -28,6 +28,13 @@ export default function AllProjects() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view: "list" | "workplan" = searchParams.get("view") === "workplan" ? "workplan" : "list";
+  const setView = (v: "list" | "workplan") => {
+    const next = new URLSearchParams(searchParams);
+    if (v === "list") next.delete("view"); else next.set("view", "workplan");
+    setSearchParams(next, { replace: true });
+  };
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["all-projects", orgId],
