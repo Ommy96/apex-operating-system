@@ -219,7 +219,11 @@ export default function OverviewTab({ filters }: OverviewTabProps) {
                     }}
                     formatter={(v: number) => [formatNumber(v), "Beneficiaries"]}
                   />
-                  <Bar dataKey="count" fill="hsl(173, 58%, 39%)" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                    {topProgrammes.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLOURS[i % PIE_COLOURS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}

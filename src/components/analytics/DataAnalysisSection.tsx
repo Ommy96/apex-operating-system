@@ -338,7 +338,11 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
                         <XAxis type="number" tick={{ fontSize: 10 }} />
                         <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="value" name="Count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="value" name="Count" radius={[0, 4, 4, 0]}>
+                          {donorAnalysis.breakdownData.slice(0, 15).map((_, i) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
