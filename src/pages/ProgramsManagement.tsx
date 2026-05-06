@@ -14,10 +14,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
 import { FieldDefinition } from "@/components/ProgramFieldBuilder";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
 import { Json } from "@/integrations/supabase/types";
 import { PageHeader, StatCard, WorkspacePanel, StatusBadge, getStatusVariant } from "@/components/workspace";
+import MECalendar from "./MECalendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
