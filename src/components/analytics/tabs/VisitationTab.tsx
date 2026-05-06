@@ -25,12 +25,12 @@ import { useVisitationIntelligence } from "@/hooks/useAnalyticsTabsData";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 
 const PALETTE = [
-  "hsl(var(--primary))",
-  "hsl(var(--accent))",
-  "hsl(var(--secondary))",
-  "hsl(var(--muted-foreground))",
-  "hsl(var(--destructive))",
-  "hsl(var(--ring))",
+  "hsl(173, 58%, 39%)",
+  "hsl(199, 89%, 48%)",
+  "hsl(262, 83%, 58%)",
+  "hsl(38, 92%, 50%)",
+  "hsl(346, 87%, 53%)",
+  "hsl(160, 60%, 45%)",
 ];
 
 const tooltipStyle = {

@@ -22,15 +22,9 @@ import { AnalyticsKpiCard } from "@/components/analytics/AnalyticsKpiCard";
 import { useBeneficiaryIntelligence } from "@/hooks/useAnalyticsTabsData";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 import AcademicPerformanceSection from "@/components/analytics/AcademicPerformanceSection";
+import { CHART_PALETTE } from "@/lib/chartPalette";
 
-const PALETTE = [
-  "hsl(var(--primary))",
-  "hsl(var(--accent))",
-  "hsl(var(--secondary))",
-  "hsl(var(--muted-foreground))",
-  "hsl(var(--destructive))",
-  "hsl(var(--ring))",
-];
+const PALETTE = CHART_PALETTE;
 
 const tooltipStyle = {
   background: "hsl(var(--popover))",
@@ -114,7 +108,11 @@ export default function BeneficiaryTab({ filters }: { filters: AnalyticsFilters 
                   <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="county" tick={{ fontSize: 11 }} width={90} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="hsl(var(--accent))" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                    {(data?.countyMix ?? []).map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}

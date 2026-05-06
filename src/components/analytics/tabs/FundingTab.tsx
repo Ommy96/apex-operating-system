@@ -4,6 +4,7 @@ import {
   Bar,
   Line,
   BarChart,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -18,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnalyticsKpiCard } from "@/components/analytics/AnalyticsKpiCard";
 import { useFundingIntelligence } from "@/hooks/useAnalyticsTabsData";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import { CHART_PALETTE } from "@/lib/chartPalette";
 
 const tooltipStyle = {
   background: "hsl(var(--popover))",
@@ -96,8 +98,8 @@ export default function FundingTab({ filters }: { filters: AnalyticsFilters }) {
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (v >= 1000 ? `${v / 1000}K` : `${v}`)} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmt(v)} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                <Line type="monotone" dataKey="expense" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3 }} />
+                <Bar dataKey="income" fill={CHART_PALETTE[0]} radius={[4, 4, 0, 0]} />
+                <Line type="monotone" dataKey="expense" stroke={CHART_PALETTE[4]} strokeWidth={2} dot={{ r: 3 }} />
               </ComposedChart>
             </ResponsiveContainer>
           )}
@@ -116,7 +118,11 @@ export default function FundingTab({ filters }: { filters: AnalyticsFilters }) {
                 <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => (v >= 1000 ? `${v / 1000}K` : `${v}`)} />
                 <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={120} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmt(v)} />
-                <Bar dataKey="total" fill="hsl(var(--accent))" radius={[0, 6, 6, 0]} />
+                <Bar dataKey="total" radius={[0, 6, 6, 0]}>
+                  {(data?.topDonors ?? []).map((_, i) => (
+                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}

@@ -19,15 +19,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnalyticsKpiCard } from "@/components/analytics/AnalyticsKpiCard";
 import { useDemographicsIntelligence } from "@/hooks/useAnalyticsTabsData";
 import type { AnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import { CHART_PALETTE } from "@/lib/chartPalette";
 
-const PALETTE = [
-  "hsl(var(--primary))",
-  "hsl(var(--accent))",
-  "hsl(var(--secondary))",
-  "hsl(var(--muted-foreground))",
-  "hsl(var(--destructive))",
-  "hsl(var(--ring))",
-];
+const PALETTE = CHART_PALETTE;
 
 const tooltipStyle = {
   background: "hsl(var(--popover))",
@@ -75,7 +69,11 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
                   <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {(data?.ageDistribution ?? []).map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -95,9 +93,9 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip contentStyle={tooltipStyle} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar dataKey="male" stackId="g" fill="hsl(var(--primary))" />
-                  <Bar dataKey="female" stackId="g" fill="hsl(var(--accent))" />
-                  <Bar dataKey="other" stackId="g" fill="hsl(var(--muted-foreground))" />
+                  <Bar dataKey="male" stackId="g" fill={PALETTE[1]} />
+                  <Bar dataKey="female" stackId="g" fill={PALETTE[4]} />
+                  <Bar dataKey="other" stackId="g" fill={PALETTE[2]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -118,7 +116,11 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
                   <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="hsl(var(--accent))" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                    {(data?.subCountyTop ?? []).map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -137,7 +139,11 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
                   <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {(data?.householdDistribution ?? []).map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
