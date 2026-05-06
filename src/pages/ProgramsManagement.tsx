@@ -357,6 +357,32 @@ const ProgramsManagement = () => {
         }
       />
 
+      {/* Tab bar */}
+      <div className="bg-[#F4F5F8] rounded-[10px] p-[3px] flex gap-[2px] w-fit">
+        <button
+          type="button"
+          onClick={() => setActiveTab("programmes")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-[8px] transition-colors ${
+            activeTab === "programmes" ? "bg-white text-[#0A0F1E] shadow-sm" : "text-[#8891A8]"
+          }`}
+        >
+          Programmes
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("calendar")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-[8px] transition-colors ${
+            activeTab === "calendar" ? "bg-white text-[#0A0F1E] shadow-sm" : "text-[#8891A8]"
+          }`}
+        >
+          M&E Calendar
+        </button>
+      </div>
+
+      {activeTab === "calendar" ? (
+        <MECalendar />
+      ) : (
+      <>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
