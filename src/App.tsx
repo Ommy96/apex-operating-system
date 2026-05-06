@@ -173,10 +173,9 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/workplans" element={
-              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout><LazyRoute><AllWorkplans /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
+              <Navigate to="/projects?view=workplan" replace />
             } />
+            <Route path="/portfolio" element={<Navigate to="/programs-management" replace />} />
             <Route path="/financial" element={
               <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
                 <DashboardLayout><LazyRoute><FinancialSuite /></LazyRoute></DashboardLayout>
@@ -317,9 +316,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/me-calendar" element={
-              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout><LazyRoute><MECalendar /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
+              <Navigate to="/programs-management?tab=calendar" replace />
             } />
             <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
 
