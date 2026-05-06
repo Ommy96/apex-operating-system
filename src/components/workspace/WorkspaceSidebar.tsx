@@ -22,6 +22,7 @@ import {
   Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
   Heart, Building2, Handshake, Activity, BarChart3, HandCoins,
+  FolderKanban, GanttChart as GanttIcon, Layers, CalendarCheck, Map,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -139,7 +140,12 @@ export function WorkspaceSidebar() {
       label: "Programs & M&E",
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: "Workplans", url: "/workplans", icon: GanttIcon, show: can.viewPrograms },
+        { title: "Portfolio", url: "/programs/portfolio", icon: Layers, show: can.viewPrograms },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
+        { title: "M&E Calendar", url: "/me-calendar", icon: CalendarCheck, show: can.viewME },
+        { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],
     },
