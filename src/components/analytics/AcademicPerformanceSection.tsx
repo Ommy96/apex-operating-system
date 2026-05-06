@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,6 +14,7 @@ import {
 import { GraduationCap, Download, Loader2, AlertTriangle, School } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_PALETTE } from '@/lib/chartPalette';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -236,7 +238,11 @@ export default function AcademicPerformanceSection() {
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={150} />
                 <Tooltip />
-                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {levelData.map((_, i) => (
+                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -295,7 +301,11 @@ export default function AcademicPerformanceSection() {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Bar dataKey="value" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {gradeData.map((_, i) => (
+                      <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -320,9 +330,9 @@ export default function AcademicPerformanceSection() {
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar dataKey="Female" fill="hsl(var(--primary))" />
-                  <Bar dataKey="Male" fill="hsl(var(--accent))" />
-                  <Bar dataKey="Other" fill="hsl(var(--muted-foreground))" />
+                  <Bar dataKey="Female" fill={CHART_PALETTE[4]} />
+                  <Bar dataKey="Male" fill={CHART_PALETTE[1]} />
+                  <Bar dataKey="Other" fill={CHART_PALETTE[2]} />
                 </BarChart>
               </ResponsiveContainer>
               {genderAlert && (
