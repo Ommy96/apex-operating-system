@@ -86,11 +86,35 @@ export default function AllProjects() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">All projects</h1>
-        <p className="text-sm text-muted-foreground mt-1">Cross-programme project portfolio</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">All projects</h1>
+          <p className="text-sm text-muted-foreground mt-1">Cross-programme project portfolio</p>
+        </div>
+        <div className="inline-flex rounded-lg border bg-muted/40 p-0.5">
+          <Button
+            variant={view === "list" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => setView("list")}
+          >
+            <List className="h-4 w-4" /> List
+          </Button>
+          <Button
+            variant={view === "workplan" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => setView("workplan")}
+          >
+            <GanttIcon className="h-4 w-4" /> Workplan
+          </Button>
+        </div>
       </div>
 
+      {view === "workplan" ? (
+        <AllWorkplans />
+      ) : (
+        <>
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[240px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -163,6 +187,8 @@ export default function AllProjects() {
           )}
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
