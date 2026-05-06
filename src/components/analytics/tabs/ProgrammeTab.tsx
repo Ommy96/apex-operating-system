@@ -126,7 +126,11 @@ export default function ProgrammeTab({ filters }: { filters: AnalyticsFilters })
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-15} textAnchor="end" height={50} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="beneficiaries" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="beneficiaries" radius={[6, 6, 0, 0]}>
+                  {(data?.programmeRows ?? []).map((_, i) => (
+                    <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}
