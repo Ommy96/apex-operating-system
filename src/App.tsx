@@ -76,6 +76,8 @@ const Setup2FA = lazy(() => import("./pages/Setup2FA"));
 // Sprint 6 pages
 const MapView = lazy(() => import("./pages/MapView"));
 const Procurement = lazy(() => import("./pages/Procurement"));
+const MEHub = lazy(() => import("./pages/MEHub"));
+const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 
 const queryClient = new QueryClient();
 
@@ -184,6 +186,16 @@ const App = () => (
             <Route path="/me-suite" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><MESuite /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><MEHub /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/indicators" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><IndicatorManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
