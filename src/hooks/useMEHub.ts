@@ -78,69 +78,56 @@ export function useMEHub() {
       const monthStart = startOfMonth(now).toISOString();
       const todayIso = now.toISOString().slice(0, 10);
 
-      const [
-        beneficiariesCount,
-        programsCount,
-        visitsMonth,
-        indicators,
-        scheduleAll,
-        cases,
-        casesHigh,
-        followUps,
-        dqFlags,
-        recentActivities,
-      ] = await Promise.all([
-        supabase.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).is("deleted_at", null),
-        supabase.from("programs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true),
-        supabase
-          .from("beneficiary_visitations")
-          .select("id", { count: "exact", head: true })
-          .eq("organization_id", orgId)
-          .gte("visit_date", monthStart),
-        supabase
-          .from("indicators")
-          .select("id, name, target_value")
-          .eq("organization_id", orgId)
-          .eq("is_active", true)
-          .is("deleted_at", null),
-        supabase
-          .from("me_data_schedule")
-          .select("id, indicator_id, due_date, status, assigned_to")
-          .eq("organization_id", orgId),
-        supabase
-          .from("beneficiary_cases")
-          .select("id, priority, case_status", { count: "exact" })
-          .eq("organization_id", orgId)
-          .is("deleted_at", null)
-          .neq("case_status", "closed")
-          .neq("case_status", "resolved"),
-        supabase
-          .from("beneficiary_cases")
-          .select("id", { count: "exact", head: true })
-          .eq("organization_id", orgId)
-          .is("deleted_at", null)
-          .in("priority", ["high", "critical"])
-          .neq("case_status", "closed"),
-        supabase
-          .from("case_entries")
-          .select("id, beneficiary_id, follow_up_date, structured_data")
-          .eq("organization_id", orgId)
-          .eq("follow_up_completed", false)
-          .not("follow_up_date", "is", null)
-          .lt("follow_up_date", todayIso)
-          .limit(50),
-        supabase
-          .from("data_quality_flags")
-          .select("id", { count: "exact", head: true })
-          .eq("organization_id", orgId)
-          .eq("is_resolved", false),
-        supabase
-          .from("activities")
-          .select("id, attendees_count, beneficiaries_reached")
-          .eq("organization_id", orgId)
-          .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-          .limit(500),
-      ]);
+      const beneficiariesCount: any = await supabase.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).is("deleted_at", null);
+      const programsCount: any = await supabase.from("programs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true);
+      const visitsMonth: any = await supabase
+        .from("beneficiary_visitations")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .gte("visit_date", monthStart);
+      const indicators: any = await supabase
+        .from("indicators")
+        .select("id, name, target_value")
+        .eq("organization_id", orgId)
+        .eq("is_active", true)
+        .is("deleted_at", null);
+      const scheduleAll: any = await supabase
+        .from("me_data_schedule")
+        .select("id, indicator_id, due_date, status, assigned_to")
+        .eq("organization_id", orgId);
+      const cases: any = await supabase
+        .from("beneficiary_cases")
+        .select("id, priority, case_status", { count: "exact" })
+        .eq("organization_id", orgId)
+        .is("deleted_at", null)
+        .neq("case_status", "closed")
+        .neq("case_status", "resolved");
+      const casesHigh: any = await supabase
+        .from("beneficiary_cases")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .is("deleted_at", null)
+        .in("priority", ["high", "critical"])
+        .neq("case_status", "closed");
+      const followUps: any = await supabase
+        .from("case_entries")
+        .select("id, beneficiary_id, follow_up_date, structured_data")
+        .eq("organization_id", orgId)
+        .eq("follow_up_completed", false)
+        .not("follow_up_date", "is", null)
+        .lt("follow_up_date", todayIso)
+        .limit(50);
+      const dqFlags: any = await supabase
+        .from("data_quality_flags")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .eq("is_resolved", false);
+      const recentActivities: any = await supabase
+        .from("activities")
+        .select("id, attendees_count, beneficiaries_reached")
+        .eq("organization_id", orgId)
+        .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+        .limit(500);
 
       // Latest indicator value for each indicator
       const indicatorIds = (indicators.data ?? []).map((i) => i.id);
