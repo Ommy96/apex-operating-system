@@ -1298,6 +1298,119 @@ export type Database = {
           },
         ]
       }
+      beneficiary_cases: {
+        Row: {
+          assigned_to: string | null
+          beneficiary_id: string
+          case_number: string | null
+          case_status: string
+          case_type: string
+          closed_date: string | null
+          closure_reason: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          opened_date: string
+          organization_id: string
+          priority: string
+          program_id: string | null
+          summary: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          beneficiary_id: string
+          case_number?: string | null
+          case_status?: string
+          case_type: string
+          closed_date?: string | null
+          closure_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          opened_date?: string
+          organization_id: string
+          priority?: string
+          program_id?: string | null
+          summary?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          beneficiary_id?: string
+          case_number?: string | null
+          case_status?: string
+          case_type?: string
+          closed_date?: string | null
+          closure_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          opened_date?: string
+          organization_id?: string
+          priority?: string
+          program_id?: string | null
+          summary?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_cases_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_cases_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       beneficiary_donors: {
         Row: {
           amount_received: number | null
@@ -3017,6 +3130,178 @@ export type Database = {
           },
         ]
       }
+      case_entries: {
+        Row: {
+          action_required: string | null
+          beneficiary_id: string
+          case_id: string
+          concern_level: string | null
+          created_at: string
+          deleted_at: string | null
+          documents: string[]
+          entered_by: string
+          entry_date: string
+          entry_type: string
+          follow_up_completed: boolean
+          follow_up_completed_date: string | null
+          follow_up_date: string | null
+          id: string
+          latitude: number | null
+          linked_activity_id: string | null
+          linked_form_submission_id: string | null
+          location_county: string | null
+          location_sub_county: string | null
+          longitude: number | null
+          organization_id: string
+          photos: string[]
+          referral_date: string | null
+          referral_organisation: string | null
+          referral_outcome: string | null
+          referral_to: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          structured_data: Json
+          summary: string
+          updated_at: string
+          updated_by: string | null
+          visit_type: string | null
+        }
+        Insert: {
+          action_required?: string | null
+          beneficiary_id: string
+          case_id: string
+          concern_level?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          documents?: string[]
+          entered_by: string
+          entry_date?: string
+          entry_type: string
+          follow_up_completed?: boolean
+          follow_up_completed_date?: string | null
+          follow_up_date?: string | null
+          id?: string
+          latitude?: number | null
+          linked_activity_id?: string | null
+          linked_form_submission_id?: string | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          longitude?: number | null
+          organization_id: string
+          photos?: string[]
+          referral_date?: string | null
+          referral_organisation?: string | null
+          referral_outcome?: string | null
+          referral_to?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          structured_data?: Json
+          summary: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_type?: string | null
+        }
+        Update: {
+          action_required?: string | null
+          beneficiary_id?: string
+          case_id?: string
+          concern_level?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          documents?: string[]
+          entered_by?: string
+          entry_date?: string
+          entry_type?: string
+          follow_up_completed?: boolean
+          follow_up_completed_date?: string | null
+          follow_up_date?: string | null
+          id?: string
+          latitude?: number | null
+          linked_activity_id?: string | null
+          linked_form_submission_id?: string | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          longitude?: number | null
+          organization_id?: string
+          photos?: string[]
+          referral_date?: string | null
+          referral_organisation?: string | null
+          referral_outcome?: string | null
+          referral_to?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          structured_data?: Json
+          summary?: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_entries_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_entered_by_fkey"
+            columns: ["entered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "case_entries_linked_activity_id_fkey"
+            columns: ["linked_activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_linked_form_submission_id_fkey"
+            columns: ["linked_form_submission_id"]
+            isOneToOne: false
+            referencedRelation: "me_form_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_entries_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "case_entries_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       cash_transfer_batches: {
         Row: {
           approved_at: string | null
@@ -3735,6 +4020,76 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_quality_flags: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          flag_message: string
+          flag_severity: string
+          flag_type: string
+          flagged_by: string
+          id: string
+          is_resolved: boolean
+          organization_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          flag_message: string
+          flag_severity?: string
+          flag_type: string
+          flagged_by?: string
+          id?: string
+          is_resolved?: boolean
+          organization_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          flag_message?: string
+          flag_severity?: string
+          flag_type?: string
+          flagged_by?: string
+          id?: string
+          is_resolved?: boolean
+          organization_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_quality_flags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_quality_flags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_quality_flags_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -6158,72 +6513,239 @@ export type Database = {
           },
         ]
       }
+      indicator_versions: {
+        Row: {
+          baseline_value: number | null
+          calculation_method: string | null
+          change_reason: string
+          changed_by: string | null
+          created_at: string
+          definition: string | null
+          disaggregation_dimensions: string[] | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          indicator_id: string
+          name: string
+          organization_id: string
+          snapshot: Json
+          target_value: number | null
+          unit: string | null
+          version: number
+        }
+        Insert: {
+          baseline_value?: number | null
+          calculation_method?: string | null
+          change_reason: string
+          changed_by?: string | null
+          created_at?: string
+          definition?: string | null
+          disaggregation_dimensions?: string[] | null
+          effective_from: string
+          effective_to?: string | null
+          id?: string
+          indicator_id: string
+          name: string
+          organization_id: string
+          snapshot: Json
+          target_value?: number | null
+          unit?: string | null
+          version: number
+        }
+        Update: {
+          baseline_value?: number | null
+          calculation_method?: string | null
+          change_reason?: string
+          changed_by?: string | null
+          created_at?: string
+          definition?: string | null
+          disaggregation_dimensions?: string[] | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          indicator_id?: string
+          name?: string
+          organization_id?: string
+          snapshot?: Json
+          target_value?: number | null
+          unit?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_versions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "indicator_versions_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicators: {
         Row: {
           aggregation_period: string | null
+          baseline_date: string | null
+          baseline_source: string | null
+          baseline_value: number | null
+          calculation_method: string | null
           category_id: string | null
           code: string
+          collection_method: string | null
+          collection_responsibility: string | null
           created_at: string
           created_by: string | null
+          data_source_description: string | null
           decimal_places: number | null
+          decision_context: string | null
+          deleted_at: string | null
           description: string | null
+          disaggregation_dimensions: string[]
           formula_config: Json
           formula_type: string
           id: string
           is_active: boolean | null
           is_template: boolean | null
+          level: string | null
+          logframe_entry_id: string | null
           name: string
+          notes: string | null
           organization_id: string
+          program_ids: string[] | null
+          publish_status: string
+          published_at: string | null
+          reporting_frequency: string | null
+          retired_at: string | null
+          retired_reason: string | null
           show_trend: boolean | null
           sort_order: number | null
+          superseded_by: string | null
+          target_date: string | null
+          target_value: number | null
           template_source_id: string | null
           trend_direction: string | null
           unit: string | null
           updated_at: string
+          updated_by: string | null
+          validation_rule: Json | null
+          version: number
+          version_notes: string | null
         }
         Insert: {
           aggregation_period?: string | null
+          baseline_date?: string | null
+          baseline_source?: string | null
+          baseline_value?: number | null
+          calculation_method?: string | null
           category_id?: string | null
           code: string
+          collection_method?: string | null
+          collection_responsibility?: string | null
           created_at?: string
           created_by?: string | null
+          data_source_description?: string | null
           decimal_places?: number | null
+          decision_context?: string | null
+          deleted_at?: string | null
           description?: string | null
+          disaggregation_dimensions?: string[]
           formula_config?: Json
           formula_type: string
           id?: string
           is_active?: boolean | null
           is_template?: boolean | null
+          level?: string | null
+          logframe_entry_id?: string | null
           name: string
+          notes?: string | null
           organization_id: string
+          program_ids?: string[] | null
+          publish_status?: string
+          published_at?: string | null
+          reporting_frequency?: string | null
+          retired_at?: string | null
+          retired_reason?: string | null
           show_trend?: boolean | null
           sort_order?: number | null
+          superseded_by?: string | null
+          target_date?: string | null
+          target_value?: number | null
           template_source_id?: string | null
           trend_direction?: string | null
           unit?: string | null
           updated_at?: string
+          updated_by?: string | null
+          validation_rule?: Json | null
+          version?: number
+          version_notes?: string | null
         }
         Update: {
           aggregation_period?: string | null
+          baseline_date?: string | null
+          baseline_source?: string | null
+          baseline_value?: number | null
+          calculation_method?: string | null
           category_id?: string | null
           code?: string
+          collection_method?: string | null
+          collection_responsibility?: string | null
           created_at?: string
           created_by?: string | null
+          data_source_description?: string | null
           decimal_places?: number | null
+          decision_context?: string | null
+          deleted_at?: string | null
           description?: string | null
+          disaggregation_dimensions?: string[]
           formula_config?: Json
           formula_type?: string
           id?: string
           is_active?: boolean | null
           is_template?: boolean | null
+          level?: string | null
+          logframe_entry_id?: string | null
           name?: string
+          notes?: string | null
           organization_id?: string
+          program_ids?: string[] | null
+          publish_status?: string
+          published_at?: string | null
+          reporting_frequency?: string | null
+          retired_at?: string | null
+          retired_reason?: string | null
           show_trend?: boolean | null
           sort_order?: number | null
+          superseded_by?: string | null
+          target_date?: string | null
+          target_value?: number | null
           template_source_id?: string | null
           trend_direction?: string | null
           unit?: string | null
           updated_at?: string
+          updated_by?: string | null
+          validation_rule?: Json | null
+          version?: number
+          version_notes?: string | null
         }
         Relationships: [
           {
@@ -6231,6 +6753,20 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "indicator_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicators_collection_responsibility_fkey"
+            columns: ["collection_responsibility"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "indicators_logframe_entry_id_fkey"
+            columns: ["logframe_entry_id"]
+            isOneToOne: false
+            referencedRelation: "logframe_entries"
             referencedColumns: ["id"]
           },
           {
@@ -6248,11 +6784,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "indicators_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "indicators_template_source_id_fkey"
             columns: ["template_source_id"]
             isOneToOne: false
             referencedRelation: "indicators"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicators_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -7048,6 +7598,356 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      me_form_fields: {
+        Row: {
+          created_at: string
+          depends_on_field_id: string | null
+          depends_on_value: string | null
+          display_order: number
+          field_key: string
+          field_label: string
+          field_options: Json
+          field_type: string
+          form_id: string
+          helper_text: string | null
+          id: string
+          is_required: boolean
+          linked_indicator_id: string | null
+          maps_to_column: string | null
+          organization_id: string
+          updated_at: string
+          validation_rule: string | null
+        }
+        Insert: {
+          created_at?: string
+          depends_on_field_id?: string | null
+          depends_on_value?: string | null
+          display_order?: number
+          field_key: string
+          field_label: string
+          field_options?: Json
+          field_type: string
+          form_id: string
+          helper_text?: string | null
+          id?: string
+          is_required?: boolean
+          linked_indicator_id?: string | null
+          maps_to_column?: string | null
+          organization_id: string
+          updated_at?: string
+          validation_rule?: string | null
+        }
+        Update: {
+          created_at?: string
+          depends_on_field_id?: string | null
+          depends_on_value?: string | null
+          display_order?: number
+          field_key?: string
+          field_label?: string
+          field_options?: Json
+          field_type?: string
+          form_id?: string
+          helper_text?: string | null
+          id?: string
+          is_required?: boolean
+          linked_indicator_id?: string | null
+          maps_to_column?: string | null
+          organization_id?: string
+          updated_at?: string
+          validation_rule?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "me_form_fields_depends_on_field_id_fkey"
+            columns: ["depends_on_field_id"]
+            isOneToOne: false
+            referencedRelation: "me_form_fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_fields_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "me_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_fields_linked_indicator_id_fkey"
+            columns: ["linked_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_fields_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_fields_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      me_form_submissions: {
+        Row: {
+          activity_id: string | null
+          beneficiary_ids: string[]
+          created_at: string
+          data: Json
+          data_quality_flags: string[]
+          deleted_at: string | null
+          form_id: string
+          household_id: string | null
+          id: string
+          is_synced: boolean
+          latitude: number | null
+          location_county: string | null
+          location_sub_county: string | null
+          longitude: number | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          submission_date: string
+          submitted_by: string | null
+          synced_at: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          beneficiary_ids?: string[]
+          created_at?: string
+          data?: Json
+          data_quality_flags?: string[]
+          deleted_at?: string | null
+          form_id: string
+          household_id?: string | null
+          id?: string
+          is_synced?: boolean
+          latitude?: number | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          longitude?: number | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          submission_date?: string
+          submitted_by?: string | null
+          synced_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          beneficiary_ids?: string[]
+          created_at?: string
+          data?: Json
+          data_quality_flags?: string[]
+          deleted_at?: string | null
+          form_id?: string
+          household_id?: string | null
+          id?: string
+          is_synced?: boolean
+          latitude?: number | null
+          location_county?: string | null
+          location_sub_county?: string | null
+          longitude?: number | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          submission_date?: string
+          submitted_by?: string | null
+          synced_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "me_form_submissions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "me_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      me_forms: {
+        Row: {
+          allow_offline: boolean
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deployed_to_roles: string[]
+          description: string | null
+          form_purpose: string | null
+          id: string
+          name: string
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          published_at: string | null
+          requires_beneficiary_link: boolean
+          requires_location: boolean
+          requires_photo: boolean
+          retired_at: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deployed_to_roles?: string[]
+          description?: string | null
+          form_purpose?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          published_at?: string | null
+          requires_beneficiary_link?: boolean
+          requires_location?: boolean
+          requires_photo?: boolean
+          retired_at?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deployed_to_roles?: string[]
+          description?: string | null
+          form_purpose?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          published_at?: string | null
+          requires_beneficiary_link?: boolean
+          requires_location?: boolean
+          requires_photo?: boolean
+          retired_at?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "me_forms_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "me_forms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_forms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_forms_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_forms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_forms_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -11023,6 +11923,98 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      stakeholder_access: {
+        Row: {
+          access_level: string
+          access_token: string
+          allowed_grant_ids: string[]
+          allowed_program_ids: string[]
+          can_download_reports: boolean
+          can_view_beneficiary_data: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          organization_id: string
+          stakeholder_type: string
+          token_expires_at: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          access_level?: string
+          access_token?: string
+          allowed_grant_ids?: string[]
+          allowed_program_ids?: string[]
+          can_download_reports?: boolean
+          can_view_beneficiary_data?: boolean
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name: string
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          organization_id: string
+          stakeholder_type: string
+          token_expires_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          access_level?: string
+          access_token?: string
+          allowed_grant_ids?: string[]
+          allowed_program_ids?: string[]
+          can_download_reports?: boolean
+          can_view_beneficiary_data?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          organization_id?: string
+          stakeholder_type?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stakeholder_access_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stakeholder_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stakeholder_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stakeholder_access_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }

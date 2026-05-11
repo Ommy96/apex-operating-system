@@ -141,6 +141,8 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
+        { title: "Indicators", url: "/indicators", icon: BarChart3, show: can.viewME },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
         { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },
