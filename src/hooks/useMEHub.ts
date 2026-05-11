@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 
+// Cast for tables added in M&E Phase 1 migration before types.ts regenerates.
+const sb = supabase as any;
+
 export interface MEHubStats {
   totalBeneficiaries: number;
   activeCases: number;
@@ -78,38 +81,38 @@ export function useMEHub() {
       const monthStart = startOfMonth(now).toISOString();
       const todayIso = now.toISOString().slice(0, 10);
 
-      const beneficiariesCount: any = await supabase.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).is("deleted_at", null);
-      const programsCount: any = await supabase.from("programs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true);
-      const visitsMonth: any = await supabase
+      const beneficiariesCount: any = await sb.from("beneficiaries").select("id", { count: "exact", head: true }).eq("organization_id", orgId).is("deleted_at", null);
+      const programsCount: any = await sb.from("programs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true);
+      const visitsMonth: any = await sb
         .from("beneficiary_visitations")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .gte("visit_date", monthStart);
-      const indicators: any = await supabase
+      const indicators: any = await sb
         .from("indicators")
         .select("id, name, target_value")
         .eq("organization_id", orgId)
         .eq("is_active", true)
         .is("deleted_at", null);
-      const scheduleAll: any = await supabase
+      const scheduleAll: any = await sb
         .from("me_data_schedule")
         .select("id, indicator_id, due_date, status, assigned_to")
         .eq("organization_id", orgId);
-      const cases: any = await supabase
+      const cases: any = await sb
         .from("beneficiary_cases")
         .select("id, priority, case_status", { count: "exact" })
         .eq("organization_id", orgId)
         .is("deleted_at", null)
         .neq("case_status", "closed")
         .neq("case_status", "resolved");
-      const casesHigh: any = await supabase
+      const casesHigh: any = await sb
         .from("beneficiary_cases")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .is("deleted_at", null)
         .in("priority", ["high", "critical"])
         .neq("case_status", "closed");
-      const followUps: any = await supabase
+      const followUps: any = await sb
         .from("case_entries")
         .select("id, beneficiary_id, follow_up_date, structured_data")
         .eq("organization_id", orgId)
@@ -117,12 +120,12 @@ export function useMEHub() {
         .not("follow_up_date", "is", null)
         .lt("follow_up_date", todayIso)
         .limit(50);
-      const dqFlags: any = await supabase
+      const dqFlags: any = await sb
         .from("data_quality_flags")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .eq("is_resolved", false);
-      const recentActivities: any = await supabase
+      const recentActivities: any = await sb
         .from("activities")
         .select("id, attendees_count, beneficiaries_reached")
         .eq("organization_id", orgId)
@@ -131,8 +134,8 @@ export function useMEHub() {
 
       // Latest indicator value for each indicator
       const indicatorIds = (indicators.data ?? []).map((i) => i.id);
-      const latestValues = indicatorIds.length
-        ? await supabase
+      const latestValues: any = indicatorIds.length
+        ? await sb
             .from("indicator_values")
             .select("indicator_id, actual_value, period_start")
             .in("indicator_id", indicatorIds)
