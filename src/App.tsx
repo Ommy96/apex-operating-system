@@ -78,6 +78,7 @@ const MapView = lazy(() => import("./pages/MapView"));
 const Procurement = lazy(() => import("./pages/Procurement"));
 const MEHub = lazy(() => import("./pages/MEHub"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
+const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
 
 const queryClient = new QueryClient();
 
@@ -196,6 +197,11 @@ const App = () => (
             <Route path="/indicators" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><IndicatorManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/indicators/:id" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><IndicatorDetail /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
