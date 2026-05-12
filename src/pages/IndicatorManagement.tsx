@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Plus, Search, Target, Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { NewIndicatorWizard } from "@/components/indicators/NewIndicatorWizard";
 
 export default function IndicatorManagement() {
   const { data: indicators, isLoading } = useIndicators();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -109,7 +110,11 @@ export default function IndicatorManagement() {
                   </thead>
                   <tbody>
                     {filtered.map((ind: any) => (
-                      <tr key={ind.id} className="border-b hover:bg-muted/30">
+                      <tr
+                        key={ind.id}
+                        className="border-b hover:bg-muted/30 cursor-pointer"
+                        onClick={() => navigate(`/indicators/${ind.id}`)}
+                      >
                         <td className="py-2 px-2 font-medium">
                           <span>{ind.name}</span>
                           {ind.decision_context && (
