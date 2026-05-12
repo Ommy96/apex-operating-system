@@ -4,6 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useHousehold, useHouseholdMembers } from '@/hooks/useBeneficiaryRelationships';
+import { useUpdateBeneficiaryHousehold } from '@/hooks/useBeneficiaryRelationships';
+import { useBeneficiarySearch } from '@/hooks/useBeneficiarySearch';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
 import { calculateAge } from '@/lib/ageUtils';
 import { useState } from 'react';
 import { RegisterFamilySheet } from '@/components/beneficiary/RegisterFamilySheet';
@@ -15,6 +20,22 @@ export default function HouseholdProfile() {
   const { data: household, isLoading } = useHousehold(householdId);
   const { data: members = [] } = useHouseholdMembers(householdId);
   const [registerOpen, setRegisterOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const memberIds = members.map((m: any) => m.id);
+  const { searchTerm, setSearchTerm, results, isFetching } = useBeneficiarySearch(memberIds, 15);
+  const updateHousehold = useUpdateBeneficiaryHousehold();
+
+  const handleAddExisting = async (beneficiaryId: string) => {
+    if (!householdId) return;
+    try {
+      await updateHousehold.mutateAsync({ beneficiaryId, householdId });
+      toast({ title: 'Member added to household' });
+      setSearchTerm('');
+      setAddOpen(false);
+    } catch (e: any) {
+      toast({ title: 'Failed to add member', description: e?.message, variant: 'destructive' });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -83,7 +104,7 @@ export default function HouseholdProfile() {
             <h2 className="text-base font-semibold flex items-center gap-2">
               <Users className="h-4 w-4" /> Members
             </h2>
-            <Button size="sm" variant="outline" onClick={() => setRegisterOpen(true)}>
+            <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
               <Plus className="h-3.5 w-3.5 mr-1" /> Add member
             </Button>
           </div>
@@ -138,6 +159,71 @@ export default function HouseholdProfile() {
         open={registerOpen}
         onOpenChange={setRegisterOpen}
       />
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add existing beneficiary to household</DialogTitle>
+            <DialogDescription>
+              Search by name or unique ID to attach an existing beneficiary to this household.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              autoFocus
+              placeholder="Search beneficiaries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="max-h-72 overflow-y-auto border rounded-md divide-y">
+              {searchTerm.trim().length < 2 && (
+                <p className="p-3 text-sm text-muted-foreground">Type at least 2 characters to search.</p>
+              )}
+              {searchTerm.trim().length >= 2 && !isFetching && results.length === 0 && (
+                <p className="p-3 text-sm text-muted-foreground">No beneficiaries found.</p>
+              )}
+              {results.map((b) => {
+                const age = calculateAge(b.date_of_birth);
+                return (
+                  <div key={b.id} className="flex items-center gap-3 p-3">
+                    <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold">
+                      {b.display_name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{b.display_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {b.unique_id || '—'}
+                        {age !== null ? ` · ${age}y` : ''}
+                        {b.gender ? ` · ${b.gender}` : ''}
+                        {b.household_id && b.household_id !== householdId ? ' · already in another household' : ''}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddExisting(b.id)}
+                      disabled={updateHousehold.isPending}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-between gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setAddOpen(false);
+                setRegisterOpen(true);
+              }}
+            >
+              Register a new beneficiary instead
+            </Button>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
