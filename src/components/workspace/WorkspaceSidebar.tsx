@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
-  Heart, Building2, Handshake, Activity, BarChart3, HandCoins,
+  Heart, Building2, Handshake, Activity, BarChart3, HandCoins, ClipboardList,
   FolderKanban, MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -143,6 +143,8 @@ export function WorkspaceSidebar() {
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
         { title: "Indicators", url: "/indicators", icon: BarChart3, show: can.viewME },
+        { title: "Forms", url: "/me/forms", icon: FileText, show: can.viewME },
+        { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewME },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
         { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },

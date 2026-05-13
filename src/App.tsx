@@ -79,6 +79,10 @@ const Procurement = lazy(() => import("./pages/Procurement"));
 const MEHub = lazy(() => import("./pages/MEHub"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
+const FormBuilderList = lazy(() => import("./pages/FormBuilderList"));
+const FormBuilderEditor = lazy(() => import("./pages/FormBuilderEditor"));
+const CaseManagement = lazy(() => import("./pages/CaseManagement"));
+const CaseDetail = lazy(() => import("./pages/CaseDetail"));
 
 const queryClient = new QueryClient();
 
@@ -202,6 +206,26 @@ const App = () => (
             <Route path="/indicators/:id" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><IndicatorDetail /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me/forms" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><FormBuilderList /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me/forms/:id" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><FormBuilderEditor /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/cases" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><CaseManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/cases/:id" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><CaseDetail /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
