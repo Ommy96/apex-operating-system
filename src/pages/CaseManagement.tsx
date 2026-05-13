@@ -93,7 +93,7 @@ export default function CaseManagement() {
         <Card><CardContent className="p-0">
           <div className="divide-y">
             {cases.map((c) => {
-              const name = c.beneficiary?.display_name ?? `${c.beneficiary?.first_name ?? ""} ${c.beneficiary?.last_name ?? ""}`.trim() || "Unknown beneficiary";
+              const name = (c.beneficiary?.display_name ?? `${c.beneficiary?.first_name ?? ""} ${c.beneficiary?.last_name ?? ""}`.trim()) || "Unknown beneficiary";
               return (
                 <Link key={c.id} to={`/cases/${c.id}`} className="flex items-center justify-between gap-3 p-4 hover:bg-muted/40 transition-colors">
                   <div className="min-w-0 flex-1">
