@@ -322,6 +322,12 @@ export default function IndicatorDetail() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-4">
+          {null}
+        </TabsContent>
+        <TabsContent value="disaggregation" className="mt-4">
+          <DisaggregationPanel indicatorId={id!} />
+        </TabsContent>
+        <TabsContent value="history-real" className="mt-4">
           <Card>
             <CardContent className="pt-6">
               {versions.length === 0 ? (
