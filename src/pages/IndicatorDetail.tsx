@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Target, History, Tag, Layers, ShieldAlert, Edit3, Save, X } from "lucide-react";
+import { ArrowLeft, Target, History, Tag, Layers, ShieldAlert, Edit3, Save, X, PieChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import {
 import { formatDisplayDate } from "@/lib/dateUtils";
 import { useIndicatorVersions, useUpdateIndicatorWithVersioning } from "@/hooks/useIndicatorVersions";
 import { useIndicatorTargets, useIndicatorValues } from "@/hooks/useIndicators";
+import { DisaggregationPanel } from "@/components/indicators/DisaggregationPanel";
+import { useDataQualityFlags } from "@/hooks/useDataQuality";
 
 function useIndicator(id?: string) {
   return useQuery({
@@ -157,6 +159,7 @@ export default function IndicatorDetail() {
           <TabsTrigger value="definition"><Layers className="h-4 w-4 mr-1" /> Definition</TabsTrigger>
           <TabsTrigger value="targets">Targets</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>
+          <TabsTrigger value="disaggregation"><PieChart className="h-4 w-4 mr-1" /> Disaggregation</TabsTrigger>
           <TabsTrigger value="history"><History className="h-4 w-4 mr-1" /> History</TabsTrigger>
           <TabsTrigger value="quality"><ShieldAlert className="h-4 w-4 mr-1" /> Quality</TabsTrigger>
         </TabsList>
@@ -318,6 +321,9 @@ export default function IndicatorDetail() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="disaggregation" className="mt-4">
+          <DisaggregationPanel indicatorId={id!} />
+        </TabsContent>
         <TabsContent value="history" className="mt-4">
           <Card>
             <CardContent className="pt-6">
@@ -346,11 +352,7 @@ export default function IndicatorDetail() {
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
-          <Card>
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Data quality flags for this indicator will appear here once the data quality engine is enabled (Phase 2).
-            </CardContent>
-          </Card>
+          <IndicatorQualityTab indicatorId={id!} />
         </TabsContent>
       </Tabs>
 
@@ -379,5 +381,34 @@ export default function IndicatorDetail() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function IndicatorQualityTab({ indicatorId }: { indicatorId: string }) {
+  const { data: flags = [], isLoading } = useDataQualityFlags({ resolved: "all" });
+  const related = flags.filter((f) => f.entity_type === "indicator_value" || f.entity_id === indicatorId);
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading flags…</p>
+        ) : related.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data quality flags raised for this indicator.</p>
+        ) : (
+          <div className="space-y-2">
+            {related.slice(0, 20).map((f) => (
+              <div key={f.id} className="border rounded-md p-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge variant={f.flag_severity === "error" ? "destructive" : "secondary"} className="capitalize">{f.flag_severity}</Badge>
+                  <span className="text-xs text-muted-foreground capitalize">{f.flag_type}</span>
+                  {f.is_resolved && <Badge className="text-xs bg-emerald-100 text-emerald-700">Resolved</Badge>}
+                </div>
+                <p className="mt-1">{f.flag_message}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

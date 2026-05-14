@@ -186,6 +186,10 @@ export default function MEHub() {
               {data && data.activitiesWithoutBeneficiaries > 0 && (
                 <p className="text-sm text-amber-700">{data.activitiesWithoutBeneficiaries} of {data.totalActivitiesRecent} recent activities have no beneficiary linkage.</p>
               )}
+              <div className="flex gap-2 pt-2">
+                <Link to="/me/data-quality" className="text-xs font-medium text-primary hover:underline">Open data quality →</Link>
+                <Link to="/me/reports" className="text-xs font-medium text-primary hover:underline">Assemble report →</Link>
+              </div>
             </div>
           </div>
         </CardContent>
