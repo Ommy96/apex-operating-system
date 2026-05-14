@@ -83,6 +83,8 @@ const FormBuilderList = lazy(() => import("./pages/FormBuilderList"));
 const FormBuilderEditor = lazy(() => import("./pages/FormBuilderEditor"));
 const CaseManagement = lazy(() => import("./pages/CaseManagement"));
 const CaseDetail = lazy(() => import("./pages/CaseDetail"));
+const DataQualityDashboard = lazy(() => import("./pages/DataQualityDashboard"));
+const ReportAssembly = lazy(() => import("./pages/ReportAssembly"));
 
 const queryClient = new QueryClient();
 
@@ -226,6 +228,16 @@ const App = () => (
             <Route path="/cases/:id" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><CaseDetail /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me/data-quality" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><DataQualityDashboard /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me/reports" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><ReportAssembly /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
