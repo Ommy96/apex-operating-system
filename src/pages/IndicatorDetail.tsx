@@ -349,11 +349,7 @@ export default function IndicatorDetail() {
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
-          <Card>
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Data quality flags for this indicator will appear here once the data quality engine is enabled (Phase 2).
-            </CardContent>
-          </Card>
+          <IndicatorQualityTab indicatorId={id!} />
         </TabsContent>
       </Tabs>
 
@@ -382,5 +378,34 @@ export default function IndicatorDetail() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function IndicatorQualityTab({ indicatorId }: { indicatorId: string }) {
+  const { data: flags = [], isLoading } = useDataQualityFlags({ resolved: "all" });
+  const related = flags.filter((f) => f.entity_type === "indicator_value" || f.entity_id === indicatorId);
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading flags…</p>
+        ) : related.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data quality flags raised for this indicator.</p>
+        ) : (
+          <div className="space-y-2">
+            {related.slice(0, 20).map((f) => (
+              <div key={f.id} className="border rounded-md p-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge variant={f.flag_severity === "error" ? "destructive" : "secondary"} className="capitalize">{f.flag_severity}</Badge>
+                  <span className="text-xs text-muted-foreground capitalize">{f.flag_type}</span>
+                  {f.is_resolved && <Badge className="text-xs bg-emerald-100 text-emerald-700">Resolved</Badge>}
+                </div>
+                <p className="mt-1">{f.flag_message}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
