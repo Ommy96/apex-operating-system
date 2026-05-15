@@ -85,6 +85,8 @@ const CaseManagement = lazy(() => import("./pages/CaseManagement"));
 const CaseDetail = lazy(() => import("./pages/CaseDetail"));
 const DataQualityDashboard = lazy(() => import("./pages/DataQualityDashboard"));
 const ReportAssembly = lazy(() => import("./pages/ReportAssembly"));
+const StakeholderAccessManagement = lazy(() => import("./pages/StakeholderAccessManagement"));
+const StakeholderPortal = lazy(() => import("./pages/StakeholderPortal"));
 
 const queryClient = new QueryClient();
 
@@ -124,6 +126,7 @@ const App = () => (
             {/* Public intake forms (no auth) */}
             <Route path="/feedback/:orgSlug" element={<LazyRoute><ComplaintIntake /></LazyRoute>} />
             <Route path="/report/:orgSlug" element={<LazyRoute><WhistleblowerForm /></LazyRoute>} />
+            <Route path="/stakeholder/:token" element={<LazyRoute><StakeholderPortal /></LazyRoute>} />
 
             <Route path="/dashboard" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><Dashboard /></LazyRoute></DashboardLayout></ProtectedRoute>
@@ -238,6 +241,11 @@ const App = () => (
             <Route path="/me/reports" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><ReportAssembly /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/me/stakeholders" element={
+              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+                <DashboardLayout><LazyRoute><StakeholderAccessManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/hr" element={
