@@ -31,13 +31,13 @@ function genToken() {
 export function useStakeholderAccessList() {
   const { currentOrganization } = useOrganization();
   return useQuery({
-    queryKey: ["stakeholder-access", currentOrganization?.id],
-    enabled: !!currentOrganization?.id,
+    queryKey: ["stakeholder-access", currentOrganization?.organization_id],
+    enabled: !!currentOrganization?.organization_id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stakeholder_access")
         .select("*")
-        .eq("organization_id", currentOrganization!.id)
+        .eq("organization_id", currentOrganization!.organization_id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data || []) as StakeholderAccess[];
@@ -51,9 +51,9 @@ export function useCreateStakeholderAccess() {
   const { currentOrganization } = useOrganization();
   return useMutation({
     mutationFn: async (input: Partial<StakeholderAccess> & { email: string; full_name: string }) => {
-      if (!currentOrganization?.id) throw new Error("No organization");
+      if (!currentOrganization?.organization_id) throw new Error("No organization");
       const payload = {
-        organization_id: currentOrganization.id,
+        organization_id: currentOrganization.organization_id,
         email: input.email,
         full_name: input.full_name,
         stakeholder_type: input.stakeholder_type ?? "donor",
