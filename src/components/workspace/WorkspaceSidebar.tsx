@@ -147,6 +147,7 @@ export function WorkspaceSidebar() {
         { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewME },
         { title: "Data quality", url: "/me/data-quality", icon: ShieldAlert, show: can.viewME },
         { title: "Report assembly", url: "/me/reports", icon: FileCheck2, show: can.viewME },
+        { title: "Stakeholders", url: "/me/stakeholders", icon: Users, show: can.viewME },
         { title: "M&E Suite", url: "/me-suite", icon: Activity, show: can.viewME },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
         { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },
