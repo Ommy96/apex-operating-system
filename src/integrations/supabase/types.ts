@@ -13223,6 +13223,7 @@ export type Database = {
         Returns: string
       }
       get_org_subscription: { Args: { _org_id: string }; Returns: Json }
+      get_stakeholder_portal_data: { Args: { _token: string }; Returns: Json }
       get_unique_beneficiary_count: {
         Args: { _org_id: string }
         Returns: number
