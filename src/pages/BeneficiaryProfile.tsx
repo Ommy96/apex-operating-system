@@ -478,8 +478,8 @@ export default function BeneficiaryProfile() {
                 <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'individual' || category === 'group' ? 'Activities attended' : 'Programmes'}</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getTimeEnrolled()}</div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">Time enrolled</div>
+                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getLastVisitLabel()}</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">Last visit</div>
               </div>
               <div className="text-center">
                 <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-primary' : overallStatus === 'Review' ? 'text-warning' : 'text-destructive'}`}>
