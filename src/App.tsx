@@ -37,7 +37,6 @@ const InferaAdminDashboard = lazy(() => import("./pages/InferaAdminDashboard"));
 const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
-const MESuite = lazy(() => import("./pages/MEsuite"));
 const HRManagement = lazy(() => import("./pages/HRManagement"));
 const AutomationEngine = lazy(() => import("./pages/AutomationEngine"));
 const CommunicationsHub = lazy(() => import("./pages/CommunicationsHub"));
