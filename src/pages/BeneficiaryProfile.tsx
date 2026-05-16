@@ -23,6 +23,10 @@ import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgre
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
+import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
+import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
+import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,6 +144,7 @@ export default function BeneficiaryProfile() {
   const [enrollmentCount, setEnrollmentCount] = useState(0);
   const [attendanceCount, setAttendanceCount] = useState(0);
   const [earliestEnrollDate, setEarliestEnrollDate] = useState<string | null>(null);
+  const [lastVisitDate, setLastVisitDate] = useState<string | null>(null);
   const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
 
   const fetchQuickStats = useCallback(async () => {
@@ -160,6 +165,7 @@ export default function BeneficiaryProfile() {
     setEnrollmentCount(enroll || 0);
     setAttendanceCount(attend || 0);
     setEarliestEnrollDate(earliest?.[0]?.enrolled_date || null);
+    setLastVisitDate(recentVisits?.[0]?.visit_date || null);
 
     // Derive overall status from risk score + visitation recency + beneficiary status
     const riskLevel = riskData?.[0]?.overall_risk_level;
@@ -310,13 +316,14 @@ export default function BeneficiaryProfile() {
 
   const getInitials = (name: string) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
 
-  const getTimeEnrolled = () => {
-    if (!earliestEnrollDate) return '—';
-    const start = new Date(earliestEnrollDate);
-    const now = new Date();
-    const months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-    if (months >= 12) return `${(months / 12).toFixed(1)} yrs`;
-    return `${months} mo`;
+  const getLastVisitLabel = () => {
+    if (!lastVisitDate) return '—';
+    const days = Math.floor((Date.now() - new Date(lastVisitDate).getTime()) / 86400000);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 30) return `${days}d ago`;
+    if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+    return `${(days / 365).toFixed(1)}y ago`;
   };
 
   if (loading) {
