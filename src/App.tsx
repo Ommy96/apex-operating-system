@@ -194,17 +194,14 @@ const App = () => (
                 <DashboardLayout><LazyRoute><FinancialSuite /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/me-suite" element={
-              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout><LazyRoute><MESuite /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/me-suite" element={<Navigate to="/me" replace />} />
             <Route path="/me" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout><LazyRoute><MEHub /></LazyRoute></DashboardLayout>
+                <DashboardLayout><LazyRoute><MEConsolidated /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/indicators" element={
+            <Route path="/indicators" element={<Navigate to="/me?tab=indicators" replace />} />
+            <Route path="/me/indicators" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><IndicatorManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
@@ -214,21 +211,13 @@ const App = () => (
                 <DashboardLayout><LazyRoute><IndicatorDetail /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/me/forms" element={
-              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout><LazyRoute><FormBuilderList /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/me/forms" element={<Navigate to="/me?tab=forms" replace />} />
             <Route path="/me/forms/:id" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><FormBuilderEditor /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/cases" element={
-              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
-                <DashboardLayout><LazyRoute><CaseManagement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/cases" element={<Navigate to="/me?tab=cases" replace />} />
             <Route path="/cases/:id" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
                 <DashboardLayout><LazyRoute><CaseDetail /></LazyRoute></DashboardLayout>
@@ -378,9 +367,7 @@ const App = () => (
                 <DashboardLayout><LazyRoute><ImpactStories /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/me-calendar" element={
-              <Navigate to="/programs-management?tab=calendar" replace />
-            } />
+            <Route path="/me-calendar" element={<Navigate to="/me?tab=data-collection" replace />} />
             <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
 
             {/* Sprint 6 routes */}
