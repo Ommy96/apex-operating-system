@@ -1583,6 +1583,70 @@ export type Database = {
           },
         ]
       }
+      beneficiary_out_of_system_contacts: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          relationship_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          relationship_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          relationship_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_out_of_system_contacts_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_out_of_system_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_out_of_system_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiary_progress_logs: {
         Row: {
           beneficiary_id: string
