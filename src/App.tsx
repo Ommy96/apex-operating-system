@@ -77,6 +77,7 @@ const Setup2FA = lazy(() => import("./pages/Setup2FA"));
 const MapView = lazy(() => import("./pages/MapView"));
 const Procurement = lazy(() => import("./pages/Procurement"));
 const MEHub = lazy(() => import("./pages/MEHub"));
+const MEConsolidated = lazy(() => import("./pages/MEConsolidated"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
 const FormBuilderList = lazy(() => import("./pages/FormBuilderList"));
