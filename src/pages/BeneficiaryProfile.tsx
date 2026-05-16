@@ -517,15 +517,40 @@ export default function BeneficiaryProfile() {
               <div className="px-[18px] py-[14px]">
                 {[
                   ['Full name', beneficiary.display_name],
-                  ['Date of birth', formatDisplayDate(beneficiary.date_of_birth)],
+                  ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} (${age} yrs)` : '—'],
                   ['Gender', beneficiary.gender],
-                  ['County', beneficiary.county],
-                  ['Sub-county', beneficiary.sub_county],
-                  ['Village', beneficiary.estate_village],
                   ['Consent', beneficiary.consent_given ? `✓ ${formatDisplayDate(beneficiary.consent_date)}` : '✗'],
-                  ...(category === 'individual' ? [['Occupation', orgConfig.collect_economic_data ? beneficiary.occupation : null], ['Income level', beneficiary.income_level], ['Marital status', beneficiary.marital_status], ['Religion', beneficiary.religion]] : []),
+                  ...(category === 'individual' ? [
+                    ...(visibility.showOccupation ? [['Occupation', beneficiary.occupation]] : []),
+                    ...(visibility.showIncomeLevel ? [['Income level', beneficiary.income_level]] : []),
+                    ...(visibility.showMaritalStatus ? [['Marital status', beneficiary.marital_status]] : []),
+                    ['Religion', beneficiary.religion],
+                  ] as any : []),
                   ...(category === 'household' ? [['Household size', beneficiary.household_size], ['Primary income source', beneficiary.source_of_income]] : []),
                   ...(category === 'group' ? [['Members', beneficiary.member_count], ['Meeting frequency', beneficiary.group_schedule], ['Leader', beneficiary.leader_name]] : []),
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
+                    <span className="text-[12px] text-muted-foreground">{label}</span>
+                    <span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Location card */}
+            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />Location</span>
+                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
+              </div>
+              <div className="px-[18px] py-[14px]">
+                {[
+                  ['Country', (beneficiary as any).country],
+                  ['County / Region', beneficiary.county],
+                  ['Sub-county', beneficiary.sub_county],
+                  ['Village / Estate', beneficiary.estate_village],
+                  ['Home county', beneficiary.home_county],
+                  ['Address', beneficiary.location],
                 ].map(([label, value]) => (
                   <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
                     <span className="text-[12px] text-muted-foreground">{label}</span>
