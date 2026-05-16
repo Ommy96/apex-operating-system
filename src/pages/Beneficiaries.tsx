@@ -21,6 +21,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BulkBeneficiaryUpload } from '@/components/beneficiary/BulkBeneficiaryUpload';
 import { RegisterFamilySheet } from '@/components/beneficiary/RegisterFamilySheet';
+import { exportBeneficiariesToExcel } from '@/lib/beneficiaryExport';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useHouseholds } from '@/hooks/useBeneficiaryRelationships';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
 import {
@@ -488,10 +490,27 @@ export default function Beneficiaries() {
             {isAdmin && <BulkBeneficiaryUpload onSuccess={fetchBeneficiaries} />}
 
             {/* Export Button */}
-            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExport}>
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExport}>CSV (current view)</DropdownMenuItem>
+                <DropdownMenuItem onClick={async () => {
+                  if (!currentOrganization?.organization_id) return;
+                  try {
+                    const ids = getFilteredBeneficiaries().map((b: any) => b.id);
+                    const count = await exportBeneficiariesToExcel({ organizationId: currentOrganization.organization_id, beneficiaryIds: ids });
+                    toast({ title: 'Exported', description: `${count} beneficiaries exported to Excel (4 sheets)` });
+                  } catch (e: any) {
+                    toast({ title: 'Export failed', description: e.message, variant: 'destructive' });
+                  }
+                }}>Excel workbook (4 sheets)</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* View Switcher */}
             <ViewSwitcher
