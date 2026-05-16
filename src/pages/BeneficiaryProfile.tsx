@@ -669,6 +669,8 @@ export default function BeneficiaryProfile() {
                 </div>
               </div>
             )}
+
+            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
           </div>
 
           {/* ─── MAIN CONTENT (Tabs) ─── */}
