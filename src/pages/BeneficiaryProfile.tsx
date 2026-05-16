@@ -349,6 +349,7 @@ export default function BeneficiaryProfile() {
 
   const age = calculateAge(beneficiary.date_of_birth);
   const category = beneficiary.beneficiary_category || (beneficiary.beneficiary_type === 'group' ? 'group' : 'individual');
+  const visibility = useFieldVisibility(beneficiary.date_of_birth, orgConfig as any);
   const CategoryIcon = category === 'household' ? Home : category === 'group' ? Users : category === 'organisation' ? Building2 : User;
   const statusLabel = beneficiary.inactive_date ? 'Exited' : beneficiary.is_active === false || beneficiary.status !== 'active' ? 'Inactive' : 'Active';
   const vulnerabilityTags = beneficiary.vulnerability_tags || [];
