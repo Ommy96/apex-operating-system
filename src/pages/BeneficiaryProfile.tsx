@@ -23,6 +23,10 @@ import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgre
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
+import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
+import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
+import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,7 +144,10 @@ export default function BeneficiaryProfile() {
   const [enrollmentCount, setEnrollmentCount] = useState(0);
   const [attendanceCount, setAttendanceCount] = useState(0);
   const [earliestEnrollDate, setEarliestEnrollDate] = useState<string | null>(null);
+  const [lastVisitDate, setLastVisitDate] = useState<string | null>(null);
   const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
+
+  const visibility = useFieldVisibility(beneficiary?.date_of_birth ?? null, orgConfig as any);
 
   const fetchQuickStats = useCallback(async () => {
     if (!id) return;
@@ -160,6 +167,7 @@ export default function BeneficiaryProfile() {
     setEnrollmentCount(enroll || 0);
     setAttendanceCount(attend || 0);
     setEarliestEnrollDate(earliest?.[0]?.enrolled_date || null);
+    setLastVisitDate(recentVisits?.[0]?.visit_date || null);
 
     // Derive overall status from risk score + visitation recency + beneficiary status
     const riskLevel = riskData?.[0]?.overall_risk_level;
@@ -310,13 +318,14 @@ export default function BeneficiaryProfile() {
 
   const getInitials = (name: string) => name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
 
-  const getTimeEnrolled = () => {
-    if (!earliestEnrollDate) return '—';
-    const start = new Date(earliestEnrollDate);
-    const now = new Date();
-    const months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-    if (months >= 12) return `${(months / 12).toFixed(1)} yrs`;
-    return `${months} mo`;
+  const getLastVisitLabel = () => {
+    if (!lastVisitDate) return '—';
+    const days = Math.floor((Date.now() - new Date(lastVisitDate).getTime()) / 86400000);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 30) return `${days}d ago`;
+    if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+    return `${(days / 365).toFixed(1)}y ago`;
   };
 
   if (loading) {
@@ -400,6 +409,13 @@ export default function BeneficiaryProfile() {
                   </div>
                   {/* Status dot */}
                   <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card ${statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'}`} />
+                  {currentOrganization?.organization_id && (
+                    <PhotoUploadButton
+                      beneficiaryId={beneficiary.id}
+                      organizationId={currentOrganization.organization_id}
+                      onUploaded={(url) => setBeneficiary(b => b ? { ...b, photo_url: url } : b)}
+                    />
+                  )}
                 </div>
 
                 {/* Name block */}
@@ -412,6 +428,9 @@ export default function BeneficiaryProfile() {
                     {beneficiary.student_id_number ? `ID: ${beneficiary.student_id_number}` : `ID: ${beneficiary.id.slice(0, 8).toUpperCase()}`}
                     {' · '}Registered {new Date(beneficiary.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
+                  <div className="mt-2 max-w-[260px]">
+                    <ProfileCompletenessMeter beneficiary={beneficiary} guardianCount={guardians.length} />
+                  </div>
                 </div>
               </div>
 
@@ -471,8 +490,8 @@ export default function BeneficiaryProfile() {
                 <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'individual' || category === 'group' ? 'Activities attended' : 'Programmes'}</div>
               </div>
               <div className="text-center">
-                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getTimeEnrolled()}</div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">Time enrolled</div>
+                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getLastVisitLabel()}</div>
+                <div className="text-[11px] text-muted-foreground mt-[2px]">Last visit</div>
               </div>
               <div className="text-center">
                 <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-primary' : overallStatus === 'Review' ? 'text-warning' : 'text-destructive'}`}>
@@ -498,15 +517,40 @@ export default function BeneficiaryProfile() {
               <div className="px-[18px] py-[14px]">
                 {[
                   ['Full name', beneficiary.display_name],
-                  ['Date of birth', formatDisplayDate(beneficiary.date_of_birth)],
+                  ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} (${age} yrs)` : '—'],
                   ['Gender', beneficiary.gender],
-                  ['County', beneficiary.county],
-                  ['Sub-county', beneficiary.sub_county],
-                  ['Village', beneficiary.estate_village],
                   ['Consent', beneficiary.consent_given ? `✓ ${formatDisplayDate(beneficiary.consent_date)}` : '✗'],
-                  ...(category === 'individual' ? [['Occupation', orgConfig.collect_economic_data ? beneficiary.occupation : null], ['Income level', beneficiary.income_level], ['Marital status', beneficiary.marital_status], ['Religion', beneficiary.religion]] : []),
+                  ...(category === 'individual' ? [
+                    ...(visibility.showOccupation ? [['Occupation', beneficiary.occupation]] : []),
+                    ...(visibility.showIncomeLevel ? [['Income level', beneficiary.income_level]] : []),
+                    ...(visibility.showMaritalStatus ? [['Marital status', beneficiary.marital_status]] : []),
+                    ['Religion', beneficiary.religion],
+                  ] as any : []),
                   ...(category === 'household' ? [['Household size', beneficiary.household_size], ['Primary income source', beneficiary.source_of_income]] : []),
                   ...(category === 'group' ? [['Members', beneficiary.member_count], ['Meeting frequency', beneficiary.group_schedule], ['Leader', beneficiary.leader_name]] : []),
+                ].map(([label, value]) => (
+                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
+                    <span className="text-[12px] text-muted-foreground">{label}</span>
+                    <span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Location card */}
+            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
+              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />Location</span>
+                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
+              </div>
+              <div className="px-[18px] py-[14px]">
+                {[
+                  ['Country', (beneficiary as any).country],
+                  ['County / Region', beneficiary.county],
+                  ['Sub-county', beneficiary.sub_county],
+                  ['Village / Estate', beneficiary.estate_village],
+                  ['Home county', beneficiary.home_county],
+                  ['Address', beneficiary.location],
                 ].map(([label, value]) => (
                   <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
                     <span className="text-[12px] text-muted-foreground">{label}</span>
@@ -625,6 +669,8 @@ export default function BeneficiaryProfile() {
                 </div>
               </div>
             )}
+
+            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
           </div>
 
           {/* ─── MAIN CONTENT (Tabs) ─── */}
