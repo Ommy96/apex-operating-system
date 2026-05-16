@@ -409,6 +409,13 @@ export default function BeneficiaryProfile() {
                   </div>
                   {/* Status dot */}
                   <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card ${statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'}`} />
+                  {currentOrganization?.organization_id && (
+                    <PhotoUploadButton
+                      beneficiaryId={beneficiary.id}
+                      organizationId={currentOrganization.organization_id}
+                      onUploaded={(url) => setBeneficiary(b => b ? { ...b, photo_url: url } : b)}
+                    />
+                  )}
                 </div>
 
                 {/* Name block */}
@@ -421,6 +428,9 @@ export default function BeneficiaryProfile() {
                     {beneficiary.student_id_number ? `ID: ${beneficiary.student_id_number}` : `ID: ${beneficiary.id.slice(0, 8).toUpperCase()}`}
                     {' · '}Registered {new Date(beneficiary.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
+                  <div className="mt-2 max-w-[260px]">
+                    <ProfileCompletenessMeter beneficiary={beneficiary} guardianCount={guardians.length} />
+                  </div>
                 </div>
               </div>
 
