@@ -1,122 +1,93 @@
-# M&E Module Architecture Upgrade — Implementation Plan
+# M&E Consolidation + Beneficiary Profile Upgrade
 
-## Schema audit (verified against live DB)
+This is a large two-part change. Proposing a phased plan so you can confirm scope before I touch ~20+ files.
 
-**Existing tables (confirmed present):** `organizations`, `profiles`, `programs`, `projects`, `activities`, `beneficiaries`, `households`, `indicators`, `indicator_values`, `me_data_schedule`, `logframe_entries`, `programme_milestones`, `beneficiary_services`, `beneficiary_visitations`, `disaggregation_categories`, `grants`, `financial_transactions`.
+## Part 1 — M&E Sidebar Consolidation
 
-**Missing:** `narrative_reports` — Step 7's "auto-pulls from narrative report challenges/lessons" will degrade gracefully (section left empty with note "no narrative report submitted for this period") rather than block the build.
+### Sidebar cleanup (`src/components/workspace/WorkspaceSidebar.tsx` + `src/components/AppSidebar.tsx`)
+Remove these entries from "Programs & M&E":
+- M&E Suite (`/me-suite`)
+- Indicators (`/indicators`)
+- Forms (`/me/forms`)
+- M&E Calendar (`/me-calendar`)
+- Data quality (`/me/data-quality`)
+- Report assembly (`/me/reports`)
+- Stakeholders (`/me/stakeholders`)
+- Cases (separate)
 
-**Convention conflicts to resolve in migrations:**
-- Prompt uses `org_id` everywhere; project standard is `organization_id`. **All new tables will use `organization_id`** to match `user_belongs_to_org()` RLS helper.
-- Prompt wants `unit_of_measurement` on `indicators`; the column is already named `unit`. Will reuse `unit` instead of adding a duplicate.
-- Prompt wants `is_active` on `indicators`; already exists. Skip.
-- Prompt wants `created_by` on `indicators`; already exists. Skip.
-- Soft-delete: project standard requires `deleted_at` + `updated_by` on every new table per Core memory.
+Keep exactly one: **M&E** → `/me` (Target icon, active when `pathname.startsWith('/me')`).
 
-## Phasing
+### New consolidated page `src/pages/MEConsolidated.tsx` (route `/me`)
+Horizontal tab bar (URL-synced via `?tab=`):
+1. **Overview** — current MEHub content
+2. **Indicators** — IndicatorManagement
+3. **Data Collection** — MECalendar + form submissions list
+4. **Forms** — FormBuilderList
+5. **Cases** — CaseManagement
+6. **Reports** — ReportAssembly
 
-The full prompt is ~10 hours. To keep each phase shippable and reviewable, I'll split into 4 phases. **This plan covers Phase 1 only** — once approved and merged, I'll write a follow-up plan for Phase 2.
+Each tab lazy-loaded via `React.lazy` + `Suspense`.
 
-```text
-Phase 1  ── Foundation                 (this plan)
-           DB migrations 1A–1E
-           M&E Hub page + sidebar restructure
-           Indicator rebuild (list + 5-step wizard + detail + versioning)
+Keep Data Quality and Stakeholders accessible via sub-routes / Overview links (not removed, just delisted from sidebar). I'll keep them under settings/Overview links so functionality isn't lost.
 
-Phase 2  ── Field tools                 (next)
-           Configurable Form Builder (Step 4)
-           Case Management (Step 5)
-           Beneficiary profile Cases sub-tab
+### Routes (`src/App.tsx`)
+- `/me` → `MEConsolidated`
+- Redirects: `/me-calendar`, `/indicators`, `/me/forms`, `/cases`, `/me-suite` → `/me?tab=...`
+- Detail routes unchanged: `/me/indicators/:id`, `/me/forms/:id`, `/me/cases/:id`
 
-Phase 3  ── Analytics & Reporting      (later)
-           Disaggregation engine (Step 6)
-           Automated Report Assembly modal (Step 7)
-           Data Quality dashboard + active prompts (Step 9)
+---
 
-Phase 4  ── Public access              (last)
-           Stakeholder access mgmt (Step 8 admin side)
-           Public /stakeholder/:token portal (no-auth route)
-```
+## Part 2 — Beneficiary Profile Upgrade
 
-## Phase 1 — what gets built
+### 2A. Field audit + display additions (`src/pages/BeneficiaryProfile.tsx` + components)
+Add missing fields to correct sections per the mapping you provided (unique ID, consent, registration_source, vulnerability, economic, audit footer, general notes box).
 
-### 1. Database migration (single migration file)
+### 2B. Age-aware display
+Wire `calculateAge` / `isMinor` from `src/lib/ageUtils.ts`. Apply rules:
+- Minors: hide marital status, occupation, income, employment, national ID (with amber warn if present)
+- Adults non-tertiary: hide school/grade/enrollment fields; show single "Highest education" line
+- Adults tertiary: relabel school→Institution, grade→Course, add Year of Study
 
-**1A. Indicator versioning + data dictionary**
-- `ALTER TABLE indicators ADD COLUMN` for: `version int default 1`, `version_notes text`, `superseded_by uuid`, `decision_context text`, `calculation_method text`, `data_source_description text`, `disaggregation_dimensions text[]`, `baseline_value numeric`, `baseline_date date`, `reporting_frequency text`, `target_value numeric`, `target_date date`, `collection_responsibility uuid` (FK profiles.user_id), `validation_rule jsonb`, `notes text`, `retired_at timestamptz`, `retired_reason text`, `level text` (output/outcome/impact/process), `deleted_at timestamptz`, `updated_by uuid`.
-- New table `indicator_versions` (snapshot history).
+### 2C. Dual relationships
+- **New table** `beneficiary_out_of_system_contacts` (org-scoped, RLS via `user_belongs_to_org`)
+- Family & Relationships section shows two sub-sections: "In this system" (from `beneficiary_relationships`) + "Outside this system" (guardian fields + new contacts table)
+- "Register this person" pre-fills BeneficiaryForm and auto-links on save
 
-**1B. Configurable forms (tables only — UI in Phase 2)**
-- `me_forms`, `me_form_fields`, `me_form_submissions` with `organization_id`, soft-delete columns, RLS by `user_belongs_to_org`.
+### 2D. Location card
+New sidebar card always showing County / Sub-county / Village (with `—` placeholders + edit link).
 
-**1C. Case management (tables only — UI in Phase 2)**
-- `beneficiary_cases`, `case_entries`.
+### 2E. Profile completeness meter
+Thin progress bar in hero, calculated from key fields (age-conditional), with tooltip listing missing fields.
 
-**1D. Data quality flags**
-- `data_quality_flags` table (used in Phase 1 only as a destination; active flagging logic lands in Phase 3).
+### 2F. Excel export (`src/lib/beneficiaryExport.ts`)
+Replace current export with 4-sheet workbook (Beneficiaries grouped columns / Guardian & Family Contacts / Programme Enrollments / Summary). Uses `xlsx` (already in project). Wire into Beneficiaries.tsx Export button.
 
-**1E. Stakeholder access (table only — UI in Phase 4)**
-- `stakeholder_access` table.
+### 2G. Profile improvements
+- G1 Print view (CSS `@media print` on profile)
+- G2 Inline quick-edit for phone, village, sub_county, school_name, grade, notes
+- G3 Photo upload via avatar overlay → new `beneficiary-photos` storage bucket
+- G4 Accurate status badge with "Record exit" sheet
+- G5 "Last visit" stat replacing "Time enrolled"
 
-All new tables: RLS enabled, `SELECT/INSERT/UPDATE` policies using `user_belongs_to_org(auth.uid(), organization_id)`, plus super-admin bypass via `has_role(auth.uid(),'admin')`.
+---
 
-### 2. M&E Hub page — `src/pages/MEHub.tsx`
+## Database migrations required
+1. `beneficiary_out_of_system_contacts` table + RLS
+2. `beneficiary-photos` storage bucket + policies
 
-Route `/me`. Sections:
-- Two large anchor cards (Beneficiary Data → `/beneficiaries`, Project Data → `/programs-management`) with live counts.
-- 3-column summary grid: indicator health (traffic light counts + top 4 off-track), data collection status (overdue/due/collected from `me_data_schedule`), case management (placeholder counts of 0 in Phase 1, wired in Phase 2).
-- Bottom donut: data quality score with the documented 40/30/30 weighting; in Phase 1 the case-related component falls back to "no flags table data yet" → score reflects only the available signals.
+Both will be presented for your approval before execution.
 
-New hook `src/hooks/useMEHub.ts` aggregates the queries.
+---
 
-### 3. Indicator management rebuild
+## Suggested execution order (please confirm)
 
-- **`src/pages/IndicatorManagement.tsx`** at `/indicators`. Replaces existing `IndicatorsDashboard` entry point (kept as embedded list inside this page initially to avoid losing functionality). Filters: programme, level, status, traffic light, search. CSV import deferred to Phase 3 (button stub disabled with "Coming soon" tooltip).
-- **`src/components/indicators/NewIndicatorWizard.tsx`** — 5-step sheet: Purpose → Definition → Targets → Measurement → Review. Enforces `decision_context` required (Principle 1) before allowing Step 2. Save as draft (`is_active=false`) or publish (`is_active=true`).
-- **`src/pages/IndicatorDetail.tsx`** at `/indicators/:id` — header + 6 tabs: Overview, Progress, History, Disaggregation (placeholder chart in Phase 1, real engine in Phase 3), Versions, Forms (empty state until Phase 2). "Record data" sheet writes to `indicator_values` and updates `me_data_schedule`.
-- **Versioning logic** in `src/hooks/useIndicators.ts`: when editing a published indicator with existing `indicator_values`, force a version-bump dialog (change reason + effective_from required), snapshot previous state to `indicator_versions`, increment `version`.
+Given the scope, I recommend executing in 3 phases so each can be reviewed:
 
-### 4. Sidebar + routing
+- **Phase A**: Part 1 (sidebar + consolidated M&E page + redirects). Smallest, highest visible impact, ~4 files.
+- **Phase B**: Part 2 sections 2A–2E (profile field audit, age rules, location card, completeness, dual relationships incl. migration). ~6–8 files + 1 migration.
+- **Phase C**: Part 2 sections 2F–2G (Excel export overhaul, print view, inline edit, photo upload incl. bucket migration, status badge, last-visit stat). ~5–7 files + 1 migration.
 
-- `WorkspaceSidebar.tsx`: Programmes & M&E section becomes 3 items — Programmes, Projects, **M&E** (new, route `/me`, icon `Activity`). When path matches `/me`, `/indicators`, `/cases`, `/me/forms`, sub-nav appears: M&E Hub, Indicators, Form builder (disabled in Phase 1), Cases (disabled in Phase 1).
-- `App.tsx`: add routes `/me`, `/indicators`, `/indicators/:id`. Reserve `/cases`, `/me/forms`, `/stakeholder/:token` as commented placeholders for later phases.
-
-### 5. Out of scope for Phase 1 (explicit)
-
-- Form Builder UI, Case Management UI, Disaggregation engine, Report Assembly modal, Stakeholder Portal, active data-quality prompts on activity save, CSV indicator import. All have DB foundations laid where needed so Phase 2/3/4 are pure UI work.
-
-## Files
-
-**Created (Phase 1):**
-```
-supabase/migrations/<timestamp>_me_phase1_foundation.sql
-src/pages/MEHub.tsx
-src/pages/IndicatorManagement.tsx
-src/pages/IndicatorDetail.tsx
-src/components/indicators/NewIndicatorWizard.tsx
-src/components/indicators/IndicatorVersionDialog.tsx
-src/components/indicators/RecordIndicatorValueSheet.tsx
-src/hooks/useMEHub.ts
-```
-
-**Modified:**
-```
-src/components/workspace/WorkspaceSidebar.tsx   (add M&E item + sub-nav)
-src/App.tsx                                      (add 3 routes)
-src/hooks/useIndicators.ts                       (versioning, new fields)
-src/integrations/supabase/types.ts               (regenerated by migration)
-```
-
-## Verification at end of Phase 1
-
-1. TypeScript build clean.
-2. `/me` loads, both anchor cards render, summary grid pulls real counts.
-3. `/indicators` lists existing indicators with new column layout.
-4. New indicator wizard blocks save without `decision_context`.
-5. Editing a published indicator with values opens version dialog and writes to `indicator_versions`.
-6. Sidebar shows new M&E item; sub-nav appears on M&E routes; disabled items show tooltip "Available in next release".
-7. Existing M&E features (calendar at `/programs-management?tab=calendar`, M&E Suite, etc.) continue to work unchanged.
-
-## Confirmation needed
-
-Approve this plan and I'll start with the migration file. After Phase 1 ships, I'll write the Phase 2 plan in a separate message.
+**Reply with:**
+- "Proceed all" → I'll execute A→B→C sequentially (migrations will pause for your approval).
+- "Proceed Phase A only" (or B / C) → I'll do just that phase.
+- Any scope edits before I start.
