@@ -27,10 +27,10 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
 
   const ids = beneficiaries.map((b: any) => b.id);
 
-  const [guardiansRes, oosRes, servicesRes] = await Promise.all([
+  const [bgRes, oosRes, servicesRes, programsRes, projectsRes] = await Promise.all([
     supabase
       .from('beneficiary_guardians')
-      .select('beneficiary_id, relationship, guardians(full_name, guardian_type, phone, email, is_alive)')
+      .select('beneficiary_id, relationship, guardian_id')
       .in('beneficiary_id', ids),
     supabase
       .from('beneficiary_out_of_system_contacts' as any)
@@ -38,9 +38,19 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
       .in('beneficiary_id', ids),
     supabase
       .from('beneficiary_services')
-      .select('beneficiary_id, status, enrolled_date, exit_date, program:programs(name), project:projects(name)')
+      .select('beneficiary_id, status, enrolled_date, exit_date, program_id, project_id, project_name')
       .in('beneficiary_id', ids),
+    supabase.from('programs').select('id, name').eq('organization_id', organizationId),
+    supabase.from('projects').select('id, name').eq('organization_id', organizationId),
   ]);
+
+  const guardianIds = Array.from(new Set((bgRes.data || []).map((g: any) => g.guardian_id).filter(Boolean)));
+  const guardiansRes = guardianIds.length
+    ? await supabase.from('guardians').select('id, full_name, guardian_type, phone, email, is_alive').in('id', guardianIds)
+    : { data: [] as any[] };
+  const guardianById = new Map((guardiansRes.data || []).map((g: any) => [g.id, g]));
+  const programById = new Map((programsRes.data || []).map((p: any) => [p.id, p.name]));
+  const projectById = new Map((projectsRes.data || []).map((p: any) => [p.id, p.name]));
 
   const beneficiariesSheet = beneficiaries.map((b: any) => ({
     'Unique ID': b.unique_id || b.id,
@@ -74,16 +84,17 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
 
   const guardiansMap = new Map(beneficiaries.map((b: any) => [b.id, b.display_name]));
   const contactsSheet: any[] = [];
-  (guardiansRes.data || []).forEach((g: any) => {
+  (bgRes.data || []).forEach((g: any) => {
+    const gu: any = guardianById.get(g.guardian_id) || {};
     contactsSheet.push({
       'Beneficiary': guardiansMap.get(g.beneficiary_id) || g.beneficiary_id,
       'Source': 'In-system guardian',
-      'Name': g.guardians?.full_name,
+      'Name': gu.full_name,
       'Relationship': g.relationship,
-      'Type': g.guardians?.guardian_type,
-      'Phone': g.guardians?.phone,
-      'Email': g.guardians?.email,
-      'Alive': g.guardians?.is_alive === false ? 'No' : 'Yes',
+      'Type': gu.guardian_type,
+      'Phone': gu.phone,
+      'Email': gu.email,
+      'Alive': gu.is_alive === false ? 'No' : 'Yes',
       'Notes': '',
     });
   });
@@ -103,8 +114,8 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
 
   const enrollmentsSheet = (servicesRes.data || []).map((s: any) => ({
     'Beneficiary': guardiansMap.get(s.beneficiary_id) || s.beneficiary_id,
-    'Programme': s.program?.name,
-    'Project': s.project?.name,
+    'Programme': programById.get(s.program_id) || '',
+    'Project': projectById.get(s.project_id) || s.project_name || '',
     'Status': s.status,
     'Enrolled': s.enrolled_date,
     'Exited': s.exit_date,
@@ -115,7 +126,7 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
     { Metric: 'Active', Value: beneficiaries.filter((b: any) => b.status === 'active').length },
     { Metric: 'Inactive', Value: beneficiaries.filter((b: any) => b.status !== 'active').length },
     { Metric: 'With consent', Value: beneficiaries.filter((b: any) => b.consent_given).length },
-    { Metric: 'In-system contacts', Value: (guardiansRes.data || []).length },
+    { Metric: 'In-system contacts', Value: (bgRes.data || []).length },
     { Metric: 'Out-of-system contacts', Value: (oosRes.data || []).length },
     { Metric: 'Total enrollments', Value: (servicesRes.data || []).length },
     { Metric: 'Generated at', Value: new Date().toISOString() },
