@@ -865,3 +865,47 @@ export default function BeneficiaryProfile() {
     </div>
   );
 }
+
+function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string; fg: string; dot?: string }) {
+  return (
+    <span className="inline-flex items-center text-[11px] px-2.5 py-1 rounded-[6px]" style={{ background: bg, color: fg, fontWeight: 500 }}>
+      {dot && <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ background: dot }} />}
+      {children}
+    </span>
+  );
+}
+
+function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
+  return (
+    <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
+      <div className="flex items-center justify-between" style={{ padding: '13px 18px 11px', borderBottom: '1px solid #E7E2DA' }}>
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-[12px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
+        </div>
+        {right ?? (onEdit && <button onClick={onEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>Edit</button>)}
+      </div>
+      <div style={{ padding: '13px 18px' }}>{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
+  const empty = value === null || value === undefined || value === '';
+  return (
+    <div className="flex justify-between items-baseline gap-2 py-[5px]">
+      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>{label}</span>
+      <span
+        className={`text-[12px] text-right truncate ${empty ? 'italic' : ''}`}
+        style={{
+          color: empty ? '#A8A29E' : '#1C1917',
+          fontWeight: empty ? 400 : 500,
+          fontFamily: mono && !empty ? "'DM Mono', monospace" : undefined,
+          maxWidth: '160px',
+        }}
+      >
+        {empty ? '—' : String(value)}
+      </span>
+    </div>
+  );
+}
