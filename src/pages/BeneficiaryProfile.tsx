@@ -1,7 +1,7 @@
 import { logger } from "@/lib/logger";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil, UsersRound } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil, UsersRound, Check, X, AlertTriangle, Camera, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -354,99 +354,176 @@ export default function BeneficiaryProfile() {
   const CategoryIcon = category === 'household' ? Home : category === 'group' ? Users : category === 'organisation' ? Building2 : User;
   const statusLabel = beneficiary.inactive_date ? 'Exited' : beneficiary.is_active === false || beneficiary.status !== 'active' ? 'Inactive' : 'Active';
   const vulnerabilityTags = beneficiary.vulnerability_tags || [];
-  const visibleVulnerabilityTags = showAllVulnerabilityTags ? vulnerabilityTags : vulnerabilityTags.slice(0, 4);
   const familyMembers = [...guardians.map(g => ({ ...g, _type: 'guardian' as const })), ...siblings.map(s => ({ ...s, _type: 'sibling' as const })), ...dependants.map(d => ({ ...d, _type: 'dependant' as const }))];
   const hasEducationData = !!(beneficiary.academic_level || beneficiary.grade || beneficiary.institution_name);
   const hasHealthData = !!(beneficiary.hiv_status || beneficiary.other_medical_conditions || beneficiary.has_special_needs);
   const hasEconomicData = !!(beneficiary.occupation || beneficiary.income_level || beneficiary.household_size || beneficiary.source_of_income);
+  const isMinorAge = visibility.isMinor;
+  const isTertiary = age !== null && age >= 18 && (beneficiary.academic_level || '').toLowerCase().includes('tertiary');
+
+  // Profile completeness
+  const completenessChecks = [
+    { key: 'photo', label: 'Photo', ok: !!beneficiary.photo_url },
+    { key: 'dob', label: 'Date of birth', ok: !!beneficiary.date_of_birth },
+    { key: 'gender', label: 'Gender', ok: !!beneficiary.gender },
+    { key: 'county', label: 'County', ok: !!beneficiary.county },
+    { key: 'sub_county', label: 'Sub-county', ok: !!beneficiary.sub_county },
+    { key: 'village', label: 'Village', ok: !!beneficiary.estate_village },
+    { key: 'primary_need', label: 'Primary need', ok: !!beneficiary.primary_need },
+    { key: 'vulnerability_level', label: 'Vulnerability level', ok: !!beneficiary.vulnerability_level },
+    { key: 'consent', label: 'Consent', ok: !!beneficiary.consent_given },
+    { key: 'tags', label: 'Vulnerability tags', ok: vulnerabilityTags.length > 0 },
+    { key: 'programmes', label: 'Programme enrolment', ok: enrollmentCount > 0 },
+    ...(orgConfig.collect_education_data ? [{ key: 'academic_level', label: 'Academic level', ok: !!beneficiary.academic_level }] : []),
+    ...(isMinorAge ? [{ key: 'guardian', label: 'Guardian / contact', ok: guardians.length > 0 }] : [{ key: 'phone', label: 'Phone', ok: !!(beneficiary as any).phone }, { key: 'nat_id', label: 'National ID', ok: !!(beneficiary as any).national_id }]),
+  ];
+  const completePct = Math.round((completenessChecks.filter(c => c.ok).length / completenessChecks.length) * 100 / 5) * 5;
+  const missingFields = completenessChecks.filter(c => !c.ok).map(c => c.label);
+  const pctColour = completePct >= 80 ? '#1D9E8A' : completePct >= 60 ? '#B45309' : '#BE185D';
+
+  // Days since last visit
+  const daysSinceVisit = lastVisitDate ? Math.floor((Date.now() - new Date(lastVisitDate).getTime()) / 86400000) : null;
+  const visitColour = daysSinceVisit === null ? '#A8A29E' : daysSinceVisit <= 30 ? '#1D9E8A' : daysSinceVisit <= 90 ? '#B45309' : '#BE185D';
+  const visitLabel = daysSinceVisit === null ? 'Never' : daysSinceVisit <= 0 ? 'Today' : daysSinceVisit === 1 ? '1d' : daysSinceVisit < 30 ? `${daysSinceVisit}d` : daysSinceVisit < 365 ? `${Math.floor(daysSinceVisit / 30)}mo` : `${(daysSinceVisit / 365).toFixed(1)}y`;
+
+  // Overall status badge
+  const computedStatus = beneficiary.inactive_date ? { label: 'Exited', colour: '#78716C' }
+    : (beneficiary.vulnerability_level === 'high' || beneficiary.vulnerability_level === 'critical') ? { label: 'High risk', colour: '#BE185D' }
+    : (daysSinceVisit !== null && daysSinceVisit > 90) ? { label: 'Overdue', colour: '#B45309' }
+    : (enrollmentCount === 0 && (Date.now() - new Date(beneficiary.created_at).getTime()) / 86400000 < 30) ? { label: 'New', colour: '#1D4ED8' }
+    : { label: 'Good', colour: '#1D9E8A' };
+
   const tabs = [
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
-    { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
-    { value: 'relationships', label: 'Family', icon: UsersRound, show: true, legacy: false },
-    { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
-    { value: 'observations', label: 'Observations', icon: MessageSquare, show: true, legacy: false },
-    { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data || hasEducationData, legacy: !orgConfig.collect_education_data && hasEducationData },
+    { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data && (isMinorAge || isTertiary || hasEducationData), legacy: !orgConfig.collect_education_data && hasEducationData },
     { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
-    { value: 'economic', label: 'Economic', icon: Building2, show: orgConfig.collect_economic_data || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
+    { value: 'economic', label: 'Economic', icon: Building2, show: (orgConfig.collect_economic_data && !isMinorAge) || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
+    { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
+    { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
+    { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
+  // Personal details rows (age-aware)
+  const personalRows: [string, any][] = [
+    ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} · ${age} yrs` : null],
+    ['Gender', beneficiary.gender],
+    ...(orgConfig.collect_religion ? [['Religion', beneficiary.religion]] as [string, any][] : []),
+    ...(!isMinorAge ? [
+      ['Marital status', beneficiary.marital_status],
+      ['Phone', (beneficiary as any).phone],
+      ['National ID', (beneficiary as any).national_id],
+    ] as [string, any][] : [
+      ...((beneficiary as any).phone ? [['Phone', (beneficiary as any).phone]] as [string, any][] : []),
+    ]),
+    ...(!isMinorAge && !isTertiary && beneficiary.academic_level ? [['Highest education', beneficiary.academic_level]] as [string, any][] : []),
+    ['Family status', (beneficiary as any).family_status],
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-5">
+    <div className="min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-stack { display: block !important; }
+          .bp-card { break-inside: avoid; background: white !important; }
+        }
+        .bp-name { font-family: 'Lora', serif; letter-spacing: -0.3px; }
+        .bp-mono { font-family: 'DM Mono', monospace; }
+        .bp-avatar-photo:hover .bp-camera-overlay { opacity: 1; }
+      `}</style>
+      <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-4">
         {/* Back nav */}
-        <button onClick={() => navigate('/beneficiaries')} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate('/beneficiaries')} className="no-print inline-flex items-center gap-1.5 text-[12px]" style={{ color: '#78716C' }}>
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {termPlural}
         </button>
 
         {/* ─── HERO CARD ─── */}
-        <div className="bg-card rounded-[20px] border border-border overflow-hidden">
+        <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           {/* Decorative band */}
           <div
-            className="h-[80px]"
+            className="h-[88px] relative"
             style={{
-              backgroundColor: 'hsl(var(--secondary))',
-              backgroundImage: 'radial-gradient(circle, hsl(var(--warning) / 0.28) 1px, transparent 1px)',
-              backgroundSize: '20px 20px',
+              background: 'linear-gradient(135deg, #1C1917 0%, #292524 40%, #1C2A20 100%)',
             }}
-          />
+          >
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 20% 30%, rgba(29,158,138,0.18), transparent 50%), radial-gradient(circle at 80% 60%, rgba(180,83,9,0.16), transparent 55%)' }} />
+            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.06 }} />
+          </div>
 
           {/* Hero body */}
-          <div className="px-5 sm:px-7 pb-6">
-            {/* Avatar + Identity row */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-9">
-              <div className="flex items-end gap-4">
+          <div className="px-7 pb-[22px]">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-42px' }}>
+              <div className="flex items-end gap-4 flex-1 min-w-0">
                 {/* Avatar */}
-                <div className="relative shrink-0">
-                  <div className="h-[72px] w-[72px] rounded-full border-[4px] border-card overflow-hidden" style={{ boxShadow: '0 0 0 4px hsl(var(--card))' }}>
+                <div className="relative shrink-0 bp-avatar-photo group">
+                  <div className="h-[82px] w-[82px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-primary-foreground text-lg font-semibold" style={{ background: 'var(--gradient-accent)' }}>
+                      <div className="h-full w-full flex items-center justify-center text-white" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontSize: '28px', fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
                   </div>
-                  {/* Status dot */}
-                  <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card ${statusLabel === 'Active' ? 'bg-primary' : 'bg-muted-foreground'}`} />
+                  {/* Status indicator dot */}
+                  <div
+                    className="absolute bottom-0 right-0 h-[18px] w-[18px] rounded-full flex items-center justify-center text-white"
+                    style={{
+                      border: '2.5px solid #FFFFFF',
+                      background: statusLabel === 'Active' ? '#1D9E8A' : statusLabel === 'Exited' ? '#78716C' : '#B45309',
+                    }}
+                  >
+                    {statusLabel === 'Active' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : statusLabel === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
+                  </div>
                   {currentOrganization?.organization_id && (
-                    <PhotoUploadButton
-                      beneficiaryId={beneficiary.id}
-                      organizationId={currentOrganization.organization_id}
-                      onUploaded={(url) => setBeneficiary(b => b ? { ...b, photo_url: url } : b)}
-                    />
+                    <div className="bp-camera-overlay no-print absolute inset-0 rounded-full flex items-center justify-center opacity-0 transition-opacity" style={{ background: 'rgba(0,0,0,0.45)' }}>
+                      <PhotoUploadButton
+                        beneficiaryId={beneficiary.id}
+                        organizationId={currentOrganization.organization_id}
+                        onUploaded={(url) => setBeneficiary(b => b ? { ...b, photo_url: url } : b)}
+                      />
+                    </div>
                   )}
                 </div>
 
                 {/* Name block */}
-                <div className="pb-1">
-                  <div className="flex items-center gap-2"><h1 className="text-[22px] font-semibold text-foreground tracking-tight leading-tight">{beneficiary.display_name}</h1><CategoryIcon className="h-4 w-4 text-primary" /></div>
-                  {beneficiary.inactive_date && (
-                    <p className="text-[12px] text-muted-foreground mt-0.5">Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}</p>
-                  )}
-                  <p className="text-[12px] text-muted-foreground font-mono mt-0.5">
-                    {beneficiary.student_id_number ? `ID: ${beneficiary.student_id_number}` : `ID: ${beneficiary.id.slice(0, 8).toUpperCase()}`}
-                    {' · '}Registered {new Date(beneficiary.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                  <div className="mt-2 max-w-[260px]">
-                    <ProfileCompletenessMeter beneficiary={beneficiary} guardianCount={guardians.length} />
+                <div className="pb-[6px] flex-1 min-w-0">
+                  <h1 className="bp-name text-[24px] leading-tight" style={{ fontWeight: 600, color: '#1C1917' }}>{beneficiary.display_name}</h1>
+                  <div className="flex items-center gap-[8px] flex-wrap mt-1">
+                    <span className="bp-mono text-[11px]" style={{ color: '#A8A29E' }}>
+                      {beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`}
+                    </span>
+                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.gender}</span></>}
+                    <span style={{ color: '#D6C9B5' }}>•</span>
+                    <span className="text-[11px]" style={{ color: '#78716C' }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
+                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.county}</span></>}
+                    <span style={{ color: '#D6C9B5' }}>•</span>
+                    <span className="text-[11px]" style={{ color: '#A8A29E' }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
                   </div>
+                  {beneficiary.inactive_date && (
+                    <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px]" style={{ background: '#FDF2F8', color: '#831843' }}>
+                      Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-2 pb-1">
+              <div className="no-print flex items-center gap-2 pb-[6px]">
                 <button
                   onClick={handleDownloadReport}
                   disabled={generatingReport}
-                  className="inline-flex items-center gap-1.5 bg-card border border-border text-foreground rounded-[8px] px-4 py-[7px] text-[13px] hover:bg-secondary transition-colors disabled:opacity-50"
+                  title="Print record"
+                  className="h-[34px] w-[34px] rounded-[9px] flex items-center justify-center disabled:opacity-50"
+                  style={{ background: '#FFFFFF', border: '1px solid #E7E2DA', color: '#44403C' }}
                 >
                   {generatingReport ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
-                  Print record
                 </button>
                 <button
                   onClick={handleEdit}
-                  className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground rounded-[8px] px-4 py-[7px] text-[13px] font-medium hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-[9px] px-[14px] h-[34px] text-[13px]"
+                  style={{ background: '#0F7B6C', color: '#FFFFFF', fontWeight: 500 }}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   Edit profile
@@ -454,7 +531,9 @@ export default function BeneficiaryProfile() {
                 {isAdmin && (
                   <button
                     onClick={() => setShowDeleteDialog(true)}
-                    className="inline-flex items-center gap-1.5 bg-card border border-border text-muted-foreground rounded-[8px] px-3 py-[7px] text-[13px] hover:text-destructive hover:border-destructive/30 transition-colors"
+                    title="Delete"
+                    className="h-[34px] w-[34px] rounded-[9px] flex items-center justify-center"
+                    style={{ background: '#FFFFFF', border: '1px solid #E7E2DA', color: '#78716C' }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -463,231 +542,200 @@ export default function BeneficiaryProfile() {
             </div>
 
             {/* Pills row */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Badge variant={statusLabel === 'Active' ? 'success' : 'secondary'}>{statusLabel}</Badge>
-              <Badge variant="outline" className="capitalize"><CategoryIcon className="h-3 w-3 mr-1" />{category}</Badge>
-              {beneficiary.county && <Badge variant="warning"><MapPin className="h-3 w-3 mr-1" />{beneficiary.county}</Badge>}
-              {beneficiary.primary_need && <Badge variant="info">{beneficiary.primary_need}</Badge>}
-              {beneficiary.vulnerability_level && <Badge variant={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? 'destructive' : beneficiary.vulnerability_level === 'medium' ? 'warning' : 'success'} className="capitalize">{beneficiary.vulnerability_level}</Badge>}
+            <div className="flex flex-wrap gap-1.5 mt-4 mb-4">
+              <Pill bg={statusLabel === 'Active' ? '#E6F5F3' : statusLabel === 'Exited' ? '#E7E2DA' : '#F5F0E8'} fg={statusLabel === 'Active' ? '#0A5449' : '#44403C'} dot={statusLabel === 'Active' ? '#1D9E8A' : '#78716C'}>{statusLabel}</Pill>
+              <Pill bg="#F5F0E8" fg="#44403C"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
+              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#FEF3CD" fg="#7A3A0A"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
+              {beneficiary.vulnerability_level && (
+                <Pill
+                  bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
+                  fg={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? '#831843' : beneficiary.vulnerability_level === 'medium' ? '#7A3A0A' : '#0A5449'}
+                >
+                  <span className="capitalize">{beneficiary.vulnerability_level}</span> vulnerability
+                </Pill>
+              )}
+              {(beneficiary as any).family_status && /orphan|child-headed/i.test(String((beneficiary as any).family_status)) && (
+                <Pill bg="#FDF2F8" fg="#831843" dot="#BE185D">{(beneficiary as any).family_status}</Pill>
+              )}
+              {vulnerabilityTags.slice(0, 3).map(t => <Pill key={t} bg="#FDF2F8" fg="#831843">{t}</Pill>)}
+              {vulnerabilityTags.length > 3 && <Pill bg="#F5F0E8" fg="#78716C">+{vulnerabilityTags.length - 3}</Pill>}
             </div>
-            {vulnerabilityTags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {visibleVulnerabilityTags.map(tag => <Badge key={tag} variant="destructive" className="bg-destructive/10 text-destructive border-transparent">{tag}</Badge>)}
-                {!showAllVulnerabilityTags && vulnerabilityTags.length > 4 && (
-                  <button type="button" onClick={() => setShowAllVulnerabilityTags(true)} className="text-[11px] text-primary hover:underline">+{vulnerabilityTags.length - 4} more</button>
-                )}
+
+            {/* Completeness bar */}
+            <div className="flex items-center gap-[10px]">
+              <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>Profile completeness</span>
+              <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: '#EDE5D8' }}>
+                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: '#0F7B6C' }} />
               </div>
-            )}
+              <span className="text-[11px] tabular-nums" style={{ color: pctColour, fontWeight: 500 }}>{completePct}%</span>
+              {missingFields.length > 0 && (
+                <span className="text-[11px] hidden md:inline truncate max-w-[260px]" style={{ color: '#A8A29E' }}>
+                  Missing: {missingFields.slice(0, 2).join(', ')}{missingFields.length > 2 ? '…' : ''}
+                </span>
+              )}
+            </div>
 
             {/* Quick stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 py-4 border-t border-b border-border">
-              <div className="text-center">
-                <div className="text-[20px] font-semibold text-foreground tracking-tight">{category === 'group' ? (beneficiary.member_count || '—') : category === 'household' ? (beneficiary.household_size || '—') : enrollmentCount}</div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'group' ? 'Group members' : category === 'household' ? 'Household members' : 'Programmes'}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-[20px] font-semibold text-foreground tracking-tight">{category === 'individual' || category === 'group' ? attendanceCount : enrollmentCount}</div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">{category === 'individual' || category === 'group' ? 'Activities attended' : 'Programmes'}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-[20px] font-semibold text-foreground tracking-tight">{getLastVisitLabel()}</div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">Last visit</div>
-              </div>
-              <div className="text-center">
-                <div className={`text-[20px] font-semibold tracking-tight ${overallStatus === 'Good' ? 'text-primary' : overallStatus === 'Review' ? 'text-warning' : 'text-destructive'}`}>
-                  {beneficiary.vulnerability_level || overallStatus}
+            <div className="grid grid-cols-2 sm:grid-cols-4 mt-4" style={{ borderTop: '1px solid #E7E2DA' }}>
+              {[
+                { label: 'Programmes', value: String(enrollmentCount), colour: '#1C1917' },
+                { label: 'Activities', value: String(attendanceCount), colour: '#1C1917' },
+                { label: 'Last visit', value: visitLabel, colour: visitColour },
+                { label: 'Overall', value: computedStatus.label, colour: computedStatus.colour },
+              ].map((s, i, arr) => (
+                <div key={s.label} className="text-center py-[14px]" style={{ borderRight: i < arr.length - 1 ? '1px solid #E7E2DA' : 'none' }}>
+                  <div className="tabular-nums" style={{ fontSize: '22px', fontWeight: 600, color: s.colour, fontFamily: s.label === 'Overall' ? "'DM Sans'" : "'DM Sans'" }}>{s.value}</div>
+                  <div className="uppercase mt-[3px]" style={{ fontSize: '10px', letterSpacing: '0.4px', color: '#A8A29E' }}>{s.label}</div>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-[2px]">{beneficiary.vulnerability_level ? 'Vulnerability' : 'Overall status'}</div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* ─── TWO-COLUMN LAYOUT ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack">
           
           {/* ─── SIDEBAR ─── */}
-          <div className="flex flex-col gap-3 order-2 md:order-1">
-            {/* Card A: Personal Details */}
-            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-foreground">Personal Details</span>
-                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
+          <aside className="flex flex-col gap-3 order-2 md:order-1">
+            {/* Personal Details */}
+            <SidebarCard
+              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#F5F0E8' }}><User className="h-3 w-3" style={{ color: '#44403C' }} /></div>}
+              title="Personal details"
+              onEdit={handleEdit}
+            >
+              {personalRows.map(([label, value]) => (
+                <InfoRow key={label} label={label} value={value} mono={label === 'National ID' || label === 'Phone'} />
+              ))}
+              <div className="flex justify-between items-baseline py-[6px]" style={{ borderTop: '1px solid #EDE5D8', marginTop: '4px' }}>
+                <span className="text-[11px]" style={{ color: '#78716C' }}>Consent</span>
+                {beneficiary.consent_given ? (
+                  <span className="text-[12px]" style={{ color: '#0A5449', fontWeight: 500 }}>✓ {beneficiary.consent_date ? formatDisplayDate(beneficiary.consent_date) : 'Recorded'}</span>
+                ) : (
+                  <button onClick={handleEdit} className="text-[12px]" style={{ color: '#B45309' }}>⚠ Record consent →</button>
+                )}
               </div>
-              <div className="px-[18px] py-[14px]">
-                {[
-                  ['Full name', beneficiary.display_name],
-                  ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} (${age} yrs)` : '—'],
-                  ['Gender', beneficiary.gender],
-                  ['Consent', beneficiary.consent_given ? `✓ ${formatDisplayDate(beneficiary.consent_date)}` : '✗'],
-                  ...(category === 'individual' ? [
-                    ...(visibility.showOccupation ? [['Occupation', beneficiary.occupation]] : []),
-                    ...(visibility.showIncomeLevel ? [['Income level', beneficiary.income_level]] : []),
-                    ...(visibility.showMaritalStatus ? [['Marital status', beneficiary.marital_status]] : []),
-                    ['Religion', beneficiary.religion],
-                  ] as any : []),
-                  ...(category === 'household' ? [['Household size', beneficiary.household_size], ['Primary income source', beneficiary.source_of_income]] : []),
-                  ...(category === 'group' ? [['Members', beneficiary.member_count], ['Meeting frequency', beneficiary.group_schedule], ['Leader', beneficiary.leader_name]] : []),
-                ].map(([label, value]) => (
-                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
-                    <span className="text-[12px] text-muted-foreground">{label}</span>
-                    <span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span>
-                  </div>
+              {beneficiary.registration_source && (
+                <div className="text-[10px] mt-2" style={{ color: '#A8A29E' }}>Registered via {beneficiary.registration_source}</div>
+              )}
+            </SidebarCard>
+
+            {/* Location */}
+            <SidebarCard
+              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#ECFDF5' }}><MapPin className="h-3 w-3" style={{ color: '#4D7C5A' }} /></div>}
+              title="Location"
+              onEdit={handleEdit}
+            >
+              {!beneficiary.county && !beneficiary.sub_county && !beneficiary.estate_village ? (
+                <div className="text-center py-3">
+                  <p className="text-[12px] italic" style={{ color: '#A8A29E' }}>Location not yet recorded</p>
+                  <button onClick={handleEdit} className="text-[12px] mt-1.5" style={{ color: '#0F7B6C' }}>Add location →</button>
+                </div>
+              ) : (
+                <>
+                  <InfoRow label="County" value={beneficiary.county} />
+                  <InfoRow label="Sub-county" value={beneficiary.sub_county} />
+                  <InfoRow label="Village / Estate" value={beneficiary.estate_village} />
+                  {(beneficiary as any).country && <InfoRow label="Country" value={(beneficiary as any).country} />}
+                  {beneficiary.home_county && <InfoRow label="Home county" value={beneficiary.home_county} />}
+                </>
+              )}
+            </SidebarCard>
+
+            {/* Vulnerability */}
+            <SidebarCard
+              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#FEF3CD' }}><Zap className="h-3 w-3" style={{ color: '#B45309' }} /></div>}
+              title="Vulnerability"
+              onEdit={handleEdit}
+            >
+              <div className="rounded-[10px] p-[12px_14px] mb-3" style={{ background: '#F5F0E8' }}>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full" style={{ background: beneficiary.vulnerability_level === 'critical' ? '#BE185D' : beneficiary.vulnerability_level === 'high' ? '#B45309' : beneficiary.vulnerability_level === 'medium' ? '#D4A04E' : beneficiary.vulnerability_level === 'low' ? '#1D9E8A' : '#A8A29E' }} />
+                  <span className="text-[12px] capitalize" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.vulnerability_level ? `${beneficiary.vulnerability_level} vulnerability` : 'Not assessed'}</span>
+                </div>
+                {beneficiary.primary_need && (
+                  <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded-[5px] text-[11px]" style={{ background: '#EFF6FF', color: '#1E3A8A' }}>{beneficiary.primary_need}</div>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {vulnerabilityTags.length === 0 ? (
+                  <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>No vulnerability tags recorded</span>
+                ) : vulnerabilityTags.map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{t}</span>
                 ))}
               </div>
-            </div>
+            </SidebarCard>
 
-            {/* Location card */}
-            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />Location</span>
-                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
-              </div>
-              <div className="px-[18px] py-[14px]">
-                {[
-                  ['Country', (beneficiary as any).country],
-                  ['County / Region', beneficiary.county],
-                  ['Sub-county', beneficiary.sub_county],
-                  ['Village / Estate', beneficiary.estate_village],
-                  ['Home county', beneficiary.home_county],
-                  ['Address', beneficiary.location],
-                ].map(([label, value]) => (
-                  <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0">
-                    <span className="text-[12px] text-muted-foreground">{label}</span>
-                    <span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-              <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-foreground">Vulnerability profile</span>
-                <button onClick={handleEdit} className="text-[11px] text-primary hover:underline">Edit</button>
-              </div>
-              <div className="px-[18px] py-[14px] space-y-3">
-                {beneficiary.primary_need && <Badge variant="info">{beneficiary.primary_need}</Badge>}
-                {beneficiary.vulnerability_level && <Badge variant={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? 'destructive' : beneficiary.vulnerability_level === 'medium' ? 'warning' : 'success'} className="capitalize">{beneficiary.vulnerability_level}</Badge>}
-                <div className="flex flex-wrap gap-1.5">
-                  {vulnerabilityTags.length ? vulnerabilityTags.map(tag => <Badge key={tag} variant="destructive" className="bg-destructive/10 text-destructive border-transparent">{tag}</Badge>) : <span className="text-[12px] text-muted-foreground">No tags recorded</span>}
-                </div>
-                <div className="text-[12px] text-muted-foreground">Source: <span className="text-foreground">{beneficiary.registration_source || '—'}</span></div>
-              </div>
-            </div>
-
-            {orgConfig.collect_economic_data && (
-              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-border"><span className="text-[13px] font-semibold text-foreground">Economic profile</span></div>
-                <div className="px-[18px] py-[14px]">
-                  {[["Occupation", beneficiary.occupation], ["Income level", beneficiary.income_level], ["Household size", beneficiary.household_size], ["Income source", beneficiary.source_of_income]].map(([label, value]) => (
-                    <div key={label as string} className="flex justify-between items-baseline py-[6px] border-b border-border last:border-0"><span className="text-[12px] text-muted-foreground">{label}</span><span className="text-[13px] font-medium text-foreground text-right max-w-[150px] truncate">{value || '—'}</span></div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Card B: Health Notes (non-group) */}
-            {beneficiary.beneficiary_type !== 'group' && (
-              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-border">
-                  <span className="text-[13px] font-semibold text-foreground">Health Notes</span>
-                </div>
-                <div className="px-[18px] py-[14px] space-y-3">
-                  {/* Medical conditions as chips */}
-                  <div>
-                    <p className="text-[12px] text-muted-foreground mb-[6px]">Conditions</p>
-                    {beneficiary.other_medical_conditions ? (
-                      <div className="flex flex-wrap gap-1">
-                        {beneficiary.other_medical_conditions.split(',').map((c, i) => (
-                          <span key={i} className="bg-destructive/10 text-destructive px-[9px] py-[3px] rounded-[6px] text-[11px] font-medium">{c.trim()}</span>
-                        ))}
+            {/* Family & Connections */}
+            <SidebarCard
+              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#F5F0E8' }}><UsersRound className="h-3 w-3" style={{ color: '#44403C' }} /></div>}
+              title="Family & connections"
+              right={<button onClick={handleEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>+ Add</button>}
+            >
+              {siblings.length > 0 && (
+                <>
+                  <div className="text-[10px] uppercase mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>In this system</div>
+                  {siblings.map((s: any) => (
+                    <div key={s.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
+                      <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>{getInitials(s.display_name || '?')}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] truncate" style={{ fontWeight: 500 }}>{s.display_name}</div>
+                        <div className="text-[11px]" style={{ color: '#78716C' }}>{s.relationship || 'Sibling'}</div>
                       </div>
-                    ) : (
-                      <span className="text-[12px] text-muted-foreground">None recorded</span>
-                    )}
-                  </div>
-                  {[
-                    ['HIV Status', beneficiary.hiv_status || '—'],
-                    ['Special needs', beneficiary.has_special_needs ? 'Yes' : 'No'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between items-baseline py-[4px] border-b border-border last:border-0">
-                      <span className="text-[12px] text-muted-foreground">{label}</span>
-                      <span className="text-[13px] font-medium text-foreground">{value}</span>
+                      <button onClick={() => navigate(`/beneficiaries/${s.id}`)} className="text-[11px]" style={{ color: '#0F7B6C' }}>View →</button>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Card C: Family */}
-            {familyMembers.length > 0 && (
-              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-border flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-foreground">Family</span>
-                  <span className="text-[11px] text-muted-foreground">{familyMembers.length} member{familyMembers.length !== 1 ? 's' : ''}</span>
-                </div>
-                <div className="px-[18px] py-[10px]">
-                  {familyMembers.map((member, i) => {
-                    const isGuardian = member._type === 'guardian';
-                    const name = isGuardian ? (member as Guardian).full_name : (member as any).display_name || '—';
-                    const initials = getInitials(name);
-                    const relation = isGuardian
-                      ? `${(member as Guardian).relationship} · ${(member as Guardian).guardian_type}`
-                      : member._type === 'sibling' ? `Sibling · ${(member as any).relationship || ''}` : 'Dependant';
-                    const phone = isGuardian ? (member as Guardian).phone : null;
-
-                    return (
-                      <div key={`${member._type}-${member.id}-${i}`} className={`flex items-center gap-3 py-[10px] ${i < familyMembers.length - 1 ? 'border-b border-border' : ''}`}>
-                        <div className="h-9 w-9 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-[12px] font-semibold shrink-0">
-                          {initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium text-foreground truncate">{name}</p>
-                          <p className="text-[11px] text-muted-foreground capitalize">{relation}</p>
-                          {phone && <p className="text-[12px] text-primary font-mono">{phone}</p>}
-                        </div>
-                        {!isGuardian && (
-                          <button onClick={() => navigate(`/beneficiaries/${member.id}`)} className="text-muted-foreground hover:text-primary">
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          </button>
-                        )}
+                </>
+              )}
+              {guardians.length > 0 && (
+                <>
+                  <div className="text-[10px] uppercase mt-3 mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>Family contacts</div>
+                  {guardians.map(g => (
+                    <div key={g.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
+                      <div className="h-9 w-9 rounded-full flex items-center justify-center" style={{ background: '#EDE5D8' }}><User className="h-4 w-4" style={{ color: '#78716C' }} /></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] truncate" style={{ fontWeight: 500 }}>{g.full_name}</div>
+                        <div className="text-[11px]" style={{ color: '#78716C' }}>{g.relationship}{g.phone ? ` · ${g.phone}` : ''}</div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
+                </>
+              )}
+              {siblings.length === 0 && guardians.length === 0 && dependants.length === 0 && (
+                <p className="text-[12px] italic text-center py-2" style={{ color: '#A8A29E' }}>No family connections recorded</p>
+              )}
+              {beneficiary.household_id && (
+                <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
+                  <Home className="h-3.5 w-3.5" style={{ color: '#78716C' }} />
+                  <button onClick={() => navigate(`/households/${beneficiary.household_id}`)} className="text-[12px] flex-1 text-left" style={{ color: '#0F7B6C' }}>View household →</button>
                 </div>
+              )}
+              <div className="mt-3">
+                <OutOfSystemContacts beneficiaryId={beneficiary.id} />
               </div>
-            )}
+            </SidebarCard>
 
-            {/* Background narrative */}
+            {/* Background */}
             {beneficiary.background_narrative && (
-              <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-                <div className="px-[18px] py-[14px] border-b border-border">
-                  <span className="text-[13px] font-semibold text-foreground">Background</span>
-                </div>
-                <div className="px-[18px] py-[14px]">
-                  <p className="text-[12px] text-foreground leading-relaxed whitespace-pre-wrap">{beneficiary.background_narrative}</p>
-                </div>
-              </div>
+              <SidebarCard title="Background">
+                <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: '#44403C' }}>{beneficiary.background_narrative}</p>
+              </SidebarCard>
             )}
-
-            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
-          </div>
+          </aside>
 
           {/* ─── MAIN CONTENT (Tabs) ─── */}
-          <div className="order-1 md:order-2">
+          <div className="order-1 md:order-2 bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {/* Warm tab bar */}
-              <div className="bg-secondary rounded-[10px] p-[3px] flex gap-[2px] mb-4 overflow-x-auto no-scrollbar">
+              {/* Sand tab bar */}
+              <div className="no-print rounded-[10px] p-[3px] flex gap-[2px] mx-4 mt-4 overflow-x-auto no-scrollbar" style={{ background: '#F5F0E8' }}>
                 {tabs.map(tab => (
                   <button
                     key={tab.value}
                     onClick={() => setActiveTab(tab.value)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-[7px] px-[8px] rounded-[8px] text-[12px] font-medium whitespace-nowrap transition-all ${
-                      activeTab === tab.value
-                        ? 'bg-card text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    style={activeTab === tab.value ? { boxShadow: 'var(--shadow-sm)' } : {}}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-[7px] px-[10px] rounded-[8px] text-[12px] whitespace-nowrap transition-all"
+                    style={activeTab === tab.value
+                      ? { background: '#FFFFFF', color: '#1C1917', fontWeight: 500, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+                      : { color: '#78716C' }
+                    }
                   >
                     <tab.icon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{tab.label}</span>
@@ -696,95 +744,93 @@ export default function BeneficiaryProfile() {
               </div>
 
               {/* TAB: Programmes */}
-              <TabsContent value="programmes" className="mt-0 space-y-3">
+              <TabsContent value="programmes" className="mt-0 p-4 space-y-3">
                 <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
+                <div className="pt-2">
+                  <div className="text-[11px] uppercase mb-3" style={{ color: '#A8A29E', letterSpacing: '0.5px', fontWeight: 600 }}>Recent activity</div>
+                  <ActivityTimeline beneficiaryId={beneficiary.id} />
+                </div>
               </TabsContent>
 
               {/* TAB: History & Risk */}
-              <TabsContent value="history-risk" className="mt-0 space-y-0">
-                <div className="bg-card rounded-[16px] border border-border overflow-hidden">
-                  <div className="p-5">
-                    <ActivityTimeline beneficiaryId={beneficiary.id} />
-                  </div>
-                  {/* Divider with label */}
-                  <div className="flex items-center gap-3 px-5">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-[11px] uppercase text-muted-foreground tracking-[0.5px] font-medium">Risk Assessment</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  <div className="p-5">
-                    <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
-                  </div>
+              <TabsContent value="history-risk" className="mt-0 p-4 space-y-4">
+                <RelationshipsTab beneficiary={beneficiary as any} />
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
+                  <span className="text-[10px] uppercase" style={{ letterSpacing: '0.5px', color: '#A8A29E', fontWeight: 600 }}>Risk signals</span>
+                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
                 </div>
+                <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Documents */}
-              <TabsContent value="documents" className="mt-0">
-                <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
-                  <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
-                </div>
+              <TabsContent value="documents" className="mt-0 p-4">
+                <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
               </TabsContent>
 
-              {/* TAB: Observations */}
-              <TabsContent value="observations" className="mt-0">
-                <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
-                  <ProgramObservations beneficiaryId={beneficiary.id} />
-                </div>
-              </TabsContent>
-
-              {/* TAB: Relationships / Family */}
-              <TabsContent value="relationships" className="mt-0">
-                <RelationshipsTab beneficiary={beneficiary as any} />
+              {/* TAB: Notes */}
+              <TabsContent value="notes" className="mt-0 p-4 space-y-3">
+                <ProgramObservations beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
-                <TabsContent value="health" className="mt-0">
-                  {tabs.find(t => t.value === 'health')?.legacy && <div className="mb-3 rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
-                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5 space-y-3">
-                    <div className="flex items-center justify-between"><h3 className="font-semibold">Health</h3><Button variant="ghost" size="sm" onClick={handleEdit}><Pencil className="h-3.5 w-3.5" /></Button></div>
-                    <div className="grid sm:grid-cols-2 gap-3 text-sm">
-                      <div><span className="text-muted-foreground">Medical notes</span><p>{beneficiary.other_medical_conditions || '—'}</p></div>
-                      <div><span className="text-muted-foreground">HIV status</span><p>{beneficiary.hiv_status || '—'}</p></div>
-                      <div><span className="text-muted-foreground">Special needs</span><p>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'No'}</p></div>
-                    </div>
+                <TabsContent value="health" className="mt-0 p-4 space-y-3">
+                  {tabs.find(t => t.value === 'health')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Health information</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>Private — not shared publicly</span>
+                  </div>
+                  <div>
+                    <div className="text-[11px] mb-1.5" style={{ color: '#78716C' }}>Known allergies</div>
+                    <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
+                    <div><div style={{ color: '#78716C' }}>Medical notes</div><div style={{ color: '#1C1917' }}>{beneficiary.other_medical_conditions || '—'}</div></div>
+                    <div><div style={{ color: '#78716C' }}>Special needs</div><div style={{ color: '#1C1917' }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
+                    {visibility.showHivStatus && (
+                      <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
+                        <div className="text-[11px]" style={{ color: '#831843' }}>HIV status — restricted access</div>
+                        <div className="text-[13px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               )}
 
               {tabs.some(t => t.value === 'economic') && (
-                <TabsContent value="economic" className="mt-0">
-                  {tabs.find(t => t.value === 'economic')?.legacy && <div className="mb-3 rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
-                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5 space-y-3">
-                    <div className="flex items-center justify-between"><h3 className="font-semibold">Economic profile</h3><Button variant="ghost" size="sm" onClick={handleEdit}><Pencil className="h-3.5 w-3.5" /></Button></div>
-                    <div className="grid sm:grid-cols-2 gap-3 text-sm">
-                      <div><span className="text-muted-foreground">Occupation</span><p>{beneficiary.occupation || '—'}</p></div>
-                      <div><span className="text-muted-foreground">Income level</span><p>{beneficiary.income_level || '—'}</p></div>
-                      <div><span className="text-muted-foreground">Household size</span><p>{beneficiary.household_size || '—'}</p></div>
-                      <div><span className="text-muted-foreground">Income source</span><p>{beneficiary.source_of_income || '—'}</p></div>
-                    </div>
+                <TabsContent value="economic" className="mt-0 p-4 space-y-3">
+                  {tabs.find(t => t.value === 'economic')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
+                  <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Economic profile</h3>
+                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
+                    <div><div style={{ color: '#78716C' }}>Occupation</div><div>{beneficiary.occupation || '—'}</div></div>
+                    <div><div style={{ color: '#78716C' }}>Income level</div><div>{beneficiary.income_level || '—'}</div></div>
+                    <div><div style={{ color: '#78716C' }}>Household size</div><div>{beneficiary.household_size || '—'}</div></div>
+                    <div><div style={{ color: '#78716C' }}>Income source</div><div>{beneficiary.source_of_income || '—'}</div></div>
                   </div>
                 </TabsContent>
               )}
 
               {/* TAB: Education */}
               {tabs.some(t => t.value === 'academics') && (
-                <TabsContent value="academics" className="mt-0 space-y-3">
-                  {tabs.find(t => t.value === 'academics')?.legacy && <div className="rounded-lg border border-warning/20 bg-warning/10 p-3 text-xs text-warning">This section is not active for your organisation type but contains existing data.</div>}
-                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
-                    <AcademicProgressionInfo 
-                      beneficiaryId={beneficiary.id}
-                      currentGrade={beneficiary.grade}
-                      currentLevel={beneficiary.academic_level}
-                      status={beneficiary.status}
-                    />
-                  </div>
-                  <div className="bg-card rounded-[16px] border border-border overflow-hidden p-5">
-                    <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
-                  </div>
+                <TabsContent value="academics" className="mt-0 p-4 space-y-3">
+                  {tabs.find(t => t.value === 'academics')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
+                  <AcademicProgressionInfo
+                    beneficiaryId={beneficiary.id}
+                    currentGrade={beneficiary.grade}
+                    currentLevel={beneficiary.academic_level}
+                    status={beneficiary.status}
+                  />
+                  <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
                 </TabsContent>
               )}
             </Tabs>
           </div>
+        </div>
+
+        {/* Audit footer */}
+        <div className="text-[10px] text-center pt-4 pb-2" style={{ color: '#A8A29E' }}>
+          Record created {formatDisplayDate(beneficiary.created_at)}
+          {beneficiary.updated_at ? ` · Last updated ${formatDisplayDate(beneficiary.updated_at)}` : ''}
         </div>
       </div>
 
@@ -816,6 +862,50 @@ export default function BeneficiaryProfile() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string; fg: string; dot?: string }) {
+  return (
+    <span className="inline-flex items-center text-[11px] px-2.5 py-1 rounded-[6px]" style={{ background: bg, color: fg, fontWeight: 500 }}>
+      {dot && <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ background: dot }} />}
+      {children}
+    </span>
+  );
+}
+
+function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
+  return (
+    <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
+      <div className="flex items-center justify-between" style={{ padding: '13px 18px 11px', borderBottom: '1px solid #E7E2DA' }}>
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-[12px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
+        </div>
+        {right ?? (onEdit && <button onClick={onEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>Edit</button>)}
+      </div>
+      <div style={{ padding: '13px 18px' }}>{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
+  const empty = value === null || value === undefined || value === '';
+  return (
+    <div className="flex justify-between items-baseline gap-2 py-[5px]">
+      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>{label}</span>
+      <span
+        className={`text-[12px] text-right truncate ${empty ? 'italic' : ''}`}
+        style={{
+          color: empty ? '#A8A29E' : '#1C1917',
+          fontWeight: empty ? 400 : 500,
+          fontFamily: mono && !empty ? "'DM Mono', monospace" : undefined,
+          maxWidth: '160px',
+        }}
+      >
+        {empty ? '—' : String(value)}
+      </span>
     </div>
   );
 }
