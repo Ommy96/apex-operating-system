@@ -22,7 +22,8 @@ import {
   Target, Shield, ShieldAlert, Lock, Wallet, UserCog, Zap,
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
   Heart, Building2, Handshake, Activity, BarChart3, HandCoins, ClipboardList,
-  FolderKanban, MapPin, FileCheck2,
+  FolderKanban, MapPin, FileCheck2, Home, ShoppingCart, GitBranch,
+  TrendingUp, ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApexLogo } from "@/components/brand/ApexLogo";
@@ -124,7 +125,7 @@ export function WorkspaceSidebar() {
   // Logically grouped navigation with permission checks
   const menuGroups: MenuGroup[] = [
     {
-      label: "Overview",
+      label: "Home",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
       ],
@@ -133,19 +134,37 @@ export function WorkspaceSidebar() {
       label: "People",
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Households", url: "/beneficiaries?view=households", icon: Home, show: can.viewBeneficiaries },
         { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
-        
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],
     },
     {
-      label: "Programs & M&E",
+      label: "Programs",
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
-        { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, show: can.viewME },
         { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },
+      ],
+    },
+    {
+      label: "Intelligence",
+      items: [
+        { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
+        { title: "Smart Insights", url: "/ai-insights?tab=insights", icon: Sparkles, show: can.viewAI },
+        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+      ],
+    },
+    {
+      label: "Funding",
+      items: [
+        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
+        { title: "Grants", url: "/financial?tab=grants", icon: ListChecks, show: can.viewFinancials },
+        { title: "Funding Intelligence", url: "/financial?tab=intelligence", icon: TrendingUp, show: can.viewFinancials },
+        { title: "Sponsorships", url: "/financial?tab=sponsorships", icon: Heart, show: can.viewFinancials },
       ],
     },
     {
@@ -153,27 +172,32 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserCog, show: can.viewHR },
+        { title: "Procurement", url: "/procurement", icon: ShoppingCart, show: can.viewFinancials },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+      ],
+    },
+    {
+      label: "Engagement",
+      items: [
         { title: "Communications", url: "/communications", icon: MessageCircle, show: can.viewCommunications },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation },
-        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
-        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+        { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
       ],
     },
     {
       label: "Governance",
       items: [
-        { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
         { title: "Compliance", url: "/compliance", icon: ShieldCheck, show: can.viewCompliance },
         { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
-        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Accountability & Safeguarding", url: "/safeguarding", icon: Shield, show: can.viewCompliance },
       ],
     },
     {
-      label: "Administration",
+      label: "Admin",
       items: [
         { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
-        { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
+        { title: "Organization Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
       ],
     },
   ];
