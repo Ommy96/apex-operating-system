@@ -91,38 +91,36 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       }
       const q = query.trim();
       const like = `%${q}%`;
-      const [ben, prog, don, proj] = await Promise.all([
-        supabase
-          .from("beneficiaries")
-          .select("id, display_name")
-          .eq("organization_id", orgId)
-          .is("deleted_at", null)
-          .ilike("display_name", like)
-          .limit(5),
-        supabase
-          .from("programs")
-          .select("id, name")
-          .eq("organization_id", orgId)
-          .ilike("name", like)
-          .limit(5),
-        supabase
-          .from("donors")
-          .select("id, name")
-          .eq("organization_id", orgId)
-          .ilike("name", like)
-          .limit(5),
-        supabase
-          .from("projects")
-          .select("id, name")
-          .eq("organization_id", orgId)
-          .ilike("name", like)
-          .limit(5),
-      ]);
+      const ben: any = await supabase
+        .from("beneficiaries")
+        .select("id, display_name")
+        .eq("organization_id", orgId)
+        .is("deleted_at", null)
+        .ilike("display_name", like)
+        .limit(5);
+      const prog: any = await supabase
+        .from("programs")
+        .select("id, name")
+        .eq("organization_id", orgId)
+        .ilike("name", like)
+        .limit(5);
+      const don: any = await supabase
+        .from("donor_accounts")
+        .select("id, donor_name")
+        .eq("organization_id", orgId)
+        .ilike("donor_name", like)
+        .limit(5);
+      const proj: any = await supabase
+        .from("projects")
+        .select("id, name")
+        .eq("organization_id", orgId)
+        .ilike("name", like)
+        .limit(5);
       return {
-        beneficiaries: ben.data ?? [],
-        programs: prog.data ?? [],
-        donors: don.data ?? [],
-        projects: proj.data ?? [],
+        beneficiaries: (ben.data ?? []) as Array<{ id: string; display_name: string }>,
+        programs: (prog.data ?? []) as Array<{ id: string; name: string }>,
+        donors: (don.data ?? []) as Array<{ id: string; donor_name: string }>,
+        projects: (proj.data ?? []) as Array<{ id: string; name: string }>,
       };
     },
     enabled: !!orgId && query.trim().length >= 2,
@@ -210,7 +208,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 className="flex items-center gap-3 cursor-pointer"
               >
                 <HandCoins className="h-4 w-4 text-muted-foreground" />
-                <span>{d.name}</span>
+                <span>{d.donor_name}</span>
               </CommandItem>
             ))}
           </CommandGroup>
