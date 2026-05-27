@@ -25,6 +25,8 @@ import {
   FolderKanban, MapPin, FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ApexLogo } from "@/components/brand/ApexLogo";
+import { PRODUCT_NAME } from "@/config/brand";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
@@ -193,14 +195,12 @@ export function WorkspaceSidebar() {
             "flex items-center gap-3 mb-3",
             isCollapsed && "justify-center"
           )}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-md shrink-0">
-              <Target className="h-5 w-5 text-white" />
-            </div>
+            <ApexLogo variant="mark" className="shrink-0" />
             {!isCollapsed && (
               <>
                 <div className="flex flex-col animate-fade-in min-w-0 flex-1">
-                  <span className="font-bold text-sidebar-foreground text-sm tracking-tight">Ufanisi</span>
-                  <span className="text-[11px] text-sidebar-muted truncate">Data Platform</span>
+                  <span className="font-bold text-sidebar-foreground text-sm tracking-tight">{PRODUCT_NAME}</span>
+                  <span className="text-[11px] text-sidebar-muted truncate">The Impact Operating System</span>
                 </div>
                 <NotificationBell />
               </>

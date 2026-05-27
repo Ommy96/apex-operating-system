@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
+import { ApexLogo } from "@/components/brand/ApexLogo";
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from "@/config/brand";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
