@@ -4,7 +4,8 @@
  * when the device is offline, and provides them for sync when online.
  */
 
-const DB_NAME = 'ufanisi_offline';
+// Keep the IndexedDB name stable to preserve existing offline data on user devices.
+const DB_NAME = 'apexos_offline';
 const DB_VERSION = 1;
 
 export type OfflineRecordType = 'beneficiary' | 'observation' | 'attachment';

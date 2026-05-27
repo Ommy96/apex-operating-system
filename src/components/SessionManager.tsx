@@ -10,7 +10,7 @@ interface SessionManagerProps {
   children: React.ReactNode;
 }
 
-const IDLE_TIMEOUT_KEY = 'ufanisi_last_active';
+const IDLE_TIMEOUT_KEY = 'apexos_last_active';
 const DEFAULT_IDLE_MINUTES = 30;
 const WARNING_SECONDS = 120; // 2-minute warning
 

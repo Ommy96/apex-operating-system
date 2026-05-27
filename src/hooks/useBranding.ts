@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
+import { PRODUCT_NAME } from "@/config/brand";
 
 export function useBranding() {
   const { currentOrganization } = useOrganization();
@@ -24,7 +25,8 @@ export function useBranding() {
 
   const primaryColor = orgDetails?.primary_color || null;
   const logoUrl = orgDetails?.logo_url || null;
-  const orgName = orgDetails?.name || (currentOrganization as any)?.organization_name || "Ufanisi";
+  const orgName =
+    orgDetails?.name || (currentOrganization as any)?.organization_name || PRODUCT_NAME;
 
   useEffect(() => {
     if (primaryColor) {
@@ -35,7 +37,7 @@ export function useBranding() {
   }, [primaryColor]);
 
   useEffect(() => {
-    document.title = `${orgName} — Ufanisi`;
+    document.title = `${orgName} · ${PRODUCT_NAME}`;
   }, [orgName]);
 
   return {

@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
+import { ApexLogo } from "@/components/brand/ApexLogo";
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from "@/config/brand";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery } from "@tanstack/react-query";
@@ -380,20 +382,15 @@ export function AppSidebar() {
             {logoUrl ? (
               <img src={logoUrl} alt={orgName} className="h-8 w-8 rounded-lg object-contain" />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0" style={{ background: 'var(--accent-mid)' }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 1L14.5 5V11L8 15L1.5 11V5L8 1Z" stroke="white" strokeWidth="1.5" fill="none" />
-                  <path d="M8 5L11 7V11L8 13L5 11V7L8 5Z" fill="white" fillOpacity="0.6" />
-                </svg>
-              </div>
+              <ApexLogo variant="mark" />
             )}
             {!isCollapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="text-[14px] font-semibold text-white" style={{ letterSpacing: '-0.3px' }}>
-                  Ufanisi
+                  {logoUrl ? orgName : PRODUCT_NAME}
                 </span>
                 <span className="text-[10px] uppercase" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.6px' }}>
-                  NGO Platform
+                  {PRODUCT_TAGLINE}
                 </span>
               </div>
             )}

@@ -15,25 +15,27 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { ApexLogo } from "@/components/brand/ApexLogo";
+import { PRODUCT_NAME, PRODUCT_TAGLINE, VENDOR } from "@/config/brand";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const coreFeatures = [
-    { icon: Building2, title: "Multi-Organization Ready", description: "Secure workspaces with full data isolation" },
-    { icon: BarChart3, title: "M&E Engine", description: "Custom indicators, targets, and progress tracking" },
-    { icon: FolderKanban, title: "Program Management", description: "Programs, timelines, and activity-level data" },
-    { icon: DollarSign, title: "Donor Tracking", description: "Link donors and generate accountability reports" },
-    { icon: FileBarChart, title: "Reports & Dashboards", description: "Export to Excel and PDF with one click" },
-    { icon: Shield, title: "Roles & Permissions", description: "Granular access control for your team" }
+    { icon: Building2, title: "Multi-tenant by design", description: "Isolated workspaces for every organization, branch and partner" },
+    { icon: BarChart3, title: "M&E intelligence", description: "Indicators, targets, disaggregation and automated progress tracking" },
+    { icon: FolderKanban, title: "Programs & projects", description: "Hierarchical programs, projects and activity-level data" },
+    { icon: DollarSign, title: "Donor & financial suite", description: "Donor management, grants, budgets and accountability reports" },
+    { icon: FileBarChart, title: "AI-assisted reporting", description: "Generate narrative reports, dashboards and exports in one click" },
+    { icon: Shield, title: "Offline-capable field mode", description: "Collect data anywhere; sync automatically when back online" },
   ];
 
   const benefits = [
-    "Designed for NGOs, not generic businesses",
-    "Built with M&E best practices",
-    "Affordable for local organizations",
-    "Works in low-resource settings"
+    "Purpose-built for NGOs, CBOs and foundations",
+    "Designed for faith-based organizations and social enterprises",
+    "Granular roles, permissions and audit trails",
+    "Works in low-bandwidth and offline settings",
   ];
 
   return (
@@ -46,12 +48,10 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl" style={{ background: 'rgba(29,158,138,0.15)', border: '1px solid rgba(29,158,138,0.25)' }}>
-                <Target className="w-7 h-7" style={{ color: 'var(--accent-mid)' }} />
-              </div>
+              <ApexLogo variant="mark" />
               <div>
-                <h1 className="text-xl font-semibold text-white tracking-tight" style={{ letterSpacing: '-0.3px' }}>Ufanisi</h1>
-                <p className="text-[11px]" style={{ color: 'var(--accent-mid)' }}>Data that drives real impact</p>
+                <h1 className="text-xl font-semibold text-white tracking-tight" style={{ letterSpacing: '-0.3px' }}>{PRODUCT_NAME}</h1>
+                <p className="text-[11px]" style={{ color: 'var(--accent-mid)' }}>{PRODUCT_TAGLINE}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -83,18 +83,19 @@ const Index = () => {
         <div className="text-center animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] mb-6" style={{ background: 'rgba(29,158,138,0.12)', border: '1px solid rgba(29,158,138,0.25)', color: 'var(--accent-mid)' }}>
             <Zap className="w-4 h-4" />
-            One platform. Many organizations. Measurable impact.
+            Modular · Multi-tenant · AI-assisted · Offline-capable
           </div>
           <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white mb-6 leading-tight" style={{ letterSpacing: '-1px' }}>
-            Empower Your NGO with
+            ApexOS — a Unified Intelligence Platform
             <br />
             <span style={{ color: 'var(--accent-mid)' }}>
-              Data-Driven Impact
+              for Social Impact Organizations
             </span>
           </h1>
           <p className="text-lg sm:text-xl mb-10 max-w-3xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            Ufanisi helps NGOs, CBOs, and social impact organizations manage programs, donors, 
-            indicators, and reports — all in one secure system built for real-world field work.
+            One operating system for NGOs, CBOs, foundations, faith-based organizations and
+            social enterprises — programs, beneficiaries, donors, finance, M&amp;E and field operations
+            in a single secure, multi-tenant platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
@@ -150,7 +151,7 @@ const Index = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="rounded-2xl p-8" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <h3 className="text-2xl font-semibold text-white mb-6">Why Choose Ufanisi?</h3>
+              <h3 className="text-2xl font-semibold text-white mb-6">Why teams choose {PRODUCT_NAME}</h3>
               <div className="space-y-3">
                 {benefits.map((item, index) => (
                   <div key={index} className="flex items-center gap-3">
@@ -211,10 +212,10 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
-              <Target className="w-5 h-5" style={{ color: 'var(--accent-mid)' }} />
-              <span className="text-white font-semibold">Ufanisi</span>
+              <ApexLogo variant="mark" />
+              <span className="text-white font-semibold">{PRODUCT_NAME}</span>
               <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-              <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.5)' }}>A product of Infera Tech Solutions</span>
+              <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.5)' }}>A product of {VENDOR}</span>
             </div>
             <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>© 2026 — Empowering measurable impact</p>
           </div>

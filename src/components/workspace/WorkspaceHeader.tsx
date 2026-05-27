@@ -144,7 +144,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-[12px] text-muted-foreground hover:text-foreground cursor-pointer" onClick={() => navigate('/dashboard')}>
-                Ufanisi
+                ApexOS
               </BreadcrumbLink>
               <BreadcrumbSeparator>
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />

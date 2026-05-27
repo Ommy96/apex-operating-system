@@ -247,7 +247,7 @@ export default function AIInsights() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">Powered by Ufanisi AI · Responses are based on your organization's live data</p>
+            <p className="text-[10px] text-muted-foreground text-center mt-2">Powered by ApexOS AI · Responses are based on your organization's live data</p>
           </div>
         </TabsContent>
       </Tabs>
