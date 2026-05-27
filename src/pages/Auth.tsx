@@ -14,6 +14,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, CheckCircle2, Mail, Lock, User, Sparkles, Building2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { ApexLogo } from '@/components/brand/ApexLogo';
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/config/brand';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -439,19 +441,14 @@ export default function Auth() {
             </Button>
             
             <div className="flex justify-center mb-4">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
-                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
-                  <Sparkles className="h-8 w-8 text-white" />
-                </div>
-              </div>
+              <ApexLogo variant="mark" className="scale-150" />
             </div>
-            
+
             <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
-              ApexOS
+              {PRODUCT_NAME}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sign in to your account
+              {PRODUCT_TAGLINE} · Sign in to your account
             </CardDescription>
           </CardHeader>
         </div>
