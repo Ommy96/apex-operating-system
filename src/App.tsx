@@ -329,17 +329,18 @@ const App = () => (
             } />
             <Route path="/safeguarding" element={
               <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'safeguarding' }}>
-                <LazyRoute><SafeguardingDashboard /></LazyRoute>
+                <DashboardLayout><LazyRoute><SafeguardingDashboard /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/whistleblower" element={
-              <ProtectedRoute>
-                <LazyRoute><WhistleblowerManagement /></LazyRoute>
-              </ProtectedRoute>
+              <Navigate to="/safeguarding?tab=whistleblower" replace />
             } />
             <Route path="/deduplication" element={
-              <ProtectedRoute>
-                <LazyRoute><DeduplicationReview /></LazyRoute>
+              <Navigate to="/beneficiaries?tab=deduplication" replace />
+            } />
+            <Route path="/complaints" element={
+              <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'accountability' }}>
+                <DashboardLayout><LazyRoute><ComplaintManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
 
