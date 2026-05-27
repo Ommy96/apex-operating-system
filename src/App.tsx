@@ -324,7 +324,7 @@ const App = () => (
             {/* Accountability routes */}
             <Route path="/complaints" element={
               <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'accountability' }}>
-                <LazyRoute><ComplaintManagement /></LazyRoute>
+                <DashboardLayout><LazyRoute><ComplaintManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/safeguarding" element={
@@ -337,11 +337,6 @@ const App = () => (
             } />
             <Route path="/deduplication" element={
               <Navigate to="/beneficiaries?tab=deduplication" replace />
-            } />
-            <Route path="/complaints" element={
-              <ProtectedRoute requirePermission={{ module: 'accountability', action: 'view', resource: 'accountability' }}>
-                <DashboardLayout><LazyRoute><ComplaintManagement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
             } />
 
             {/* Sprint 3: Financial routes */}
