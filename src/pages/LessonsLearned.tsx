@@ -99,7 +99,7 @@ export default function LessonsLearned() {
     const margin = 20;
     const maxW = pageW - margin * 2;
     let y = 0;
-    const orgLabel = currentOrganization?.organization_name || "Ufanisi";
+    const orgLabel = currentOrganization?.organization_name || "ApexOS";
 
     const addFooter = (pg: number) => {
       pdf.setFontSize(8);

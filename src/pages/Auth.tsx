@@ -294,7 +294,7 @@ export default function Auth() {
               Accept Invitation
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Join your organization on Ufanisi
+              Join your organization on ApexOS
             </CardDescription>
           </CardHeader>
           
@@ -448,7 +448,7 @@ export default function Auth() {
             </div>
             
             <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
-              Ufanisi
+              ApexOS
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               Sign in to your account
@@ -608,7 +608,7 @@ export default function Auth() {
           {/* Registration options */}
           <div className="mt-6 pt-6 border-t border-border/50">
             <p className="text-sm text-center text-muted-foreground mb-4">
-              New to Ufanisi?
+              New to ApexOS?
             </p>
             <Link to="/register-organization" className="block">
               <Button 

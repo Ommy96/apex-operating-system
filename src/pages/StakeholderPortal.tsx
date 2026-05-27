@@ -182,7 +182,7 @@ export default function StakeholderPortal() {
         )}
 
         <footer className="text-center text-xs text-muted-foreground pt-8 pb-4">
-          Powered by Ufanisi · This is a confidential view shared with you by {organization?.name}
+          Powered by ApexOS · This is a confidential view shared with you by {organization?.name}
         </footer>
       </main>
     </div>
