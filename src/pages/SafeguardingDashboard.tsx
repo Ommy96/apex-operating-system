@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -15,8 +16,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { ShieldAlert, AlertTriangle, Plus, Upload } from 'lucide-react';
+import { WhistleblowerInner } from './WhistleblowerManagement';
 
 const INCIDENT_TYPES = [
   { value: 'child_abuse', label: 'Child Abuse' },
@@ -47,6 +50,15 @@ export default function SafeguardingDashboard() {
   const { user } = useAuth();
   const orgId = currentOrganization?.organization_id;
   const qc = useQueryClient();
+  const [params, setParams] = useSearchParams();
+  const tabParam = params.get('tab');
+  const activeTab = tabParam === 'whistleblower' ? 'whistleblower' : 'incidents';
+  const onTabChange = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v === 'incidents') next.delete('tab');
+    else next.set('tab', v);
+    setParams(next, { replace: true });
+  };
   const [selected, setSelected] = useState<any>(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportForm, setReportForm] = useState({
@@ -116,6 +128,7 @@ export default function SafeguardingDashboard() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <ShieldAlert className="h-6 w-6 text-destructive" /> Safeguarding
           </h1>
+          {activeTab === 'incidents' && (
           <Dialog open={showReportForm} onOpenChange={setShowReportForm}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-1" /> Report Incident</Button>
@@ -180,8 +193,16 @@ export default function SafeguardingDashboard() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
+        <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+          <TabsList>
+            <TabsTrigger value="incidents">Incidents</TabsTrigger>
+            <TabsTrigger value="whistleblower">Whistleblower</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="incidents" className="mt-4 space-y-4">
         {criticalUnassigned.length > 0 && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -223,6 +244,12 @@ export default function SafeguardingDashboard() {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="whistleblower" className="mt-4">
+            <WhistleblowerInner />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Sheet open={!!selected} onOpenChange={() => setSelected(null)}>
