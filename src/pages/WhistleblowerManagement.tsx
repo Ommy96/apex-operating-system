@@ -63,7 +63,8 @@ export function WhistleblowerInner() {
   };
 
   return (
-    <div className="space-y-4">
+    <>
+      <div className="space-y-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ShieldAlert className="h-6 w-6" /> Whistleblower Reports
         </h1>
@@ -160,6 +161,16 @@ export function WhistleblowerInner() {
           )}
         </SheetContent>
       </Sheet>
+    </>
+  );
+}
+
+export default function WhistleblowerManagement() {
+  return (
+    <DashboardLayout>
+      <div className="p-4">
+        <WhistleblowerInner />
+      </div>
     </DashboardLayout>
   );
 }
