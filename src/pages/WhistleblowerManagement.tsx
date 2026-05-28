@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from '@/hooks/use-toast';
 import { ShieldAlert, EyeOff } from 'lucide-react';
 
-export default function WhistleblowerManagement() {
+export function WhistleblowerInner() {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
   const qc = useQueryClient();
@@ -63,8 +63,7 @@ export default function WhistleblowerManagement() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-4 p-4">
+    <div className="space-y-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ShieldAlert className="h-6 w-6" /> Whistleblower Reports
         </h1>
