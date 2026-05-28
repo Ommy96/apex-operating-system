@@ -170,6 +170,13 @@ export default function Beneficiaries() {
     }
   }, [searchParams, beneficiaries]);
 
+  // Deep-link: /beneficiaries?view=households opens households sheet
+  useEffect(() => {
+    if (searchParams.get('view') === 'households') {
+      setHouseholdsOpen(true);
+    }
+  }, [searchParams]);
+
   const fetchBeneficiaries = async () => {
     if (!organizationId) return;
     setLoading(true);

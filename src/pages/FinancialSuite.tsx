@@ -12,8 +12,24 @@ import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { PettyCashTab } from "@/components/finance/PettyCashTab";
 import { FundingSchedulesTab } from "@/components/financial/FundingSchedulesTab";
 
+const VALID_TABS = [
+  "overview","sponsorship","budgets","expenses","grants",
+  "petty-cash","cost-analytics","funding-schedules",
+] as const;
+type TabId = typeof VALID_TABS[number];
+
 export default function FinancialSuite() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [params, setParams] = useSearchParams();
+  const tabParam = params.get("tab");
+  const activeTab: TabId = (VALID_TABS as readonly string[]).includes(tabParam || "")
+    ? (tabParam as TabId)
+    : "overview";
+  const setActiveTab = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v === "overview") next.delete("tab");
+    else next.set("tab", v);
+    setParams(next, { replace: true });
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
