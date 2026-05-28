@@ -163,8 +163,8 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
         { title: "Grants", url: "/financial?tab=grants", icon: ListChecks, show: can.viewFinancials },
-        { title: "Funding Intelligence", url: "/financial?tab=intelligence", icon: TrendingUp, show: can.viewFinancials },
-        { title: "Sponsorships", url: "/financial?tab=sponsorships", icon: Heart, show: can.viewFinancials },
+        { title: "Funding Intelligence", url: "/financial?tab=cost-analytics", icon: TrendingUp, show: can.viewFinancials },
+        { title: "Sponsorships", url: "/financial?tab=sponsorship", icon: Heart, show: can.viewFinancials },
       ],
     },
     {

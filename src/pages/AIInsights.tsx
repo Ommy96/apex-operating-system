@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import SmartInsightsDashboard from "@/components/insights/SmartInsightsDashboard";
+import { useSearchParams } from "react-router-dom";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -28,6 +29,15 @@ export default function AIInsights() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { currentOrganization } = useOrganization();
+  const [params, setParams] = useSearchParams();
+  const tabParam = params.get("tab");
+  const activeTab = tabParam === "chat" ? "chat" : "insights";
+  const onTabChange = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v === "insights") next.delete("tab");
+    else next.set("tab", v);
+    setParams(next, { replace: true });
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -123,7 +133,7 @@ export default function AIInsights() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
-      <Tabs defaultValue="insights" className="flex flex-col flex-1 overflow-hidden">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="flex flex-col flex-1 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 border-b border-border/40">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md shrink-0">
