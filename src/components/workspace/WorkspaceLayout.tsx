@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { WorkspaceSidebar } from "./WorkspaceSidebar";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { CommandPalette } from "./CommandPalette";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 interface WorkspaceLayoutProps {
   children: ReactNode;
@@ -26,7 +27,7 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
             id="main-content"
             role="main"
             aria-label="Page content"
-            className="flex-1 overflow-auto p-6 workspace-scroll"
+            className="flex-1 overflow-auto p-6 pb-24 md:pb-6 workspace-scroll"
             style={{ background: 'var(--brand-canvas)' }}
           >
             <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
@@ -36,6 +37,7 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         </div>
         
         <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );
