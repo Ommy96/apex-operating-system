@@ -33,10 +33,10 @@ export function SetupGate({ children }: { children: ReactNode }) {
       if (!orgId) return null;
       const { data } = await supabase
         .from('organizations')
-        .select('setup_completed')
+        .select('setup_completed' as any)
         .eq('id', orgId)
         .maybeSingle();
-      return data as { setup_completed: boolean } | null;
+      return (data as any) as { setup_completed: boolean } | null;
     },
     enabled: !!orgId,
     staleTime: 60 * 1000,
@@ -47,7 +47,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
   const exempt = EXEMPT_PREFIXES.some((p) => location.pathname.startsWith(p));
   const isAdminLike = role === 'admin' || role === 'management' || role === 'org_admin';
 
-  if (!exempt && orgId && data && data.setup_completed === false && isAdminLike) {
+  if (!exempt && orgId && data && (data as any).setup_completed === false && isAdminLike) {
     return <Navigate to="/setup/wizard" replace />;
   }
 
