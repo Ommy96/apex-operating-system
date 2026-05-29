@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UnsavedBar } from '../UnsavedBar';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
 
@@ -194,6 +195,25 @@ export function ProfileSection() {
   return (
     <div className="space-y-6">
       <UnsavedBar isDirty={form.isDirty} isSaving={form.isSaving} onSave={form.save} onReset={form.reset} disabled={!isAdmin} />
+
+      {isAdmin && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium">Reconfigure Organisation</div>
+                <div className="text-xs text-muted-foreground">Re-run the setup wizard to refresh sector defaults. Non-destructive — your existing data stays.</div>
+              </div>
+            </div>
+            <Button asChild variant="outline" size="sm" className="shrink-0">
+              <Link to="/setup/wizard?reconfigure=1">Open wizard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
