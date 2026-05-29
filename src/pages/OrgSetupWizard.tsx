@@ -54,7 +54,7 @@ export default function OrgSetupWizard() {
     (async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('setup_config,country,county')
+        .select('setup_config,country,county' as any)
         .eq('id', orgId)
         .maybeSingle();
       const cfg: any = (data as any)?.setup_config || {};
@@ -123,7 +123,7 @@ export default function OrgSetupWizard() {
 
       // 1) Merge features into organizations.features_enabled and mark setup complete
       const { data: orgRow } = await supabase
-        .from('organizations').select('features_enabled,country').eq('id', orgId).maybeSingle();
+        .from('organizations').select('features_enabled,country' as any).eq('id', orgId).maybeSingle();
       const mergedFeatures = { ...(((orgRow as any)?.features_enabled) || {}), ...features };
       const orgUpdate: any = {
         setup_completed: true,
