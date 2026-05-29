@@ -71,6 +71,7 @@ const LessonsLearned = lazy(() => import("./pages/LessonsLearned"));
 const ImpactStories = lazy(() => import("./pages/ImpactStories"));
 const MECalendar = lazy(() => import("./pages/MECalendar"));
 const Setup2FA = lazy(() => import("./pages/Setup2FA"));
+const OrgSetupWizard = lazy(() => import("./pages/OrgSetupWizard"));
 
 // Sprint 6 pages
 const MapView = lazy(() => import("./pages/MapView"));
@@ -364,6 +365,9 @@ const App = () => (
             } />
             <Route path="/me-calendar" element={<Navigate to="/me?tab=data-collection" replace />} />
             <Route path="/setup-2fa" element={<LazyRoute><Setup2FA /></LazyRoute>} />
+            <Route path="/setup/wizard" element={
+              <ProtectedRoute><LazyRoute><OrgSetupWizard /></LazyRoute></ProtectedRoute>
+            } />
 
             {/* Sprint 6 routes */}
             <Route path="/map" element={
