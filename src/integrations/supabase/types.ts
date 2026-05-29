@@ -8447,6 +8447,9 @@ export type Database = {
           safeguarding_policy_url: string | null
           session_timeout_minutes: number | null
           settings: Json | null
+          setup_completed: boolean
+          setup_completed_at: string | null
+          setup_config: Json
           show_name_in_sidebar: boolean | null
           slug: string
           stripe_customer_id: string | null
@@ -8533,6 +8536,9 @@ export type Database = {
           safeguarding_policy_url?: string | null
           session_timeout_minutes?: number | null
           settings?: Json | null
+          setup_completed?: boolean
+          setup_completed_at?: string | null
+          setup_config?: Json
           show_name_in_sidebar?: boolean | null
           slug: string
           stripe_customer_id?: string | null
@@ -8619,6 +8625,9 @@ export type Database = {
           safeguarding_policy_url?: string | null
           session_timeout_minutes?: number | null
           settings?: Json | null
+          setup_completed?: boolean
+          setup_completed_at?: string | null
+          setup_config?: Json
           show_name_in_sidebar?: boolean | null
           slug?: string
           stripe_customer_id?: string | null
