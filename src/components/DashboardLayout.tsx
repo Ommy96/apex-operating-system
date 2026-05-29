@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { WorkspaceLayout } from "@/components/workspace";
 import { useBranding } from "@/hooks/useBranding";
+import { SetupGate } from "@/components/setup/SetupGate";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, X, Megaphone, AlertTriangle, Info, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -97,6 +98,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 
   return (
+    <SetupGate>
     <WorkspaceLayout>
       {/* Impersonation banner */}
       {impersonating && (
@@ -151,5 +153,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {children}
     </WorkspaceLayout>
+    </SetupGate>
   );
 }
