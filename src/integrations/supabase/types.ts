@@ -311,11 +311,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "activities_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -1403,6 +1417,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "beneficiary_cases_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "beneficiary_cases_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
@@ -1479,6 +1500,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_donors_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -2038,11 +2066,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "beneficiary_services_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "beneficiary_services_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_services_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -3032,11 +3074,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budgets_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "budgets_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -3438,6 +3494,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cash_transfer_batches_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       cash_transfers: {
@@ -3550,6 +3613,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cash_transfers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       child_programs: {
@@ -3610,6 +3680,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_programs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -4663,11 +4740,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "donor_report_packs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "donor_report_packs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_packs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -4820,6 +4911,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_report_templates_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -5122,6 +5220,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "expense_claims_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       expenses: {
@@ -5272,11 +5377,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "expenses_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "expenses_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -5520,11 +5639,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_transactions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "financial_transactions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -5818,6 +5951,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_programs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -6276,6 +6416,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impact_stories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -7139,6 +7286,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lessons_learned_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       logframe_assumptions: {
@@ -7201,6 +7355,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_assumptions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -7281,6 +7442,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframe_entries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -7461,11 +7629,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "logframes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "logframes_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logframes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -7657,11 +7839,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "me_data_schedule_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "me_data_schedule_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_data_schedule_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -7878,11 +8074,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "me_form_submissions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "me_form_submissions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_form_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "me_form_submissions_submitted_by_fkey"
@@ -8000,11 +8210,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "me_forms_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "me_forms_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "me_forms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "me_forms_updated_by_fkey"
@@ -8767,6 +8991,13 @@ export type Database = {
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "partner_activities_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
         ]
       }
       partner_organizations: {
@@ -8984,6 +9215,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_funds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9256,6 +9494,13 @@ export type Database = {
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "program_beneficiaries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
         ]
       }
       program_comms_outputs: {
@@ -9334,11 +9579,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_comms_outputs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_comms_outputs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_comms_outputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9401,6 +9660,13 @@ export type Database = {
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "program_donors_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
         ]
       }
       program_entries: {
@@ -9452,6 +9718,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_entries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -9533,11 +9806,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_indicators_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_indicators_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_indicators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9588,6 +9875,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_modules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -9683,11 +9977,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_observations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_observations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_observations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9771,11 +10079,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_partners_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_partners_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_partners_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9870,6 +10192,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_report_types_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_report_types_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -9957,11 +10286,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_risks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_risks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_risks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10038,11 +10381,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_stakeholders_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_stakeholders_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_stakeholders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10116,11 +10473,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_sustainability_milestones_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_sustainability_milestones_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_sustainability_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10191,11 +10562,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_sustainability_plans_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_sustainability_plans_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_sustainability_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10240,6 +10625,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_visit_types_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -10330,6 +10722,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "program_visits_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "program_visits_visit_type_id_fkey"
             columns: ["visit_type_id"]
             isOneToOne: false
@@ -10404,11 +10803,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "programme_field_config_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "programme_field_config_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_field_config_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10467,6 +10880,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_logframes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -10548,11 +10968,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "programme_milestones_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "programme_milestones_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10628,11 +11062,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "programme_team_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "programme_team_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_team_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10856,6 +11304,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_narrative_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       project_team_members: {
@@ -10893,6 +11348,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_team_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_team_members_user_id_fkey"
@@ -11042,6 +11504,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -11221,6 +11690,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requisitions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "purchase_requisitions_requested_by_fkey"
@@ -11991,11 +12467,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_tasks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "staff_tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -12376,11 +12866,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "surveys_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "surveys_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -12474,6 +12978,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theory_of_change_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -12816,11 +13327,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "volunteer_assignments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
             foreignKeyName: "volunteer_assignments_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "volunteer_assignments_volunteer_id_fkey"
@@ -13255,6 +13780,106 @@ export type Database = {
         }
         Relationships: []
       }
+      v_program_funding_summary: {
+        Row: {
+          beneficiary_level_funding: number | null
+          currency: string | null
+          donor_count: number | null
+          name: string | null
+          organization_id: string | null
+          program_id: string | null
+          program_level_funding: number | null
+          project_level_funding: number | null
+          status: string | null
+          total_budget: number | null
+          total_received: number | null
+          total_spent: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_project_funding_summary: {
+        Row: {
+          end_date: string | null
+          name: string | null
+          organization_id: string | null
+          program_id: string | null
+          project_id: string | null
+          start_date: string | null
+          status: string | null
+          total_budget: number | null
+          total_received: number | null
+          total_spent: number | null
+        }
+        Insert: {
+          end_date?: string | null
+          name?: string | null
+          organization_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          total_budget?: never
+          total_received?: never
+          total_spent?: never
+        }
+        Update: {
+          end_date?: string | null
+          name?: string | null
+          organization_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          total_budget?: never
+          total_received?: never
+          total_spent?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_invitation: {
@@ -13338,6 +13963,10 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      program_funding_health_score: {
+        Args: { _program_id: string }
+        Returns: Json
+      }
       register_organization: {
         Args: {
           _address?: string
