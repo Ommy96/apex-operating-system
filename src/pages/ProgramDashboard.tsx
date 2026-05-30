@@ -29,6 +29,7 @@ import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { ProgramCommsPlan } from "@/components/programs/ProgramCommsPlan";
 import { SustainabilityPlan } from "@/components/programs/SustainabilityPlan";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
+import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   planning: { label: "Planning", color: "text-muted-foreground", bg: "bg-muted/60", dot: "bg-muted-foreground" },
@@ -302,6 +303,11 @@ const ProgramDashboard = () => {
 
         {activeTab === "overview" && (
           <TabsContent value="overview" forceMount className="mt-6 space-y-6">
+            {programId && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <FundingHealthBadge programId={programId} />
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Program Details */}
               <Card className="border-border/60">
