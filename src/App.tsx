@@ -37,6 +37,7 @@ const InferaAdminDashboard = lazy(() => import("./pages/InferaAdminDashboard"));
 const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
+const FundingIntelligence = lazy(() => import("./pages/FundingIntelligence"));
 const HRManagement = lazy(() => import("./pages/HRManagement"));
 const AutomationEngine = lazy(() => import("./pages/AutomationEngine"));
 const CommunicationsHub = lazy(() => import("./pages/CommunicationsHub"));
@@ -192,6 +193,11 @@ const App = () => (
             <Route path="/financial" element={
               <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
                 <DashboardLayout><LazyRoute><FinancialSuite /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/funding/intelligence" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><FundingIntelligence /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/me-suite" element={<Navigate to="/me" replace />} />
