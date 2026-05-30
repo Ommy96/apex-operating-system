@@ -47,13 +47,13 @@ export interface FundingHealthScore {
 export function useProgramFundingSummaries() {
   const { currentOrganization } = useOrganization();
   return useQuery({
-    queryKey: ["v_program_funding_summary", currentOrganization?.id],
-    enabled: !!currentOrganization?.id,
+    queryKey: ["v_program_funding_summary", currentOrganization?.organization_id],
+    enabled: !!currentOrganization?.organization_id,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("v_program_funding_summary")
         .select("*")
-        .eq("organization_id", currentOrganization!.id);
+        .eq("organization_id", currentOrganization!.organization_id);
       if (error) throw error;
       return (data ?? []) as ProgramFundingSummary[];
     },
@@ -63,13 +63,13 @@ export function useProgramFundingSummaries() {
 export function useProjectFundingSummaries() {
   const { currentOrganization } = useOrganization();
   return useQuery({
-    queryKey: ["v_project_funding_summary", currentOrganization?.id],
-    enabled: !!currentOrganization?.id,
+    queryKey: ["v_project_funding_summary", currentOrganization?.organization_id],
+    enabled: !!currentOrganization?.organization_id,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("v_project_funding_summary")
         .select("*")
-        .eq("organization_id", currentOrganization!.id);
+        .eq("organization_id", currentOrganization!.organization_id);
       if (error) throw error;
       return (data ?? []) as ProjectFundingSummary[];
     },
@@ -79,13 +79,13 @@ export function useProjectFundingSummaries() {
 export function useOrgGrants() {
   const { currentOrganization } = useOrganization();
   return useQuery({
-    queryKey: ["grants-intel", currentOrganization?.id],
-    enabled: !!currentOrganization?.id,
+    queryKey: ["grants-intel", currentOrganization?.organization_id],
+    enabled: !!currentOrganization?.organization_id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("grants")
         .select("id, grant_name, donor_name, grant_amount, amount_received, currency, status, start_date, end_date, reporting_frequency, next_report_due, compliance_notes, supported_funding_model")
-        .eq("organization_id", currentOrganization!.id);
+        .eq("organization_id", currentOrganization!.organization_id);
       if (error) throw error;
       return data ?? [];
     },
