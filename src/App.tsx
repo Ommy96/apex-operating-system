@@ -201,6 +201,11 @@ const App = () => (
                 <DashboardLayout><LazyRoute><FundingIntelligence /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/ai/grants" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><GrantDiscovery /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/me-suite" element={<Navigate to="/me" replace />} />
             <Route path="/me" element={
               <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
