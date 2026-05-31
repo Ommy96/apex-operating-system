@@ -154,6 +154,7 @@ export function WorkspaceSidebar() {
       items: [
         { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
         { title: "Smart Insights", url: "/ai-insights?tab=insights", icon: Sparkles, show: can.viewAI },
+        { title: "Grant Discovery", url: "/ai/grants", icon: Target, show: can.viewAI },
         { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
         { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
       ],

@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.grant-deadline-reminders]
 verify_jwt = false
+
+[functions.grant-discovery]
+verify_jwt = false
+
+[functions.proposal-generator]
+verify_jwt = false
+
+[functions.risk-scoring]
+verify_jwt = false

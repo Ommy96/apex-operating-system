@@ -38,6 +38,7 @@ const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
 const FundingIntelligence = lazy(() => import("./pages/FundingIntelligence"));
+const GrantDiscovery = lazy(() => import("./pages/GrantDiscovery"));
 const HRManagement = lazy(() => import("./pages/HRManagement"));
 const AutomationEngine = lazy(() => import("./pages/AutomationEngine"));
 const CommunicationsHub = lazy(() => import("./pages/CommunicationsHub"));
@@ -198,6 +199,11 @@ const App = () => (
             <Route path="/funding/intelligence" element={
               <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
                 <DashboardLayout><LazyRoute><FundingIntelligence /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/ai/grants" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><GrantDiscovery /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/me-suite" element={<Navigate to="/me" replace />} />
