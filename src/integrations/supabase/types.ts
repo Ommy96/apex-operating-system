@@ -431,6 +431,71 @@ export type Database = {
           },
         ]
       }
+      ai_document_drafts: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          document_type: string
+          grant_id: string | null
+          id: string
+          model: string | null
+          opportunity_id: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          document_type: string
+          grant_id?: string | null
+          id?: string
+          model?: string | null
+          opportunity_id?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          document_type?: string
+          grant_id?: string | null
+          id?: string
+          model?: string | null
+          opportunity_id?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_document_drafts_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "grant_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert_instances: {
         Row: {
           alert_rule_id: string | null
@@ -5912,6 +5977,89 @@ export type Database = {
           },
         ]
       }
+      grant_opportunities: {
+        Row: {
+          ai_payload: Json | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          deadline: string | null
+          deleted_at: string | null
+          estimated_amount: number | null
+          funder_name: string | null
+          id: string
+          match_reasons: Json | null
+          match_score: number | null
+          organization_id: string
+          saved_grant_id: string | null
+          sdg_focus: number[] | null
+          sectors: string[] | null
+          source_id: string | null
+          status: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+        }
+        Insert: {
+          ai_payload?: Json | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline?: string | null
+          deleted_at?: string | null
+          estimated_amount?: number | null
+          funder_name?: string | null
+          id?: string
+          match_reasons?: Json | null
+          match_score?: number | null
+          organization_id: string
+          saved_grant_id?: string | null
+          sdg_focus?: number[] | null
+          sectors?: string[] | null
+          source_id?: string | null
+          status?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          ai_payload?: Json | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline?: string | null
+          deleted_at?: string | null
+          estimated_amount?: number | null
+          funder_name?: string | null
+          id?: string
+          match_reasons?: Json | null
+          match_score?: number | null
+          organization_id?: string
+          saved_grant_id?: string | null
+          sdg_focus?: number[] | null
+          sectors?: string[] | null
+          source_id?: string | null
+          status?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_opportunities_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "grant_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grant_programs: {
         Row: {
           allocated_amount: number | null
@@ -6068,6 +6216,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      grant_sources: {
+        Row: {
+          application_url: string | null
+          contact_email: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          deleted_at: string | null
+          eligibility_notes: string | null
+          funder_name: string | null
+          funder_type: string | null
+          geographies: string[] | null
+          id: string
+          is_active: boolean | null
+          max_amount: number | null
+          min_amount: number | null
+          name: string
+          next_deadline: string | null
+          notes: string | null
+          organization_id: string
+          sdg_focus: number[] | null
+          sectors: string[] | null
+          typical_deadline_month: number | null
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+        }
+        Insert: {
+          application_url?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          eligibility_notes?: string | null
+          funder_name?: string | null
+          funder_type?: string | null
+          geographies?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name: string
+          next_deadline?: string | null
+          notes?: string | null
+          organization_id: string
+          sdg_focus?: number[] | null
+          sectors?: string[] | null
+          typical_deadline_month?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          application_url?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deleted_at?: string | null
+          eligibility_notes?: string | null
+          funder_name?: string | null
+          funder_type?: string | null
+          geographies?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name?: string
+          next_deadline?: string | null
+          notes?: string | null
+          organization_id?: string
+          sdg_focus?: number[] | null
+          sectors?: string[] | null
+          typical_deadline_month?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+        }
+        Relationships: []
       }
       grants: {
         Row: {
