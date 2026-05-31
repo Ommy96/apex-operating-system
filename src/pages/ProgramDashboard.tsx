@@ -193,6 +193,7 @@ const ProgramDashboard = () => {
                 <span className={`inline-block h-2 w-2 rounded-full ${status.dot}`} />
                 {status.label}
               </Badge>
+              {programId && <GenerateWithAIButton programId={programId} />}
             </div>
 
             {program.description && (
