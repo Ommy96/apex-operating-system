@@ -16,8 +16,6 @@ import {
   Camera, Upload, CheckCircle, AlertCircle, Clock, Trash2,
   Smartphone, Signal, Database, ArrowLeft, Plus, Zap, ShieldAlert
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { format } from "date-fns";
