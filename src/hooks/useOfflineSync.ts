@@ -10,6 +10,11 @@ import {
   clearSyncedRecords,
   OfflineRecord,
   SyncStatus,
+  setRecordRetry,
+  logConflict,
+  getConflicts,
+  resolveConflict as resolveConflictDb,
+  ConflictEntry,
 } from "@/lib/offlineStorage";
 import {
   registerBackgroundSync,
@@ -33,6 +38,7 @@ export function useOfflineSync() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [records, setRecords] = useState<OfflineRecord[]>([]);
   const [stats, setStats] = useState<SyncStats>({ pending: 0, syncing: 0, synced: 0, failed: 0, total: 0 });
+  const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const refreshRecords = useCallback(async () => {
@@ -44,6 +50,7 @@ export function useOfflineSync() {
       const synced = all.filter(r => r.status === 'synced').length;
       const failed = all.filter(r => r.status === 'failed').length;
       setStats({ pending, syncing, synced, failed, total: all.length });
+      try { setConflicts(await getConflicts()); } catch {}
     } catch {
       // IndexedDB may not be available
     }
@@ -132,6 +139,62 @@ export function useOfflineSync() {
             // Non-fatal if visitation insert fails
           }
         }
+      } else if (record.type === 'attendance') {
+        const { activity_id, beneficiary_id, attendance_status, notes } = record.data;
+        const { error } = await supabase.from('activity_attendance').insert({
+          activity_id,
+          beneficiary_id,
+          attendance_status: attendance_status || 'present',
+          notes: notes || null,
+          organization_id: record.organizationId,
+          recorded_by: record.userId,
+        });
+        if (error) throw error;
+      } else if (record.type === 'form_submission') {
+        const { form_id, program_id, project_id, activity_id, beneficiary_ids, latitude, longitude, location_county, location_sub_county, submission_date, data } = record.data;
+        const { error } = await supabase.from('me_form_submissions').insert({
+          form_id, program_id: program_id || null, project_id: project_id || null,
+          activity_id: activity_id || null,
+          beneficiary_ids: beneficiary_ids || null,
+          latitude: latitude ?? null, longitude: longitude ?? null,
+          location_county: location_county || null,
+          location_sub_county: location_sub_county || null,
+          submission_date: submission_date || new Date().toISOString().slice(0, 10),
+          data: data || {},
+          organization_id: record.organizationId,
+          submitted_by: record.userId,
+          is_synced: true,
+          synced_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+      } else if (record.type === 'gps_point') {
+        // GPS pings are appended to the related entity's location metadata when possible.
+        const { beneficiary_id, latitude, longitude, captured_at, note } = record.data;
+        if (beneficiary_id) {
+          const { error } = await supabase.from('beneficiary_visitations').insert({
+            beneficiary_id,
+            visit_type: 'field_visit',
+            visit_date: (captured_at || new Date().toISOString()).slice(0, 10),
+            location: `${latitude},${longitude}`,
+            observation_findings: note || 'GPS waypoint',
+            organization_id: record.organizationId,
+            created_by: record.userId,
+          });
+          if (error) throw error;
+        }
+      } else if (record.type === 'visit') {
+        const { beneficiary_id, visit_type, visit_date, observation_findings, recommendations, location } = record.data;
+        const { error } = await supabase.from('beneficiary_visitations').insert({
+          beneficiary_id,
+          visit_type: visit_type || 'field_visit',
+          visit_date: visit_date || new Date().toISOString().slice(0, 10),
+          observation_findings: observation_findings || null,
+          recommendations: recommendations || null,
+          location: location || null,
+          organization_id: record.organizationId,
+          created_by: record.userId,
+        });
+        if (error) throw error;
       } else if (record.type === 'attachment') {
         // Upload file blob to storage
         const { fileData, fileName, bucket, path } = record.data;
@@ -143,7 +206,26 @@ export function useOfflineSync() {
       await updateRecordStatus(record.id, 'synced');
       return true;
     } catch (err: any) {
-      await updateRecordStatus(record.id, 'failed', err.message);
+      // Detect duplicate-key / conflict-type errors → log as conflict (last-write-wins default)
+      const message = String(err?.message || err);
+      const isConflict = /duplicate key|conflict|409|unique constraint/i.test(message);
+      if (isConflict) {
+        try {
+          await logConflict({
+            id: crypto.randomUUID(),
+            recordId: record.id,
+            type: record.type,
+            detectedAt: new Date().toISOString(),
+            localData: record.data,
+            resolution: 'pending',
+            notes: message,
+          });
+        } catch {}
+        // Default: last-write-wins → mark synced so we don't block the queue
+        await updateRecordStatus(record.id, 'synced', message);
+        return true;
+      }
+      await setRecordRetry(record.id, (record.retryCount || 0) + 1, message);
       return false;
     }
   };
@@ -154,7 +236,9 @@ export function useOfflineSync() {
     try {
       const pending = await getRecordsByStatus('pending');
       const failed = await getRecordsByStatus('failed');
-      const toSync = [...pending, ...failed.filter(r => r.retryCount < 3)];
+      const now = Date.now();
+      const readyFailed = failed.filter(r => r.retryCount < 6 && (!r.nextRetryAt || new Date(r.nextRetryAt).getTime() <= now));
+      const toSync = [...pending, ...readyFailed];
 
       if (toSync.length === 0) { setIsSyncing(false); return; }
 
@@ -213,15 +297,22 @@ export function useOfflineSync() {
     toast.success("Cleared synced records");
   };
 
+  const resolveConflict = async (id: string, resolution: 'local_wins' | 'server_wins', notes?: string) => {
+    await resolveConflictDb(id, resolution, notes);
+    await refreshRecords();
+  };
+
   return {
     isOnline,
     isSyncing,
     records,
     stats,
+    conflicts,
     addRecord,
     syncAll,
     retryFailed,
     cleanSynced,
     refreshRecords,
+    resolveConflict,
   };
 }

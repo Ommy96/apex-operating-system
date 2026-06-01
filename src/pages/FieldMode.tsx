@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { captureGPS, compressImage } from "@/lib/offlineStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,49 +12,28 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Wifi, WifiOff, RefreshCw, Users, ClipboardList, MapPin,
-  Camera, Upload, CheckCircle, AlertCircle, Clock, Trash2,
-  Smartphone, Signal, Database, ArrowLeft, Plus
+  WifiOff, RefreshCw, Users, ClipboardList, MapPin,
+  Camera, CheckCircle, AlertCircle, Clock, Trash2,
+  Smartphone, Signal, Database, ArrowLeft, Zap, ShieldAlert
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { SyncStatusIndicator } from "@/components/field/SyncStatusIndicator";
+import { QuickVisitFlow } from "@/components/field/QuickVisitFlow";
+import { VoiceTextarea } from "@/components/field/VoiceTextarea";
+import { useFieldScopeCache } from "@/hooks/useFieldScopeCache";
 
 export default function FieldMode() {
   const navigate = useNavigate();
-  const { isOnline, isSyncing, stats, addRecord, syncAll, retryFailed, cleanSynced, records } = useOfflineSync();
-  const { currentOrganization } = useOrganization();
-  const orgId = currentOrganization?.organization_id;
-
+  const { isOnline, isSyncing, stats, addRecord, syncAll, retryFailed, cleanSynced, records, conflicts, resolveConflict } = useOfflineSync();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [beneficiaryFormOpen, setBeneficiaryFormOpen] = useState(false);
   const [observationFormOpen, setObservationFormOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
 
-  // Fetch programs for selectors (cached for offline)
-  const { data: programs } = useQuery({
-    queryKey: ['field-programs', orgId],
-    queryFn: async () => {
-      const { data } = await supabase.from('programs').select('id, name')
-        .eq('organization_id', orgId!).eq('is_active', true).order('name');
-      return data || [];
-    },
-    enabled: !!orgId,
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
-  });
-
-  const { data: beneficiaries } = useQuery({
-    queryKey: ['field-beneficiaries', orgId],
-    queryFn: async () => {
-      const { data } = await supabase.from('beneficiaries').select('id, display_name')
-        .eq('organization_id', orgId!).eq('status', 'active').order('display_name').limit(500);
-      return data || [];
-    },
-    enabled: !!orgId,
-    staleTime: 1000 * 60 * 60,
-  });
+  // IndexedDB-backed scope cache: usable offline for a full day
+  const { programs, beneficiaries } = useFieldScopeCache();
 
   // ── Beneficiary Registration Form ──
   const [benForm, setBenForm] = useState({
@@ -165,14 +144,14 @@ export default function FieldMode() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={`text-xs ${isOnline ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-destructive text-destructive'}`}>
-              {isOnline ? <><Wifi className="h-3 w-3 mr-1" /> Online</> : <><WifiOff className="h-3 w-3 mr-1" /> Offline</>}
-            </Badge>
-            {stats.pending > 0 && (
-              <Badge className="bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 text-xs">
-                {stats.pending} pending
-              </Badge>
-            )}
+            <SyncStatusIndicator
+              isOnline={isOnline}
+              isSyncing={isSyncing}
+              pending={stats.pending}
+              failed={stats.failed}
+              conflicts={conflicts?.filter(c => c.resolution === 'pending').length || 0}
+              onClick={() => setActiveTab('sync')}
+            />
           </div>
         </div>
       </div>
@@ -233,6 +212,13 @@ export default function FieldMode() {
             </div>
 
             {/* Quick Actions */}
+            <Button
+              size="lg"
+              className="w-full h-16 gap-3 rounded-xl text-base bg-gradient-to-r from-primary to-primary/80"
+              onClick={() => setQuickOpen(true)}
+            >
+              <Zap className="h-5 w-5" /> Quick Visit (under 60s)
+            </Button>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 size="lg"
@@ -257,6 +243,13 @@ export default function FieldMode() {
           {/* ════════ COLLECT TAB ════════ */}
           <TabsContent value="collect" className="mt-4 space-y-4">
             <div className="grid grid-cols-1 gap-3">
+              <Button size="lg" className="h-16 justify-start gap-4 rounded-xl bg-gradient-to-r from-primary to-primary/80" onClick={() => setQuickOpen(true)}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20"><Zap className="h-5 w-5" /></div>
+                <div className="text-left">
+                  <p className="font-semibold">Quick Visit</p>
+                  <p className="text-xs opacity-80">Project → beneficiary → note → photo → GPS</p>
+                </div>
+              </Button>
               <Button size="lg" className="h-16 justify-start gap-4 rounded-xl" onClick={() => setBeneficiaryFormOpen(true)}>
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20"><Users className="h-5 w-5" /></div>
                 <div className="text-left">
@@ -300,6 +293,27 @@ export default function FieldMode() {
 
           {/* ════════ SYNC TAB ════════ */}
           <TabsContent value="sync" className="mt-4 space-y-4">
+            {conflicts && conflicts.filter(c => c.resolution === 'pending').length > 0 && (
+              <Card className="border-destructive/40">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2 text-destructive">
+                    <ShieldAlert className="h-4 w-4" /> Conflicts ({conflicts.filter(c => c.resolution === 'pending').length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 max-h-60 overflow-y-auto">
+                  {conflicts.filter(c => c.resolution === 'pending').map(c => (
+                    <div key={c.id} className="rounded-lg border p-2 text-xs space-y-1">
+                      <p className="font-medium text-foreground">{c.type} · {format(new Date(c.detectedAt), 'dd MMM HH:mm')}</p>
+                      {c.notes && <p className="text-muted-foreground truncate">{c.notes}</p>}
+                      <div className="flex gap-2 pt-1">
+                        <Button size="sm" variant="outline" className="h-7" onClick={() => resolveConflict(c.id, 'server_wins')}>Keep server</Button>
+                        <Button size="sm" className="h-7" onClick={() => resolveConflict(c.id, 'local_wins')}>Keep local (default)</Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardContent className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
@@ -474,8 +488,12 @@ export default function FieldMode() {
             <div><Label>Date</Label><Input type="date" value={obsForm.visit_date} onChange={e => setObsForm(p => ({ ...p, visit_date: e.target.value }))} /></div>
             <div><Label>Reason for Visit</Label><Input value={obsForm.reason_for_visit} onChange={e => setObsForm(p => ({ ...p, reason_for_visit: e.target.value }))} placeholder="Why the visit was conducted" /></div>
             <div><Label>Findings / Observations *</Label><Textarea value={obsForm.observation_findings} onChange={e => setObsForm(p => ({ ...p, observation_findings: e.target.value }))} placeholder="What did you observe?" rows={3} /></div>
-            <div><Label>Challenges Identified</Label><Textarea value={obsForm.challenges_identified} onChange={e => setObsForm(p => ({ ...p, challenges_identified: e.target.value }))} placeholder="Any challenges?" rows={2} /></div>
-            <div><Label>Recommendations</Label><Textarea value={obsForm.recommendations} onChange={e => setObsForm(p => ({ ...p, recommendations: e.target.value }))} placeholder="Suggested actions" rows={2} /></div>
+            <div><Label>Challenges Identified</Label>
+              <VoiceTextarea value={obsForm.challenges_identified} onValueChange={v => setObsForm(p => ({ ...p, challenges_identified: v }))} placeholder="Any challenges? Tap mic to dictate." rows={2} />
+            </div>
+            <div><Label>Recommendations</Label>
+              <VoiceTextarea value={obsForm.recommendations} onValueChange={v => setObsForm(p => ({ ...p, recommendations: v }))} placeholder="Suggested actions" rows={2} />
+            </div>
 
             {/* GPS */}
             <div>
@@ -492,6 +510,8 @@ export default function FieldMode() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <QuickVisitFlow open={quickOpen} onOpenChange={setQuickOpen} />
     </div>
   );
 }
