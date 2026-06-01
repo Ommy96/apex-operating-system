@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { captureGPS, compressImage } from "@/lib/offlineStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,10 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   WifiOff, RefreshCw, Users, ClipboardList, MapPin,
-  Camera, Upload, CheckCircle, AlertCircle, Clock, Trash2,
-  Smartphone, Signal, Database, ArrowLeft, Plus, Zap, ShieldAlert
+  Camera, CheckCircle, AlertCircle, Clock, Trash2,
+  Smartphone, Signal, Database, ArrowLeft, Zap, ShieldAlert
 } from "lucide-react";
-import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -28,9 +27,6 @@ import { useFieldScopeCache } from "@/hooks/useFieldScopeCache";
 export default function FieldMode() {
   const navigate = useNavigate();
   const { isOnline, isSyncing, stats, addRecord, syncAll, retryFailed, cleanSynced, records, conflicts, resolveConflict } = useOfflineSync();
-  const { currentOrganization } = useOrganization();
-  const orgId = currentOrganization?.organization_id;
-
   const [activeTab, setActiveTab] = useState("dashboard");
   const [beneficiaryFormOpen, setBeneficiaryFormOpen] = useState(false);
   const [observationFormOpen, setObservationFormOpen] = useState(false);
