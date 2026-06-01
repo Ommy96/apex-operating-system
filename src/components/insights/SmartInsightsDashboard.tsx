@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { useAIInsights, BeneficiaryRisk, FundingGap, DonorOpportunity } from '@/hooks/useAIInsights';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
+import { toast } from 'sonner';
 
 const riskColors = { high: 'text-destructive', medium: 'text-orange-500', low: 'text-green-600' };
 const riskBg = { high: 'bg-destructive/10 border-destructive/30', medium: 'bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800', low: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' };
@@ -190,6 +193,27 @@ function DonorOpportunityCard({ opp }: { opp: DonorOpportunity }) {
 export default function SmartInsightsDashboard() {
   const { data, isLoading, generateInsights } = useAIInsights();
   const [riskFilter, setRiskFilter] = useState<string>('all');
+  const { currentOrganization } = useOrganization();
+  const [scanning, setScanning] = useState(false);
+
+  const runRiskScan = async () => {
+    if (!currentOrganization?.organization_id) return;
+    setScanning(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke('risk-scoring', {
+        body: { organizationId: currentOrganization.organization_id },
+      });
+      if (error) throw new Error(error.message);
+      if (res?.error) { toast.error(res.error); return; }
+      const counts = res?.flagCounts ?? {};
+      const total = Object.values(counts).reduce((s: number, n: any) => s + (n as number), 0);
+      toast.success(`Risk scan complete — ${res?.updated ?? 0} beneficiaries assessed, ${total} flags raised.`);
+    } catch (e: any) {
+      toast.error(e.message ?? 'Risk scan failed');
+    } finally {
+      setScanning(false);
+    }
+  };
 
   const filteredRisks = data?.beneficiaryRisks?.filter(r => riskFilter === 'all' || r.riskLevel === riskFilter) || [];
   const highRisks = data?.beneficiaryRisks?.filter(r => r.riskLevel === 'high').length || 0;
@@ -211,10 +235,16 @@ export default function SmartInsightsDashboard() {
             </p>
           </div>
         </div>
-        <Button onClick={() => generateInsights()} disabled={isLoading} className="gap-2">
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          {isLoading ? 'Analyzing...' : 'Generate Insights'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={runRiskScan} disabled={scanning} className="gap-2">
+            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+            {scanning ? 'Scanning...' : 'Run Risk Scan'}
+          </Button>
+          <Button onClick={() => generateInsights()} disabled={isLoading} className="gap-2">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {isLoading ? 'Analyzing...' : 'Generate Insights'}
+          </Button>
+        </div>
       </div>
 
       {/* Executive Summary */}
