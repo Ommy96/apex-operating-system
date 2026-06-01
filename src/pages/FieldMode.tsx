@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Wifi, WifiOff, RefreshCw, Users, ClipboardList, MapPin,
+  WifiOff, RefreshCw, Users, ClipboardList, MapPin,
   Camera, Upload, CheckCircle, AlertCircle, Clock, Trash2,
   Smartphone, Signal, Database, ArrowLeft, Plus, Zap, ShieldAlert
 } from "lucide-react";
