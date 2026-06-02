@@ -90,6 +90,7 @@ const DataQualityDashboard = lazy(() => import("./pages/DataQualityDashboard"));
 const ReportAssembly = lazy(() => import("./pages/ReportAssembly"));
 const StakeholderAccessManagement = lazy(() => import("./pages/StakeholderAccessManagement"));
 const StakeholderPortal = lazy(() => import("./pages/StakeholderPortal"));
+const PublicDonationPage = lazy(() => import("./pages/PublicDonationPage"));
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,7 @@ const App = () => (
             <Route path="/feedback/:orgSlug" element={<LazyRoute><ComplaintIntake /></LazyRoute>} />
             <Route path="/report/:orgSlug" element={<LazyRoute><WhistleblowerForm /></LazyRoute>} />
             <Route path="/stakeholder/:token" element={<LazyRoute><StakeholderPortal /></LazyRoute>} />
+            <Route path="/give/:orgSlug/:campaignSlug" element={<LazyRoute><PublicDonationPage /></LazyRoute>} />
 
             <Route path="/dashboard" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><Dashboard /></LazyRoute></DashboardLayout></ProtectedRoute>
