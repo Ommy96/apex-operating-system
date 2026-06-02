@@ -649,6 +649,8 @@ export default function DonorManagement() {
           )}
         </DialogContent>
       </Dialog>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
