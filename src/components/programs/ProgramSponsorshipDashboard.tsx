@@ -7,6 +7,7 @@ import { Users, DollarSign, TrendingDown, Target, AlertTriangle } from 'lucide-r
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useProgramCoverage } from '@/hooks/useSponsorshipCoverage';
 import { useNavigate } from 'react-router-dom';
+import { SponsorshipUpdatesPanel } from './SponsorshipUpdatesPanel';
 
 interface Props {
   programId: string | undefined;
@@ -213,6 +214,9 @@ export function ProgramSponsorshipDashboard({ programId }: Props) {
           </CardContent>
         </Card>
       )}
+
+      {/* Sponsor communications */}
+      <SponsorshipUpdatesPanel />
     </div>
   );
 }

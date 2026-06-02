@@ -83,6 +83,18 @@ export function useDonorPortal() {
     return data || [];
   };
 
+  const fetchBeneficiaryUpdates = async (beneficiaryId: string) => {
+    const { data, error } = await supabase
+      .from('sponsorship_updates' as any)
+      .select('*')
+      .eq('beneficiary_id', beneficiaryId)
+      .eq('visible_to_donor', true)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  };
+
   const getDocumentDownloadUrl = async (fileUrl: string) => {
     const path = fileUrl.replace(/^.*\/managed-documents\//, '');
     const { data } = await supabase.storage
@@ -97,6 +109,7 @@ export function useDonorPortal() {
     donorDocuments,
     fetchBeneficiaryAcademics,
     fetchBeneficiaryProgression,
+    fetchBeneficiaryUpdates,
     getDocumentDownloadUrl,
     isLoading: accountLoading || beneficiariesLoading,
     documentsLoading,

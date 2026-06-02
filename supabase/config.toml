@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.risk-scoring]
 verify_jwt = false
+
+[functions.donation-init]
+verify_jwt = false
+
+[functions.donation-callback]
+verify_jwt = false
