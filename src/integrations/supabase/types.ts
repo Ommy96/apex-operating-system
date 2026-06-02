@@ -4672,6 +4672,207 @@ export type Database = {
           },
         ]
       }
+      donation_campaigns: {
+        Row: {
+          beneficiary_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          deleted_at: string | null
+          donor_count: number
+          end_date: string | null
+          id: string
+          image_url: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          raised_amount: number
+          slug: string
+          status: string
+          story: string | null
+          target_amount: number
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deleted_at?: string | null
+          donor_count?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          raised_amount?: number
+          slug: string
+          status?: string
+          story?: string | null
+          target_amount?: number
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deleted_at?: string | null
+          donor_count?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          raised_amount?: number
+          slug?: string
+          status?: string
+          story?: string | null
+          target_amount?: number
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_campaigns_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_campaigns_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      donations: {
+        Row: {
+          amount: number
+          campaign_id: string | null
+          completed_at: string | null
+          created_at: string
+          currency: string
+          donor_email: string | null
+          donor_name: string
+          donor_phone: string | null
+          id: string
+          is_anonymous: boolean
+          message: string | null
+          metadata: Json
+          organization_id: string
+          provider: string
+          provider_reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          campaign_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_email?: string | null
+          donor_name: string
+          donor_phone?: string | null
+          id?: string
+          is_anonymous?: boolean
+          message?: string | null
+          metadata?: Json
+          organization_id: string
+          provider?: string
+          provider_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_email?: string | null
+          donor_name?: string
+          donor_phone?: string | null
+          id?: string
+          is_anonymous?: boolean
+          message?: string | null
+          metadata?: Json
+          organization_id?: string
+          provider?: string
+          provider_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "donation_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donor_accounts: {
         Row: {
           created_at: string | null
@@ -12492,6 +12693,88 @@ export type Database = {
           },
           {
             foreignKeyName: "saved_report_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorship_updates: {
+        Row: {
+          beneficiary_id: string
+          content: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          donor_name: string | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          organization_id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          title: string
+          update_type: string
+          updated_at: string
+          updated_by: string | null
+          visible_to_donor: boolean
+        }
+        Insert: {
+          beneficiary_id: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          donor_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          organization_id: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title: string
+          update_type?: string
+          updated_at?: string
+          updated_by?: string | null
+          visible_to_donor?: boolean
+        }
+        Update: {
+          beneficiary_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          donor_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          organization_id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title?: string
+          update_type?: string
+          updated_at?: string
+          updated_by?: string | null
+          visible_to_donor?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_updates_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_updates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_updates_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
