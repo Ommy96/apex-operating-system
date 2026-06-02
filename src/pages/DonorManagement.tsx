@@ -290,6 +290,15 @@ export default function DonorManagement() {
       {/* Org-wide Sponsorship Coverage */}
       <SponsorshipMetrics />
 
+      <Tabs defaultValue="donors" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="donors">Donors</TabsTrigger>
+          <TabsTrigger value="campaigns">Public Campaigns</TabsTrigger>
+        </TabsList>
+        <TabsContent value="campaigns">
+          <CampaignsTab />
+        </TabsContent>
+        <TabsContent value="donors" className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
