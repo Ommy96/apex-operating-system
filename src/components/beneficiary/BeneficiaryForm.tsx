@@ -38,6 +38,12 @@ import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
+import {
+  GuardianFields,
+  EMPTY_GUARDIAN,
+  relationshipToGuardianType,
+  type GuardianFieldsValue,
+} from './GuardianFields';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
 
@@ -90,9 +96,8 @@ interface FormState {
 
   // Step 3 — family
   family_status: string;
-  guardian_name: string;
-  guardian_relationship: string;
-  guardian_phone: string;
+  guardians: GuardianFieldsValue[];
+  removed_guardian_link_ids: string[];
 
   // Step 4 — education
   academic_level: string;
@@ -152,9 +157,8 @@ const EMPTY_STATE: FormState = {
   leader_name: '',
   leader_phone: '',
   family_status: '',
-  guardian_name: '',
-  guardian_relationship: '',
-  guardian_phone: '',
+  guardians: [],
+  removed_guardian_link_ids: [],
   academic_level: '',
   institution_name: '',
   grade: '',
@@ -288,6 +292,64 @@ export function BeneficiaryForm({
 
   // Age-aware field visibility
   const visibility = useFieldVisibility(form.date_of_birth, config);
+
+  // When the beneficiary becomes a minor (DOB makes them < 18),
+  // clear any National ID that was captured earlier so a stale value
+  // cannot be saved.
+  useEffect(() => {
+    if (visibility.isMinor && form.national_id) {
+      setForm((prev) => ({ ...prev, national_id: '' }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibility.isMinor]);
+
+  // Load existing guardian links when editing an existing beneficiary,
+  // so the user can update / remove parents instead of duplicating them.
+  useEffect(() => {
+    if (!beneficiary?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('beneficiary_guardians')
+        .select(
+          `id, relationship, is_primary,
+           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income )`,
+        )
+        .eq('beneficiary_id', beneficiary.id);
+      if (error || cancelled || !data) return;
+      const loaded: GuardianFieldsValue[] = data
+        .filter((row: any) => row.guardians)
+        .map((row: any) => {
+          const g = row.guardians;
+          // Prefer the link.relationship if present, else derive from type
+          const rel =
+            row.relationship ||
+            (g.guardian_type === 'father'
+              ? 'Father'
+              : g.guardian_type === 'mother'
+              ? 'Mother'
+              : 'Other');
+          return {
+            id: g.id,
+            linkId: row.id,
+            guardian_type: g.guardian_type,
+            relationship: rel,
+            full_name: g.full_name ?? '',
+            national_id: g.national_id ?? '',
+            phone: g.phone ?? '',
+            is_alive: g.is_alive !== false,
+            employment_type: g.employment_type ?? '',
+            source_of_income: g.source_of_income ?? '',
+          };
+        });
+      if (loaded.length) {
+        setForm((prev) => ({ ...prev, guardians: loaded }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [beneficiary?.id]);
 
   useEffect(() => {
     if (beneficiary) {
@@ -431,10 +493,11 @@ export function BeneficiaryForm({
       setStep(0);
       return;
     }
-    if (isIndividual && visibility.isMinor && !form.guardian_name.trim()) {
+    const filledGuardians = form.guardians.filter((g) => g.full_name.trim());
+    if (isIndividual && visibility.isMinor && filledGuardians.length === 0) {
       toast({
         title: 'Guardian required',
-        description: 'Minors must have a guardian name on file.',
+        description: 'Minors must have at least one parent or guardian on file.',
         variant: 'destructive',
       });
       const familyStep = visibleSteps.indexOf(2);
@@ -541,33 +604,76 @@ export function BeneficiaryForm({
         uniqueId = data.unique_id;
       }
 
-      // Save guardian if applicable
-      if (
-        isIndividual &&
-        beneficiaryId &&
-        form.guardian_name.trim() &&
-        form.guardian_relationship
-      ) {
+      // Save / upsert guardians & beneficiary_guardians links.
+      if (isIndividual && beneficiaryId) {
         try {
-          const { data: g } = await supabase
-            .from('guardians')
-            .insert({
-              full_name: form.guardian_name,
-              phone: form.guardian_phone || null,
-              organization_id: orgId,
-            } as any)
-            .select('id')
-            .single();
-          if (g?.id) {
-            await supabase.from('beneficiary_guardians').insert({
-              beneficiary_id: beneficiaryId,
-              guardian_id: g.id,
-              relationship: form.guardian_relationship,
-              is_primary: true,
-            } as any);
+          // 1. Remove links the user deleted while editing.
+          if (form.removed_guardian_link_ids.length) {
+            await supabase
+              .from('beneficiary_guardians')
+              .delete()
+              .in('id', form.removed_guardian_link_ids);
           }
-        } catch (e) {
-          logger.warn('Failed to save guardian', e);
+
+          // 2. Upsert each filled guardian.
+          for (let idx = 0; idx < filledGuardians.length; idx++) {
+            const g = filledGuardians[idx];
+            const guardianType = relationshipToGuardianType(g.relationship);
+            const guardianPayload: any = {
+              organization_id: orgId,
+              full_name: g.full_name.trim(),
+              guardian_type: guardianType,
+              national_id: g.national_id?.trim() || null,
+              phone: g.phone?.trim() || null,
+              is_alive: g.is_alive,
+              employment_type: g.employment_type || null,
+              source_of_income: g.source_of_income?.trim() || null,
+            };
+
+            let guardianId = g.id;
+            if (guardianId) {
+              const { error: upErr } = await supabase
+                .from('guardians')
+                .update(guardianPayload)
+                .eq('id', guardianId);
+              if (upErr) throw upErr;
+            } else {
+              const { data: inserted, error: insErr } = await supabase
+                .from('guardians')
+                .insert(guardianPayload)
+                .select('id')
+                .single();
+              if (insErr) throw insErr;
+              guardianId = inserted!.id;
+            }
+
+            // Link row
+            if (g.linkId) {
+              await supabase
+                .from('beneficiary_guardians')
+                .update({
+                  relationship: g.relationship || null,
+                  is_primary: idx === 0,
+                } as any)
+                .eq('id', g.linkId);
+            } else {
+              await supabase
+                .from('beneficiary_guardians')
+                .insert({
+                  beneficiary_id: beneficiaryId,
+                  guardian_id: guardianId,
+                  relationship: g.relationship || null,
+                  is_primary: idx === 0,
+                } as any);
+            }
+          }
+        } catch (e: any) {
+          logger.error('Failed to save guardian', e);
+          toast({
+            title: 'Could not save guardian information',
+            description: e?.message || 'Please try again.',
+            variant: 'destructive',
+          });
         }
       }
 
@@ -693,6 +799,7 @@ export function BeneficiaryForm({
             update={update}
             subCounties={subCounties}
             term={term}
+            showNationalId={visibility.showNationalId}
           />
         )}
         {step === 1 && (
@@ -774,11 +881,13 @@ function Step1Identity({
   update,
   subCounties,
   term,
+  showNationalId,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   subCounties: string[];
   term: string;
+  showNationalId: boolean;
 }) {
   const isPerson =
     form.beneficiary_category === 'individual' ||
@@ -879,7 +988,7 @@ function Step1Identity({
           <Label>Phone</Label>
           <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
         </div>
-        {isPerson && (
+        {isPerson && showNationalId && (
           <div>
             <Label>National ID / Passport</Label>
             <Input
@@ -1187,19 +1296,82 @@ function Step3Family({
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
 }) {
-  // Show guardian fields for any family status (or whenever DOB is present so minors are covered)
-  const needsGuardian =
-    !!form.family_status || !!form.date_of_birth;
+  const status = form.family_status;
+  const guardians = form.guardians;
+
+  const setGuardianAt = (index: number, next: GuardianFieldsValue) => {
+    const copy = [...guardians];
+    copy[index] = next;
+    update('guardians', copy);
+  };
+
+  const removeGuardianAt = (index: number) => {
+    const removed = guardians[index];
+    const copy = guardians.filter((_, i) => i !== index);
+    update('guardians', copy);
+    if (removed?.linkId) {
+      update('removed_guardian_link_ids', [
+        ...form.removed_guardian_link_ids,
+        removed.linkId,
+      ]);
+    }
+  };
+
+  // Find or seed a guardian record for a locked role (father / mother).
+  const ensureRole = (role: 'Father' | 'Mother'): GuardianFieldsValue => {
+    const found = guardians.find(
+      (g) => g.relationship.toLowerCase() === role.toLowerCase(),
+    );
+    return (
+      found || {
+        ...EMPTY_GUARDIAN,
+        relationship: role,
+        guardian_type: role === 'Father' ? 'father' : 'mother',
+      }
+    );
+  };
+
+  const upsertRole = (role: 'Father' | 'Mother', next: GuardianFieldsValue) => {
+    const idx = guardians.findIndex(
+      (g) => g.relationship.toLowerCase() === role.toLowerCase(),
+    );
+    if (idx >= 0) {
+      setGuardianAt(idx, { ...next, relationship: role });
+    } else {
+      update('guardians', [...guardians, { ...next, relationship: role }]);
+    }
+  };
+
+  const isBothParents = status === 'Both parents present';
+  const isSingleish = status === 'Single parent' || status === 'Single orphan';
+  const isOrphan = status === 'Double orphan' || status === 'Child-headed household';
+  const isIndependent = status === 'Independent adult';
+
+  // Primary guardian (single slot) — first non-empty record.
+  const primaryIndex = guardians.findIndex((g) => g.full_name || g.relationship);
+  const primaryGuardian = primaryIndex >= 0 ? guardians[primaryIndex] : { ...EMPTY_GUARDIAN };
+  const setPrimaryGuardian = (next: GuardianFieldsValue) => {
+    if (primaryIndex >= 0) {
+      setGuardianAt(primaryIndex, next);
+    } else {
+      update('guardians', [next, ...guardians]);
+    }
+  };
 
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-base font-semibold">Family dynamics</h3>
+        <p className="text-xs text-muted-foreground">
+          Who lives with this person and who can be contacted on their behalf.
+        </p>
       </div>
       <div>
         <Label>Family status</Label>
-        <Select value={form.family_status} onValueChange={(v) => update('family_status', v)}>
-          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+        <Select value={status} onValueChange={(v) => update('family_status', v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="Both parents present">Both parents present</SelectItem>
             <SelectItem value="Single parent">Single parent</SelectItem>
@@ -1211,34 +1383,66 @@ function Step3Family({
         </Select>
       </div>
 
-      {needsGuardian && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t pt-3">
-          <div>
-            <Label>Guardian name</Label>
-            <Input
-              value={form.guardian_name}
-              onChange={(e) => update('guardian_name', e.target.value)}
-            />
-          </div>
-          <div>
-            <Label>Relationship</Label>
-            <Select value={form.guardian_relationship} onValueChange={(v) => update('guardian_relationship', v)}>
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>
-                {['Mother', 'Father', 'Grandparent', 'Aunt/Uncle', 'Sibling', 'Foster parent', 'Other'].map((r) => (
-                  <SelectItem key={r} value={r}>{r}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="sm:col-span-2">
-            <Label>Guardian phone</Label>
-            <Input
-              value={form.guardian_phone}
-              onChange={(e) => update('guardian_phone', e.target.value)}
-            />
-          </div>
+      {isBothParents && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
+          <GuardianFields
+            title="Father"
+            value={ensureRole('Father')}
+            onChange={(v) => upsertRole('Father', v)}
+            lockRelationship
+            requireName
+          />
+          <GuardianFields
+            title="Mother"
+            value={ensureRole('Mother')}
+            onChange={(v) => upsertRole('Mother', v)}
+            lockRelationship
+            requireName
+          />
         </div>
+      )}
+
+      {isSingleish && (
+        <div className="border-t pt-3">
+          <GuardianFields
+            title="Primary guardian"
+            value={primaryGuardian}
+            onChange={setPrimaryGuardian}
+            requireName
+          />
+        </div>
+      )}
+
+      {isOrphan && (
+        <div className="border-t pt-3">
+          <GuardianFields
+            title="Caregiver / contact"
+            value={primaryGuardian}
+            onChange={setPrimaryGuardian}
+            requireName
+            relationshipOptions={[
+              'Grandparent',
+              'Aunt/Uncle',
+              'Sibling',
+              'Foster parent',
+              'Guardian',
+              'Neighbour',
+              'Other',
+            ]}
+          />
+        </div>
+      )}
+
+      {isIndependent && (
+        <p className="text-sm text-muted-foreground border-t pt-3">
+          No parent or guardian details required for an independent adult.
+        </p>
+      )}
+
+      {!status && form.date_of_birth && (
+        <p className="text-xs text-muted-foreground">
+          Select a family status above to capture parent or guardian details.
+        </p>
       )}
     </div>
   );

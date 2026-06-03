@@ -108,6 +108,12 @@ interface Guardian {
   employment_type: string | null;
   source_of_income: string | null;
   relationship: string;
+  national_id: string | null;
+  age: number | null;
+  date_of_birth: string | null;
+  address: string | null;
+  employment_details: string | null;
+  date_of_death: string | null;
 }
 
 interface Donor {
@@ -223,7 +229,9 @@ export default function BeneficiaryProfile() {
 
       const { data: guardiansData } = await supabase
         .from('beneficiary_guardians')
-        .select(`id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income)`)
+        .select(
+          `id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income, national_id, age, date_of_birth, address, employment_details, date_of_death)`,
+        )
         .eq('beneficiary_id', id);
 
       if (guardiansData) {
@@ -686,21 +694,67 @@ export default function BeneficiaryProfile() {
                   ))}
                 </>
               )}
-              {guardians.length > 0 && (
+              {(guardians.length > 0 || isMinorAge) && (
                 <>
-                  <div className="text-[10px] uppercase mt-3 mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>Family contacts</div>
-                  {guardians.map(g => (
-                    <div key={g.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
-                      <div className="h-9 w-9 rounded-full flex items-center justify-center" style={{ background: '#EDE5D8' }}><User className="h-4 w-4" style={{ color: '#78716C' }} /></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[12px] truncate" style={{ fontWeight: 500 }}>{g.full_name}</div>
-                        <div className="text-[11px]" style={{ color: '#78716C' }}>{g.relationship}{g.phone ? ` · ${g.phone}` : ''}</div>
-                      </div>
+                  <div className="text-[10px] uppercase mt-3 mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>Parents / Guardians</div>
+                  {guardians.length === 0 && isMinorAge && (
+                    <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
+                      <p>No parent or guardian recorded for this minor.</p>
+                      <button
+                        onClick={() => setEditOpen(true)}
+                        className="text-[12px] font-medium underline"
+                        style={{ color: '#0F7B6C' }}
+                      >
+                        Add guardian →
+                      </button>
                     </div>
-                  ))}
+                  )}
+                  {guardians.map((g) => {
+                    const relLabel =
+                      g.relationship ||
+                      (g.guardian_type === 'father'
+                        ? 'Father'
+                        : g.guardian_type === 'mother'
+                        ? 'Mother'
+                        : 'Guardian');
+                    return (
+                      <div key={g.id} className="flex items-start gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
+                        <div className="h-9 w-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EDE5D8' }}>
+                          <User className="h-4 w-4" style={{ color: '#78716C' }} />
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[12px] truncate" style={{ fontWeight: 600 }}>{g.full_name}</span>
+                            <span
+                              className="text-[10px] px-1.5 py-0.5 rounded-full"
+                              style={
+                                g.is_alive === false
+                                  ? { background: '#FEE2E2', color: '#991B1B' }
+                                  : { background: '#DCFCE7', color: '#166534' }
+                              }
+                            >
+                              {g.is_alive === false ? 'Deceased' : 'Alive'}
+                            </span>
+                          </div>
+                          <div className="text-[11px]" style={{ color: '#78716C' }}>{relLabel}</div>
+                          {g.phone && (
+                            <div className="text-[11px]" style={{ color: '#44403C' }}>📞 {g.phone}</div>
+                          )}
+                          {g.national_id && (
+                            <div className="text-[11px]" style={{ color: '#78716C' }}>ID: {g.national_id}</div>
+                          )}
+                          {(g.employment_type || g.source_of_income) && (
+                            <div className="text-[11px]" style={{ color: '#78716C' }}>
+                              {[g.employment_type, g.source_of_income].filter(Boolean).join(' · ')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </>
               )}
-              {siblings.length === 0 && guardians.length === 0 && dependants.length === 0 && (
+              {siblings.length === 0 && guardians.length === 0 && dependants.length === 0 && !isMinorAge && (
                 <p className="text-[12px] italic text-center py-2" style={{ color: '#A8A29E' }}>No family connections recorded</p>
               )}
               {beneficiary.household_id && (
