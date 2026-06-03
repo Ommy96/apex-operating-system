@@ -881,11 +881,13 @@ function Step1Identity({
   update,
   subCounties,
   term,
+  showNationalId,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   subCounties: string[];
   term: string;
+  showNationalId: boolean;
 }) {
   const isPerson =
     form.beneficiary_category === 'individual' ||
@@ -986,7 +988,7 @@ function Step1Identity({
           <Label>Phone</Label>
           <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
         </div>
-        {isPerson && (
+        {isPerson && showNationalId && (
           <div>
             <Label>National ID / Passport</Label>
             <Input
