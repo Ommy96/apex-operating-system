@@ -38,6 +38,12 @@ import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
+import {
+  GuardianFields,
+  EMPTY_GUARDIAN,
+  relationshipToGuardianType,
+  type GuardianFieldsValue,
+} from './GuardianFields';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
 
@@ -90,9 +96,8 @@ interface FormState {
 
   // Step 3 — family
   family_status: string;
-  guardian_name: string;
-  guardian_relationship: string;
-  guardian_phone: string;
+  guardians: GuardianFieldsValue[];
+  removed_guardian_link_ids: string[];
 
   // Step 4 — education
   academic_level: string;
@@ -152,9 +157,8 @@ const EMPTY_STATE: FormState = {
   leader_name: '',
   leader_phone: '',
   family_status: '',
-  guardian_name: '',
-  guardian_relationship: '',
-  guardian_phone: '',
+  guardians: [],
+  removed_guardian_link_ids: [],
   academic_level: '',
   institution_name: '',
   grade: '',
