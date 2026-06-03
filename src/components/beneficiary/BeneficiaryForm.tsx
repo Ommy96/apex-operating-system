@@ -293,6 +293,64 @@ export function BeneficiaryForm({
   // Age-aware field visibility
   const visibility = useFieldVisibility(form.date_of_birth, config);
 
+  // When the beneficiary becomes a minor (DOB makes them < 18),
+  // clear any National ID that was captured earlier so a stale value
+  // cannot be saved.
+  useEffect(() => {
+    if (visibility.isMinor && form.national_id) {
+      setForm((prev) => ({ ...prev, national_id: '' }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibility.isMinor]);
+
+  // Load existing guardian links when editing an existing beneficiary,
+  // so the user can update / remove parents instead of duplicating them.
+  useEffect(() => {
+    if (!beneficiary?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('beneficiary_guardians')
+        .select(
+          `id, relationship, is_primary,
+           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income )`,
+        )
+        .eq('beneficiary_id', beneficiary.id);
+      if (error || cancelled || !data) return;
+      const loaded: GuardianFieldsValue[] = data
+        .filter((row: any) => row.guardians)
+        .map((row: any) => {
+          const g = row.guardians;
+          // Prefer the link.relationship if present, else derive from type
+          const rel =
+            row.relationship ||
+            (g.guardian_type === 'father'
+              ? 'Father'
+              : g.guardian_type === 'mother'
+              ? 'Mother'
+              : 'Other');
+          return {
+            id: g.id,
+            linkId: row.id,
+            guardian_type: g.guardian_type,
+            relationship: rel,
+            full_name: g.full_name ?? '',
+            national_id: g.national_id ?? '',
+            phone: g.phone ?? '',
+            is_alive: g.is_alive !== false,
+            employment_type: g.employment_type ?? '',
+            source_of_income: g.source_of_income ?? '',
+          };
+        });
+      if (loaded.length) {
+        setForm((prev) => ({ ...prev, guardians: loaded }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [beneficiary?.id]);
+
   useEffect(() => {
     if (beneficiary) {
       setForm(createFormStateFromBeneficiary(beneficiary, defaultCategory));
@@ -435,10 +493,11 @@ export function BeneficiaryForm({
       setStep(0);
       return;
     }
-    if (isIndividual && visibility.isMinor && !form.guardian_name.trim()) {
+    const filledGuardians = form.guardians.filter((g) => g.full_name.trim());
+    if (isIndividual && visibility.isMinor && filledGuardians.length === 0) {
       toast({
         title: 'Guardian required',
-        description: 'Minors must have a guardian name on file.',
+        description: 'Minors must have at least one parent or guardian on file.',
         variant: 'destructive',
       });
       const familyStep = visibleSteps.indexOf(2);
@@ -545,33 +604,76 @@ export function BeneficiaryForm({
         uniqueId = data.unique_id;
       }
 
-      // Save guardian if applicable
-      if (
-        isIndividual &&
-        beneficiaryId &&
-        form.guardian_name.trim() &&
-        form.guardian_relationship
-      ) {
+      // Save / upsert guardians & beneficiary_guardians links.
+      if (isIndividual && beneficiaryId) {
         try {
-          const { data: g } = await supabase
-            .from('guardians')
-            .insert({
-              full_name: form.guardian_name,
-              phone: form.guardian_phone || null,
-              organization_id: orgId,
-            } as any)
-            .select('id')
-            .single();
-          if (g?.id) {
-            await supabase.from('beneficiary_guardians').insert({
-              beneficiary_id: beneficiaryId,
-              guardian_id: g.id,
-              relationship: form.guardian_relationship,
-              is_primary: true,
-            } as any);
+          // 1. Remove links the user deleted while editing.
+          if (form.removed_guardian_link_ids.length) {
+            await supabase
+              .from('beneficiary_guardians')
+              .delete()
+              .in('id', form.removed_guardian_link_ids);
           }
-        } catch (e) {
-          logger.warn('Failed to save guardian', e);
+
+          // 2. Upsert each filled guardian.
+          for (let idx = 0; idx < filledGuardians.length; idx++) {
+            const g = filledGuardians[idx];
+            const guardianType = relationshipToGuardianType(g.relationship);
+            const guardianPayload: any = {
+              organization_id: orgId,
+              full_name: g.full_name.trim(),
+              guardian_type: guardianType,
+              national_id: g.national_id?.trim() || null,
+              phone: g.phone?.trim() || null,
+              is_alive: g.is_alive,
+              employment_type: g.employment_type || null,
+              source_of_income: g.source_of_income?.trim() || null,
+            };
+
+            let guardianId = g.id;
+            if (guardianId) {
+              const { error: upErr } = await supabase
+                .from('guardians')
+                .update(guardianPayload)
+                .eq('id', guardianId);
+              if (upErr) throw upErr;
+            } else {
+              const { data: inserted, error: insErr } = await supabase
+                .from('guardians')
+                .insert(guardianPayload)
+                .select('id')
+                .single();
+              if (insErr) throw insErr;
+              guardianId = inserted!.id;
+            }
+
+            // Link row
+            if (g.linkId) {
+              await supabase
+                .from('beneficiary_guardians')
+                .update({
+                  relationship: g.relationship || null,
+                  is_primary: idx === 0,
+                } as any)
+                .eq('id', g.linkId);
+            } else {
+              await supabase
+                .from('beneficiary_guardians')
+                .insert({
+                  beneficiary_id: beneficiaryId,
+                  guardian_id: guardianId,
+                  relationship: g.relationship || null,
+                  is_primary: idx === 0,
+                } as any);
+            }
+          }
+        } catch (e: any) {
+          logger.error('Failed to save guardian', e);
+          toast({
+            title: 'Could not save guardian information',
+            description: e?.message || 'Please try again.',
+            variant: 'destructive',
+          });
         }
       }
 
@@ -697,6 +799,7 @@ export function BeneficiaryForm({
             update={update}
             subCounties={subCounties}
             term={term}
+            showNationalId={visibility.showNationalId}
           />
         )}
         {step === 1 && (
