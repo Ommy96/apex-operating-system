@@ -108,6 +108,12 @@ interface Guardian {
   employment_type: string | null;
   source_of_income: string | null;
   relationship: string;
+  national_id: string | null;
+  age: number | null;
+  date_of_birth: string | null;
+  address: string | null;
+  employment_details: string | null;
+  date_of_death: string | null;
 }
 
 interface Donor {
@@ -223,7 +229,9 @@ export default function BeneficiaryProfile() {
 
       const { data: guardiansData } = await supabase
         .from('beneficiary_guardians')
-        .select(`id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income)`)
+        .select(
+          `id, relationship, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income, national_id, age, date_of_birth, address, employment_details, date_of_death)`,
+        )
         .eq('beneficiary_id', id);
 
       if (guardiansData) {
