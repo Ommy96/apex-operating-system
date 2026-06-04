@@ -698,7 +698,7 @@ export default function BeneficiaryProfile() {
             >
               {siblings.length > 0 && (
                 <>
-                  <div className="text-[10px] uppercase mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>In this system</div>
+                  <div className="text-[12px] mb-2" style={{ color: '#78716C', fontWeight: 500 }}>In this system</div>
                   {siblings.map((s: any) => (
                     <div key={s.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
                       <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>{getInitials(s.display_name || '?')}</div>
@@ -713,7 +713,7 @@ export default function BeneficiaryProfile() {
               )}
               {(guardians.length > 0 || isMinorAge) && (
                 <>
-                  <div className="text-[10px] uppercase mt-3 mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>Parents / Guardians</div>
+                  <div className="text-[12px] mt-3 mb-2" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
                   {guardians.length === 0 && isMinorAge && (
                     <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
                       <p>No parent or guardian recorded for this minor.</p>
