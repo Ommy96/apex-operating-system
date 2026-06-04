@@ -27,6 +27,7 @@ import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContact
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { useBranding } from '@/hooks/useBranding';
 import {
   AlertDialog,
   AlertDialogAction,
