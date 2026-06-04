@@ -27,6 +27,7 @@ import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContact
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { useBranding } from '@/hooks/useBranding';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,6 +134,8 @@ export default function BeneficiaryProfile() {
   const { currentOrganization } = useOrganization();
   const { term, termPlural } = useBeneficiaryTerminology();
   const { config: orgConfig } = useOrgBeneficiaryConfig();
+  const { primaryColor } = useBranding();
+  const brandHex = primaryColor || '#0F7B6C';
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -438,51 +441,65 @@ export default function BeneficiaryProfile() {
         .bp-name { font-family: 'Lora', serif; letter-spacing: -0.3px; }
         .bp-mono { font-family: 'DM Mono', monospace; }
         .bp-avatar-photo:hover .bp-camera-overlay { opacity: 1; }
+        @keyframes bp-status-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(190,24,93,0.55); }
+          50% { box-shadow: 0 0 0 6px rgba(190,24,93,0); }
+        }
+        .bp-status-pulse { animation: bp-status-pulse 1.8s ease-in-out infinite; }
       `}</style>
-      <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-4">
+      <div className="max-w-[1200px] mx-auto px-4 py-4">
         {/* Back nav */}
-        <button onClick={() => navigate('/beneficiaries')} className="no-print inline-flex items-center gap-1.5 text-[12px]" style={{ color: '#78716C' }}>
+        <button onClick={() => navigate('/beneficiaries')} className="no-print inline-flex items-center gap-1.5 text-[12px] mb-4" style={{ color: '#78716C' }}>
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {termPlural}
         </button>
 
         {/* ─── HERO CARD ─── */}
         <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          {/* Decorative band */}
+          {/* Decorative band — soft brand wash */}
           <div
             className="h-[88px] relative"
             style={{
-              background: 'linear-gradient(135deg, #1C1917 0%, #292524 40%, #1C2A20 100%)',
+              background: primaryColor
+                ? `color-mix(in srgb, ${brandHex} 10%, #FAFAF9)`
+                : '#F5F0E8',
+              overflow: 'hidden',
             }}
           >
-            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 20% 30%, rgba(29,158,138,0.18), transparent 50%), radial-gradient(circle at 80% 60%, rgba(180,83,9,0.16), transparent 55%)' }} />
-            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.06 }} />
+            <div
+              className="absolute -inset-10"
+              style={{
+                background: `radial-gradient(circle at 22% 35%, color-mix(in srgb, ${brandHex} 35%, transparent), transparent 55%), radial-gradient(circle at 78% 60%, color-mix(in srgb, ${brandHex} 28%, transparent), transparent 60%)`,
+                filter: 'blur(80px)',
+                opacity: 0.6,
+              }}
+            />
           </div>
 
           {/* Hero body */}
-          <div className="px-7 pb-[22px]">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-42px' }}>
+          <div className="px-6 sm:px-8 pb-7">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-50px' }}>
               <div className="flex items-end gap-4 flex-1 min-w-0">
                 {/* Avatar */}
                 <div className="relative shrink-0 bp-avatar-photo group">
-                  <div className="h-[82px] w-[82px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                  <div className="h-[80px] w-[80px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontSize: '28px', fontWeight: 600 }}>
+                      <div className="h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
                   </div>
-                  {/* Status indicator dot */}
+                  {/* Status indicator dot — colour family matches the meaningful status pill */}
                   <div
-                    className="absolute bottom-0 right-0 h-[18px] w-[18px] rounded-full flex items-center justify-center text-white"
+                    className={`absolute bottom-0 right-0 h-[20px] w-[20px] rounded-full flex items-center justify-center text-white ${(computedStatus.label === 'High risk' || computedStatus.label === 'Overdue') ? 'bp-status-pulse' : ''}`}
                     style={{
                       border: '2.5px solid #FFFFFF',
-                      background: statusLabel === 'Active' ? '#1D9E8A' : statusLabel === 'Exited' ? '#78716C' : '#B45309',
+                      background: computedStatus.colour,
                     }}
                   >
-                    {statusLabel === 'Active' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : statusLabel === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
+                    {computedStatus.label === 'Good' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : computedStatus.label === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
                   </div>
                   {currentOrganization?.organization_id && (
                     <div className="bp-camera-overlay no-print absolute inset-0 rounded-full flex items-center justify-center opacity-0 transition-opacity" style={{ background: 'rgba(0,0,0,0.45)' }}>
@@ -497,17 +514,17 @@ export default function BeneficiaryProfile() {
 
                 {/* Name block */}
                 <div className="pb-[6px] flex-1 min-w-0">
-                  <h1 className="bp-name text-[24px] leading-tight" style={{ fontWeight: 600, color: '#1C1917' }}>{beneficiary.display_name}</h1>
-                  <div className="flex items-center gap-[8px] flex-wrap mt-1">
-                    <span className="bp-mono text-[11px]" style={{ color: '#A8A29E' }}>
+                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>{beneficiary.display_name}</h1>
+                  <div className="flex items-center gap-[8px] flex-wrap mt-2">
+                    <span className="bp-mono text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>
                       {beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`}
                     </span>
-                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.gender}</span></>}
+                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.gender}</span></>}
                     <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[11px]" style={{ color: '#78716C' }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
-                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.county}</span></>}
+                    <span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
+                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.county}</span></>}
                     <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[11px]" style={{ color: '#A8A29E' }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
+                    <span className="text-[12px]" style={{ color: '#A8A29E', fontWeight: 500 }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
                   </div>
                   {beneficiary.inactive_date && (
                     <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px]" style={{ background: '#FDF2F8', color: '#831843' }}>
@@ -531,7 +548,7 @@ export default function BeneficiaryProfile() {
                 <button
                   onClick={handleEdit}
                   className="inline-flex items-center gap-1.5 rounded-[9px] px-[14px] h-[34px] text-[13px]"
-                  style={{ background: '#0F7B6C', color: '#FFFFFF', fontWeight: 500 }}
+                  style={{ background: brandHex, color: '#FFFFFF', fontWeight: 500 }}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   Edit profile
@@ -550,10 +567,10 @@ export default function BeneficiaryProfile() {
             </div>
 
             {/* Pills row */}
-            <div className="flex flex-wrap gap-1.5 mt-4 mb-4">
+            <div className="flex flex-wrap gap-1.5 mt-5 mb-4">
               <Pill bg={statusLabel === 'Active' ? '#E6F5F3' : statusLabel === 'Exited' ? '#E7E2DA' : '#F5F0E8'} fg={statusLabel === 'Active' ? '#0A5449' : '#44403C'} dot={statusLabel === 'Active' ? '#1D9E8A' : '#78716C'}>{statusLabel}</Pill>
-              <Pill bg="#F5F0E8" fg="#44403C"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
-              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#FEF3CD" fg="#7A3A0A"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
+              <Pill bg="#F5F0E8" fg="#57534E"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
+              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#F5F0E8" fg="#57534E"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
               {beneficiary.vulnerability_level && (
                 <Pill
                   bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
@@ -573,7 +590,7 @@ export default function BeneficiaryProfile() {
             <div className="flex items-center gap-[10px]">
               <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>Profile completeness</span>
               <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: '#EDE5D8' }}>
-                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: '#0F7B6C' }} />
+                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: brandHex }} />
               </div>
               <span className="text-[11px] tabular-nums" style={{ color: pctColour, fontWeight: 500 }}>{completePct}%</span>
               {missingFields.length > 0 && (
@@ -601,7 +618,7 @@ export default function BeneficiaryProfile() {
         </div>
 
         {/* ─── TWO-COLUMN LAYOUT ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack">
+        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack mt-6 md:mt-8">
           
           {/* ─── SIDEBAR ─── */}
           <aside className="flex flex-col gap-3 order-2 md:order-1">
@@ -681,7 +698,7 @@ export default function BeneficiaryProfile() {
             >
               {siblings.length > 0 && (
                 <>
-                  <div className="text-[10px] uppercase mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>In this system</div>
+                  <div className="text-[12px] mb-2" style={{ color: '#78716C', fontWeight: 500 }}>In this system</div>
                   {siblings.map((s: any) => (
                     <div key={s.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
                       <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>{getInitials(s.display_name || '?')}</div>
@@ -696,7 +713,7 @@ export default function BeneficiaryProfile() {
               )}
               {(guardians.length > 0 || isMinorAge) && (
                 <>
-                  <div className="text-[10px] uppercase mt-3 mb-1.5" style={{ letterSpacing: '0.4px', color: '#A8A29E', fontWeight: 600 }}>Parents / Guardians</div>
+                  <div className="text-[12px] mt-3 mb-2" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
                   {guardians.length === 0 && isMinorAge && (
                     <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
                       <p>No parent or guardian recorded for this minor.</p>
@@ -798,53 +815,51 @@ export default function BeneficiaryProfile() {
               </div>
 
               {/* TAB: Programmes */}
-              <TabsContent value="programmes" className="mt-0 p-4 space-y-3">
+              <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
                 <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
                 <div className="pt-2">
-                  <div className="text-[11px] uppercase mb-3" style={{ color: '#A8A29E', letterSpacing: '0.5px', fontWeight: 600 }}>Recent activity</div>
+                  <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} />
                 </div>
               </TabsContent>
 
               {/* TAB: History & Risk */}
-              <TabsContent value="history-risk" className="mt-0 p-4 space-y-4">
+              <TabsContent value="history-risk" className="mt-0 p-6 space-y-5">
                 <RelationshipsTab beneficiary={beneficiary as any} />
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
-                  <span className="text-[10px] uppercase" style={{ letterSpacing: '0.5px', color: '#A8A29E', fontWeight: 600 }}>Risk signals</span>
-                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
+                <div className="pt-2">
+                  <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Risk signals</div>
                 </div>
                 <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Documents */}
-              <TabsContent value="documents" className="mt-0 p-4">
+              <TabsContent value="documents" className="mt-0 p-6">
                 <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Notes */}
-              <TabsContent value="notes" className="mt-0 p-4 space-y-3">
+              <TabsContent value="notes" className="mt-0 p-6 space-y-4">
                 <ProgramObservations beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
-                <TabsContent value="health" className="mt-0 p-4 space-y-3">
+                <TabsContent value="health" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'health')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Health information</h3>
+                    <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Health information</h3>
                     <span className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>Private — not shared publicly</span>
                   </div>
                   <div>
-                    <div className="text-[11px] mb-1.5" style={{ color: '#78716C' }}>Known allergies</div>
+                    <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
                     <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
-                    <div><div style={{ color: '#78716C' }}>Medical notes</div><div style={{ color: '#1C1917' }}>{beneficiary.other_medical_conditions || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Special needs</div><div style={{ color: '#1C1917' }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
                     {visibility.showHivStatus && (
                       <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
-                        <div className="text-[11px]" style={{ color: '#831843' }}>HIV status — restricted access</div>
-                        <div className="text-[13px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                        <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
+                        <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
                       </div>
                     )}
                   </div>
@@ -852,21 +867,21 @@ export default function BeneficiaryProfile() {
               )}
 
               {tabs.some(t => t.value === 'economic') && (
-                <TabsContent value="economic" className="mt-0 p-4 space-y-3">
+                <TabsContent value="economic" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'economic')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
-                  <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Economic profile</h3>
-                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
-                    <div><div style={{ color: '#78716C' }}>Occupation</div><div>{beneficiary.occupation || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Income level</div><div>{beneficiary.income_level || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Household size</div><div>{beneficiary.household_size || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Income source</div><div>{beneficiary.source_of_income || '—'}</div></div>
+                  <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Economic profile</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
                   </div>
                 </TabsContent>
               )}
 
               {/* TAB: Education */}
               {tabs.some(t => t.value === 'academics') && (
-                <TabsContent value="academics" className="mt-0 p-4 space-y-3">
+                <TabsContent value="academics" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'academics')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <AcademicProgressionInfo
                     beneficiaryId={beneficiary.id}
@@ -932,14 +947,14 @@ function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string
 function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
   return (
     <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
-      <div className="flex items-center justify-between" style={{ padding: '13px 18px 11px', borderBottom: '1px solid #E7E2DA' }}>
+      <div className="flex items-center justify-between" style={{ padding: '16px 22px 14px', borderBottom: '1px solid #E7E2DA' }}>
         <div className="flex items-center gap-2">
           {icon}
-          <span className="text-[12px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
+          <span className="text-[14px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
         </div>
         {right ?? (onEdit && <button onClick={onEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>Edit</button>)}
       </div>
-      <div style={{ padding: '13px 18px' }}>{children}</div>
+      <div style={{ padding: '20px 22px' }}>{children}</div>
     </div>
   );
 }
@@ -947,15 +962,15 @@ function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.Re
 function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
   const empty = value === null || value === undefined || value === '';
   return (
-    <div className="flex justify-between items-baseline gap-2 py-[5px]">
-      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>{label}</span>
+    <div className="flex justify-between items-baseline gap-3 py-[7px]">
+      <span className="text-[12px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
       <span
-        className={`text-[12px] text-right truncate ${empty ? 'italic' : ''}`}
+        className={`text-[14px] text-right truncate ${empty ? 'italic' : ''}`}
         style={{
           color: empty ? '#A8A29E' : '#1C1917',
           fontWeight: empty ? 400 : 500,
           fontFamily: mono && !empty ? "'DM Mono', monospace" : undefined,
-          maxWidth: '160px',
+          maxWidth: '170px',
         }}
       >
         {empty ? '—' : String(value)}
