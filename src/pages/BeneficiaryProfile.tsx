@@ -441,51 +441,65 @@ export default function BeneficiaryProfile() {
         .bp-name { font-family: 'Lora', serif; letter-spacing: -0.3px; }
         .bp-mono { font-family: 'DM Mono', monospace; }
         .bp-avatar-photo:hover .bp-camera-overlay { opacity: 1; }
+        @keyframes bp-status-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(190,24,93,0.55); }
+          50% { box-shadow: 0 0 0 6px rgba(190,24,93,0); }
+        }
+        .bp-status-pulse { animation: bp-status-pulse 1.8s ease-in-out infinite; }
       `}</style>
-      <div className="max-w-[1200px] mx-auto px-4 py-4 space-y-4">
+      <div className="max-w-[1200px] mx-auto px-4 py-4">
         {/* Back nav */}
-        <button onClick={() => navigate('/beneficiaries')} className="no-print inline-flex items-center gap-1.5 text-[12px]" style={{ color: '#78716C' }}>
+        <button onClick={() => navigate('/beneficiaries')} className="no-print inline-flex items-center gap-1.5 text-[12px] mb-4" style={{ color: '#78716C' }}>
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to {termPlural}
         </button>
 
         {/* ─── HERO CARD ─── */}
         <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          {/* Decorative band */}
+          {/* Decorative band — soft brand wash */}
           <div
             className="h-[88px] relative"
             style={{
-              background: 'linear-gradient(135deg, #1C1917 0%, #292524 40%, #1C2A20 100%)',
+              background: primaryColor
+                ? `color-mix(in srgb, ${brandHex} 10%, #FAFAF9)`
+                : '#F5F0E8',
+              overflow: 'hidden',
             }}
           >
-            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 20% 30%, rgba(29,158,138,0.18), transparent 50%), radial-gradient(circle at 80% 60%, rgba(180,83,9,0.16), transparent 55%)' }} />
-            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.06 }} />
+            <div
+              className="absolute -inset-10"
+              style={{
+                background: `radial-gradient(circle at 22% 35%, color-mix(in srgb, ${brandHex} 35%, transparent), transparent 55%), radial-gradient(circle at 78% 60%, color-mix(in srgb, ${brandHex} 28%, transparent), transparent 60%)`,
+                filter: 'blur(80px)',
+                opacity: 0.6,
+              }}
+            />
           </div>
 
           {/* Hero body */}
-          <div className="px-7 pb-[22px]">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-42px' }}>
+          <div className="px-6 sm:px-8 pb-7">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-50px' }}>
               <div className="flex items-end gap-4 flex-1 min-w-0">
                 {/* Avatar */}
                 <div className="relative shrink-0 bp-avatar-photo group">
-                  <div className="h-[82px] w-[82px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                  <div className="h-[80px] w-[80px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontSize: '28px', fontWeight: 600 }}>
+                      <div className="h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
                   </div>
-                  {/* Status indicator dot */}
+                  {/* Status indicator dot — colour family matches the meaningful status pill */}
                   <div
-                    className="absolute bottom-0 right-0 h-[18px] w-[18px] rounded-full flex items-center justify-center text-white"
+                    className={`absolute bottom-0 right-0 h-[20px] w-[20px] rounded-full flex items-center justify-center text-white ${(computedStatus.label === 'High risk' || computedStatus.label === 'Overdue') ? 'bp-status-pulse' : ''}`}
                     style={{
                       border: '2.5px solid #FFFFFF',
-                      background: statusLabel === 'Active' ? '#1D9E8A' : statusLabel === 'Exited' ? '#78716C' : '#B45309',
+                      background: computedStatus.colour,
                     }}
                   >
-                    {statusLabel === 'Active' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : statusLabel === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
+                    {computedStatus.label === 'Good' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : computedStatus.label === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
                   </div>
                   {currentOrganization?.organization_id && (
                     <div className="bp-camera-overlay no-print absolute inset-0 rounded-full flex items-center justify-center opacity-0 transition-opacity" style={{ background: 'rgba(0,0,0,0.45)' }}>
@@ -500,17 +514,17 @@ export default function BeneficiaryProfile() {
 
                 {/* Name block */}
                 <div className="pb-[6px] flex-1 min-w-0">
-                  <h1 className="bp-name text-[24px] leading-tight" style={{ fontWeight: 600, color: '#1C1917' }}>{beneficiary.display_name}</h1>
-                  <div className="flex items-center gap-[8px] flex-wrap mt-1">
-                    <span className="bp-mono text-[11px]" style={{ color: '#A8A29E' }}>
+                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>{beneficiary.display_name}</h1>
+                  <div className="flex items-center gap-[8px] flex-wrap mt-2">
+                    <span className="bp-mono text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>
                       {beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`}
                     </span>
-                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.gender}</span></>}
+                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.gender}</span></>}
                     <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[11px]" style={{ color: '#78716C' }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
-                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[11px]" style={{ color: '#78716C' }}>{beneficiary.county}</span></>}
+                    <span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
+                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.county}</span></>}
                     <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[11px]" style={{ color: '#A8A29E' }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
+                    <span className="text-[12px]" style={{ color: '#A8A29E', fontWeight: 500 }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
                   </div>
                   {beneficiary.inactive_date && (
                     <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px]" style={{ background: '#FDF2F8', color: '#831843' }}>
@@ -534,7 +548,7 @@ export default function BeneficiaryProfile() {
                 <button
                   onClick={handleEdit}
                   className="inline-flex items-center gap-1.5 rounded-[9px] px-[14px] h-[34px] text-[13px]"
-                  style={{ background: '#0F7B6C', color: '#FFFFFF', fontWeight: 500 }}
+                  style={{ background: brandHex, color: '#FFFFFF', fontWeight: 500 }}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   Edit profile
@@ -553,10 +567,10 @@ export default function BeneficiaryProfile() {
             </div>
 
             {/* Pills row */}
-            <div className="flex flex-wrap gap-1.5 mt-4 mb-4">
+            <div className="flex flex-wrap gap-1.5 mt-5 mb-4">
               <Pill bg={statusLabel === 'Active' ? '#E6F5F3' : statusLabel === 'Exited' ? '#E7E2DA' : '#F5F0E8'} fg={statusLabel === 'Active' ? '#0A5449' : '#44403C'} dot={statusLabel === 'Active' ? '#1D9E8A' : '#78716C'}>{statusLabel}</Pill>
-              <Pill bg="#F5F0E8" fg="#44403C"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
-              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#FEF3CD" fg="#7A3A0A"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
+              <Pill bg="#F5F0E8" fg="#57534E"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
+              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#F5F0E8" fg="#57534E"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
               {beneficiary.vulnerability_level && (
                 <Pill
                   bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
@@ -576,7 +590,7 @@ export default function BeneficiaryProfile() {
             <div className="flex items-center gap-[10px]">
               <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>Profile completeness</span>
               <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: '#EDE5D8' }}>
-                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: '#0F7B6C' }} />
+                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: brandHex }} />
               </div>
               <span className="text-[11px] tabular-nums" style={{ color: pctColour, fontWeight: 500 }}>{completePct}%</span>
               {missingFields.length > 0 && (
@@ -604,7 +618,7 @@ export default function BeneficiaryProfile() {
         </div>
 
         {/* ─── TWO-COLUMN LAYOUT ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack">
+        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack mt-6 md:mt-8">
           
           {/* ─── SIDEBAR ─── */}
           <aside className="flex flex-col gap-3 order-2 md:order-1">
