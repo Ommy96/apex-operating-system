@@ -949,14 +949,14 @@ function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string
 function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
   return (
     <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
-      <div className="flex items-center justify-between" style={{ padding: '13px 18px 11px', borderBottom: '1px solid #E7E2DA' }}>
+      <div className="flex items-center justify-between" style={{ padding: '16px 22px 14px', borderBottom: '1px solid #E7E2DA' }}>
         <div className="flex items-center gap-2">
           {icon}
-          <span className="text-[12px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
+          <span className="text-[14px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
         </div>
         {right ?? (onEdit && <button onClick={onEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>Edit</button>)}
       </div>
-      <div style={{ padding: '13px 18px' }}>{children}</div>
+      <div style={{ padding: '20px 22px' }}>{children}</div>
     </div>
   );
 }
@@ -964,15 +964,15 @@ function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.Re
 function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
   const empty = value === null || value === undefined || value === '';
   return (
-    <div className="flex justify-between items-baseline gap-2 py-[5px]">
-      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>{label}</span>
+    <div className="flex justify-between items-baseline gap-3 py-[7px]">
+      <span className="text-[12px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
       <span
-        className={`text-[12px] text-right truncate ${empty ? 'italic' : ''}`}
+        className={`text-[14px] text-right truncate ${empty ? 'italic' : ''}`}
         style={{
           color: empty ? '#A8A29E' : '#1C1917',
           fontWeight: empty ? 400 : 500,
           fontFamily: mono && !empty ? "'DM Mono', monospace" : undefined,
-          maxWidth: '160px',
+          maxWidth: '170px',
         }}
       >
         {empty ? '—' : String(value)}
