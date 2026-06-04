@@ -815,53 +815,51 @@ export default function BeneficiaryProfile() {
               </div>
 
               {/* TAB: Programmes */}
-              <TabsContent value="programmes" className="mt-0 p-4 space-y-3">
+              <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
                 <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
                 <div className="pt-2">
-                  <div className="text-[11px] uppercase mb-3" style={{ color: '#A8A29E', letterSpacing: '0.5px', fontWeight: 600 }}>Recent activity</div>
+                  <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} />
                 </div>
               </TabsContent>
 
               {/* TAB: History & Risk */}
-              <TabsContent value="history-risk" className="mt-0 p-4 space-y-4">
+              <TabsContent value="history-risk" className="mt-0 p-6 space-y-5">
                 <RelationshipsTab beneficiary={beneficiary as any} />
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
-                  <span className="text-[10px] uppercase" style={{ letterSpacing: '0.5px', color: '#A8A29E', fontWeight: 600 }}>Risk signals</span>
-                  <div className="flex-1 h-px" style={{ background: '#E7E2DA' }} />
+                <div className="pt-2">
+                  <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Risk signals</div>
                 </div>
                 <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Documents */}
-              <TabsContent value="documents" className="mt-0 p-4">
+              <TabsContent value="documents" className="mt-0 p-6">
                 <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Notes */}
-              <TabsContent value="notes" className="mt-0 p-4 space-y-3">
+              <TabsContent value="notes" className="mt-0 p-6 space-y-4">
                 <ProgramObservations beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
-                <TabsContent value="health" className="mt-0 p-4 space-y-3">
+                <TabsContent value="health" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'health')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Health information</h3>
+                    <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Health information</h3>
                     <span className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>Private — not shared publicly</span>
                   </div>
                   <div>
-                    <div className="text-[11px] mb-1.5" style={{ color: '#78716C' }}>Known allergies</div>
+                    <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
                     <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
-                    <div><div style={{ color: '#78716C' }}>Medical notes</div><div style={{ color: '#1C1917' }}>{beneficiary.other_medical_conditions || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Special needs</div><div style={{ color: '#1C1917' }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
                     {visibility.showHivStatus && (
                       <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
-                        <div className="text-[11px]" style={{ color: '#831843' }}>HIV status — restricted access</div>
-                        <div className="text-[13px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                        <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
+                        <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
                       </div>
                     )}
                   </div>
@@ -869,21 +867,21 @@ export default function BeneficiaryProfile() {
               )}
 
               {tabs.some(t => t.value === 'economic') && (
-                <TabsContent value="economic" className="mt-0 p-4 space-y-3">
+                <TabsContent value="economic" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'economic')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
-                  <h3 className="text-[14px]" style={{ fontWeight: 600 }}>Economic profile</h3>
-                  <div className="grid sm:grid-cols-2 gap-3 text-[12px]">
-                    <div><div style={{ color: '#78716C' }}>Occupation</div><div>{beneficiary.occupation || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Income level</div><div>{beneficiary.income_level || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Household size</div><div>{beneficiary.household_size || '—'}</div></div>
-                    <div><div style={{ color: '#78716C' }}>Income source</div><div>{beneficiary.source_of_income || '—'}</div></div>
+                  <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Economic profile</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
+                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
                   </div>
                 </TabsContent>
               )}
 
               {/* TAB: Education */}
               {tabs.some(t => t.value === 'academics') && (
-                <TabsContent value="academics" className="mt-0 p-4 space-y-3">
+                <TabsContent value="academics" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'academics')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <AcademicProgressionInfo
                     beneficiaryId={beneficiary.id}
