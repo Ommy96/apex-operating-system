@@ -134,6 +134,8 @@ export default function BeneficiaryProfile() {
   const { currentOrganization } = useOrganization();
   const { term, termPlural } = useBeneficiaryTerminology();
   const { config: orgConfig } = useOrgBeneficiaryConfig();
+  const { primaryColor } = useBranding();
+  const brandHex = primaryColor || '#0F7B6C';
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
