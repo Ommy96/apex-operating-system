@@ -26,6 +26,8 @@ import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { useBranding } from '@/hooks/useBranding';
 import {
