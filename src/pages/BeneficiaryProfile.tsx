@@ -935,6 +935,7 @@ export default function BeneficiaryProfile() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </TooltipProvider>
   );
 }
 
