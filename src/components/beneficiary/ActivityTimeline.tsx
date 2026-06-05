@@ -3,74 +3,151 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, FolderKanban, DollarSign, MessageSquare, GraduationCap, Upload, Clock } from 'lucide-react';
+import {
+  Loader2, FolderKanban, DollarSign, MessageSquare, GraduationCap, Upload, Clock,
+  UserPlus, Heart, MapPin, ShieldAlert, Activity, CheckCircle2, LogOut,
+} from 'lucide-react';
+
+type EventCategory = 'registration' | 'programme' | 'visit' | 'risk' | 'academic' | 'service' | 'document' | 'note' | 'status' | 'sponsor';
 
 interface TimelineEvent {
   id: string;
   date: string;
-  type: 'enrollment' | 'funding' | 'observation' | 'progression' | 'upload';
+  category: EventCategory;
   title: string;
-  description: string;
+  description?: string;
   icon: typeof Clock;
-  color: string;
 }
 
 interface ActivityTimelineProps {
   beneficiaryId: string;
+  beneficiary?: { created_at?: string | null; inactive_date?: string | null; inactive_reason?: string | null; display_name?: string } | null;
+  donors?: Array<{ id: string; donor_name: string; donation_date: string | null; amount_received: number | null; program?: { name: string } | null }>;
+  canLogVisit?: boolean;
+  onLogVisit?: () => void;
 }
 
-export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
+const CATEGORY_META: Record<EventCategory, { label: string; dot: string }> = {
+  registration: { label: 'Registration', dot: '#78716C' },
+  programme:    { label: 'Programmes',   dot: 'var(--brand-primary, #0F7B6C)' },
+  sponsor:      { label: 'Sponsors',     dot: '#1D9E8A' },
+  visit:        { label: 'Visits',       dot: 'var(--brand-primary, #0F7B6C)' },
+  risk:         { label: 'Risk',         dot: '#BE185D' },
+  academic:     { label: 'Academic',     dot: '#1D4ED8' },
+  service:      { label: 'Services',     dot: '#1D9E8A' },
+  document:     { label: 'Documents',    dot: '#A8A29E' },
+  note:         { label: 'Notes',        dot: '#A8A29E' },
+  status:       { label: 'Status',       dot: '#B45309' },
+};
+
+const FILTERS: Array<{ key: 'all' | EventCategory; label: string }> = [
+  { key: 'all', label: 'All' },
+  { key: 'programme', label: 'Programmes' },
+  { key: 'visit', label: 'Visits' },
+  { key: 'risk', label: 'Risk' },
+  { key: 'academic', label: 'Academic' },
+  { key: 'document', label: 'Documents' },
+  { key: 'note', label: 'Notes' },
+];
+
+const PAGE = 20;
+
+export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVisit, onLogVisit }: ActivityTimelineProps) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | EventCategory>('all');
+  const [visible, setVisible] = useState(PAGE);
 
   useEffect(() => {
     fetchTimeline();
-  }, [beneficiaryId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [beneficiaryId, beneficiary?.created_at, beneficiary?.inactive_date, donors?.length]);
 
   const fetchTimeline = async () => {
     setLoading(true);
     const allEvents: TimelineEvent[] = [];
 
     try {
-      // Enrollments
+      // Registration synthetic event
+      if (beneficiary?.created_at) {
+        allEvents.push({
+          id: 'registered',
+          date: beneficiary.created_at,
+          category: 'registration',
+          title: 'Registered as a beneficiary',
+          icon: UserPlus,
+        });
+      }
+
+      // Sponsor matched (earliest per sponsor)
+      const propDonors = donors;
+      if (propDonors && propDonors.length > 0) {
+        const byName = new Map<string, { date: string | null; donor_name: string }>();
+        for (const d of propDonors) {
+          const cur = byName.get(d.donor_name);
+          if (!cur || (d.donation_date && (!cur.date || d.donation_date < cur.date))) {
+            byName.set(d.donor_name, { date: d.donation_date, donor_name: d.donor_name });
+          }
+        }
+        for (const [name, info] of byName) {
+          if (!info.date) continue;
+          allEvents.push({
+            id: `sponsor-${name}`,
+            date: info.date,
+            category: 'sponsor',
+            title: `Matched with ${name}`,
+            icon: Heart,
+          });
+        }
+      }
+
+      // Enrollments + service delivered
       const { data: enrollments } = await supabase
         .from('beneficiary_services')
-        .select('id, enrolled_date, status, program:programs(name), project:projects(name)')
+        .select('id, enrolled_date, completed_date, status, program:programs(name), project:projects(name)')
         .eq('beneficiary_id', beneficiaryId)
         .order('enrolled_date', { ascending: false });
 
       enrollments?.forEach((e: any) => {
         allEvents.push({
           id: `enroll-${e.id}`,
-          date: e.enrolled_date || e.created_at,
-          type: 'enrollment',
+          date: e.enrolled_date,
+          category: 'programme',
           title: `Enrolled in ${e.program?.name || 'Program'}`,
           description: e.project?.name ? `Project: ${e.project.name}` : `Status: ${e.status || 'Active'}`,
           icon: FolderKanban,
-          color: 'text-info',
         });
+        if ((e.status === 'completed' || e.completed_date) && e.completed_date) {
+          allEvents.push({
+            id: `svc-${e.id}`,
+            date: e.completed_date,
+            category: 'service',
+            title: `Service delivered: ${e.program?.name || 'Program'}`,
+            description: e.project?.name || undefined,
+            icon: CheckCircle2,
+          });
+        }
       });
 
-      // Donors/Funding
-      const { data: donors } = await supabase
+      // Funding receipts
+      const { data: fundingRows } = await supabase
         .from('beneficiary_donors')
         .select('id, donor_name, amount_received, donation_date, program:programs(name)')
         .eq('beneficiary_id', beneficiaryId)
         .order('donation_date', { ascending: false });
 
-      donors?.forEach((d: any) => {
+      fundingRows?.forEach((d: any) => {
         allEvents.push({
           id: `fund-${d.id}`,
-          date: d.donation_date || '',
-          type: 'funding',
+          date: d.donation_date,
+          category: 'sponsor',
           title: `Funding from ${d.donor_name}`,
           description: d.amount_received ? `KES ${d.amount_received.toLocaleString()} — ${d.program?.name || 'General'}` : d.program?.name || '',
           icon: DollarSign,
-          color: 'text-success',
         });
       });
 
-      // Progression history
+      // Academic progression
       const { data: progressions } = await supabase
         .from('beneficiary_progression_history')
         .select('id, progression_date, previous_grade, new_grade, previous_academic_level, new_academic_level, progression_type')
@@ -81,11 +158,84 @@ export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
         allEvents.push({
           id: `prog-${p.id}`,
           date: p.progression_date,
-          type: 'progression',
+          category: 'academic',
           title: `Academic ${p.progression_type || 'Progression'}`,
           description: `${p.previous_grade || '?'} → ${p.new_grade || '?'}${p.new_academic_level ? ` (${p.new_academic_level})` : ''}`,
           icon: GraduationCap,
-          color: 'text-warning',
+        });
+      });
+
+      // Academic history + performance
+      const { data: academicHistory } = await (supabase as any)
+        .from('academic_history')
+        .select('id, start_date, end_date, created_at, school_name, grade, academic_level')
+        .eq('beneficiary_id', beneficiaryId);
+      academicHistory?.forEach((a: any) => {
+        const date = a.end_date || a.start_date || a.created_at;
+        if (!date) return;
+        allEvents.push({
+          id: `ah-${a.id}`,
+          date,
+          category: 'academic',
+          title: a.school_name ? `Attended ${a.school_name}` : 'Academic record',
+          description: [a.grade, a.academic_level].filter(Boolean).join(' · ') || undefined,
+          icon: GraduationCap,
+        });
+      });
+
+      const { data: academicPerf } = await (supabase as any)
+        .from('academic_performance')
+        .select('id, assessment_date, term_end, created_at, term, grade, average_grade, average_score')
+        .eq('beneficiary_id', beneficiaryId);
+      academicPerf?.forEach((p: any) => {
+        const date = p.assessment_date || p.term_end || p.created_at;
+        if (!date) return;
+        const grade = p.grade || p.average_grade || p.average_score;
+        allEvents.push({
+          id: `ap-${p.id}`,
+          date,
+          category: 'academic',
+          title: p.term ? `${p.term} results` : 'Academic results',
+          description: grade ? `Grade: ${grade}` : undefined,
+          icon: GraduationCap,
+        });
+      });
+
+      // Visits
+      const { data: visits } = await supabase
+        .from('beneficiary_visitations')
+        .select('id, visit_date, created_at, visit_type, notes, location, outcome')
+        .eq('beneficiary_id', beneficiaryId);
+      visits?.forEach((v: any) => {
+        const date = v.visit_date || v.created_at;
+        if (!date) return;
+        allEvents.push({
+          id: `visit-${v.id}`,
+          date,
+          category: 'visit',
+          title: v.visit_type ? `${v.visit_type} visit` : 'Field visit',
+          description: v.notes || v.location || v.outcome || undefined,
+          icon: MapPin,
+        });
+      });
+
+      // Risk scores
+      const { data: risks } = await supabase
+        .from('beneficiary_risk_scores')
+        .select('id, assessment_date, created_at, overall_risk_level, notes')
+        .eq('beneficiary_id', beneficiaryId);
+      risks?.forEach((r: any) => {
+        const date = r.assessment_date || r.created_at;
+        if (!date) return;
+        const level = r.overall_risk_level;
+        if (!level || (level !== 'medium' && level !== 'high' && level !== 'critical')) return;
+        allEvents.push({
+          id: `risk-${r.id}`,
+          date,
+          category: 'risk',
+          title: `Risk flag raised: ${String(level).toUpperCase()}`,
+          description: r.notes || undefined,
+          icon: ShieldAlert,
         });
       });
 
@@ -100,15 +250,14 @@ export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
         allEvents.push({
           id: `upload-${u.id}`,
           date: u.created_at,
-          type: 'upload',
+          category: 'document',
           title: `Document uploaded: ${u.document_name}`,
           description: u.document_type || 'File',
           icon: Upload,
-          color: 'text-muted-foreground',
         });
       });
 
-      // Observations
+      // Observations / notes
       const { data: observations } = await supabase
         .from('program_observations')
         .select('id, observation_date, category, notes, program:programs(name)')
@@ -119,17 +268,28 @@ export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
         allEvents.push({
           id: `obs-${o.id}`,
           date: o.observation_date,
-          type: 'observation',
+          category: 'note',
           title: `Observation: ${o.category || 'General'}`,
           description: o.notes?.substring(0, 80) || o.program?.name || '',
           icon: MessageSquare,
-          color: 'text-primary',
         });
       });
 
+      // Status change — exit
+      if (beneficiary?.inactive_date) {
+        allEvents.push({
+          id: 'exit',
+          date: beneficiary.inactive_date,
+          category: 'status',
+          title: 'Exited programme',
+          description: beneficiary.inactive_reason || undefined,
+          icon: LogOut,
+        });
+      }
+
       // Sort by date descending
       allEvents.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
-      setEvents(allEvents);
+      setEvents(allEvents.filter(e => !!e.date));
     } catch (err) {
       logger.error('Timeline fetch error:', err);
     } finally {
@@ -147,46 +307,95 @@ export function ActivityTimeline({ beneficiaryId }: ActivityTimelineProps) {
 
   if (events.length === 0) {
     return (
-      <Card className="border-muted">
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <Clock className="h-10 w-10 mx-auto mb-3 opacity-40" />
-          <p>No activity recorded yet</p>
-        </CardContent>
-      </Card>
+      <div className="rounded-[14px] py-14 text-center" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
+        <CheckCircle2 className="h-10 w-10 mx-auto mb-3" style={{ color: '#A8A29E' }} />
+        <p className="text-[14px]" style={{ color: '#57534E', fontWeight: 500 }}>No activity recorded yet</p>
+        {canLogVisit && onLogVisit && (
+          <button onClick={onLogVisit} className="mt-3 text-[12px] underline" style={{ color: '#0F7B6C' }}>
+            Log first visit →
+          </button>
+        )}
+      </div>
     );
   }
 
+  const filtered = filter === 'all' ? events : events.filter(e => e.category === filter);
+  const shown = filtered.slice(0, visible);
+  const newest = events[0]?.date ? new Date(events[0].date) : null;
+  const oldest = events[events.length - 1]?.date ? new Date(events[events.length - 1].date) : null;
+  const spanDays = newest && oldest ? Math.max(1, Math.floor((newest.getTime() - oldest.getTime()) / 86400000)) : 0;
+  const spanLabel = spanDays >= 730 ? `${(spanDays / 365).toFixed(1)} yrs` : spanDays >= 60 ? `${Math.round(spanDays / 30)} months` : `${spanDays} days`;
+  const daysAgo = newest ? Math.max(0, Math.floor((Date.now() - newest.getTime()) / 86400000)) : null;
+  const recentLabel = daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : daysAgo !== null ? `${daysAgo} days ago` : '';
+
   return (
-    <Card className="border-primary/10">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Clock className="h-5 w-5 text-primary" />
-          Activity Timeline
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="relative pl-6 border-l-2 border-border space-y-6">
-          {events.map((event) => {
-            const Icon = event.icon;
-            return (
-              <div key={event.id} className="relative">
-                <div className={`absolute -left-[calc(1.5rem+1px)] top-0.5 h-6 w-6 rounded-full bg-background border-2 border-border flex items-center justify-center`}>
-                  <Icon className={`h-3 w-3 ${event.color}`} />
-                </div>
-                <div className="ml-2">
-                  <p className="text-sm font-medium text-foreground">{event.title}</p>
-                  {event.description && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    {event.date ? new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Date unknown'}
-                  </p>
-                </div>
+    <div>
+      {/* Summary line */}
+      <div className="text-[12px] mb-3" style={{ color: '#78716C' }}>
+        {events.length} events over {spanLabel}{recentLabel ? `, most recent ${recentLabel}` : ''}
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex gap-1.5 flex-wrap mb-4 no-print">
+        {FILTERS.map(f => {
+          const active = filter === f.key;
+          const count = f.key === 'all' ? events.length : events.filter(e => e.category === f.key).length;
+          return (
+            <button
+              key={f.key}
+              onClick={() => { setFilter(f.key); setVisible(PAGE); }}
+              className="text-[12px] px-2.5 py-1 rounded-full transition-colors"
+              style={
+                active
+                  ? { background: 'var(--brand-primary, #0F7B6C)', color: '#FFFFFF', fontWeight: 500 }
+                  : { background: '#F5F0E8', color: '#57534E', fontWeight: 500 }
+              }
+            >
+              {f.label}{count > 0 && f.key !== 'all' ? ` · ${count}` : ''}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Timeline rows */}
+      <div className="rounded-[14px] divide-y" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', borderColor: '#EDE5D8' }}>
+        {shown.map(event => {
+          const Icon = event.icon;
+          const meta = CATEGORY_META[event.category];
+          return (
+            <div key={event.id} className="flex items-start gap-3 px-4 py-3">
+              <span className="mt-1.5 h-2 w-2 rounded-full shrink-0" style={{ background: meta.dot }} />
+              <Icon className="h-4 w-4 mt-0.5 shrink-0" style={{ color: '#78716C' }} />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px]" style={{ color: '#1C1917', fontWeight: 500 }}>{event.title}</div>
+                {event.description && (
+                  <div className="text-[12px] mt-0.5 truncate" style={{ color: '#78716C' }}>{event.description}</div>
+                )}
               </div>
-            );
-          })}
+              <div className="text-[11px] tabular-nums shrink-0 pt-0.5" style={{ color: '#A8A29E' }}>
+                {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </div>
+            </div>
+          );
+        })}
+        {shown.length === 0 && (
+          <div className="py-10 text-center text-[12px]" style={{ color: '#A8A29E' }}>
+            No events match this filter.
+          </div>
+        )}
+      </div>
+
+      {filtered.length > visible && (
+        <div className="text-center mt-3 no-print">
+          <button
+            onClick={() => setVisible(v => v + PAGE)}
+            className="text-[12px] px-3 py-1.5 rounded-md"
+            style={{ background: '#F5F0E8', color: '#44403C', fontWeight: 500 }}
+          >
+            Load more ({filtered.length - visible} remaining)
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

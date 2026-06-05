@@ -21,6 +21,7 @@ import { formatDisplayDate } from '@/lib/dateUtils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
+import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
@@ -147,7 +148,7 @@ export default function BeneficiaryProfile() {
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
-  const [activeTab, setActiveTab] = useState('programmes');
+  const [activeTab, setActiveTab] = useState('overview');
   const [editOpen, setEditOpen] = useState(false);
   const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
 
@@ -407,6 +408,7 @@ export default function BeneficiaryProfile() {
     : { label: 'Good', colour: '#1D9E8A' };
 
   const tabs = [
+    { value: 'overview', label: 'Overview', icon: Clock, show: true, legacy: false },
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
     { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data && (isMinorAge || isTertiary || hasEducationData), legacy: !orgConfig.collect_education_data && hasEducationData },
     { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
@@ -915,8 +917,20 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
-                  <ActivityTimeline beneficiaryId={beneficiary.id} />
+                  <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
                 </div>
+              </TabsContent>
+
+              {/* TAB: Overview */}
+              <TabsContent value="overview" className="mt-0 p-6">
+                <BeneficiaryOverviewTab
+                  beneficiary={beneficiary as any}
+                  guardians={guardians}
+                  donors={donors}
+                  visibility={visibility}
+                  canLogVisit={true}
+                  onLogVisit={() => setActiveTab('programmes')}
+                />
               </TabsContent>
 
               {/* TAB: History & Risk */}
