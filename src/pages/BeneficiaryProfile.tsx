@@ -26,6 +26,8 @@ import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { useBranding } from '@/hooks/useBranding';
 import {
@@ -431,6 +433,7 @@ export default function BeneficiaryProfile() {
   ];
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
       <style>{`
         @media print {
@@ -534,8 +537,21 @@ export default function BeneficiaryProfile() {
                 </div>
               </div>
 
+              {/* Signature impact card — anchors the hero with one headline number */}
+              <SignatureImpactCard
+                metric={pickSignatureMetric({
+                  beneficiary,
+                  donors,
+                  enrollmentCount,
+                  earliestEnrollDate,
+                  completePct,
+                })}
+                brandHex={brandHex}
+                className="no-print w-full md:w-[240px] md:order-2 md:self-stretch"
+              />
+
               {/* Action buttons */}
-              <div className="no-print flex items-center gap-2 pb-[6px]">
+              <div className="no-print flex items-center gap-2 pb-[6px] md:order-3">
                 <button
                   onClick={handleDownloadReport}
                   disabled={generatingReport}
@@ -615,6 +631,86 @@ export default function BeneficiaryProfile() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* ─── STATUS-AT-A-GLANCE STRIP ─── */}
+        <div className="no-print mt-4 grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          {(() => {
+            const sponsored = donors.length > 0;
+            const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+            const sponsorshipStatus = !sponsored
+              ? { label: 'Unsponsored', accent: '#A8A29E', tone: 'muted' as const }
+              : totalReceived > 0
+                ? { label: 'Sponsored', accent: '#1D9E8A', tone: 'success' as const }
+                : { label: 'Partially funded', accent: '#B45309', tone: 'warning' as const };
+
+            const riskLevel = (beneficiary.vulnerability_level || '').toLowerCase();
+            const riskMap: Record<string, { label: string; accent: string }> = {
+              low: { label: 'Low risk', accent: '#1D9E8A' },
+              medium: { label: 'Medium risk', accent: '#B45309' },
+              high: { label: 'High risk', accent: '#BE185D' },
+              critical: { label: 'Critical', accent: '#BE185D' },
+            };
+            const risk = riskMap[riskLevel];
+
+            const stageValue = isMinorAge
+              ? age !== null
+                ? `${age} yrs${beneficiary.grade ? ` · ${beneficiary.grade}` : beneficiary.academic_level ? ` · ${beneficiary.academic_level}` : ''}`
+                : null
+              : beneficiary.occupation
+                ? `Adult · ${beneficiary.occupation}`
+                : 'Adult';
+
+            return (
+              <>
+                <StatusPill
+                  icon={<Heart className="h-3.5 w-3.5" />}
+                  label="Sponsorship"
+                  value={sponsorshipStatus.label}
+                  accent={sponsorshipStatus.accent}
+                  onClick={() => setActiveTab('programmes')}
+                />
+                <StatusPill
+                  icon={<Shield className="h-3.5 w-3.5" />}
+                  label="Risk"
+                  value={risk?.label ?? null}
+                  accent={risk?.accent ?? '#A8A29E'}
+                  tooltip={!risk ? 'Not recorded' : undefined}
+                  onClick={() => setActiveTab('history-risk')}
+                />
+                <StatusPill
+                  icon={<Clock className="h-3.5 w-3.5" />}
+                  label="Last visit"
+                  value={daysSinceVisit === null ? null : visitLabel}
+                  accent={visitColour}
+                  tooltip={daysSinceVisit === null ? 'Not recorded' : undefined}
+                  onClick={() => setActiveTab('history-risk')}
+                />
+                <StatusPill
+                  icon={<FolderKanban className="h-3.5 w-3.5" />}
+                  label="Active programmes"
+                  value={String(enrollmentCount)}
+                  accent={enrollmentCount > 0 ? brandHex : '#A8A29E'}
+                  onClick={() => setActiveTab('programmes')}
+                />
+                <StatusPill
+                  icon={<Check className="h-3.5 w-3.5" />}
+                  label="Profile"
+                  value={`${completePct}% complete`}
+                  accent={pctColour}
+                  tooltip={missingFields.length > 0 ? `Missing: ${missingFields.slice(0, 4).join(', ')}${missingFields.length > 4 ? '…' : ''}` : undefined}
+                  onClick={handleEdit}
+                />
+                <StatusPill
+                  icon={<User className="h-3.5 w-3.5" />}
+                  label={isMinorAge ? 'Age / Stage' : 'Adult'}
+                  value={stageValue}
+                  accent="#78716C"
+                  tooltip={!stageValue ? 'Not recorded' : undefined}
+                />
+              </>
+            );
+          })()}
         </div>
 
         {/* ─── TWO-COLUMN LAYOUT ─── */}
@@ -932,6 +1028,7 @@ export default function BeneficiaryProfile() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </TooltipProvider>
   );
 }
 
@@ -975,6 +1072,224 @@ function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boo
       >
         {empty ? '—' : String(value)}
       </span>
+    </div>
+  );
+}
+
+/* ─── Status-at-a-glance pill ─── */
+function StatusPill({
+  icon,
+  label,
+  value,
+  accent,
+  tooltip,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | null;
+  accent: string;
+  tooltip?: string;
+  onClick?: () => void;
+}) {
+  const unknown = value === null || value === undefined || value === '';
+  const displayValue = unknown ? '—' : value;
+  const clickable = !!onClick;
+  const content = (
+    <div
+      className={`bp-card relative flex items-center gap-2.5 rounded-[12px] pl-[14px] pr-3 py-2.5 text-left overflow-hidden ${clickable ? 'transition-shadow hover:shadow-elevation-2' : ''}`}
+      style={{
+        background: '#FFFEF9',
+        border: '1px solid #E7E2DA',
+        opacity: unknown ? 0.7 : 1,
+      }}
+    >
+      <span
+        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ background: unknown ? '#D6CFC2' : accent }}
+      />
+      <span
+        className="h-7 w-7 rounded-[8px] flex items-center justify-center shrink-0"
+        style={{ background: '#F5F0E8', color: unknown ? '#A8A29E' : accent }}
+      >
+        {icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[11px] truncate" style={{ color: '#78716C', fontWeight: 500 }}>{label}</div>
+        <div className="text-[14px] truncate" style={{ color: unknown ? '#A8A29E' : '#1C1917', fontWeight: 600 }}>{displayValue}</div>
+      </div>
+    </div>
+  );
+  const node = clickable ? (
+    <button type="button" onClick={onClick} className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 rounded-[12px]" style={{ outlineColor: accent }}>
+      {content}
+    </button>
+  ) : content;
+  if (tooltip) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{node as any}</TooltipTrigger>
+        <TooltipContent side="top">{tooltip}</TooltipContent>
+      </Tooltip>
+    );
+  }
+  return node;
+}
+
+/* ─── Signature impact metric chooser ─── */
+type SignatureMetric =
+  | { kind: 'months_sponsored'; months: number; sponsorName: string; totalReceived: number }
+  | { kind: 'current_grade'; grade: string; term: string | null }
+  | { kind: 'programmes_enrolled'; count: number; recent: string | null }
+  | { kind: 'vulnerability_score'; level: 'low' | 'medium' | 'high' | 'critical' | null }
+  | { kind: 'members_reached'; members: number; activities: number }
+  | { kind: 'completeness'; pct: number };
+
+function pickSignatureMetric(args: {
+  beneficiary: Beneficiary;
+  donors: Donor[];
+  enrollmentCount: number;
+  earliestEnrollDate: string | null;
+  completePct: number;
+}): SignatureMetric {
+  const { beneficiary, donors, enrollmentCount, completePct } = args;
+  const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+
+  // Sponsored student
+  if (beneficiary.beneficiary_type === 'student' && donors.length > 0) {
+    const earliestDate = donors
+      .map(d => d.donation_date)
+      .filter(Boolean)
+      .sort()[0];
+    const months = earliestDate
+      ? Math.max(1, Math.floor((Date.now() - new Date(earliestDate).getTime()) / (1000 * 60 * 60 * 24 * 30)))
+      : donors.length;
+    const topSponsor = [...donors]
+      .sort((a, b) => (b.amount_received || 0) - (a.amount_received || 0))[0];
+    return {
+      kind: 'months_sponsored',
+      months,
+      sponsorName: topSponsor?.donor_name || 'Sponsor',
+      totalReceived,
+    };
+  }
+
+  // Student without sponsor
+  if (beneficiary.beneficiary_type === 'student') {
+    const grade = beneficiary.grade || beneficiary.academic_level;
+    if (grade) {
+      return { kind: 'current_grade', grade, term: null };
+    }
+  }
+
+  // Adult individual
+  if (beneficiary.beneficiary_type === 'adult') {
+    return {
+      kind: 'programmes_enrolled',
+      count: enrollmentCount,
+      recent: null,
+    };
+  }
+
+  // Household
+  if (beneficiary.beneficiary_category === 'household') {
+    return {
+      kind: 'vulnerability_score',
+      level: (beneficiary.vulnerability_level as any) || null,
+    };
+  }
+
+  // Group
+  if (beneficiary.beneficiary_type === 'group') {
+    return {
+      kind: 'members_reached',
+      members: beneficiary.member_count || 0,
+      activities: 0,
+    };
+  }
+
+  return { kind: 'completeness', pct: completePct };
+}
+
+function SignatureImpactCard({
+  metric,
+  brandHex,
+  className = '',
+}: {
+  metric: SignatureMetric;
+  brandHex: string;
+  className?: string;
+}) {
+  let label = '';
+  let headline: string = '';
+  let supporting: string = '';
+  let footer: React.ReactNode = null;
+
+  switch (metric.kind) {
+    case 'months_sponsored':
+      label = 'Months sponsored';
+      headline = String(metric.months);
+      supporting = `by ${metric.sponsorName}`;
+      footer = metric.totalReceived > 0 ? (
+        <FundingCoverageBar totalReceived={metric.totalReceived} compact />
+      ) : null;
+      break;
+    case 'current_grade':
+      label = 'Current grade';
+      headline = metric.grade;
+      supporting = metric.term || 'Latest recorded';
+      break;
+    case 'programmes_enrolled':
+      label = 'Programmes enrolled';
+      headline = String(metric.count);
+      supporting = metric.recent || (metric.count === 0 ? 'No active enrolment' : 'Active enrolment');
+      break;
+    case 'vulnerability_score': {
+      label = 'Vulnerability';
+      const level = metric.level;
+      headline = level ? level[0].toUpperCase() + level.slice(1) : '—';
+      supporting = 'Household assessment';
+      const idx = level === 'low' ? 0 : level === 'medium' ? 1 : (level === 'high' || level === 'critical') ? 2 : -1;
+      footer = (
+        <div className="flex gap-1 mt-1">
+          {['#1D9E8A', '#B45309', '#BE185D'].map((c, i) => (
+            <div key={i} className="h-1.5 flex-1 rounded-full" style={{ background: idx === i ? c : '#EDE5D8' }} />
+          ))}
+        </div>
+      );
+      break;
+    }
+    case 'members_reached':
+      label = 'Members reached';
+      headline = String(metric.members);
+      supporting = `${metric.activities} group activities`;
+      break;
+    case 'completeness':
+      label = 'Profile completeness';
+      headline = `${metric.pct}%`;
+      supporting = 'Keep it up to date';
+      footer = (
+        <div className="h-1.5 rounded-full overflow-hidden mt-1" style={{ background: '#EDE5D8' }}>
+          <div className="h-full" style={{ width: `${metric.pct}%`, background: brandHex }} />
+        </div>
+      );
+      break;
+  }
+
+  return (
+    <div
+      className={`bp-card rounded-[14px] px-4 py-3 flex flex-col justify-between ${className}`}
+      style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}
+    >
+      <div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{label}</div>
+      <div
+        className="tabular-nums leading-none mt-1"
+        style={{ fontSize: 'clamp(28px, 3.2vw, 36px)', fontWeight: 600, color: brandHex, fontFamily: "'DM Sans', sans-serif" }}
+      >
+        {headline}
+      </div>
+      <div className="text-[13px] mt-1.5 truncate" style={{ color: '#78716C' }}>{supporting}</div>
+      {footer && <div className="mt-2">{footer}</div>}
     </div>
   );
 }
