@@ -633,6 +633,86 @@ export default function BeneficiaryProfile() {
           </div>
         </div>
 
+        {/* ─── STATUS-AT-A-GLANCE STRIP ─── */}
+        <div className="no-print mt-4 grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          {(() => {
+            const sponsored = donors.length > 0;
+            const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+            const sponsorshipStatus = !sponsored
+              ? { label: 'Unsponsored', accent: '#A8A29E', tone: 'muted' as const }
+              : totalReceived > 0
+                ? { label: 'Sponsored', accent: '#1D9E8A', tone: 'success' as const }
+                : { label: 'Partially funded', accent: '#B45309', tone: 'warning' as const };
+
+            const riskLevel = (beneficiary.vulnerability_level || '').toLowerCase();
+            const riskMap: Record<string, { label: string; accent: string }> = {
+              low: { label: 'Low risk', accent: '#1D9E8A' },
+              medium: { label: 'Medium risk', accent: '#B45309' },
+              high: { label: 'High risk', accent: '#BE185D' },
+              critical: { label: 'Critical', accent: '#BE185D' },
+            };
+            const risk = riskMap[riskLevel];
+
+            const stageValue = isMinorAge
+              ? age !== null
+                ? `${age} yrs${beneficiary.grade ? ` · ${beneficiary.grade}` : beneficiary.academic_level ? ` · ${beneficiary.academic_level}` : ''}`
+                : null
+              : beneficiary.occupation
+                ? `Adult · ${beneficiary.occupation}`
+                : 'Adult';
+
+            return (
+              <>
+                <StatusPill
+                  icon={<Heart className="h-3.5 w-3.5" />}
+                  label="Sponsorship"
+                  value={sponsorshipStatus.label}
+                  accent={sponsorshipStatus.accent}
+                  onClick={() => setActiveTab('programmes')}
+                />
+                <StatusPill
+                  icon={<Shield className="h-3.5 w-3.5" />}
+                  label="Risk"
+                  value={risk?.label ?? null}
+                  accent={risk?.accent ?? '#A8A29E'}
+                  tooltip={!risk ? 'Not recorded' : undefined}
+                  onClick={() => setActiveTab('history-risk')}
+                />
+                <StatusPill
+                  icon={<Clock className="h-3.5 w-3.5" />}
+                  label="Last visit"
+                  value={daysSinceVisit === null ? null : visitLabel}
+                  accent={visitColour}
+                  tooltip={daysSinceVisit === null ? 'Not recorded' : undefined}
+                  onClick={() => setActiveTab('history-risk')}
+                />
+                <StatusPill
+                  icon={<FolderKanban className="h-3.5 w-3.5" />}
+                  label="Active programmes"
+                  value={String(enrollmentCount)}
+                  accent={enrollmentCount > 0 ? brandHex : '#A8A29E'}
+                  onClick={() => setActiveTab('programmes')}
+                />
+                <StatusPill
+                  icon={<Check className="h-3.5 w-3.5" />}
+                  label="Profile"
+                  value={`${completePct}% complete`}
+                  accent={pctColour}
+                  tooltip={missingFields.length > 0 ? `Missing: ${missingFields.slice(0, 4).join(', ')}${missingFields.length > 4 ? '…' : ''}` : undefined}
+                  onClick={handleEdit}
+                />
+                <StatusPill
+                  icon={<User className="h-3.5 w-3.5" />}
+                  label={isMinorAge ? 'Age / Stage' : 'Adult'}
+                  value={stageValue}
+                  accent="#78716C"
+                  tooltip={!stageValue ? 'Not recorded' : undefined}
+                />
+              </>
+            );
+          })()}
+        </div>
+
         {/* ─── TWO-COLUMN LAYOUT ─── */}
         <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack mt-6 md:mt-8">
           
