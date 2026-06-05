@@ -917,8 +917,20 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
-                  <ActivityTimeline beneficiaryId={beneficiary.id} />
+                  <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
                 </div>
+              </TabsContent>
+
+              {/* TAB: Overview */}
+              <TabsContent value="overview" className="mt-0 p-6">
+                <BeneficiaryOverviewTab
+                  beneficiary={beneficiary as any}
+                  guardians={guardians}
+                  donors={donors}
+                  visibility={visibility}
+                  canLogVisit={true}
+                  onLogVisit={() => setActiveTab('programmes')}
+                />
               </TabsContent>
 
               {/* TAB: History & Risk */}
