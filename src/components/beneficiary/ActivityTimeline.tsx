@@ -80,9 +80,10 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       }
 
       // Sponsor matched (earliest per sponsor)
-      if (donors && donors.length > 0) {
+      const propDonors = donors;
+      if (propDonors && propDonors.length > 0) {
         const byName = new Map<string, { date: string | null; donor_name: string }>();
-        for (const d of donors) {
+        for (const d of propDonors) {
           const cur = byName.get(d.donor_name);
           if (!cur || (d.donation_date && (!cur.date || d.donation_date < cur.date))) {
             byName.set(d.donor_name, { date: d.donation_date, donor_name: d.donor_name });
@@ -129,13 +130,13 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       });
 
       // Funding receipts
-      const { data: donors } = await supabase
+      const { data: fundingRows } = await supabase
         .from('beneficiary_donors')
         .select('id, donor_name, amount_received, donation_date, program:programs(name)')
         .eq('beneficiary_id', beneficiaryId)
         .order('donation_date', { ascending: false });
 
-      donors?.forEach((d: any) => {
+      fundingRows?.forEach((d: any) => {
         allEvents.push({
           id: `fund-${d.id}`,
           date: d.donation_date,
@@ -167,7 +168,7 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       // Academic history + performance
       const { data: academicHistory } = await supabase
         .from('academic_history')
-        .select('*')
+        .select('id, start_date, end_date, created_at, school_name, grade, academic_level')
         .eq('beneficiary_id', beneficiaryId);
       academicHistory?.forEach((a: any) => {
         const date = a.end_date || a.start_date || a.created_at;
@@ -184,7 +185,7 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
 
       const { data: academicPerf } = await supabase
         .from('academic_performance')
-        .select('*')
+        .select('id, assessment_date, term_end, created_at, term, grade, average_grade, average_score')
         .eq('beneficiary_id', beneficiaryId);
       academicPerf?.forEach((p: any) => {
         const date = p.assessment_date || p.term_end || p.created_at;
@@ -203,7 +204,7 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       // Visits
       const { data: visits } = await supabase
         .from('beneficiary_visitations')
-        .select('*')
+        .select('id, visit_date, created_at, visit_type, notes, location, outcome')
         .eq('beneficiary_id', beneficiaryId);
       visits?.forEach((v: any) => {
         const date = v.visit_date || v.created_at;
@@ -221,19 +222,19 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       // Risk scores
       const { data: risks } = await supabase
         .from('beneficiary_risk_scores')
-        .select('*')
+        .select('id, assessment_date, created_at, overall_risk_level, notes')
         .eq('beneficiary_id', beneficiaryId);
       risks?.forEach((r: any) => {
         const date = r.assessment_date || r.created_at;
         if (!date) return;
-        const level = r.overall_risk_level || r.risk_level;
+        const level = r.overall_risk_level;
         if (!level || (level !== 'medium' && level !== 'high' && level !== 'critical')) return;
         allEvents.push({
           id: `risk-${r.id}`,
           date,
           category: 'risk',
           title: `Risk flag raised: ${String(level).toUpperCase()}`,
-          description: r.notes || r.reason || undefined,
+          description: r.notes || undefined,
           icon: ShieldAlert,
         });
       });
