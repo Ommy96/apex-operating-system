@@ -166,7 +166,7 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       });
 
       // Academic history + performance
-      const { data: academicHistory } = await supabase
+      const { data: academicHistory } = await (supabase as any)
         .from('academic_history')
         .select('id, start_date, end_date, created_at, school_name, grade, academic_level')
         .eq('beneficiary_id', beneficiaryId);
@@ -183,7 +183,7 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
         });
       });
 
-      const { data: academicPerf } = await supabase
+      const { data: academicPerf } = await (supabase as any)
         .from('academic_performance')
         .select('id, assessment_date, term_end, created_at, term, grade, average_grade, average_score')
         .eq('beneficiary_id', beneficiaryId);
