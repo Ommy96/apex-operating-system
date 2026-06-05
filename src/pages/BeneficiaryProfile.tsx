@@ -537,8 +537,21 @@ export default function BeneficiaryProfile() {
                 </div>
               </div>
 
+              {/* Signature impact card — anchors the hero with one headline number */}
+              <SignatureImpactCard
+                metric={pickSignatureMetric({
+                  beneficiary,
+                  donors,
+                  enrollmentCount,
+                  earliestEnrollDate,
+                  completePct,
+                })}
+                brandHex={brandHex}
+                className="no-print w-full md:w-[240px] md:order-2 md:self-stretch"
+              />
+
               {/* Action buttons */}
-              <div className="no-print flex items-center gap-2 pb-[6px]">
+              <div className="no-print flex items-center gap-2 pb-[6px] md:order-3">
                 <button
                   onClick={handleDownloadReport}
                   disabled={generatingReport}
