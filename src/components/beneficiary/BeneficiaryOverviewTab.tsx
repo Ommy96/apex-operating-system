@@ -246,3 +246,17 @@ function Row({ label, value }: { label: string; value: any }) {
     </div>
   );
 }
+
+function EditableRow(props: {
+  label: string;
+  value: any;
+  canEdit: boolean;
+  type: InlineFieldType;
+  options?: Array<{ label: string; value: string } | string>;
+  validate?: (v: any) => string | null;
+  onSave: (v: any) => Promise<any>;
+  display?: (v: any) => React.ReactNode;
+  mono?: boolean;
+}) {
+  return <InlineEditableField {...props} />;
+}
