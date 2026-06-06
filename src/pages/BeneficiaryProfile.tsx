@@ -31,6 +31,9 @@ import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { useBranding } from '@/hooks/useBranding';
+import { usePermissions } from '@/hooks/usePermissions';
+import { InlineEditableField } from '@/components/beneficiary/InlineEditableField';
+import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,12 +136,14 @@ interface Donor {
 export default function BeneficiaryProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { term, termPlural } = useBeneficiaryTerminology();
   const { config: orgConfig } = useOrgBeneficiaryConfig();
   const { primaryColor } = useBranding();
   const brandHex = primaryColor || '#0F7B6C';
+  const { can } = usePermissions();
+  const canEditInline = !!can.editBeneficiaries;
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -301,6 +306,24 @@ export default function BeneficiaryProfile() {
   const handleEditSuccess = async () => {
     await fetchBeneficiaryData();
     setEditOpen(false);
+  };
+
+  const applyLocal = (partial: Record<string, any>) => {
+    setBeneficiary((prev) => prev ? ({ ...prev, ...partial }) as Beneficiary : prev);
+  };
+
+  const saveNameInline = async (newValue: any) => {
+    if (!id || !currentOrganization?.organization_id || !beneficiary) return;
+    await saveBeneficiaryField({
+      beneficiaryId: id,
+      organizationId: currentOrganization.organization_id,
+      field: 'display_name',
+      label: 'Name',
+      newValue,
+      oldValue: beneficiary.display_name,
+      userId: user?.id ?? null,
+      applyLocal: (v) => applyLocal({ display_name: v }),
+    });
   };
 
   const handleDownloadReport = async () => {
@@ -519,7 +542,16 @@ export default function BeneficiaryProfile() {
 
                 {/* Name block */}
                 <div className="pb-[6px] flex-1 min-w-0">
-                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>{beneficiary.display_name}</h1>
+                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>
+                    <InlineEditableField
+                      bare
+                      value={beneficiary.display_name}
+                      type="text"
+                      canEdit={canEditInline}
+                      validate={(v) => !v || String(v).trim().length < 2 ? 'Name must be at least 2 characters' : null}
+                      onSave={saveNameInline}
+                    />
+                  </h1>
                   <div className="flex items-center gap-[8px] flex-wrap mt-2">
                     <span className="bp-mono text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>
                       {beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`}
@@ -930,6 +962,10 @@ export default function BeneficiaryProfile() {
                   visibility={visibility}
                   canLogVisit={true}
                   onLogVisit={() => setActiveTab('programmes')}
+                  canEdit={canEditInline}
+                  organizationId={currentOrganization?.organization_id ?? null}
+                  userId={user?.id ?? null}
+                  onLocalUpdate={applyLocal}
                 />
               </TabsContent>
 
