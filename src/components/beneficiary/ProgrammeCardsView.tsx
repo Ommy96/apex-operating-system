@@ -115,14 +115,12 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
     queryFn: async () => {
       const { data } = await supabase
         .from('beneficiary_visitations')
-        .select('visit_date, program_id')
+        .select('visit_date')
         .eq('beneficiary_id', beneficiaryId)
         .order('visit_date', { ascending: false })
-        .limit(50);
+        .limit(1);
       const map: Record<string, string> = {};
       (data || []).forEach((v: any) => {
-        const k = v.program_id || '_any';
-        if (!map[k]) map[k] = v.visit_date;
         if (!map._latest) map._latest = v.visit_date;
       });
       return map;
