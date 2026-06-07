@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { BeneficiaryEnrollmentForm } from '@/components/beneficiary/BeneficiaryEnrollmentForm';
+import { ProgrammeCardsView } from '@/components/beneficiary/ProgrammeCardsView';
 import { BeneficiaryForm } from '@/components/beneficiary/BeneficiaryForm';
 import { BeneficiaryAcademicsTab } from '@/components/beneficiary/BeneficiaryAcademicsTab';
 import { BeneficiaryUploadsTab } from '@/components/beneficiary/BeneficiaryUploadsTab';
@@ -946,7 +947,27 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: Programmes */}
               <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
-                <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} />
+                <ProgrammeCardsView
+                  beneficiaryId={beneficiary.id}
+                  organizationId={currentOrganization?.organization_id ?? null}
+                  canEdit={canEditInline}
+                  onEnrol={() => {
+                    const el = document.getElementById('beneficiary-manage-enrolments');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  onAddDonor={() => {
+                    const el = document.getElementById('beneficiary-manage-enrolments');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                />
+                <details id="beneficiary-manage-enrolments" className="rounded-lg border border-border bg-card">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground select-none">
+                    Manage enrolments & donations
+                  </summary>
+                  <div className="p-4 border-t border-border">
+                    <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} showTitle={false} />
+                  </div>
+                </details>
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
