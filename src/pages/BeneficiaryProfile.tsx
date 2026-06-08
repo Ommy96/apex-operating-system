@@ -1193,7 +1193,7 @@ function EmptySection({
   message,
   cta,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   message: string;
   cta?: { label: string; onClick: () => void };
 }) {
