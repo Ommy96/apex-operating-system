@@ -545,7 +545,7 @@ export default function BeneficiaryProfile() {
         <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           {/* Decorative band — soft brand wash */}
           <div
-            className="h-[88px] relative"
+            className="bp-hero-band h-[88px] relative"
             style={{
               background: primaryColor
                 ? `color-mix(in srgb, ${brandHex} 10%, #FAFAF9)`
@@ -554,7 +554,7 @@ export default function BeneficiaryProfile() {
             }}
           >
             <div
-              className="absolute -inset-10"
+              className="bp-hero-mesh absolute -inset-10"
               style={{
                 background: `radial-gradient(circle at 22% 35%, color-mix(in srgb, ${brandHex} 35%, transparent), transparent 55%), radial-gradient(circle at 78% 60%, color-mix(in srgb, ${brandHex} 28%, transparent), transparent 60%)`,
                 filter: 'blur(80px)',
@@ -573,7 +573,7 @@ export default function BeneficiaryProfile() {
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
+                      <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
