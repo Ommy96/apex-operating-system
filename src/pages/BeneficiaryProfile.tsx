@@ -1074,20 +1074,30 @@ export default function BeneficiaryProfile() {
                     <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Health information</h3>
                     <span className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>Private — not shared publicly</span>
                   </div>
-                  <div>
-                    <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
-                    <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
-                    {visibility.showHivStatus && (
-                      <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
-                        <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
-                        <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                  {!hasHealthData && !((beneficiary as any).allergies || []).length ? (
+                    <EmptySection
+                      icon={Heart}
+                      message="No health information recorded yet."
+                      cta={canEditInline ? { label: 'Add health details', onClick: handleEdit } : undefined}
+                    />
+                  ) : (
+                    <>
+                      <div>
+                        <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
+                        <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
                       </div>
-                    )}
-                  </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
+                        <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
+                        {visibility.showHivStatus && (
+                          <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
+                            <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
+                            <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </TabsContent>
               )}
 
@@ -1095,12 +1105,20 @@ export default function BeneficiaryProfile() {
                 <TabsContent value="economic" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'economic')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Economic profile</h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
-                  </div>
+                  {!hasEconomicData ? (
+                    <EmptySection
+                      icon={Building2}
+                      message="No economic profile yet — add occupation, income, or household size to inform support."
+                      cta={canEditInline ? { label: 'Add economic details', onClick: handleEdit } : undefined}
+                    />
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
+                    </div>
+                  )}
                 </TabsContent>
               )}
 
