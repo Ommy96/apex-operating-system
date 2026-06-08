@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldAlert, DollarSign, GraduationCap, Users, HeartPulse, AlertTriangle } from "lucide-react";
+import { ShieldAlert, DollarSign, GraduationCap, Users, HeartPulse, AlertTriangle, ShieldCheck } from "lucide-react";
 
 const categoryConfig = {
   funding: { icon: DollarSign, label: "Funding", color: "text-warning" },
@@ -37,6 +37,7 @@ export function BeneficiaryRiskPanel({ beneficiaryId }: Props) {
   if (!risk) return null;
 
   const cfg = levelConfig[risk.level];
+  const hasFactors = risk.factors.length > 0;
 
   return (
     <div className="space-y-4">
@@ -68,7 +69,7 @@ export function BeneficiaryRiskPanel({ beneficiaryId }: Props) {
       </Card>
 
       {/* Risk Factors */}
-      {risk.factors.length > 0 && (
+      {hasFactors ? (
         <Card className="border-border/50">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -102,6 +103,15 @@ export function BeneficiaryRiskPanel({ beneficiaryId }: Props) {
                   </div>
                 );
               })}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-border/50 border-dashed">
+          <CardContent className="py-6 flex flex-col items-center text-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              No risk flags raised. This beneficiary is currently considered low risk.
+            </p>
           </CardContent>
         </Card>
       )}
