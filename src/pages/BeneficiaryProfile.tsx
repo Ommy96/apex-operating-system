@@ -460,7 +460,7 @@ export default function BeneficiaryProfile() {
 
   return (
     <TooltipProvider delayDuration={150}>
-    <div className="min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
+    <div className="bp-page min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -475,6 +475,64 @@ export default function BeneficiaryProfile() {
           50% { box-shadow: 0 0 0 6px rgba(190,24,93,0); }
         }
         .bp-status-pulse { animation: bp-status-pulse 1.8s ease-in-out infinite; }
+
+        /* ─── Dark mode polish (overrides hardcoded sand/stone palette) ─── */
+        .dark .bp-page { background: hsl(var(--background)) !important; color: hsl(var(--foreground)) !important; }
+        .dark .bp-card { background: hsl(var(--card)) !important; border-color: hsl(var(--border)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.4) !important; }
+        .dark .bp-page [style*="background: #FFFEF9"],
+        .dark .bp-page [style*="background:#FFFEF9"],
+        .dark .bp-page [style*="background: #FFFFFF"],
+        .dark .bp-page [style*="background:#FFFFFF"] { background: hsl(var(--card)) !important; }
+        .dark .bp-page [style*="background: #F5F0E8"],
+        .dark .bp-page [style*="background:#F5F0E8"],
+        .dark .bp-page [style*="background: #EDE5D8"],
+        .dark .bp-page [style*="background:#EDE5D8"],
+        .dark .bp-page [style*="background: #F5F5F4"] { background: hsl(var(--muted)) !important; }
+        .dark .bp-page [style*="border: 1px solid #E7E2DA"],
+        .dark .bp-page [style*="border:1px solid #E7E2DA"],
+        .dark .bp-page [style*="border-top: 1px solid #E7E2DA"],
+        .dark .bp-page [style*="borderBottom: 1px solid #E7E2DA"] { border-color: hsl(var(--border)) !important; }
+        .dark .bp-page [style*="border-bottom: 1px solid #F5F0E8"],
+        .dark .bp-page [style*="border-top: 1px solid #EDE5D8"],
+        .dark .bp-page [style*="border-right: 1px solid #E7E2DA"] { border-color: hsl(var(--border)) !important; }
+        /* Text colors: warm off-white for primary, muted neutral for secondary */
+        .dark .bp-page [style*="color: #1C1917"],
+        .dark .bp-page [style*="color:#1C1917"],
+        .dark .bp-page [style*="color: #44403C"],
+        .dark .bp-page [style*="color:#44403C"] { color: hsl(var(--foreground)) !important; }
+        .dark .bp-page [style*="color: #78716C"],
+        .dark .bp-page [style*="color:#78716C"],
+        .dark .bp-page [style*="color: #57534E"],
+        .dark .bp-page [style*="color:#57534E"],
+        .dark .bp-page [style*="color: #A8A29E"],
+        .dark .bp-page [style*="color:#A8A29E"],
+        .dark .bp-page [style*="color: #D6C9B5"] { color: hsl(var(--muted-foreground)) !important; }
+        /* Brand teal text */
+        .dark .bp-page [style*="color: #0F7B6C"],
+        .dark .bp-page [style*="color:#0F7B6C"],
+        .dark .bp-page [style*="color: #0A5449"] { color: hsl(var(--primary-light)) !important; }
+        /* Hero brand wash — drop the mesh opacity in dark mode */
+        .dark .bp-page .bp-hero-mesh { opacity: 0.3 !important; }
+        .dark .bp-page .bp-hero-band { background: hsl(var(--secondary)) !important; }
+        /* Avatar gradient: desaturate */
+        .dark .bp-page .bp-avatar-gradient { background: linear-gradient(145deg, #5C3B1A, #1D6D60) !important; }
+        /* Status pills/chips: soften saturated bgs */
+        .dark .bp-page [style*="background: #FDF2F8"],
+        .dark .bp-page [style*="background:#FDF2F8"] { background: rgba(190,24,93,0.18) !important; }
+        .dark .bp-page [style*="background: #FEF3CD"],
+        .dark .bp-page [style*="background:#FEF3CD"],
+        .dark .bp-page [style*="background: #FEF3C7"] { background: rgba(180,123,9,0.18) !important; }
+        .dark .bp-page [style*="background: #E6F5F3"],
+        .dark .bp-page [style*="background:#E6F5F3"] { background: rgba(29,158,138,0.18) !important; }
+        .dark .bp-page [style*="background: #EFF6FF"] { background: rgba(29,78,216,0.18) !important; }
+        .dark .bp-page [style*="background: #ECFDF5"] { background: rgba(77,124,90,0.18) !important; }
+        .dark .bp-page [style*="color: #831843"] { color: #F472B6 !important; }
+        .dark .bp-page [style*="color: #7A3A0A"],
+        .dark .bp-page [style*="color: #92400E"],
+        .dark .bp-page [style*="color: #B45309"] { color: #FBBF24 !important; }
+        .dark .bp-page [style*="color: #0A5449"] { color: #5EEAD4 !important; }
+        .dark .bp-page [style*="color: #166534"] { color: #86EFAC !important; }
+        .dark .bp-page [style*="color: #991B1B"] { color: #FCA5A5 !important; }
       `}</style>
       <div className="max-w-[1200px] mx-auto px-4 py-4">
         {/* Back nav */}
