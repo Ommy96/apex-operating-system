@@ -460,7 +460,7 @@ export default function BeneficiaryProfile() {
 
   return (
     <TooltipProvider delayDuration={150}>
-    <div className="min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
+    <div className="bp-page min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -475,6 +475,64 @@ export default function BeneficiaryProfile() {
           50% { box-shadow: 0 0 0 6px rgba(190,24,93,0); }
         }
         .bp-status-pulse { animation: bp-status-pulse 1.8s ease-in-out infinite; }
+
+        /* ─── Dark mode polish (overrides hardcoded sand/stone palette) ─── */
+        .dark .bp-page { background: hsl(var(--background)) !important; color: hsl(var(--foreground)) !important; }
+        .dark .bp-card { background: hsl(var(--card)) !important; border-color: hsl(var(--border)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.4) !important; }
+        .dark .bp-page [style*="background: #FFFEF9"],
+        .dark .bp-page [style*="background:#FFFEF9"],
+        .dark .bp-page [style*="background: #FFFFFF"],
+        .dark .bp-page [style*="background:#FFFFFF"] { background: hsl(var(--card)) !important; }
+        .dark .bp-page [style*="background: #F5F0E8"],
+        .dark .bp-page [style*="background:#F5F0E8"],
+        .dark .bp-page [style*="background: #EDE5D8"],
+        .dark .bp-page [style*="background:#EDE5D8"],
+        .dark .bp-page [style*="background: #F5F5F4"] { background: hsl(var(--muted)) !important; }
+        .dark .bp-page [style*="border: 1px solid #E7E2DA"],
+        .dark .bp-page [style*="border:1px solid #E7E2DA"],
+        .dark .bp-page [style*="border-top: 1px solid #E7E2DA"],
+        .dark .bp-page [style*="borderBottom: 1px solid #E7E2DA"] { border-color: hsl(var(--border)) !important; }
+        .dark .bp-page [style*="border-bottom: 1px solid #F5F0E8"],
+        .dark .bp-page [style*="border-top: 1px solid #EDE5D8"],
+        .dark .bp-page [style*="border-right: 1px solid #E7E2DA"] { border-color: hsl(var(--border)) !important; }
+        /* Text colors: warm off-white for primary, muted neutral for secondary */
+        .dark .bp-page [style*="color: #1C1917"],
+        .dark .bp-page [style*="color:#1C1917"],
+        .dark .bp-page [style*="color: #44403C"],
+        .dark .bp-page [style*="color:#44403C"] { color: hsl(var(--foreground)) !important; }
+        .dark .bp-page [style*="color: #78716C"],
+        .dark .bp-page [style*="color:#78716C"],
+        .dark .bp-page [style*="color: #57534E"],
+        .dark .bp-page [style*="color:#57534E"],
+        .dark .bp-page [style*="color: #A8A29E"],
+        .dark .bp-page [style*="color:#A8A29E"],
+        .dark .bp-page [style*="color: #D6C9B5"] { color: hsl(var(--muted-foreground)) !important; }
+        /* Brand teal text */
+        .dark .bp-page [style*="color: #0F7B6C"],
+        .dark .bp-page [style*="color:#0F7B6C"],
+        .dark .bp-page [style*="color: #0A5449"] { color: hsl(var(--primary-light)) !important; }
+        /* Hero brand wash — drop the mesh opacity in dark mode */
+        .dark .bp-page .bp-hero-mesh { opacity: 0.3 !important; }
+        .dark .bp-page .bp-hero-band { background: hsl(var(--secondary)) !important; }
+        /* Avatar gradient: desaturate */
+        .dark .bp-page .bp-avatar-gradient { background: linear-gradient(145deg, #5C3B1A, #1D6D60) !important; }
+        /* Status pills/chips: soften saturated bgs */
+        .dark .bp-page [style*="background: #FDF2F8"],
+        .dark .bp-page [style*="background:#FDF2F8"] { background: rgba(190,24,93,0.18) !important; }
+        .dark .bp-page [style*="background: #FEF3CD"],
+        .dark .bp-page [style*="background:#FEF3CD"],
+        .dark .bp-page [style*="background: #FEF3C7"] { background: rgba(180,123,9,0.18) !important; }
+        .dark .bp-page [style*="background: #E6F5F3"],
+        .dark .bp-page [style*="background:#E6F5F3"] { background: rgba(29,158,138,0.18) !important; }
+        .dark .bp-page [style*="background: #EFF6FF"] { background: rgba(29,78,216,0.18) !important; }
+        .dark .bp-page [style*="background: #ECFDF5"] { background: rgba(77,124,90,0.18) !important; }
+        .dark .bp-page [style*="color: #831843"] { color: #F472B6 !important; }
+        .dark .bp-page [style*="color: #7A3A0A"],
+        .dark .bp-page [style*="color: #92400E"],
+        .dark .bp-page [style*="color: #B45309"] { color: #FBBF24 !important; }
+        .dark .bp-page [style*="color: #0A5449"] { color: #5EEAD4 !important; }
+        .dark .bp-page [style*="color: #166534"] { color: #86EFAC !important; }
+        .dark .bp-page [style*="color: #991B1B"] { color: #FCA5A5 !important; }
       `}</style>
       <div className="max-w-[1200px] mx-auto px-4 py-4">
         {/* Back nav */}
@@ -487,7 +545,7 @@ export default function BeneficiaryProfile() {
         <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           {/* Decorative band — soft brand wash */}
           <div
-            className="h-[88px] relative"
+            className="bp-hero-band h-[88px] relative"
             style={{
               background: primaryColor
                 ? `color-mix(in srgb, ${brandHex} 10%, #FAFAF9)`
@@ -496,7 +554,7 @@ export default function BeneficiaryProfile() {
             }}
           >
             <div
-              className="absolute -inset-10"
+              className="bp-hero-mesh absolute -inset-10"
               style={{
                 background: `radial-gradient(circle at 22% 35%, color-mix(in srgb, ${brandHex} 35%, transparent), transparent 55%), radial-gradient(circle at 78% 60%, color-mix(in srgb, ${brandHex} 28%, transparent), transparent 60%)`,
                 filter: 'blur(80px)',
@@ -515,7 +573,7 @@ export default function BeneficiaryProfile() {
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
+                      <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
@@ -1016,20 +1074,30 @@ export default function BeneficiaryProfile() {
                     <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Health information</h3>
                     <span className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>Private — not shared publicly</span>
                   </div>
-                  <div>
-                    <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
-                    <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
-                    {visibility.showHivStatus && (
-                      <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
-                        <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
-                        <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                  {!hasHealthData && !((beneficiary as any).allergies || []).length ? (
+                    <EmptySection
+                      icon={Heart}
+                      message="No health information recorded yet."
+                      cta={canEditInline ? { label: 'Add health details', onClick: handleEdit } : undefined}
+                    />
+                  ) : (
+                    <>
+                      <div>
+                        <div className="text-[12px] mb-1.5" style={{ color: '#78716C', fontWeight: 500 }}>Known allergies</div>
+                        <div className="flex flex-wrap gap-1.5">{((beneficiary as any).allergies || []).length ? ((beneficiary as any).allergies || []).map((a: string) => <span key={a} className="text-[11px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{a}</span>) : <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>None recorded</span>}</div>
                       </div>
-                    )}
-                  </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Medical notes</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.other_medical_conditions || '—'}</div></div>
+                        <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Special needs</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.has_special_needs ? beneficiary.special_needs_details || 'Yes' : 'None'}</div></div>
+                        {visibility.showHivStatus && (
+                          <div className="sm:col-span-2 rounded-[8px] p-3" style={{ borderLeft: '3px solid #BE185D', background: '#FDF2F8' }}>
+                            <div className="text-[12px]" style={{ color: '#831843', fontWeight: 500, marginBottom: 5 }}>HIV status — restricted access</div>
+                            <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.hiv_status || 'Not recorded'}</div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </TabsContent>
               )}
 
@@ -1037,12 +1105,20 @@ export default function BeneficiaryProfile() {
                 <TabsContent value="economic" className="mt-0 p-6 space-y-4">
                   {tabs.find(t => t.value === 'economic')?.legacy && <div className="rounded-lg p-3 text-xs italic" style={{ background: '#FEF3CD', color: '#7A3A0A' }}>(historical data — not active for this organisation)</div>}
                   <h3 className="text-[15px]" style={{ fontWeight: 600 }}>Economic profile</h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
-                    <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
-                  </div>
+                  {!hasEconomicData ? (
+                    <EmptySection
+                      icon={Building2}
+                      message="No economic profile yet — add occupation, income, or household size to inform support."
+                      cta={canEditInline ? { label: 'Add economic details', onClick: handleEdit } : undefined}
+                    />
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Occupation</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.occupation || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income level</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.income_level || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Household size</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.household_size || '—'}</div></div>
+                      <div><div className="text-[12px]" style={{ color: '#78716C', fontWeight: 500, marginBottom: 5 }}>Income source</div><div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.source_of_income || '—'}</div></div>
+                    </div>
+                  )}
                 </TabsContent>
               )}
 
@@ -1109,6 +1185,35 @@ function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string
       {dot && <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ background: dot }} />}
       {children}
     </span>
+  );
+}
+
+function EmptySection({
+  icon: Icon,
+  message,
+  cta,
+}: {
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  message: string;
+  cta?: { label: string; onClick: () => void };
+}) {
+  return (
+    <div
+      className="bp-card rounded-[12px] py-8 px-4 flex flex-col items-center text-center gap-2"
+      style={{ background: '#FFFEF9', border: '1px dashed #E7E2DA' }}
+    >
+      <Icon className="h-5 w-5" style={{ color: '#A8A29E' }} />
+      <p className="text-[12px]" style={{ color: '#78716C' }}>{message}</p>
+      {cta && (
+        <button
+          onClick={cta.onClick}
+          className="text-[12px] mt-1"
+          style={{ color: '#0F7B6C', fontWeight: 500 }}
+        >
+          {cta.label} →
+        </button>
+      )}
+    </div>
   );
 }
 
