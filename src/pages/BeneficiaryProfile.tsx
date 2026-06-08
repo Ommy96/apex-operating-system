@@ -1188,6 +1188,35 @@ function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string
   );
 }
 
+function EmptySection({
+  icon: Icon,
+  message,
+  cta,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  message: string;
+  cta?: { label: string; onClick: () => void };
+}) {
+  return (
+    <div
+      className="bp-card rounded-[12px] py-8 px-4 flex flex-col items-center text-center gap-2"
+      style={{ background: '#FFFEF9', border: '1px dashed #E7E2DA' }}
+    >
+      <Icon className="h-5 w-5" style={{ color: '#A8A29E' }} />
+      <p className="text-[12px]" style={{ color: '#78716C' }}>{message}</p>
+      {cta && (
+        <button
+          onClick={cta.onClick}
+          className="text-[12px] mt-1"
+          style={{ color: '#0F7B6C', fontWeight: 500 }}
+        >
+          {cta.label} →
+        </button>
+      )}
+    </div>
+  );
+}
+
 function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
   return (
     <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
