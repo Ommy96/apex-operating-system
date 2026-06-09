@@ -445,22 +445,6 @@ export default function BeneficiaryProfile() {
     { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
-  // Personal details rows (age-aware)
-  const personalRows: [string, any][] = [
-    ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} · ${age} yrs` : null],
-    ['Gender', beneficiary.gender],
-    ...(orgConfig.collect_religion ? [['Religion', beneficiary.religion]] as [string, any][] : []),
-    ...(!isMinorAge ? [
-      ['Marital status', beneficiary.marital_status],
-      ['Phone', (beneficiary as any).phone],
-      ['National ID', (beneficiary as any).national_id],
-    ] as [string, any][] : [
-      ...((beneficiary as any).phone ? [['Phone', (beneficiary as any).phone]] as [string, any][] : []),
-    ]),
-    ...(!isMinorAge && !isTertiary && beneficiary.academic_level ? [['Highest education', beneficiary.academic_level]] as [string, any][] : []),
-    ['Family status', (beneficiary as any).family_status],
-  ];
-
   return (
     <TooltipProvider delayDuration={150}>
     <div className="bp-page min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
