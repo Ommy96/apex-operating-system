@@ -1,7 +1,7 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, ChevronRight, Home, User, Pencil, UsersRound, Check, X, AlertTriangle, Camera, Shield, Zap } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -25,7 +25,6 @@ import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
-import { OutOfSystemContacts } from '@/components/beneficiary/OutOfSystemContacts';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
 import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
@@ -446,22 +445,6 @@ export default function BeneficiaryProfile() {
     { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
-  // Personal details rows (age-aware)
-  const personalRows: [string, any][] = [
-    ['Date of birth', beneficiary.date_of_birth ? `${formatDisplayDate(beneficiary.date_of_birth)} · ${age} yrs` : null],
-    ['Gender', beneficiary.gender],
-    ...(orgConfig.collect_religion ? [['Religion', beneficiary.religion]] as [string, any][] : []),
-    ...(!isMinorAge ? [
-      ['Marital status', beneficiary.marital_status],
-      ['Phone', (beneficiary as any).phone],
-      ['National ID', (beneficiary as any).national_id],
-    ] as [string, any][] : [
-      ...((beneficiary as any).phone ? [['Phone', (beneficiary as any).phone]] as [string, any][] : []),
-    ]),
-    ...(!isMinorAge && !isTertiary && beneficiary.academic_level ? [['Highest education', beneficiary.academic_level]] as [string, any][] : []),
-    ['Family status', (beneficiary as any).family_status],
-  ];
-
   return (
     <TooltipProvider delayDuration={150}>
     <div className="bp-page min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
@@ -605,7 +588,11 @@ export default function BeneficiaryProfile() {
 
                 {/* Name block */}
                 <div className="pb-[6px] flex-1 min-w-0">
-                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>
+                  <h1
+                    className="bp-name text-[26px] sm:text-[34px] leading-[1.1] truncate"
+                    title={beneficiary.display_name}
+                    style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}
+                  >
                     <InlineEditableField
                       bare
                       value={beneficiary.display_name}
@@ -689,7 +676,7 @@ export default function BeneficiaryProfile() {
                   bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
                   fg={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? '#831843' : beneficiary.vulnerability_level === 'medium' ? '#7A3A0A' : '#0A5449'}
                 >
-                  <span className="capitalize">{beneficiary.vulnerability_level}</span> vulnerability
+                  {`${String(beneficiary.vulnerability_level).charAt(0).toUpperCase()}${String(beneficiary.vulnerability_level).slice(1).toLowerCase()} vulnerability`}
                 </Pill>
               )}
               {(beneficiary as any).family_status && /orphan|child-headed/i.test(String((beneficiary as any).family_status)) && (
@@ -711,21 +698,6 @@ export default function BeneficiaryProfile() {
                   Missing: {missingFields.slice(0, 2).join(', ')}{missingFields.length > 2 ? '…' : ''}
                 </span>
               )}
-            </div>
-
-            {/* Quick stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 mt-4" style={{ borderTop: '1px solid #E7E2DA' }}>
-              {[
-                { label: 'Programmes', value: String(enrollmentCount), colour: '#1C1917' },
-                { label: 'Activities', value: String(attendanceCount), colour: '#1C1917' },
-                { label: 'Last visit', value: visitLabel, colour: visitColour },
-                { label: 'Overall', value: computedStatus.label, colour: computedStatus.colour },
-              ].map((s, i, arr) => (
-                <div key={s.label} className="text-center py-[14px]" style={{ borderRight: i < arr.length - 1 ? '1px solid #E7E2DA' : 'none' }}>
-                  <div className="tabular-nums" style={{ fontSize: '22px', fontWeight: 600, color: s.colour, fontFamily: s.label === 'Overall' ? "'DM Sans'" : "'DM Sans'" }}>{s.value}</div>
-                  <div className="uppercase mt-[3px]" style={{ fontSize: '10px', letterSpacing: '0.4px', color: '#A8A29E' }}>{s.label}</div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -810,184 +782,9 @@ export default function BeneficiaryProfile() {
           })()}
         </div>
 
-        {/* ─── TWO-COLUMN LAYOUT ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] gap-4 items-start print-stack mt-6 md:mt-8">
-          
-          {/* ─── SIDEBAR ─── */}
-          <aside className="flex flex-col gap-3 order-2 md:order-1">
-            {/* Personal Details */}
-            <SidebarCard
-              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#F5F0E8' }}><User className="h-3 w-3" style={{ color: '#44403C' }} /></div>}
-              title="Personal details"
-              onEdit={handleEdit}
-            >
-              {personalRows.map(([label, value]) => (
-                <InfoRow key={label} label={label} value={value} mono={label === 'National ID' || label === 'Phone'} />
-              ))}
-              <div className="flex justify-between items-baseline py-[6px]" style={{ borderTop: '1px solid #EDE5D8', marginTop: '4px' }}>
-                <span className="text-[11px]" style={{ color: '#78716C' }}>Consent</span>
-                {beneficiary.consent_given ? (
-                  <span className="text-[12px]" style={{ color: '#0A5449', fontWeight: 500 }}>✓ {beneficiary.consent_date ? formatDisplayDate(beneficiary.consent_date) : 'Recorded'}</span>
-                ) : (
-                  <button onClick={handleEdit} className="text-[12px]" style={{ color: '#B45309' }}>⚠ Record consent →</button>
-                )}
-              </div>
-              {beneficiary.registration_source && (
-                <div className="text-[10px] mt-2" style={{ color: '#A8A29E' }}>Registered via {beneficiary.registration_source}</div>
-              )}
-            </SidebarCard>
-
-            {/* Location */}
-            <SidebarCard
-              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#ECFDF5' }}><MapPin className="h-3 w-3" style={{ color: '#4D7C5A' }} /></div>}
-              title="Location"
-              onEdit={handleEdit}
-            >
-              {!beneficiary.county && !beneficiary.sub_county && !beneficiary.estate_village ? (
-                <div className="text-center py-3">
-                  <p className="text-[12px] italic" style={{ color: '#A8A29E' }}>Location not yet recorded</p>
-                  <button onClick={handleEdit} className="text-[12px] mt-1.5" style={{ color: '#0F7B6C' }}>Add location →</button>
-                </div>
-              ) : (
-                <>
-                  <InfoRow label="County" value={beneficiary.county} />
-                  <InfoRow label="Sub-county" value={beneficiary.sub_county} />
-                  <InfoRow label="Village / Estate" value={beneficiary.estate_village} />
-                  {(beneficiary as any).country && <InfoRow label="Country" value={(beneficiary as any).country} />}
-                  {beneficiary.home_county && <InfoRow label="Home county" value={beneficiary.home_county} />}
-                </>
-              )}
-            </SidebarCard>
-
-            {/* Vulnerability */}
-            <SidebarCard
-              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#FEF3CD' }}><Zap className="h-3 w-3" style={{ color: '#B45309' }} /></div>}
-              title="Vulnerability"
-              onEdit={handleEdit}
-            >
-              <div className="rounded-[10px] p-[12px_14px] mb-3" style={{ background: '#F5F0E8' }}>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: beneficiary.vulnerability_level === 'critical' ? '#BE185D' : beneficiary.vulnerability_level === 'high' ? '#B45309' : beneficiary.vulnerability_level === 'medium' ? '#D4A04E' : beneficiary.vulnerability_level === 'low' ? '#1D9E8A' : '#A8A29E' }} />
-                  <span className="text-[12px] capitalize" style={{ color: '#1C1917', fontWeight: 500 }}>{beneficiary.vulnerability_level ? `${beneficiary.vulnerability_level} vulnerability` : 'Not assessed'}</span>
-                </div>
-                {beneficiary.primary_need && (
-                  <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded-[5px] text-[11px]" style={{ background: '#EFF6FF', color: '#1E3A8A' }}>{beneficiary.primary_need}</div>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {vulnerabilityTags.length === 0 ? (
-                  <span className="text-[11px] italic" style={{ color: '#A8A29E' }}>No vulnerability tags recorded</span>
-                ) : vulnerabilityTags.map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-[5px]" style={{ background: '#FDF2F8', color: '#831843' }}>{t}</span>
-                ))}
-              </div>
-            </SidebarCard>
-
-            {/* Family & Connections */}
-            <SidebarCard
-              icon={<div className="h-[22px] w-[22px] rounded-[6px] flex items-center justify-center" style={{ background: '#F5F0E8' }}><UsersRound className="h-3 w-3" style={{ color: '#44403C' }} /></div>}
-              title="Family & connections"
-              right={<button onClick={handleEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>+ Add</button>}
-            >
-              {siblings.length > 0 && (
-                <>
-                  <div className="text-[12px] mb-2" style={{ color: '#78716C', fontWeight: 500 }}>In this system</div>
-                  {siblings.map((s: any) => (
-                    <div key={s.id} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
-                      <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-[11px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>{getInitials(s.display_name || '?')}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[12px] truncate" style={{ fontWeight: 500 }}>{s.display_name}</div>
-                        <div className="text-[11px]" style={{ color: '#78716C' }}>{s.relationship || 'Sibling'}</div>
-                      </div>
-                      <button onClick={() => navigate(`/beneficiaries/${s.id}`)} className="text-[11px]" style={{ color: '#0F7B6C' }}>View →</button>
-                    </div>
-                  ))}
-                </>
-              )}
-              {(guardians.length > 0 || isMinorAge) && (
-                <>
-                  <div className="text-[12px] mt-3 mb-2" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
-                  {guardians.length === 0 && isMinorAge && (
-                    <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
-                      <p>No parent or guardian recorded for this minor.</p>
-                      <button
-                        onClick={() => setEditOpen(true)}
-                        className="text-[12px] font-medium underline"
-                        style={{ color: '#0F7B6C' }}
-                      >
-                        Add guardian →
-                      </button>
-                    </div>
-                  )}
-                  {guardians.map((g) => {
-                    const relLabel =
-                      g.relationship ||
-                      (g.guardian_type === 'father'
-                        ? 'Father'
-                        : g.guardian_type === 'mother'
-                        ? 'Mother'
-                        : 'Guardian');
-                    return (
-                      <div key={g.id} className="flex items-start gap-2.5 py-2" style={{ borderBottom: '1px solid #F5F0E8' }}>
-                        <div className="h-9 w-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EDE5D8' }}>
-                          <User className="h-4 w-4" style={{ color: '#78716C' }} />
-                        </div>
-                        <div className="flex-1 min-w-0 space-y-0.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[12px] truncate" style={{ fontWeight: 600 }}>{g.full_name}</span>
-                            <span
-                              className="text-[10px] px-1.5 py-0.5 rounded-full"
-                              style={
-                                g.is_alive === false
-                                  ? { background: '#FEE2E2', color: '#991B1B' }
-                                  : { background: '#DCFCE7', color: '#166534' }
-                              }
-                            >
-                              {g.is_alive === false ? 'Deceased' : 'Alive'}
-                            </span>
-                          </div>
-                          <div className="text-[11px]" style={{ color: '#78716C' }}>{relLabel}</div>
-                          {g.phone && (
-                            <div className="text-[11px]" style={{ color: '#44403C' }}>📞 {g.phone}</div>
-                          )}
-                          {g.national_id && (
-                            <div className="text-[11px]" style={{ color: '#78716C' }}>ID: {g.national_id}</div>
-                          )}
-                          {(g.employment_type || g.source_of_income) && (
-                            <div className="text-[11px]" style={{ color: '#78716C' }}>
-                              {[g.employment_type, g.source_of_income].filter(Boolean).join(' · ')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              )}
-              {siblings.length === 0 && guardians.length === 0 && dependants.length === 0 && !isMinorAge && (
-                <p className="text-[12px] italic text-center py-2" style={{ color: '#A8A29E' }}>No family connections recorded</p>
-              )}
-              {beneficiary.household_id && (
-                <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
-                  <Home className="h-3.5 w-3.5" style={{ color: '#78716C' }} />
-                  <button onClick={() => navigate(`/households/${beneficiary.household_id}`)} className="text-[12px] flex-1 text-left" style={{ color: '#0F7B6C' }}>View household →</button>
-                </div>
-              )}
-              <div className="mt-3">
-                <OutOfSystemContacts beneficiaryId={beneficiary.id} />
-              </div>
-            </SidebarCard>
-
-            {/* Background */}
-            {beneficiary.background_narrative && (
-              <SidebarCard title="Background">
-                <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: '#44403C' }}>{beneficiary.background_narrative}</p>
-              </SidebarCard>
-            )}
-          </aside>
-
-          {/* ─── MAIN CONTENT (Tabs) ─── */}
-          <div className="order-1 md:order-2 bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
+        {/* ─── MAIN CONTENT (Tabs) — full width after side-aside removal ─── */}
+        <div className="print-stack mt-6 md:mt-8">
+          <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Sand tab bar */}
               <div className="no-print rounded-[10px] p-[3px] flex gap-[2px] mx-4 mt-4 overflow-x-auto no-scrollbar" style={{ background: '#F5F0E8' }}>
@@ -1049,6 +846,7 @@ export default function BeneficiaryProfile() {
                   organizationId={currentOrganization?.organization_id ?? null}
                   userId={user?.id ?? null}
                   onLocalUpdate={applyLocal}
+                  onAddGuardian={() => setEditOpen(true)}
                 />
               </TabsContent>
 
@@ -1217,41 +1015,6 @@ function EmptySection({
           {cta.label} →
         </button>
       )}
-    </div>
-  );
-}
-
-function SidebarCard({ icon, title, right, onEdit, children }: { icon?: React.ReactNode; title: string; right?: React.ReactNode; onEdit?: () => void; children: React.ReactNode }) {
-  return (
-    <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
-      <div className="flex items-center justify-between" style={{ padding: '16px 22px 14px', borderBottom: '1px solid #E7E2DA' }}>
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="text-[14px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
-        </div>
-        {right ?? (onEdit && <button onClick={onEdit} className="text-[11px]" style={{ color: '#0F7B6C' }}>Edit</button>)}
-      </div>
-      <div style={{ padding: '20px 22px' }}>{children}</div>
-    </div>
-  );
-}
-
-function InfoRow({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
-  const empty = value === null || value === undefined || value === '';
-  return (
-    <div className="flex justify-between items-baseline gap-3 py-[7px]">
-      <span className="text-[12px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
-      <span
-        className={`text-[14px] text-right truncate ${empty ? 'italic' : ''}`}
-        style={{
-          color: empty ? '#A8A29E' : '#1C1917',
-          fontWeight: empty ? 400 : 500,
-          fontFamily: mono && !empty ? "'DM Mono', monospace" : undefined,
-          maxWidth: '170px',
-        }}
-      >
-        {empty ? '—' : String(value)}
-      </span>
     </div>
   );
 }

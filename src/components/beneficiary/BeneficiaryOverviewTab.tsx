@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { formatDisplayDate } from '@/lib/dateUtils';
@@ -8,6 +8,7 @@ import type { FieldVisibility } from '@/hooks/useFieldVisibility';
 import { InlineEditableField, type InlineFieldType } from './InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
+import { OutOfSystemContacts } from './OutOfSystemContacts';
 
 interface OverviewProps {
   beneficiary: any;
@@ -22,6 +23,8 @@ interface OverviewProps {
   userId?: string | null;
   /** Optimistically merges a partial update into the beneficiary record. */
   onLocalUpdate?: (partial: Record<string, any>) => void;
+  /** Opens the full edit sheet (used by the "Add guardian" empty-state CTA). */
+  onAddGuardian?: () => void;
 }
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -40,7 +43,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
-  canEdit = false, organizationId, userId, onLocalUpdate,
+  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const age = visibility.age;
@@ -142,8 +145,21 @@ export function BeneficiaryOverviewTab({
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
-          {guardians.length === 0 && (
-            <p className="text-[12px] italic mt-1" style={{ color: '#A8A29E' }}>No guardians recorded</p>
+
+          {/* Parents / guardians */}
+          <div className="mt-3 mb-1 text-[11px]" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
+          {guardians.length === 0 && isMinorAge && (
+            <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
+              <p>No parent or guardian recorded for this minor.</p>
+              {onAddGuardian && (
+                <button onClick={onAddGuardian} className="text-[12px] font-medium underline" style={{ color: '#0F7B6C' }}>
+                  Add guardian →
+                </button>
+              )}
+            </div>
+          )}
+          {guardians.length === 0 && !isMinorAge && (
+            <p className="text-[12px] italic" style={{ color: '#A8A29E' }}>No guardians recorded</p>
           )}
           {guardians.map((g) => {
             const relLabel = g.relationship || (g.guardian_type === 'father' ? 'Father' : g.guardian_type === 'mother' ? 'Mother' : 'Guardian');
@@ -169,6 +185,11 @@ export function BeneficiaryOverviewTab({
               </div>
             );
           })}
+
+          {/* Out-of-system contacts */}
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
+            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
+          </div>
         </DetailsSection>
         <DetailsSection title="Household" defaultOpen={!isMobile}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
