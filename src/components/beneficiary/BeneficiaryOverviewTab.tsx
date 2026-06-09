@@ -145,8 +145,21 @@ export function BeneficiaryOverviewTab({
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
-          {guardians.length === 0 && (
-            <p className="text-[12px] italic mt-1" style={{ color: '#A8A29E' }}>No guardians recorded</p>
+
+          {/* Parents / guardians */}
+          <div className="mt-3 mb-1 text-[11px]" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
+          {guardians.length === 0 && isMinorAge && (
+            <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
+              <p>No parent or guardian recorded for this minor.</p>
+              {onAddGuardian && (
+                <button onClick={onAddGuardian} className="text-[12px] font-medium underline" style={{ color: '#0F7B6C' }}>
+                  Add guardian →
+                </button>
+              )}
+            </div>
+          )}
+          {guardians.length === 0 && !isMinorAge && (
+            <p className="text-[12px] italic" style={{ color: '#A8A29E' }}>No guardians recorded</p>
           )}
           {guardians.map((g) => {
             const relLabel = g.relationship || (g.guardian_type === 'father' ? 'Father' : g.guardian_type === 'mother' ? 'Mother' : 'Guardian');
@@ -172,6 +185,11 @@ export function BeneficiaryOverviewTab({
               </div>
             );
           })}
+
+          {/* Out-of-system contacts */}
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
+            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
+          </div>
         </DetailsSection>
         <DetailsSection title="Household" defaultOpen={!isMobile}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
