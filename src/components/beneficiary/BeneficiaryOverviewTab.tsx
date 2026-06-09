@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { formatDisplayDate } from '@/lib/dateUtils';
@@ -8,6 +8,7 @@ import type { FieldVisibility } from '@/hooks/useFieldVisibility';
 import { InlineEditableField, type InlineFieldType } from './InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
+import { OutOfSystemContacts } from './OutOfSystemContacts';
 
 interface OverviewProps {
   beneficiary: any;
@@ -22,6 +23,8 @@ interface OverviewProps {
   userId?: string | null;
   /** Optimistically merges a partial update into the beneficiary record. */
   onLocalUpdate?: (partial: Record<string, any>) => void;
+  /** Opens the full edit sheet (used by the "Add guardian" empty-state CTA). */
+  onAddGuardian?: () => void;
 }
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -40,7 +43,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
-  canEdit = false, organizationId, userId, onLocalUpdate,
+  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const age = visibility.age;
