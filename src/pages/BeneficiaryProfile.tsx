@@ -141,7 +141,7 @@ export default function BeneficiaryProfile() {
   const { currentOrganization } = useOrganization();
   const { term, termPlural } = useBeneficiaryTerminology();
   const { config: orgConfig } = useOrgBeneficiaryConfig();
-  const { primaryColor } = useBranding();
+  const { primaryColor, logoUrl, orgName } = useBranding();
   const brandHex = primaryColor || '#0F7B6C';
   const { can } = usePermissions();
   const canEditInline = !!can.editBeneficiaries;
@@ -333,7 +333,11 @@ export default function BeneficiaryProfile() {
     try {
       await generateBeneficiaryReport({
         beneficiary, guardians, donors, academics: [],
-        organizationName: currentOrganization?.organization_name || 'Organization',
+        organizationName: orgName || currentOrganization?.organization_name || 'Organization',
+        primaryColor: brandHex,
+        logoUrl: logoUrl || undefined,
+        servicesReceived: enrollmentCount,
+        attendancePct: attendanceCount > 0 ? Math.min(100, Math.round((attendanceCount / Math.max(1, enrollmentCount * 4)) * 100)) : undefined,
       });
       toast({ title: "Success", description: "Report downloaded successfully" });
     } catch (error) {
