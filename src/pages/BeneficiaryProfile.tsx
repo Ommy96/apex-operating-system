@@ -605,7 +605,11 @@ export default function BeneficiaryProfile() {
 
                 {/* Name block */}
                 <div className="pb-[6px] flex-1 min-w-0">
-                  <h1 className="bp-name text-[26px] sm:text-[34px] leading-[1.1]" style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}>
+                  <h1
+                    className="bp-name text-[26px] sm:text-[34px] leading-[1.1] truncate"
+                    title={beneficiary.display_name}
+                    style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}
+                  >
                     <InlineEditableField
                       bare
                       value={beneficiary.display_name}
