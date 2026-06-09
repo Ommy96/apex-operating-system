@@ -716,21 +716,6 @@ export default function BeneficiaryProfile() {
                 </span>
               )}
             </div>
-
-            {/* Quick stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 mt-4" style={{ borderTop: '1px solid #E7E2DA' }}>
-              {[
-                { label: 'Programmes', value: String(enrollmentCount), colour: '#1C1917' },
-                { label: 'Activities', value: String(attendanceCount), colour: '#1C1917' },
-                { label: 'Last visit', value: visitLabel, colour: visitColour },
-                { label: 'Overall', value: computedStatus.label, colour: computedStatus.colour },
-              ].map((s, i, arr) => (
-                <div key={s.label} className="text-center py-[14px]" style={{ borderRight: i < arr.length - 1 ? '1px solid #E7E2DA' : 'none' }}>
-                  <div className="tabular-nums" style={{ fontSize: '22px', fontWeight: 600, color: s.colour, fontFamily: s.label === 'Overall' ? "'DM Sans'" : "'DM Sans'" }}>{s.value}</div>
-                  <div className="uppercase mt-[3px]" style={{ fontSize: '10px', letterSpacing: '0.4px', color: '#A8A29E' }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
