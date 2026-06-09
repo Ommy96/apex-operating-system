@@ -693,7 +693,7 @@ export default function BeneficiaryProfile() {
                   bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
                   fg={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? '#831843' : beneficiary.vulnerability_level === 'medium' ? '#7A3A0A' : '#0A5449'}
                 >
-                  <span className="capitalize">{beneficiary.vulnerability_level}</span> vulnerability
+                  {`${String(beneficiary.vulnerability_level).charAt(0).toUpperCase()}${String(beneficiary.vulnerability_level).slice(1).toLowerCase()} vulnerability`}
                 </Pill>
               )}
               {(beneficiary as any).family_status && /orphan|child-headed/i.test(String((beneficiary as any).family_status)) && (
