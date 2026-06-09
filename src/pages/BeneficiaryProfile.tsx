@@ -863,6 +863,7 @@ export default function BeneficiaryProfile() {
                   organizationId={currentOrganization?.organization_id ?? null}
                   userId={user?.id ?? null}
                   onLocalUpdate={applyLocal}
+                  onAddGuardian={() => setEditOpen(true)}
                 />
               </TabsContent>
 
