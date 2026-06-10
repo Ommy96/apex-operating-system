@@ -79,6 +79,13 @@ interface Beneficiary {
   academic_level: string | null;
   grade: string | null;
   institution_name: string | null;
+  // Care arrangement
+  care_arrangement?: 'unknown' | 'independent' | 'under_guardian_care' | 'head_of_household_with_dependents' | 'institutional_care' | null;
+  institution_type?: string | null;
+  institution_contact_person?: string | null;
+  institution_contact_phone?: string | null;
+  institution_placement_date?: string | null;
+  case_worker_name?: string | null;
   course_name: string | null;
   student_id_number: string | null;
   year_enrolled: number | null;
