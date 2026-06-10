@@ -1459,6 +1459,91 @@ function Step3Family({
           Who lives with this person and who can be contacted on their behalf.
         </p>
       </div>
+
+      {/* Care arrangement */}
+      <div className="rounded-lg border p-3 space-y-3">
+        <div>
+          <div className="text-sm font-semibold">How is this person cared for?</div>
+          <p className="text-xs text-muted-foreground">
+            This determines whether we capture guardian details, dependants, or institution details.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { v: 'independent', t: 'Independent', d: 'Lives autonomously, makes own decisions.' },
+            { v: 'under_guardian_care', t: 'Under parental / guardian care', d: 'Depends on parents, guardians, or other family members.' },
+            { v: 'head_of_household_with_dependents', t: 'Head of household with dependents', d: 'The primary beneficiary; others depend on them.' },
+            { v: 'institutional_care', t: 'Institutional care', d: "Under a children's home, hospital, rehabilitation centre, or similar." },
+          ].map(opt => {
+            const selected = form.care_arrangement === opt.v;
+            return (
+              <button
+                type="button"
+                key={opt.v}
+                onClick={() => update('care_arrangement', opt.v as any)}
+                className={cn(
+                  'text-left p-3 rounded-md border-2 transition-colors',
+                  selected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+                )}
+              >
+                <div className="text-sm font-medium">{opt.t}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{opt.d}</div>
+              </button>
+            );
+          })}
+        </div>
+        {!form.care_arrangement && (
+          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+            Please choose — this affects what details we capture below.
+          </p>
+        )}
+
+        {/* Institutional care fields */}
+        {form.care_arrangement === 'institutional_care' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t">
+            <div>
+              <Label>Institution name *</Label>
+              <Input value={form.care_institution_name} onChange={(e) => update('care_institution_name', e.target.value)} />
+            </div>
+            <div>
+              <Label>Institution type *</Label>
+              <Select value={form.care_institution_type} onValueChange={(v) => update('care_institution_type', v)}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="childrens_home">Children's home</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="rehabilitation">Rehabilitation centre</SelectItem>
+                  <SelectItem value="refugee_camp">Refugee camp</SelectItem>
+                  <SelectItem value="boarding_school">Boarding school</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Contact person *</Label>
+              <Input value={form.care_institution_contact_person} onChange={(e) => update('care_institution_contact_person', e.target.value)} />
+            </div>
+            <div>
+              <Label>Contact phone</Label>
+              <Input value={form.care_institution_contact_phone} onChange={(e) => update('care_institution_contact_phone', e.target.value)} />
+            </div>
+            <div>
+              <Label>Placement date</Label>
+              <Input type="date" value={form.care_institution_placement_date} onChange={(e) => update('care_institution_placement_date', e.target.value)} />
+            </div>
+            <div>
+              <Label>Case worker name</Label>
+              <Input value={form.care_case_worker_name} onChange={(e) => update('care_case_worker_name', e.target.value)} />
+            </div>
+          </div>
+        )}
+        {form.care_arrangement === 'head_of_household_with_dependents' && (
+          <p className="text-[11px] text-muted-foreground pt-2 border-t">
+            After saving, link or register dependants from the profile's Relationships tab.
+          </p>
+        )}
+      </div>
+
       <div>
         <Label>Family status</Label>
         <Select value={status} onValueChange={(v) => update('family_status', v)}>
