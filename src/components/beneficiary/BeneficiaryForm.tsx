@@ -561,6 +561,26 @@ export function BeneficiaryForm({
       if (familyStep >= 0) setStep(2);
       return;
     }
+    if (isIndividual && !form.care_arrangement) {
+      toast({ title: 'Care arrangement is required', variant: 'destructive' });
+      const fs = visibleSteps.indexOf(2);
+      if (fs >= 0) setStep(2);
+      return;
+    }
+    if (form.care_arrangement === 'under_guardian_care' && filledGuardians.length === 0) {
+      toast({ title: 'At least one guardian required', variant: 'destructive' });
+      const fs = visibleSteps.indexOf(2);
+      if (fs >= 0) setStep(2);
+      return;
+    }
+    if (form.care_arrangement === 'institutional_care') {
+      if (!form.care_institution_name.trim() || !form.care_institution_type || !form.care_institution_contact_person.trim()) {
+        toast({ title: 'Institution details required', description: 'Name, type and contact person are required.', variant: 'destructive' });
+        const fs = visibleSteps.indexOf(2);
+        if (fs >= 0) setStep(2);
+        return;
+      }
+    }
 
     setIsLoading(true);
     try {
