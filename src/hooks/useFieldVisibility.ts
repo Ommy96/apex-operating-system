@@ -41,6 +41,12 @@ export interface FieldVisibility {
   showDisability: boolean;
   showVulnerabilityAssessment: boolean;
 
+  // Care arrangement-driven sections
+  showGuardianSection: boolean;
+  showDependantsSection: boolean;
+  showInstitutionSection: boolean;
+  guardianSectionRequired: boolean;
+
   // Meta
   age: number | null;
   ageGroup: AgeGroup;
@@ -53,6 +59,7 @@ export interface FieldVisibility {
 export function useFieldVisibility(
   dateOfBirth: string | null | undefined,
   orgConfig: OrgBeneficiaryConfig | null | undefined,
+  careArrangement?: string | null,
 ): FieldVisibility {
   const age = calculateAge(dateOfBirth);
   const ageGroup = getAgeGroup(age);
@@ -63,6 +70,8 @@ export function useFieldVisibility(
   const educationOn = orgConfig?.collect_education_data ?? true;
   const healthOn = orgConfig?.collect_health_data ?? true;
   const economicOn = orgConfig?.collect_economic_data ?? false;
+
+  const care = careArrangement ?? '';
 
   return {
     // Personal / identity
@@ -103,6 +112,12 @@ export function useFieldVisibility(
     // Disability / vulnerability
     showDisability: orgConfig?.collect_disability_details ?? false,
     showVulnerabilityAssessment: true,
+
+    // Care arrangement-driven sections
+    showGuardianSection: care === 'under_guardian_care',
+    showDependantsSection: care === 'head_of_household_with_dependents',
+    showInstitutionSection: care === 'institutional_care',
+    guardianSectionRequired: care === 'under_guardian_care',
 
     // Meta
     age,
