@@ -650,6 +650,29 @@ export function BeneficiaryForm({
           .eq('id', beneficiary.id)
           .eq('organization_id', orgId);
         if (error) throw error;
+        // Audit care_arrangement change on edit
+        if (form.care_arrangement && beneficiary.care_arrangement !== form.care_arrangement) {
+          try {
+            const { data: u } = await supabase.auth.getUser();
+            await supabase.from('audit_logs').insert({
+              event_type: 'change_care_arrangement',
+              entity_type: 'beneficiary',
+              entity_id: beneficiary.id,
+              user_id: u.user?.id ?? null,
+              old_values: { care_arrangement: beneficiary.care_arrangement ?? null } as any,
+              new_values: { care_arrangement: form.care_arrangement } as any,
+              metadata: { organization_id: orgId } as any,
+            } as any);
+          } catch (e) { logger.warn('audit log failed', e); }
+          // If moving away from under_guardian_care, demote (not delete) guardian links.
+          if (beneficiary.care_arrangement === 'under_guardian_care' && form.care_arrangement !== 'under_guardian_care') {
+            try {
+              await supabase.from('beneficiary_guardians')
+                .update({ is_primary: false } as any)
+                .eq('beneficiary_id', beneficiary.id);
+            } catch (e) { logger.warn('demote guardians failed', e); }
+          }
+        }
       } else {
         // Generate unique_id via RPC
         try {
