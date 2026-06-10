@@ -99,6 +99,20 @@ interface FormState {
   guardians: GuardianFieldsValue[];
   removed_guardian_link_ids: string[];
 
+  // Care arrangement
+  care_arrangement:
+    | ''
+    | 'independent'
+    | 'under_guardian_care'
+    | 'head_of_household_with_dependents'
+    | 'institutional_care';
+  care_institution_name: string;
+  care_institution_type: string;
+  care_institution_contact_person: string;
+  care_institution_contact_phone: string;
+  care_institution_placement_date: string;
+  care_case_worker_name: string;
+
   // Step 4 — education
   academic_level: string;
   institution_name: string;
@@ -159,6 +173,13 @@ const EMPTY_STATE: FormState = {
   family_status: '',
   guardians: [],
   removed_guardian_link_ids: [],
+  care_arrangement: '',
+  care_institution_name: '',
+  care_institution_type: '',
+  care_institution_contact_person: '',
+  care_institution_contact_phone: '',
+  care_institution_placement_date: '',
+  care_case_worker_name: '',
   academic_level: '',
   institution_name: '',
   grade: '',
@@ -245,6 +266,15 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   leader_phone: beneficiary?.leader_phone ?? '',
   meeting_frequency: beneficiary?.group_schedule ?? '',
   family_status: beneficiary?.family_status ?? '',
+  care_arrangement: (beneficiary?.care_arrangement && beneficiary.care_arrangement !== 'unknown'
+    ? beneficiary.care_arrangement
+    : '') as FormState['care_arrangement'],
+  care_institution_name: beneficiary?.institution_name ?? '',
+  care_institution_type: beneficiary?.institution_type ?? '',
+  care_institution_contact_person: beneficiary?.institution_contact_person ?? '',
+  care_institution_contact_phone: beneficiary?.institution_contact_phone ?? '',
+  care_institution_placement_date: toDateInputValue(beneficiary?.institution_placement_date),
+  care_case_worker_name: beneficiary?.case_worker_name ?? '',
   academic_level: beneficiary?.academic_level ?? '',
   institution_name: beneficiary?.institution_name ?? '',
   grade: beneficiary?.grade ?? '',
@@ -302,6 +332,33 @@ export function BeneficiaryForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibility.isMinor]);
+
+  // Care arrangement: suggest a default the first time the registrar lands on
+  // Step 3 (or whenever DOB/family status changes and no choice has been made).
+  const [careSuggestedFrom, setCareSuggestedFrom] = useState<string | null>(null);
+  useEffect(() => {
+    if (form.care_arrangement) return;
+    let suggestion: FormState['care_arrangement'] = '';
+    let reason: string | null = null;
+    if (form.family_status === 'Independent adult') {
+      suggestion = 'independent';
+      reason = 'Suggested because family status is Independent adult.';
+    } else if (form.family_status === 'Child-headed household') {
+      suggestion = 'head_of_household_with_dependents';
+      reason = 'Suggested because family status is Child-headed household.';
+    } else if (visibility.age !== null && visibility.age < 18) {
+      suggestion = 'under_guardian_care';
+      reason = `Suggested because age is ${visibility.age}.`;
+    } else if (visibility.age !== null && visibility.age >= 25) {
+      suggestion = 'independent';
+      reason = `Suggested because age is ${visibility.age}.`;
+    }
+    if (suggestion) {
+      setForm((prev) => prev.care_arrangement ? prev : { ...prev, care_arrangement: suggestion });
+      setCareSuggestedFrom(reason);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.family_status, form.date_of_birth]);
 
   // Load existing guardian links when editing an existing beneficiary,
   // so the user can update / remove parents instead of duplicating them.
@@ -504,6 +561,26 @@ export function BeneficiaryForm({
       if (familyStep >= 0) setStep(2);
       return;
     }
+    if (isIndividual && !form.care_arrangement) {
+      toast({ title: 'Care arrangement is required', variant: 'destructive' });
+      const fs = visibleSteps.indexOf(2);
+      if (fs >= 0) setStep(2);
+      return;
+    }
+    if (form.care_arrangement === 'under_guardian_care' && filledGuardians.length === 0) {
+      toast({ title: 'At least one guardian required', variant: 'destructive' });
+      const fs = visibleSteps.indexOf(2);
+      if (fs >= 0) setStep(2);
+      return;
+    }
+    if (form.care_arrangement === 'institutional_care') {
+      if (!form.care_institution_name.trim() || !form.care_institution_type || !form.care_institution_contact_person.trim()) {
+        toast({ title: 'Institution details required', description: 'Name, type and contact person are required.', variant: 'destructive' });
+        const fs = visibleSteps.indexOf(2);
+        if (fs >= 0) setStep(2);
+        return;
+      }
+    }
 
     setIsLoading(true);
     try {
@@ -548,11 +625,24 @@ export function BeneficiaryForm({
         academic_level: config.collect_education_data
           ? (form.academic_level as any) || null
           : beneficiary?.id ? undefined : null,
-        institution_name: config.collect_education_data
-          ? form.institution_name || null
-          : beneficiary?.id ? undefined : null,
         grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
         family_status: form.family_status || null,
+        // Care arrangement
+        care_arrangement: (form.care_arrangement || 'unknown') as any,
+        ...(form.care_arrangement && (!beneficiary?.id || beneficiary.care_arrangement !== form.care_arrangement)
+          ? {
+              care_arrangement_set_by: (await supabase.auth.getUser()).data.user?.id ?? null,
+              care_arrangement_set_at: new Date().toISOString(),
+            }
+          : {}),
+        institution_name: form.care_arrangement === 'institutional_care'
+          ? (form.care_institution_name || null)
+          : (config.collect_education_data ? form.institution_name || null : beneficiary?.id ? undefined : null),
+        institution_type: form.care_arrangement === 'institutional_care' ? (form.care_institution_type || null) : null,
+        institution_contact_person: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_person || null) : null,
+        institution_contact_phone: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_phone || null) : null,
+        institution_placement_date: form.care_arrangement === 'institutional_care' ? (form.care_institution_placement_date || null) : null,
+        case_worker_name: form.care_arrangement === 'institutional_care' ? (form.care_case_worker_name || null) : null,
         hiv_status:
           config.collect_health_data && config.collect_hiv_status && (can as any)?.viewHIVData !== false
             ? (form.hiv_status as any) || null
@@ -580,6 +670,29 @@ export function BeneficiaryForm({
           .eq('id', beneficiary.id)
           .eq('organization_id', orgId);
         if (error) throw error;
+        // Audit care_arrangement change on edit
+        if (form.care_arrangement && beneficiary.care_arrangement !== form.care_arrangement) {
+          try {
+            const { data: u } = await supabase.auth.getUser();
+            await supabase.from('audit_logs').insert({
+              event_type: 'change_care_arrangement',
+              entity_type: 'beneficiary',
+              entity_id: beneficiary.id,
+              user_id: u.user?.id ?? null,
+              old_values: { care_arrangement: beneficiary.care_arrangement ?? null } as any,
+              new_values: { care_arrangement: form.care_arrangement } as any,
+              metadata: { organization_id: orgId } as any,
+            } as any);
+          } catch (e) { logger.warn('audit log failed', e); }
+          // If moving away from under_guardian_care, demote (not delete) guardian links.
+          if (beneficiary.care_arrangement === 'under_guardian_care' && form.care_arrangement !== 'under_guardian_care') {
+            try {
+              await supabase.from('beneficiary_guardians')
+                .update({ is_primary: false } as any)
+                .eq('beneficiary_id', beneficiary.id);
+            } catch (e) { logger.warn('demote guardians failed', e); }
+          }
+        }
       } else {
         // Generate unique_id via RPC
         try {
@@ -1366,6 +1479,91 @@ function Step3Family({
           Who lives with this person and who can be contacted on their behalf.
         </p>
       </div>
+
+      {/* Care arrangement */}
+      <div className="rounded-lg border p-3 space-y-3">
+        <div>
+          <div className="text-sm font-semibold">How is this person cared for?</div>
+          <p className="text-xs text-muted-foreground">
+            This determines whether we capture guardian details, dependants, or institution details.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { v: 'independent', t: 'Independent', d: 'Lives autonomously, makes own decisions.' },
+            { v: 'under_guardian_care', t: 'Under parental / guardian care', d: 'Depends on parents, guardians, or other family members.' },
+            { v: 'head_of_household_with_dependents', t: 'Head of household with dependents', d: 'The primary beneficiary; others depend on them.' },
+            { v: 'institutional_care', t: 'Institutional care', d: "Under a children's home, hospital, rehabilitation centre, or similar." },
+          ].map(opt => {
+            const selected = form.care_arrangement === opt.v;
+            return (
+              <button
+                type="button"
+                key={opt.v}
+                onClick={() => update('care_arrangement', opt.v as any)}
+                className={cn(
+                  'text-left p-3 rounded-md border-2 transition-colors',
+                  selected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+                )}
+              >
+                <div className="text-sm font-medium">{opt.t}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{opt.d}</div>
+              </button>
+            );
+          })}
+        </div>
+        {!form.care_arrangement && (
+          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+            Please choose — this affects what details we capture below.
+          </p>
+        )}
+
+        {/* Institutional care fields */}
+        {form.care_arrangement === 'institutional_care' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t">
+            <div>
+              <Label>Institution name *</Label>
+              <Input value={form.care_institution_name} onChange={(e) => update('care_institution_name', e.target.value)} />
+            </div>
+            <div>
+              <Label>Institution type *</Label>
+              <Select value={form.care_institution_type} onValueChange={(v) => update('care_institution_type', v)}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="childrens_home">Children's home</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="rehabilitation">Rehabilitation centre</SelectItem>
+                  <SelectItem value="refugee_camp">Refugee camp</SelectItem>
+                  <SelectItem value="boarding_school">Boarding school</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Contact person *</Label>
+              <Input value={form.care_institution_contact_person} onChange={(e) => update('care_institution_contact_person', e.target.value)} />
+            </div>
+            <div>
+              <Label>Contact phone</Label>
+              <Input value={form.care_institution_contact_phone} onChange={(e) => update('care_institution_contact_phone', e.target.value)} />
+            </div>
+            <div>
+              <Label>Placement date</Label>
+              <Input type="date" value={form.care_institution_placement_date} onChange={(e) => update('care_institution_placement_date', e.target.value)} />
+            </div>
+            <div>
+              <Label>Case worker name</Label>
+              <Input value={form.care_case_worker_name} onChange={(e) => update('care_case_worker_name', e.target.value)} />
+            </div>
+          </div>
+        )}
+        {form.care_arrangement === 'head_of_household_with_dependents' && (
+          <p className="text-[11px] text-muted-foreground pt-2 border-t">
+            After saving, link or register dependants from the profile's Relationships tab.
+          </p>
+        )}
+      </div>
+
       <div>
         <Label>Family status</Label>
         <Select value={status} onValueChange={(v) => update('family_status', v)}>

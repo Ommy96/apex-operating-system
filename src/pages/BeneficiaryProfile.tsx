@@ -79,6 +79,13 @@ interface Beneficiary {
   academic_level: string | null;
   grade: string | null;
   institution_name: string | null;
+  // Care arrangement
+  care_arrangement?: 'unknown' | 'independent' | 'under_guardian_care' | 'head_of_household_with_dependents' | 'institutional_care' | null;
+  institution_type?: string | null;
+  institution_contact_person?: string | null;
+  institution_contact_phone?: string | null;
+  institution_placement_date?: string | null;
+  case_worker_name?: string | null;
   course_name: string | null;
   student_id_number: string | null;
   year_enrolled: number | null;
@@ -618,6 +625,23 @@ export default function BeneficiaryProfile() {
                       Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}
                     </div>
                   )}
+                  {/* Care arrangement pill */}
+                  {(() => {
+                    const ca = beneficiary.care_arrangement || 'unknown';
+                    const labels: Record<string, { text: string; bg: string; fg: string }> = {
+                      independent: { text: 'Independent', bg: '#F5F5F4', fg: '#44403C' },
+                      under_guardian_care: { text: 'Under guardian care', bg: `${brandHex}1A`, fg: brandHex },
+                      head_of_household_with_dependents: { text: 'Head of household', bg: `${brandHex}1A`, fg: brandHex },
+                      institutional_care: { text: 'Institutional care', bg: '#FEF3C7', fg: '#92400E' },
+                      unknown: { text: 'Set care arrangement', bg: '#F5F5F4', fg: '#78716C' },
+                    };
+                    const l = labels[ca] || labels.unknown;
+                    return (
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[11px] font-medium" style={{ background: l.bg, color: l.fg }}>
+                        {l.text}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -784,6 +808,19 @@ export default function BeneficiaryProfile() {
 
         {/* ─── MAIN CONTENT (Tabs) — full width after side-aside removal ─── */}
         <div className="print-stack mt-6 md:mt-8">
+          {beneficiary.care_arrangement === 'institutional_care' && (
+            <div className="bp-card rounded-[14px] p-4 mb-4" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
+              <div className="text-[12px] font-semibold mb-2" style={{ color: '#92400E' }}>Institution</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[13px]" style={{ color: '#1C1917' }}>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Name </span>{beneficiary.institution_name || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Type </span>{beneficiary.institution_type || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Contact person </span>{beneficiary.institution_contact_person || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Contact phone </span>{beneficiary.institution_contact_phone || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Placement date </span>{beneficiary.institution_placement_date ? formatDisplayDate(beneficiary.institution_placement_date) : '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Case worker </span>{beneficiary.case_worker_name || '—'}</div>
+              </div>
+            </div>
+          )}
           <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Sand tab bar */}

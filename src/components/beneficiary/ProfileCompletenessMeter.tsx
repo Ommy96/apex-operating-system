@@ -7,6 +7,11 @@ interface Props {
 }
 
 export function ProfileCompletenessMeter({ beneficiary, guardianCount }: Props) {
+  const dob = beneficiary?.date_of_birth ? new Date(beneficiary.date_of_birth) : null;
+  const age = dob ? Math.floor((Date.now() - dob.getTime()) / 31557600000) : null;
+  const isMinor = age !== null && age < 18;
+  const care = beneficiary?.care_arrangement || 'unknown';
+  const careOk = !(isMinor && (care === 'independent' || care === 'unknown'));
   const checks: { label: string; ok: boolean }[] = [
     { label: 'Photo', ok: !!beneficiary.photo_url },
     { label: 'Date of birth', ok: !!beneficiary.date_of_birth },
@@ -19,6 +24,7 @@ export function ProfileCompletenessMeter({ beneficiary, guardianCount }: Props) 
     { label: 'Consent recorded', ok: !!beneficiary.consent_given },
     { label: 'Contact / guardian', ok: guardianCount > 0 },
     { label: 'Background narrative', ok: !!beneficiary.background_narrative },
+    { label: 'Care arrangement', ok: careOk && care !== 'unknown' },
   ];
   const total = checks.length;
   const complete = checks.filter(c => c.ok).length;
