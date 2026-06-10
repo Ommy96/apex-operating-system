@@ -605,9 +605,6 @@ export function BeneficiaryForm({
         academic_level: config.collect_education_data
           ? (form.academic_level as any) || null
           : beneficiary?.id ? undefined : null,
-        institution_name: config.collect_education_data
-          ? form.institution_name || null
-          : beneficiary?.id ? undefined : null,
         grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
         family_status: form.family_status || null,
         // Care arrangement
