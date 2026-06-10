@@ -333,6 +333,33 @@ export function BeneficiaryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibility.isMinor]);
 
+  // Care arrangement: suggest a default the first time the registrar lands on
+  // Step 3 (or whenever DOB/family status changes and no choice has been made).
+  const [careSuggestedFrom, setCareSuggestedFrom] = useState<string | null>(null);
+  useEffect(() => {
+    if (form.care_arrangement) return;
+    let suggestion: FormState['care_arrangement'] = '';
+    let reason: string | null = null;
+    if (form.family_status === 'Independent adult') {
+      suggestion = 'independent';
+      reason = 'Suggested because family status is Independent adult.';
+    } else if (form.family_status === 'Child-headed household') {
+      suggestion = 'head_of_household_with_dependents';
+      reason = 'Suggested because family status is Child-headed household.';
+    } else if (visibility.age !== null && visibility.age < 18) {
+      suggestion = 'under_guardian_care';
+      reason = `Suggested because age is ${visibility.age}.`;
+    } else if (visibility.age !== null && visibility.age >= 25) {
+      suggestion = 'independent';
+      reason = `Suggested because age is ${visibility.age}.`;
+    }
+    if (suggestion) {
+      setForm((prev) => prev.care_arrangement ? prev : { ...prev, care_arrangement: suggestion });
+      setCareSuggestedFrom(reason);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.family_status, form.date_of_birth]);
+
   // Load existing guardian links when editing an existing beneficiary,
   // so the user can update / remove parents instead of duplicating them.
   useEffect(() => {
