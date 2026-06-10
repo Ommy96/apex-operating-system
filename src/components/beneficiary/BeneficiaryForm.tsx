@@ -610,6 +610,22 @@ export function BeneficiaryForm({
           : beneficiary?.id ? undefined : null,
         grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
         family_status: form.family_status || null,
+        // Care arrangement
+        care_arrangement: (form.care_arrangement || 'unknown') as any,
+        ...(form.care_arrangement && (!beneficiary?.id || beneficiary.care_arrangement !== form.care_arrangement)
+          ? {
+              care_arrangement_set_by: (await supabase.auth.getUser()).data.user?.id ?? null,
+              care_arrangement_set_at: new Date().toISOString(),
+            }
+          : {}),
+        institution_name: form.care_arrangement === 'institutional_care'
+          ? (form.care_institution_name || null)
+          : (config.collect_education_data ? form.institution_name || null : beneficiary?.id ? undefined : null),
+        institution_type: form.care_arrangement === 'institutional_care' ? (form.care_institution_type || null) : null,
+        institution_contact_person: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_person || null) : null,
+        institution_contact_phone: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_phone || null) : null,
+        institution_placement_date: form.care_arrangement === 'institutional_care' ? (form.care_institution_placement_date || null) : null,
+        case_worker_name: form.care_arrangement === 'institutional_care' ? (form.care_case_worker_name || null) : null,
         hiv_status:
           config.collect_health_data && config.collect_hiv_status && (can as any)?.viewHIVData !== false
             ? (form.hiv_status as any) || null
