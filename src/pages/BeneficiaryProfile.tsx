@@ -808,6 +808,19 @@ export default function BeneficiaryProfile() {
 
         {/* ─── MAIN CONTENT (Tabs) — full width after side-aside removal ─── */}
         <div className="print-stack mt-6 md:mt-8">
+          {beneficiary.care_arrangement === 'institutional_care' && (
+            <div className="bp-card rounded-[14px] p-4 mb-4" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
+              <div className="text-[12px] font-semibold mb-2" style={{ color: '#92400E' }}>Institution</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[13px]" style={{ color: '#1C1917' }}>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Name </span>{beneficiary.institution_name || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Type </span>{beneficiary.institution_type || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Contact person </span>{beneficiary.institution_contact_person || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Contact phone </span>{beneficiary.institution_contact_phone || '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Placement date </span>{beneficiary.institution_placement_date ? formatDisplayDate(beneficiary.institution_placement_date) : '—'}</div>
+                <div><span className="text-[11px]" style={{ color: '#78716C' }}>Case worker </span>{beneficiary.case_worker_name || '—'}</div>
+              </div>
+            </div>
+          )}
           <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Sand tab bar */}
