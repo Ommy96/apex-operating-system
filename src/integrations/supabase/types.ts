@@ -1050,6 +1050,10 @@ export type Database = {
           beneficiary_category: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id: string | null
+          care_arrangement: Database["public"]["Enums"]["care_arrangement_type"]
+          care_arrangement_set_at: string | null
+          care_arrangement_set_by: string | null
+          case_worker_name: string | null
           consent_date: string | null
           consent_given: boolean | null
           country: string | null
@@ -1083,7 +1087,11 @@ export type Database = {
           inactive_date: string | null
           inactive_reason: string | null
           income_level: string | null
+          institution_contact_person: string | null
+          institution_contact_phone: string | null
           institution_name: string | null
+          institution_placement_date: string | null
+          institution_type: string | null
           is_active: boolean | null
           last_name: string | null
           latitude: number | null
@@ -1124,6 +1132,10 @@ export type Database = {
           beneficiary_category?: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
+          care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
+          care_arrangement_set_at?: string | null
+          care_arrangement_set_by?: string | null
+          case_worker_name?: string | null
           consent_date?: string | null
           consent_given?: boolean | null
           country?: string | null
@@ -1157,7 +1169,11 @@ export type Database = {
           inactive_date?: string | null
           inactive_reason?: string | null
           income_level?: string | null
+          institution_contact_person?: string | null
+          institution_contact_phone?: string | null
           institution_name?: string | null
+          institution_placement_date?: string | null
+          institution_type?: string | null
           is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
@@ -1198,6 +1214,10 @@ export type Database = {
           beneficiary_category?: string | null
           beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
+          care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
+          care_arrangement_set_at?: string | null
+          care_arrangement_set_by?: string | null
+          case_worker_name?: string | null
           consent_date?: string | null
           consent_given?: boolean | null
           country?: string | null
@@ -1231,7 +1251,11 @@ export type Database = {
           inactive_date?: string | null
           inactive_reason?: string | null
           income_level?: string | null
+          institution_contact_person?: string | null
+          institution_contact_phone?: string | null
           institution_name?: string | null
+          institution_placement_date?: string | null
+          institution_type?: string | null
           is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
@@ -14548,6 +14572,12 @@ export type Database = {
         | "Senior School"
       amount_status_type: "Loan" | "Grant"
       beneficiary_type: "student" | "adult" | "group"
+      care_arrangement_type:
+        | "unknown"
+        | "independent"
+        | "under_guardian_care"
+        | "head_of_household_with_dependents"
+        | "institutional_care"
       family_category_type: "Guardian Ration" | "Home Based Care"
       feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
       gender_type: "Male" | "Female"
@@ -14716,6 +14746,13 @@ export const Constants = {
       ],
       amount_status_type: ["Loan", "Grant"],
       beneficiary_type: ["student", "adult", "group"],
+      care_arrangement_type: [
+        "unknown",
+        "independent",
+        "under_guardian_care",
+        "head_of_household_with_dependents",
+        "institutional_care",
+      ],
       family_category_type: ["Guardian Ration", "Home Based Care"],
       feeding_type: ["Kawangware Lunch Hour", "Kibera Early Dinner"],
       gender_type: ["Male", "Female"],
