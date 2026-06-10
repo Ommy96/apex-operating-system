@@ -266,6 +266,15 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   leader_phone: beneficiary?.leader_phone ?? '',
   meeting_frequency: beneficiary?.group_schedule ?? '',
   family_status: beneficiary?.family_status ?? '',
+  care_arrangement: (beneficiary?.care_arrangement && beneficiary.care_arrangement !== 'unknown'
+    ? beneficiary.care_arrangement
+    : '') as FormState['care_arrangement'],
+  care_institution_name: beneficiary?.institution_name ?? '',
+  care_institution_type: beneficiary?.institution_type ?? '',
+  care_institution_contact_person: beneficiary?.institution_contact_person ?? '',
+  care_institution_contact_phone: beneficiary?.institution_contact_phone ?? '',
+  care_institution_placement_date: toDateInputValue(beneficiary?.institution_placement_date),
+  care_case_worker_name: beneficiary?.case_worker_name ?? '',
   academic_level: beneficiary?.academic_level ?? '',
   institution_name: beneficiary?.institution_name ?? '',
   grade: beneficiary?.grade ?? '',
