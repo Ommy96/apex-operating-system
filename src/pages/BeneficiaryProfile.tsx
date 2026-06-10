@@ -625,6 +625,23 @@ export default function BeneficiaryProfile() {
                       Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}
                     </div>
                   )}
+                  {/* Care arrangement pill */}
+                  {(() => {
+                    const ca = beneficiary.care_arrangement || 'unknown';
+                    const labels: Record<string, { text: string; bg: string; fg: string }> = {
+                      independent: { text: 'Independent', bg: '#F5F5F4', fg: '#44403C' },
+                      under_guardian_care: { text: 'Under guardian care', bg: `${brandHex}1A`, fg: brandHex },
+                      head_of_household_with_dependents: { text: 'Head of household', bg: `${brandHex}1A`, fg: brandHex },
+                      institutional_care: { text: 'Institutional care', bg: '#FEF3C7', fg: '#92400E' },
+                      unknown: { text: 'Set care arrangement', bg: '#F5F5F4', fg: '#78716C' },
+                    };
+                    const l = labels[ca] || labels.unknown;
+                    return (
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[11px] font-medium" style={{ background: l.bg, color: l.fg }}>
+                        {l.text}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
