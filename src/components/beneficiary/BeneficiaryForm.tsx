@@ -99,6 +99,20 @@ interface FormState {
   guardians: GuardianFieldsValue[];
   removed_guardian_link_ids: string[];
 
+  // Care arrangement
+  care_arrangement:
+    | ''
+    | 'independent'
+    | 'under_guardian_care'
+    | 'head_of_household_with_dependents'
+    | 'institutional_care';
+  care_institution_name: string;
+  care_institution_type: string;
+  care_institution_contact_person: string;
+  care_institution_contact_phone: string;
+  care_institution_placement_date: string;
+  care_case_worker_name: string;
+
   // Step 4 — education
   academic_level: string;
   institution_name: string;
