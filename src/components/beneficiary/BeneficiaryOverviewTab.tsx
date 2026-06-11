@@ -233,38 +233,48 @@ export function BeneficiaryOverviewTab({
   );
 }
 
-function DetailsSection({
-  title, rows, children, defaultOpen = true,
-}: { title: string; rows?: Array<[string, any]>; children?: React.ReactNode; defaultOpen?: boolean }) {
+function PanelSection({
+  title, children, defaultOpen = true, isMobile = false, first = false,
+}: { title: string; children?: React.ReactNode; defaultOpen?: boolean; isMobile?: boolean; first?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen} className="rounded-[14px]" >
-      <div style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', borderRadius: 14 }}>
-        <CollapsibleTrigger className="w-full flex items-center justify-between px-5 py-3">
-          <span className="text-[13px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#78716C' }} />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-5 pb-4 pt-1" style={{ borderTop: '1px solid #EDE5D8' }}>
-            {rows?.map(([l, v]) => <Row key={l} label={l} value={v} />)}
-            {children}
-          </div>
-        </CollapsibleContent>
+  const wrapStyle: React.CSSProperties = first
+    ? {}
+    : { borderTop: '1px solid #ECE7DE', marginTop: 24, paddingTop: 24 };
+  if (isMobile) {
+    return (
+      <div style={wrapStyle}>
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          className="w-full flex items-center justify-between mb-3"
+        >
+          <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>{title}</span>
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#A8A29E' }} />
+        </button>
+        {open && <div>{children}</div>}
       </div>
-    </Collapsible>
+    );
+  }
+  return (
+    <div style={wrapStyle}>
+      <div className="mb-3 text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>
+        {title}
+      </div>
+      {children}
+    </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: any }) {
   const empty = value === null || value === undefined || value === '';
   return (
-    <div className="flex justify-between items-baseline gap-3 py-[7px]">
-      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
+    <div className="flex justify-between items-baseline gap-3 py-[6px]">
+      <span className="text-[12px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
       <span
-        className={`text-[13px] text-right ${empty ? 'italic' : ''}`}
+        className="text-[14px] text-right"
         style={{ color: empty ? '#A8A29E' : '#1C1917', fontWeight: empty ? 400 : 500, maxWidth: '60%', wordBreak: 'break-word' }}
       >
-        {empty ? '—' : String(value)}
+        {empty ? 'Not recorded' : String(value)}
       </span>
     </div>
   );
