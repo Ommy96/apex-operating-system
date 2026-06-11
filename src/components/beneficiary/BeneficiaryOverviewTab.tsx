@@ -44,7 +44,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
-  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian,
+  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian, signatureLine,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const age = visibility.age;
