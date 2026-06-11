@@ -455,7 +455,7 @@ export default function BeneficiaryProfile() {
 
   return (
     <TooltipProvider delayDuration={150}>
-    <div className="bp-page min-h-screen" style={{ background: '#FAFAF9', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
+    <div className="bp-page min-h-screen" style={{ background: '#FFFFFF', fontFamily: "'DM Sans', sans-serif", color: '#1C1917' }}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
