@@ -536,52 +536,57 @@ export default function BeneficiaryProfile() {
           Back to {termPlural}
         </button>
 
-        {/* ─── HERO CARD ─── */}
-        <div className="bp-card rounded-[20px] overflow-hidden" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          {/* Decorative band — soft brand wash */}
-          <div
-            className="bp-hero-band h-[88px] relative"
-            style={{
-              background: primaryColor
-                ? `color-mix(in srgb, ${brandHex} 10%, #FAFAF9)`
-                : '#F5F0E8',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              className="bp-hero-mesh absolute -inset-10"
-              style={{
-                background: `radial-gradient(circle at 22% 35%, color-mix(in srgb, ${brandHex} 35%, transparent), transparent 55%), radial-gradient(circle at 78% 60%, color-mix(in srgb, ${brandHex} 28%, transparent), transparent 60%)`,
-                filter: 'blur(80px)',
-                opacity: 0.6,
-              }}
-            />
-          </div>
+        {/* ─── HERO — single row, no band ─── */}
+        {(() => {
+          const ca = beneficiary.care_arrangement || 'unknown';
+          const careLabels: Record<string, string> = {
+            independent: 'Independent',
+            under_guardian_care: 'Under guardian care',
+            head_of_household_with_dependents: 'Head of household',
+            institutional_care: 'Institutional care',
+            unknown: 'Set care arrangement',
+          };
+          const sponsored = donors.length > 0;
+          const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+          const sponsorshipChip = !sponsored
+            ? { label: 'Unsponsored', accent: '#A8A29E' }
+            : totalReceived > 0
+              ? { label: 'Sponsored', accent: '#1D9E8A' }
+              : { label: 'Partially funded', accent: '#B45309' };
+          const riskLevel = (beneficiary.vulnerability_level || '').toLowerCase();
+          const riskMap: Record<string, { label: string; accent: string }> = {
+            low: { label: 'Low risk', accent: '#1D9E8A' },
+            medium: { label: 'Medium risk', accent: '#B45309' },
+            high: { label: 'High risk', accent: '#BE185D' },
+            critical: { label: 'Critical', accent: '#BE185D' },
+          };
+          const riskChip = riskMap[riskLevel] ?? { label: 'No risk recorded', accent: '#A8A29E' };
+          const visitChip = daysSinceVisit === null
+            ? { label: 'Not yet visited', accent: '#A8A29E' }
+            : { label: `${visitLabel} since visit`, accent: visitColour };
+          const progChip = enrollmentCount > 0
+            ? { label: `${enrollmentCount} active`, accent: brandHex }
+            : { label: 'Not enrolled', accent: '#A8A29E' };
+          const stageChipValue = isMinorAge
+            ? age !== null
+              ? `${age} yrs${beneficiary.grade ? ` · ${beneficiary.grade}` : beneficiary.academic_level ? ` · ${beneficiary.academic_level}` : ''}`
+              : 'Age not recorded'
+            : beneficiary.occupation ? `Adult · ${beneficiary.occupation}` : 'Adult';
+          const careChip = { label: careLabels[ca], accent: ca === 'institutional_care' ? '#B45309' : ca === 'unknown' ? '#A8A29E' : brandHex };
 
-          {/* Hero body */}
-          <div className="px-6 sm:px-8 pb-7">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" style={{ marginTop: '-50px' }}>
-              <div className="flex items-end gap-4 flex-1 min-w-0">
+          return (
+            <div className="pb-5" style={{ borderBottom: '1px solid #E7E2DA' }}>
+              <div className="flex items-start gap-5">
                 {/* Avatar */}
                 <div className="relative shrink-0 bp-avatar-photo group">
-                  <div className="h-[80px] w-[80px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden" style={{ border: '4px solid #FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                  <div className="h-[88px] w-[88px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden">
                     {beneficiary.photo_url ? (
                       <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[28px] sm:text-[34px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
+                      <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[32px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
                       </div>
                     )}
-                  </div>
-                  {/* Status indicator dot — colour family matches the meaningful status pill */}
-                  <div
-                    className={`absolute bottom-0 right-0 h-[20px] w-[20px] rounded-full flex items-center justify-center text-white ${(computedStatus.label === 'High risk' || computedStatus.label === 'Overdue') ? 'bp-status-pulse' : ''}`}
-                    style={{
-                      border: '2.5px solid #FFFFFF',
-                      background: computedStatus.colour,
-                    }}
-                  >
-                    {computedStatus.label === 'Good' ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : computedStatus.label === 'Exited' ? <X className="h-2.5 w-2.5" strokeWidth={3} /> : <span className="text-[9px] font-bold">!</span>}
                   </div>
                   {currentOrganization?.organization_id && (
                     <div className="bp-camera-overlay no-print absolute inset-0 rounded-full flex items-center justify-center opacity-0 transition-opacity" style={{ background: 'rgba(0,0,0,0.45)' }}>
@@ -594,218 +599,104 @@ export default function BeneficiaryProfile() {
                   )}
                 </div>
 
-                {/* Name block */}
-                <div className="pb-[6px] flex-1 min-w-0">
-                  <h1
-                    className="bp-name text-[26px] sm:text-[34px] leading-[1.1] truncate"
-                    title={beneficiary.display_name}
-                    style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}
-                  >
-                    <InlineEditableField
-                      bare
-                      value={beneficiary.display_name}
-                      type="text"
-                      canEdit={canEditInline}
-                      validate={(v) => !v || String(v).trim().length < 2 ? 'Name must be at least 2 characters' : null}
-                      onSave={saveNameInline}
-                    />
-                  </h1>
-                  <div className="flex items-center gap-[8px] flex-wrap mt-2">
-                    <span className="bp-mono text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>
-                      {beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`}
-                    </span>
-                    {beneficiary.gender && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.gender}</span></>}
-                    <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{age !== null ? `${age} years old` : 'Age unknown'}</span>
-                    {beneficiary.county && <><span style={{ color: '#D6C9B5' }}>•</span><span className="text-[12px]" style={{ color: '#78716C', fontWeight: 500 }}>{beneficiary.county}</span></>}
-                    <span style={{ color: '#D6C9B5' }}>•</span>
-                    <span className="text-[12px]" style={{ color: '#A8A29E', fontWeight: 500 }}>Registered {formatDisplayDate(beneficiary.created_at)}</span>
-                  </div>
-                  {beneficiary.inactive_date && (
-                    <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px]" style={{ background: '#FDF2F8', color: '#831843' }}>
-                      Exited {formatDisplayDate(beneficiary.inactive_date)}{beneficiary.inactive_reason ? ` · ${beneficiary.inactive_reason}` : ''}
+                {/* Name + meta + chips */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <h1
+                      className="bp-name text-[28px] sm:text-[36px] leading-[1.1] truncate flex-1 min-w-0"
+                      title={beneficiary.display_name}
+                      style={{ fontWeight: 600, color: '#1C1917', letterSpacing: '-0.5px' }}
+                    >
+                      <InlineEditableField
+                        bare
+                        value={beneficiary.display_name}
+                        type="text"
+                        canEdit={canEditInline}
+                        validate={(v) => !v || String(v).trim().length < 2 ? 'Name must be at least 2 characters' : null}
+                        onSave={saveNameInline}
+                      />
+                    </h1>
+                    {/* Top-right action icons */}
+                    <div className="no-print flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={handleDownloadReport}
+                        disabled={generatingReport}
+                        title="Print record"
+                        aria-label="Print record"
+                        className="h-9 w-9 rounded-md flex items-center justify-center hover:bg-muted disabled:opacity-50"
+                        style={{ color: '#44403C' }}
+                      >
+                        {generatingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            title="More actions"
+                            aria-label="More actions"
+                            className="h-9 w-9 rounded-md flex items-center justify-center hover:bg-muted"
+                            style={{ color: '#44403C' }}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {isAdmin && (
+                            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
+                              <Trash2 className="h-4 w-4 mr-2" /> Delete {term.toLowerCase()}
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={handleDownloadReport}>
+                            <Printer className="h-4 w-4 mr-2" /> Print record
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  )}
-                  {/* Care arrangement pill */}
-                  {(() => {
-                    const ca = beneficiary.care_arrangement || 'unknown';
-                    const labels: Record<string, { text: string; bg: string; fg: string }> = {
-                      independent: { text: 'Independent', bg: '#F5F5F4', fg: '#44403C' },
-                      under_guardian_care: { text: 'Under guardian care', bg: `${brandHex}1A`, fg: brandHex },
-                      head_of_household_with_dependents: { text: 'Head of household', bg: `${brandHex}1A`, fg: brandHex },
-                      institutional_care: { text: 'Institutional care', bg: '#FEF3C7', fg: '#92400E' },
-                      unknown: { text: 'Set care arrangement', bg: '#F5F5F4', fg: '#78716C' },
-                    };
-                    const l = labels[ca] || labels.unknown;
-                    return (
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[11px] font-medium" style={{ background: l.bg, color: l.fg }}>
-                        {l.text}
-                      </div>
-                    );
-                  })()}
+                  </div>
+
+                  {/* Meta line */}
+                  <div className="text-[13px] truncate mt-1.5" style={{ color: '#78716C', fontWeight: 500 }}>
+                    {[
+                      beneficiary.student_id_number || `UFN-${beneficiary.id.slice(0, 8).toUpperCase()}`,
+                      beneficiary.gender,
+                      age !== null ? `${age} years` : null,
+                      beneficiary.county,
+                    ].filter(Boolean).join(' · ')}
+                  </div>
+
+                  {/* Chips row */}
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    <HeroChip accent={careChip.accent} onClick={handleEdit}>{careChip.label}</HeroChip>
+                    <HeroChip accent={sponsorshipChip.accent} onClick={() => setActiveTab('programmes')}>{sponsorshipChip.label}</HeroChip>
+                    <HeroChip accent={riskChip.accent} onClick={() => setActiveTab('history-risk')}>{riskChip.label}</HeroChip>
+                    <HeroChip accent={visitChip.accent} onClick={() => setActiveTab('history-risk')}>{visitChip.label}</HeroChip>
+                    <HeroChip accent={progChip.accent} onClick={() => setActiveTab('programmes')}>{progChip.label}</HeroChip>
+                    <HeroChip accent="#78716C">{stageChipValue}</HeroChip>
+                    {beneficiary.inactive_date && (
+                      <HeroChip accent="#BE185D">Exited {formatDisplayDate(beneficiary.inactive_date)}</HeroChip>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Signature impact card — anchors the hero with one headline number */}
-              <SignatureImpactCard
-                metric={pickSignatureMetric({
-                  beneficiary,
-                  donors,
-                  enrollmentCount,
-                  earliestEnrollDate,
-                  completePct,
-                })}
-                brandHex={brandHex}
-                className="no-print w-full md:w-[240px] md:order-2 md:self-stretch"
-              />
-
-              {/* Action buttons */}
-              <div className="no-print flex items-center gap-2 pb-[6px] md:order-3">
-                <button
-                  onClick={handleDownloadReport}
-                  disabled={generatingReport}
-                  title="Print record"
-                  className="h-[34px] w-[34px] rounded-[9px] flex items-center justify-center disabled:opacity-50"
-                  style={{ background: '#FFFFFF', border: '1px solid #E7E2DA', color: '#44403C' }}
-                >
-                  {generatingReport ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
-                </button>
+              {/* Completeness + Edit profile row */}
+              <div className="flex items-center gap-4 mt-5 pt-4" style={{ borderTop: '1px solid #E7E2DA' }}>
+                <span className="text-[11px] uppercase tracking-[0.6px] shrink-0" style={{ color: '#78716C', fontWeight: 600 }}>Profile</span>
+                <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: '#EDE5D8' }}>
+                  <div className="h-full transition-all" style={{ width: `${completePct}%`, background: brandHex }} />
+                </div>
+                <span className="text-[12px] tabular-nums shrink-0" style={{ color: pctColour, fontWeight: 600 }}>{completePct}%</span>
                 <button
                   onClick={handleEdit}
-                  className="inline-flex items-center gap-1.5 rounded-[9px] px-[14px] h-[34px] text-[13px]"
+                  className="no-print inline-flex items-center gap-1.5 rounded-md px-3.5 h-9 text-[13px] shrink-0"
                   style={{ background: brandHex, color: '#FFFFFF', fontWeight: 500 }}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   Edit profile
                 </button>
-                {isAdmin && (
-                  <button
-                    onClick={() => setShowDeleteDialog(true)}
-                    title="Delete"
-                    className="h-[34px] w-[34px] rounded-[9px] flex items-center justify-center"
-                    style={{ background: '#FFFFFF', border: '1px solid #E7E2DA', color: '#78716C' }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
             </div>
-
-            {/* Pills row */}
-            <div className="flex flex-wrap gap-1.5 mt-5 mb-4">
-              <Pill bg={statusLabel === 'Active' ? '#E6F5F3' : statusLabel === 'Exited' ? '#E7E2DA' : '#F5F0E8'} fg={statusLabel === 'Active' ? '#0A5449' : '#44403C'} dot={statusLabel === 'Active' ? '#1D9E8A' : '#78716C'}>{statusLabel}</Pill>
-              <Pill bg="#F5F0E8" fg="#57534E"><CategoryIcon className="h-3 w-3 mr-1 inline" />{isMinorAge ? 'Child beneficiary' : category === 'individual' ? 'Adult' : category[0].toUpperCase() + category.slice(1)}</Pill>
-              {(beneficiary.county || beneficiary.sub_county) && <Pill bg="#F5F0E8" fg="#57534E"><MapPin className="h-3 w-3 mr-1 inline" />{[beneficiary.county, beneficiary.sub_county].filter(Boolean).join(' · ')}</Pill>}
-              {beneficiary.vulnerability_level && (
-                <Pill
-                  bg={beneficiary.vulnerability_level === 'critical' ? '#FDF2F8' : beneficiary.vulnerability_level === 'high' ? '#FDF2F8' : beneficiary.vulnerability_level === 'medium' ? '#FEF3CD' : '#E6F5F3'}
-                  fg={beneficiary.vulnerability_level === 'critical' || beneficiary.vulnerability_level === 'high' ? '#831843' : beneficiary.vulnerability_level === 'medium' ? '#7A3A0A' : '#0A5449'}
-                >
-                  {`${String(beneficiary.vulnerability_level).charAt(0).toUpperCase()}${String(beneficiary.vulnerability_level).slice(1).toLowerCase()} vulnerability`}
-                </Pill>
-              )}
-              {(beneficiary as any).family_status && /orphan|child-headed/i.test(String((beneficiary as any).family_status)) && (
-                <Pill bg="#FDF2F8" fg="#831843" dot="#BE185D">{(beneficiary as any).family_status}</Pill>
-              )}
-              {vulnerabilityTags.slice(0, 3).map(t => <Pill key={t} bg="#FDF2F8" fg="#831843">{t}</Pill>)}
-              {vulnerabilityTags.length > 3 && <Pill bg="#F5F0E8" fg="#78716C">+{vulnerabilityTags.length - 3}</Pill>}
-            </div>
-
-            {/* Completeness bar */}
-            <div className="flex items-center gap-[10px]">
-              <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C' }}>Profile completeness</span>
-              <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: '#EDE5D8' }}>
-                <div className="h-full transition-all" style={{ width: `${completePct}%`, background: brandHex }} />
-              </div>
-              <span className="text-[11px] tabular-nums" style={{ color: pctColour, fontWeight: 500 }}>{completePct}%</span>
-              {missingFields.length > 0 && (
-                <span className="text-[11px] hidden md:inline truncate max-w-[260px]" style={{ color: '#A8A29E' }}>
-                  Missing: {missingFields.slice(0, 2).join(', ')}{missingFields.length > 2 ? '…' : ''}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ─── STATUS-AT-A-GLANCE STRIP ─── */}
-        <div className="no-print mt-4 grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-          {(() => {
-            const sponsored = donors.length > 0;
-            const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
-            const sponsorshipStatus = !sponsored
-              ? { label: 'Unsponsored', accent: '#A8A29E', tone: 'muted' as const }
-              : totalReceived > 0
-                ? { label: 'Sponsored', accent: '#1D9E8A', tone: 'success' as const }
-                : { label: 'Partially funded', accent: '#B45309', tone: 'warning' as const };
-
-            const riskLevel = (beneficiary.vulnerability_level || '').toLowerCase();
-            const riskMap: Record<string, { label: string; accent: string }> = {
-              low: { label: 'Low risk', accent: '#1D9E8A' },
-              medium: { label: 'Medium risk', accent: '#B45309' },
-              high: { label: 'High risk', accent: '#BE185D' },
-              critical: { label: 'Critical', accent: '#BE185D' },
-            };
-            const risk = riskMap[riskLevel];
-
-            const stageValue = isMinorAge
-              ? age !== null
-                ? `${age} yrs${beneficiary.grade ? ` · ${beneficiary.grade}` : beneficiary.academic_level ? ` · ${beneficiary.academic_level}` : ''}`
-                : null
-              : beneficiary.occupation
-                ? `Adult · ${beneficiary.occupation}`
-                : 'Adult';
-
-            return (
-              <>
-                <StatusPill
-                  icon={<Heart className="h-3.5 w-3.5" />}
-                  label="Sponsorship"
-                  value={sponsorshipStatus.label}
-                  accent={sponsorshipStatus.accent}
-                  onClick={() => setActiveTab('programmes')}
-                />
-                <StatusPill
-                  icon={<Shield className="h-3.5 w-3.5" />}
-                  label="Risk"
-                  value={risk?.label ?? null}
-                  accent={risk?.accent ?? '#A8A29E'}
-                  tooltip={!risk ? 'Not recorded' : undefined}
-                  onClick={() => setActiveTab('history-risk')}
-                />
-                <StatusPill
-                  icon={<Clock className="h-3.5 w-3.5" />}
-                  label="Last visit"
-                  value={daysSinceVisit === null ? null : visitLabel}
-                  accent={visitColour}
-                  tooltip={daysSinceVisit === null ? 'Not recorded' : undefined}
-                  onClick={() => setActiveTab('history-risk')}
-                />
-                <StatusPill
-                  icon={<FolderKanban className="h-3.5 w-3.5" />}
-                  label="Active programmes"
-                  value={String(enrollmentCount)}
-                  accent={enrollmentCount > 0 ? brandHex : '#A8A29E'}
-                  onClick={() => setActiveTab('programmes')}
-                />
-                <StatusPill
-                  icon={<Check className="h-3.5 w-3.5" />}
-                  label="Profile"
-                  value={`${completePct}% complete`}
-                  accent={pctColour}
-                  tooltip={missingFields.length > 0 ? `Missing: ${missingFields.slice(0, 4).join(', ')}${missingFields.length > 4 ? '…' : ''}` : undefined}
-                  onClick={handleEdit}
-                />
-                <StatusPill
-                  icon={<User className="h-3.5 w-3.5" />}
-                  label={isMinorAge ? 'Age / Stage' : 'Adult'}
-                  value={stageValue}
-                  accent="#78716C"
-                  tooltip={!stageValue ? 'Not recorded' : undefined}
-                />
-              </>
-            );
-          })()}
-        </div>
+          );
+        })()}
 
         {/* ─── MAIN CONTENT (Tabs) — full width after side-aside removal ─── */}
         <div className="print-stack mt-6 md:mt-8">
