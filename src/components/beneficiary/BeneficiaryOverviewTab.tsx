@@ -112,7 +112,7 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('display_name', 'Full name')}
             validate={(v) => !v ? 'Name is required' : null} />
           <EditableRow label="Date of birth" value={beneficiary.date_of_birth} canEdit={canSave} type="date"
-            display={(v) => v ? `${formatDisplayDate(v)} · ${age ?? '?'} yrs` : '—'}
+            display={(v) => v ? `${formatDisplayDate(v)} · ${age ?? '?'} yrs` : 'Not recorded'}
             onSave={makeSaver('date_of_birth', 'Date of birth')} />
           <EditableRow label="Gender" value={beneficiary.gender} canEdit={canSave} type="select" options={GENDER_OPTIONS}
             onSave={makeSaver('gender', 'Gender')} />
@@ -202,7 +202,7 @@ export function BeneficiaryOverviewTab({
         <PanelSection title="Vulnerability" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
             type="select" options={VULNERABILITY_OPTIONS}
-            display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : '—'}
+            display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : 'No risk recorded'}
             onSave={makeSaver('vulnerability_level', 'Vulnerability level')} />
           <EditableRow label="Primary need" value={beneficiary.primary_need} canEdit={canSave} type="text"
             onSave={makeSaver('primary_need', 'Primary need')} />
@@ -220,10 +220,10 @@ export function BeneficiaryOverviewTab({
         <PanelSection title="Consent" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Consent given" value={beneficiary.consent_given === null || beneficiary.consent_given === undefined ? null : String(!!beneficiary.consent_given)}
             canEdit={canSave} type="select" options={YES_NO}
-            display={(v) => v === null || v === '' ? '—' : v === 'true' || v === true ? 'Yes' : 'No'}
+            display={(v) => v === null || v === '' ? 'Not recorded' : v === 'true' || v === true ? 'Yes' : 'No'}
             onSave={boolSaver('consent_given', 'Consent given')} />
           <EditableRow label="Consent date" value={beneficiary.consent_date} canEdit={canSave} type="date"
-            display={(v) => v ? formatDisplayDate(v) : '—'}
+            display={(v) => v ? formatDisplayDate(v) : 'Not recorded'}
             onSave={makeSaver('consent_date', 'Consent date')} />
           <EditableRow label="Registration source" value={beneficiary.registration_source} canEdit={canSave} type="text"
             onSave={makeSaver('registration_source', 'Registration source')} />
