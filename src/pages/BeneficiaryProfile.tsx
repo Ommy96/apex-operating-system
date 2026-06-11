@@ -713,24 +713,29 @@ export default function BeneficiaryProfile() {
               </div>
             </div>
           )}
-          <div className="bp-card rounded-[16px] overflow-hidden" style={{ background: '#FFFFFF', border: '1px solid #E7E2DA' }}>
+          <div>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {/* Sand tab bar */}
-              <div className="no-print rounded-[10px] p-[3px] flex gap-[2px] mx-4 mt-4 overflow-x-auto no-scrollbar" style={{ background: '#F5F0E8' }}>
-                {tabs.map(tab => (
-                  <button
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-[7px] px-[10px] rounded-[8px] text-[12px] whitespace-nowrap transition-all"
-                    style={activeTab === tab.value
-                      ? { background: '#FFFFFF', color: '#1C1917', fontWeight: 500, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
-                      : { color: '#78716C' }
-                    }
-                  >
-                    <tab.icon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </button>
-                ))}
+              {/* Underline tab bar */}
+              <div className="no-print flex gap-1 overflow-x-auto no-scrollbar" style={{ borderBottom: '1px solid #E7E2DA' }}>
+                {tabs.map(tab => {
+                  const active = activeTab === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setActiveTab(tab.value)}
+                      className="relative px-3 py-3 text-[14px] whitespace-nowrap transition-colors"
+                      style={{ color: active ? '#1C1917' : '#78716C', fontWeight: 500 }}
+                    >
+                      {tab.label}
+                      {active && (
+                        <span
+                          className="absolute left-0 right-0 -bottom-px h-[3px] rounded-t-sm"
+                          style={{ background: brandHex }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* TAB: Programmes */}
