@@ -92,7 +92,7 @@ export function BeneficiaryOverviewTab({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 lg:gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 lg:gap-12">
       {/* Timeline column */}
       <div className="min-w-0">
         <ActivityTimeline
@@ -101,12 +101,13 @@ export function BeneficiaryOverviewTab({
           donors={donors}
           canLogVisit={canLogVisit}
           onLogVisit={onLogVisit}
+          signatureLine={signatureLine}
         />
       </div>
 
-      {/* Details side panel */}
-      <aside className="space-y-3">
-        <DetailsSection title="Personal" defaultOpen={!isMobile}>
+      {/* Details side panel — continuous list, no card chrome */}
+      <aside className="min-w-0">
+        <PanelSection title="Personal" first defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Full name" value={beneficiary.display_name} canEdit={canSave} type="text"
             onSave={makeSaver('display_name', 'Full name')}
             validate={(v) => !v ? 'Name is required' : null} />
