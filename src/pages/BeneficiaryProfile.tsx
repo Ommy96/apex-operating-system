@@ -781,6 +781,20 @@ export default function BeneficiaryProfile() {
                   userId={user?.id ?? null}
                   onLocalUpdate={applyLocal}
                   onAddGuardian={() => setEditOpen(true)}
+                  signatureLine={(() => {
+                    const m = pickSignatureMetric({ beneficiary, donors, enrollmentCount, earliestEnrollDate, completePct });
+                    let number = '';
+                    let rest = '';
+                    switch (m.kind) {
+                      case 'months_sponsored': number = String(m.months); rest = ` month${m.months === 1 ? '' : 's'} sponsored by ${m.sponsorName}`; break;
+                      case 'current_grade': number = m.grade; rest = ' — current grade'; break;
+                      case 'programmes_enrolled': number = String(m.count); rest = ` active programme${m.count === 1 ? '' : 's'}`; break;
+                      case 'vulnerability_score': number = m.level ? m.level[0].toUpperCase() + m.level.slice(1) : 'Unknown'; rest = ' vulnerability'; break;
+                      case 'members_reached': number = String(m.members); rest = ' members reached'; break;
+                      case 'completeness': number = `${m.pct}%`; rest = ' profile complete'; break;
+                    }
+                    return (<><span style={{ color: brandHex, fontWeight: 600 }}>{number}</span>{rest}</>);
+                  })()}
                 />
               </TabsContent>
 
