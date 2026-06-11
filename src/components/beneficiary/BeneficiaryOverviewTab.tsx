@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { formatDisplayDate } from '@/lib/dateUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { FieldVisibility } from '@/hooks/useFieldVisibility';
@@ -25,6 +24,8 @@ interface OverviewProps {
   onLocalUpdate?: (partial: Record<string, any>) => void;
   /** Opens the full edit sheet (used by the "Add guardian" empty-state CTA). */
   onAddGuardian?: () => void;
+  /** Pre-rendered signature impact line, shown above the activity timeline. */
+  signatureLine?: React.ReactNode;
 }
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -43,7 +44,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
-  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian,
+  canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian, signatureLine,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const age = visibility.age;
@@ -91,7 +92,7 @@ export function BeneficiaryOverviewTab({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 lg:gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 lg:gap-12">
       {/* Timeline column */}
       <div className="min-w-0">
         <ActivityTimeline
@@ -100,17 +101,18 @@ export function BeneficiaryOverviewTab({
           donors={donors}
           canLogVisit={canLogVisit}
           onLogVisit={onLogVisit}
+          signatureLine={signatureLine}
         />
       </div>
 
-      {/* Details side panel */}
-      <aside className="space-y-3">
-        <DetailsSection title="Personal" defaultOpen={!isMobile}>
+      {/* Details side panel — continuous list, no card chrome */}
+      <aside className="min-w-0">
+        <PanelSection title="Personal" first defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Full name" value={beneficiary.display_name} canEdit={canSave} type="text"
             onSave={makeSaver('display_name', 'Full name')}
             validate={(v) => !v ? 'Name is required' : null} />
           <EditableRow label="Date of birth" value={beneficiary.date_of_birth} canEdit={canSave} type="date"
-            display={(v) => v ? `${formatDisplayDate(v)} · ${age ?? '?'} yrs` : '—'}
+            display={(v) => v ? `${formatDisplayDate(v)} · ${age ?? '?'} yrs` : 'Not recorded'}
             onSave={makeSaver('date_of_birth', 'Date of birth')} />
           <EditableRow label="Gender" value={beneficiary.gender} canEdit={canSave} type="select" options={GENDER_OPTIONS}
             onSave={makeSaver('gender', 'Gender')} />
@@ -120,9 +122,9 @@ export function BeneficiaryOverviewTab({
             <EditableRow label="Marital status" value={beneficiary.marital_status} canEdit={canSave} type="select" options={MARITAL_OPTIONS}
               onSave={makeSaver('marital_status', 'Marital status')} />
           )}
-        </DetailsSection>
+        </PanelSection>
 
-        <DetailsSection title="Contact" defaultOpen={!isMobile}>
+        <PanelSection title="Contact" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
             validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
             onSave={makeSaver('phone', 'Phone')} />
@@ -140,8 +142,8 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('estate_village', 'Village / Estate')} />
           <EditableRow label="Address" value={beneficiary.address} canEdit={canSave} type="long-text"
             onSave={makeSaver('address', 'Address')} />
-        </DetailsSection>
-        <DetailsSection title="Family" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Family" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
@@ -190,17 +192,17 @@ export function BeneficiaryOverviewTab({
           <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
             <OutOfSystemContacts beneficiaryId={beneficiary.id} />
           </div>
-        </DetailsSection>
-        <DetailsSection title="Household" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Household" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
             validate={(v) => v != null && Number(v) < 0 ? 'Must be ≥ 0' : null}
             onSave={numSaver('household_size', 'Household size')} />
           <Row label="Household ID" value={beneficiary.household_id} />
-        </DetailsSection>
-        <DetailsSection title="Vulnerability" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Vulnerability" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
             type="select" options={VULNERABILITY_OPTIONS}
-            display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : '—'}
+            display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : 'No risk recorded'}
             onSave={makeSaver('vulnerability_level', 'Vulnerability level')} />
           <EditableRow label="Primary need" value={beneficiary.primary_need} canEdit={canSave} type="text"
             onSave={makeSaver('primary_need', 'Primary need')} />
@@ -214,55 +216,65 @@ export function BeneficiaryOverviewTab({
                   ))}
             </div>
           </div>
-        </DetailsSection>
-        <DetailsSection title="Consent" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Consent" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Consent given" value={beneficiary.consent_given === null || beneficiary.consent_given === undefined ? null : String(!!beneficiary.consent_given)}
             canEdit={canSave} type="select" options={YES_NO}
-            display={(v) => v === null || v === '' ? '—' : v === 'true' || v === true ? 'Yes' : 'No'}
+            display={(v) => v === null || v === '' ? 'Not recorded' : v === 'true' || v === true ? 'Yes' : 'No'}
             onSave={boolSaver('consent_given', 'Consent given')} />
           <EditableRow label="Consent date" value={beneficiary.consent_date} canEdit={canSave} type="date"
-            display={(v) => v ? formatDisplayDate(v) : '—'}
+            display={(v) => v ? formatDisplayDate(v) : 'Not recorded'}
             onSave={makeSaver('consent_date', 'Consent date')} />
           <EditableRow label="Registration source" value={beneficiary.registration_source} canEdit={canSave} type="text"
             onSave={makeSaver('registration_source', 'Registration source')} />
-        </DetailsSection>
+        </PanelSection>
       </aside>
     </div>
   );
 }
 
-function DetailsSection({
-  title, rows, children, defaultOpen = true,
-}: { title: string; rows?: Array<[string, any]>; children?: React.ReactNode; defaultOpen?: boolean }) {
+function PanelSection({
+  title, children, defaultOpen = true, isMobile = false, first = false,
+}: { title: string; children?: React.ReactNode; defaultOpen?: boolean; isMobile?: boolean; first?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen} className="rounded-[14px]" >
-      <div style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', borderRadius: 14 }}>
-        <CollapsibleTrigger className="w-full flex items-center justify-between px-5 py-3">
-          <span className="text-[13px]" style={{ color: '#1C1917', fontWeight: 600 }}>{title}</span>
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#78716C' }} />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-5 pb-4 pt-1" style={{ borderTop: '1px solid #EDE5D8' }}>
-            {rows?.map(([l, v]) => <Row key={l} label={l} value={v} />)}
-            {children}
-          </div>
-        </CollapsibleContent>
+  const wrapStyle: React.CSSProperties = first
+    ? {}
+    : { borderTop: '1px solid #ECE7DE', marginTop: 24, paddingTop: 24 };
+  if (isMobile) {
+    return (
+      <div style={wrapStyle}>
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          className="w-full flex items-center justify-between mb-3"
+        >
+          <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>{title}</span>
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#A8A29E' }} />
+        </button>
+        {open && <div>{children}</div>}
       </div>
-    </Collapsible>
+    );
+  }
+  return (
+    <div style={wrapStyle}>
+      <div className="mb-3 text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>
+        {title}
+      </div>
+      {children}
+    </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: any }) {
   const empty = value === null || value === undefined || value === '';
   return (
-    <div className="flex justify-between items-baseline gap-3 py-[7px]">
-      <span className="text-[11px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
+    <div className="flex justify-between items-baseline gap-3 py-[6px]">
+      <span className="text-[12px] flex-shrink-0" style={{ color: '#78716C', fontWeight: 500 }}>{label}</span>
       <span
-        className={`text-[13px] text-right ${empty ? 'italic' : ''}`}
+        className="text-[14px] text-right"
         style={{ color: empty ? '#A8A29E' : '#1C1917', fontWeight: empty ? 400 : 500, maxWidth: '60%', wordBreak: 'break-word' }}
       >
-        {empty ? '—' : String(value)}
+        {empty ? 'Not recorded' : String(value)}
       </span>
     </div>
   );
