@@ -122,9 +122,9 @@ export function BeneficiaryOverviewTab({
             <EditableRow label="Marital status" value={beneficiary.marital_status} canEdit={canSave} type="select" options={MARITAL_OPTIONS}
               onSave={makeSaver('marital_status', 'Marital status')} />
           )}
-        </DetailsSection>
+        </PanelSection>
 
-        <DetailsSection title="Contact" defaultOpen={!isMobile}>
+        <PanelSection title="Contact" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
             validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
             onSave={makeSaver('phone', 'Phone')} />
@@ -142,8 +142,8 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('estate_village', 'Village / Estate')} />
           <EditableRow label="Address" value={beneficiary.address} canEdit={canSave} type="long-text"
             onSave={makeSaver('address', 'Address')} />
-        </DetailsSection>
-        <DetailsSection title="Family" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Family" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
@@ -192,14 +192,14 @@ export function BeneficiaryOverviewTab({
           <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
             <OutOfSystemContacts beneficiaryId={beneficiary.id} />
           </div>
-        </DetailsSection>
-        <DetailsSection title="Household" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Household" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
             validate={(v) => v != null && Number(v) < 0 ? 'Must be ≥ 0' : null}
             onSave={numSaver('household_size', 'Household size')} />
           <Row label="Household ID" value={beneficiary.household_id} />
-        </DetailsSection>
-        <DetailsSection title="Vulnerability" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Vulnerability" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
             type="select" options={VULNERABILITY_OPTIONS}
             display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : '—'}
@@ -216,8 +216,8 @@ export function BeneficiaryOverviewTab({
                   ))}
             </div>
           </div>
-        </DetailsSection>
-        <DetailsSection title="Consent" defaultOpen={!isMobile}>
+        </PanelSection>
+        <PanelSection title="Consent" defaultOpen={!isMobile} isMobile={isMobile}>
           <EditableRow label="Consent given" value={beneficiary.consent_given === null || beneficiary.consent_given === undefined ? null : String(!!beneficiary.consent_given)}
             canEdit={canSave} type="select" options={YES_NO}
             display={(v) => v === null || v === '' ? '—' : v === 'true' || v === true ? 'Yes' : 'No'}
@@ -227,7 +227,7 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('consent_date', 'Consent date')} />
           <EditableRow label="Registration source" value={beneficiary.registration_source} canEdit={canSave} type="text"
             onSave={makeSaver('registration_source', 'Registration source')} />
-        </DetailsSection>
+        </PanelSection>
       </aside>
     </div>
   );
