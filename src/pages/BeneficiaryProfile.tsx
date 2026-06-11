@@ -919,6 +919,28 @@ function Pill({ children, bg, fg, dot }: { children: React.ReactNode; bg: string
   );
 }
 
+function HeroChip({
+  children,
+  accent,
+  onClick,
+}: {
+  children: React.ReactNode;
+  accent: string;
+  onClick?: () => void;
+}) {
+  const Tag: any = onClick ? 'button' : 'span';
+  return (
+    <Tag
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-md text-[12px] transition-colors ${onClick ? 'hover:bg-muted/60' : ''}`}
+      style={{ background: '#F7F5F1', color: '#1C1917', fontWeight: 500, border: '1px solid #ECE7DE' }}
+    >
+      <span className="h-3 w-[3px] rounded-sm" style={{ background: accent }} />
+      <span className="truncate">{children}</span>
+    </Tag>
+  );
+}
+
 function EmptySection({
   icon: Icon,
   message,
