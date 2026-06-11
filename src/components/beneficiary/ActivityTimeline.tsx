@@ -25,6 +25,8 @@ interface ActivityTimelineProps {
   donors?: Array<{ id: string; donor_name: string; donation_date: string | null; amount_received: number | null; program?: { name: string } | null }>;
   canLogVisit?: boolean;
   onLogVisit?: () => void;
+  /** Optional signature impact line (e.g. "2 months sponsored by NSP-AID") rendered above the summary. */
+  signatureLine?: React.ReactNode;
 }
 
 const CATEGORY_META: Record<EventCategory, { label: string; dot: string }> = {
@@ -52,7 +54,7 @@ const FILTERS: Array<{ key: 'all' | EventCategory; label: string }> = [
 
 const PAGE = 20;
 
-export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVisit, onLogVisit }: ActivityTimelineProps) {
+export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVisit, onLogVisit, signatureLine }: ActivityTimelineProps) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | EventCategory>('all');
@@ -330,6 +332,11 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
 
   return (
     <div>
+      {signatureLine && (
+        <div className="text-[15px] mb-1.5" style={{ color: '#1C1917', fontWeight: 500 }}>
+          {signatureLine}
+        </div>
+      )}
       {/* Summary line */}
       <div className="text-[12px] mb-3" style={{ color: '#78716C' }}>
         {events.length} events over {spanLabel}{recentLabel ? `, most recent ${recentLabel}` : ''}
@@ -358,21 +365,25 @@ export function ActivityTimeline({ beneficiaryId, beneficiary, donors, canLogVis
       </div>
 
       {/* Timeline rows */}
-      <div className="rounded-[14px] divide-y" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA', borderColor: '#EDE5D8' }}>
+      <div className="divide-y" style={{ borderColor: '#EDE5D8' }}>
         {shown.map(event => {
           const Icon = event.icon;
           const meta = CATEGORY_META[event.category];
           return (
-            <div key={event.id} className="flex items-start gap-3 px-4 py-3">
-              <span className="mt-1.5 h-2 w-2 rounded-full shrink-0" style={{ background: meta.dot }} />
-              <Icon className="h-4 w-4 mt-0.5 shrink-0" style={{ color: '#78716C' }} />
+            <div key={event.id} className="flex items-start gap-3 py-4">
+              <span
+                className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: `color-mix(in srgb, ${meta.dot} 14%, transparent)`, color: meta.dot }}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </span>
               <div className="flex-1 min-w-0">
-                <div className="text-[13px]" style={{ color: '#1C1917', fontWeight: 500 }}>{event.title}</div>
+                <div className="text-[14px]" style={{ color: '#1C1917', fontWeight: 600 }}>{event.title}</div>
                 {event.description && (
-                  <div className="text-[12px] mt-0.5 truncate" style={{ color: '#78716C' }}>{event.description}</div>
+                  <div className="text-[12px] mt-0.5 truncate" style={{ color: '#78716C', fontWeight: 500 }}>{event.description}</div>
                 )}
               </div>
-              <div className="text-[11px] tabular-nums shrink-0 pt-0.5" style={{ color: '#A8A29E' }}>
+              <div className="text-[12px] tabular-nums shrink-0 pt-1" style={{ color: '#78716C' }}>
                 {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               </div>
             </div>
