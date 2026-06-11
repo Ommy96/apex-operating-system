@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { formatDisplayDate } from '@/lib/dateUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { FieldVisibility } from '@/hooks/useFieldVisibility';
@@ -25,6 +24,8 @@ interface OverviewProps {
   onLocalUpdate?: (partial: Record<string, any>) => void;
   /** Opens the full edit sheet (used by the "Add guardian" empty-state CTA). */
   onAddGuardian?: () => void;
+  /** Pre-rendered signature impact line, shown above the activity timeline. */
+  signatureLine?: React.ReactNode;
 }
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
