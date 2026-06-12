@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { differenceInDays, subDays } from "date-fns";
+import { isCompletedStatus, isResolvedStatus } from "@/lib/statusHelpers";
 
 export type RiskSeverity = "critical" | "high" | "medium" | "low";
 
@@ -53,7 +54,7 @@ export function useRiskAssessment() {
       });
 
       // Overdue activities
-      const overdueActivities = activities?.filter(a => a.status !== "completed" && a.planned_date && new Date(a.planned_date) < subDays(new Date(), 0)) || [];
+      const overdueActivities = activities?.filter(a => !isCompletedStatus(a.status) && a.planned_date && new Date(a.planned_date) < subDays(new Date(), 0)) || [];
       if (overdueActivities.length > 3) {
         risks.push({ id: "overdue-activities", severity: "high", category: "programme", description: `${overdueActivities.length} activities are overdue`, entityName: "Activities", link: "/programs" });
       } else if (overdueActivities.length > 0) {
@@ -61,7 +62,7 @@ export function useRiskAssessment() {
       }
 
       // Unresolved complaints
-      const unresolvedComplaints = complaints?.filter(c => c.status !== "resolved" && differenceInDays(new Date(), new Date(c.created_at)) > 7) || [];
+      const unresolvedComplaints = complaints?.filter(c => !isResolvedStatus(c.status) && differenceInDays(new Date(), new Date(c.created_at)) > 7) || [];
       if (unresolvedComplaints.length > 0) {
         const severity: RiskSeverity = unresolvedComplaints.some(c => differenceInDays(new Date(), new Date(c.created_at)) > 14) ? "critical" : "high";
         risks.push({ id: "unresolved-complaints", severity, category: "compliance", description: `${unresolvedComplaints.length} complaints unresolved for 7+ days`, entityName: "Complaints", link: "/complaint-management" });
@@ -75,7 +76,7 @@ export function useRiskAssessment() {
       }
 
       // No-activity activities (activities with no attendance)
-      const noAttendance = activities?.filter(a => a.status === "completed") || [];
+      const noAttendance = activities?.filter(a => isCompletedStatus(a.status)) || [];
       if (noAttendance.length > 10) {
         risks.push({ id: "no-attendance-data", severity: "low", category: "data_quality", description: `${noAttendance.length} completed activities — verify attendance data`, entityName: "Activities" });
       }
@@ -87,5 +88,7 @@ export function useRiskAssessment() {
     },
     enabled: !!orgId,
     refetchInterval: 5 * 60 * 1000,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 }

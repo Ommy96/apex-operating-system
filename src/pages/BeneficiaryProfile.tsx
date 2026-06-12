@@ -163,6 +163,7 @@ export default function BeneficiaryProfile() {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [editOpen, setEditOpen] = useState(false);
+  const [enrolmentOpen, setEnrolmentOpen] = useState(false);
   const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
 
   // Quick stats
@@ -744,23 +745,9 @@ export default function BeneficiaryProfile() {
                   beneficiaryId={beneficiary.id}
                   organizationId={currentOrganization?.organization_id ?? null}
                   canEdit={canEditInline}
-                  onEnrol={() => {
-                    const el = document.getElementById('beneficiary-manage-enrolments');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  onAddDonor={() => {
-                    const el = document.getElementById('beneficiary-manage-enrolments');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
+                  onEnrol={() => setEnrolmentOpen(true)}
+                  onAddDonor={() => setEnrolmentOpen(true)}
                 />
-                <details id="beneficiary-manage-enrolments" className="rounded-lg border border-border bg-card">
-                  <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground select-none">
-                    Manage enrolments & donations
-                  </summary>
-                  <div className="p-4 border-t border-border">
-                    <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} showTitle={false} />
-                  </div>
-                </details>
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
@@ -882,7 +869,14 @@ export default function BeneficiaryProfile() {
                     currentLevel={beneficiary.academic_level}
                     status={beneficiary.status}
                   />
-                  <BeneficiaryAcademicsTab beneficiaryId={beneficiary.id} />
+                  <BeneficiaryAcademicsTab
+                    beneficiaryId={beneficiary.id}
+                    beneficiary={beneficiary as any}
+                    organizationId={currentOrganization?.organization_id ?? null}
+                    canEdit={canEditInline}
+                    userId={user?.id ?? null}
+                    onLocalUpdate={applyLocal}
+                  />
                 </TabsContent>
               )}
             </Tabs>
@@ -905,6 +899,19 @@ export default function BeneficiaryProfile() {
           </SheetHeader>
           <div className="mt-5 pb-6">
             <BeneficiaryForm beneficiary={beneficiary} onSuccess={handleEditSuccess} onCancel={() => setEditOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Enrolment / donation manager */}
+      <Sheet open={enrolmentOpen} onOpenChange={setEnrolmentOpen}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-3xl">
+          <SheetHeader>
+            <SheetTitle>Manage enrolments & sponsorship</SheetTitle>
+            <SheetDescription>Enrol {beneficiary.display_name} in a programme or record a sponsor contribution.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-5 pb-6">
+            <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} showTitle={false} />
           </div>
         </SheetContent>
       </Sheet>

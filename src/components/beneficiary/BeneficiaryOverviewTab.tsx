@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
 import { formatDisplayDate } from '@/lib/dateUtils';
@@ -47,6 +47,13 @@ export function BeneficiaryOverviewTab({
   canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian, signatureLine,
 }: OverviewProps) {
   const isMobile = useIsMobile();
+  const SECTION_KEYS = ['personal', 'contact', 'family', 'household', 'vulnerability', 'consent'] as const;
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const toggleSection = (k: string) =>
+    setOpenSections(s => ({ ...s, [k]: !s[k] }));
+  const allOpen = SECTION_KEYS.every(k => !!openSections[k]);
+  const setAll = (v: boolean) =>
+    setOpenSections(Object.fromEntries(SECTION_KEYS.map(k => [k, v])));
   const age = visibility.age;
   const isMinorAge = visibility.isMinor;
   const vulnerabilityTags: string[] = beneficiary.vulnerability_tags || [];
@@ -107,7 +114,18 @@ export function BeneficiaryOverviewTab({
 
       {/* Details side panel — continuous list, no card chrome */}
       <aside className="min-w-0">
-        <PanelSection title="Personal" first defaultOpen={!isMobile} isMobile={isMobile}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>Details</span>
+          <button
+            type="button"
+            onClick={() => setAll(!allOpen)}
+            className="text-[12px]"
+            style={{ color: '#78716C', fontWeight: 500, fontFamily: 'DM Sans, sans-serif' }}
+          >
+            {allOpen ? 'Collapse all' : 'Expand all'}
+          </button>
+        </div>
+        <PanelSection title="Personal" first open={!!openSections.personal} onToggle={() => toggleSection('personal')}>
           <EditableRow label="Full name" value={beneficiary.display_name} canEdit={canSave} type="text"
             onSave={makeSaver('display_name', 'Full name')}
             validate={(v) => !v ? 'Name is required' : null} />
@@ -124,7 +142,7 @@ export function BeneficiaryOverviewTab({
           )}
         </PanelSection>
 
-        <PanelSection title="Contact" defaultOpen={!isMobile} isMobile={isMobile}>
+        <PanelSection title="Contact" open={!!openSections.contact} onToggle={() => toggleSection('contact')}>
           <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
             validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
             onSave={makeSaver('phone', 'Phone')} />
@@ -143,7 +161,7 @@ export function BeneficiaryOverviewTab({
           <EditableRow label="Address" value={beneficiary.address} canEdit={canSave} type="long-text"
             onSave={makeSaver('address', 'Address')} />
         </PanelSection>
-        <PanelSection title="Family" defaultOpen={!isMobile} isMobile={isMobile}>
+        <PanelSection title="Family" open={!!openSections.family} onToggle={() => toggleSection('family')}>
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
@@ -193,13 +211,13 @@ export function BeneficiaryOverviewTab({
             <OutOfSystemContacts beneficiaryId={beneficiary.id} />
           </div>
         </PanelSection>
-        <PanelSection title="Household" defaultOpen={!isMobile} isMobile={isMobile}>
+        <PanelSection title="Household" open={!!openSections.household} onToggle={() => toggleSection('household')}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
             validate={(v) => v != null && Number(v) < 0 ? 'Must be ≥ 0' : null}
             onSave={numSaver('household_size', 'Household size')} />
           <Row label="Household ID" value={beneficiary.household_id} />
         </PanelSection>
-        <PanelSection title="Vulnerability" defaultOpen={!isMobile} isMobile={isMobile}>
+        <PanelSection title="Vulnerability" open={!!openSections.vulnerability} onToggle={() => toggleSection('vulnerability')}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
             type="select" options={VULNERABILITY_OPTIONS}
             display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : 'No risk recorded'}
@@ -217,7 +235,7 @@ export function BeneficiaryOverviewTab({
             </div>
           </div>
         </PanelSection>
-        <PanelSection title="Consent" defaultOpen={!isMobile} isMobile={isMobile}>
+        <PanelSection title="Consent" open={!!openSections.consent} onToggle={() => toggleSection('consent')}>
           <EditableRow label="Consent given" value={beneficiary.consent_given === null || beneficiary.consent_given === undefined ? null : String(!!beneficiary.consent_given)}
             canEdit={canSave} type="select" options={YES_NO}
             display={(v) => v === null || v === '' ? 'Not recorded' : v === 'true' || v === true ? 'Yes' : 'No'}
@@ -234,33 +252,23 @@ export function BeneficiaryOverviewTab({
 }
 
 function PanelSection({
-  title, children, defaultOpen = true, isMobile = false, first = false,
-}: { title: string; children?: React.ReactNode; defaultOpen?: boolean; isMobile?: boolean; first?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+  title, children, open, onToggle, first = false,
+}: { title: string; children?: React.ReactNode; open: boolean; onToggle: () => void; first?: boolean }) {
   const wrapStyle: React.CSSProperties = first
     ? {}
-    : { borderTop: '1px solid #ECE7DE', marginTop: 24, paddingTop: 24 };
-  if (isMobile) {
-    return (
-      <div style={wrapStyle}>
-        <button
-          type="button"
-          onClick={() => setOpen(v => !v)}
-          className="w-full flex items-center justify-between mb-3"
-        >
-          <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>{title}</span>
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#A8A29E' }} />
-        </button>
-        {open && <div>{children}</div>}
-      </div>
-    );
-  }
+    : { borderTop: '1px solid #ECE7DE', marginTop: 16, paddingTop: 16 };
   return (
     <div style={wrapStyle}>
-      <div className="mb-3 text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600 }}>
-        {title}
-      </div>
-      {children}
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between py-1 group"
+      >
+        <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600, fontFamily: 'DM Sans, sans-serif' }}>{title}</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#A8A29E' }} />
+      </button>
+      {open && <div className="mt-2">{children}</div>}
     </div>
   );
 }

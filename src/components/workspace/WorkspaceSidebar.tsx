@@ -1,4 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -203,6 +205,61 @@ export function WorkspaceSidebar() {
     },
   ];
 
+  // ── Collapsible groups state ──
+  const storageKey = useMemo(
+    () => `ws-sidebar-groups:${user?.id ?? 'anon'}`,
+    [user?.id],
+  );
+
+  const groupContainsActive = (group: MenuGroup) =>
+    group.items.some(i => i.show && isActive(i.url));
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => ({}));
+  const [hydrated, setHydrated] = useState(false);
+
+  // Hydrate from localStorage once (per user); else default to closed + auto-open active group
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? window.localStorage.getItem(storageKey) : null;
+      if (raw) {
+        setOpenGroups(JSON.parse(raw));
+      } else {
+        const next: Record<string, boolean> = {};
+        menuGroups.forEach(g => {
+          if (groupContainsActive(g)) next[g.label] = true;
+        });
+        setOpenGroups(next);
+      }
+    } catch {
+      /* ignore */
+    }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  // Also ensure active route's group is open after navigation
+  useEffect(() => {
+    if (!hydrated) return;
+    setOpenGroups(prev => {
+      const next = { ...prev };
+      let changed = false;
+      menuGroups.forEach(g => {
+        if (groupContainsActive(g) && !next[g.label]) { next[g.label] = true; changed = true; }
+      });
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPath, hydrated]);
+
+  // Persist
+  useEffect(() => {
+    if (!hydrated) return;
+    try { window.localStorage.setItem(storageKey, JSON.stringify(openGroups)); } catch { /* ignore */ }
+  }, [openGroups, storageKey, hydrated]);
+
+  const toggleGroup = (label: string) =>
+    setOpenGroups(s => ({ ...s, [label]: !s[label] }));
+
   return (
     <TooltipProvider>
       <Sidebar 
@@ -238,27 +295,47 @@ export function WorkspaceSidebar() {
           {menuGroups.map((group) => {
             const visibleItems = group.items.filter(i => i.show);
             if (visibleItems.length === 0) return null;
+            const isFlat = group.label === "Home" || visibleItems.length === 1;
+            const isOpen = isCollapsed || isFlat || !!openGroups[group.label];
 
             return (
               <SidebarGroup key={group.label} className="mt-1 first:mt-0">
-                {!isCollapsed && (
+                {!isCollapsed && !isFlat && (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.label)}
+                    aria-expanded={isOpen}
+                    className="w-full flex items-center justify-between px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring rounded-sm"
+                  >
+                    <span>{group.label}</span>
+                    <ChevronDown
+                      className={cn(
+                        "h-3 w-3 transition-transform",
+                        isOpen ? "rotate-180" : "",
+                      )}
+                    />
+                  </button>
+                )}
+                {!isCollapsed && isFlat && (
                   <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted mb-1">
                     {group.label}
                   </SidebarGroupLabel>
                 )}
                 <SidebarGroupContent>
-                  <SidebarMenu className="space-y-0.5">
-                    {visibleItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <MenuItem 
-                          item={item} 
-                          isCollapsed={isCollapsed} 
-                          isActive={isActive} 
-                          onClick={handleNavClick} 
-                        />
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
+                  {isOpen && (
+                    <SidebarMenu className="space-y-0.5 mt-0.5">
+                      {visibleItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <MenuItem 
+                            item={item} 
+                            isCollapsed={isCollapsed} 
+                            isActive={isActive} 
+                            onClick={handleNavClick} 
+                          />
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  )}
                 </SidebarGroupContent>
               </SidebarGroup>
             );
