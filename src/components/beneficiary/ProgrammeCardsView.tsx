@@ -159,100 +159,7 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
 
   return (
     <div className="space-y-6">
-      {/* SPONSORSHIP STRIP */}
-      {sponsorships.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {sponsorships.map((s) => {
-            const thisYear = s.entries
-              .filter((e) => e.donation_date && e.donation_date >= yearStart)
-              .reduce((sum, e) => sum + (e.amount_received || 0), 0);
-            const lastUpdate = s.entries[0]?.notes || (s.last ? `Last contribution ${format(new Date(s.last), 'MMM d, yyyy')}` : null);
-            return (
-              <Card key={s.name} className="border-l-[3px]" style={{ borderLeftColor: 'hsl(var(--primary))' }}>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="h-11 w-11 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
-                      style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}
-                    >
-                      {initials(s.name) || <Heart className="h-5 w-5" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-[15px]" style={{ fontFamily: 'DM Sans, sans-serif' }}>{s.name}</span>
-                        <Badge variant="outline" className="text-[10px] h-5">Sponsor</Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
-                        {s.first && <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" />Since {format(new Date(s.first), 'MMM yyyy')}</span>}
-                        <span>· {s.entries.length} contribution{s.entries.length !== 1 ? 's' : ''}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <FundingCoverageBar totalReceived={s.total} compact />
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-md bg-muted/40 px-2 py-1.5">
-                      <div className="text-muted-foreground text-[10px]">This year</div>
-                      <div className="font-semibold font-mono">KES {thisYear.toLocaleString()}</div>
-                    </div>
-                    <div className="rounded-md bg-muted/40 px-2 py-1.5">
-                      <div className="text-muted-foreground text-[10px]">Lifetime</div>
-                      <div className="font-semibold font-mono">KES {s.total.toLocaleString()}</div>
-                    </div>
-                  </div>
-
-                  {lastUpdate && (
-                    <p className="text-xs text-muted-foreground line-clamp-2 italic">“{lastUpdate}”</p>
-                  )}
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {canEdit && (
-                      <>
-                        <Button size="sm" variant="outline" className="h-7 text-xs gap-1" disabled title="Coming soon">
-                          <Send className="h-3 w-3" /> Send update
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-xs gap-1" disabled title="Coming soon">
-                          <FileText className="h-3 w-3" /> Sponsor report
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-xs gap-1"
-                      onClick={() => navigate('/donors')}
-                    >
-                      <ExternalLink className="h-3 w-3" /> View sponsor
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <Card className="border-dashed border-primary/30 bg-primary/5">
-          <CardContent className="p-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold">Available for sponsorship</div>
-                <p className="text-xs text-muted-foreground">No sponsor linked yet — match this beneficiary with a donor.</p>
-              </div>
-            </div>
-            {canEdit && onAddDonor && (
-              <Button size="sm" variant="primary" onClick={onAddDonor} className="gap-1">
-                <Heart className="h-3.5 w-3.5" /> Find sponsor
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* PROGRAMME GRID */}
+      {/* PROGRAMME GRID (primary story) */}
       <div className="flex items-center justify-between">
         <h3 className="text-[14px] font-semibold" style={{ color: '#1C1917' }}>Programme enrolments</h3>
         {canEdit && programmes.length > 0 && (
@@ -401,6 +308,113 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
             );
           })}
         </div>
+      )}
+
+      {/* SPONSORSHIP STRIP (supporting context) */}
+      <div className="flex items-center justify-between pt-2">
+        <h3 className="text-[14px] font-semibold" style={{ color: '#1C1917' }}>Sponsorship</h3>
+        {canEdit && sponsorships.length > 0 && onAddDonor && (
+          <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={onAddDonor}>
+            <Heart className="h-3.5 w-3.5" /> Add sponsor
+          </Button>
+        )}
+      </div>
+      {sponsorships.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {sponsorships.map((s) => {
+            const thisYear = s.entries
+              .filter((e) => e.donation_date && e.donation_date >= yearStart)
+              .reduce((sum, e) => sum + (e.amount_received || 0), 0);
+            const programmeName = s.entries.find(e => e.program?.name)?.program?.name;
+            const range = s.first
+              ? `${format(new Date(s.first), 'MMM yyyy')} – ${s.last ? format(new Date(s.last), 'MMM yyyy') : 'present'}`
+              : null;
+            const subline = [programmeName, range].filter(Boolean).join(' · ');
+            return (
+              <Card key={s.name} className="border-l-[3px]" style={{ borderLeftColor: 'hsl(var(--primary))' }}>
+                <CardContent className="p-4 space-y-3">
+                  {/* Top row — avatar + name + badge, vertically centered */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
+                      style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}
+                    >
+                      {initials(s.name) || <Heart className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-[14px] truncate" style={{ fontFamily: 'DM Sans, sans-serif' }}>{s.name}</span>
+                        <Badge variant="outline" className="text-[10px] h-5 shrink-0">Sponsor</Badge>
+                      </div>
+                      {subline && (
+                        <div className="text-[11px] text-muted-foreground truncate mt-0.5">{subline}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Two equal stat tiles */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">This year</div>
+                      <div className="font-semibold text-[13px] tabular-nums">
+                        <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
+                        {thisYear.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Lifetime</div>
+                      <div className="font-semibold text-[13px] tabular-nums">
+                        <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
+                        {s.total.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action row — right-aligned, equal height */}
+                  <div className="flex items-center justify-end gap-1.5 pt-1">
+                    {canEdit && (
+                      <>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
+                          <Send className="h-3 w-3" /> Send update
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
+                          <FileText className="h-3 w-3" /> Report
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[11px] gap-1"
+                      onClick={() => navigate('/donors')}
+                    >
+                      <ExternalLink className="h-3 w-3" /> View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <Card className="border-dashed border-primary/30 bg-primary/5">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold">Available for sponsorship</div>
+                <p className="text-xs text-muted-foreground">No sponsor linked yet — match this beneficiary with a donor.</p>
+              </div>
+            </div>
+            {canEdit && onAddDonor && (
+              <Button size="sm" variant="primary" onClick={onAddDonor} className="gap-1">
+                <Heart className="h-3.5 w-3.5" /> Find sponsor
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
