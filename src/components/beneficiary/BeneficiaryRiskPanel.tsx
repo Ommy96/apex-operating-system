@@ -1,9 +1,13 @@
 import { useBeneficiaryRisk, RiskFactor } from "@/hooks/useBeneficiaryRisk";
+import { useQueryClient } from "@tanstack/react-query";
+import { useOrganization } from "@/hooks/useOrganization";
+import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldAlert, DollarSign, GraduationCap, Users, HeartPulse, AlertTriangle, ShieldCheck } from "lucide-react";
+import { ShieldAlert, DollarSign, GraduationCap, Users, HeartPulse, AlertTriangle, ShieldCheck, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const categoryConfig = {
   funding: { icon: DollarSign, label: "Funding", color: "text-warning" },
@@ -23,7 +27,19 @@ interface Props {
 }
 
 export function BeneficiaryRiskPanel({ beneficiaryId }: Props) {
-  const { data: risk, isLoading } = useBeneficiaryRisk(beneficiaryId);
+  const query = useBeneficiaryRisk(beneficiaryId);
+  const { data: risk, isLoading, dataUpdatedAt, isFetching } = query;
+  const queryClient = useQueryClient();
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
+
+  const lastUpdatedLabel = dataUpdatedAt
+    ? `Last updated · ${formatDistanceToNow(new Date(dataUpdatedAt), { addSuffix: true })}`
+    : "";
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["beneficiary-risk", beneficiaryId, orgId] });
+  };
 
   if (isLoading) {
     return (
@@ -41,6 +57,13 @@ export function BeneficiaryRiskPanel({ beneficiaryId }: Props) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span>{lastUpdatedLabel}</span>
+        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" onClick={refresh} disabled={isFetching}>
+          <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+          <span className="text-[11px]">Refresh</span>
+        </Button>
+      </div>
       {/* Risk Score Card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
