@@ -43,9 +43,16 @@ import {
   BookOpen,
   Calendar
 } from "lucide-react";
+import { InlineEditableField } from "./InlineEditableField";
+import { saveBeneficiaryField } from "@/lib/saveBeneficiaryField";
 
 interface BeneficiaryAcademicsTabProps {
   beneficiaryId: string;
+  beneficiary?: any;
+  organizationId?: string | null;
+  canEdit?: boolean;
+  userId?: string | null;
+  onLocalUpdate?: (partial: Record<string, any>) => void;
 }
 
 interface AcademicRecord {
@@ -99,8 +106,16 @@ const initialFormState: FormState = {
   remarks: "",
 };
 
-export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsTabProps) {
+export function BeneficiaryAcademicsTab({
+  beneficiaryId,
+  beneficiary,
+  organizationId: orgIdProp,
+  canEdit = false,
+  userId,
+  onLocalUpdate,
+}: BeneficiaryAcademicsTabProps) {
   const { currentOrganization } = useOrganization();
+  const organizationId = orgIdProp ?? currentOrganization?.organization_id ?? null;
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AcademicRecord | null>(null);
@@ -112,7 +127,7 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
     queryFn: async () => {
       const { data, error } = await supabase
         .from("beneficiary_academics")
-        .select("*")
+        .select("*, institution_name")
         .eq("beneficiary_id", beneficiaryId)
         .order("academic_year", { ascending: false })
         .order("term", { ascending: false });
@@ -246,6 +261,77 @@ export function BeneficiaryAcademicsTab({ beneficiaryId }: BeneficiaryAcademicsT
 
   return (
     <div className="space-y-6">
+      {/* Institution header strip */}
+      {beneficiary && (() => {
+        const institutionName =
+          beneficiary.institution_name ||
+          (records.find((r: any) => r.institution_name)?.institution_name as string | undefined) ||
+          "";
+        const subParts = [
+          beneficiary.institution_type,
+          beneficiary.grade || beneficiary.academic_level,
+          beneficiary.sub_county || beneficiary.county,
+        ].filter(Boolean);
+
+        const saveInstitution = async (newValue: any) => {
+          if (!organizationId) return;
+          await saveBeneficiaryField({
+            beneficiaryId,
+            organizationId,
+            field: "institution_name",
+            label: "Institution",
+            newValue: newValue || null,
+            oldValue: beneficiary.institution_name ?? null,
+            userId: userId ?? null,
+            applyLocal: (v) => onLocalUpdate?.({ institution_name: v }),
+          });
+        };
+
+        return (
+          <div
+            className="rounded-[12px] p-4 flex items-start gap-3"
+            style={{ background: "hsl(var(--muted) / 0.4)", border: "1px solid hsl(var(--border))" }}
+          >
+            <div
+              className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }}
+            >
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[15px] font-semibold leading-tight" style={{ fontFamily: "DM Sans, sans-serif" }}>
+                {institutionName ? (
+                  <InlineEditableField
+                    bare
+                    value={institutionName}
+                    type="text"
+                    canEdit={canEdit}
+                    onSave={saveInstitution}
+                    placeholder="Set institution"
+                  />
+                ) : canEdit ? (
+                  <InlineEditableField
+                    bare
+                    value={null}
+                    type="text"
+                    canEdit={canEdit}
+                    onSave={saveInstitution}
+                    placeholder="No institution recorded — click to add"
+                  />
+                ) : (
+                  <span className="text-muted-foreground italic font-normal">No institution recorded</span>
+                )}
+              </div>
+              {subParts.length > 0 && (
+                <div className="text-[12px] text-muted-foreground mt-0.5 truncate">
+                  {subParts.join(" · ")}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
