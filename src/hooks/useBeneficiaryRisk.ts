@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { isActiveStatus, normaliseStatus } from "@/lib/statusHelpers";
 
 export interface RiskFactor {
   category: "funding" | "academic" | "participation" | "welfare";
@@ -86,7 +87,7 @@ export function useBeneficiaryRisk(beneficiaryId: string | undefined) {
       }
 
       // 3. PARTICIPATION RISK
-      const activeEnrollments = (enrollments || []).filter(e => e.status === "active");
+      const activeEnrollments = (enrollments || []).filter(e => isActiveStatus(e.status));
       if (enrollments && enrollments.length > 0 && activeEnrollments.length === 0) {
         factors.push({ category: "participation", label: "No Active Program Enrollment", points: 20, detail: "Previously enrolled but no current active programs" });
       } else if (!enrollments || enrollments.length === 0) {
@@ -137,7 +138,8 @@ export function useBeneficiaryRisk(beneficiaryId: string | undefined) {
       return { score, level: computeRiskLevel(score), factors };
     },
     enabled: !!beneficiaryId && !!orgId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -160,7 +162,7 @@ export function useOrgRiskSummary() {
         { data: allVisitations },
         { data: programs },
       ] = await Promise.all([
-        supabase.from("beneficiaries").select("id, display_name, status, photo_url, beneficiary_type").eq("organization_id", orgId).eq("status", "active").is("deleted_at", null),
+        supabase.from("beneficiaries").select("id, display_name, status, photo_url, beneficiary_type").eq("organization_id", orgId).ilike("status", "active").is("deleted_at", null),
         supabase.from("beneficiary_donors").select("beneficiary_id, amount_received").eq("organization_id", orgId),
         supabase.from("beneficiary_services").select("beneficiary_id, status").eq("organization_id", orgId),
         supabase.from("beneficiary_progression_history").select("beneficiary_id, is_repeating").eq("organization_id", orgId),
@@ -182,7 +184,9 @@ export function useOrgRiskSummary() {
         if (bRepeats.length >= 1) score += 15;
 
         const bEnrollments = (allEnrollments || []).filter(e => e.beneficiary_id === b.id);
+        const bActiveEnrollments = bEnrollments.filter(e => isActiveStatus(e.status));
         if (bEnrollments.length === 0) score += 15;
+        else if (bActiveEnrollments.length === 0) score += 10;
 
         const bVisits = (allVisitations || []).filter(v => v.beneficiary_id === b.id);
         if (bVisits.length === 0) score += 15;
@@ -205,7 +209,7 @@ export function useOrgRiskSummary() {
 
       // Program risk
       const programRisks = (programs || []).map(p => {
-        const enrolled = (allEnrollments || []).filter(e => e.status === "active");
+        const enrolled = (allEnrollments || []).filter(e => isActiveStatus(e.status));
         const total = enrolled.length || 1;
         // Simplified program risk
         return { id: p.id, name: p.name, status: p.status, enrolledCount: enrolled.length };
@@ -214,6 +218,7 @@ export function useOrgRiskSummary() {
       return { highRisk, mediumRisk, lowRisk, topRisks, programRisks, fundingAtRisk: unfundedCount };
     },
     enabled: !!orgId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 }
