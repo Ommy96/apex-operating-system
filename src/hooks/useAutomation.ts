@@ -274,12 +274,12 @@ export function useAutomation() {
       ]);
 
       const totalExpenses = (expenses.data || []).reduce((sum, e) => sum + (e.amount || 0), 0);
-      const approvedExpenses = (expenses.data || []).filter(e => e.status === "approved").reduce((sum, e) => sum + (e.amount || 0), 0);
+      const approvedExpenses = (expenses.data || []).filter(e => (e.status || "").toLowerCase() === "approved").reduce((sum, e) => sum + (e.amount || 0), 0);
 
       const generatedData = {
         summary: {
           total_beneficiaries: beneficiaries.count || 0,
-          active_beneficiaries: (beneficiaries.data || []).filter(b => b.status === "active").length,
+          active_beneficiaries: (beneficiaries.data || []).filter(b => (b.status || "").toLowerCase() === "active").length,
           total_programs: programs.count || 0,
           active_programs: (programs.data || []).filter(p => p.is_active).length,
           total_expenditure: totalExpenses,
