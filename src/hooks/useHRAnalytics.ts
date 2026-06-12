@@ -100,7 +100,7 @@ export function useHRAnalytics() {
       // Volunteer retention (active >= 6 months / total)
       const sixMonthsAgo = new Date(Date.now() - 182 * 86400_000);
       const retainedVolunteers = v.filter(
-        (x) => x.status === "active" && x.start_date && new Date(x.start_date) <= sixMonthsAgo,
+        (x) => (x.status || "").toLowerCase() === "active" && x.start_date && new Date(x.start_date) <= sixMonthsAgo,
       ).length;
       const retentionRate = v.length ? (retainedVolunteers / v.length) * 100 : 0;
 
@@ -117,7 +117,7 @@ export function useHRAnalytics() {
 
       // Tasks
       const overdueTasks = t.filter(
-        (x) => x.status !== "completed" && x.due_date && new Date(x.due_date) < new Date(),
+        (x) => (x.status || "").toLowerCase() !== "completed" && x.due_date && new Date(x.due_date) < new Date(),
       ).length;
       const tasksByStatus = t.reduce<Record<string, number>>((acc, x) => {
         acc[x.status] = (acc[x.status] ?? 0) + 1;
@@ -130,7 +130,7 @@ export function useHRAnalytics() {
       return {
         totalStaff: m.length,
         totalVolunteers: v.length,
-        activeVolunteers: v.filter((x) => x.status === "active").length,
+        activeVolunteers: v.filter((x) => (x.status || "").toLowerCase() === "active").length,
         pendingLeave,
         approvedLeaveDays,
         activeFieldStaff,
