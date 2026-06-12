@@ -65,9 +65,9 @@ export function useBeneficiaryIntelligence(filters: AnalyticsFilters) {
 
       // KPIs
       const total = filteredBen.length;
-      const active = filteredBen.filter((b) => b.status === "active").length;
-      const inactive = filteredBen.filter((b) => b.status === "inactive").length;
-      const exited = filteredBen.filter((b) => b.exit_reason || b.status === "exited").length;
+      const active = filteredBen.filter((b) => (b.status || "").toLowerCase() === "active").length;
+      const inactive = filteredBen.filter((b) => (b.status || "").toLowerCase() === "inactive").length;
+      const exited = filteredBen.filter((b) => b.exit_reason || (b.status || "").toLowerCase() === "exited").length;
       const newInRange = filteredBen.filter((b) => {
         if (!fromIso || !toIsoStr) return false;
         const c = new Date(b.created_at).getTime();
@@ -214,7 +214,7 @@ export function useProgrammeIntelligence(filters: AnalyticsFilters) {
       return {
         totalPrograms: programmeRows.length,
         totalProjects: (projects ?? []).length,
-        activePrograms: programmeRows.filter((p) => p.status === "active").length,
+        activePrograms: programmeRows.filter((p) => (p.status || "").toLowerCase() === "active").length,
         endingSoon,
         totalBudget,
         totalSponsorshipTarget,
@@ -431,7 +431,7 @@ export function useVisitationIntelligence(filters: AnalyticsFilters) {
       // Beneficiaries with no visit in window (gap)
       const visitedSet = new Set(scoped.map((v) => v.beneficiary_id));
       const neverVisited = ben.filter(
-        (b) => (!programScopedIds || programScopedIds.has(b.id)) && !visitedSet.has(b.id) && b.status === "active",
+        (b) => (!programScopedIds || programScopedIds.has(b.id)) && !visitedSet.has(b.id) && (b.status || "").toLowerCase() === "active",
       ).length;
 
       const coveragePct =
@@ -972,7 +972,7 @@ export function useDataQualityIntelligence(filters: AnalyticsFilters) {
         .select("beneficiary_id")
         .eq("organization_id", orgId!);
       const enrolled = new Set((services ?? []).map((s) => s.beneficiary_id));
-      const orphanBeneficiaries = ben.filter((b) => !enrolled.has(b.id) && b.status === "active").length;
+      const orphanBeneficiaries = ben.filter((b) => !enrolled.has(b.id) && (b.status || "").toLowerCase() === "active").length;
 
       // Stale records: active but no update in >180 days — cheap proxy via separate fetch
       const { data: stale = [] } = await supabase
@@ -992,7 +992,7 @@ export function useDataQualityIntelligence(filters: AnalyticsFilters) {
         .eq("organization_id", orgId!)
         .is("deleted_at", null);
       const activitiesMissingOutcome = (acts ?? []).filter(
-        (a) => a.status === "completed" && !a.outcome,
+        (a) => (a.status || "").toLowerCase() === "completed" && !a.outcome,
       ).length;
 
       const { data: visits = [] } = await supabase
