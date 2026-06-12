@@ -127,7 +127,7 @@ export function BeneficiaryAcademicsTab({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("beneficiary_academics")
-        .select("*, institution_name")
+        .select("*")
         .eq("beneficiary_id", beneficiaryId)
         .order("academic_year", { ascending: false })
         .order("term", { ascending: false });
@@ -263,10 +263,7 @@ export function BeneficiaryAcademicsTab({
     <div className="space-y-6">
       {/* Institution header strip */}
       {beneficiary && (() => {
-        const institutionName =
-          beneficiary.institution_name ||
-          (records.find((r: any) => r.institution_name)?.institution_name as string | undefined) ||
-          "";
+        const institutionName = beneficiary.institution_name || "";
         const subParts = [
           beneficiary.institution_type,
           beneficiary.grade || beneficiary.academic_level,
