@@ -731,16 +731,34 @@ export const BeneficiaryEnrollmentForm = ({
             {/* Program */}
             <div className="space-y-2">
               <Label>Program *</Label>
-              <Select value={enrollProgramId} onValueChange={(v) => { setEnrollProgramId(v); setEnrollProjectIds([]); }}>
+              {(() => {
+                const activeEnrolledIds = new Set(
+                  (enrollments || [])
+                    .filter((e: any) => (e.status || '').toLowerCase() === 'active' && e.programs?.id)
+                    .map((e: any) => e.programs.id as string),
+                );
+                const availablePrograms = programs.filter(p => !activeEnrolledIds.has(p.id));
+                return (
+                  <>
+                    {activeEnrolledIds.size > 0 && (
+                      <p className="text-xs text-muted-foreground">Already enrolled in {activeEnrolledIds.size} programme{activeEnrolledIds.size === 1 ? '' : 's'}</p>
+                    )}
+                    <Select value={enrollProgramId} onValueChange={(v) => { setEnrollProgramId(v); setEnrollProjectIds([]); }}>
                 <SelectTrigger><SelectValue placeholder="Select a program" /></SelectTrigger>
                 <SelectContent>
-                  {programs.map((p) => (
+                        {availablePrograms.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name}
                     </SelectItem>
                   ))}
+                        {availablePrograms.length === 0 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground">No programmes available — already enrolled in all.</div>
+                        )}
                 </SelectContent>
               </Select>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Projects - multi-select checkboxes */}
