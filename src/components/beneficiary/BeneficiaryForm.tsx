@@ -603,6 +603,8 @@ export function BeneficiaryForm({
         last_name: isGroup || isOrganisation ? null : form.last_name || null,
         date_of_birth: form.date_of_birth || null,
         gender: form.gender || null,
+        // Phone is hidden for minors; clear it so stale values aren't kept.
+        phone: visibility.isMinor ? null : (form.phone || null),
         county: form.county || null,
         sub_county: form.sub_county || null,
         estate_village: form.estate_village || null,
