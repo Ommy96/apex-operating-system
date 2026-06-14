@@ -234,7 +234,11 @@ export const BeneficiaryEnrollmentForm = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['program-stats'] });
-      toast.success(`Enrolled in ${enrollProjectIds.length > 1 ? enrollProjectIds.length + ' projects' : 'program'} successfully`);
+      queryClient.invalidateQueries({ queryKey: ['programme-cards-enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-services'] });
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-risk'] });
+      const programmeName = programs.find(p => p.id === enrollProgramId)?.name ?? 'programme';
+      toast.success(`Enrolled in ${programmeName}`);
       resetEnrollForm();
     },
     onError: (error) => toast.error('Failed to enroll: ' + error.message),
