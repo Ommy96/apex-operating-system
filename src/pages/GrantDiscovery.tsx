@@ -70,7 +70,7 @@ function OpportunityCard({ opp, onSave }: { opp: DiscoveredOpportunity; onSave: 
 }
 
 export default function GrantDiscovery() {
-  const { opportunities, loading, generatedAt, run, saveOpportunity } = useGrantDiscovery();
+  const { opportunities, loading, generatedAt, lastError, run, saveOpportunity } = useGrantDiscovery();
 
   return (
     <div className="space-y-6">
@@ -79,6 +79,20 @@ export default function GrantDiscovery() {
         description="Find funding opportunities ranked against your organization's sector, programs, and focus areas."
         icon={Sparkles}
       />
+
+      {lastError && (
+        <Card className="border-destructive/40 bg-destructive/5">
+          <CardContent className="py-4 space-y-2 text-sm">
+            <p className="font-medium text-destructive">Grant discovery couldn't run</p>
+            <p className="text-muted-foreground text-xs">{lastError}</p>
+            <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
+              <li>The grant-discovery edge function may not be deployed yet.</li>
+              <li>The LOVABLE_API_KEY secret may be missing on the Supabase project.</li>
+              <li>The organization profile may be incomplete (sector, country, programmes).</li>
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground">

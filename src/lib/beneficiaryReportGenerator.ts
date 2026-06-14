@@ -425,7 +425,27 @@ async function buildPdf(data: BeneficiaryReportData): Promise<jsPDF> {
   ]);
 
   leftY = renderSection(leftX, leftY, 'Contact & Location', [
-    ['Residence', beneficiary.location],
+    // Address removed from export per profile design.
+    ...(() => {
+      // For minors, surface the primary guardian's phone, not the beneficiary's.
+      const dob = beneficiary.date_of_birth ? new Date(beneficiary.date_of_birth) : null;
+      let isMinor = false;
+      if (dob) {
+        const a = new Date();
+        let age = a.getFullYear() - dob.getFullYear();
+        const m = a.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && a.getDate() < dob.getDate())) age--;
+        isMinor = age < 18;
+      }
+      if (isMinor) {
+        const primary = guardians.find((g: any) => g.is_primary) || guardians[0];
+        if (primary?.phone) {
+          return [['Guardian phone', `${primary.phone} — ${primary.full_name}`] as [string, string]];
+        }
+        return [];
+      }
+      return (beneficiary as any).phone ? [['Phone', (beneficiary as any).phone] as [string, string]] : [];
+    })(),
     ['County', beneficiary.county],
     ['Sub-county', beneficiary.sub_county],
     ['Village', beneficiary.estate_village],

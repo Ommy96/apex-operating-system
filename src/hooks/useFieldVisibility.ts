@@ -4,6 +4,8 @@ import type { OrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
 export interface FieldVisibility {
   // Personal / identity
   showPhone: boolean;
+  /** Address is removed from beneficiary UI entirely. Always false. */
+  showAddress: boolean;
   showNationalId: boolean;
   showMaritalStatus: boolean;
   showOccupation: boolean;
@@ -75,7 +77,9 @@ export function useFieldVisibility(
 
   return {
     // Personal / identity
-    showPhone: !child,
+    // Phone is hidden for minors entirely (guardian phone is shown via report path).
+    showPhone: !minor,
+    showAddress: false,
     showNationalId: !minor,
     showMaritalStatus: !minor,
     showOccupation: !minor && economicOn,

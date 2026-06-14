@@ -31,9 +31,24 @@ import {
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
   showTitle?: boolean;
+  /** Opens the "Enroll in Program" dialog automatically on mount. */
+  autoOpenEnroll?: boolean;
+  /** Opens the "Record Donation" dialog automatically on mount. */
+  autoOpenDonor?: boolean;
+  /** Pre-selects a programme inside the donation dialog. */
+  prefilledDonorProgramId?: string | null;
+  /** Pre-selects a project inside the donation dialog (reserved). */
+  prefilledDonorProjectId?: string | null;
 }
 
-export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: BeneficiaryEnrollmentFormProps) => {
+export const BeneficiaryEnrollmentForm = ({
+  beneficiaryId,
+  showTitle = true,
+  autoOpenEnroll = false,
+  autoOpenDonor = false,
+  prefilledDonorProgramId = null,
+  prefilledDonorProjectId = null,
+}: BeneficiaryEnrollmentFormProps) => {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -67,6 +82,16 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
 
   // Expanded sections
   const [expandedDonors, setExpandedDonors] = useState(false);
+
+  // Auto-open dialogs on mount when requested by the parent.
+  useEffect(() => {
+    if (autoOpenEnroll) setIsEnrollOpen(true);
+    if (autoOpenDonor) {
+      if (prefilledDonorProgramId) setDonationProgramId(prefilledDonorProgramId);
+      setIsDonationOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch existing donor names
   const { data: existingDonors = [] } = useQuery({
@@ -209,7 +234,11 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['program-stats'] });
-      toast.success(`Enrolled in ${enrollProjectIds.length > 1 ? enrollProjectIds.length + ' projects' : 'program'} successfully`);
+      queryClient.invalidateQueries({ queryKey: ['programme-cards-enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-services'] });
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-risk'] });
+      const programmeName = programs.find(p => p.id === enrollProgramId)?.name ?? 'programme';
+      toast.success(`Enrolled in ${programmeName}`);
       resetEnrollForm();
     },
     onError: (error) => toast.error('Failed to enroll: ' + error.message),
@@ -702,16 +731,34 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
             {/* Program */}
             <div className="space-y-2">
               <Label>Program *</Label>
-              <Select value={enrollProgramId} onValueChange={(v) => { setEnrollProgramId(v); setEnrollProjectIds([]); }}>
+              {(() => {
+                const activeEnrolledIds = new Set(
+                  (enrollments || [])
+                    .filter((e: any) => (e.status || '').toLowerCase() === 'active' && e.programs?.id)
+                    .map((e: any) => e.programs.id as string),
+                );
+                const availablePrograms = programs.filter(p => !activeEnrolledIds.has(p.id));
+                return (
+                  <>
+                    {activeEnrolledIds.size > 0 && (
+                      <p className="text-xs text-muted-foreground">Already enrolled in {activeEnrolledIds.size} programme{activeEnrolledIds.size === 1 ? '' : 's'}</p>
+                    )}
+                    <Select value={enrollProgramId} onValueChange={(v) => { setEnrollProgramId(v); setEnrollProjectIds([]); }}>
                 <SelectTrigger><SelectValue placeholder="Select a program" /></SelectTrigger>
                 <SelectContent>
-                  {programs.map((p) => (
+                        {availablePrograms.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name}
                     </SelectItem>
                   ))}
+                        {availablePrograms.length === 0 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground">No programmes available — already enrolled in all.</div>
+                        )}
                 </SelectContent>
               </Select>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Projects - multi-select checkboxes */}
@@ -819,6 +866,18 @@ export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: B
                   ))}
                 </SelectContent>
               </Select>
+              {prefilledDonorProgramId && donationProgramId === prefilledDonorProgramId && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <span>from {programs.find(p => p.id === prefilledDonorProgramId)?.name ?? 'selected programme'}</span>
+                  <button
+                    type="button"
+                    onClick={() => setDonationProgramId('')}
+                    className="underline hover:text-foreground"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Notes</Label>

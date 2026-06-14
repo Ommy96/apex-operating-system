@@ -7,7 +7,6 @@ import type { FieldVisibility } from '@/hooks/useFieldVisibility';
 import { InlineEditableField, type InlineFieldType } from './InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
-import { OutOfSystemContacts } from './OutOfSystemContacts';
 
 interface OverviewProps {
   beneficiary: any;
@@ -143,9 +142,11 @@ export function BeneficiaryOverviewTab({
         </PanelSection>
 
         <PanelSection title="Contact" open={!!openSections.contact} onToggle={() => toggleSection('contact')}>
-          <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
-            validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
-            onSave={makeSaver('phone', 'Phone')} />
+          {visibility.showPhone && (
+            <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
+              validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
+              onSave={makeSaver('phone', 'Phone')} />
+          )}
           {visibility.showNationalId && (
             <EditableRow label="National ID" value={beneficiary.national_id} canEdit={canSave} type="text" mono
               onSave={makeSaver('national_id', 'National ID')} />
@@ -158,8 +159,6 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('sub_county', 'Sub-county')} />
           <EditableRow label="Village / Estate" value={beneficiary.estate_village} canEdit={canSave} type="text"
             onSave={makeSaver('estate_village', 'Village / Estate')} />
-          <EditableRow label="Address" value={beneficiary.address} canEdit={canSave} type="long-text"
-            onSave={makeSaver('address', 'Address')} />
         </PanelSection>
         <PanelSection title="Family" open={!!openSections.family} onToggle={() => toggleSection('family')}>
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
@@ -181,41 +180,44 @@ export function BeneficiaryOverviewTab({
           {guardians.length === 0 && !isMinorAge && (
             <p className="text-[12px] italic" style={{ color: '#A8A29E' }}>No guardians recorded</p>
           )}
-          {guardians.map((g) => {
-            const relLabel = g.relationship || (g.guardian_type === 'father' ? 'Father' : g.guardian_type === 'mother' ? 'Mother' : 'Guardian');
-            return (
-              <div key={g.id} className="mt-2 pt-2" style={{ borderTop: '1px solid #F5F0E8' }}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[13px]" style={{ color: '#1C1917', fontWeight: 600 }}>{g.full_name}</span>
-                  <span
-                    className="text-[10px] px-1.5 py-0.5 rounded-full"
-                    style={g.is_alive === false ? { background: '#FEE2E2', color: '#991B1B' } : { background: '#DCFCE7', color: '#166534' }}
-                  >
-                    {g.is_alive === false ? 'Deceased' : 'Alive'}
-                  </span>
-                </div>
-                <div className="text-[11px]" style={{ color: '#78716C' }}>{relLabel}</div>
-                {g.phone && <div className="text-[11px]" style={{ color: '#44403C' }}>📞 {g.phone}</div>}
-                {g.national_id && <div className="text-[11px]" style={{ color: '#78716C' }}>ID: {g.national_id}</div>}
-                {(g.employment_type || g.source_of_income) && (
-                  <div className="text-[11px]" style={{ color: '#78716C' }}>
-                    {[g.employment_type, g.source_of_income].filter(Boolean).join(' · ')}
+          {[...guardians]
+            .sort((a: any, b: any) => {
+              const ap = a.is_primary ? 1 : 0;
+              const bp = b.is_primary ? 1 : 0;
+              if (ap !== bp) return bp - ap;
+              const ad = a.created_at ? new Date(a.created_at).getTime() : 0;
+              const bd = b.created_at ? new Date(b.created_at).getTime() : 0;
+              return bd - ad;
+            })
+            .map((g: any) => {
+              const relLabel = g.relationship || (g.guardian_type === 'father' ? 'Father' : g.guardian_type === 'mother' ? 'Mother' : 'Guardian');
+              return (
+                <div key={g.id} className="mt-2 pt-2" style={{ borderTop: '1px solid #F5F0E8' }}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded-[5px]"
+                      style={{ background: '#F5F0E8', color: '#57534E', fontWeight: 500 }}
+                    >
+                      {relLabel}
+                    </span>
+                    <span className="text-[13px] flex-1 min-w-0 truncate" style={{ color: '#1C1917', fontWeight: 600 }}>{g.full_name}</span>
+                    {g.is_alive === false && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEE2E2', color: '#991B1B' }}>Deceased</span>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Out-of-system contacts */}
-          <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EDE5D8' }}>
-            <OutOfSystemContacts beneficiaryId={beneficiary.id} />
-          </div>
+                  {(g.phone || g.national_id) && (
+                    <div className="text-[11px] mt-1 bp-mono" style={{ color: '#78716C', fontFamily: 'DM Mono, monospace' }}>
+                      {[g.phone, g.national_id].filter(Boolean).join(' · ')}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
         </PanelSection>
         <PanelSection title="Household" open={!!openSections.household} onToggle={() => toggleSection('household')}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
             validate={(v) => v != null && Number(v) < 0 ? 'Must be ≥ 0' : null}
             onSave={numSaver('household_size', 'Household size')} />
-          <Row label="Household ID" value={beneficiary.household_id} />
         </PanelSection>
         <PanelSection title="Vulnerability" open={!!openSections.vulnerability} onToggle={() => toggleSection('vulnerability')}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}

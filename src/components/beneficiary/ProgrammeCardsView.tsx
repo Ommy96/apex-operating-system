@@ -28,6 +28,8 @@ interface Props {
   canEdit: boolean;
   onEnrol: () => void;
   onAddDonor?: () => void;
+  /** Context-aware "Add donor" — receives the programme (and optional project) the user came from. */
+  onAddDonorForProgramme?: (programmeId: string, projectId?: string | null) => void;
 }
 
 type EnrollmentRow = {
@@ -75,7 +77,7 @@ function initials(name: string) {
     .join('');
 }
 
-export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onEnrol, onAddDonor }: Props) {
+export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onEnrol, onAddDonor, onAddDonorForProgramme }: Props) {
   const navigate = useNavigate();
 
   const { data: enrollments = [], isLoading: enrollLoading } = useQuery({
@@ -303,6 +305,27 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                       </Badge>
                     )}
                   </div>
+
+                  {/* Action row */}
+                  {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[11px] gap-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onAddDonorForProgramme) {
+                            onAddDonorForProgramme(program.id!, entries[0]?.projects?.id ?? null);
+                          } else if (onAddDonor) {
+                            onAddDonor();
+                          }
+                        }}
+                      >
+                        <Heart className="h-3 w-3" /> Add donor
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );

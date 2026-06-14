@@ -23,20 +23,39 @@ export function useGrantDiscovery() {
   const [opportunities, setOpportunities] = useState<DiscoveredOpportunity[]>([]);
   const [loading, setLoading] = useState(false);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const run = useCallback(async () => {
     if (!currentOrganization?.organization_id) return;
     setLoading(true);
+    setLastError(null);
     try {
       const { data, error } = await supabase.functions.invoke('grant-discovery', {
         body: { organizationId: currentOrganization.organization_id },
       });
-      if (error) throw new Error(error.message);
-      if (data?.error) { toast.error(data.error); return; }
+      if (error) {
+        let detail = '';
+        try {
+          const body = (error as any).context?.body;
+          if (body && typeof body.text === 'function') detail = await body.text();
+        } catch { /* ignore */ }
+        const msg = `Grant discovery failed: ${error.message}${detail ? ` — ${detail.slice(0, 240)}` : ''}`;
+        setLastError(msg);
+        toast.error(msg);
+        return;
+      }
+      if (data?.error) {
+        const msg = String(data.error);
+        setLastError(msg);
+        toast.error(msg);
+        return;
+      }
       setOpportunities(data?.opportunities ?? []);
       setGeneratedAt(data?.generatedAt ?? null);
     } catch (e: any) {
-      toast.error(e.message ?? 'Failed to discover grants');
+      const msg = e?.message ?? 'Failed to discover grants';
+      setLastError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -64,5 +83,5 @@ export function useGrantDiscovery() {
     toast.success('Opportunity saved to pipeline');
   }, [currentOrganization?.organization_id]);
 
-  return { opportunities, loading, generatedAt, run, saveOpportunity };
+  return { opportunities, loading, generatedAt, lastError, run, saveOpportunity };
 }

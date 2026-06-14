@@ -603,6 +603,8 @@ export function BeneficiaryForm({
         last_name: isGroup || isOrganisation ? null : form.last_name || null,
         date_of_birth: form.date_of_birth || null,
         gender: form.gender || null,
+        // Phone is hidden for minors; clear it so stale values aren't kept.
+        phone: visibility.isMinor ? null : (form.phone || null),
         county: form.county || null,
         sub_county: form.sub_county || null,
         estate_village: form.estate_village || null,
@@ -913,6 +915,7 @@ export function BeneficiaryForm({
             subCounties={subCounties}
             term={term}
             showNationalId={visibility.showNationalId}
+            showPhone={visibility.showPhone}
           />
         )}
         {step === 1 && (
@@ -995,12 +998,14 @@ function Step1Identity({
   subCounties,
   term,
   showNationalId,
+  showPhone,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   subCounties: string[];
   term: string;
   showNationalId: boolean;
+  showPhone: boolean;
 }) {
   const isPerson =
     form.beneficiary_category === 'individual' ||
@@ -1097,10 +1102,12 @@ function Step1Identity({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <Label>Phone</Label>
-          <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-        </div>
+        {showPhone && (
+          <div>
+            <Label>Phone</Label>
+            <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+          </div>
+        )}
         {isPerson && showNationalId && (
           <div>
             <Label>National ID / Passport</Label>
