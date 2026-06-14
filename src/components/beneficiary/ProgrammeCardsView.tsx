@@ -28,6 +28,8 @@ interface Props {
   canEdit: boolean;
   onEnrol: () => void;
   onAddDonor?: () => void;
+  /** Context-aware "Add donor" — receives the programme (and optional project) the user came from. */
+  onAddDonorForProgramme?: (programmeId: string, projectId?: string | null) => void;
 }
 
 type EnrollmentRow = {
