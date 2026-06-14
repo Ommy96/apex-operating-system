@@ -915,6 +915,7 @@ export function BeneficiaryForm({
             subCounties={subCounties}
             term={term}
             showNationalId={visibility.showNationalId}
+            showPhone={visibility.showPhone}
           />
         )}
         {step === 1 && (
@@ -997,12 +998,14 @@ function Step1Identity({
   subCounties,
   term,
   showNationalId,
+  showPhone,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   subCounties: string[];
   term: string;
   showNationalId: boolean;
+  showPhone: boolean;
 }) {
   const isPerson =
     form.beneficiary_category === 'individual' ||
