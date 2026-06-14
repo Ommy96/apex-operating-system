@@ -31,9 +31,24 @@ import {
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
   showTitle?: boolean;
+  /** Opens the "Enroll in Program" dialog automatically on mount. */
+  autoOpenEnroll?: boolean;
+  /** Opens the "Record Donation" dialog automatically on mount. */
+  autoOpenDonor?: boolean;
+  /** Pre-selects a programme inside the donation dialog. */
+  prefilledDonorProgramId?: string | null;
+  /** Pre-selects a project inside the donation dialog (reserved). */
+  prefilledDonorProjectId?: string | null;
 }
 
-export const BeneficiaryEnrollmentForm = ({ beneficiaryId, showTitle = true }: BeneficiaryEnrollmentFormProps) => {
+export const BeneficiaryEnrollmentForm = ({
+  beneficiaryId,
+  showTitle = true,
+  autoOpenEnroll = false,
+  autoOpenDonor = false,
+  prefilledDonorProgramId = null,
+  prefilledDonorProjectId = null,
+}: BeneficiaryEnrollmentFormProps) => {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
