@@ -305,6 +305,27 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                       </Badge>
                     )}
                   </div>
+
+                  {/* Action row */}
+                  {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[11px] gap-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onAddDonorForProgramme) {
+                            onAddDonorForProgramme(program.id!, entries[0]?.projects?.id ?? null);
+                          } else if (onAddDonor) {
+                            onAddDonor();
+                          }
+                        }}
+                      >
+                        <Heart className="h-3 w-3" /> Add donor
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
