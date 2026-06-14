@@ -77,7 +77,7 @@ function initials(name: string) {
     .join('');
 }
 
-export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onEnrol, onAddDonor }: Props) {
+export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onEnrol, onAddDonor, onAddDonorForProgramme }: Props) {
   const navigate = useNavigate();
 
   const { data: enrollments = [], isLoading: enrollLoading } = useQuery({
