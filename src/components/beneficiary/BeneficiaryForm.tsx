@@ -1102,10 +1102,12 @@ function Step1Identity({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <Label>Phone</Label>
-          <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-        </div>
+        {showPhone && (
+          <div>
+            <Label>Phone</Label>
+            <Input value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+          </div>
+        )}
         {isPerson && showNationalId && (
           <div>
             <Label>National ID / Passport</Label>
