@@ -165,6 +165,9 @@ export default function BeneficiaryProfile() {
   const [editOpen, setEditOpen] = useState(false);
   const [enrolmentOpen, setEnrolmentOpen] = useState(false);
   const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
+  const [donorOpen, setDonorOpen] = useState(false);
+  const [prefillProgramId, setPrefillProgramId] = useState<string | null>(null);
+  const [prefillProjectId, setPrefillProjectId] = useState<string | null>(null);
 
   // Quick stats
   const [enrollmentCount, setEnrollmentCount] = useState(0);
@@ -750,7 +753,12 @@ export default function BeneficiaryProfile() {
                   organizationId={currentOrganization?.organization_id ?? null}
                   canEdit={canEditInline}
                   onEnrol={() => setEnrolmentOpen(true)}
-                  onAddDonor={() => setEnrolmentOpen(true)}
+                  onAddDonor={() => { setPrefillProgramId(null); setPrefillProjectId(null); setDonorOpen(true); }}
+                  onAddDonorForProgramme={(programmeId, projectId) => {
+                    setPrefillProgramId(programmeId);
+                    setPrefillProjectId(projectId ?? null);
+                    setDonorOpen(true);
+                  }}
                 />
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
@@ -915,7 +923,27 @@ export default function BeneficiaryProfile() {
             <SheetDescription>Enrol {beneficiary.display_name} in a programme or record a sponsor contribution.</SheetDescription>
           </SheetHeader>
           <div className="mt-5 pb-6">
-            <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} showTitle={false} />
+            <BeneficiaryEnrollmentForm beneficiaryId={beneficiary.id} showTitle={false} autoOpenEnroll />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Donor sheet — opens donation dialog directly with programme prefilled */}
+      <Sheet open={donorOpen} onOpenChange={setDonorOpen}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-3xl">
+          <SheetHeader>
+            <SheetTitle>Add donor</SheetTitle>
+            <SheetDescription>Record a sponsor contribution for {beneficiary.display_name}.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-5 pb-6">
+            <BeneficiaryEnrollmentForm
+              key={`donor-${prefillProgramId ?? 'none'}-${donorOpen}`}
+              beneficiaryId={beneficiary.id}
+              showTitle={false}
+              autoOpenDonor
+              prefilledDonorProgramId={prefillProgramId}
+              prefilledDonorProjectId={prefillProjectId}
+            />
           </div>
         </SheetContent>
       </Sheet>
