@@ -866,6 +866,18 @@ export const BeneficiaryEnrollmentForm = ({
                   ))}
                 </SelectContent>
               </Select>
+              {prefilledDonorProgramId && donationProgramId === prefilledDonorProgramId && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <span>from {programs.find(p => p.id === prefilledDonorProgramId)?.name ?? 'selected programme'}</span>
+                  <button
+                    type="button"
+                    onClick={() => setDonationProgramId('')}
+                    className="underline hover:text-foreground"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Notes</Label>
