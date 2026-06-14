@@ -83,6 +83,16 @@ export const BeneficiaryEnrollmentForm = ({
   // Expanded sections
   const [expandedDonors, setExpandedDonors] = useState(false);
 
+  // Auto-open dialogs on mount when requested by the parent.
+  useEffect(() => {
+    if (autoOpenEnroll) setIsEnrollOpen(true);
+    if (autoOpenDonor) {
+      if (prefilledDonorProgramId) setDonationProgramId(prefilledDonorProgramId);
+      setIsDonationOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch existing donor names
   const { data: existingDonors = [] } = useQuery({
     queryKey: ['existing-donor-names', currentOrganization?.organization_id],
