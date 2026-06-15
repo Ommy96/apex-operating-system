@@ -259,12 +259,15 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                 )}
                 style={accent ? { borderLeftColor: accent } : undefined}
               >
-                <CardContent className="p-4 space-y-3">
-                  {/* Header */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 min-w-0">
+                <CardContent className="p-4">
+                  <div style={CARD_GRID_STYLE}>
+                    {/* avatar */}
+                    <div
+                      style={{ gridArea: 'avatar', width: 40, height: 40 }}
+                      className="rounded-lg flex items-center justify-center shrink-0 self-start"
+                    >
                       <div
-                        className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
+                        className="h-10 w-10 rounded-lg flex items-center justify-center"
                         style={{
                           background: accent ? `${accent}1a` : 'hsl(var(--muted))',
                           color: accent || 'hsl(var(--muted-foreground))',
@@ -276,74 +279,89 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                           <FolderKanban className="h-4 w-4" />
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <div
-                          className="font-semibold text-[16px] leading-tight truncate"
-                          style={{ fontFamily: 'DM Sans, sans-serif' }}
-                        >
-                          {program?.name || 'Unknown programme'}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          {enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : '—'}
-                        </div>
+                    </div>
+
+                    {/* name */}
+                    <div
+                      style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
+                      title={program?.name || 'Unknown programme'}
+                      className="text-[14px] font-semibold leading-[1.2] truncate"
+                    >
+                      {program?.name || 'Unknown programme'}
+                    </div>
+
+                    {/* status */}
+                    <div style={{ gridArea: 'status' }} className="justify-self-end">
+                      <Badge
+                        variant="outline"
+                        className={cn('h-[22px] px-2 text-[10px] leading-none flex items-center', tone.cls)}
+                      >
+                        {tone.label}
+                      </Badge>
+                    </div>
+
+                    {/* meta */}
+                    <div
+                      style={{ gridArea: 'meta' }}
+                      className="text-[12px] text-muted-foreground leading-[1.2] truncate"
+                      title={[
+                        enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : null,
+                        latestActivity,
+                      ].filter(Boolean).join(' · ')}
+                    >
+                      {enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : '—'}
+                      <span className="mx-1.5 text-muted-foreground/60">·</span>
+                      {latestActivity}
+                    </div>
+
+                    {/* stats — two equal tiles */}
+                    <div
+                      style={{ gridArea: 'stats', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}
+                    >
+                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Enrolments</div>
+                        <div className="font-semibold text-[13px] tabular-nums font-mono">{entries.length}</div>
+                      </div>
+                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Projects</div>
+                        <div className="font-semibold text-[13px] tabular-nums font-mono">{projects.length}</div>
                       </div>
                     </div>
-                    <Badge variant="outline" className={cn('shrink-0', tone.cls)}>{tone.label}</Badge>
-                  </div>
 
-                  {/* Progress */}
-                  <div className="space-y-1">
-                    {progress !== null ? (
-                      <Progress value={progress} className="h-1.5" />
-                    ) : (
-                      <div className="h-1.5 rounded-full bg-muted/60" />
-                    )}
-                    <div className="text-[11px] text-muted-foreground">{progressLabel}</div>
-                  </div>
-
-                  {/* Latest activity */}
-                  <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <ActivityIcon className="h-3 w-3" />
-                    {latestActivity}
-                  </div>
-
-                  {/* Metric chips */}
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge variant="secondary" className="text-[10px]">
-                      {entries.length} enrol{entries.length !== 1 ? 'ments' : 'ment'}
-                    </Badge>
-                    {projects.length > 0 && (
-                      <Badge variant="secondary" className="text-[10px]">
-                        {projects.length} project{projects.length !== 1 ? 's' : ''}
-                      </Badge>
-                    )}
-                    {entries.filter((e) => (e.status || '').toLowerCase() === 'active').length > 0 && (
-                      <Badge variant="secondary" className="text-[10px]">
-                        {entries.filter((e) => (e.status || '').toLowerCase() === 'active').length} active
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Action row */}
-                  {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
-                    <div className="flex justify-end pt-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-[11px] gap-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onAddDonorForProgramme) {
-                            onAddDonorForProgramme(program.id!, entries[0]?.projects?.id ?? null);
-                          } else if (onAddDonor) {
-                            onAddDonor();
-                          }
-                        }}
-                      >
-                        <Heart className="h-3 w-3" /> Add donor
-                      </Button>
+                    {/* progress (within stats area as a thin line) */}
+                    <div style={{ gridArea: 'actions' }} className="space-y-2">
+                      <div className="space-y-1">
+                        {progress !== null ? (
+                          <Progress value={progress} className="h-1.5" />
+                        ) : (
+                          <div className="h-1.5 rounded-full bg-muted/60" />
+                        )}
+                        <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          <ActivityIcon className="h-3 w-3" />
+                          {progressLabel}
+                        </div>
+                      </div>
+                      {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-[11px] gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onAddDonorForProgramme) {
+                                onAddDonorForProgramme(program.id!, entries[0]?.projects?.id ?? null);
+                              } else if (onAddDonor) {
+                                onAddDonor();
+                              }
+                            }}
+                          >
+                            <Heart className="h-3 w-3" /> Add donor
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             );
