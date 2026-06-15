@@ -22,6 +22,24 @@ import {
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+/**
+ * Strict grid layout shared by both programme cards and sponsorship cards
+ * so the two read as one visual family. See Fix 6.
+ */
+const CARD_GRID_STYLE: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '40px 1fr auto',
+  gridTemplateAreas: `
+    "avatar  name     status"
+    "avatar  meta     meta"
+    "stats   stats    stats"
+    "actions actions  actions"
+  `,
+  columnGap: 12,
+  rowGap: 8,
+  alignItems: 'center',
+};
+
 interface Props {
   beneficiaryId: string;
   organizationId: string | null;
