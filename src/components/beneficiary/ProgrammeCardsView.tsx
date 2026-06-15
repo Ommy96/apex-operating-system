@@ -391,64 +391,82 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
             const subline = [programmeName, range].filter(Boolean).join(' · ');
             return (
               <Card key={s.name} className="border-l-[3px]" style={{ borderLeftColor: 'hsl(var(--primary))' }}>
-                <CardContent className="p-4 space-y-3">
-                  {/* Top row — avatar + name + badge, vertically centered */}
-                  <div className="flex items-center gap-3">
+                <CardContent className="p-4">
+                  <div style={CARD_GRID_STYLE}>
+                    {/* avatar */}
+                    <div style={{ gridArea: 'avatar', width: 40, height: 40 }} className="self-start">
+                      <div
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[12px] font-semibold"
+                        style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}
+                      >
+                        {initials(s.name) || <Heart className="h-4 w-4" />}
+                      </div>
+                    </div>
+
+                    {/* name */}
                     <div
-                      className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
-                      style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}
+                      style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
+                      title={s.name}
+                      className="text-[14px] font-semibold leading-[1.2] truncate"
                     >
-                      {initials(s.name) || <Heart className="h-4 w-4" />}
+                      {s.name}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[14px] truncate" style={{ fontFamily: 'DM Sans, sans-serif' }}>{s.name}</span>
-                        <Badge variant="outline" className="text-[10px] h-5 shrink-0">Sponsor</Badge>
+
+                    {/* status */}
+                    <div style={{ gridArea: 'status' }} className="justify-self-end">
+                      <Badge variant="outline" className="h-[22px] px-2 text-[10px] leading-none flex items-center">
+                        Sponsor
+                      </Badge>
+                    </div>
+
+                    {/* meta */}
+                    <div
+                      style={{ gridArea: 'meta' }}
+                      title={subline || ''}
+                      className="text-[12px] text-muted-foreground leading-[1.2] truncate"
+                    >
+                      {subline || '—'}
+                    </div>
+
+                    {/* stats */}
+                    <div style={{ gridArea: 'stats', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">This year</div>
+                        <div className="font-semibold text-[13px] tabular-nums font-mono">
+                          <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
+                          {thisYear.toLocaleString()}
+                        </div>
                       </div>
-                      {subline && (
-                        <div className="text-[11px] text-muted-foreground truncate mt-0.5">{subline}</div>
+                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Lifetime</div>
+                        <div className="font-semibold text-[13px] tabular-nums font-mono">
+                          <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
+                          {s.total.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* actions */}
+                    <div style={{ gridArea: 'actions' }} className="flex justify-end gap-2">
+                      {canEdit && (
+                        <>
+                          <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
+                            <Send className="h-3 w-3" /> Send update
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
+                            <FileText className="h-3 w-3" /> Report
+                          </Button>
+                        </>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[11px] gap-1"
+                        onClick={() => navigate('/donors')}
+                      >
+                        <ExternalLink className="h-3 w-3" /> View
+                      </Button>
                     </div>
-                  </div>
-
-                  {/* Two equal stat tiles */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
-                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">This year</div>
-                      <div className="font-semibold text-[13px] tabular-nums">
-                        <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
-                        {thisYear.toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
-                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Lifetime</div>
-                      <div className="font-semibold text-[13px] tabular-nums">
-                        <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
-                        {s.total.toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action row — right-aligned, equal height */}
-                  <div className="flex items-center justify-end gap-1.5 pt-1">
-                    {canEdit && (
-                      <>
-                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
-                          <Send className="h-3 w-3" /> Send update
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
-                          <FileText className="h-3 w-3" /> Report
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-[11px] gap-1"
-                      onClick={() => navigate('/donors')}
-                    >
-                      <ExternalLink className="h-3 w-3" /> View
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
