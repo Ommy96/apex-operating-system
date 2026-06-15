@@ -66,6 +66,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Programs
@@ -77,6 +79,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Projects
@@ -88,6 +92,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Enrollments / Services
@@ -102,6 +108,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Visitations
@@ -116,6 +124,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Reports (remaining types only)
@@ -136,6 +146,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Donors (beneficiary-level)
@@ -150,6 +162,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Program-level grants (direct program funding)
@@ -165,6 +179,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Activities
@@ -179,6 +195,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Observations
@@ -193,6 +211,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Uploads
@@ -204,6 +224,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Organization members (staff)
@@ -218,6 +240,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Profiles for staff names
@@ -232,6 +256,8 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       return data || [];
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // Staff metrics computation

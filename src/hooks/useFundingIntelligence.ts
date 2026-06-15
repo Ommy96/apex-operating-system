@@ -57,6 +57,8 @@ export function useProgramFundingSummaries() {
       if (error) throw error;
       return (data ?? []) as ProgramFundingSummary[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -73,6 +75,8 @@ export function useProjectFundingSummaries() {
       if (error) throw error;
       return (data ?? []) as ProjectFundingSummary[];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -89,6 +93,8 @@ export function useOrgGrants() {
       if (error) throw error;
       return data ?? [];
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -103,5 +109,7 @@ export function useFundingHealthScore(programId: string | null | undefined) {
       if (error) throw error;
       return data as FundingHealthScore;
     },
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
