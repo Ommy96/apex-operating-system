@@ -52,6 +52,7 @@ export function useAIInsights() {
   const [data, setData] = useState<AIInsightsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const { currentOrganization } = useOrganization();
 
   const generateInsights = useCallback(async (insightType: string = 'all') => {
@@ -80,6 +81,7 @@ export function useAIInsights() {
         ...result.insights,
         generatedAt: result.generatedAt,
       });
+      setGeneratedAt(result.generatedAt ?? new Date().toISOString());
     } catch (e: any) {
       const msg = e.message || 'Failed to generate insights';
       setError(msg);
@@ -89,5 +91,5 @@ export function useAIInsights() {
     }
   }, [currentOrganization?.organization_id]);
 
-  return { data, isLoading, error, generateInsights };
+  return { data, isLoading, error, generatedAt, generateInsights };
 }
