@@ -24,6 +24,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const createRule = useMutation({
@@ -86,6 +88,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   // ========== ALERT RULES ==========
@@ -101,6 +105,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const createAlertRule = useMutation({
@@ -165,6 +171,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const resolveAlert = useMutation({
@@ -204,6 +212,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const createReportTemplate = useMutation({
@@ -257,6 +267,8 @@ export function useAutomation() {
       return data;
     },
     enabled: !!orgId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const generateReport = useMutation({
