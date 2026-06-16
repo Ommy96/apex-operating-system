@@ -11,6 +11,8 @@ import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
 interface OverviewProps {
   beneficiary: any;
   guardians: any[];
+  guardiansError?: boolean;
+  onRetryGuardians?: () => void;
   donors: any[];
   visibility: FieldVisibility;
   canLogVisit?: boolean;
@@ -44,6 +46,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
   canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian, signatureLine,
+  guardiansError = false, onRetryGuardians,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const SECTION_KEYS = ['personal', 'contact', 'family', 'household', 'vulnerability', 'consent'] as const;
@@ -167,6 +170,14 @@ export function BeneficiaryOverviewTab({
 
           {/* Parents / guardians */}
           <div className="mt-3 mb-1 text-[11px]" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>
+          {guardiansError && (
+            <div className="rounded-md p-2 text-[12px] flex items-center justify-between gap-2" style={{ background: '#FEE2E2', color: '#991B1B' }}>
+              <span>Couldn't load guardians</span>
+              {onRetryGuardians && (
+                <button type="button" onClick={onRetryGuardians} className="text-[12px] font-medium underline">Retry</button>
+              )}
+            </div>
+          )}
           {guardians.length === 0 && isMinorAge && (
             <div className="rounded-md p-3 text-[12px] text-center space-y-2" style={{ background: '#FEF3C7', color: '#92400E' }}>
               <p>No parent or guardian recorded for this minor.</p>

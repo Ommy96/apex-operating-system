@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { useState, useEffect, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TagInput } from '@/components/ui/TagInput';
@@ -308,6 +309,7 @@ export function BeneficiaryForm({
   const { term } = useBeneficiaryTerminology();
   const { can } = usePermissions();
   const orgId = currentOrganization?.organization_id;
+  const queryClient = useQueryClient();
 
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -665,6 +667,8 @@ export function BeneficiaryForm({
       let beneficiaryId = beneficiary?.id;
       let uniqueId = beneficiary?.unique_id;
 
+      logger.debug('Beneficiary save payload', payload);
+
       if (beneficiary?.id) {
         const { error } = await supabase
           .from('beneficiaries')
@@ -795,6 +799,13 @@ export function BeneficiaryForm({
       localStorage.removeItem(draftKey);
       setCreatedId(beneficiaryId!);
       setCreatedUniqueId(uniqueId || null);
+      // Invalidate downstream caches so Family side-panel and Relationships tab
+      // refresh without a manual reload (Fix 1d).
+      if (beneficiaryId) {
+        queryClient.invalidateQueries({ queryKey: ['beneficiary-guardians', beneficiaryId] });
+        queryClient.invalidateQueries({ queryKey: ['beneficiary-relationships', beneficiaryId] });
+        queryClient.invalidateQueries({ queryKey: ['beneficiary', beneficiaryId] });
+      }
       toast({
         title: beneficiary ? `${term} updated` : `${term} registered`,
         description: uniqueId ? `ID: ${uniqueId}` : undefined,
@@ -803,11 +814,19 @@ export function BeneficiaryForm({
       if (onSuccess) onSuccess(beneficiaryId!);
     } catch (error: any) {
       logger.error('BeneficiaryForm submit error', error);
-      toast({
-        title: 'Save failed',
-        description: error?.message || 'Could not save record',
-        variant: 'destructive',
-      });
+      if (typeof error?.message === 'string' && error.message.includes('schema cache')) {
+        toast({
+          title: 'Database needs a schema refresh',
+          description: 'Run the latest migration or contact your administrator. Detail: ' + error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Save failed',
+          description: error?.message || 'Could not save record',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }

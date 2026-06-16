@@ -31,6 +31,7 @@ import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { useBeneficiaryGuardians } from '@/hooks/useBeneficiaryGuardians';
 import { useBranding } from '@/hooks/useBranding';
 import { usePermissions } from '@/hooks/usePermissions';
 import { InlineEditableField } from '@/components/beneficiary/InlineEditableField';
@@ -154,7 +155,6 @@ export default function BeneficiaryProfile() {
   const canEditInline = !!can.editBeneficiaries;
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
-  const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
@@ -177,6 +177,11 @@ export default function BeneficiaryProfile() {
   const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
 
   const visibility = useFieldVisibility(beneficiary?.date_of_birth ?? null, orgConfig as any);
+  const {
+    data: guardians = [],
+    error: guardiansError,
+    refetch: refetchGuardians,
+  } = useBeneficiaryGuardians(id);
 
   const fetchQuickStats = useCallback(async () => {
     if (!id) return;
@@ -249,21 +254,6 @@ export default function BeneficiaryProfile() {
 
       if (beneficiaryError) throw beneficiaryError;
       setBeneficiary(beneficiaryData as Beneficiary);
-
-      const { data: guardiansData } = await supabase
-        .from('beneficiary_guardians')
-        .select(
-          `id, relationship, is_primary, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income, national_id, age, date_of_birth, address, employment_details, date_of_death, created_at)`,
-        )
-        .eq('beneficiary_id', id);
-
-      if (guardiansData) {
-        setGuardians(guardiansData.map((g: any) => ({
-          ...g.guardians,
-          relationship: g.relationship,
-          is_primary: !!g.is_primary,
-        })));
-      }
 
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
@@ -771,6 +761,8 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryOverviewTab
                   beneficiary={beneficiary as any}
                   guardians={guardians}
+                  guardiansError={!!guardiansError}
+                  onRetryGuardians={() => { refetchGuardians(); }}
                   donors={donors}
                   visibility={visibility}
                   canLogVisit={true}
@@ -799,7 +791,7 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: History & Risk */}
               <TabsContent value="history-risk" className="mt-0 p-6 space-y-5">
-                <RelationshipsTab beneficiary={beneficiary as any} />
+                <RelationshipsTab beneficiary={beneficiary as any} onEditGuardians={() => setEditOpen(true)} />
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Risk signals</div>
                 </div>
