@@ -326,6 +326,11 @@ const App = () => (
                 <DashboardLayout><LazyRoute><ReportsAnalytics /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><Analytics /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/role-management" element={
               <ProtectedRoute requirePermission={{ module: 'users', action: 'manage', resource: 'roles' }}>
                 <DashboardLayout><LazyRoute><RoleManagement /></LazyRoute></DashboardLayout>
