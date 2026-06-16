@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FundingCoverageBar } from './FundingCoverageBar';
+import * as LucideIcons from 'lucide-react';
 import {
   FolderKanban,
   Heart,
@@ -21,6 +22,21 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+
+/**
+ * Resolves a lucide-react icon name (stored as a string on `programs.icon`)
+ * into an actual icon component. Falls back to FolderKanban when missing or
+ * unknown — this fixes the "the word 'Sparkles' renders as text overlapping
+ * the programme name" bug (Fix 3a).
+ */
+function renderProgramIcon(iconName: string | null | undefined) {
+  if (!iconName) return <FolderKanban className="h-4 w-4" />;
+  const IconComponent = (LucideIcons as any)[iconName];
+  if (!IconComponent || typeof IconComponent !== 'function') {
+    return <FolderKanban className="h-4 w-4" />;
+  }
+  return <IconComponent className="h-4 w-4" />;
+}
 
 /**
  * Strict grid layout shared by both programme cards and sponsorship cards
