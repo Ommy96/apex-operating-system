@@ -31,6 +31,7 @@ import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
+import { useBeneficiaryGuardians } from '@/hooks/useBeneficiaryGuardians';
 import { useBranding } from '@/hooks/useBranding';
 import { usePermissions } from '@/hooks/usePermissions';
 import { InlineEditableField } from '@/components/beneficiary/InlineEditableField';
@@ -154,7 +155,6 @@ export default function BeneficiaryProfile() {
   const canEditInline = !!can.editBeneficiaries;
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
-  const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
@@ -177,6 +177,11 @@ export default function BeneficiaryProfile() {
   const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
 
   const visibility = useFieldVisibility(beneficiary?.date_of_birth ?? null, orgConfig as any);
+  const {
+    data: guardians = [],
+    error: guardiansError,
+    refetch: refetchGuardians,
+  } = useBeneficiaryGuardians(id);
 
   const fetchQuickStats = useCallback(async () => {
     if (!id) return;
