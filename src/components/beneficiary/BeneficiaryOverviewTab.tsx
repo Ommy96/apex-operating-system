@@ -11,6 +11,8 @@ import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
 interface OverviewProps {
   beneficiary: any;
   guardians: any[];
+  guardiansError?: boolean;
+  onRetryGuardians?: () => void;
   donors: any[];
   visibility: FieldVisibility;
   canLogVisit?: boolean;
@@ -44,6 +46,7 @@ const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }
 export function BeneficiaryOverviewTab({
   beneficiary, guardians, donors, visibility, canLogVisit, onLogVisit,
   canEdit = false, organizationId, userId, onLocalUpdate, onAddGuardian, signatureLine,
+  guardiansError = false, onRetryGuardians,
 }: OverviewProps) {
   const isMobile = useIsMobile();
   const SECTION_KEYS = ['personal', 'contact', 'family', 'household', 'vulnerability', 'consent'] as const;
