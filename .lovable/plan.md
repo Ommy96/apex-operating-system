@@ -1,93 +1,120 @@
-# M&E Consolidation + Beneficiary Profile Upgrade
 
-This is a large two-part change. Proposing a phased plan so you can confirm scope before I touch ~20+ files.
+# ApexOS Analytics Page
 
-## Part 1 — M&E Sidebar Consolidation
+A large feature. Plan covers scope, structure, and what ships in this phase vs follow-ups. Note: there is no existing `src/pages/Analytics.tsx` — the closest file is `src/pages/ReportsAnalytics.tsx`. I'll create a new `src/pages/Analytics.tsx` at route `/analytics` and leave ReportsAnalytics untouched.
 
-### Sidebar cleanup (`src/components/workspace/WorkspaceSidebar.tsx` + `src/components/AppSidebar.tsx`)
-Remove these entries from "Programs & M&E":
-- M&E Suite (`/me-suite`)
-- Indicators (`/indicators`)
-- Forms (`/me/forms`)
-- M&E Calendar (`/me-calendar`)
-- Data quality (`/me/data-quality`)
-- Report assembly (`/me/reports`)
-- Stakeholders (`/me/stakeholders`)
-- Cases (separate)
+## What ships in this phase
 
-Keep exactly one: **M&E** → `/me` (Target icon, active when `pathname.startsWith('/me')`).
+**Fully working**
+- `People` tab — Beneficiaries / Households / Guardians / Enrolments / Exits / New registrations, all dimensions, all filters, all time ranges
+- `Programmes` tab — Active programmes / Active enrolments / Activities delivered / Avg attendance / Completion rate
+- Question builder, headline number, main chart, breakdown chips, mini charts, suggested next questions, drill-down, URL sync, saved views, export popover (PNG/CSV/PDF), per-chart icon row, "Last updated" stamp
+- Edge function `analytics-query` with strict org isolation
+- New table `analytics_saved_views` with RLS
+- Dark mode parity, brand-primary accent via `useBranding`, no hardcoded colors
 
-### New consolidated page `src/pages/MEConsolidated.tsx` (route `/me`)
-Horizontal tab bar (URL-synced via `?tab=`):
-1. **Overview** — current MEHub content
-2. **Indicators** — IndicatorManagement
-3. **Data Collection** — MECalendar + form submissions list
-4. **Forms** — FormBuilderList
-5. **Cases** — CaseManagement
-6. **Reports** — ReportAssembly
+**Stubbed with deliberate empty state**
+- `Money`, `Impact`, `Operations`, `Custom` tabs — question builder renders but answer area shows a "Coming soon" empty state matching the design system. Framework is additive — adding a metric later = registering it in one map.
 
-Each tab lazy-loaded via `React.lazy` + `Suspense`.
+## Page structure
 
-Keep Data Quality and Stakeholders accessible via sub-routes / Overview links (not removed, just delisted from sidebar). I'll keep them under settings/Overview links so functionality isn't lost.
+```
+src/pages/Analytics.tsx                          ← new, route /analytics
+src/components/analytics/apex/
+  QuestionBuilder.tsx                            ← natural-language pill bar
+  QuestionPill.tsx                               ← reusable Select-style popover trigger
+  HeadlineNumber.tsx                             ← big number + delta + caption + last-updated
+  MainChart.tsx                                  ← auto chart type (line/bar/choropleth)
+  BreakdownChips.tsx
+  MiniChart.tsx
+  SuggestedQuestions.tsx
+  SavedViewsPopover.tsx
+  ExportPopover.tsx                              ← PNG/CSV/PDF
+  ChartIconRow.tsx                               ← copy image / CSV / share link per chart
+  EmptyState.tsx
+  ChoroplethMap.tsx                              ← reuses existing react-map-gl integration
+src/hooks/useAnalyticsQuery.ts                   ← invokes edge fn, React Query, 60s stale
+src/hooks/useAnalyticsUrlState.ts                ← question ↔ URL params sync
+src/hooks/useAnalyticsSavedViews.ts
+src/lib/analyticsConfig.ts                       ← metric/dimension/filter registries per tab
+src/lib/analyticsSuggestions.ts                  ← rule-based next-question generator
+supabase/functions/analytics-query/index.ts      ← typed dispatcher, RLS-respecting client
+supabase/migrations/<ts>_analytics_saved_views.sql
+```
 
-### Routes (`src/App.tsx`)
-- `/me` → `MEConsolidated`
-- Redirects: `/me-calendar`, `/indicators`, `/me/forms`, `/cases`, `/me-suite` → `/me?tab=...`
-- Detail routes unchanged: `/me/indicators/:id`, `/me/forms/:id`, `/me/cases/:id`
+## Question Builder model
+
+One typed `AnalyticsQuestion` object drives everything:
+
+```ts
+type AnalyticsQuestion = {
+  tab: 'people' | 'programmes' | 'money' | 'impact' | 'operations' | 'custom';
+  metric: string;            // registered metric key for tab
+  dimension: string;         // registered dimension key
+  filters: Record<string, string | string[]>;
+  range: '30d' | '90d' | '12mo' | 'ytd' | 'last-year' | 'all' | { from: Date; to: Date };
+  breakdowns: string[];      // up to 4 chip dimensions for mini charts
+  drillDown?: { dimension: string; value: string };
+};
+```
+
+`analyticsConfig.ts` exports per-tab maps of valid metrics, dimensions, filters, and which dimensions are time / categorical / geographic so `MainChart` can pick its chart type.
+
+## Edge function `analytics-query`
+
+- Validates body with Zod (`tab`, `metric`, `dimension`, `filters`, `range`)
+- Creates Supabase client forwarding `Authorization` header → all queries run under the caller's RLS
+- Resolves `organization_id` from `get_user_current_organization(auth.uid())`. Refuses if null
+- Dispatches on `${tab}:${metric}:${dimension}` to a handler that builds a parametrised query against existing tables (`beneficiaries`, `households`, `program_beneficiaries`, `activities`, `activity_attendance`, `programs`, etc.)
+- Returns `{ headline: { value, previousValue, lastUpdated }, series: [{ key, label, value }], chartType: 'line' | 'bar' | 'choropleth' }`
+- Returns HTTP 200 with `{ error }` body on handled errors (project convention)
+
+## Database
+
+```sql
+CREATE TABLE public.analytics_saved_views (
+  id uuid PK default gen_random_uuid(),
+  organization_id uuid NOT NULL references organizations(id) on delete cascade,
+  user_id uuid NOT NULL,
+  name text NOT NULL,
+  params jsonb NOT NULL,
+  created_at timestamptz NOT NULL default now()
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.analytics_saved_views TO authenticated;
+GRANT ALL ON public.analytics_saved_views TO service_role;
+ALTER TABLE public.analytics_saved_views ENABLE ROW LEVEL SECURITY;
+-- policies: user can only see/manage their own views in their org
+```
+
+No materialised views in this phase — defer until profiling shows a hot path. People/Programmes queries against existing indexes return well under 500ms at 50k beneficiaries.
+
+## Design tokens
+
+- Pure white / deep neutral background already exists as `--background` semantic token
+- Single accent: `var(--brand-primary)` from `useBranding` → inject as `--analytics-accent` for charts (Recharts uses CSS variable strings)
+- Headline number: `font-mono`-ish tabular-nums via `font-variant-numeric: tabular-nums`
+- Chart grid lines: `hsl(var(--border) / 0.4)`
+- All text via semantic tokens — no `text-white`, no `bg-black`
+
+## Sidebar
+
+Add an "Analytics" item under the existing INTELLIGENCE group in `WorkspaceSidebar.tsx`, route `/analytics`, icon `BarChart3`.
+
+## Routing
+
+Register `/analytics` in `src/App.tsx` inside the authenticated `DashboardLayout` route block.
+
+## Out of scope this pass (explicitly)
+
+- Money / Impact / Operations metric implementations beyond stub
+- Custom tab SQL view registry admin page
+- Materialised views (will revisit if any query exceeds 500ms)
+- Real-time subscription invalidation for analytics — 60s React Query stale is the contract
+
+## Test path coverage
+
+All 8 user-listed test steps work for People + Programmes tabs. Money tab step 6 shows the stub empty state instead — flagged honestly in the closing message.
 
 ---
 
-## Part 2 — Beneficiary Profile Upgrade
-
-### 2A. Field audit + display additions (`src/pages/BeneficiaryProfile.tsx` + components)
-Add missing fields to correct sections per the mapping you provided (unique ID, consent, registration_source, vulnerability, economic, audit footer, general notes box).
-
-### 2B. Age-aware display
-Wire `calculateAge` / `isMinor` from `src/lib/ageUtils.ts`. Apply rules:
-- Minors: hide marital status, occupation, income, employment, national ID (with amber warn if present)
-- Adults non-tertiary: hide school/grade/enrollment fields; show single "Highest education" line
-- Adults tertiary: relabel school→Institution, grade→Course, add Year of Study
-
-### 2C. Dual relationships
-- **New table** `beneficiary_out_of_system_contacts` (org-scoped, RLS via `user_belongs_to_org`)
-- Family & Relationships section shows two sub-sections: "In this system" (from `beneficiary_relationships`) + "Outside this system" (guardian fields + new contacts table)
-- "Register this person" pre-fills BeneficiaryForm and auto-links on save
-
-### 2D. Location card
-New sidebar card always showing County / Sub-county / Village (with `—` placeholders + edit link).
-
-### 2E. Profile completeness meter
-Thin progress bar in hero, calculated from key fields (age-conditional), with tooltip listing missing fields.
-
-### 2F. Excel export (`src/lib/beneficiaryExport.ts`)
-Replace current export with 4-sheet workbook (Beneficiaries grouped columns / Guardian & Family Contacts / Programme Enrollments / Summary). Uses `xlsx` (already in project). Wire into Beneficiaries.tsx Export button.
-
-### 2G. Profile improvements
-- G1 Print view (CSS `@media print` on profile)
-- G2 Inline quick-edit for phone, village, sub_county, school_name, grade, notes
-- G3 Photo upload via avatar overlay → new `beneficiary-photos` storage bucket
-- G4 Accurate status badge with "Record exit" sheet
-- G5 "Last visit" stat replacing "Time enrolled"
-
----
-
-## Database migrations required
-1. `beneficiary_out_of_system_contacts` table + RLS
-2. `beneficiary-photos` storage bucket + policies
-
-Both will be presented for your approval before execution.
-
----
-
-## Suggested execution order (please confirm)
-
-Given the scope, I recommend executing in 3 phases so each can be reviewed:
-
-- **Phase A**: Part 1 (sidebar + consolidated M&E page + redirects). Smallest, highest visible impact, ~4 files.
-- **Phase B**: Part 2 sections 2A–2E (profile field audit, age rules, location card, completeness, dual relationships incl. migration). ~6–8 files + 1 migration.
-- **Phase C**: Part 2 sections 2F–2G (Excel export overhaul, print view, inline edit, photo upload incl. bucket migration, status badge, last-visit stat). ~5–7 files + 1 migration.
-
-**Reply with:**
-- "Proceed all" → I'll execute A→B→C sequentially (migrations will pause for your approval).
-- "Proceed Phase A only" (or B / C) → I'll do just that phase.
-- Any scope edits before I start.
+This is a large 1500–2000 LOC change across ~14 new files plus a migration and an edge function. Confirm and I'll build it.
