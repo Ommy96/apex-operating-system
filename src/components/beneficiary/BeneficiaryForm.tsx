@@ -797,6 +797,13 @@ export function BeneficiaryForm({
       localStorage.removeItem(draftKey);
       setCreatedId(beneficiaryId!);
       setCreatedUniqueId(uniqueId || null);
+      // Invalidate downstream caches so Family side-panel and Relationships tab
+      // refresh without a manual reload (Fix 1d).
+      if (beneficiaryId) {
+        queryClient.invalidateQueries({ queryKey: ['beneficiary-guardians', beneficiaryId] });
+        queryClient.invalidateQueries({ queryKey: ['beneficiary-relationships', beneficiaryId] });
+        queryClient.invalidateQueries({ queryKey: ['beneficiary', beneficiaryId] });
+      }
       toast({
         title: beneficiary ? `${term} updated` : `${term} registered`,
         description: uniqueId ? `ID: ${uniqueId}` : undefined,
@@ -805,11 +812,19 @@ export function BeneficiaryForm({
       if (onSuccess) onSuccess(beneficiaryId!);
     } catch (error: any) {
       logger.error('BeneficiaryForm submit error', error);
-      toast({
-        title: 'Save failed',
-        description: error?.message || 'Could not save record',
-        variant: 'destructive',
-      });
+      if (typeof error?.message === 'string' && error.message.includes('schema cache')) {
+        toast({
+          title: 'Database needs a schema refresh',
+          description: 'Run the latest migration or contact your administrator. Detail: ' + error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Save failed',
+          description: error?.message || 'Could not save record',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
