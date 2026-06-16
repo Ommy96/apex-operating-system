@@ -417,7 +417,7 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                     <div
                       style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
                       title={s.name}
-                      className="text-[14px] font-semibold leading-[1.2] truncate"
+                      className="text-[14px] font-semibold leading-[1.2] truncate min-w-0"
                     >
                       {s.name}
                     </div>
