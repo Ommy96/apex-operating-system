@@ -198,12 +198,12 @@ export function AnswerArea({
                 <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.4} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontVariantNumeric: "tabular-nums" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontVariantNumeric: "tabular-nums" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   axisLine={false}
                   tickLine={false}
                   width={36}
