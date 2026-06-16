@@ -157,7 +157,8 @@ export function WorkspaceSidebar() {
         { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
         { title: "Grant Discovery", url: "/ai/grants", icon: Target, show: can.viewAI },
         { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
-        { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Analytics", url: "/analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Reports & Insights", url: "/reports-analytics", icon: BarChart3, show: can.viewReports },
       ],
     },
     {
