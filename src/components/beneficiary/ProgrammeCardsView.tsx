@@ -289,11 +289,7 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                           color: accent || 'hsl(var(--muted-foreground))',
                         }}
                       >
-                        {program?.icon ? (
-                          <span className="text-base leading-none">{program.icon}</span>
-                        ) : (
-                          <FolderKanban className="h-4 w-4" />
-                        )}
+                        {renderProgramIcon(program?.icon)}
                       </div>
                     </div>
 
@@ -301,7 +297,7 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                     <div
                       style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
                       title={program?.name || 'Unknown programme'}
-                      className="text-[14px] font-semibold leading-[1.2] truncate"
+                      className="text-[14px] font-semibold leading-[1.2] truncate min-w-0"
                     >
                       {program?.name || 'Unknown programme'}
                     </div>
@@ -346,17 +342,15 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
 
                     {/* progress (within stats area as a thin line) */}
                     <div style={{ gridArea: 'actions' }} className="space-y-2">
-                      <div className="space-y-1">
-                        {progress !== null ? (
+                      {progress !== null && (
+                        <div className="space-y-1">
                           <Progress value={progress} className="h-1.5" />
-                        ) : (
-                          <div className="h-1.5 rounded-full bg-muted/60" />
-                        )}
-                        <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                          <ActivityIcon className="h-3 w-3" />
-                          {progressLabel}
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                            <ActivityIcon className="h-3 w-3" />
+                            {progressLabel}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
                         <div className="flex justify-end gap-2">
                           <Button
