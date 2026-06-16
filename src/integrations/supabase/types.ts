@@ -1044,6 +1044,7 @@ export type Database = {
           academic_level:
             | Database["public"]["Enums"]["academic_level_type"]
             | null
+          address: string | null
           amount_given: number | null
           background_image_url: string | null
           background_narrative: string | null
@@ -1065,6 +1066,7 @@ export type Database = {
           deleted_at: string | null
           disability_status: string | null
           display_name: string
+          email: string | null
           estate_village: string | null
           exit_reason: string | null
           family_status: string | null
@@ -1106,6 +1108,7 @@ export type Database = {
           occupation: string | null
           organization_id: string
           other_medical_conditions: string | null
+          phone: string | null
           photo_url: string | null
           primary_need: string | null
           registration_source: string | null
@@ -1126,6 +1129,7 @@ export type Database = {
           academic_level?:
             | Database["public"]["Enums"]["academic_level_type"]
             | null
+          address?: string | null
           amount_given?: number | null
           background_image_url?: string | null
           background_narrative?: string | null
@@ -1147,6 +1151,7 @@ export type Database = {
           deleted_at?: string | null
           disability_status?: string | null
           display_name: string
+          email?: string | null
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
@@ -1188,6 +1193,7 @@ export type Database = {
           occupation?: string | null
           organization_id: string
           other_medical_conditions?: string | null
+          phone?: string | null
           photo_url?: string | null
           primary_need?: string | null
           registration_source?: string | null
@@ -1208,6 +1214,7 @@ export type Database = {
           academic_level?:
             | Database["public"]["Enums"]["academic_level_type"]
             | null
+          address?: string | null
           amount_given?: number | null
           background_image_url?: string | null
           background_narrative?: string | null
@@ -1229,6 +1236,7 @@ export type Database = {
           deleted_at?: string | null
           disability_status?: string | null
           display_name?: string
+          email?: string | null
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
@@ -1270,6 +1278,7 @@ export type Database = {
           occupation?: string | null
           organization_id?: string
           other_medical_conditions?: string | null
+          phone?: string | null
           photo_url?: string | null
           primary_need?: string | null
           registration_source?: string | null
