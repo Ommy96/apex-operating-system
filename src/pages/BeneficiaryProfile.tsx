@@ -761,6 +761,8 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryOverviewTab
                   beneficiary={beneficiary as any}
                   guardians={guardians}
+                  guardiansError={!!guardiansError}
+                  onRetryGuardians={() => { refetchGuardians(); }}
                   donors={donors}
                   visibility={visibility}
                   canLogVisit={true}
