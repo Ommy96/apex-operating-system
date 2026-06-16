@@ -667,6 +667,8 @@ export function BeneficiaryForm({
       let beneficiaryId = beneficiary?.id;
       let uniqueId = beneficiary?.unique_id;
 
+      logger.debug('Beneficiary save payload', payload);
+
       if (beneficiary?.id) {
         const { error } = await supabase
           .from('beneficiaries')
