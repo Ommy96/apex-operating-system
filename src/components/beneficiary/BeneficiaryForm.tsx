@@ -309,6 +309,7 @@ export function BeneficiaryForm({
   const { term } = useBeneficiaryTerminology();
   const { can } = usePermissions();
   const orgId = currentOrganization?.organization_id;
+  const queryClient = useQueryClient();
 
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
