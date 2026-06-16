@@ -255,21 +255,6 @@ export default function BeneficiaryProfile() {
       if (beneficiaryError) throw beneficiaryError;
       setBeneficiary(beneficiaryData as Beneficiary);
 
-      const { data: guardiansData } = await supabase
-        .from('beneficiary_guardians')
-        .select(
-          `id, relationship, is_primary, guardians (id, full_name, guardian_type, phone, email, is_alive, employment_type, source_of_income, national_id, age, date_of_birth, address, employment_details, date_of_death, created_at)`,
-        )
-        .eq('beneficiary_id', id);
-
-      if (guardiansData) {
-        setGuardians(guardiansData.map((g: any) => ({
-          ...g.guardians,
-          relationship: g.relationship,
-          is_primary: !!g.is_primary,
-        })));
-      }
-
       const { data: donorsData } = await supabase
         .from('beneficiary_donors')
         .select('*, program:programs(name)')
