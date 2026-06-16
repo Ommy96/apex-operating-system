@@ -35,6 +35,7 @@ const EntityDataPage = lazy(() => import("./pages/EntityDataPage"));
 const OrganizationSettings = lazy(() => import("./pages/OrganizationSettings"));
 const InferaAdminDashboard = lazy(() => import("./pages/InferaAdminDashboard"));
 const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
+const Analytics = lazy(() => import("./pages/Analytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
 const FundingIntelligence = lazy(() => import("./pages/FundingIntelligence"));
@@ -323,6 +324,11 @@ const App = () => (
             <Route path="/reports-analytics" element={
               <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
                 <DashboardLayout><LazyRoute><ReportsAnalytics /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><Analytics /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/role-management" element={

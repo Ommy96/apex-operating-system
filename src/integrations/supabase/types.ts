@@ -753,6 +753,48 @@ export type Database = {
           },
         ]
       }
+      analytics_saved_views: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          params: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          params: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          params?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_saved_views_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_saved_views_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_usage_logs: {
         Row: {
           created_at: string
