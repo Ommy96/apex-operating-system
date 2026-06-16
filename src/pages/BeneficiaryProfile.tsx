@@ -791,7 +791,7 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: History & Risk */}
               <TabsContent value="history-risk" className="mt-0 p-6 space-y-5">
-                <RelationshipsTab beneficiary={beneficiary as any} />
+                <RelationshipsTab beneficiary={beneficiary as any} onEditGuardians={() => setEditOpen(true)} />
                 <div className="pt-2">
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Risk signals</div>
                 </div>
