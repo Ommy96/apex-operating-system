@@ -26,6 +26,8 @@ const ProgramDashboard = lazy(() => import("./pages/ProgramDashboard"));
 const ProjectDashboard = lazy(() => import("./pages/ProjectDashboard"));
 const ProjectReports = lazy(() => import("./pages/ProjectReports"));
 const ProgramReports = lazy(() => import("./pages/ProgramReports"));
+const ProjectEligibility = lazy(() => import("./pages/ProjectEligibility"));
+const BeneficiaryEligibility = lazy(() => import("./pages/BeneficiaryEligibility"));
 const ProgramsPortfolio = lazy(() => import("./pages/ProgramsPortfolio"));
 const AllProjects = lazy(() => import("./pages/AllProjects"));
 const Activities = lazy(() => import("./pages/Activities"));
@@ -198,6 +200,16 @@ const App = () => (
             <Route path="/programs/:programId/reports" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
                 <DashboardLayout><LazyRoute><ProgramReports /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:projectId/eligibility" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><ProjectEligibility /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/beneficiaries/:id/eligibility" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><BeneficiaryEligibility /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/projects" element={
