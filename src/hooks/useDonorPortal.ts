@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 export function useDonorPortal() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: donorAccount, isLoading: accountLoading } = useQuery({
     queryKey: ['donor-account', user?.id],
@@ -63,6 +65,89 @@ export function useDonorPortal() {
     enabled: !!donorAccount,
   });
 
+  // Allocations tied to this donor account (Impact Allocation Engine)
+  const { data: donorAllocations, isLoading: allocationsLoading } = useQuery({
+    queryKey: ['donor-allocations', donorAccount?.id],
+    queryFn: async () => {
+      if (!donorAccount?.id) return [];
+      const { data, error } = await supabase
+        .from('allocations')
+        .select(`
+          id, scope, status, amount_native, native_currency,
+          amount_base, base_currency, fx_rate, fx_at, allocated_at,
+          beneficiary:beneficiaries!allocations_beneficiary_id_fkey(id, display_name, photo_url),
+          project:projects!allocations_project_id_fkey(id, name),
+          program:programs!allocations_program_id_fkey(id, name)
+        `)
+        .eq('donor_account_id', donorAccount.id)
+        .order('allocated_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!donorAccount?.id,
+  });
+
+  // Live donor pool balances (unallocated funds per scope)
+  const { data: donorPools } = useQuery({
+    queryKey: ['donor-pools', donorAccount?.id],
+    queryFn: async () => {
+      if (!donorAccount?.id) return [];
+      const { data, error } = await supabase
+        .from('donor_pools')
+        .select(`
+          id, scope, currency, balance_native, balance_base,
+          scope_beneficiary_id, scope_project_id, scope_program_id,
+          beneficiary:beneficiaries!donor_pools_scope_beneficiary_id_fkey(display_name),
+          project:projects!donor_pools_scope_project_id_fkey(name),
+          program:programs!donor_pools_scope_program_id_fkey(name)
+        `)
+        .eq('donor_account_id', donorAccount.id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!donorAccount?.id,
+  });
+
+  // Impact stories for beneficiaries this donor sponsors
+  const { data: impactStories, isLoading: storiesLoading } = useQuery({
+    queryKey: ['donor-impact-stories', donorAccount?.organization_id, donorAccount?.id],
+    queryFn: async () => {
+      if (!donorAccount?.id) return [];
+      const sponsoredIds = (sponsoredBeneficiaries || [])
+        .map((bd: any) => bd.beneficiary?.id)
+        .filter(Boolean);
+      if (sponsoredIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from('impact_stories')
+        .select('id, title, story_text, theme, tags, photo_urls, published_at, beneficiary_id, project_id')
+        .eq('org_id', donorAccount.organization_id)
+        .eq('status', 'published')
+        .is('deleted_at', null)
+        .in('beneficiary_id', sponsoredIds)
+        .order('published_at', { ascending: false, nullsFirst: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!donorAccount?.id && !!sponsoredBeneficiaries,
+  });
+
+  // Preferred currency mutation
+  const updatePreferredCurrency = useMutation({
+    mutationFn: async (currency: string) => {
+      if (!donorAccount?.id) throw new Error('no_donor_account');
+      const { error } = await supabase
+        .from('donor_accounts')
+        .update({ preferred_currency: currency })
+        .eq('id', donorAccount.id);
+      if (error) throw error;
+      return currency;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donor-account'] });
+    },
+  });
+
   const fetchBeneficiaryAcademics = async (beneficiaryId: string) => {
     const { data, error } = await supabase
       .from('beneficiary_academics')
@@ -107,12 +192,18 @@ export function useDonorPortal() {
     donorAccount,
     sponsoredBeneficiaries,
     donorDocuments,
+    donorAllocations,
+    donorPools,
+    impactStories,
+    updatePreferredCurrency,
     fetchBeneficiaryAcademics,
     fetchBeneficiaryProgression,
     fetchBeneficiaryUpdates,
     getDocumentDownloadUrl,
     isLoading: accountLoading || beneficiariesLoading,
     documentsLoading,
+    allocationsLoading,
+    storiesLoading,
     isDonor: !!donorAccount,
   };
 }
