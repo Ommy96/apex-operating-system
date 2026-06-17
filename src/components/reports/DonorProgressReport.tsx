@@ -54,12 +54,12 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
   const activities = useQuery({
     queryKey: ["donor-report-activities", projectId, reportingPeriodStart, reportingPeriodEnd],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("activities")
-        .select("id, title, actual_date, location, status")
+        .select("id, name, scheduled_at, completed_at, location, status")
         .eq("project_id", projectId)
-        .gte("actual_date", reportingPeriodStart)
-        .lte("actual_date", reportingPeriodEnd)
+        .gte("completed_at", reportingPeriodStart)
+        .lte("completed_at", reportingPeriodEnd)
         .eq("status", "completed");
       return data || [];
     },
@@ -71,7 +71,7 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
     queryFn: async () => {
       const ids = (activities.data || []).map((a: any) => a.id);
       if (ids.length === 0) return {};
-      const { data } = await supabase.from("activity_attendance").select("activity_id").in("activity_id", ids);
+      const { data } = await (supabase as any).from("activity_participants").select("activity_id").eq("attended", true).in("activity_id", ids);
       const counts: Record<string, number> = {};
       (data || []).forEach((a: any) => { counts[a.activity_id] = (counts[a.activity_id] || 0) + 1; });
       return counts;
@@ -82,7 +82,7 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
   const allActivitiesCount = useQuery({
     queryKey: ["donor-report-all-activities", projectId, reportingPeriodStart, reportingPeriodEnd],
     queryFn: async () => {
-      const { count } = await supabase.from("activities").select("id", { count: "exact", head: true }).eq("project_id", projectId).gte("planned_start_date", reportingPeriodStart).lte("planned_start_date", reportingPeriodEnd);
+      const { count } = await (supabase as any).from("activities").select("id", { count: "exact", head: true }).eq("project_id", projectId).gte("scheduled_at", reportingPeriodStart).lte("scheduled_at", reportingPeriodEnd);
       return count || 0;
     },
     enabled: !!projectId,
@@ -206,8 +206,8 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
                 <TableBody>
                   {(activities.data || []).map((a: any) => (
                     <TableRow key={a.id}>
-                      <TableCell className="font-medium text-sm">{a.title}</TableCell>
-                      <TableCell className="text-sm">{a.actual_date ? new Date(a.actual_date).toLocaleDateString("en-KE") : "—"}</TableCell>
+                      <TableCell className="font-medium text-sm">{a.name}</TableCell>
+                      <TableCell className="text-sm">{a.completed_at ? new Date(a.completed_at).toLocaleDateString("en-KE") : a.scheduled_at ? new Date(a.scheduled_at).toLocaleDateString("en-KE") : "—"}</TableCell>
                       <TableCell className="text-sm">{a.location || "—"}</TableCell>
                       <TableCell className="text-right text-sm">{(attendance.data as any)?.[a.id] || 0}</TableCell>
                     </TableRow>
