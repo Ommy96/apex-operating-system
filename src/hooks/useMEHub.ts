@@ -209,7 +209,11 @@ export function useMEHub() {
       // Activities without beneficiary linkage
       const activitiesArr = recentActivities.data ?? [];
       const totalActivitiesRecent = activitiesArr.length;
-      const activitiesWithoutBeneficiaries = activitiesArr.filter((a: any) => !a.beneficiaries_reached || a.beneficiaries_reached === 0).length;
+      const activitiesWithoutBeneficiaries = activitiesArr.filter((a: any) => {
+        const p = a.activity_participants?.[0]?.count ?? 0;
+        const d = a.activity_disbursements?.[0]?.count ?? 0;
+        return (p + d) === 0;
+      }).length;
 
       return {
         totalBeneficiaries: beneficiariesCount.count ?? 0,
