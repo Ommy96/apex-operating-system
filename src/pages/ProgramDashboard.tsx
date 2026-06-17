@@ -28,6 +28,7 @@ import { ProgramReachTargets } from "@/components/programs/ProgramReachTargets";
 import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { ProgramCommsPlan } from "@/components/programs/ProgramCommsPlan";
 import { SustainabilityPlan } from "@/components/programs/SustainabilityPlan";
+import { ProjectActivitiesTab } from "@/components/activities/ProjectActivitiesTab";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 import { GenerateWithAIButton } from "@/components/ai/GenerateWithAIButton";
