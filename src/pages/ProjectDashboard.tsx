@@ -474,19 +474,12 @@ const ProjectDashboard = () => {
           <TabsList className="inline-flex w-max md:w-auto bg-muted/50 p-1">
             <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
             <TabsTrigger value="beneficiaries" className="text-xs sm:text-sm">Beneficiaries</TabsTrigger>
+            <TabsTrigger value="activities" className="text-xs sm:text-sm">Activities</TabsTrigger>
             <TabsTrigger value="funding" className="text-xs sm:text-sm">Funding</TabsTrigger>
-            <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
-            <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
+            <TabsTrigger value="me" className="text-xs sm:text-sm">M&E</TabsTrigger>
+            <TabsTrigger value="team_partners" className="text-xs sm:text-sm">Team &amp; Partners</TabsTrigger>
             <TabsTrigger value="workplan" className="text-xs sm:text-sm">Workplan</TabsTrigger>
-            <TabsTrigger value="milestones" className="text-xs sm:text-sm">Milestones</TabsTrigger>
-            <TabsTrigger value="me_schedule" className="text-xs sm:text-sm">M&E Schedule</TabsTrigger>
-           <TabsTrigger value="risks" className="text-xs sm:text-sm">Risks</TabsTrigger>
-           <TabsTrigger value="partners" className="text-xs sm:text-sm">Partners</TabsTrigger>
-           <TabsTrigger value="reach" className="text-xs sm:text-sm">Reach</TabsTrigger>
             <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
-            <TabsTrigger value="donor_packs" className="text-xs sm:text-sm">Donor Packs</TabsTrigger>
-            <TabsTrigger value="comms" className="text-xs sm:text-sm">Comms</TabsTrigger>
-            <TabsTrigger value="sustainability" className="text-xs sm:text-sm">Sustainability</TabsTrigger>
           </TabsList>
         </div>
 
@@ -693,7 +686,12 @@ const ProjectDashboard = () => {
           </Card>
         </TabsContent>
 
-        {/* Funding Tab */}
+        {/* Activities Tab (NEW — entry to Phase 1 activity flow from inside a project) */}
+        <TabsContent value="activities" className="mt-4">
+          <ProjectActivitiesTab projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        {/* Funding Tab — includes Expenses sub-section (folded from old Expenses tab) */}
         <TabsContent value="funding" className="space-y-4 mt-4">
           {/* Grants */}
           <Card>
@@ -794,13 +792,13 @@ const ProjectDashboard = () => {
           </Card>
         </TabsContent>
 
-        {/* Expenses Tab */}
-        <TabsContent value="expenses" className="mt-4">
+        {/* Expenses (folded into Funding) */}
+        <TabsContent value="funding" className="mt-4">
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base">Project Expenses</CardTitle>
+                  <CardTitle className="text-base">Expenses</CardTitle>
                   <CardDescription>Total spent: {formatCurrency(totalExpenses)}</CardDescription>
                 </div>
                 {totalBudget > 0 && (
@@ -854,9 +852,15 @@ const ProjectDashboard = () => {
           </Card>
         </TabsContent>
 
-        {/* Team Tab */}
-        <TabsContent value="team" className="mt-4">
+        {/* Team & Partners — Team */}
+        <TabsContent value="team_partners" className="mt-4">
           <ProjectTeamTab projectId={projectId!} orgId={currentOrganization?.organization_id} />
+        </TabsContent>
+
+        {/* Team & Partners — Partner organisations */}
+        <TabsContent value="team_partners" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Partner organisations</h3>
+          <ProgramPartners programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
         {/* Workplan Tab */}
@@ -864,23 +868,24 @@ const ProjectDashboard = () => {
           <ProjectWorkplanTab projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
-        <TabsContent value="milestones" className="mt-4">
+        {/* Milestones (folded into Workplan) */}
+        <TabsContent value="workplan" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Milestones</h3>
           <ProgramMilestones projectId={projectId} />
         </TabsContent>
 
-        <TabsContent value="me_schedule" className="mt-4">
+        {/* M&E (folded from M&E Schedule + Risks + Reach) */}
+        <TabsContent value="me" className="mt-4">
           <ProgramMESchedule projectId={projectId!} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
-        <TabsContent value="risks" className="mt-4">
+        <TabsContent value="me" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Risks</h3>
           <ProgramRiskRegister programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
-        <TabsContent value="partners" className="mt-4">
-          <ProgramPartners programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
-        </TabsContent>
-
-        <TabsContent value="reach" className="mt-4">
+        <TabsContent value="me" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Reach</h3>
           <ProgramReachTargets programId={project?.program_id || projectId!} projectId={projectId} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
@@ -889,16 +894,14 @@ const ProjectDashboard = () => {
           <NarrativeReportsTab projectId={projectId!} projectName={project?.name} />
         </TabsContent>
 
-        <TabsContent value="donor_packs" className="mt-4">
+        <TabsContent value="reports" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Donor packs</h3>
           <DonorReportPacks projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
 
-        <TabsContent value="comms" className="mt-4">
+        <TabsContent value="reports" className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Communications</h3>
           <ProgramCommsPlan projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
-        </TabsContent>
-
-        <TabsContent value="sustainability" className="mt-4">
-          <SustainabilityPlan projectId={projectId!} programId={project?.program_id} orgId={currentOrganization?.organization_id} />
         </TabsContent>
       </Tabs>
       <ProjectSettingsSheet

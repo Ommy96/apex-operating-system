@@ -30,7 +30,6 @@ const ProjectEligibility = lazy(() => import("./pages/ProjectEligibility"));
 const BeneficiaryEligibility = lazy(() => import("./pages/BeneficiaryEligibility"));
 const LeadWorkspace = lazy(() => import("./pages/LeadWorkspace"));
 const BurnVsImpact = lazy(() => import("./pages/BurnVsImpact"));
-const ProgramsPortfolio = lazy(() => import("./pages/ProgramsPortfolio"));
 const AllProjects = lazy(() => import("./pages/AllProjects"));
 const Activities = lazy(() => import("./pages/Activities"));
 const ActivityDetail = lazy(() => import("./pages/ActivityDetail"));
@@ -41,7 +40,6 @@ const DynamicProgramPage = lazy(() => import("./pages/DynamicProgramPage"));
 const EntityDataPage = lazy(() => import("./pages/EntityDataPage"));
 const OrganizationSettings = lazy(() => import("./pages/OrganizationSettings"));
 const InferaAdminDashboard = lazy(() => import("./pages/InferaAdminDashboard"));
-const ReportsAnalytics = lazy(() => import("./pages/ReportsAnalytics"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
@@ -65,6 +63,7 @@ const DonorAuth = lazy(() => import("./pages/DonorAuth"));
 const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 const BoardPortal = lazy(() => import("./pages/BoardPortal"));
 const HouseholdProfile = lazy(() => import("./pages/HouseholdProfile"));
+const Households = lazy(() => import("./pages/Households"));
 
 // Sprint 2 pages
 const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
@@ -88,7 +87,6 @@ const OrgSetupWizard = lazy(() => import("./pages/OrgSetupWizard"));
 // Sprint 6 pages
 const MapView = lazy(() => import("./pages/MapView"));
 const Procurement = lazy(() => import("./pages/Procurement"));
-const MEHub = lazy(() => import("./pages/MEHub"));
 const MEConsolidated = lazy(() => import("./pages/MEConsolidated"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
@@ -151,11 +149,7 @@ const App = () => (
                 <DashboardLayout><LazyRoute><ProgramsManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/programs/portfolio" element={
-              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
-                <DashboardLayout><LazyRoute><ProgramsPortfolio /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/programs/portfolio" element={<Navigate to="/programs-management?tab=portfolio" replace />} />
             <Route path="/entities/:slug" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><EntityDataPage /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
@@ -172,6 +166,11 @@ const App = () => (
             <Route path="/beneficiaries/:id" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><BeneficiaryProfile /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/households" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><Households /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/households/:householdId" element={
@@ -377,11 +376,7 @@ const App = () => (
                 <DashboardLayout><LazyRoute><RiskIntelligence /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/reports-analytics" element={
-              <ProtectedRoute requirePermission={{ module: 'reports', action: 'view', resource: 'reports' }}>
-                <DashboardLayout><LazyRoute><ReportsAnalytics /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/reports-analytics" element={<Navigate to="/analytics" replace />} />
             <Route path="/analytics" element={
               <ProtectedRoute>
                 <DashboardLayout><LazyRoute><Analytics /></LazyRoute></DashboardLayout>

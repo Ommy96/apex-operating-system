@@ -170,12 +170,13 @@ export default function Beneficiaries() {
     }
   }, [searchParams, beneficiaries]);
 
-  // Deep-link: /beneficiaries?view=households opens households sheet
+  // Legacy deep-link: /beneficiaries?view=households now redirects to the
+  // standalone /households page. Preserves old bookmarks.
   useEffect(() => {
     if (searchParams.get('view') === 'households') {
-      setHouseholdsOpen(true);
+      navigate('/households', { replace: true });
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const fetchBeneficiaries = async () => {
     if (!organizationId) return;
