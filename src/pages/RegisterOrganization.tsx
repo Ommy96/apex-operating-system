@@ -304,7 +304,15 @@ export default function RegisterOrganization() {
 
         <CardContent className="px-6 pb-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+                const first = Object.values(errors)[0] as any;
+                const msg = first?.message || 'Please fix the highlighted fields before continuing.';
+                toast.error(msg);
+                logger.error('Registration form invalid', errors);
+              })}
+              className="space-y-4"
+            >
 
               {/* ── STEP 0: Organization Information ────────────────────────── */}
               {step === 0 && (
