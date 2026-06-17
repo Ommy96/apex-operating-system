@@ -218,6 +218,9 @@ const App = () => (
               <ProtectedRoute><DashboardLayout><LazyRoute><LeadWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/my-project" element={<Navigate to="/workspace/lead" replace />} />
+            <Route path="/intelligence/burn-vs-impact" element={
+              <ProtectedRoute><DashboardLayout><LazyRoute><BurnVsImpact /></LazyRoute></DashboardLayout></ProtectedRoute>
+            } />
             <Route path="/projects" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
                 <DashboardLayout><LazyRoute><AllProjects /></LazyRoute></DashboardLayout>
