@@ -33,7 +33,7 @@ export function useRiskAssessment() {
         { data: enrollments },
       ] = await Promise.all([
         supabase.from("grants").select("id, grant_name, status, end_date, grant_amount").eq("organization_id", orgId),
-        supabase.from("activities").select("id, title, status, planned_date, organization_id").eq("organization_id", orgId).is("deleted_at", null),
+        (supabase as any).from("activities").select("id, name, status, scheduled_at, organization_id").eq("organization_id", orgId),
         supabase.from("complaints").select("id, description, status, created_at").eq("organization_id", orgId),
         supabase.from("beneficiaries").select("id, display_name").eq("organization_id", orgId).is("deleted_at", null),
         supabase.from("beneficiary_services").select("beneficiary_id").eq("organization_id", orgId),
@@ -54,7 +54,7 @@ export function useRiskAssessment() {
       });
 
       // Overdue activities
-      const overdueActivities = activities?.filter(a => !isCompletedStatus(a.status) && a.planned_date && new Date(a.planned_date) < subDays(new Date(), 0)) || [];
+      const overdueActivities = (activities as any[] | null)?.filter((a: any) => !isCompletedStatus(a.status) && a.scheduled_at && new Date(a.scheduled_at) < subDays(new Date(), 0)) || [];
       if (overdueActivities.length > 3) {
         risks.push({ id: "overdue-activities", severity: "high", category: "programme", description: `${overdueActivities.length} activities are overdue`, entityName: "Activities", link: "/programs" });
       } else if (overdueActivities.length > 0) {
@@ -76,7 +76,7 @@ export function useRiskAssessment() {
       }
 
       // No-activity activities (activities with no attendance)
-      const noAttendance = activities?.filter(a => isCompletedStatus(a.status)) || [];
+      const noAttendance = (activities as any[] | null)?.filter((a: any) => isCompletedStatus(a.status)) || [];
       if (noAttendance.length > 10) {
         risks.push({ id: "no-attendance-data", severity: "low", category: "data_quality", description: `${noAttendance.length} completed activities — verify attendance data`, entityName: "Activities" });
       }
