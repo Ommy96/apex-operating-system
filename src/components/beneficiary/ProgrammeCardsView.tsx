@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { BeneficiaryBaselinesPopover } from '@/components/baselines/BeneficiaryBaselinesPopover';
 
 /**
  * Resolves a lucide-react icon name (stored as a string on `programs.icon`)
