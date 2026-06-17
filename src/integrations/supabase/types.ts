@@ -1456,6 +1456,94 @@ export type Database = {
           },
         ]
       }
+      beneficiary_baselines: {
+        Row: {
+          beneficiary_id: string
+          captured_at: string
+          captured_by: string | null
+          enrollment_id: string | null
+          id: string
+          indicator_key: string
+          indicator_label: string
+          organization_id: string
+          project_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          beneficiary_id: string
+          captured_at?: string
+          captured_by?: string | null
+          enrollment_id?: string | null
+          id?: string
+          indicator_key: string
+          indicator_label: string
+          organization_id: string
+          project_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          beneficiary_id?: string
+          captured_at?: string
+          captured_by?: string | null
+          enrollment_id?: string | null
+          id?: string
+          indicator_key?: string
+          indicator_label?: string
+          organization_id?: string
+          project_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_baselines_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_baselines_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_baselines_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_baselines_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_baselines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_baselines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       beneficiary_cases: {
         Row: {
           assigned_to: string | null
@@ -11687,6 +11775,77 @@ export type Database = {
           },
         ]
       }
+      project_baseline_indicators: {
+        Row: {
+          created_at: string
+          id: string
+          indicator_key: string
+          indicator_label: string
+          organization_id: string
+          project_id: string
+          required: boolean
+          sort_order: number | null
+          unit: string | null
+          updated_at: string
+          value_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indicator_key: string
+          indicator_label: string
+          organization_id: string
+          project_id: string
+          required?: boolean
+          sort_order?: number | null
+          unit?: string | null
+          updated_at?: string
+          value_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indicator_key?: string
+          indicator_label?: string
+          organization_id?: string
+          project_id?: string
+          required?: boolean
+          sort_order?: number | null
+          unit?: string | null
+          updated_at?: string
+          value_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_baseline_indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_baseline_indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_baseline_indicators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_baseline_indicators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       project_narrative_reports: {
         Row: {
           achievements: string | null
@@ -14566,6 +14725,10 @@ export type Database = {
       }
       seed_default_org_roles: {
         Args: { _admin_user_id: string; _org_id: string }
+        Returns: undefined
+      }
+      seed_project_baseline_indicators: {
+        Args: { _project_id: string; _sector?: string }
         Returns: undefined
       }
       switch_user_organization: {
