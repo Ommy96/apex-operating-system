@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
+import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
@@ -316,6 +317,9 @@ export function BeneficiaryForm({
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [dupMatches, setDupMatches] = useState<DuplicateMatch[]>([]);
+  const [dupDialogOpen, setDupDialogOpen] = useState(false);
+  const [dupCheckBypassed, setDupCheckBypassed] = useState(false);
   const [form, setForm] = useState<FormState>(() =>
     beneficiary
       ? createFormStateFromBeneficiary(beneficiary, defaultCategory)
