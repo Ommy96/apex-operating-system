@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
   Users, DollarSign, Heart, Calendar, TrendingUp, Clock,
- ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake, Package, Megaphone, Sprout
+ ChevronRight, Activity, Layers, Flag, Network, CalendarClock, ShieldAlert, Handshake, Package, Megaphone, Sprout, GitMerge
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
+import { ProgramRollups } from "@/components/programs/ProgramRollups";
 import { ProgramProjects } from "@/components/programs/ProgramProjects";
 import { ProgramFunding } from "@/components/programs/ProgramFunding";
 import { ProgramSponsorshipDashboard } from "@/components/programs/ProgramSponsorshipDashboard";
