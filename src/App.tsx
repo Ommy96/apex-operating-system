@@ -213,6 +213,10 @@ const App = () => (
                 <DashboardLayout><LazyRoute><BeneficiaryEligibility /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/workspace/lead" element={
+              <ProtectedRoute><DashboardLayout><LazyRoute><LeadWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
+            } />
+            <Route path="/my-project" element={<Navigate to="/workspace/lead" replace />} />
             <Route path="/projects" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
                 <DashboardLayout><LazyRoute><AllProjects /></LazyRoute></DashboardLayout>
