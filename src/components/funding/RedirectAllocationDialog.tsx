@@ -22,7 +22,7 @@ interface Props {
 }
 
 export function RedirectAllocationDialog(p: Props) {
-  const { organization } = useOrganization();
+  const { currentOrganization: organization } = useOrganization();
   const qc = useQueryClient();
   const [target, setTarget] = useState<string>("");
   const [reason, setReason] = useState("");
