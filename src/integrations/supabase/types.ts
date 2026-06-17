@@ -6412,6 +6412,103 @@ export type Database = {
           },
         ]
       }
+      field_logs: {
+        Row: {
+          activity_id: string | null
+          beneficiary_id: string | null
+          body: string | null
+          category: string
+          created_at: string
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          logged_at: string
+          logged_by: string
+          metadata: Json
+          organization_id: string
+          photo_urls: string[] | null
+          project_id: string
+          title: string
+        }
+        Insert: {
+          activity_id?: string | null
+          beneficiary_id?: string | null
+          body?: string | null
+          category: string
+          created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          logged_at?: string
+          logged_by: string
+          metadata?: Json
+          organization_id: string
+          photo_urls?: string[] | null
+          project_id: string
+          title: string
+        }
+        Update: {
+          activity_id?: string | null
+          beneficiary_id?: string | null
+          body?: string | null
+          category?: string
+          created_at?: string
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          logged_at?: string
+          logged_by?: string
+          metadata?: Json
+          organization_id?: string
+          photo_urls?: string[] | null
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_logs_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_logs_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       financial_transactions: {
         Row: {
           amount: number
@@ -11199,6 +11296,98 @@ export type Database = {
         }
         Relationships: []
       }
+      program_report_drafts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          program_id: string
+          qualitative_lessons: string | null
+          qualitative_summary: string | null
+          quantitative: Json
+          source_project_report_ids: string[]
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          program_id: string
+          qualitative_lessons?: string | null
+          qualitative_summary?: string | null
+          quantitative?: Json
+          source_project_report_ids?: string[]
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          program_id?: string
+          qualitative_lessons?: string | null
+          qualitative_summary?: string | null
+          quantitative?: Json
+          source_project_report_ids?: string[]
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_report_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_report_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_report_drafts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_report_drafts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
       program_report_types: {
         Row: {
           created_at: string
@@ -12589,6 +12778,98 @@ export type Database = {
           },
           {
             foreignKeyName: "project_narrative_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      project_report_drafts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approver_notes: string | null
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          project_id: string
+          qualitative_lessons: string | null
+          qualitative_summary: string | null
+          quantitative: Json
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approver_notes?: string | null
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          project_id: string
+          qualitative_lessons?: string | null
+          qualitative_summary?: string | null
+          quantitative?: Json
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approver_notes?: string | null
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          project_id?: string
+          qualitative_lessons?: string | null
+          qualitative_summary?: string | null
+          quantitative?: Json
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_report_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_report_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_report_drafts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_report_drafts_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "v_project_funding_summary"

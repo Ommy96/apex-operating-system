@@ -16,7 +16,8 @@ export type OfflineRecordType =
   | 'attendance'
   | 'form_submission'
   | 'gps_point'
-  | 'visit';
+  | 'visit'
+  | 'field_log';
 export type SyncStatus = 'pending' | 'syncing' | 'synced' | 'failed' | 'conflict';
 
 export interface OfflineRecord {

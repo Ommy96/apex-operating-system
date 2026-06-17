@@ -200,6 +200,32 @@ export function useOfflineSync() {
         const blob = new Blob([Uint8Array.from(atob(fileData), c => c.charCodeAt(0))]);
         const { error } = await supabase.storage.from(bucket || 'child-photos').upload(path || `field/${Date.now()}_${fileName}`, blob);
         if (error) throw error;
+      } else if (record.type === 'field_log') {
+        const {
+          project_id, activity_id, beneficiary_id, category, title, body,
+          photo_urls, gps_lat, gps_lng, metadata, logged_at,
+        } = record.data;
+        if (!project_id) {
+          // field_logs requires a project; skip silently if missing
+          await updateRecordStatus(record.id, 'synced', 'skipped: no project_id');
+          return true;
+        }
+        const { error } = await (supabase as any).from('field_logs').insert({
+          organization_id: record.organizationId,
+          logged_by: record.userId,
+          project_id,
+          activity_id: activity_id || null,
+          beneficiary_id: beneficiary_id || null,
+          category,
+          title,
+          body: body || null,
+          photo_urls: photo_urls || null,
+          gps_lat: gps_lat ?? null,
+          gps_lng: gps_lng ?? null,
+          metadata: metadata || {},
+          logged_at: logged_at || new Date().toISOString(),
+        });
+        if (error) throw error;
       }
 
       await updateRecordStatus(record.id, 'synced');
