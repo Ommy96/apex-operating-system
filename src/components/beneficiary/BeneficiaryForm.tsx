@@ -1008,6 +1008,28 @@ export function BeneficiaryForm({
         </AlertDialogContent>
       </AlertDialog>
 
+      <DuplicatePreSaveDialog
+        open={dupDialogOpen}
+        matches={dupMatches}
+        orgId={orgId}
+        newBeneficiarySnapshot={{
+          first_name: form.first_name,
+          last_name: form.last_name,
+          date_of_birth: form.date_of_birth,
+          sub_county: form.sub_county,
+        }}
+        onLoadExisting={(id) => {
+          setDupDialogOpen(false);
+          window.location.assign(`/beneficiary/${id}`);
+        }}
+        onSaveAnyway={() => {
+          setDupDialogOpen(false);
+          setDupCheckBypassed(true);
+          setTimeout(() => submit(), 0);
+        }}
+        onClose={() => setDupDialogOpen(false)}
+      />
+
       {/* Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <div className="flex gap-2">
