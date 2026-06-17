@@ -342,6 +342,12 @@ export function AppSidebar() {
       ],
     },
     {
+      label: "Intelligence",
+      items: [
+        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewPrograms || superAdmin },
+      ],
+    },
+    {
       label: "Governance",
       items: [
         { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
