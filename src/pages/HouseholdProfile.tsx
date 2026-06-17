@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Crown, Home, Loader2, MapPin, Plus, Users } from 'lucide-react';
+import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -13,6 +13,12 @@ import { calculateAge } from '@/lib/ageUtils';
 import { useState } from 'react';
 import { RegisterFamilySheet } from '@/components/beneficiary/RegisterFamilySheet';
 import { formatDisplayDate } from '@/lib/dateUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/hooks/useAuth';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 export default function HouseholdProfile() {
   const { householdId } = useParams<{ householdId: string }>();
@@ -21,6 +27,13 @@ export default function HouseholdProfile() {
   const { data: members = [] } = useHouseholdMembers(householdId);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [headOpen, setHeadOpen] = useState(false);
+  const [pickedHead, setPickedHead] = useState<string | null>(null);
+  const [savingHead, setSavingHead] = useState(false);
+  const queryClient = useQueryClient();
+  const { can } = usePermissions();
+  const { user } = useAuth();
+  const canEditHead = !!(can as any).manageBeneficiaries || !!(can as any).editBeneficiaries;
   const memberIds = members.map((m: any) => m.id);
   const { searchTerm, setSearchTerm, results, isFetching } = useBeneficiarySearch(memberIds, 15);
   const updateHousehold = useUpdateBeneficiaryHousehold();
@@ -58,6 +71,42 @@ export default function HouseholdProfile() {
   }
 
   const head = members.find((m: any) => m.id === household.head_of_household_id);
+
+  const handleChangeHead = async () => {
+    if (!pickedHead || !householdId) return;
+    setSavingHead(true);
+    try {
+      const previousHeadId = household.head_of_household_id || null;
+      const { error } = await supabase
+        .from('households')
+        .update({ head_of_household_id: pickedHead })
+        .eq('id', householdId);
+      if (error) throw error;
+      try {
+        await supabase.from('audit_logs').insert({
+          event_type: 'change_household_head',
+          entity_type: 'household',
+          entity_id: householdId,
+          user_id: user?.id,
+          old_values: { head_of_household_id: previousHeadId } as any,
+          new_values: { head_of_household_id: pickedHead } as any,
+          metadata: { household_name: household.household_name } as any,
+        } as any);
+      } catch (_) { /* non-fatal */ }
+      const newHead = members.find((m: any) => m.id === pickedHead);
+      toast({ title: `Head of household updated to ${newHead?.display_name || 'new member'}` });
+      queryClient.invalidateQueries({ queryKey: ['household', householdId] });
+      queryClient.invalidateQueries({ queryKey: ['household-members', householdId] });
+      setHeadOpen(false);
+      setPickedHead(null);
+    } catch (e: any) {
+      toast({ title: 'Failed to change head', description: e?.message, variant: 'destructive' });
+    } finally {
+      setSavingHead(false);
+    }
+  };
+
+  const eligibleHeads = members.filter((m: any) => m.id !== household.head_of_household_id);
   const vulnLevels: Record<string, number> = {};
   members.forEach((m: any) => {
     const v = m.vulnerability_level || 'low';
@@ -94,6 +143,11 @@ export default function HouseholdProfile() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="capitalize">Highest vulnerability: {highestVuln}</Badge>
+            {canEditHead && head && (
+              <Button variant="outline" size="sm" onClick={() => { setPickedHead(null); setHeadOpen(true); }}>
+                <Pencil className="h-3.5 w-3.5 mr-1.5" /> Change head
+              </Button>
+            )}
           </div>
         </div>
       </Card>
@@ -159,6 +213,49 @@ export default function HouseholdProfile() {
         open={registerOpen}
         onOpenChange={setRegisterOpen}
       />
+
+      <Dialog open={headOpen} onOpenChange={setHeadOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change head of household</DialogTitle>
+            <DialogDescription>
+              Pick a household member to promote. The previous head becomes a regular member.
+            </DialogDescription>
+          </DialogHeader>
+          {eligibleHeads.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              No eligible members to promote. Add another member to this household first.
+            </p>
+          ) : (
+            <RadioGroup value={pickedHead || ''} onValueChange={setPickedHead} className="space-y-1 max-h-72 overflow-y-auto">
+              {eligibleHeads.map((m: any) => {
+                const age = calculateAge(m.date_of_birth);
+                return (
+                  <label
+                    key={m.id}
+                    htmlFor={`head-${m.id}`}
+                    className="flex items-center gap-3 p-2 rounded-md border hover:bg-secondary/40 cursor-pointer"
+                  >
+                    <RadioGroupItem id={`head-${m.id}`} value={m.id} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{m.display_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {age !== null ? `${age}y` : 'No DOB'}{m.gender ? ` · ${m.gender}` : ''}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </RadioGroup>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHeadOpen(false)}>Cancel</Button>
+            <Button onClick={handleChangeHead} disabled={!pickedHead || savingHead}>
+              {savingHead ? 'Saving…' : 'Confirm change'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-lg">
