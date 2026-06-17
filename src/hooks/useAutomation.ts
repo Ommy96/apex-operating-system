@@ -261,6 +261,7 @@ export function useAutomation() {
         .from("donor_report_runs")
         .select("*")
         .eq("organization_id", orgId!)
+        .or("is_deleted.is.null,is_deleted.eq.false")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -322,6 +323,35 @@ export function useAutomation() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const deleteReportRun = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("donor_report_runs")
+        .update({ is_deleted: true, deleted_at: new Date().toISOString() } as any)
+        .eq("id", id);
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: ["donor-report-runs"] });
+      toast.success("Report deleted", {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            await supabase
+              .from("donor_report_runs")
+              .update({ is_deleted: false, deleted_at: null } as any)
+              .eq("id", id);
+            queryClient.invalidateQueries({ queryKey: ["donor-report-runs"] });
+            toast.success("Report restored");
+          },
+        },
+        duration: 10_000,
+      });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   // Real-time subscriptions for automation tables
   useRealtimeSubscription([
     { table: "automation_rules", queryKeys: [["automation-rules", orgId || ""]], orgId, enabled: !!orgId },
@@ -333,6 +363,6 @@ export function useAutomation() {
   return {
     rules, createRule, updateRule, deleteRule, automationLogs,
     alertRules, createAlertRule, updateAlertRule, deleteAlertRule, alertInstances, resolveAlert, markAlertRead,
-    reportTemplates, createReportTemplate, deleteReportTemplate, reportRuns, generateReport,
+    reportTemplates, createReportTemplate, deleteReportTemplate, reportRuns, generateReport, deleteReportRun,
   };
 }
