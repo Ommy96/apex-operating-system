@@ -25,7 +25,7 @@ import {
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
   Layers, FolderKanban, GanttChart as GanttIcon,
-  TrendingUp,
+  TrendingUp, Home, MapPin, Network, LayoutGrid,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
@@ -41,6 +41,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useBranding } from "@/hooks/useBranding";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
+import { useLeadProjects } from "@/hooks/useLeadProjects";
 
 interface MenuItemType {
   title: string;
@@ -162,6 +163,7 @@ export function AppSidebar() {
   const { currentOrganization } = useOrganization();
   const { logoUrl, orgName } = useBranding();
   const { termPlural } = useBeneficiaryTerminology();
+  const { isProjectLead } = useLeadProjects();
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -292,8 +294,9 @@ export function AppSidebar() {
 
   const menuGroups: MenuGroup[] = [
     {
-      label: "Overview",
+      label: "Home",
       items: [
+        { title: "My Workspace", url: "/workspace/lead", icon: LayoutGrid, show: isProjectLead },
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
       ],
     },
@@ -301,21 +304,38 @@ export function AppSidebar() {
       label: "People",
       items: [
         { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
-        
+        { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],
     },
     {
-      label: "Programs & M&E",
+      label: "Programs",
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms, badgeCount: overdueMilestones },
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
-        { title: "Workplans", url: "/workplans", icon: GanttIcon, show: can.viewPrograms },
-        { title: "Portfolio", url: "/programs/portfolio", icon: Layers, show: can.viewPrograms },
+        { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME, badgeCount: overdueCollections },
-        { title: "Map", url: "/map", icon: Map, show: can.viewPrograms },
-        { title: "Analytics", url: "/reports-analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Logframe & ToC", url: "/me?tab=logframe", icon: Network, show: can.viewME },
+      ],
+    },
+    {
+      label: "Intelligence",
+      items: [
+        { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
+        { title: "Grant Discovery", url: "/ai/grants", icon: Sparkles, show: true },
+        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewReports || superAdmin },
+        { title: "Analytics", url: "/analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms || can.viewBeneficiaries },
+      ],
+    },
+    {
+      label: "Funding",
+      items: [
+        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
+        { title: "Funding Intelligence", url: "/funding/intelligence", icon: TrendingUp, show: can.viewFinancials },
+        { title: "Allocation Engine", url: "/funding/allocation-engine", icon: Layers, show: can.viewFinancials },
+        { title: "Donations Inbox", url: "/funding/donations-inbox", icon: HandCoins, show: can.viewFinancials },
       ],
     },
     {
@@ -328,9 +348,13 @@ export function AppSidebar() {
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
-        { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
-        { title: "AI Insights", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries, featureFlag: 'field_mode' },
+      ],
+    },
+    {
+      label: "Engagement",
+      items: [
+        { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
       ],
     },
     {
@@ -342,18 +366,11 @@ export function AppSidebar() {
       ],
     },
     {
-      label: "Intelligence",
-      items: [
-        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewPrograms || superAdmin },
-      ],
-    },
-    {
       label: "Governance",
       items: [
         { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
         { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: can.viewCompliance },
         { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
-        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
         { title: "Learning Log", url: "/lessons-learned", icon: BookOpen, show: can.viewPrograms },
         { title: "Impact Stories", url: "/impact-stories", icon: BookHeart, show: can.viewPrograms },
       ],

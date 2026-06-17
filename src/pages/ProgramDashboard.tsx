@@ -47,6 +47,19 @@ const ProgramDashboard = () => {
   const { currentOrganization } = useOrganization();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Consolidated tab map: each new tab renders the union of the old sub-tabs listed.
+  // The underlying sub-components are reused as-is from the previous structure.
+  const TAB_GROUPS: Record<string, string[]> = {
+    overview: ["overview", "partners", "sustainability"],
+    projects: ["projects"],
+    performance: ["indicators", "rollups", "logframe", "reach"],
+    funding: ["funding", "sponsorship"],
+    risks: ["risks", "observations"],
+    reports: ["reports", "donor_packs", "comms"],
+  };
+  const activeOldTabs = TAB_GROUPS[activeTab] ?? [];
+  const isOldTabActive = (k: string) => activeOldTabs.includes(k);
+
   const { data: program, isLoading } = useQuery({
     queryKey: ['program-detail', programId],
     queryFn: async () => {
@@ -282,22 +295,10 @@ const ProgramDashboard = () => {
             {[
               { value: "overview", icon: BarChart3, label: "Overview" },
               { value: "projects", icon: FolderKanban, label: "Projects" },
-              { value: "activities", icon: Activity, label: "Activities" },
-            { value: "team", icon: Users, label: "Team" },
-            { value: "milestones", icon: Flag, label: "Milestones" },
-              { value: "logframe", icon: Network, label: "Logframe" },
+              { value: "performance", icon: Target, label: "Performance" },
               { value: "funding", icon: DollarSign, label: "Funding" },
-              { value: "indicators", icon: Target, label: "Indicators" },
-              { value: "rollups", icon: GitMerge, label: "Roll-ups" },
-              { value: "me_schedule", icon: CalendarClock, label: "M&E Schedule" },
-              { value: "risks", icon: ShieldAlert, label: "Risks" },
-              { value: "partners", icon: Handshake, label: "Partners" },
-              { value: "reach", icon: Target, label: "Reach" },
-              { value: "observations", icon: MessageSquare, label: "Observations" },
-              { value: "sponsorship", icon: Heart, label: "Sponsorship" },
-              { value: "donor_packs", icon: Package, label: "Donor Packs" },
-              { value: "comms", icon: Megaphone, label: "Comms" },
-              { value: "sustainability", icon: Sprout, label: "Sustainability" },
+              { value: "risks", icon: ShieldAlert, label: "Risks & Issues" },
+              { value: "reports", icon: Package, label: "Reports" },
             ].map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <tab.icon className="h-4 w-4" />
@@ -307,7 +308,7 @@ const ProgramDashboard = () => {
           </TabsList>
         </div>
 
-        {activeTab === "overview" && (
+        {isOldTabActive("overview") && (
           <TabsContent value="overview" forceMount className="mt-6 space-y-6">
             {programId && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -427,88 +428,77 @@ const ProgramDashboard = () => {
           </TabsContent>
         )}
 
-        {activeTab === "projects" && (
+        {isOldTabActive("projects") && (
           <TabsContent value="projects" forceMount className="mt-6">
             <ProgramProjects programId={programId} />
           </TabsContent>
         )}
-        {activeTab === "team" && (
-          <TabsContent value="team" forceMount className="mt-6">
-            <ProgramTeam programId={programId} />
-          </TabsContent>
-        )}
-        {activeTab === "milestones" && (
-          <TabsContent value="milestones" forceMount className="mt-6">
-            <ProgramMilestones programId={programId} />
-          </TabsContent>
-        )}
-        {activeTab === "logframe" && (
+        {isOldTabActive("logframe") && (
           <TabsContent value="logframe" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Logframe</h2>
             <ProgramLogframe programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "funding" && (
+        {isOldTabActive("funding") && (
           <TabsContent value="funding" forceMount className="mt-6">
             <ProgramFunding programId={programId} />
           </TabsContent>
         )}
-        {activeTab === "indicators" && (
+        {isOldTabActive("indicators") && (
           <TabsContent value="indicators" forceMount className="mt-6">
             <ProgramIndicators programId={programId} />
           </TabsContent>
         )}
-        {activeTab === "rollups" && (
+        {isOldTabActive("rollups") && (
           <TabsContent value="rollups" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Rollups</h2>
             {programId && <ProgramRollups programId={programId} />}
           </TabsContent>
         )}
-        {activeTab === "me_schedule" && (
-          <TabsContent value="me_schedule" forceMount className="mt-6">
-            <ProgramMESchedule programId={programId!} orgId={currentOrganization?.organization_id} />
-          </TabsContent>
-        )}
-        {activeTab === "risks" && (
+        {isOldTabActive("risks") && (
           <TabsContent value="risks" forceMount className="mt-6">
             <ProgramRiskRegister programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "activities" && (
-          <TabsContent value="activities" forceMount className="mt-6">
-            <ProjectActivitiesTab programId={programId!} orgId={currentOrganization?.organization_id} readOnly />
-          </TabsContent>
-        )}
-        {activeTab === "partners" && (
+        {isOldTabActive("partners") && (
           <TabsContent value="partners" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Partners</h2>
             <ProgramPartners programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "reach" && (
+        {isOldTabActive("reach") && (
           <TabsContent value="reach" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Reach</h2>
             <ProgramReachTargets programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "observations" && (
+        {isOldTabActive("observations") && (
           <TabsContent value="observations" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Programme-level observations</h2>
             <ProgramObservations programId={programId} />
           </TabsContent>
         )}
-        {activeTab === "sponsorship" && (
+        {isOldTabActive("sponsorship") && (
           <TabsContent value="sponsorship" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Sponsorships</h2>
             <ProgramSponsorshipDashboard programId={programId} />
           </TabsContent>
         )}
-        {activeTab === "donor_packs" && (
+        {isOldTabActive("donor_packs") && (
           <TabsContent value="donor_packs" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Donor packs</h2>
             <DonorReportPacks programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "comms" && (
+        {isOldTabActive("comms") && (
           <TabsContent value="comms" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Communications</h2>
             <ProgramCommsPlan programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
-        {activeTab === "sustainability" && (
+        {isOldTabActive("sustainability") && (
           <TabsContent value="sustainability" forceMount className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Sustainability notes</h2>
             <SustainabilityPlan programId={programId!} orgId={currentOrganization?.organization_id} />
           </TabsContent>
         )}
