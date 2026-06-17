@@ -853,6 +853,23 @@ export const BeneficiaryEnrollmentForm = ({
               <Textarea value={enrollNotes} onChange={(e) => setEnrollNotes(e.target.value)} placeholder="Optional notes..." rows={2} />
             </div>
 
+            {/* Baseline indicators */}
+            {enrollProjectIds.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm">Baseline indicators</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Snapshot values captured now become the "from" point for future M&E progress.
+                </p>
+                <BaselineIndicatorsInput
+                  projectIds={enrollProjectIds}
+                  values={baselineValues}
+                  onChange={setBaselineValues}
+                  onTemplatesLoaded={setBaselineTemplates}
+                  compact
+                />
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={resetEnrollForm}>Cancel</Button>
               <Button type="submit" disabled={!enrollProgramId || enrollMutation.isPending}>
