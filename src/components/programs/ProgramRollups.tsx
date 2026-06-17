@@ -31,8 +31,8 @@ const SOURCE_TYPES: { value: SourceType; label: string }[] = [
 ];
 
 export function ProgramRollups({ programId }: { programId: string }) {
-  const { organization } = useOrganization();
-  const orgId = organization?.id;
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.id;
   const r = useProgramRollups(programId, orgId);
   const [editing, setEditing] = useState<Partial<ProgramRollup> | null>(null);
   const [mappingFor, setMappingFor] = useState<ProgramRollup | null>(null);
