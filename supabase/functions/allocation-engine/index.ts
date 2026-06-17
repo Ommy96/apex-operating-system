@@ -281,17 +281,31 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
       .maybeSingle();
     const perBenCap: number | null = null; // unlimited by default
 
-    // Try to use risk-derived need_score: beneficiary_risk_scores.overall_risk DESC
+    // Rank by eligibility_score DESC (primary), then risk DESC (tiebreaker).
     const benIds = Array.from(new Set((enrolled ?? []).map((e: any) => e.beneficiary_id).filter(Boolean)));
     let ordered: string[] = benIds;
     if (benIds.length > 0) {
-      const { data: risks } = await supabase
-        .from("beneficiary_risk_scores")
-        .select("beneficiary_id, overall_risk")
-        .in("beneficiary_id", benIds);
+      const [{ data: elig }, { data: risks }] = await Promise.all([
+        supabase
+          .from("beneficiary_eligibility_scores")
+          .select("beneficiary_id, score, eligible")
+          .eq("project_id", scopeProj!)
+          .in("beneficiary_id", benIds),
+        supabase
+          .from("beneficiary_risk_scores")
+          .select("beneficiary_id, overall_risk")
+          .in("beneficiary_id", benIds),
+      ]);
+      const eligMap = new Map<string, { score: number; eligible: boolean }>();
+      (elig ?? []).forEach((r: any) => eligMap.set(r.beneficiary_id, { score: Number(r.score ?? 0), eligible: !!r.eligible }));
       const riskMap = new Map<string, number>();
       (risks ?? []).forEach((r: any) => riskMap.set(r.beneficiary_id, Number(r.overall_risk ?? 0)));
-      ordered = [...benIds].sort((a, b) => (riskMap.get(b) ?? 0) - (riskMap.get(a) ?? 0));
+      ordered = [...benIds].sort((a, b) => {
+        const ea = eligMap.get(a)?.score ?? 0;
+        const eb = eligMap.get(b)?.score ?? 0;
+        if (eb !== ea) return eb - ea;
+        return (riskMap.get(b) ?? 0) - (riskMap.get(a) ?? 0);
+      });
     }
 
     let remainingNative = amountNative;
