@@ -23,6 +23,7 @@ import { SyncStatusIndicator } from "@/components/field/SyncStatusIndicator";
 import { QuickVisitFlow } from "@/components/field/QuickVisitFlow";
 import { VoiceTextarea } from "@/components/field/VoiceTextarea";
 import { useFieldScopeCache } from "@/hooks/useFieldScopeCache";
+import { QuickFieldLog } from "@/components/field/QuickFieldLog";
 
 export default function FieldMode() {
   const navigate = useNavigate();
@@ -242,6 +243,7 @@ export default function FieldMode() {
 
           {/* ════════ COLLECT TAB ════════ */}
           <TabsContent value="collect" className="mt-4 space-y-4">
+            <QuickFieldLog />
             <div className="grid grid-cols-1 gap-3">
               <Button size="lg" className="h-16 justify-start gap-4 rounded-xl bg-gradient-to-r from-primary to-primary/80" onClick={() => setQuickOpen(true)}>
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20"><Zap className="h-5 w-5" /></div>
