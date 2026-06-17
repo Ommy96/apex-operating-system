@@ -3634,6 +3634,95 @@ export type Database = {
           },
         ]
       }
+      burn_impact_snapshots: {
+        Row: {
+          allocated_base: number | null
+          base_volume: number | null
+          budget_base: number | null
+          burn_rate: number | null
+          computed_at: string
+          created_at: string
+          detail: Json
+          id: string
+          impact_velocity: number | null
+          indicator_actual: number | null
+          indicator_planned: number | null
+          organization_id: string
+          period: string
+          period_end: string
+          period_start: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_base?: number | null
+          base_volume?: number | null
+          budget_base?: number | null
+          burn_rate?: number | null
+          computed_at?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          impact_velocity?: number | null
+          indicator_actual?: number | null
+          indicator_planned?: number | null
+          organization_id: string
+          period: string
+          period_end: string
+          period_start: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_base?: number | null
+          base_volume?: number | null
+          budget_base?: number | null
+          burn_rate?: number | null
+          computed_at?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          impact_velocity?: number | null
+          indicator_actual?: number | null
+          indicator_planned?: number | null
+          organization_id?: string
+          period?: string
+          period_end?: string
+          period_start?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "burn_impact_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "burn_impact_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "burn_impact_snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "burn_impact_snapshots_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       campaign_recipients: {
         Row: {
           campaign_id: string
@@ -12680,6 +12769,80 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_anomaly_flags: {
+        Row: {
+          created_at: string
+          detail: Json
+          detected_at: string
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          detected_at?: string
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          detected_at?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_anomaly_flags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_anomaly_flags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_anomaly_flags_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_anomaly_flags_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
