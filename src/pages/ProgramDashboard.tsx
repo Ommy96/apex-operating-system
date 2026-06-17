@@ -456,7 +456,8 @@ const ProgramDashboard = () => {
           <TabsContent value="indicators" forceMount className="mt-6">
             <ProgramIndicators programId={programId} />
           </TabsContent>
-
+        )}
+        {activeTab === "rollups" && (
           <TabsContent value="rollups" forceMount className="mt-6">
             {programId && <ProgramRollups programId={programId} />}
           </TabsContent>
