@@ -1973,6 +1973,81 @@ export type Database = {
           },
         ]
       }
+      beneficiary_eligibility_scores: {
+        Row: {
+          beneficiary_id: string
+          computed_at: string
+          eligible: boolean
+          failed_required_rules: Json
+          id: string
+          matched_rules: Json
+          max_score: number
+          organization_id: string
+          project_id: string
+          score: number
+        }
+        Insert: {
+          beneficiary_id: string
+          computed_at?: string
+          eligible?: boolean
+          failed_required_rules?: Json
+          id?: string
+          matched_rules?: Json
+          max_score?: number
+          organization_id: string
+          project_id: string
+          score?: number
+        }
+        Update: {
+          beneficiary_id?: string
+          computed_at?: string
+          eligible?: boolean
+          failed_required_rules?: Json
+          id?: string
+          matched_rules?: Json
+          max_score?: number
+          organization_id?: string
+          project_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_eligibility_scores_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_eligibility_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_eligibility_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_eligibility_scores_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_eligibility_scores_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       beneficiary_field_values: {
         Row: {
           beneficiary_id: string
@@ -12679,6 +12754,86 @@ export type Database = {
           },
         ]
       }
+      project_eligibility_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          operator: string
+          organization_id: string
+          points_if_match: number
+          project_id: string
+          required: boolean
+          sort_order: number
+          source: string
+          updated_at: string
+          value: Json
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          operator: string
+          organization_id: string
+          points_if_match?: number
+          project_id: string
+          required?: boolean
+          sort_order?: number
+          source: string
+          updated_at?: string
+          value?: Json
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          operator?: string
+          organization_id?: string
+          points_if_match?: number
+          project_id?: string
+          required?: boolean
+          sort_order?: number
+          source?: string
+          updated_at?: string
+          value?: Json
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_eligibility_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_eligibility_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_eligibility_rules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_eligibility_rules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       project_narrative_reports: {
         Row: {
           achievements: string | null
@@ -15658,6 +15813,10 @@ export type Database = {
         Returns: undefined
       }
       seed_project_baseline_indicators: {
+        Args: { _project_id: string; _sector?: string }
+        Returns: undefined
+      }
+      seed_project_eligibility_rules: {
         Args: { _project_id: string; _sector?: string }
         Returns: undefined
       }
