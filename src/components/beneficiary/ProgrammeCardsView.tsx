@@ -353,6 +353,12 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                       )}
                       {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
                         <div className="flex justify-end gap-2">
+                          <BeneficiaryBaselinesPopover
+                            beneficiaryId={beneficiaryId}
+                            programId={program.id}
+                            projectIds={entries.map((e) => e.projects?.id).filter(Boolean) as string[]}
+                            onCaptureNow={onEnrol}
+                          />
                           <Button
                             size="sm"
                             variant="outline"
