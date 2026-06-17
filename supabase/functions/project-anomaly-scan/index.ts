@@ -268,24 +268,37 @@ Deno.serve(async (req) => {
         }
       }
 
-      // === Impact velocity from indicator_values ===
-      const { data: indVals } = await supabase
-        .from("indicator_values")
-        .select("indicator_id, value, period_start, period_end, target_value")
+      // === Impact velocity from latest project report draft in this period ===
+      const { data: reportRows } = await supabase
+        .from("project_report_drafts")
+        .select("quantitative, period_start, period_end")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
-        .gte("period_start", startISO)
-        .lte("period_end", endISO);
+        .lte("period_start", endISO)
+        .gte("period_end", startISO)
+        .order("generated_at", { ascending: false })
+        .limit(1);
       let actual = 0;
       let planned = 0;
-      (indVals || []).forEach((v: any) => {
-        const val = Number(v.value ?? 0);
-        const tgt = Number(v.target_value ?? 0);
-        if (tgt > 0) {
-          actual += val;
-          planned += tgt;
+      const q: any = (reportRows && reportRows[0]?.quantitative) || {};
+      const indicators = Array.isArray(q.indicators) ? q.indicators : [];
+      indicators.forEach((it: any) => {
+        const a = Number(it.actual ?? it.value ?? 0);
+        const t = Number(it.target ?? it.planned ?? 0);
+        if (t > 0) {
+          actual += a;
+          planned += t;
         }
       });
+      // Fallback proxy: treat activity completion as planned-vs-actual when no indicator data
+      if (planned === 0) {
+        const completed = (actsRecent || []).filter((a: any) => a.completed_at).length;
+        const scheduled = (actsRecent || []).length;
+        if (scheduled > 0) {
+          actual = completed;
+          planned = scheduled;
+        }
+      }
       const impactVelocity = safeDiv(actual, planned);
 
       // === Upsert snapshot ===
