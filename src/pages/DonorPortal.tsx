@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 import { CurrencySelector } from '@/components/donor-portal/CurrencySelector';
 import { DonorAllocationsTab } from '@/components/donor-portal/DonorAllocationsTab';
 import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStoriesTab';
+import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
+import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { useDonorFx } from '@/hooks/useDonorFx';
 
 export default function DonorPortal() {
@@ -197,8 +199,14 @@ export default function DonorPortal() {
           </Card>
         </div>
 
-        <Tabs defaultValue="beneficiaries" className="space-y-6">
+        <Tabs defaultValue="feed" className="space-y-6">
           <TabsList className="bg-muted/50">
+            <TabsTrigger value="feed" className="gap-2">
+              <Sparkles className="h-4 w-4" /> Impact Feed
+            </TabsTrigger>
+            <TabsTrigger value="money" className="gap-2">
+              <Wallet className="h-4 w-4" /> Where my money went
+            </TabsTrigger>
             <TabsTrigger value="beneficiaries" className="gap-2">
               <Users className="h-4 w-4" /> My Beneficiaries
             </TabsTrigger>
@@ -215,6 +223,14 @@ export default function DonorPortal() {
               <FileText className="h-4 w-4" /> Documents
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="feed">
+            <DonorImpactFeed />
+          </TabsContent>
+
+          <TabsContent value="money">
+            <DonorMoneyFlow />
+          </TabsContent>
 
           {/* Beneficiaries Tab */}
           <TabsContent value="beneficiaries">
