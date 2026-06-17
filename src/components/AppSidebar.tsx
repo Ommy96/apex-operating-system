@@ -25,6 +25,7 @@ import {
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
   Layers, FolderKanban, GanttChart as GanttIcon,
+  TrendingUp,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
@@ -338,6 +339,12 @@ export function AppSidebar() {
         { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
         { title: "Safeguarding", url: "/safeguarding", icon: ShieldCheck, show: can.viewSafeguarding },
         { title: "Whistleblower", url: "/whistleblower", icon: AlertTriangle, show: superAdmin || can.viewAccountability },
+      ],
+    },
+    {
+      label: "Intelligence",
+      items: [
+        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewPrograms || superAdmin },
       ],
     },
     {
