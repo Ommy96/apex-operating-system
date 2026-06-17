@@ -40,6 +40,8 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const FinancialSuite = lazy(() => import("./pages/FinancialSuite"));
 const FundingIntelligence = lazy(() => import("./pages/FundingIntelligence"));
+const AllocationEngine = lazy(() => import("./pages/AllocationEngine"));
+const DonationsInbox = lazy(() => import("./pages/DonationsInbox"));
 const GrantDiscovery = lazy(() => import("./pages/GrantDiscovery"));
 const HRManagement = lazy(() => import("./pages/HRManagement"));
 const AutomationEngine = lazy(() => import("./pages/AutomationEngine"));
@@ -213,6 +215,16 @@ const App = () => (
             <Route path="/funding/intelligence" element={
               <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
                 <DashboardLayout><LazyRoute><FundingIntelligence /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/funding/allocation-engine" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><AllocationEngine /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/funding/donations-inbox" element={
+              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
+                <DashboardLayout><LazyRoute><DonationsInbox /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/ai/grants" element={
