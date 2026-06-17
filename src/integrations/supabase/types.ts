@@ -15180,6 +15180,7 @@ export type Database = {
         }
         Returns: Json
       }
+      rpc_allocate_donation: { Args: { _donation_id: string }; Returns: Json }
       search_children_for_linking: {
         Args: { _org_id: string; _search_term: string }
         Returns: {
