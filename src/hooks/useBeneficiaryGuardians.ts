@@ -10,7 +10,6 @@ export interface BeneficiaryGuardian {
   email: string | null;
   national_id: string | null;
   age: number | null;
-  date_of_birth: string | null;
   is_alive: boolean | null;
   employment_type: string | null;
   source_of_income: string | null;
@@ -34,7 +33,7 @@ export function useBeneficiaryGuardians(beneficiaryId: string | undefined) {
           id, relationship, is_primary,
           guardians (
             id, full_name, guardian_type, phone, email, national_id,
-            age, date_of_birth, is_alive, employment_type,
+            age, is_alive, employment_type,
             source_of_income, address, employment_details,
             date_of_death, created_at
           )
