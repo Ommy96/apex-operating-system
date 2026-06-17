@@ -16,15 +16,26 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { formatDistanceToNow } from "date-fns";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
+import { useLeadProjects } from "@/hooks/useLeadProjects";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, isManagement, user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
   const { can } = usePermissions();
   const { term, termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
+
+  // Project Lead users land on their scoped workspace instead of the org dashboard.
+  const { isProjectLead, loading: leadLoading } = useLeadProjects();
+  useEffect(() => {
+    if (leadLoading) return;
+    if (isAdmin || isManagement) return;
+    if (isProjectLead) {
+      navigate("/workspace/lead", { replace: true });
+    }
+  }, [leadLoading, isAdmin, isManagement, isProjectLead, navigate]);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const firstName = userName.split(' ')[0];
