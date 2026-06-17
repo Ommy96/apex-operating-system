@@ -6,6 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, FileBarChart, Play, Trash2, Eye } from "lucide-react";
@@ -21,7 +32,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function DonorReports() {
-  const { reportTemplates, createReportTemplate, deleteReportTemplate, reportRuns, generateReport } = useAutomation();
+  const { reportTemplates, createReportTemplate, deleteReportTemplate, reportRuns, generateReport, deleteReportRun } = useAutomation();
   const [showCreate, setShowCreate] = useState(false);
   const [showGenerate, setShowGenerate] = useState<any>(null);
   const [showPreview, setShowPreview] = useState<any>(null);
@@ -203,6 +214,35 @@ export function DonorReports() {
                             )}
                           </DialogContent>
                         </Dialog>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              aria-label="Delete report"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {r.template_name} ({format(new Date(r.report_period_start), "MMM d")} – {format(new Date(r.report_period_end), "MMM d, yyyy")}). You'll have 10 seconds to undo.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteReportRun.mutate(r.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </CardContent>

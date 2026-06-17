@@ -5106,9 +5106,11 @@ export type Database = {
       donor_report_runs: {
         Row: {
           created_at: string
+          deleted_at: string | null
           generated_by: string | null
           generated_data: Json | null
           id: string
+          is_deleted: boolean
           notes: string | null
           organization_id: string
           report_period_end: string
@@ -5122,9 +5124,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           generated_by?: string | null
           generated_data?: Json | null
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           organization_id: string
           report_period_end: string
@@ -5138,9 +5142,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           generated_by?: string | null
           generated_data?: Json | null
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           organization_id?: string
           report_period_end?: string
@@ -14023,6 +14029,7 @@ export type Database = {
           end_date: string | null
           full_name: string
           id: string
+          is_deleted: boolean
           notes: string | null
           organization_id: string
           phone: string | null
@@ -14044,6 +14051,7 @@ export type Database = {
           end_date?: string | null
           full_name: string
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           organization_id: string
           phone?: string | null
@@ -14065,6 +14073,7 @@ export type Database = {
           end_date?: string | null
           full_name?: string
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           organization_id?: string
           phone?: string | null

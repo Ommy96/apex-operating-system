@@ -6,11 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export function VolunteerDirectory() {
-  const { volunteers, loadingVolunteers, createVolunteer } = useVolunteers();
+  const { volunteers, loadingVolunteers, createVolunteer, deleteVolunteer } = useVolunteers();
+  const { can } = usePermissions();
+  const canDelete = !!(can as any).manageStaff || !!(can as any).manageHR;
   const [showNewVol, setShowNewVol] = useState(false);
   const [volForm, setVolForm] = useState({ full_name: '', email: '', phone: '', skills: '', availability: '', start_date: '', notes: '' });
 
@@ -68,6 +82,37 @@ export function VolunteerDirectory() {
                     <p className="text-xs text-muted-foreground truncate">{v.email || 'No email'}</p>
                   </div>
                   <Badge variant={v.status === 'active' ? 'default' : 'secondary'} className="text-xs capitalize">{v.status}</Badge>
+                  {canDelete && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          aria-label={`Delete ${v.full_name}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete {v.full_name}?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This cannot be undone after 10 seconds. Their activity history will be retained but their profile will be removed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteVolunteer.mutate(v.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
                 {v.skills && (v.skills as string[]).length > 0 && (
                   <div className="flex flex-wrap gap-1">

@@ -18,6 +18,7 @@ export function useVolunteers() {
         .from("volunteers")
         .select("*")
         .eq("organization_id", orgId!)
+        .or("is_deleted.is.null,is_deleted.eq.false")
         .order("full_name");
       if (error) throw error;
       return data;
@@ -81,6 +82,35 @@ export function useVolunteers() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const deleteVolunteer = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("volunteers")
+        .update({ is_deleted: true, deleted_at: new Date().toISOString() } as any)
+        .eq("id", id);
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: ["volunteers"] });
+      toast.success("Volunteer deleted", {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            await supabase
+              .from("volunteers")
+              .update({ is_deleted: false, deleted_at: null } as any)
+              .eq("id", id);
+            queryClient.invalidateQueries({ queryKey: ["volunteers"] });
+            toast.success("Volunteer restored");
+          },
+        },
+        duration: 10_000,
+      });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const totalHours = hoursLog.reduce((sum, h) => sum + Number(h.hours || 0), 0);
 
   // Real-time subscriptions
@@ -93,7 +123,7 @@ export function useVolunteers() {
   return {
     volunteers, assignments, hoursLog,
     loadingVolunteers, loadingAssignments, loadingHours,
-    createVolunteer, createAssignment, logHours,
+    createVolunteer, createAssignment, logHours, deleteVolunteer,
     totalHours,
   };
 }
