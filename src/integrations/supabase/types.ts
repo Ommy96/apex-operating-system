@@ -5405,6 +5405,7 @@ export type Database = {
           last_login_at: string | null
           organization_id: string
           phone: string | null
+          preferred_currency: string
           updated_at: string | null
           user_id: string
         }
@@ -5417,6 +5418,7 @@ export type Database = {
           last_login_at?: string | null
           organization_id: string
           phone?: string | null
+          preferred_currency?: string
           updated_at?: string | null
           user_id: string
         }
@@ -5429,6 +5431,7 @@ export type Database = {
           last_login_at?: string | null
           organization_id?: string
           phone?: string | null
+          preferred_currency?: string
           updated_at?: string | null
           user_id?: string
         }

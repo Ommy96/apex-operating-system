@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Heart, Users, FileText, Download, GraduationCap, MapPin,
   Calendar, LogOut, User, ChevronRight, School, Building2,
-  BookOpen, TrendingUp, Eye, ArrowLeft, ShieldAlert,
+  BookOpen, TrendingUp, Eye, ArrowLeft, ShieldAlert, Wallet, Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +17,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { CurrencySelector } from '@/components/donor-portal/CurrencySelector';
+import { DonorAllocationsTab } from '@/components/donor-portal/DonorAllocationsTab';
+import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStoriesTab';
+import { useDonorFx } from '@/hooks/useDonorFx';
 
 export default function DonorPortal() {
   const { user, loading } = useAuth();
@@ -25,7 +29,9 @@ export default function DonorPortal() {
     donorAccount, sponsoredBeneficiaries, donorDocuments,
     fetchBeneficiaryAcademics, fetchBeneficiaryProgression,
     getDocumentDownloadUrl, isLoading, documentsLoading, isDonor,
+    donorAllocations,
   } = useDonorPortal();
+  const fx = useDonorFx((donorAccount as any)?.preferred_currency);
 
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<string | null>(null);
   const [academics, setAcademics] = useState<any[]>([]);
@@ -147,6 +153,7 @@ export default function DonorPortal() {
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
           </Button>
+          <CurrencySelector />
         </div>
       </header>
 
@@ -171,7 +178,7 @@ export default function DonorPortal() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  KES {totalContributed.toLocaleString()}
+                  {fx.format(totalContributed, 'KES')}
                 </p>
                 <p className="text-sm text-muted-foreground">Total Contributed</p>
               </div>
@@ -194,6 +201,15 @@ export default function DonorPortal() {
           <TabsList className="bg-muted/50">
             <TabsTrigger value="beneficiaries" className="gap-2">
               <Users className="h-4 w-4" /> My Beneficiaries
+            </TabsTrigger>
+            <TabsTrigger value="allocations" className="gap-2">
+              <Wallet className="h-4 w-4" /> Allocations
+              {donorAllocations && donorAllocations.length > 0 && (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">{donorAllocations.length}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="impact" className="gap-2">
+              <Sparkles className="h-4 w-4" /> Impact Stories
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" /> Documents
@@ -275,6 +291,14 @@ export default function DonorPortal() {
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="allocations">
+            <DonorAllocationsTab />
+          </TabsContent>
+
+          <TabsContent value="impact">
+            <DonorImpactStoriesTab />
           </TabsContent>
 
           {/* Documents Tab */}
