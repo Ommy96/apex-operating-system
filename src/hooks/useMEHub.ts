@@ -127,7 +127,7 @@ export function useMEHub() {
         .eq("is_resolved", false);
       const recentActivities: any = await sb
         .from("activities")
-        .select("id, attendees_count, beneficiaries_reached")
+        .select("id, activity_participants(count), activity_disbursements(count)")
         .eq("organization_id", orgId)
         .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
         .limit(500);
