@@ -145,6 +145,7 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
         { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, show: can.viewME },
         { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },

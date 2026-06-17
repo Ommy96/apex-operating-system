@@ -28,6 +28,7 @@ import { ProgramReachTargets } from "@/components/programs/ProgramReachTargets";
 import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { ProgramCommsPlan } from "@/components/programs/ProgramCommsPlan";
 import { SustainabilityPlan } from "@/components/programs/SustainabilityPlan";
+import { ProjectActivitiesTab } from "@/components/activities/ProjectActivitiesTab";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 import { GenerateWithAIButton } from "@/components/ai/GenerateWithAIButton";
@@ -280,6 +281,7 @@ const ProgramDashboard = () => {
             {[
               { value: "overview", icon: BarChart3, label: "Overview" },
               { value: "projects", icon: FolderKanban, label: "Projects" },
+              { value: "activities", icon: Activity, label: "Activities" },
             { value: "team", icon: Users, label: "Team" },
             { value: "milestones", icon: Flag, label: "Milestones" },
               { value: "logframe", icon: Network, label: "Logframe" },
@@ -461,6 +463,11 @@ const ProgramDashboard = () => {
         {activeTab === "risks" && (
           <TabsContent value="risks" forceMount className="mt-6">
             <ProgramRiskRegister programId={programId!} orgId={currentOrganization?.organization_id} />
+          </TabsContent>
+        )}
+        {activeTab === "activities" && (
+          <TabsContent value="activities" forceMount className="mt-6">
+            <ProjectActivitiesTab programId={programId!} orgId={currentOrganization?.organization_id} readOnly />
           </TabsContent>
         )}
         {activeTab === "partners" && (

@@ -127,7 +127,7 @@ export function useMEHub() {
         .eq("is_resolved", false);
       const recentActivities: any = await sb
         .from("activities")
-        .select("id, attendees_count, beneficiaries_reached")
+        .select("id, activity_participants(count), activity_disbursements(count)")
         .eq("organization_id", orgId)
         .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
         .limit(500);
@@ -209,7 +209,11 @@ export function useMEHub() {
       // Activities without beneficiary linkage
       const activitiesArr = recentActivities.data ?? [];
       const totalActivitiesRecent = activitiesArr.length;
-      const activitiesWithoutBeneficiaries = activitiesArr.filter((a: any) => !a.beneficiaries_reached || a.beneficiaries_reached === 0).length;
+      const activitiesWithoutBeneficiaries = activitiesArr.filter((a: any) => {
+        const p = a.activity_participants?.[0]?.count ?? 0;
+        const d = a.activity_disbursements?.[0]?.count ?? 0;
+        return (p + d) === 0;
+      }).length;
 
       return {
         totalBeneficiaries: beneficiariesCount.count ?? 0,

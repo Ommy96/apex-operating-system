@@ -22,6 +22,7 @@ import { formatDisplayDate } from '@/lib/dateUtils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
+import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
@@ -754,6 +755,7 @@ export default function BeneficiaryProfile() {
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
                 </div>
+                <BeneficiaryActivitiesSection beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Overview */}
