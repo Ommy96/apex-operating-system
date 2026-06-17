@@ -22,6 +22,7 @@ import { formatDisplayDate } from '@/lib/dateUtils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgressionInfo';
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
+import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
