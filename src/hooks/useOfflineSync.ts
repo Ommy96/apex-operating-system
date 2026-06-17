@@ -141,13 +141,12 @@ export function useOfflineSync() {
         }
       } else if (record.type === 'attendance') {
         const { activity_id, beneficiary_id, attendance_status, notes } = record.data;
-        const { error } = await supabase.from('activity_attendance').insert({
+        const { error } = await (supabase as any).from('activity_participants').insert({
           activity_id,
           beneficiary_id,
-          attendance_status: attendance_status || 'present',
+          attended: (attendance_status || 'present') === 'present',
           notes: notes || null,
           organization_id: record.organizationId,
-          recorded_by: record.userId,
         });
         if (error) throw error;
       } else if (record.type === 'form_submission') {
