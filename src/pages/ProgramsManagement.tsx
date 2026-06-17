@@ -19,6 +19,7 @@ import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm"
 import { Json } from "@/integrations/supabase/types";
 import { PageHeader, StatCard, WorkspacePanel, StatusBadge, getStatusVariant } from "@/components/workspace";
 import MECalendar from "./MECalendar";
+import PortfolioRollupView from "@/components/programs/PortfolioRollupView";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,10 +71,14 @@ const ProgramsManagement = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") === "calendar" ? "calendar" : "programmes";
-  const setActiveTab = (t: "programmes" | "calendar") => {
+  const rawTab = searchParams.get("tab");
+  const activeTab: "portfolio" | "programmes" | "calendar" =
+    rawTab === "programmes" ? "programmes" :
+    rawTab === "calendar" ? "calendar" :
+    "portfolio";
+  const setActiveTab = (t: "portfolio" | "programmes" | "calendar") => {
     const next = new URLSearchParams(searchParams);
-    if (t === "programmes") next.delete("tab"); else next.set("tab", "calendar");
+    if (t === "portfolio") next.delete("tab"); else next.set("tab", t);
     setSearchParams(next, { replace: true });
   };
   const [searchTerm, setSearchTerm] = useState("");
@@ -361,6 +366,15 @@ const ProgramsManagement = () => {
       <div className="bg-[#F4F5F8] rounded-[10px] p-[3px] flex gap-[2px] w-fit">
         <button
           type="button"
+          onClick={() => setActiveTab("portfolio")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-[8px] transition-colors ${
+            activeTab === "portfolio" ? "bg-white text-[#0A0F1E] shadow-sm" : "text-[#8891A8]"
+          }`}
+        >
+          Portfolio
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab("programmes")}
           className={`px-4 py-1.5 text-sm font-medium rounded-[8px] transition-colors ${
             activeTab === "programmes" ? "bg-white text-[#0A0F1E] shadow-sm" : "text-[#8891A8]"
@@ -379,7 +393,9 @@ const ProgramsManagement = () => {
         </button>
       </div>
 
-      {activeTab === "calendar" ? (
+      {activeTab === "portfolio" ? (
+        <PortfolioRollupView />
+      ) : activeTab === "calendar" ? (
         <MECalendar />
       ) : (
       <>
