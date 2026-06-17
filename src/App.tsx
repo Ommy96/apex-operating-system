@@ -191,6 +191,16 @@ const App = () => (
                 <DashboardLayout><LazyRoute><AllProjects /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/activities" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><Activities /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/activities/:id" element={
+              <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
+                <DashboardLayout><LazyRoute><ActivityDetail /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/workplans" element={
               <Navigate to="/projects?view=workplan" replace />
             } />

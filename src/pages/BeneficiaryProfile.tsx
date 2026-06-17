@@ -754,6 +754,7 @@ export default function BeneficiaryProfile() {
                   <div className="text-[14px] mb-3" style={{ color: '#1C1917', fontWeight: 600 }}>Recent activity</div>
                   <ActivityTimeline beneficiaryId={beneficiary.id} beneficiary={beneficiary as any} donors={donors as any} />
                 </div>
+                <BeneficiaryActivitiesSection beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Overview */}
