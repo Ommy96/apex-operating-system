@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
+import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
@@ -316,6 +317,9 @@ export function BeneficiaryForm({
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [dupMatches, setDupMatches] = useState<DuplicateMatch[]>([]);
+  const [dupDialogOpen, setDupDialogOpen] = useState(false);
+  const [dupCheckBypassed, setDupCheckBypassed] = useState(false);
   const [form, setForm] = useState<FormState>(() =>
     beneficiary
       ? createFormStateFromBeneficiary(beneficiary, defaultCategory)
@@ -581,6 +585,37 @@ export function BeneficiaryForm({
         const fs = visibleSteps.indexOf(2);
         if (fs >= 0) setStep(2);
         return;
+      }
+    }
+
+    // Fuzzy + phonetic duplicate check (new beneficiaries only, individuals/households)
+    if (
+      !beneficiary?.id &&
+      !dupCheckBypassed &&
+      (isIndividual || isHousehold) &&
+      form.first_name.trim() &&
+      form.last_name.trim()
+    ) {
+      try {
+        const { data, error } = await supabase.rpc('fuzzy_match_beneficiaries', {
+          _org_id: orgId,
+          _first_name: form.first_name.trim(),
+          _last_name: form.last_name.trim(),
+          _dob: form.date_of_birth || null,
+          _sub_county: form.sub_county || null,
+          _household_id: null,
+          _exclude_id: null,
+        });
+        if (!error && Array.isArray(data)) {
+          const strong = (data as DuplicateMatch[]).filter((m) => m.match_score > 70);
+          if (strong.length > 0) {
+            setDupMatches(strong);
+            setDupDialogOpen(true);
+            return;
+          }
+        }
+      } catch (e) {
+        logger.warn('fuzzy_match_beneficiaries failed; continuing save', e);
       }
     }
 
@@ -972,6 +1007,28 @@ export function BeneficiaryForm({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DuplicatePreSaveDialog
+        open={dupDialogOpen}
+        matches={dupMatches}
+        orgId={orgId}
+        newBeneficiarySnapshot={{
+          first_name: form.first_name,
+          last_name: form.last_name,
+          date_of_birth: form.date_of_birth,
+          sub_county: form.sub_county,
+        }}
+        onLoadExisting={(id) => {
+          setDupDialogOpen(false);
+          window.location.assign(`/beneficiary/${id}`);
+        }}
+        onSaveAnyway={() => {
+          setDupDialogOpen(false);
+          setDupCheckBypassed(true);
+          setTimeout(() => submit(), 0);
+        }}
+        onClose={() => setDupDialogOpen(false)}
+      />
 
       {/* Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
