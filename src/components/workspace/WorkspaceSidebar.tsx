@@ -25,7 +25,7 @@ import {
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
   Heart, Building2, Handshake, Activity, BarChart3, HandCoins, ClipboardList,
   FolderKanban, MapPin, FileCheck2, Home, ShoppingCart, GitBranch,
-  TrendingUp, ListChecks,
+  TrendingUp, ListChecks, Coins, Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApexLogo } from "@/components/brand/ApexLogo";
@@ -166,6 +166,8 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
         { title: "Funding Intelligence", url: "/funding/intelligence", icon: TrendingUp, show: can.viewFinancials },
+        { title: "Allocation Engine", url: "/funding/allocation-engine", icon: Coins, show: can.viewFinancials },
+        { title: "Donations Inbox", url: "/funding/donations-inbox", icon: Inbox, show: can.viewFinancials },
       ],
     },
     {
