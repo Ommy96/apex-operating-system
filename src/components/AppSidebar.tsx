@@ -25,6 +25,7 @@ import {
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
   Layers, FolderKanban, GanttChart as GanttIcon,
+  TrendingUp,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOrgPlanData } from "@/hooks/useFeatureFlag";
