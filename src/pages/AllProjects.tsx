@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, FolderKanban, List, GanttChart as GanttIcon } from "lucide-react";
+import { Search, FolderKanban, List } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import AllWorkplans from "./AllWorkplans";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
@@ -29,12 +28,7 @@ export default function AllProjects() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
   const [searchParams, setSearchParams] = useSearchParams();
-  const view: "list" | "workplan" = searchParams.get("view") === "workplan" ? "workplan" : "list";
-  const setView = (v: "list" | "workplan") => {
-    const next = new URLSearchParams(searchParams);
-    if (v === "list") next.delete("view"); else next.set("view", "workplan");
-    setSearchParams(next, { replace: true });
-  };
+  const view: "list" = "list";
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["all-projects", orgId],
@@ -91,29 +85,12 @@ export default function AllProjects() {
           <h1 className="text-2xl font-semibold">All projects</h1>
           <p className="text-sm text-muted-foreground mt-1">Cross-programme project portfolio</p>
         </div>
-        <div className="inline-flex rounded-lg border bg-muted/40 p-0.5">
-          <Button
-            variant={view === "list" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-8 gap-1.5"
-            onClick={() => setView("list")}
-          >
-            <List className="h-4 w-4" /> List
-          </Button>
-          <Button
-            variant={view === "workplan" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-8 gap-1.5"
-            onClick={() => setView("workplan")}
-          >
-            <GanttIcon className="h-4 w-4" /> Workplan
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => navigate("/activities")}>
+          <List className="h-4 w-4" /> Activities
+        </Button>
       </div>
 
-      {view === "workplan" ? (
-        <AllWorkplans />
-      ) : (
+      {view === "list" && (
         <>
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[240px]">
