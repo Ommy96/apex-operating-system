@@ -136,7 +136,9 @@ export function useProgramRollups(programId: string | undefined, organizationId:
           normalized,
         };
       });
-      const value = aggregateNormalized(contributions);
+      const value = aggregateNormalized(
+        contributions.map((c) => ({ value: c.normalized, weight: c.weight })),
+      );
       return { rollup: r, contributions, value };
     });
   }, [rollupsQ.data, translationsQ.data, projectsQ.data, sourcePool.data]);
