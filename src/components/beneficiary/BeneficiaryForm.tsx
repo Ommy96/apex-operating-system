@@ -588,6 +588,37 @@ export function BeneficiaryForm({
       }
     }
 
+    // Fuzzy + phonetic duplicate check (new beneficiaries only, individuals/households)
+    if (
+      !beneficiary?.id &&
+      !dupCheckBypassed &&
+      (isIndividual || isHousehold) &&
+      form.first_name.trim() &&
+      form.last_name.trim()
+    ) {
+      try {
+        const { data, error } = await supabase.rpc('fuzzy_match_beneficiaries', {
+          _org_id: orgId,
+          _first_name: form.first_name.trim(),
+          _last_name: form.last_name.trim(),
+          _dob: form.date_of_birth || null,
+          _sub_county: form.sub_county || null,
+          _household_id: null,
+          _exclude_id: null,
+        });
+        if (!error && Array.isArray(data)) {
+          const strong = (data as DuplicateMatch[]).filter((m) => m.match_score > 70);
+          if (strong.length > 0) {
+            setDupMatches(strong);
+            setDupDialogOpen(true);
+            return;
+          }
+        }
+      } catch (e) {
+        logger.warn('fuzzy_match_beneficiaries failed; continuing save', e);
+      }
+    }
+
     setIsLoading(true);
     try {
       const display_name = buildDisplayName();
