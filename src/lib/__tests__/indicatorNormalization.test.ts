@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeValue, aggregateNormalized } from '../indicatorNormalization';
+import { normalizeValue, aggregateNormalized, type LinearMapping } from '../indicatorNormalization';
 
 describe('normalizeValue', () => {
   it('handles grade letters → percentage', () => {
@@ -10,9 +10,9 @@ describe('normalizeValue', () => {
   });
 
   it('handles linear numeric mapping', () => {
-    const m = { type: 'linear', from: [0, 100], to: [0, 100] } as const;
+    const m: LinearMapping = { type: 'linear', from: [0, 100], to: [0, 100] };
     expect(normalizeValue(50, 'numeric', m, 'percentage_0_100')).toBe(50);
-    const m2 = { type: 'linear', from: [0, 50], to: [0, 100] } as const;
+    const m2: LinearMapping = { type: 'linear', from: [0, 50], to: [0, 100] };
     expect(normalizeValue(25, 'numeric', m2, 'percentage_0_100')).toBe(50);
   });
 
