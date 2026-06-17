@@ -5990,6 +5990,77 @@ export type Database = {
           },
         ]
       }
+      duplicate_candidates: {
+        Row: {
+          beneficiary_id_a: string
+          beneficiary_id_b: string
+          detected_at: string
+          id: string
+          match_reasons: Json
+          match_score: number
+          organization_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          beneficiary_id_a: string
+          beneficiary_id_b: string
+          detected_at?: string
+          id?: string
+          match_reasons?: Json
+          match_score: number
+          organization_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          beneficiary_id_a?: string
+          beneficiary_id_b?: string
+          detected_at?: string
+          id?: string
+          match_reasons?: Json
+          match_score?: number
+          organization_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duplicate_candidates_beneficiary_id_a_fkey"
+            columns: ["beneficiary_id_a"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duplicate_candidates_beneficiary_id_b_fkey"
+            columns: ["beneficiary_id_b"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duplicate_candidates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duplicate_candidates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entities: {
         Row: {
           created_at: string
@@ -15867,6 +15938,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      daitch_mokotoff: { Args: { "": string }; Returns: string[] }
+      dmetaphone: { Args: { "": string }; Returns: string }
+      dmetaphone_alt: { Args: { "": string }; Returns: string }
       find_potential_duplicates: {
         Args: { _org_id: string }
         Returns: {
@@ -15877,6 +15951,28 @@ export type Database = {
           match_type: string
           name_a: string
           name_b: string
+        }[]
+      }
+      fuzzy_match_beneficiaries: {
+        Args: {
+          _dob?: string
+          _exclude_id?: string
+          _first_name: string
+          _household_id?: string
+          _last_name: string
+          _org_id: string
+          _sub_county?: string
+        }
+        Returns: {
+          date_of_birth: string
+          display_name: string
+          first_name: string
+          household_id: string
+          id: string
+          last_name: string
+          match_reasons: Json
+          match_score: number
+          sub_county: string
         }[]
       }
       generate_beneficiary_unique_id: {
@@ -15930,6 +16026,15 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      merge_beneficiaries: {
+        Args: {
+          _candidate_id: string
+          _canonical_id: string
+          _duplicate_id: string
+          _note?: string
+        }
+        Returns: Json
+      }
       program_funding_health_score: {
         Args: { _program_id: string }
         Returns: Json
@@ -15983,10 +16088,14 @@ export type Database = {
         Args: { _project_id: string; _sector?: string }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
+      soundex: { Args: { "": string }; Returns: string }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      text_soundex: { Args: { "": string }; Returns: string }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
