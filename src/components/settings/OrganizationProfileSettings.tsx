@@ -33,7 +33,7 @@ export function OrganizationProfileSettings() {
   });
 
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', address: '', country: '', website: '', description: '', registration_number: '',
+    name: '', email: '', phone: '', address: '', country: '', website: '', description: '', registration_number: '', base_currency: 'KES',
   });
 
   useEffect(() => {
@@ -47,6 +47,7 @@ export function OrganizationProfileSettings() {
         website: organization.website || '',
         description: organization.description || '',
         registration_number: organization.registration_number || '',
+        base_currency: (organization as any).base_currency || 'KES',
       });
     }
   }, [organization]);
@@ -81,6 +82,7 @@ export function OrganizationProfileSettings() {
     { id: 'website', label: 'Website', icon: Globe, placeholder: 'https://www.org.com' },
     { id: 'country', label: 'Country', icon: Globe, placeholder: 'Kenya' },
     { id: 'registration_number', label: 'Registration Number', icon: Building2, placeholder: 'ORG-12345' },
+    { id: 'base_currency', label: 'Base Currency', icon: Globe, placeholder: 'KES' },
   ];
 
   return (
