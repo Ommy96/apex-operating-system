@@ -49,7 +49,7 @@ export function ExitBeneficiaryAllocationsModal(p: Props) {
       const { data } = await supabase
         .from("beneficiary_services")
         .select("beneficiary_id, beneficiaries:beneficiary_id(id, first_name, last_name, unique_id)")
-        .eq("organization_id", organization!.id)
+        .eq("organization_id", organization!.organization_id)
         .eq("project_id", p.projectId)
         .eq("status", "active");
       return (data ?? [])
