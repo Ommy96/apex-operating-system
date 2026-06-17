@@ -986,13 +986,12 @@ export function useDataQualityIntelligence(filters: AnalyticsFilters) {
       const staleCount = (stale ?? []).length;
 
       // Activities & visitations missing details
-      const { data: acts = [] } = await supabase
+      const { data: acts = [] } = await (supabase as any)
         .from("activities")
-        .select("id, outcome, status")
-        .eq("organization_id", orgId!)
-        .is("deleted_at", null);
-      const activitiesMissingOutcome = (acts ?? []).filter(
-        (a) => (a.status || "").toLowerCase() === "completed" && !a.outcome,
+        .select("id, notes, status, completed_at")
+        .eq("organization_id", orgId!);
+      const activitiesMissingOutcome = ((acts as any[]) ?? []).filter(
+        (a: any) => (a.status || "").toLowerCase() === "completed" && !a.notes,
       ).length;
 
       const { data: visits = [] } = await supabase

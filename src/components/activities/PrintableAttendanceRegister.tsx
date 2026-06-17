@@ -20,9 +20,9 @@ export function PrintableAttendanceRegister({ activityId, activityTitle, activit
   const { data: attendees = [] } = useQuery({
     queryKey: ["attendance-register", activityId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("activity_attendance")
-        .select("*, beneficiaries(display_name)")
+      const { data } = await (supabase as any)
+        .from("activity_participants")
+        .select("attended, notes, beneficiaries(display_name)")
         .eq("activity_id", activityId);
       return data || [];
     },

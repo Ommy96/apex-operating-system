@@ -193,7 +193,7 @@ export default function BeneficiaryProfile() {
       { data: recentVisits },
     ] = await Promise.all([
       supabase.from('beneficiary_services').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id).eq('status', 'active'),
-      supabase.from('activity_attendance').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id),
+      (supabase as any).from('activity_participants').select('*', { count: 'exact', head: true }).eq('beneficiary_id', id),
       supabase.from('beneficiary_services').select('enrolled_date').eq('beneficiary_id', id).order('enrolled_date', { ascending: true }).limit(1),
       supabase.from('beneficiary_risk_scores').select('overall_risk_level').eq('beneficiary_id', id).order('assessment_date', { ascending: false }).limit(1),
       supabase.from('beneficiary_visitations').select('visit_date').eq('beneficiary_id', id).order('visit_date', { ascending: false }).limit(1),
@@ -223,7 +223,7 @@ export default function BeneficiaryProfile() {
     const channel = supabase
       .channel(`profile-stats-${id}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_services', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
-      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'activity_attendance', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'activity_participants', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_risk_scores', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'beneficiary_visitations', filter: `beneficiary_id=eq.${id}` }, () => fetchQuickStats())
       .subscribe();

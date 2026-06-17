@@ -147,148 +147,69 @@ export type Database = {
       }
       activities: {
         Row: {
-          activity_date: string
-          activity_type: string | null
-          actual_date: string | null
-          actual_end_date: string | null
-          actual_participants: number | null
-          actual_start_date: string | null
-          assigned_to: string | null
-          attachments: Json | null
-          child_id: string
-          completion_percentage: number
-          created_at: string
+          completed_at: string | null
+          county: string | null
+          created_at: string | null
           created_by: string | null
-          deleted_at: string | null
-          depends_on: string | null
           description: string | null
-          expected_participants: number | null
+          facilitator_name: string | null
+          facilitator_user_id: string | null
           id: string
           location: string | null
-          location_county: string | null
-          location_sub_county: string | null
-          milestone_id: string | null
-          name: string | null
+          name: string
           notes: string | null
-          organization_id: string | null
-          outcome: string | null
-          planned_date: string | null
-          planned_end_date: string | null
-          planned_start_date: string | null
-          program_id: string
-          project_id: string | null
-          responsible_staff_id: string | null
-          status: string | null
-          term: string | null
-          title: string
-          updated_at: string
-          updated_by: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["activity_status"]
+          sub_county: string | null
+          type: Database["public"]["Enums"]["activity_type"]
+          updated_at: string | null
         }
         Insert: {
-          activity_date?: string
-          activity_type?: string | null
-          actual_date?: string | null
-          actual_end_date?: string | null
-          actual_participants?: number | null
-          actual_start_date?: string | null
-          assigned_to?: string | null
-          attachments?: Json | null
-          child_id: string
-          completion_percentage?: number
-          created_at?: string
+          completed_at?: string | null
+          county?: string | null
+          created_at?: string | null
           created_by?: string | null
-          deleted_at?: string | null
-          depends_on?: string | null
           description?: string | null
-          expected_participants?: number | null
+          facilitator_name?: string | null
+          facilitator_user_id?: string | null
           id?: string
           location?: string | null
-          location_county?: string | null
-          location_sub_county?: string | null
-          milestone_id?: string | null
-          name?: string | null
+          name: string
           notes?: string | null
-          organization_id?: string | null
-          outcome?: string | null
-          planned_date?: string | null
-          planned_end_date?: string | null
-          planned_start_date?: string | null
-          program_id: string
-          project_id?: string | null
-          responsible_staff_id?: string | null
-          status?: string | null
-          term?: string | null
-          title: string
-          updated_at?: string
-          updated_by?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id: string
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["activity_status"]
+          sub_county?: string | null
+          type: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string | null
         }
         Update: {
-          activity_date?: string
-          activity_type?: string | null
-          actual_date?: string | null
-          actual_end_date?: string | null
-          actual_participants?: number | null
-          actual_start_date?: string | null
-          assigned_to?: string | null
-          attachments?: Json | null
-          child_id?: string
-          completion_percentage?: number
-          created_at?: string
+          completed_at?: string | null
+          county?: string | null
+          created_at?: string | null
           created_by?: string | null
-          deleted_at?: string | null
-          depends_on?: string | null
           description?: string | null
-          expected_participants?: number | null
+          facilitator_name?: string | null
+          facilitator_user_id?: string | null
           id?: string
           location?: string | null
-          location_county?: string | null
-          location_sub_county?: string | null
-          milestone_id?: string | null
-          name?: string | null
+          name?: string
           notes?: string | null
-          organization_id?: string | null
-          outcome?: string | null
-          planned_date?: string | null
-          planned_end_date?: string | null
-          planned_start_date?: string | null
-          program_id?: string
-          project_id?: string | null
-          responsible_staff_id?: string | null
-          status?: string | null
-          term?: string | null
-          title?: string
-          updated_at?: string
-          updated_by?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["activity_status"]
+          sub_county?: string | null
+          type?: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "activities_child_id_fkey"
-            columns: ["child_id"]
-            isOneToOne: false
-            referencedRelation: "children"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_child_id_fkey"
-            columns: ["child_id"]
-            isOneToOne: false
-            referencedRelation: "children_safe_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_depends_on_fkey"
-            columns: ["depends_on"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_milestone_id_fkey"
-            columns: ["milestone_id"]
-            isOneToOne: false
-            referencedRelation: "programme_milestones"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "activities_organization_id_fkey"
             columns: ["organization_id"]
@@ -333,61 +254,144 @@ export type Database = {
           },
         ]
       }
-      activity_attendance: {
+      activity_disbursements: {
         Row: {
           activity_id: string
-          attendance_status: string | null
           beneficiary_id: string
-          created_at: string
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
           id: string
+          kind: Database["public"]["Enums"]["disbursement_kind"]
+          monetary_value: number | null
           notes: string | null
           organization_id: string
-          recorded_by: string | null
+          quantity: number | null
+          receipt_url: string | null
+          received_at: string | null
+          reference_no: string | null
+          unit: string | null
         }
         Insert: {
           activity_id: string
-          attendance_status?: string | null
           beneficiary_id: string
-          created_at?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
           id?: string
+          kind: Database["public"]["Enums"]["disbursement_kind"]
+          monetary_value?: number | null
           notes?: string | null
           organization_id: string
-          recorded_by?: string | null
+          quantity?: number | null
+          receipt_url?: string | null
+          received_at?: string | null
+          reference_no?: string | null
+          unit?: string | null
         }
         Update: {
           activity_id?: string
-          attendance_status?: string | null
           beneficiary_id?: string
-          created_at?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["disbursement_kind"]
+          monetary_value?: number | null
           notes?: string | null
           organization_id?: string
-          recorded_by?: string | null
+          quantity?: number | null
+          receipt_url?: string | null
+          received_at?: string | null
+          reference_no?: string | null
+          unit?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "activity_attendance_activity_id_fkey"
+            foreignKeyName: "activity_disbursements_activity_id_fkey"
             columns: ["activity_id"]
             isOneToOne: false
             referencedRelation: "activities"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_attendance_beneficiary_id_fkey"
+            foreignKeyName: "activity_disbursements_beneficiary_id_fkey"
             columns: ["beneficiary_id"]
             isOneToOne: false
             referencedRelation: "beneficiaries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_attendance_organization_id_fkey"
+            foreignKeyName: "activity_disbursements_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_attendance_organization_id_fkey"
+            foreignKeyName: "activity_disbursements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_participants: {
+        Row: {
+          activity_id: string
+          arrival_at: string | null
+          attended: boolean
+          beneficiary_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+        }
+        Insert: {
+          activity_id: string
+          arrival_at?: string | null
+          attended?: boolean
+          beneficiary_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+        }
+        Update: {
+          activity_id?: string
+          arrival_at?: string | null
+          attended?: boolean
+          beneficiary_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_participants_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_participants_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_participants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_participants_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
@@ -3519,13 +3523,6 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
-            foreignKeyName: "case_entries_linked_activity_id_fkey"
-            columns: ["linked_activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "case_entries_linked_form_submission_id_fkey"
             columns: ["linked_form_submission_id"]
             isOneToOne: false
@@ -5675,13 +5672,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "expenses_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "expenses_budget_id_fkey"
             columns: ["budget_id"]
             isOneToOne: false
@@ -5838,13 +5828,6 @@ export type Database = {
           staff_user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "field_check_ins_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "field_check_ins_beneficiary_id_fkey"
             columns: ["beneficiary_id"]
@@ -8543,13 +8526,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "me_form_submissions_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "me_form_submissions_form_id_fkey"
             columns: ["form_id"]
             isOneToOne: false
@@ -10452,13 +10428,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "program_observations_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "program_observations_beneficiary_id_fkey"
             columns: ["beneficiary_id"]
@@ -14630,6 +14599,8 @@ export type Database = {
         | "Junior School"
         | "Junior Secondary School"
         | "Senior School"
+      activity_status: "planned" | "in_progress" | "completed" | "cancelled"
+      activity_type: "event" | "disbursement"
       amount_status_type: "Loan" | "Grant"
       beneficiary_type: "student" | "adult" | "group"
       care_arrangement_type:
@@ -14638,6 +14609,18 @@ export type Database = {
         | "under_guardian_care"
         | "head_of_household_with_dependents"
         | "institutional_care"
+      disbursement_kind:
+        | "cash"
+        | "school_fees"
+        | "textbook"
+        | "uniform"
+        | "food_kit"
+        | "medical"
+        | "agricultural_input"
+        | "hygiene_kit"
+        | "transport"
+        | "rent"
+        | "other"
       family_category_type: "Guardian Ration" | "Home Based Care"
       feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
       gender_type: "Male" | "Female"
@@ -14804,6 +14787,8 @@ export const Constants = {
         "Junior Secondary School",
         "Senior School",
       ],
+      activity_status: ["planned", "in_progress", "completed", "cancelled"],
+      activity_type: ["event", "disbursement"],
       amount_status_type: ["Loan", "Grant"],
       beneficiary_type: ["student", "adult", "group"],
       care_arrangement_type: [
@@ -14812,6 +14797,19 @@ export const Constants = {
         "under_guardian_care",
         "head_of_household_with_dependents",
         "institutional_care",
+      ],
+      disbursement_kind: [
+        "cash",
+        "school_fees",
+        "textbook",
+        "uniform",
+        "food_kit",
+        "medical",
+        "agricultural_input",
+        "hygiene_kit",
+        "transport",
+        "rent",
+        "other",
       ],
       family_category_type: ["Guardian Ration", "Home Based Care"],
       feeding_type: ["Kawangware Lunch Hour", "Kibera Early Dinner"],
