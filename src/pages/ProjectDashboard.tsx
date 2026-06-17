@@ -7,6 +7,7 @@ import {
 import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
 import { NewActivitySheet } from "@/components/activities/NewActivitySheet";
 import { ProjectActivitiesTab } from "@/components/activities/ProjectActivitiesTab";
+import { ProjectBaselineIndicatorsManager } from "@/components/baselines/ProjectBaselineIndicatorsManager";
 import { ProjectSettingsSheet } from "@/components/projects/ProjectSettingsSheet";
 import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
@@ -154,7 +155,12 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
 }
 
 function ProjectWorkplanTab({ projectId, orgId }: { projectId: string; programId?: string | null; orgId?: string }) {
-  return <ProjectActivitiesTab projectId={projectId} orgId={orgId} />;
+  return (
+    <div className="space-y-6">
+      <ProjectActivitiesTab projectId={projectId} orgId={orgId} />
+      {orgId && <ProjectBaselineIndicatorsManager projectId={projectId} orgId={orgId} />}
+    </div>
+  );
 }
 
 const ProjectDashboard = () => {
