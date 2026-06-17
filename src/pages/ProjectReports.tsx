@@ -226,7 +226,7 @@ function DraftEditor({ draft, onChanged }: { draft: Draft; onChanged: () => void
   };
 
   const submit = () =>
-    save({ status: "submitted", submitted_at: new Date().toISOString(), submitted_by: user?.id });
+    save({ status: "submitted", submitted_at: new Date().toISOString(), submitted_by: user?.id } as any);
 
   const approve = () =>
     save({ status: "approved", approved_at: new Date().toISOString(), approved_by: user?.id } as any);
