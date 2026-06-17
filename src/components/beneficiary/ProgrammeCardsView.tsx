@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { BeneficiaryBaselinesPopover } from '@/components/baselines/BeneficiaryBaselinesPopover';
 
 /**
  * Resolves a lucide-react icon name (stored as a string on `programs.icon`)
@@ -353,6 +354,12 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                       )}
                       {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
                         <div className="flex justify-end gap-2">
+                          <BeneficiaryBaselinesPopover
+                            beneficiaryId={beneficiaryId}
+                            programId={program.id}
+                            projectIds={entries.map((e) => e.projects?.id).filter(Boolean) as string[]}
+                            onCaptureNow={onEnrol}
+                          />
                           <Button
                             size="sm"
                             variant="outline"

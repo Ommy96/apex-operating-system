@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BaselineIndicatorsInput, type BaselineTemplate, type BaselineValueMap, findMissingRequiredBaselines, buildBaselineRows } from '@/components/baselines/BaselineIndicatorsInput';
 
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
@@ -59,6 +60,9 @@ export const BeneficiaryEnrollmentForm = ({
   const [enrollProjectIds, setEnrollProjectIds] = useState<string[]>([]);
   const [enrollDate, setEnrollDate] = useState(new Date().toISOString().split('T')[0]);
   const [enrollNotes, setEnrollNotes] = useState('');
+  // Baseline indicator capture state
+  const [baselineValues, setBaselineValues] = useState<BaselineValueMap>({});
+  const [baselineTemplates, setBaselineTemplates] = useState<BaselineTemplate[]>([]);
 
   // Donation form state
   const [isDonationOpen, setIsDonationOpen] = useState(false);
@@ -228,8 +232,35 @@ export const BeneficiaryEnrollmentForm = ({
             created_by: user?.id,
           }];
 
-      const { error } = await supabase.from('beneficiary_services').insert(rows);
+      // Validate required baselines BEFORE inserting the enrollment.
+      if (enrollProjectIds.length > 0 && baselineTemplates.length > 0) {
+        const missing = findMissingRequiredBaselines(baselineTemplates, baselineValues);
+        if (missing.length > 0) {
+          throw new Error('Please fill all required baseline indicators before saving.');
+        }
+      }
+
+      const { data: inserted, error } = await supabase.from('beneficiary_services').insert(rows).select('id, project_id');
       if (error) throw error;
+
+      // After enrollment write succeeds, write baselines.
+      if (enrollProjectIds.length > 0 && baselineTemplates.length > 0 && inserted) {
+        const enrollmentByProject: Record<string, string> = {};
+        inserted.forEach((r: any) => { if (r.project_id) enrollmentByProject[r.project_id] = r.id; });
+        const baselineRows = buildBaselineRows(baselineTemplates, baselineValues, {
+          organization_id: currentOrganization.organization_id,
+          beneficiary_id: beneficiaryId,
+          captured_by: user?.id,
+          enrollmentByProject,
+        });
+        if (baselineRows.length > 0) {
+          const { error: bErr } = await (supabase as any).from('beneficiary_baselines').insert(baselineRows);
+          if (bErr) {
+            // Surface the warning but don't roll back the enrollment.
+            toast.error('Enrolled, but baseline capture failed: ' + bErr.message);
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['beneficiary-enrollments'] });
@@ -237,6 +268,7 @@ export const BeneficiaryEnrollmentForm = ({
       queryClient.invalidateQueries({ queryKey: ['programme-cards-enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['beneficiary-services'] });
       queryClient.invalidateQueries({ queryKey: ['beneficiary-risk'] });
+      queryClient.invalidateQueries({ queryKey: ['beneficiary-baselines'] });
       const programmeName = programs.find(p => p.id === enrollProgramId)?.name ?? 'programme';
       toast.success(`Enrolled in ${programmeName}`);
       resetEnrollForm();
@@ -336,6 +368,8 @@ export const BeneficiaryEnrollmentForm = ({
     setEnrollProjectIds([]);
     setEnrollDate(new Date().toISOString().split('T')[0]);
     setEnrollNotes('');
+    setBaselineValues({});
+    setBaselineTemplates([]);
     setIsEnrollOpen(false);
   };
 
@@ -818,6 +852,23 @@ export const BeneficiaryEnrollmentForm = ({
               <Label>Notes</Label>
               <Textarea value={enrollNotes} onChange={(e) => setEnrollNotes(e.target.value)} placeholder="Optional notes..." rows={2} />
             </div>
+
+            {/* Baseline indicators */}
+            {enrollProjectIds.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm">Baseline indicators</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Snapshot values captured now become the "from" point for future M&E progress.
+                </p>
+                <BaselineIndicatorsInput
+                  projectIds={enrollProjectIds}
+                  values={baselineValues}
+                  onChange={setBaselineValues}
+                  onTemplatesLoaded={setBaselineTemplates}
+                  compact
+                />
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={resetEnrollForm}>Cancel</Button>
