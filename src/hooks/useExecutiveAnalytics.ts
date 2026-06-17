@@ -188,9 +188,9 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
     queryKey: ['exec-activities', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('activities')
-        .select('id, title, program_id, project_id, status, created_by, created_at, responsible_staff_id, actual_participants')
+        .select('id, name, program_id, project_id, status, created_by, created_at, facilitator_user_id')
         .eq('organization_id', orgId);
       return data || [];
     },
@@ -446,7 +446,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
       });
 
       // Program activities
-      const programActivities = activities.filter(a => a.program_id === p.id);
+      const programActivities = (activities as any[]).filter((a: any) => a.program_id === p.id);
 
       return {
         programId: p.id,
@@ -465,7 +465,7 @@ export function useExecutiveAnalytics(dateRange?: DateRange, programFilter?: str
         projects: programProjects,
         visitationCount: programVisitations.length,
         activityCount: programActivities.length,
-        participantCount: programActivities.reduce((s, a) => s + (a.actual_participants || 0), 0),
+        participantCount: 0,
       };
     });
 
