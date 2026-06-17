@@ -4,12 +4,9 @@ import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
   TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus, Settings, Flag, CalendarClock
 } from "lucide-react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { GanttChart } from "@/components/projects/GanttChart";
 import { NarrativeReportsTab } from "@/components/projects/NarrativeReportsTab";
-import { NewActivitySheet } from "@/components/projects/NewActivitySheet";
-import { ActivityDetailSheet } from "@/components/projects/ActivityDetailSheet";
+import { NewActivitySheet } from "@/components/activities/NewActivitySheet";
+import { ProjectActivitiesTab } from "@/components/activities/ProjectActivitiesTab";
 import { ProjectSettingsSheet } from "@/components/projects/ProjectSettingsSheet";
 import { ProgramMilestones } from "@/components/programs/ProgramMilestones";
 import { ProgramMESchedule } from "@/components/programs/ProgramMESchedule";
@@ -156,50 +153,8 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
   );
 }
 
-function ProjectWorkplanTab({ projectId, programId, orgId }: { projectId: string; programId?: string | null; orgId?: string }) {
-  const ganttRef = useRef<HTMLDivElement>(null);
-  const [rangeMonths, setRangeMonths] = useState(3);
-  const [newOpen, setNewOpen] = useState(false);
-  const [selected, setSelected] = useState<any | null>(null);
-  const { data: activities = [], isLoading } = useQuery({
-    queryKey: ["project-gantt-activities", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("activities").select("id, title, name, description, planned_start_date, planned_end_date, actual_start_date, actual_end_date, status, responsible_staff_id, completion_percentage, milestone_id").eq("project_id", projectId);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId,
-  });
-  const hasPlannedDates = activities.some((a: any) => a.planned_start_date && a.planned_end_date);
-  const exportPdf = async () => {
-    if (!ganttRef.current) return;
-    try {
-      const canvas = await html2canvas(ganttRef.current, { scale: 2 });
-      const pdf = new jsPDF("l", "mm", "a4");
-      const w = pdf.internal.pageSize.getWidth() - 20;
-      const h = (canvas.height * w) / canvas.width;
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, w, Math.min(h, pdf.internal.pageSize.getHeight() - 20));
-      pdf.save("workplan.pdf");
-      toast.success("Workplan exported");
-    } catch { toast.error("Export failed"); }
-  };
-  if (isLoading) return <div className="text-center py-6 text-muted-foreground">Loading...</div>;
-  return (
-    <Card><CardContent className="p-4 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex gap-1">{[1, 3, 6, 0].map(m => (
-          <Button key={m} variant={rangeMonths === m ? "default" : "outline"} size="sm" className="text-xs" onClick={() => setRangeMonths(m)}>{m === 0 ? "Full" : `${m}m`}</Button>
-        ))}</div>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => setNewOpen(true)} className="text-xs"><Plus className="h-3.5 w-3.5 mr-1" /> Activity</Button>
-          {hasPlannedDates && <Button variant="outline" size="sm" onClick={exportPdf} className="text-xs">Export PDF</Button>}
-        </div>
-      </div>
-      <div ref={ganttRef}><GanttChart activities={activities as any} rangeMonths={rangeMonths || undefined} onActivityClick={setSelected} /></div>
-      <NewActivitySheet open={newOpen} onOpenChange={setNewOpen} projectId={projectId} programId={programId} orgId={orgId} />
-      <ActivityDetailSheet activity={selected} onClose={() => setSelected(null)} />
-    </CardContent></Card>
-  );
+function ProjectWorkplanTab({ projectId, orgId }: { projectId: string; programId?: string | null; orgId?: string }) {
+  return <ProjectActivitiesTab projectId={projectId} orgId={orgId} />;
 }
 
 const ProjectDashboard = () => {
