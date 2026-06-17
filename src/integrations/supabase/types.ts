@@ -645,6 +645,237 @@ export type Database = {
           },
         ]
       }
+      allocation_overrides: {
+        Row: {
+          after_beneficiary_id: string | null
+          after_status: Database["public"]["Enums"]["allocation_status"] | null
+          allocation_id: string
+          before_beneficiary_id: string | null
+          before_status: Database["public"]["Enums"]["allocation_status"] | null
+          created_at: string
+          id: string
+          organization_id: string
+          overridden_at: string
+          overridden_by: string
+          reason: string
+        }
+        Insert: {
+          after_beneficiary_id?: string | null
+          after_status?: Database["public"]["Enums"]["allocation_status"] | null
+          allocation_id: string
+          before_beneficiary_id?: string | null
+          before_status?:
+            | Database["public"]["Enums"]["allocation_status"]
+            | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          overridden_at?: string
+          overridden_by: string
+          reason: string
+        }
+        Update: {
+          after_beneficiary_id?: string | null
+          after_status?: Database["public"]["Enums"]["allocation_status"] | null
+          allocation_id?: string
+          before_beneficiary_id?: string | null
+          before_status?:
+            | Database["public"]["Enums"]["allocation_status"]
+            | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          overridden_at?: string
+          overridden_by?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocation_overrides_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      allocations: {
+        Row: {
+          activity_disbursement_id: string | null
+          allocated_at: string
+          allocated_by: string | null
+          amount_base: number
+          amount_native: number
+          base_currency: string
+          beneficiary_id: string | null
+          created_at: string
+          donation_id: string | null
+          donor_account_id: string
+          donor_pool_id: string
+          fx_at: string
+          fx_rate: number
+          id: string
+          native_currency: string
+          organization_id: string
+          parent_allocation_id: string | null
+          program_id: string | null
+          project_id: string | null
+          reason: string | null
+          scope: Database["public"]["Enums"]["allocation_scope"]
+          status: Database["public"]["Enums"]["allocation_status"]
+          updated_at: string
+        }
+        Insert: {
+          activity_disbursement_id?: string | null
+          allocated_at?: string
+          allocated_by?: string | null
+          amount_base: number
+          amount_native: number
+          base_currency: string
+          beneficiary_id?: string | null
+          created_at?: string
+          donation_id?: string | null
+          donor_account_id: string
+          donor_pool_id: string
+          fx_at: string
+          fx_rate: number
+          id?: string
+          native_currency: string
+          organization_id: string
+          parent_allocation_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          reason?: string | null
+          scope: Database["public"]["Enums"]["allocation_scope"]
+          status?: Database["public"]["Enums"]["allocation_status"]
+          updated_at?: string
+        }
+        Update: {
+          activity_disbursement_id?: string | null
+          allocated_at?: string
+          allocated_by?: string | null
+          amount_base?: number
+          amount_native?: number
+          base_currency?: string
+          beneficiary_id?: string | null
+          created_at?: string
+          donation_id?: string | null
+          donor_account_id?: string
+          donor_pool_id?: string
+          fx_at?: string
+          fx_rate?: number
+          id?: string
+          native_currency?: string
+          organization_id?: string
+          parent_allocation_id?: string | null
+          program_id?: string | null
+          project_id?: string | null
+          reason?: string | null
+          scope?: Database["public"]["Enums"]["allocation_scope"]
+          status?: Database["public"]["Enums"]["allocation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocations_activity_disbursement_id_fkey"
+            columns: ["activity_disbursement_id"]
+            isOneToOne: false
+            referencedRelation: "activity_disbursements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_donation_id_fkey"
+            columns: ["donation_id"]
+            isOneToOne: false
+            referencedRelation: "donations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_donor_pool_id_fkey"
+            columns: ["donor_pool_id"]
+            isOneToOne: false
+            referencedRelation: "donor_pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_parent_allocation_id_fkey"
+            columns: ["parent_allocation_id"]
+            isOneToOne: false
+            referencedRelation: "allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "allocations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       analytics_report_runs: {
         Row: {
           error_message: string | null
@@ -4951,6 +5182,117 @@ export type Database = {
           },
         ]
       }
+      donation_intents: {
+        Row: {
+          committed_amount: number | null
+          committed_at: string | null
+          committed_currency: string | null
+          created_at: string
+          created_by: string | null
+          donor_account_id: string
+          id: string
+          kind: Database["public"]["Enums"]["donation_intent_kind"]
+          lock_to_beneficiary: boolean
+          notes: string | null
+          organization_id: string
+          target_beneficiary_id: string | null
+          target_program_id: string | null
+          target_project_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          committed_amount?: number | null
+          committed_at?: string | null
+          committed_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          donor_account_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["donation_intent_kind"]
+          lock_to_beneficiary?: boolean
+          notes?: string | null
+          organization_id: string
+          target_beneficiary_id?: string | null
+          target_program_id?: string | null
+          target_project_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          committed_amount?: number | null
+          committed_at?: string | null
+          committed_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          donor_account_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["donation_intent_kind"]
+          lock_to_beneficiary?: boolean
+          notes?: string | null
+          organization_id?: string
+          target_beneficiary_id?: string | null
+          target_program_id?: string | null
+          target_project_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_intents_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_target_beneficiary_id_fkey"
+            columns: ["target_beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_target_program_id_fkey"
+            columns: ["target_program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_target_program_id_fkey"
+            columns: ["target_program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "donation_intents_target_project_id_fkey"
+            columns: ["target_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intents_target_project_id_fkey"
+            columns: ["target_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       donations: {
         Row: {
           amount: number
@@ -4958,6 +5300,8 @@ export type Database = {
           completed_at: string | null
           created_at: string
           currency: string
+          donation_intent_id: string | null
+          donor_account_id: string | null
           donor_email: string | null
           donor_name: string
           donor_phone: string | null
@@ -4977,6 +5321,8 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
+          donation_intent_id?: string | null
+          donor_account_id?: string | null
           donor_email?: string | null
           donor_name: string
           donor_phone?: string | null
@@ -4996,6 +5342,8 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
+          donation_intent_id?: string | null
+          donor_account_id?: string | null
           donor_email?: string | null
           donor_name?: string
           donor_phone?: string | null
@@ -5015,6 +5363,20 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "donation_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_donation_intent_id_fkey"
+            columns: ["donation_intent_id"]
+            isOneToOne: false
+            referencedRelation: "donation_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -5084,6 +5446,114 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_pools: {
+        Row: {
+          balance_base: number
+          balance_native: number
+          created_at: string
+          currency: string
+          donor_account_id: string
+          id: string
+          last_fx_at: string | null
+          last_fx_rate: number | null
+          organization_id: string
+          scope: Database["public"]["Enums"]["allocation_scope"]
+          scope_beneficiary_id: string | null
+          scope_program_id: string | null
+          scope_project_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          balance_base?: number
+          balance_native?: number
+          created_at?: string
+          currency: string
+          donor_account_id: string
+          id?: string
+          last_fx_at?: string | null
+          last_fx_rate?: number | null
+          organization_id: string
+          scope: Database["public"]["Enums"]["allocation_scope"]
+          scope_beneficiary_id?: string | null
+          scope_program_id?: string | null
+          scope_project_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          balance_base?: number
+          balance_native?: number
+          created_at?: string
+          currency?: string
+          donor_account_id?: string
+          id?: string
+          last_fx_at?: string | null
+          last_fx_rate?: number | null
+          organization_id?: string
+          scope?: Database["public"]["Enums"]["allocation_scope"]
+          scope_beneficiary_id?: string | null
+          scope_program_id?: string | null
+          scope_project_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_pools_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_scope_beneficiary_id_fkey"
+            columns: ["scope_beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_scope_program_id_fkey"
+            columns: ["scope_program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_scope_program_id_fkey"
+            columns: ["scope_program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "donor_pools_scope_project_id_fkey"
+            columns: ["scope_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_pools_scope_project_id_fkey"
+            columns: ["scope_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -14764,6 +15234,16 @@ export type Database = {
         | "Senior School"
       activity_status: "planned" | "in_progress" | "completed" | "cancelled"
       activity_type: "event" | "disbursement"
+      allocation_scope:
+        | "direct_beneficiary"
+        | "project_pool"
+        | "program_unrestricted"
+      allocation_status:
+        | "active"
+        | "held"
+        | "redirected"
+        | "consumed"
+        | "cancelled"
       amount_status_type: "Loan" | "Grant"
       beneficiary_type: "student" | "adult" | "group"
       care_arrangement_type:
@@ -14784,6 +15264,11 @@ export type Database = {
         | "transport"
         | "rent"
         | "other"
+      donation_intent_kind:
+        | "beneficiary"
+        | "project"
+        | "program"
+        | "unrestricted"
       family_category_type: "Guardian Ration" | "Home Based Care"
       feeding_type: "Kawangware Lunch Hour" | "Kibera Early Dinner"
       gender_type: "Male" | "Female"
@@ -14952,6 +15437,18 @@ export const Constants = {
       ],
       activity_status: ["planned", "in_progress", "completed", "cancelled"],
       activity_type: ["event", "disbursement"],
+      allocation_scope: [
+        "direct_beneficiary",
+        "project_pool",
+        "program_unrestricted",
+      ],
+      allocation_status: [
+        "active",
+        "held",
+        "redirected",
+        "consumed",
+        "cancelled",
+      ],
       amount_status_type: ["Loan", "Grant"],
       beneficiary_type: ["student", "adult", "group"],
       care_arrangement_type: [
@@ -14973,6 +15470,12 @@ export const Constants = {
         "transport",
         "rent",
         "other",
+      ],
+      donation_intent_kind: [
+        "beneficiary",
+        "project",
+        "program",
+        "unrestricted",
       ],
       family_category_type: ["Guardian Ration", "Home Based Care"],
       feeding_type: ["Kawangware Lunch Hour", "Kibera Early Dinner"],
