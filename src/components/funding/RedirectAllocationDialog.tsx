@@ -29,8 +29,8 @@ export function RedirectAllocationDialog(p: Props) {
   const [saving, setSaving] = useState(false);
 
   const { data: candidates = [] } = useQuery({
-    queryKey: ["redirect-candidates", organization?.id, p.projectId, p.currentBeneficiaryId],
-    enabled: !!organization?.id && p.open,
+    queryKey: ["redirect-candidates", organization?.organization_id, p.projectId, p.currentBeneficiaryId],
+    enabled: !!organization?.organization_id && p.open,
     queryFn: async () => {
       // Prefer beneficiaries enrolled in the same project; fall back to all org beneficiaries
       if (p.projectId) {

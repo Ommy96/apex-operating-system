@@ -43,8 +43,8 @@ export function ExitBeneficiaryAllocationsModal(p: Props) {
   });
 
   const { data: candidates = [] } = useQuery({
-    queryKey: ["exit-candidates", organization?.id, p.projectId, p.beneficiaryId],
-    enabled: p.open && !!organization?.id && resolution === "redirect",
+    queryKey: ["exit-candidates", organization?.organization_id, p.projectId, p.beneficiaryId],
+    enabled: p.open && !!organization?.organization_id && resolution === "redirect",
     queryFn: async () => {
       const { data } = await supabase
         .from("beneficiary_services")
