@@ -11349,6 +11349,177 @@ export type Database = {
           },
         ]
       }
+      program_rollup_indicators: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction: string
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          normalized_scale: string
+          organization_id: string
+          program_id: string
+          target_value: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          normalized_scale: string
+          organization_id: string
+          program_id: string
+          target_value?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          normalized_scale?: string
+          organization_id?: string
+          program_id?: string
+          target_value?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_rollup_indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_indicators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_indicators_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_indicators_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
+      program_rollup_translations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          mapping: Json
+          organization_id: string
+          program_rollup_indicator_id: string
+          source_indicator_id: string | null
+          source_indicator_key: string
+          source_project_id: string
+          source_type: string
+          updated_at: string
+          updated_by: string | null
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mapping: Json
+          organization_id: string
+          program_rollup_indicator_id: string
+          source_indicator_id?: string | null
+          source_indicator_key: string
+          source_project_id: string
+          source_type: string
+          updated_at?: string
+          updated_by?: string | null
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mapping?: Json
+          organization_id?: string
+          program_rollup_indicator_id?: string
+          source_indicator_id?: string | null
+          source_indicator_key?: string
+          source_project_id?: string
+          source_type?: string
+          updated_at?: string
+          updated_by?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_rollup_translations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_translations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_translations_program_rollup_indicator_id_fkey"
+            columns: ["program_rollup_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "program_rollup_indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_translations_source_indicator_id_fkey"
+            columns: ["source_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_translations_source_project_id_fkey"
+            columns: ["source_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_rollup_translations_source_project_id_fkey"
+            columns: ["source_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       program_stakeholders: {
         Row: {
           contact_email: string | null
@@ -15199,6 +15370,10 @@ export type Database = {
       }
       seed_default_org_roles: {
         Args: { _admin_user_id: string; _org_id: string }
+        Returns: undefined
+      }
+      seed_program_rollup_indicators: {
+        Args: { _program_id: string; _sector?: string }
         Returns: undefined
       }
       seed_project_baseline_indicators: {
