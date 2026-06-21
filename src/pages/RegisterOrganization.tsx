@@ -175,6 +175,16 @@ export default function RegisterOrganization() {
       }
       if (!authData.user) throw new Error('Failed to create user account');
 
+      // Supabase returns a fake user (empty identities) when the email is
+      // already registered. Detect and surface a proper error instead of
+      // hitting the auth.users FK violation in register_organization.
+      if (!authData.user.identities || authData.user.identities.length === 0) {
+        form.setError('adminEmail', { message: 'Email already registered. Please sign in.' });
+        setStep(1);
+        setIsLoading(false);
+        return;
+      }
+
       // 2 – build features config
       const selectedPlan = PLANS.find(p => p.id === data.plan) || PLANS[0];
       const featuresEnabled = {
