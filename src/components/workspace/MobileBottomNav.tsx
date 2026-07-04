@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const items = [
   { title: "Home", url: "/dashboard", icon: LayoutDashboard, match: (p: string) => p === "/dashboard" },
   { title: "People", url: "/beneficiaries", icon: Users, match: (p: string) => p.startsWith("/beneficiaries") || p.startsWith("/households") || p.startsWith("/donors") || p.startsWith("/partners") },
-  { title: "Programs", url: "/programs-management", icon: Target, match: (p: string) => p.startsWith("/programs") || p.startsWith("/projects") || p.startsWith("/me") || p.startsWith("/map") },
-  { title: "Insights", url: "/ai-insights", icon: BrainCircuit, match: (p: string) => p.startsWith("/ai-insights") || p.startsWith("/reports-analytics") || p.startsWith("/risk-intelligence") },
+  { title: "Programs", url: "/programs-management", icon: Target, match: (p: string) => p.startsWith("/programs") || p.startsWith("/projects") || p.startsWith("/me") },
+  { title: "Insights", url: "/ai-insights", icon: BrainCircuit, match: (p: string) => p.startsWith("/ai-insights") || p.startsWith("/analytics") || p.startsWith("/risk-intelligence") || p.startsWith("/intelligence") || p.startsWith("/map") },
 ];
 
 export function MobileBottomNav() {

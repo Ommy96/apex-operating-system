@@ -373,7 +373,7 @@ const Dashboard = () => {
         </div>
         <div className="flex items-center gap-[7px]">
           <button
-            onClick={() => navigate('/reports-analytics')}
+            onClick={() => navigate('/analytics')}
             style={{ background: '#fff', border: '1px solid #CDD2DF', color: '#3D4558', borderRadius: 8, padding: '7px 13px', fontSize: 12, cursor: 'pointer' }}
             className="hover:bg-gray-50 transition-colors"
           >

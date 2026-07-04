@@ -51,7 +51,7 @@ export function QuickNavCards() {
     { title: "Donors", icon: HandCoins, path: "/beneficiaries", count: counts?.donors ?? null, subtitle: "Sponsor records" },
     { title: "Finance", icon: Wallet, path: "/financial", count: counts?.expenses ?? null, subtitle: "Expense records" },
     { title: "M&E", icon: BarChart3, path: "/me-suite", count: null, subtitle: "Monitoring & Evaluation" },
-    { title: "Analytics", icon: BarChart3, path: "/reports-analytics", count: null, subtitle: "Reports & insights" },
+    { title: "Analytics", icon: BarChart3, path: "/analytics", count: null, subtitle: "Reports & insights" },
     { title: "Documents", icon: FileText, path: "/document-management", count: null, subtitle: "File management" },
   ];
 
