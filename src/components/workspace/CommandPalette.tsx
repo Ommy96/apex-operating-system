@@ -40,11 +40,12 @@ const navigationItems = [
   { title: "M&E", url: "/me", icon: Activity, group: "Programs" },
   { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, group: "Programs" },
   { title: "Indicators", url: "/me?tab=indicators", icon: BarChart3, group: "Programs" },
-  { title: "Map view", url: "/map", icon: MapPin, group: "Programs" },
   // Intelligence
   { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, group: "Intelligence" },
   { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, group: "Intelligence" },
-  { title: "Analytics", url: "/reports-analytics", icon: BarChart3, group: "Intelligence" },
+  { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, group: "Intelligence" },
+  { title: "Analytics", url: "/analytics", icon: BarChart3, group: "Intelligence" },
+  { title: "Map view", url: "/map", icon: MapPin, group: "Intelligence" },
   // Funding
   { title: "Grants", url: "/financial?tab=grants", icon: ListChecks, group: "Funding" },
   { title: "Funding Intelligence", url: "/financial?tab=intelligence", icon: TrendingUp, group: "Funding" },

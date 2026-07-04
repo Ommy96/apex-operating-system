@@ -148,7 +148,6 @@ export function WorkspaceSidebar() {
         { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
         { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, show: can.viewME },
-        { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },
       ],
     },
     {
@@ -157,8 +156,9 @@ export function WorkspaceSidebar() {
         { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI },
         { title: "Grant Discovery", url: "/ai/grants", icon: Target, show: can.viewAI },
         { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewReports },
         { title: "Analytics", url: "/analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
-        { title: "Reports & Insights", url: "/reports-analytics", icon: BarChart3, show: can.viewReports },
+        { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms },
       ],
     },
     {

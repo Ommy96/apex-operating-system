@@ -23,7 +23,7 @@ export function QuickActionsPanel() {
     { id: "add-beneficiary", label: `Add ${term}`, icon: UserPlus, url: "/beneficiaries", show: can.viewBeneficiaries },
     { id: "enroll-beneficiary", label: "Enroll in Program", icon: Users, url: "/beneficiaries", show: can.viewBeneficiaries },
     { id: "add-observation", label: "Add Observation", icon: Eye, url: "/programs-management", show: can.viewPrograms },
-    { id: "add-report", label: "Add Report", icon: FileText, url: "/reports-analytics", show: can.viewReports },
+    { id: "add-report", label: "Add Report", icon: FileText, url: "/analytics", show: can.viewReports },
     { id: "record-donation", label: "Record Donation", icon: DollarSign, url: "/donors", show: can.viewDonors },
     { id: "add-sponsorship", label: "Add Sponsorship", icon: HandCoins, url: "/financial", show: can.viewFinancials },
     { id: "record-expense", label: "Record Expense", icon: Receipt, url: "/financial", show: can.viewFinancials },
