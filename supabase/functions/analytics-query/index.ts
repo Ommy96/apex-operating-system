@@ -281,6 +281,19 @@ Deno.serve(async (req) => {
     let result: Result;
     if (body.tab === "people") result = await peopleHandler(supa, orgId, body);
     else if (body.tab === "programmes") result = await programmesHandler(supa, orgId, body);
+    else if (body.tab === "money") result = await moneyHandler(supa, orgId, body);
+    else if (body.tab === "impact") result = await impactHandler(supa, orgId, body);
+    else if (body.tab === "operations") result = await operationsHandler(supa, orgId, body);
+    else if (body.tab === "custom") {
+      // Custom tab reuses whichever tab owns the metric — client must pass `sourceTab`
+      const src = (body as any).sourceTab as string | undefined;
+      if (src === "people") result = await peopleHandler(supa, orgId, { ...body, tab: "people" });
+      else if (src === "programmes") result = await programmesHandler(supa, orgId, { ...body, tab: "programmes" });
+      else if (src === "money") result = await moneyHandler(supa, orgId, { ...body, tab: "money" });
+      else if (src === "impact") result = await impactHandler(supa, orgId, { ...body, tab: "impact" });
+      else if (src === "operations") result = await operationsHandler(supa, orgId, { ...body, tab: "operations" });
+      else return ok({ error: "invalid_source", message: "Custom queries require a sourceTab" });
+    }
     else return ok({ error: "not_implemented", message: `${body.tab} tab is not yet implemented` });
 
     return ok(result);
