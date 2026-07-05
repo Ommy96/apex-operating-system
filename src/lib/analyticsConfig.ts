@@ -199,7 +199,7 @@ export const TABS: Record<TabKey, TabConfig> = {
   money: {
     key: "money",
     label: "Money",
-    implemented: false,
+    implemented: true,
     dimensions: moneyDimensions,
     filters: [
       { key: "donor_type", label: "Donor type" },
@@ -217,7 +217,7 @@ export const TABS: Record<TabKey, TabConfig> = {
   impact: {
     key: "impact",
     label: "Impact",
-    implemented: false,
+    implemented: true,
     dimensions: [
       { key: "month", label: "Month", kind: "time" },
       { key: "project", label: "Project", kind: "categorical" },
@@ -234,7 +234,7 @@ export const TABS: Record<TabKey, TabConfig> = {
   operations: {
     key: "operations",
     label: "Operations",
-    implemented: false,
+    implemented: true,
     dimensions: [
       { key: "week", label: "Week", kind: "time" },
       { key: "project", label: "Project", kind: "categorical" },
