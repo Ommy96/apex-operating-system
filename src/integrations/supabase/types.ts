@@ -10065,6 +10065,9 @@ export type Database = {
           subscription_tier: string | null
           suspended_at: string | null
           suspended_reason: string | null
+          tier_label_activity: string
+          tier_label_program: string
+          tier_label_project: string
           trial_ends_at: string | null
           updated_at: string
           usage_stats: Json | null
@@ -10154,6 +10157,9 @@ export type Database = {
           subscription_tier?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
+          tier_label_activity?: string
+          tier_label_program?: string
+          tier_label_project?: string
           trial_ends_at?: string | null
           updated_at?: string
           usage_stats?: Json | null
@@ -10243,6 +10249,9 @@ export type Database = {
           subscription_tier?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
+          tier_label_activity?: string
+          tier_label_program?: string
+          tier_label_project?: string
           trial_ends_at?: string | null
           updated_at?: string
           usage_stats?: Json | null
