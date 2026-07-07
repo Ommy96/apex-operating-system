@@ -12,6 +12,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface ProjectFormData {
   name: string;
@@ -48,14 +49,36 @@ interface Project {
 interface ProjectFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  programId: string;
+  /** Preselected programme id. Pass null / undefined for a standalone project flow. */
+  programId?: string | null;
+  /** When true, show a programme picker (with "No programme" option). Used by cross-programme creators. */
+  allowProgramSelection?: boolean;
   project?: Project | null;
   onSuccess: () => void;
 }
 
-export function ProjectForm({ open, onOpenChange, programId, project, onSuccess }: ProjectFormProps) {
+export function ProjectForm({ open, onOpenChange, programId, allowProgramSelection, project, onSuccess }: ProjectFormProps) {
   const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProgramId, setSelectedProgramId] = useState<string | "none">(programId ?? "none");
+
+  useEffect(() => {
+    setSelectedProgramId(project?.program_id ?? programId ?? "none");
+  }, [project, programId, open]);
+
+  const { data: programOptions = [] } = useQuery({
+    queryKey: ["project-form-programs", currentOrganization?.organization_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("programs")
+        .select("id, name")
+        .eq("organization_id", currentOrganization!.organization_id)
+        .is("deleted_at", null)
+        .order("name");
+      return data || [];
+    },
+    enabled: !!currentOrganization?.organization_id && !!allowProgramSelection && open,
+  });
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ProjectFormData>({
     defaultValues: {
@@ -150,7 +173,7 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         funding_cycle: data.funding_cycle || "annually",
         funding_model: data.funding_model || "programme",
         sponsorship_required: data.funding_model !== "programme",
-        program_id: programId,
+        program_id: selectedProgramId && selectedProgramId !== "none" ? selectedProgramId : null,
         organization_id: currentOrganization.organization_id,
         slug: generateSlug(data.name),
       };
@@ -190,11 +213,31 @@ export function ProjectForm({ open, onOpenChange, programId, project, onSuccess 
         <DialogHeader>
           <DialogTitle>{project ? "Edit Project" : "Add New Project"}</DialogTitle>
           <DialogDescription>
-            {project ? "Update the project details below." : "Create a new project under this program."}
+            {project ? "Update the project details below." : "Create a new project. You can attach it to a programme, or leave it standalone."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {allowProgramSelection && (
+            <div className="space-y-2">
+              <Label>Programme</Label>
+              <Select value={selectedProgramId} onValueChange={(v) => setSelectedProgramId(v as any)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a programme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No programme (standalone project)</SelectItem>
+                  {programOptions.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Standalone projects appear in your Projects list without a parent programme.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Project Name *</Label>
