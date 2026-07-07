@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, FolderKanban, List } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { ProjectForm } from "@/components/programs/ProjectForm";
+import { useTierLabels } from "@/hooks/useTierLabels";
+import { Plus } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
@@ -29,6 +32,8 @@ export default function AllProjects() {
   const [programFilter, setProgramFilter] = useState("all");
   const [searchParams, setSearchParams] = useSearchParams();
   const view: "list" = "list";
+  const [newOpen, setNewOpen] = useState(false);
+  const T = useTierLabels();
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["all-projects", orgId],
@@ -82,12 +87,17 @@ export default function AllProjects() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold">All projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">Cross-programme project portfolio</p>
+          <h1 className="text-2xl font-semibold">All {T.projectPluralLower}</h1>
+          <p className="text-sm text-muted-foreground mt-1">Cross-{T.programLower} {T.projectLower} portfolio</p>
         </div>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => navigate("/activities")}>
-          <List className="h-4 w-4" /> Activities
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => navigate("/activities")}>
+            <List className="h-4 w-4" /> {T.activityPlural}
+          </Button>
+          <Button size="sm" className="h-8 gap-1.5" onClick={() => setNewOpen(true)}>
+            <Plus className="h-4 w-4" /> New {T.projectLower}
+          </Button>
+        </div>
       </div>
 
       {view === "list" && (
@@ -98,9 +108,10 @@ export default function AllProjects() {
           <Input className="pl-9" placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={programFilter} onValueChange={setProgramFilter}>
-          <SelectTrigger className="w-[200px]"><SelectValue placeholder="Programme" /></SelectTrigger>
+          <SelectTrigger className="w-[200px]"><SelectValue placeholder={T.program} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All programmes</SelectItem>
+            <SelectItem value="all">All {T.programPluralLower}</SelectItem>
+            <SelectItem value="__none__">Standalone (no {T.programLower})</SelectItem>
             {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
