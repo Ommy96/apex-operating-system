@@ -78,10 +78,23 @@ export default function AllProjects() {
 
   const filtered = projects.filter((p: any) => {
     if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (programFilter !== "all" && p.program_id !== programFilter) return false;
+    if (programFilter === "__none__") { if (p.program_id) return false; }
+    else if (programFilter !== "all" && p.program_id !== programFilter) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, { name: string; items: any[] }>();
+    const standalone: any[] = [];
+    for (const p of filtered) {
+      if (!p.program_id) { standalone.push(p); continue; }
+      const key = p.program_id as string;
+      if (!map.has(key)) map.set(key, { name: p.programs?.name || T.program, items: [] });
+      map.get(key)!.items.push(p);
+    }
+    return { groups: Array.from(map.entries()).map(([id, v]) => ({ id, ...v })), standalone };
+  }, [filtered, T.program]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -144,8 +157,8 @@ export default function AllProjects() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium">Project</th>
-                    <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Programme</th>
+                    <th className="text-left px-4 py-3 font-medium">{T.project}</th>
+                    <th className="text-left px-4 py-3 font-medium hidden md:table-cell">{T.program}</th>
                     <th className="text-left px-4 py-3 font-medium">Status</th>
                     <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Start</th>
                     <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">End</th>
@@ -153,22 +166,46 @@ export default function AllProjects() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((p: any) => (
-                    <tr
-                      key={p.id}
-                      onClick={() => navigate(`/projects/dashboard/${p.id}`)}
-                      className="border-t hover:bg-muted/30 cursor-pointer transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium">{p.name}</td>
-                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{p.programs?.name || "—"}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant="secondary" className={STATUS_COLORS[p.status] || ""}>{p.status?.replace("_", " ") || "—"}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.start_date ? format(new Date(p.start_date), "MMM d, yyyy") : "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.end_date ? format(new Date(p.end_date), "MMM d, yyyy") : "—"}</td>
-                      <td className="px-4 py-3 text-right tabular-nums font-medium">{counts[p.id] ?? "—"}</td>
-                    </tr>
+                  {grouped.groups.map((g) => (
+                    <>
+                      <tr key={`h-${g.id}`} className="bg-muted/20">
+                        <td colSpan={6} className="px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                          {T.program} · {g.name}
+                        </td>
+                      </tr>
+                      {g.items.map((p: any) => (
+                        <tr key={p.id} onClick={() => navigate(`/projects/dashboard/${p.id}`)}
+                          className="border-t hover:bg-muted/30 cursor-pointer transition-colors">
+                          <td className="px-4 py-3 font-medium">{p.name}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{p.programs?.name || "—"}</td>
+                          <td className="px-4 py-3"><Badge variant="secondary" className={STATUS_COLORS[p.status] || ""}>{p.status?.replace("_", " ") || "—"}</Badge></td>
+                          <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.start_date ? format(new Date(p.start_date), "MMM d, yyyy") : "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.end_date ? format(new Date(p.end_date), "MMM d, yyyy") : "—"}</td>
+                          <td className="px-4 py-3 text-right tabular-nums font-medium">{counts[p.id] ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </>
                   ))}
+                  {grouped.standalone.length > 0 && (
+                    <>
+                      <tr className="bg-muted/20">
+                        <td colSpan={6} className="px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                          Standalone {T.projectPluralLower} · no {T.programLower}
+                        </td>
+                      </tr>
+                      {grouped.standalone.map((p: any) => (
+                        <tr key={p.id} onClick={() => navigate(`/projects/dashboard/${p.id}`)}
+                          className="border-t hover:bg-muted/30 cursor-pointer transition-colors">
+                          <td className="px-4 py-3 font-medium">{p.name}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden md:table-cell italic">Standalone</td>
+                          <td className="px-4 py-3"><Badge variant="secondary" className={STATUS_COLORS[p.status] || ""}>{p.status?.replace("_", " ") || "—"}</Badge></td>
+                          <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.start_date ? format(new Date(p.start_date), "MMM d, yyyy") : "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.end_date ? format(new Date(p.end_date), "MMM d, yyyy") : "—"}</td>
+                          <td className="px-4 py-3 text-right tabular-nums font-medium">{counts[p.id] ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -177,6 +214,14 @@ export default function AllProjects() {
       </Card>
         </>
       )}
+
+      <ProjectForm
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        programId={null}
+        allowProgramSelection
+        onSuccess={() => { setNewOpen(false); /* rely on realtime + query key */ }}
+      />
     </div>
   );
 }
