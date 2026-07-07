@@ -39,6 +39,7 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTierLabels } from "@/hooks/useTierLabels";
 
 interface MenuItemProps {
   item: { title: string; url: string; icon: any };
@@ -123,8 +124,7 @@ export function WorkspaceSidebar() {
   };
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const T = require('@/hooks/useTierLabels').useTierLabels();
+  const T = useTierLabels();
 
   // Logically grouped navigation with permission checks
   const menuGroups: MenuGroup[] = [
