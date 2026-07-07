@@ -1,6 +1,6 @@
 import {
   Building2, Palette, ShieldCheck, Users, Target, Sliders,
-  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle,
+  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle, Type,
 } from 'lucide-react';
 
 export type SettingsGroup = 'Organisation' | 'Data collection' | 'System' | 'Account';
@@ -23,6 +23,7 @@ export const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   { id: 'beneficiary', label: 'Beneficiary data',    description: 'What you collect & terminology',  icon: Users,        group: 'Data collection' },
   { id: 'programmes',  label: 'Programmes & M&E',    description: 'Indicators, visitation, reports', icon: Target,       group: 'Data collection' },
   { id: 'fields',      label: 'Custom fields',       description: 'Org-specific extra fields',       icon: Sliders,      group: 'Data collection' },
+  { id: 'terminology', label: 'Terminology',         description: 'Rename Programme / Project / Activity tiers', icon: Type, group: 'Data collection' },
 
   // System
   { id: 'financial',   label: 'Financial',           description: 'Currency, fiscal year, M-Pesa',   icon: Wallet,       group: 'System' },
