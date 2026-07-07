@@ -123,6 +123,8 @@ export function WorkspaceSidebar() {
   };
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const T = require('@/hooks/useTierLabels').useTierLabels();
 
   // Logically grouped navigation with permission checks
   const menuGroups: MenuGroup[] = [
@@ -141,11 +143,11 @@ export function WorkspaceSidebar() {
       ],
     },
     {
-      label: "Programs",
+      label: T.programPlural,
       items: [
-        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
-        { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
-        { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
+        { title: T.programPlural, url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: T.projectPlural, url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: T.activityPlural, url: "/activities", icon: Activity, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
         { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, show: can.viewME },
       ],
