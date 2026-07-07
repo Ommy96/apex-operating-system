@@ -39,6 +39,7 @@ import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTierLabels } from "@/hooks/useTierLabels";
 
 interface MenuItemProps {
   item: { title: string; url: string; icon: any };
@@ -123,6 +124,7 @@ export function WorkspaceSidebar() {
   };
 
   const isSuperAdminUser = isSuperAdmin(user?.email);
+  const T = useTierLabels();
 
   // Logically grouped navigation with permission checks
   const menuGroups: MenuGroup[] = [
@@ -141,11 +143,11 @@ export function WorkspaceSidebar() {
       ],
     },
     {
-      label: "Programs",
+      label: T.programPlural,
       items: [
-        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
-        { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
-        { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
+        { title: T.programPlural, url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: T.projectPlural, url: "/projects", icon: FolderKanban, show: can.viewPrograms },
+        { title: T.activityPlural, url: "/activities", icon: Activity, show: can.viewPrograms },
         { title: "M&E", url: "/me", icon: Activity, show: can.viewME },
         { title: "Logframe & ToC", url: "/me?tab=logframe", icon: GitBranch, show: can.viewME },
       ],
