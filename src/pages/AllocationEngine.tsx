@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { FxChip } from "@/components/funding/FxChip";
+import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
 import { formatMoney } from "@/lib/allocationEngine";
 
 export default function AllocationEngine() {
@@ -115,7 +116,10 @@ export default function AllocationEngine() {
                   {pools!.map((p: any) => (
                     <TableRow key={p.id}>
                       <TableCell className="text-xs font-medium">{p.donor_accounts?.donor_name ?? "—"}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px]">{p.scope}</Badge></TableCell>
+                      <TableCell className="flex items-center gap-1">
+                        <Badge variant="outline" className="text-[10px]">{p.scope}</Badge>
+                        <RestrictionBadge restriction={p.restriction} />
+                      </TableCell>
                       <TableCell className="text-xs font-mono">{p.currency}</TableCell>
                       <TableCell className="text-right text-xs">{formatMoney(p.balance_native, p.currency)}</TableCell>
                       <TableCell className="text-right text-xs">{formatMoney(p.balance_base, totals.baseCur)}</TableCell>
@@ -152,6 +156,7 @@ export default function AllocationEngine() {
                       <TableCell className="text-right text-xs flex items-center justify-end gap-1">
                         {formatMoney(a.amount_native, a.native_currency)}
                         <FxChip nativeCurrency={a.native_currency} baseCurrency={a.base_currency} rate={a.fx_rate} at={a.fx_at} />
+                        <RestrictionBadge restriction={a.restriction} />
                       </TableCell>
                       <TableCell><Badge variant={a.status === "active" ? "default" : "secondary"} className="text-[10px]">{a.status}</Badge></TableCell>
                     </TableRow>

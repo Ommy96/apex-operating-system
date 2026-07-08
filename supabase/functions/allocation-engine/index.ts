@@ -93,6 +93,7 @@ async function upsertPool(
     add_base: number;
     fx_rate: number;
     fx_at: string;
+    restriction: "restricted" | "unrestricted" | "time_restricted";
   },
 ) {
   // Find existing
@@ -119,6 +120,7 @@ async function upsertPool(
         balance_base: newBase,
         last_fx_rate: args.fx_rate,
         last_fx_at: args.fx_at,
+        restriction: args.restriction,
       })
       .eq("id", existing.id)
       .select("id, balance_native, balance_base")
@@ -141,6 +143,7 @@ async function upsertPool(
       balance_base: args.add_base,
       last_fx_rate: args.fx_rate,
       last_fx_at: args.fx_at,
+      restriction: args.restriction,
     })
     .select("id, balance_native, balance_base")
     .single();
@@ -205,6 +208,11 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     intent = data;
   }
   const kind: string = intent?.kind ?? "unrestricted";
+  // Restriction is driven by the intent. Default: beneficiary/project = restricted,
+  // program-level defaults to unrestricted unless the donor said otherwise.
+  const restriction: "restricted" | "unrestricted" | "time_restricted" =
+    (intent?.restriction as any) ??
+    (kind === "unrestricted" ? "unrestricted" : kind === "program" ? "unrestricted" : "restricted");
 
   const allocations: any[] = [];
 
@@ -233,6 +241,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     currency: nativeCur,
     add_native: amountNative, add_base: amountBase,
     fx_rate: fxRate, fx_at: fxAt,
+    restriction,
   });
 
   // 2) Eager allocation
@@ -256,6 +265,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
         amount_base: amountBase,
         base_currency: baseCur,
         status: "active",
+        restriction,
         allocated_by: actorId,
       })
       .select("*")
@@ -336,6 +346,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
           amount_base: finalBase,
           base_currency: baseCur,
           status: "active",
+          restriction,
           allocated_by: actorId,
         })
         .select("*")
@@ -365,6 +376,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     fxAt,
     scope,
     intentKind: kind,
+    restriction,
   });
 }
 
@@ -482,6 +494,118 @@ async function exitBeneficiary(
 }
 
 // --- REQUEST HANDLER ----------------------------------------------------
+// --- TOP UP PROJECT FROM PROGRAM UNRESTRICTED POOL ---------------------
+async function topUpProject(
+  supabase: SupabaseClient,
+  args: { sourcePoolId: string; projectId: string; amountNative: number; reason: string },
+  actorId: string | null,
+) {
+  if (!args.sourcePoolId || !args.projectId) return json(400, { error: "missing_args" });
+  if (!args.amountNative || args.amountNative <= 0) return json(400, { error: "invalid_amount" });
+  if (!args.reason || args.reason.trim().length < 3) return json(400, { error: "reason_required" });
+
+  const { data: src, error: pErr } = await supabase
+    .from("donor_pools")
+    .select("*")
+    .eq("id", args.sourcePoolId)
+    .maybeSingle();
+  if (pErr) throw pErr;
+  if (!src) return json(404, { error: "source_pool_not_found" });
+
+  if (src.scope !== "program_unrestricted") {
+    return json(400, {
+      error: "invalid_source_scope",
+      message: "Only program-unrestricted pools can top up projects.",
+    });
+  }
+  if (src.restriction !== "unrestricted") {
+    return json(400, {
+      error: "restricted_funds_blocked",
+      message: "Restricted program funds cannot be moved to a project. Only unrestricted program funds may top up projects.",
+    });
+  }
+  if (Number(src.balance_native) < args.amountNative) {
+    return json(400, { error: "insufficient_balance", message: "Source pool has insufficient balance." });
+  }
+
+  const { data: proj, error: prErr } = await supabase
+    .from("projects")
+    .select("id, organization_id, program_id")
+    .eq("id", args.projectId)
+    .maybeSingle();
+  if (prErr) throw prErr;
+  if (!proj || proj.organization_id !== src.organization_id) {
+    return json(400, { error: "project_org_mismatch" });
+  }
+
+  const fxRate = Number(src.last_fx_rate ?? 1);
+  const fxAt = new Date().toISOString();
+  const amountBase = args.amountNative * fxRate;
+  const baseCur = await getBaseCurrency(supabase, src.organization_id);
+
+  // 1) Debit source pool
+  await decrementPool(supabase, src.id, args.amountNative, amountBase);
+
+  // 2) Credit destination project pool (restricted to project)
+  const dest = await upsertPool(supabase, {
+    organization_id: src.organization_id,
+    donor_account_id: src.donor_account_id,
+    scope: "project_pool",
+    scope_beneficiary_id: null,
+    scope_project_id: args.projectId,
+    scope_program_id: proj.program_id ?? null,
+    currency: src.currency,
+    add_native: args.amountNative,
+    add_base: amountBase,
+    fx_rate: fxRate,
+    fx_at: fxAt,
+    restriction: "restricted",
+  });
+
+  // 3) Log an allocation row for auditability
+  const { data: alloc, error: aErr } = await supabase
+    .from("allocations")
+    .insert({
+      organization_id: src.organization_id,
+      donor_pool_id: dest!.id,
+      donor_account_id: src.donor_account_id,
+      donation_id: null,
+      beneficiary_id: null,
+      project_id: args.projectId,
+      program_id: proj.program_id ?? null,
+      scope: "project_pool",
+      amount_native: args.amountNative,
+      native_currency: src.currency,
+      fx_rate: fxRate,
+      fx_at: fxAt,
+      amount_base: amountBase,
+      base_currency: baseCur,
+      status: "active",
+      restriction: "restricted",
+      reason: `Program top-up: ${args.reason}`,
+      allocated_by: actorId,
+    })
+    .select("*")
+    .single();
+  if (aErr) throw aErr;
+
+  // 4) Log override for audit trail
+  if (actorId) {
+    await supabase.from("allocation_overrides").insert({
+      organization_id: src.organization_id,
+      allocation_id: alloc.id,
+      overridden_by: actorId,
+      reason: `Top-up from unrestricted program pool ${src.id}: ${args.reason}`,
+      before_status: "active",
+      after_status: "active",
+      before_beneficiary_id: null,
+      after_beneficiary_id: null,
+    });
+  }
+
+  return json(200, { success: true, allocation: alloc, destinationPoolId: dest!.id });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -514,6 +638,14 @@ Deno.serve(async (req) => {
         projectId: body.projectId,
         resolution: body.resolution,
         redirectBeneficiaryId: body.redirectBeneficiaryId,
+        reason: body.reason,
+      }, actorId);
+    }
+    if (mode === "top_up_project") {
+      return await topUpProject(supabase, {
+        sourcePoolId: body.sourcePoolId,
+        projectId: body.projectId,
+        amountNative: Number(body.amountNative),
         reason: body.reason,
       }, actorId);
     }

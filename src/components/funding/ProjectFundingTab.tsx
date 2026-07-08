@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { FxChip } from "./FxChip";
+import { RestrictionBadge } from "./RestrictionBadge";
 import { formatMoney } from "@/lib/allocationEngine";
 import { useOrganization } from "@/hooks/useOrganization";
 
@@ -135,6 +136,7 @@ export function ProjectFundingTab({ projectId, targetTotalBase }: Props) {
                   <TableCell className="text-right text-xs flex items-center justify-end gap-1">
                     {formatMoney(a.amount_native, a.native_currency)}
                     <FxChip nativeCurrency={a.native_currency} baseCurrency={a.base_currency} rate={a.fx_rate} at={a.fx_at} />
+                    <RestrictionBadge restriction={a.restriction} />
                   </TableCell>
                   <TableCell><Badge variant={a.status === "active" ? "default" : "secondary"} className="text-[10px]">{a.status}</Badge></TableCell>
                 </TableRow>

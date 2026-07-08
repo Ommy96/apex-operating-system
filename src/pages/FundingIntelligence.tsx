@@ -17,6 +17,11 @@ import {
 import {
   useProgramFundingSummaries, useProjectFundingSummaries, useOrgGrants, useFundingHealthScore,
 } from "@/hooks/useFundingIntelligence";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
+import { Lock, LockOpen } from "lucide-react";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 import { CHART_PALETTE } from "@/lib/chartPalette";
 import { differenceInDays, format, parseISO } from "date-fns";
@@ -29,6 +34,41 @@ export default function FundingIntelligence() {
   const { data: programs = [], isLoading: lp } = useProgramFundingSummaries();
   const { data: projects = [], isLoading: lpr } = useProjectFundingSummaries();
   const { data: grants = [], isLoading: lg } = useOrgGrants();
+  const { currentOrganization } = useOrganization();
+
+  // Live restricted vs unrestricted totals from allocation-engine pools + allocations.
+  // These are compliance-grade — never merged into a single "committed" figure.
+  const { data: restrictionRollup } = useQuery({
+    queryKey: ["funding-restriction-rollup", currentOrganization?.organization_id],
+    enabled: !!currentOrganization?.organization_id,
+    queryFn: async () => {
+      const orgId = currentOrganization!.organization_id;
+      const [pools, allocs] = await Promise.all([
+        supabase
+          .from("donor_pools")
+          .select("restriction, balance_base")
+          .eq("organization_id", orgId),
+        supabase
+          .from("allocations")
+          .select("restriction, amount_base, status")
+          .eq("organization_id", orgId)
+          .eq("status", "active"),
+      ]);
+      const acc = {
+        restricted_pool: 0, unrestricted_pool: 0, time_restricted_pool: 0,
+        restricted_alloc: 0, unrestricted_alloc: 0, time_restricted_alloc: 0,
+      };
+      (pools.data ?? []).forEach((p: any) => {
+        const k = `${p.restriction || "restricted"}_pool` as keyof typeof acc;
+        acc[k] = (acc[k] || 0) + Number(p.balance_base || 0);
+      });
+      (allocs.data ?? []).forEach((a: any) => {
+        const k = `${a.restriction || "restricted"}_alloc` as keyof typeof acc;
+        acc[k] = (acc[k] || 0) + Number(a.amount_base || 0);
+      });
+      return acc;
+    },
+  });
 
   // ===== Overview totals =====
   const totals = useMemo(() => {
@@ -57,6 +97,15 @@ export default function FundingIntelligence() {
       restricted, unrestricted,
     };
   }, [programs, grants]);
+
+  // Compliance-grade restricted/unrestricted (from live pools + allocations).
+  const compliance = useMemo(() => {
+    const r = restrictionRollup ?? {} as any;
+    const restrictedTotal = (r.restricted_pool || 0) + (r.restricted_alloc || 0);
+    const unrestrictedTotal = (r.unrestricted_pool || 0) + (r.unrestricted_alloc || 0);
+    const timeRestrictedTotal = (r.time_restricted_pool || 0) + (r.time_restricted_alloc || 0);
+    return { restrictedTotal, unrestrictedTotal, timeRestrictedTotal };
+  }, [restrictionRollup]);
 
   const statusBreakdown = [
     { name: "Pledged", value: totals.grantPledged },
@@ -180,6 +229,41 @@ export default function FundingIntelligence() {
             <StatTile label="Restricted" value={totals.restricted} />
             <StatTile label="Unrestricted" value={totals.unrestricted} />
           </div>
+
+          {/* Compliance-grade split: pools + active allocations, never merged */}
+          <Card className="border-amber-500/30 bg-amber-500/[0.03]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Lock className="h-4 w-4 text-amber-600" /> Restricted vs Unrestricted balances
+              </CardTitle>
+              <CardDescription>
+                Compliance view — restricted funds must be used for their stated purpose and are reported separately.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-amber-800 dark:text-amber-300">
+                  <Lock className="h-3.5 w-3.5" /> Restricted
+                </div>
+                <p className="text-2xl font-semibold mt-1">{fmt(compliance.restrictedTotal)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Must be used for stated purpose.</p>
+              </div>
+              <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+                  <LockOpen className="h-3.5 w-3.5" /> Unrestricted
+                </div>
+                <p className="text-2xl font-semibold mt-1">{fmt(compliance.unrestrictedTotal)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Available wherever most needed.</p>
+              </div>
+              <div className="rounded-md border border-sky-500/40 bg-sky-500/10 p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-sky-800 dark:text-sky-300">
+                  <CalendarClock className="h-3.5 w-3.5" /> Time-restricted
+                </div>
+                <p className="text-2xl font-semibold mt-1">{fmt(compliance.timeRestrictedTotal)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Usable within a defined period.</p>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 border-border/60">

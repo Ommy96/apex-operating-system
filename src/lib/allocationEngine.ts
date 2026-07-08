@@ -37,6 +37,19 @@ export async function exitBeneficiary(args: {
   return data;
 }
 
+export async function topUpProject(args: {
+  sourcePoolId: string;
+  projectId: string;
+  amountNative: number;
+  reason: string;
+}) {
+  const { data, error } = await supabase.functions.invoke("allocation-engine", {
+    body: { mode: "top_up_project", ...args },
+  });
+  if (error) return { success: false, error: error.message } as any;
+  return data;
+}
+
 /**
  * Management override: redirect a single allocation to a different beneficiary.
  * Reuses exit_beneficiary by passing the originating beneficiary & project,

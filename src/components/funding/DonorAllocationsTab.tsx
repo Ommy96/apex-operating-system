@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 import { FxChip } from "./FxChip";
+import { RestrictionBadge } from "./RestrictionBadge";
 import { formatMoney } from "@/lib/allocationEngine";
 
 interface Props { donorAccountId: string; }
@@ -87,6 +88,7 @@ export function DonorAllocationsTab({ donorAccountId }: Props) {
                     <TableCell className="text-right text-xs flex items-center justify-end gap-1">
                       {formatMoney(r.amount_native, r.native_currency)}
                       <FxChip nativeCurrency={r.native_currency} baseCurrency={r.base_currency} rate={r.fx_rate} at={r.fx_at} />
+                      <RestrictionBadge restriction={r.restriction} />
                     </TableCell>
                     <TableCell className="text-right text-xs hidden md:table-cell">{formatMoney(r.amount_base, r.base_currency)}</TableCell>
                     <TableCell><Badge variant={r.status === "active" ? "default" : "secondary"} className="text-[10px]">{r.status}</Badge></TableCell>

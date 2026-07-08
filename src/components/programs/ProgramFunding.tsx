@@ -12,9 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, DollarSign, Trash2, FolderKanban } from "lucide-react";
+import { Plus, DollarSign, Trash2, FolderKanban, ArrowDownToLine } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
+import { topUpProject } from "@/lib/allocationEngine";
 
 interface Props {
   programId: string | undefined;
@@ -26,6 +28,10 @@ export function ProgramFunding({ programId }: Props) {
   const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
   const [isOpen, setIsOpen] = useState(false);
+  const [topUpFor, setTopUpFor] = useState<null | { projectId: string; name: string; gap: number }>(null);
+  const [topUpAmount, setTopUpAmount] = useState("");
+  const [topUpReason, setTopUpReason] = useState("");
+  const [topUpPoolId, setTopUpPoolId] = useState<string>("");
   const [form, setForm] = useState({
     donor_name: "",
     amount: "",
@@ -68,6 +74,72 @@ export function ProgramFunding({ programId }: Props) {
       return data || [];
     },
     enabled: !!programId && !!orgId,
+  });
+
+  // Unrestricted program pools available for top-up
+  const { data: unrestrictedPools = [] } = useQuery({
+    queryKey: ["program-unrestricted-pools", programId, orgId],
+    enabled: !!programId && !!orgId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("donor_pools")
+        .select("id, currency, balance_native, balance_base, restriction, scope, scope_program_id, donor_account_id, donor_accounts:donor_account_id(donor_name)")
+        .eq("organization_id", orgId!)
+        .eq("scope", "program_unrestricted")
+        .eq("restriction", "unrestricted")
+        .gt("balance_native", 0);
+      return (data ?? []).filter(
+        (p: any) => !p.scope_program_id || p.scope_program_id === programId,
+      );
+    },
+  });
+
+  // Under-funded projects for this program
+  const { data: projectHealth = [] } = useQuery({
+    queryKey: ["program-project-health", programId],
+    enabled: !!programId,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("v_project_funding_summary")
+        .select("project_id, name, total_budget, total_received")
+        .eq("program_id", programId!);
+      return (data ?? [])
+        .map((p: any) => ({
+          ...p,
+          gap: Math.max(0, Number(p.total_budget || 0) - Number(p.total_received || 0)),
+        }))
+        .filter((p: any) => p.gap > 0)
+        .sort((a: any, b: any) => b.gap - a.gap);
+    },
+  });
+
+  const topUpMutation = useMutation({
+    mutationFn: async () => {
+      if (!topUpFor || !topUpPoolId) throw new Error("Choose a source pool");
+      const amt = parseFloat(topUpAmount);
+      if (!(amt > 0)) throw new Error("Enter a valid amount");
+      const res: any = await topUpProject({
+        sourcePoolId: topUpPoolId,
+        projectId: topUpFor.projectId,
+        amountNative: amt,
+        reason: topUpReason,
+      });
+      if (!res?.success) throw new Error(res?.message || res?.error || "Top-up failed");
+      return res;
+    },
+    onSuccess: () => {
+      toast.success("Project topped up from unrestricted program pool");
+      setTopUpFor(null);
+      setTopUpAmount("");
+      setTopUpReason("");
+      setTopUpPoolId("");
+      queryClient.invalidateQueries({ queryKey: ["program-unrestricted-pools", programId, orgId] });
+      queryClient.invalidateQueries({ queryKey: ["program-project-health", programId] });
+      queryClient.invalidateQueries({ queryKey: ["project-pools"] });
+      queryClient.invalidateQueries({ queryKey: ["project-allocations"] });
+      queryClient.invalidateQueries({ queryKey: ["funding-restriction-rollup"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Top-up failed"),
   });
 
   const addMutation = useMutation({
@@ -270,6 +342,109 @@ export function ProgramFunding({ programId }: Props) {
           </Dialog>
         )}
       </div>
+
+      {/* Program-to-project top up from unrestricted pool */}
+      {(unrestrictedPools.length > 0 || projectHealth.length > 0) && (
+        <Card className="border-emerald-500/30 bg-emerald-500/[0.03]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <ArrowDownToLine className="h-4 w-4 text-emerald-600" />
+              Top up projects from unrestricted program funds
+              <RestrictionBadge restriction="unrestricted" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Unrestricted pool available:&nbsp;
+              <span className="font-semibold">
+                {unrestrictedPools.reduce((s: number, p: any) => s + Number(p.balance_base || 0), 0).toLocaleString()}
+              </span>{" "}
+              across {unrestrictedPools.length} pool(s). Restricted program funds cannot be moved.
+            </div>
+            {projectHealth.length === 0 ? (
+              <p className="text-xs text-muted-foreground">All projects are on budget.</p>
+            ) : (
+              <div className="divide-y">
+                {projectHealth.slice(0, 8).map((p: any) => (
+                  <div key={p.project_id} className="flex items-center justify-between gap-2 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">Gap: KES {Number(p.gap).toLocaleString()}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!isAdmin || unrestrictedPools.length === 0}
+                      onClick={() => {
+                        setTopUpFor({ projectId: p.project_id, name: p.name, gap: Number(p.gap) });
+                        setTopUpPoolId(unrestrictedPools[0]?.id ?? "");
+                        setTopUpAmount("");
+                        setTopUpReason("");
+                      }}
+                    >
+                      Allocate to project
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={!!topUpFor} onOpenChange={(o) => !o && setTopUpFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Top up {topUpFor?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Funding gap: KES {topUpFor?.gap.toLocaleString()}
+            </div>
+            <div className="space-y-2">
+              <Label>Source pool (unrestricted)</Label>
+              <Select value={topUpPoolId} onValueChange={setTopUpPoolId}>
+                <SelectTrigger><SelectValue placeholder="Choose pool" /></SelectTrigger>
+                <SelectContent>
+                  {unrestrictedPools.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.donor_accounts?.donor_name ?? "Donor"} · {p.currency} {Number(p.balance_native).toLocaleString()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Amount (native currency)</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Reason (required)</Label>
+              <Textarea
+                value={topUpReason}
+                onChange={(e) => setTopUpReason(e.target.value)}
+                rows={2}
+                placeholder="Why is this reallocation needed?"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setTopUpFor(null)}>Cancel</Button>
+              <Button
+                onClick={() => topUpMutation.mutate()}
+                disabled={topUpMutation.isPending || !topUpPoolId || !topUpAmount || topUpReason.trim().length < 3}
+              >
+                {topUpMutation.isPending ? "Allocating…" : "Allocate"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
