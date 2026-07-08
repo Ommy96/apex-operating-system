@@ -12,9 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, DollarSign, Trash2, FolderKanban } from "lucide-react";
+import { Plus, DollarSign, Trash2, FolderKanban, ArrowDownToLine } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
+import { topUpProject } from "@/lib/allocationEngine";
 
 interface Props {
   programId: string | undefined;
@@ -26,6 +28,10 @@ export function ProgramFunding({ programId }: Props) {
   const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
   const [isOpen, setIsOpen] = useState(false);
+  const [topUpFor, setTopUpFor] = useState<null | { projectId: string; name: string; gap: number }>(null);
+  const [topUpAmount, setTopUpAmount] = useState("");
+  const [topUpReason, setTopUpReason] = useState("");
+  const [topUpPoolId, setTopUpPoolId] = useState<string>("");
   const [form, setForm] = useState({
     donor_name: "",
     amount: "",
