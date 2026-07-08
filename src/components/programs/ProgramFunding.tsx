@@ -76,6 +76,72 @@ export function ProgramFunding({ programId }: Props) {
     enabled: !!programId && !!orgId,
   });
 
+  // Unrestricted program pools available for top-up
+  const { data: unrestrictedPools = [] } = useQuery({
+    queryKey: ["program-unrestricted-pools", programId, orgId],
+    enabled: !!programId && !!orgId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("donor_pools")
+        .select("id, currency, balance_native, balance_base, restriction, scope, scope_program_id, donor_account_id, donor_accounts:donor_account_id(donor_name)")
+        .eq("organization_id", orgId!)
+        .eq("scope", "program_unrestricted")
+        .eq("restriction", "unrestricted")
+        .gt("balance_native", 0);
+      return (data ?? []).filter(
+        (p: any) => !p.scope_program_id || p.scope_program_id === programId,
+      );
+    },
+  });
+
+  // Under-funded projects for this program
+  const { data: projectHealth = [] } = useQuery({
+    queryKey: ["program-project-health", programId],
+    enabled: !!programId,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("v_project_funding_summary")
+        .select("project_id, name, total_budget, total_received")
+        .eq("program_id", programId!);
+      return (data ?? [])
+        .map((p: any) => ({
+          ...p,
+          gap: Math.max(0, Number(p.total_budget || 0) - Number(p.total_received || 0)),
+        }))
+        .filter((p: any) => p.gap > 0)
+        .sort((a: any, b: any) => b.gap - a.gap);
+    },
+  });
+
+  const topUpMutation = useMutation({
+    mutationFn: async () => {
+      if (!topUpFor || !topUpPoolId) throw new Error("Choose a source pool");
+      const amt = parseFloat(topUpAmount);
+      if (!(amt > 0)) throw new Error("Enter a valid amount");
+      const res: any = await topUpProject({
+        sourcePoolId: topUpPoolId,
+        projectId: topUpFor.projectId,
+        amountNative: amt,
+        reason: topUpReason,
+      });
+      if (!res?.success) throw new Error(res?.message || res?.error || "Top-up failed");
+      return res;
+    },
+    onSuccess: () => {
+      toast.success("Project topped up from unrestricted program pool");
+      setTopUpFor(null);
+      setTopUpAmount("");
+      setTopUpReason("");
+      setTopUpPoolId("");
+      queryClient.invalidateQueries({ queryKey: ["program-unrestricted-pools", programId, orgId] });
+      queryClient.invalidateQueries({ queryKey: ["program-project-health", programId] });
+      queryClient.invalidateQueries({ queryKey: ["project-pools"] });
+      queryClient.invalidateQueries({ queryKey: ["project-allocations"] });
+      queryClient.invalidateQueries({ queryKey: ["funding-restriction-rollup"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Top-up failed"),
+  });
+
   const addMutation = useMutation({
     mutationFn: async () => {
       if (!orgId || !programId) throw new Error("Missing org or program");
