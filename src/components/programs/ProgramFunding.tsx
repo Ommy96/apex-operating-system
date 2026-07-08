@@ -271,6 +271,109 @@ export function ProgramFunding({ programId }: Props) {
         )}
       </div>
 
+      {/* Program-to-project top up from unrestricted pool */}
+      {(unrestrictedPools.length > 0 || projectHealth.length > 0) && (
+        <Card className="border-emerald-500/30 bg-emerald-500/[0.03]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <ArrowDownToLine className="h-4 w-4 text-emerald-600" />
+              Top up projects from unrestricted program funds
+              <RestrictionBadge restriction="unrestricted" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Unrestricted pool available:&nbsp;
+              <span className="font-semibold">
+                {unrestrictedPools.reduce((s: number, p: any) => s + Number(p.balance_base || 0), 0).toLocaleString()}
+              </span>{" "}
+              across {unrestrictedPools.length} pool(s). Restricted program funds cannot be moved.
+            </div>
+            {projectHealth.length === 0 ? (
+              <p className="text-xs text-muted-foreground">All projects are on budget.</p>
+            ) : (
+              <div className="divide-y">
+                {projectHealth.slice(0, 8).map((p: any) => (
+                  <div key={p.project_id} className="flex items-center justify-between gap-2 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">Gap: KES {Number(p.gap).toLocaleString()}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!isAdmin || unrestrictedPools.length === 0}
+                      onClick={() => {
+                        setTopUpFor({ projectId: p.project_id, name: p.name, gap: Number(p.gap) });
+                        setTopUpPoolId(unrestrictedPools[0]?.id ?? "");
+                        setTopUpAmount("");
+                        setTopUpReason("");
+                      }}
+                    >
+                      Allocate to project
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={!!topUpFor} onOpenChange={(o) => !o && setTopUpFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Top up {topUpFor?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Funding gap: KES {topUpFor?.gap.toLocaleString()}
+            </div>
+            <div className="space-y-2">
+              <Label>Source pool (unrestricted)</Label>
+              <Select value={topUpPoolId} onValueChange={setTopUpPoolId}>
+                <SelectTrigger><SelectValue placeholder="Choose pool" /></SelectTrigger>
+                <SelectContent>
+                  {unrestrictedPools.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.donor_accounts?.donor_name ?? "Donor"} · {p.currency} {Number(p.balance_native).toLocaleString()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Amount (native currency)</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Reason (required)</Label>
+              <Textarea
+                value={topUpReason}
+                onChange={(e) => setTopUpReason(e.target.value)}
+                rows={2}
+                placeholder="Why is this reallocation needed?"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setTopUpFor(null)}>Cancel</Button>
+              <Button
+                onClick={() => topUpMutation.mutate()}
+                disabled={topUpMutation.isPending || !topUpPoolId || !topUpAmount || topUpReason.trim().length < 3}
+              >
+                {topUpMutation.isPending ? "Allocating…" : "Allocate"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
