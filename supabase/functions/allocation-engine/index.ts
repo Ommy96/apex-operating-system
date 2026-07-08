@@ -208,6 +208,11 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     intent = data;
   }
   const kind: string = intent?.kind ?? "unrestricted";
+  // Restriction is driven by the intent. Default: beneficiary/project = restricted,
+  // program-level defaults to unrestricted unless the donor said otherwise.
+  const restriction: "restricted" | "unrestricted" | "time_restricted" =
+    (intent?.restriction as any) ??
+    (kind === "unrestricted" ? "unrestricted" : kind === "program" ? "unrestricted" : "restricted");
 
   const allocations: any[] = [];
 
@@ -236,6 +241,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     currency: nativeCur,
     add_native: amountNative, add_base: amountBase,
     fx_rate: fxRate, fx_at: fxAt,
+    restriction,
   });
 
   // 2) Eager allocation
@@ -259,6 +265,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
         amount_base: amountBase,
         base_currency: baseCur,
         status: "active",
+        restriction,
         allocated_by: actorId,
       })
       .select("*")
@@ -339,6 +346,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
           amount_base: finalBase,
           base_currency: baseCur,
           status: "active",
+          restriction,
           allocated_by: actorId,
         })
         .select("*")
@@ -368,6 +376,7 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     fxAt,
     scope,
     intentKind: kind,
+    restriction,
   });
 }
 
