@@ -735,6 +735,7 @@ export type Database = {
           program_id: string | null
           project_id: string | null
           reason: string | null
+          restriction: string
           scope: Database["public"]["Enums"]["allocation_scope"]
           status: Database["public"]["Enums"]["allocation_status"]
           updated_at: string
@@ -760,6 +761,7 @@ export type Database = {
           program_id?: string | null
           project_id?: string | null
           reason?: string | null
+          restriction?: string
           scope: Database["public"]["Enums"]["allocation_scope"]
           status?: Database["public"]["Enums"]["allocation_status"]
           updated_at?: string
@@ -785,6 +787,7 @@ export type Database = {
           program_id?: string | null
           project_id?: string | null
           reason?: string | null
+          restriction?: string
           scope?: Database["public"]["Enums"]["allocation_scope"]
           status?: Database["public"]["Enums"]["allocation_status"]
           updated_at?: string
@@ -5359,6 +5362,9 @@ export type Database = {
           lock_to_beneficiary: boolean
           notes: string | null
           organization_id: string
+          restriction: string
+          restriction_expires_at: string | null
+          restriction_note: string | null
           target_beneficiary_id: string | null
           target_program_id: string | null
           target_project_id: string | null
@@ -5376,6 +5382,9 @@ export type Database = {
           lock_to_beneficiary?: boolean
           notes?: string | null
           organization_id: string
+          restriction?: string
+          restriction_expires_at?: string | null
+          restriction_note?: string | null
           target_beneficiary_id?: string | null
           target_program_id?: string | null
           target_project_id?: string | null
@@ -5393,6 +5402,9 @@ export type Database = {
           lock_to_beneficiary?: boolean
           notes?: string | null
           organization_id?: string
+          restriction?: string
+          restriction_expires_at?: string | null
+          restriction_note?: string | null
           target_beneficiary_id?: string | null
           target_program_id?: string | null
           target_project_id?: string | null
@@ -5627,6 +5639,7 @@ export type Database = {
           last_fx_at: string | null
           last_fx_rate: number | null
           organization_id: string
+          restriction: string
           scope: Database["public"]["Enums"]["allocation_scope"]
           scope_beneficiary_id: string | null
           scope_program_id: string | null
@@ -5643,6 +5656,7 @@ export type Database = {
           last_fx_at?: string | null
           last_fx_rate?: number | null
           organization_id: string
+          restriction?: string
           scope: Database["public"]["Enums"]["allocation_scope"]
           scope_beneficiary_id?: string | null
           scope_program_id?: string | null
@@ -5659,6 +5673,7 @@ export type Database = {
           last_fx_at?: string | null
           last_fx_rate?: number | null
           organization_id?: string
+          restriction?: string
           scope?: Database["public"]["Enums"]["allocation_scope"]
           scope_beneficiary_id?: string | null
           scope_program_id?: string | null
@@ -7477,6 +7492,9 @@ export type Database = {
           objectives: string | null
           organization_id: string
           reporting_frequency: string | null
+          restriction: string
+          restriction_expires_at: string | null
+          restriction_note: string | null
           start_date: string | null
           status: string
           supported_funding_model: string | null
@@ -7502,6 +7520,9 @@ export type Database = {
           objectives?: string | null
           organization_id: string
           reporting_frequency?: string | null
+          restriction?: string
+          restriction_expires_at?: string | null
+          restriction_note?: string | null
           start_date?: string | null
           status?: string
           supported_funding_model?: string | null
@@ -7527,6 +7548,9 @@ export type Database = {
           objectives?: string | null
           organization_id?: string
           reporting_frequency?: string | null
+          restriction?: string
+          restriction_expires_at?: string | null
+          restriction_note?: string | null
           start_date?: string | null
           status?: string
           supported_funding_model?: string | null
