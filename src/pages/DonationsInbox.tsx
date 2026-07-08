@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { allocateDonation, formatMoney } from "@/lib/allocationEngine";
 import { toast } from "sonner";
+import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
 
 export default function DonationsInbox() {
   const { currentOrganization: organization } = useOrganization();
@@ -21,7 +22,7 @@ export default function DonationsInbox() {
     queryFn: async () => {
       const { data } = await supabase
         .from("donations")
-        .select("*, donor_accounts:donor_account_id(donor_name), donation_intents:donation_intent_id(kind, target_beneficiary_id, target_project_id, target_program_id)")
+        .select("*, donor_accounts:donor_account_id(donor_name), donation_intents:donation_intent_id(kind, restriction, restriction_note, target_beneficiary_id, target_project_id, target_program_id)")
         .eq("organization_id", orgId!)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -85,7 +86,15 @@ export default function DonationsInbox() {
                         <TableCell className="text-xs">{format(new Date(d.created_at), "d MMM HH:mm")}</TableCell>
                         <TableCell className="text-xs">{d.donor_accounts?.donor_name ?? d.donor_name ?? "—"}</TableCell>
                         <TableCell className="text-xs">{formatMoney(d.amount, d.currency)}</TableCell>
-                        <TableCell className="text-xs hidden md:table-cell"><Badge variant="outline" className="text-[10px]">{kind}</Badge></TableCell>
+                        <TableCell className="text-xs hidden md:table-cell">
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-[10px]">{kind}</Badge>
+                            <RestrictionBadge
+                              restriction={d.donation_intents?.restriction}
+                              note={d.donation_intents?.restriction_note}
+                            />
+                          </div>
+                        </TableCell>
                         <TableCell className="text-xs"><Badge variant={c?.active ? "default" : "secondary"} className="text-[10px]">{allocStatus}</Badge></TableCell>
                         <TableCell className="text-right">
                           {completed && d.donor_account_id && (!c || c.total === 0) && (
