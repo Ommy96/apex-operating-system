@@ -93,6 +93,7 @@ async function upsertPool(
     add_base: number;
     fx_rate: number;
     fx_at: string;
+    restriction: "restricted" | "unrestricted" | "time_restricted";
   },
 ) {
   // Find existing
@@ -119,6 +120,7 @@ async function upsertPool(
         balance_base: newBase,
         last_fx_rate: args.fx_rate,
         last_fx_at: args.fx_at,
+        restriction: args.restriction,
       })
       .eq("id", existing.id)
       .select("id, balance_native, balance_base")
@@ -141,6 +143,7 @@ async function upsertPool(
       balance_base: args.add_base,
       last_fx_rate: args.fx_rate,
       last_fx_at: args.fx_at,
+      restriction: args.restriction,
     })
     .select("id, balance_native, balance_base")
     .single();
