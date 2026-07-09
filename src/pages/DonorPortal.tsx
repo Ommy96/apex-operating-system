@@ -22,6 +22,7 @@ import { DonorAllocationsTab } from '@/components/donor-portal/DonorAllocationsT
 import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStoriesTab';
 import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
 import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
+import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
 import { useDonorFx } from '@/hooks/useDonorFx';
 
 export default function DonorPortal() {
@@ -219,6 +220,9 @@ export default function DonorPortal() {
             <TabsTrigger value="impact" className="gap-2">
               <Sparkles className="h-4 w-4" /> Impact Stories
             </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2">
+              <FileText className="h-4 w-4" /> Reports
+            </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" /> Documents
             </TabsTrigger>
@@ -315,6 +319,10 @@ export default function DonorPortal() {
 
           <TabsContent value="impact">
             <DonorImpactStoriesTab />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <DonorReportsTab />
           </TabsContent>
 
           {/* Documents Tab */}
