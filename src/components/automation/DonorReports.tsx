@@ -264,6 +264,9 @@ export function DonorReports() {
           </div>
         </div>
       )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
