@@ -22,6 +22,8 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, FileBarChart, Play, Trash2, Eye } from "lucide-react";
 import { useAutomation } from "@/hooks/useAutomation";
 import { format } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DonorReportRouter } from "@/components/reports/DonorReportRouter";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -62,6 +64,16 @@ export function DonorReports() {
 
   return (
     <div className="space-y-4">
+      <Tabs defaultValue="scoped" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="scoped">Scoped donor report</TabsTrigger>
+          <TabsTrigger value="templates">Report templates</TabsTrigger>
+        </TabsList>
+        <TabsContent value="scoped">
+          <DonorReportRouter />
+        </TabsContent>
+        <TabsContent value="templates">
+          <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Donor Report Generator</h3>
