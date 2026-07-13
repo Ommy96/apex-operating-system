@@ -354,8 +354,8 @@ function AttentionPanel({ programId, orgId }: { programId: string; orgId: string
 function RollupPanel({ programId, orgId }: { programId: string; orgId: string }) {
   const r = useProgramRollups(programId, orgId);
   if (r.isLoading) return <Skeleton className="h-56 w-full" />;
-  const rollups = (r.data?.rollups ?? []) as any[];
-  const translations = (r.data?.translations ?? []) as any[];
+  const rollups = ((r as any).rollups ?? []) as any[];
+  const translations = ((r as any).translations ?? []) as any[];
 
   if (!rollups.length)
     return (
