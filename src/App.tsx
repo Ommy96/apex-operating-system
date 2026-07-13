@@ -217,6 +217,9 @@ const App = () => (
             <Route path="/workspace/lead" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><LeadWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
+            <Route path="/workspace/program" element={
+              <ProtectedRoute><DashboardLayout><LazyRoute><ProgramManagerWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
+            } />
             <Route path="/my-project" element={<Navigate to="/workspace/lead" replace />} />
             <Route path="/intelligence/burn-vs-impact" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><BurnVsImpact /></LazyRoute></DashboardLayout></ProtectedRoute>
