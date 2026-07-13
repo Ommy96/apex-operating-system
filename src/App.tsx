@@ -29,6 +29,7 @@ const ProgramReports = lazy(() => import("./pages/ProgramReports"));
 const ProjectEligibility = lazy(() => import("./pages/ProjectEligibility"));
 const BeneficiaryEligibility = lazy(() => import("./pages/BeneficiaryEligibility"));
 const LeadWorkspace = lazy(() => import("./pages/LeadWorkspace"));
+const ProgramManagerWorkspace = lazy(() => import("./pages/ProgramManagerWorkspace"));
 const BurnVsImpact = lazy(() => import("./pages/BurnVsImpact"));
 const AllProjects = lazy(() => import("./pages/AllProjects"));
 const Activities = lazy(() => import("./pages/Activities"));
