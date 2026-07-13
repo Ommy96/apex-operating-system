@@ -42,6 +42,7 @@ import { isSuperAdmin } from "@/lib/superAdmin";
 import { useBranding } from "@/hooks/useBranding";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
+import { useManagedPrograms } from "@/hooks/useManagedPrograms";
 
 interface MenuItemType {
   title: string;
@@ -164,6 +165,8 @@ export function AppSidebar() {
   const { logoUrl, orgName } = useBranding();
   const { termPlural } = useBeneficiaryTerminology();
   const { isProjectLead } = useLeadProjects();
+  const { data: managed } = useManagedPrograms();
+  const isProgramManager = !!managed?.isProgramManager;
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -296,6 +299,7 @@ export function AppSidebar() {
     {
       label: "Home",
       items: [
+        { title: "My Programme", url: "/workspace/program", icon: Layers, show: isProgramManager },
         { title: "My Workspace", url: "/workspace/lead", icon: LayoutGrid, show: isProjectLead },
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
       ],
