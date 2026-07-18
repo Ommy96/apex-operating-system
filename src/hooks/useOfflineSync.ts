@@ -194,6 +194,22 @@ export function useOfflineSync() {
           created_by: record.userId,
         });
         if (error) throw error;
+      } else if (record.type === 'home_visit') {
+        const { error } = await (supabase as any).from('home_visits').insert({
+          ...record.data,
+          organization_id: record.organizationId,
+          visited_by: record.userId,
+          synced_from_offline: true,
+        });
+        if (error) throw error;
+      } else if (record.type === 'school_visit') {
+        const { error } = await (supabase as any).from('school_visits').insert({
+          ...record.data,
+          organization_id: record.organizationId,
+          visited_by: record.userId,
+          synced_from_offline: true,
+        });
+        if (error) throw error;
       } else if (record.type === 'attachment') {
         // Upload file blob to storage
         const { fileData, fileName, bucket, path } = record.data;
