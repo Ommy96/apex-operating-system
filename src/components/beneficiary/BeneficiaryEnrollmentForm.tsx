@@ -28,6 +28,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BaselineIndicatorsInput, type BaselineTemplate, type BaselineValueMap, findMissingRequiredBaselines, buildBaselineRows } from '@/components/baselines/BaselineIndicatorsInput';
+import { useSponsorshipPackages } from '@/hooks/useSponsorshipPackages';
+import { useNavigate } from 'react-router-dom';
+import { Users } from 'lucide-react';
 
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
@@ -71,6 +74,9 @@ export const BeneficiaryEnrollmentForm = ({
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
   const [donationProgramId, setDonationProgramId] = useState('');
   const [donationNotes, setDonationNotes] = useState('');
+  const [donationPackageId, setDonationPackageId] = useState<string>('');
+  const { data: sponsorshipPackages = [] } = useSponsorshipPackages();
+  const navigate = useNavigate();
   // Add donor for specific program (shortcut from enrollment card)
   const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
 
@@ -284,6 +290,7 @@ export const BeneficiaryEnrollmentForm = ({
         organization_id: currentOrganization.organization_id,
         beneficiary_id: beneficiaryId,
         program_id: donationProgramId || null,
+        sponsorship_package_id: donationPackageId || null,
         donor_name: donorName.trim(),
         amount_received: donationAmount ? parseFloat(donationAmount) : null,
         donation_date: donationDate || null,
@@ -379,6 +386,7 @@ export const BeneficiaryEnrollmentForm = ({
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId('');
     setDonationNotes('');
+    setDonationPackageId('');
     setIsDonationOpen(false);
   };
 
@@ -402,6 +410,7 @@ export const BeneficiaryEnrollmentForm = ({
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId(programId || '');
     setDonationNotes('');
+    setDonationPackageId('');
     setIsDonationOpen(true);
   };
 
