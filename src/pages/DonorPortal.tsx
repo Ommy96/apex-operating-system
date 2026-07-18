@@ -223,6 +223,9 @@ export default function DonorPortal() {
             <TabsTrigger value="reports" className="gap-2">
               <FileText className="h-4 w-4" /> Reports
             </TabsTrigger>
+            <TabsTrigger value="visits" className="gap-2">
+              <Users className="h-4 w-4" /> Visits
+            </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" /> Documents
             </TabsTrigger>
