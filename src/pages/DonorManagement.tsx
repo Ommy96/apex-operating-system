@@ -287,9 +287,7 @@ export default function DonorManagement() {
         iconColorClass="text-rose-500"
       />
 
-      {/* Org-wide Sponsorship Coverage */}
-      <SponsorshipMetrics />
-
+      {/* Sponsorship coverage widget removed — see Sponsorship tab in Financial Suite */}
       <Tabs defaultValue="donors" className="space-y-4">
         <TabsList>
           <TabsTrigger value="donors">Donors</TabsTrigger>
