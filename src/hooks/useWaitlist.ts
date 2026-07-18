@@ -203,10 +203,10 @@ export function useMatchAndEnroll() {
           beneficiary_id: application.beneficiary_id,
           program_id: application.program_id,
           sponsorship_package_id: packageId,
-          donor_account_id: donorAccountId || null,
           donor_name: donorName || "Package sponsor",
-          amount_committed: packageCost,
-          amount_received: 0,
+          amount_received: packageCost,
+          donation_date: new Date().toISOString().slice(0, 10),
+          notes: `Enrolled from waiting list · package cost ${packageCost}`,
         });
       }
 
