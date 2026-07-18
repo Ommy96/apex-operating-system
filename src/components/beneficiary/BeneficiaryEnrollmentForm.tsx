@@ -313,7 +313,7 @@ export const BeneficiaryEnrollmentForm = ({
     mutationFn: async ({ id, status, exitDate }: { id: string; status: string; exitDate?: string }) => {
       const updates: Record<string, any> = { status };
       if (exitDate) updates.exit_date = exitDate;
-      if (status === 'Active') updates.exit_date = null;
+      if ((status || '').toLowerCase() === 'active') updates.exit_date = null;
       const { error } = await supabase.from('beneficiary_services').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -605,21 +605,21 @@ export const BeneficiaryEnrollmentForm = ({
                         {enrollment.notes && <p className="text-xs text-muted-foreground mt-1">{enrollment.notes}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {enrollment.status === 'Active' ? (
+                        {(enrollment.status || '').toLowerCase() === 'active' ? (
                           <Select onValueChange={(status) => {
                             updateStatusMutation.mutate({
                               id: enrollment.id,
                               status,
-                              exitDate: status !== 'Active' ? new Date().toISOString().split('T')[0] : undefined,
+                              exitDate: (status || '').toLowerCase() !== 'active' ? new Date().toISOString().split('T')[0] : undefined,
                             });
                           }}>
                             <SelectTrigger className="w-[120px] h-7 text-xs">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Completed">Completed</SelectItem>
-                              <SelectItem value="Dropped">Dropped</SelectItem>
-                              <SelectItem value="Transferred">Transferred</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="dropped">Dropped</SelectItem>
+                              <SelectItem value="transferred">Transferred</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
