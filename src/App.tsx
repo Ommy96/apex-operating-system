@@ -473,11 +473,7 @@ const App = () => (
                 <DashboardLayout><LazyRoute><MapView /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/procurement" element={
-              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
-                <DashboardLayout><LazyRoute><Procurement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/procurement" element={<Navigate to="/dashboard" replace />} />
 
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
