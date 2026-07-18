@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileDown, Trash2, Package, Loader2 } from "lucide-react";
+import { Plus, FileDown, Trash2, Package, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import { format } from "date-fns";
@@ -33,6 +33,7 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
   const qc = useQueryClient();
   const [openCreate, setOpenCreate] = useState(false);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [autoCompiling, setAutoCompiling] = useState(false);
   const [form, setForm] = useState({
     title: "",
     donor_name: "",
@@ -139,6 +140,100 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // Auto-compile a report pack from data already in the system.
+  // Pulls the latest narrative draft, metrics for the last 90 days,
+  // and up to 3 field-log highlights. Creates a draft the user can edit.
+  const autoCompile = async () => {
+    if (!orgId) return;
+    setAutoCompiling(true);
+    try {
+      const filterCol = projectId ? "project_id" : "program_id";
+      const filterId = projectId || programId;
+      if (!filterId) throw new Error("Scope required");
+
+      const today = new Date();
+      const start = new Date(today);
+      start.setDate(today.getDate() - 90);
+      const period_start = start.toISOString().slice(0, 10);
+      const period_end = today.toISOString().slice(0, 10);
+
+      // Latest narrative draft in scope
+      const draftTable = projectId ? "project_report_drafts" : "program_report_drafts";
+      const { data: draftRows } = await (supabase as any)
+        .from(draftTable)
+        .select("*")
+        .eq(filterCol, filterId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const draft: any = (draftRows && draftRows[0]) || {};
+      const pick = (...keys: string[]) => {
+        for (const k of keys) { if (draft?.[k]) return String(draft[k]); }
+        return "";
+      };
+
+      // Metrics snapshot
+      const snapshot: any = {};
+      const { data: bs } = await supabase
+        .from("beneficiary_services")
+        .select("beneficiary_id, beneficiary:beneficiaries(gender)")
+        .eq(filterCol, filterId);
+      const bens = bs || [];
+      snapshot.beneficiaries_total = new Set(bens.map((b: any) => b.beneficiary_id)).size;
+      snapshot.beneficiaries_male = bens.filter((b: any) => b.beneficiary?.gender === "Male").length;
+      snapshot.beneficiaries_female = bens.filter((b: any) => b.beneficiary?.gender === "Female").length;
+
+      const { count: actCompleted } = await supabase.from("activities").select("id", { count: "exact", head: true })
+        .eq(filterCol, filterId).eq("status", "completed").gte("actual_date", period_start).lte("actual_date", period_end);
+      const { count: actTotal } = await supabase.from("activities").select("id", { count: "exact", head: true })
+        .eq(filterCol, filterId).gte("planned_start_date", period_start).lte("planned_start_date", period_end);
+      snapshot.activities_completed = actCompleted || 0;
+      snapshot.activities_planned = actTotal || 0;
+
+      const { data: txs } = await supabase.from("financial_transactions")
+        .select("transaction_type, amount").eq(filterCol, filterId)
+        .gte("transaction_date", period_start).lte("transaction_date", period_end);
+      snapshot.income = (txs || []).filter((t: any) => t.transaction_type !== "expense").reduce((s: number, t: any) => s + Number(t.amount || 0), 0);
+      snapshot.expense = (txs || []).filter((t: any) => t.transaction_type === "expense").reduce((s: number, t: any) => s + Number(t.amount || 0), 0);
+
+      // Field-log highlights (respect consent implicit via RLS)
+      const { data: logs } = await (supabase as any).from("field_logs")
+        .select("id, notes, created_at, photo_url")
+        .eq(filterCol, filterId)
+        .gte("created_at", period_start)
+        .order("created_at", { ascending: false }).limit(3);
+      const highlights = (logs || []).map((l: any) =>
+        `• ${format(new Date(l.created_at), "MMM d")} — ${(l.notes || "").slice(0, 220)}`
+      ).join("\n") || "No data recorded for this section yet.";
+
+      const EMPTY = "No data recorded for this section yet.";
+      const title = `Auto Report — ${format(today, "MMM yyyy")}`;
+      const { error } = await supabase.from("donor_report_packs").insert({
+        organization_id: orgId,
+        program_id: programId || null,
+        project_id: projectId || null,
+        title,
+        donor_name: null,
+        period_start,
+        period_end,
+        status: "draft",
+        narrative_executive_summary: pick("executive_summary", "summary", "overview") || EMPTY,
+        narrative_challenges: pick("challenges", "risks") || EMPTY,
+        narrative_next_steps: pick("next_steps", "recommendations") || EMPTY,
+        narrative_lessons: pick("lessons_learned", "lessons") || (highlights ? `Field highlights:\n${highlights}` : EMPTY),
+        snapshot_json: snapshot,
+        created_by: user?.id,
+        updated_by: user?.id,
+      });
+      if (error) throw error;
+      toast.success("Report pack auto-compiled — review before sending");
+      qc.invalidateQueries({ queryKey: ["donor-report-packs"] });
+    } catch (e: any) {
+      toast.error(e.message || "Auto-compile failed");
+    } finally {
+      setAutoCompiling(false);
+    }
+  };
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from("donor_report_packs").update({ status, updated_by: user?.id }).eq("id", id);
@@ -238,9 +333,15 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
           <p className="text-sm text-muted-foreground">Compile narrative + metrics + financials into a single donor-ready report.</p>
         </div>
         <Sheet open={openCreate} onOpenChange={setOpenCreate}>
-          <SheetTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1" /> New Report Pack</Button>
-          </SheetTrigger>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="secondary" onClick={autoCompile} disabled={autoCompiling || (!programId && !projectId)}>
+              {autoCompiling ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+              Auto-compile
+            </Button>
+            <SheetTrigger asChild>
+              <Button size="sm"><Plus className="h-4 w-4 mr-1" /> New Report Pack</Button>
+            </SheetTrigger>
+          </div>
           <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
             <SheetHeader><SheetTitle>Create Donor Report Pack</SheetTitle></SheetHeader>
             <div className="space-y-3 mt-4">
