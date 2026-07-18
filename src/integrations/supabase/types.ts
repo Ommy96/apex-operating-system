@@ -13589,6 +13589,8 @@ export type Database = {
       projects: {
         Row: {
           allow_partial_sponsorship: boolean | null
+          archived_at: string | null
+          archived_by: string | null
           budget: number | null
           created_at: string
           created_by: string | null
@@ -13604,6 +13606,7 @@ export type Database = {
           funding_model: string
           geographic_focus: string[] | null
           id: string
+          is_archived: boolean
           latitude: number | null
           location: string | null
           longitude: number | null
@@ -13628,6 +13631,8 @@ export type Database = {
         }
         Insert: {
           allow_partial_sponsorship?: boolean | null
+          archived_at?: string | null
+          archived_by?: string | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -13643,6 +13648,7 @@ export type Database = {
           funding_model?: string
           geographic_focus?: string[] | null
           id?: string
+          is_archived?: boolean
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -13667,6 +13673,8 @@ export type Database = {
         }
         Update: {
           allow_partial_sponsorship?: boolean | null
+          archived_at?: string | null
+          archived_by?: string | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -13682,6 +13690,7 @@ export type Database = {
           funding_model?: string
           geographic_focus?: string[] | null
           id?: string
+          is_archived?: boolean
           latitude?: number | null
           location?: string | null
           longitude?: number | null
