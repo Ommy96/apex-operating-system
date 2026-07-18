@@ -75,21 +75,21 @@ export default function VisitManagement() {
                 <div key={r.id} className="border rounded-md p-2 space-y-1">
                   <div className="text-sm font-medium">{r.beneficiary?.display_name || "Beneficiary"}</div>
                   <div className="text-xs text-muted-foreground">{r.donor?.donor_name || "Donor"}</div>
-                  {r.preferred_date && <div className="text-xs">Preferred: {format(parseISO(r.preferred_date), "MMM d, yyyy")}</div>}
-                  {r.scheduled_at && <div className="text-xs">Scheduled: {format(parseISO(r.scheduled_at), "MMM d, yyyy")}</div>}
+                  {r.requested_date && <div className="text-xs">Preferred: {format(parseISO(r.requested_date), "MMM d, yyyy")}</div>}
+                  {r.scheduled_date && <div className="text-xs">Scheduled: {format(parseISO(r.scheduled_date), "MMM d, yyyy")}</div>}
                   {r.purpose && <div className="text-xs italic text-muted-foreground line-clamp-2">"{r.purpose}"</div>}
                   <div className="flex flex-wrap gap-1 pt-1">
                     {r.status === "requested" && (
                       <>
-                        <Button size="sm" variant="outline" onClick={() => transition.mutate({ id: r.id, patch: { status: "approved", approved_by: user?.id, approved_at: new Date().toISOString() } })}><CheckCircle2 className="h-3 w-3 mr-1" />Approve</Button>
-                        <Button size="sm" variant="ghost" onClick={() => transition.mutate({ id: r.id, patch: { status: "declined", declined_at: new Date().toISOString() } })}><XCircle className="h-3 w-3 mr-1" />Decline</Button>
+                        <Button size="sm" variant="outline" onClick={() => transition.mutate({ id: r.id, patch: { status: "approved", reviewed_by: user?.id, reviewed_at: new Date().toISOString() } })}><CheckCircle2 className="h-3 w-3 mr-1" />Approve</Button>
+                        <Button size="sm" variant="ghost" onClick={() => transition.mutate({ id: r.id, patch: { status: "declined", reviewed_by: user?.id, reviewed_at: new Date().toISOString() } })}><XCircle className="h-3 w-3 mr-1" />Decline</Button>
                       </>
                     )}
                     {r.status === "approved" && (
-                      <Button size="sm" onClick={() => { setScheduleFor(r); setScheduledAt(r.preferred_date || ""); }}>Schedule</Button>
+                      <Button size="sm" onClick={() => { setScheduleFor(r); setScheduledAt(r.requested_date || ""); }}>Schedule</Button>
                     )}
                     {r.status === "scheduled" && (
-                      <Button size="sm" onClick={() => transition.mutate({ id: r.id, patch: { status: "conducted", conducted_at: new Date().toISOString() } })}>Mark conducted</Button>
+                      <Button size="sm" onClick={() => transition.mutate({ id: r.id, patch: { status: "conducted" } })}>Mark conducted</Button>
                     )}
                     {r.status === "conducted" && (
                       <Button size="sm" onClick={() => { setFeedbackFor(r); setFeedback(""); }}>Add feedback</Button>
@@ -109,7 +109,7 @@ export default function VisitManagement() {
           <div><Label>Scheduled date & time</Label><Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} /></div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setScheduleFor(null)}>Cancel</Button>
-            <Button onClick={() => { transition.mutate({ id: scheduleFor.id, patch: { status: "scheduled", scheduled_at: new Date(scheduledAt).toISOString() } }); setScheduleFor(null); }}>Schedule</Button>
+            <Button onClick={() => { transition.mutate({ id: scheduleFor.id, patch: { status: "scheduled", scheduled_date: new Date(scheduledAt).toISOString() } }); setScheduleFor(null); }}>Schedule</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -120,7 +120,7 @@ export default function VisitManagement() {
           <Textarea rows={4} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Summary shared with the donor" />
           <DialogFooter>
             <Button variant="outline" onClick={() => setFeedbackFor(null)}>Cancel</Button>
-            <Button onClick={() => { transition.mutate({ id: feedbackFor.id, patch: { status: "completed", feedback, completed_at: new Date().toISOString() } }); setFeedbackFor(null); }}>Complete</Button>
+            <Button onClick={() => { transition.mutate({ id: feedbackFor.id, patch: { status: "completed", visit_feedback: feedback, completed_at: new Date().toISOString() } }); setFeedbackFor(null); }}>Complete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
