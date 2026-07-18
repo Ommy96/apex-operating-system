@@ -111,7 +111,7 @@ export function BeneficiaryDataSettings() {
     setSaving(true);
     try {
       const payload = {
-        org_id: orgId,
+        organization_id: orgId,
         org_type: form.org_type,
         collect_education_data: form.collect_education_data,
         collect_health_data: form.collect_health_data,
@@ -129,7 +129,7 @@ export function BeneficiaryDataSettings() {
 
       const { error } = await supabase
         .from('org_beneficiary_config' as any)
-        .upsert(payload, { onConflict: 'org_id' });
+        .upsert(payload, { onConflict: 'organization_id' });
 
       if (error) throw error;
       await invalidate();
