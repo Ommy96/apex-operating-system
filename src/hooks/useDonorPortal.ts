@@ -7,7 +7,13 @@ export function useDonorPortal() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: donorAccount, isLoading: accountLoading } = useQuery({
+  const commonOpts = {
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  } as const;
+
+  const { data: donorAccount, isLoading: accountLoading, dataUpdatedAt: accountUpdatedAt } = useQuery({
     queryKey: ['donor-account', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -21,9 +27,10 @@ export function useDonorPortal() {
       return data;
     },
     enabled: !!user?.id,
+    ...commonOpts,
   });
 
-  const { data: sponsoredBeneficiaries, isLoading: beneficiariesLoading } = useQuery({
+  const { data: sponsoredBeneficiaries, isLoading: beneficiariesLoading, dataUpdatedAt: beneficiariesUpdatedAt } = useQuery({
     queryKey: ['donor-beneficiaries', donorAccount?.id, donorAccount?.donor_name, donorAccount?.organization_id],
     queryFn: async () => {
       if (!donorAccount) return [];
@@ -47,6 +54,7 @@ export function useDonorPortal() {
       return data || [];
     },
     enabled: !!donorAccount,
+    ...commonOpts,
   });
 
   const { data: donorDocuments, isLoading: documentsLoading } = useQuery({
@@ -63,10 +71,11 @@ export function useDonorPortal() {
       return data || [];
     },
     enabled: !!donorAccount,
+    ...commonOpts,
   });
 
   // Allocations tied to this donor account (Impact Allocation Engine)
-  const { data: donorAllocations, isLoading: allocationsLoading } = useQuery({
+  const { data: donorAllocations, isLoading: allocationsLoading, dataUpdatedAt: allocationsUpdatedAt } = useQuery({
     queryKey: ['donor-allocations', donorAccount?.id],
     queryFn: async () => {
       if (!donorAccount?.id) return [];
@@ -86,6 +95,7 @@ export function useDonorPortal() {
       return data || [];
     },
     enabled: !!donorAccount?.id,
+    ...commonOpts,
   });
 
   // Live donor pool balances (unallocated funds per scope)
@@ -107,6 +117,7 @@ export function useDonorPortal() {
       return data || [];
     },
     enabled: !!donorAccount?.id,
+    ...commonOpts,
   });
 
   // Impact stories for beneficiaries this donor sponsors
@@ -130,6 +141,7 @@ export function useDonorPortal() {
       return data || [];
     },
     enabled: !!donorAccount?.id && !!sponsoredBeneficiaries,
+    ...commonOpts,
   });
 
   // Preferred currency mutation
@@ -205,5 +217,14 @@ export function useDonorPortal() {
     allocationsLoading,
     storiesLoading,
     isDonor: !!donorAccount,
+    lastUpdatedAt: Math.max(accountUpdatedAt || 0, beneficiariesUpdatedAt || 0, allocationsUpdatedAt || 0),
+    refetchAll: () => {
+      queryClient.invalidateQueries({ queryKey: ['donor-account'] });
+      queryClient.invalidateQueries({ queryKey: ['donor-beneficiaries'] });
+      queryClient.invalidateQueries({ queryKey: ['donor-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['donor-allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['donor-pools'] });
+      queryClient.invalidateQueries({ queryKey: ['donor-impact-stories'] });
+    },
   };
 }
