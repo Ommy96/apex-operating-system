@@ -1,11 +1,21 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Users, User } from 'lucide-react';
 
 export function RoleIndicator() {
-  const { userRole, isAdmin, isManagement, isStaff } = useAuth();
+  const { userRole } = useAuth();
+  const { currentOrganization } = useOrganization();
 
-  if (!userRole) return null;
+  // Prefer the org-level role (admin/owner/member/staff) so the badge reflects
+  // the user's role in the currently active organization, not their global
+  // auth-level role which is always "staff" for new sign-ups.
+  const effectiveRole = currentOrganization?.user_role || userRole;
+  if (!effectiveRole) return null;
+
+  const normalized = effectiveRole.toLowerCase();
+  const isAdmin = normalized === 'admin' || normalized === 'owner' || normalized === 'org_admin';
+  const isManagement = normalized === 'management' || normalized === 'manager';
 
   const getRoleIcon = () => {
     if (isAdmin) return <Shield className="h-3 w-3" />;
@@ -20,7 +30,8 @@ export function RoleIndicator() {
   };
 
   const getRoleLabel = () => {
-    return userRole.charAt(0).toUpperCase() + userRole.slice(1);
+    if (normalized === 'org_admin') return 'Admin';
+    return effectiveRole.charAt(0).toUpperCase() + effectiveRole.slice(1);
   };
 
   return (
