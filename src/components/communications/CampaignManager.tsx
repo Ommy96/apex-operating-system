@@ -194,7 +194,9 @@ export function CampaignManager() {
                     <span className="text-sm font-semibold truncate">{c.name}</span>
                     <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusColors[c.status] || ""}`}>{c.status}</Badge>
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      {c.channel === "email" ? <Mail className="h-2.5 w-2.5 mr-1 inline" /> : <Phone className="h-2.5 w-2.5 mr-1 inline" />}
+                      {c.channel === "email" ? <Mail className="h-2.5 w-2.5 mr-1 inline" />
+                        : c.channel === "whatsapp" ? <MessageCircle className="h-2.5 w-2.5 mr-1 inline" />
+                        : <Phone className="h-2.5 w-2.5 mr-1 inline" />}
                       {c.channel}
                     </Badge>
                   </div>
