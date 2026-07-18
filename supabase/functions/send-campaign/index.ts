@@ -108,14 +108,13 @@ const handler = async (req: Request): Promise<Response> => {
         } else if (recipient.channel === "whatsapp" && recipient.recipient_phone) {
           if (!waToken || !waPhoneId) throw new Error("WhatsApp not configured (WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID)");
           const to = recipient.recipient_phone.replace(/[^\d]/g, "");
-          const usingTemplate = !!(campaign as any).whatsapp_template_name;
+          // For WhatsApp campaigns, `subject` doubles as the approved template name (optional)
+          const templateName = (campaign.subject || "").trim();
+          const usingTemplate = templateName.length > 0;
           const payload: Record<string, unknown> = { messaging_product: "whatsapp", to };
           if (usingTemplate) {
             payload.type = "template";
-            payload.template = {
-              name: (campaign as any).whatsapp_template_name,
-              language: { code: (campaign as any).whatsapp_template_language || "en_US" },
-            };
+            payload.template = { name: templateName, language: { code: "en_US" } };
           } else {
             payload.type = "text";
             payload.text = { preview_url: false, body: campaign.body };
