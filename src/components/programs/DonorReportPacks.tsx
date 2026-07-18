@@ -196,7 +196,7 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
       snapshot.expense = (txs || []).filter((t: any) => t.transaction_type === "expense").reduce((s: number, t: any) => s + Number(t.amount || 0), 0);
 
       // Field-log highlights (respect consent implicit via RLS)
-      const { data: logs } = await supabase.from("field_logs")
+      const { data: logs } = await (supabase as any).from("field_logs")
         .select("id, notes, created_at, photo_url")
         .eq(filterCol, filterId)
         .gte("created_at", period_start)
