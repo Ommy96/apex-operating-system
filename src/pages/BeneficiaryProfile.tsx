@@ -37,6 +37,9 @@ import { useBranding } from '@/hooks/useBranding';
 import { usePermissions } from '@/hooks/usePermissions';
 import { InlineEditableField } from '@/components/beneficiary/InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
+import { HomeVisitDialog } from '@/components/visits/HomeVisitDialog';
+import { SchoolVisitDialog } from '@/components/visits/SchoolVisitDialog';
+import { ConsentVaultSection } from '@/components/consent/ConsentVaultSection';
 import {
   AlertDialog,
   AlertDialogAction,
