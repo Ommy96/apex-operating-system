@@ -188,6 +188,8 @@ const ProjectDashboard = () => {
     enabled: !!projectId,
   });
 
+  useDocumentTitle(project?.name ?? null);
+
   // Fetch beneficiaries enrolled in this project (or its parent program)
   const { data: enrolledBeneficiaries = [] } = useQuery({
     queryKey: ['project-beneficiaries', projectId, project?.program_id],
