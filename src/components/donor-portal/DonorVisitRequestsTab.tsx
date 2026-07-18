@@ -21,7 +21,7 @@ interface Props {
 export function DonorVisitRequestsTab({ donorAccountId, organizationId }: Props) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ beneficiary_id: "", preferred_date: "", purpose: "" });
+  const [form, setForm] = useState({ beneficiary_id: "", requested_date: "", purpose: "" });
 
   const { data: beneficiaries = [] } = useQuery({
     queryKey: ["donor-portal-beneficiaries", donorAccountId],
@@ -54,13 +54,13 @@ export function DonorVisitRequestsTab({ donorAccountId, organizationId }: Props)
         organization_id: organizationId,
         donor_account_id: donorAccountId,
         beneficiary_id: form.beneficiary_id,
-        preferred_date: form.preferred_date || null,
+        requested_date: form.requested_date || null,
         purpose: form.purpose || null,
         status: "requested",
       });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Visit request submitted"); setOpen(false); setForm({ beneficiary_id: "", preferred_date: "", purpose: "" }); qc.invalidateQueries({ queryKey: ["donor-visit-requests", donorAccountId] }); },
+    onSuccess: () => { toast.success("Visit request submitted"); setOpen(false); setForm({ beneficiary_id: "", requested_date: "", purpose: "" }); qc.invalidateQueries({ queryKey: ["donor-visit-requests", donorAccountId] }); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -80,11 +80,11 @@ export function DonorVisitRequestsTab({ donorAccountId, organizationId }: Props)
               <div>
                 <div className="font-medium text-sm">{r.beneficiary?.display_name}</div>
                 <div className="text-xs text-muted-foreground">
-                  {r.preferred_date && `Preferred: ${format(parseISO(r.preferred_date), "MMM d, yyyy")}`}
-                  {r.scheduled_at && ` · Scheduled: ${format(parseISO(r.scheduled_at), "MMM d, yyyy")}`}
+                  {r.requested_date && `Preferred: ${format(parseISO(r.requested_date), "MMM d, yyyy")}`}
+                  {r.scheduled_date && ` · Scheduled: ${format(parseISO(r.scheduled_date), "MMM d, yyyy")}`}
                 </div>
                 {r.purpose && <p className="text-sm mt-1">{r.purpose}</p>}
-                {r.feedback && <p className="text-sm mt-2 italic border-l-2 pl-2">{r.feedback}</p>}
+                {r.visit_feedback && <p className="text-sm mt-2 italic border-l-2 pl-2">{r.visit_feedback}</p>}
               </div>
               <Badge variant={statusVariant(r.status) as any} className="capitalize">{r.status}</Badge>
             </div>
@@ -105,7 +105,7 @@ export function DonorVisitRequestsTab({ donorAccountId, organizationId }: Props)
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Preferred date</Label><Input type="date" value={form.preferred_date} onChange={(e) => setForm({ ...form, preferred_date: e.target.value })} /></div>
+            <div><Label>Preferred date</Label><Input type="date" value={form.requested_date} onChange={(e) => setForm({ ...form, requested_date: e.target.value })} /></div>
             <div><Label>Purpose (optional)</Label><Textarea rows={3} value={form.purpose} onChange={(e) => setForm({ ...form, purpose: e.target.value })} /></div>
           </div>
           <DialogFooter>
