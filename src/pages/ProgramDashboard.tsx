@@ -129,12 +129,12 @@ const ProgramDashboard = () => {
   });
 
   const timeline = useMemo(() => {
-    if (!program?.start_date) return null;
+    if (!program?.start_date || !program?.end_date) return null;
     const start = new Date(program.start_date);
-    const end = program.end_date ? new Date(program.end_date) : null;
+    const end = new Date(program.end_date);
     const today = new Date();
-    if (!end) return { progress: null, daysLeft: null, totalDays: null, elapsed: differenceInDays(today, start) };
     const totalDays = differenceInDays(end, start);
+    if (!Number.isFinite(totalDays) || totalDays <= 0) return null;
     const elapsed = differenceInDays(today, start);
     const progress = Math.min(100, Math.max(0, Math.round((elapsed / totalDays) * 100)));
     const daysLeft = differenceInDays(end, today);
@@ -222,7 +222,7 @@ const ProgramDashboard = () => {
             )}
 
             {/* Timeline bar */}
-            {timeline && timeline.progress !== null && (
+            {timeline && (
               <div className="max-w-md space-y-1.5">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -233,13 +233,13 @@ const ProgramDashboard = () => {
                   <span>{program.end_date ? format(new Date(program.end_date), 'MMM yyyy') : ''}</span>
                 </div>
                 <Progress value={timeline.progress} className="h-2" />
-                {timeline.daysLeft !== null && timeline.daysLeft > 0 && (
+                {timeline.daysLeft > 0 && (
                   <p className="text-xs text-muted-foreground">
                     <Clock className="inline h-3 w-3 mr-1" />
                     {timeline.daysLeft} days remaining
                   </p>
                 )}
-                {timeline.daysLeft !== null && timeline.daysLeft <= 0 && program.status !== 'completed' && (
+                {timeline.daysLeft <= 0 && program.status !== 'completed' && (
                   <p className="text-xs text-destructive font-medium">
                     <Clock className="inline h-3 w-3 mr-1" />
                     Program timeline has ended
@@ -286,8 +286,16 @@ const ProgramDashboard = () => {
         <StatCard
           icon={TrendingUp}
           label="Timeline"
-          value={timeline?.progress !== null ? `${timeline?.progress}%` : '—'}
-          subtitle={timeline?.daysLeft && timeline.daysLeft > 0 ? `${timeline.daysLeft}d left` : program.end_date ? 'Ended' : 'Ongoing'}
+          value={timeline ? `${timeline.progress}%` : '—'}
+          subtitle={
+            !program.start_date || !program.end_date
+              ? 'No timeline set'
+              : timeline && timeline.daysLeft > 0
+                ? `${timeline.daysLeft}d left`
+                : program.status === 'completed'
+                  ? 'Completed'
+                  : 'Ended'
+          }
           accent="warning"
         />
       </div>
