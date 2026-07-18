@@ -136,12 +136,12 @@ export default function OrgSetupWizard() {
 
       // 2) Upsert org_beneficiary_config (non-destructive merge of custom_fields)
       const { data: existingCfg } = await supabase
-        .from('org_beneficiary_config' as any).select('*').eq('org_id', orgId).maybeSingle();
+        .from('org_beneficiary_config' as any).select('*').eq('organization_id', orgId).maybeSingle();
       const existingFields: any[] = Array.isArray((existingCfg as any)?.custom_fields) ? (existingCfg as any).custom_fields : [];
       const existingNames = new Set(existingFields.map((f: any) => f?.name));
       const mergedFields = [...existingFields, ...preset.customFields.filter((f) => !existingNames.has(f.name))];
       const cfgPayload: any = {
-        org_id: orgId,
+        organization_id: orgId,
         org_type: preset.orgType,
         beneficiary_terminology: (existingCfg as any)?.beneficiary_terminology || preset.terminology,
         custom_fields: mergedFields,
@@ -150,7 +150,7 @@ export default function OrgSetupWizard() {
         custom_vulnerability_tags: (existingCfg as any)?.custom_vulnerability_tags || [],
       };
       if (existingCfg) {
-        await supabase.from('org_beneficiary_config' as any).update(cfgPayload).eq('org_id', orgId);
+        await supabase.from('org_beneficiary_config' as any).update(cfgPayload).eq('organization_id', orgId);
       } else {
         await supabase.from('org_beneficiary_config' as any).insert(cfgPayload);
       }
