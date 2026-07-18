@@ -11,6 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, MoreHorizontal, Pencil, Trash2, FolderKanban, Calendar, MapPin, Banknote, Eye } from "lucide-react";
+import { Archive, ArchiveRestore } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { ProjectForm } from "./ProjectForm";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -33,6 +36,7 @@ interface Project {
   organization_id: string;
   slug: string;
   created_at: string;
+  is_archived?: boolean | null;
 }
 
 interface ProgramProjectsProps {
@@ -45,17 +49,23 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [archiveProject, setArchiveProject] = useState<Project | null>(null);
   const [deleteProject, setDeleteProject] = useState<Project | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [linkCounts, setLinkCounts] = useState<{ reports: number; enrollments: number; allocations: number; activities: number } | null>(null);
+  const [countsLoadingFor, setCountsLoadingFor] = useState<string | null>(null);
 
   const { data: projects, isLoading } = useQuery({
-    queryKey: ['program-projects', programId],
+    queryKey: ['program-projects', programId, showArchived],
     queryFn: async () => {
       if (!programId) return [];
-      const { data, error } = await supabase
+      let q = supabase
         .from('projects')
         .select('*')
         .eq('program_id', programId)
         .order('created_at', { ascending: false });
+      if (!showArchived) q = q.eq('is_archived', false);
+      const { data, error } = await q;
       if (error) throw error;
       return data as Project[];
     },
@@ -87,23 +97,110 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
     setShowForm(true);
   };
 
-  const handleDelete = async () => {
-    if (!deleteProject) return;
-
+  const fetchLinkCounts = async (projectId: string) => {
+    setCountsLoadingFor(projectId);
+    setLinkCounts(null);
     try {
+      const [reports, enrollments, allocations, activities] = await Promise.all([
+        supabase.from('project_narrative_reports').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
+        supabase.from('beneficiary_services').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
+        supabase.from('allocations').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
+        supabase.from('activities').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
+      ]);
+      setLinkCounts({
+        reports: reports.count || 0,
+        enrollments: enrollments.count || 0,
+        allocations: allocations.count || 0,
+        activities: activities.count || 0,
+      });
+    } finally {
+      setCountsLoadingFor(null);
+    }
+  };
+
+  const openArchive = async (project: Project) => {
+    setArchiveProject(project);
+    await fetchLinkCounts(project.id);
+  };
+
+  const openDelete = async (project: Project) => {
+    setDeleteProject(project);
+    await fetchLinkCounts(project.id);
+  };
+
+  const translateError = (error: any): string => {
+    const msg = (error?.message || '').toString();
+    if (msg.includes('foreign key') || error?.code === '23503') {
+      return "This project has linked records (reports, enrollments, allocations, or activities) and can't be deleted directly — archive it instead.";
+    }
+    return msg || 'An unexpected error occurred';
+  };
+
+  const handleArchive = async () => {
+    if (!archiveProject) return;
+    try {
+      const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
         .from('projects')
-        .delete()
-        .eq('id', deleteProject.id);
-
+        .update({ is_archived: true, archived_at: new Date().toISOString(), archived_by: userData?.user?.id ?? null })
+        .eq('id', archiveProject.id);
       if (error) throw error;
-      toast.success("Project deleted successfully");
+      const archivedId = archiveProject.id;
+      const archivedName = archiveProject.name;
+      toast.success(`Archived "${archivedName}"`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const { error: e } = await supabase
+              .from('projects')
+              .update({ is_archived: false, archived_at: null, archived_by: null })
+              .eq('id', archivedId);
+            if (e) { toast.error(translateError(e)); return; }
+            toast.success('Project restored');
+            queryClient.invalidateQueries({ queryKey: ['program-projects', programId] });
+          },
+        },
+      });
+      queryClient.invalidateQueries({ queryKey: ['program-projects', programId] });
+    } catch (error: any) {
+      logger.error('Error archiving project:', error);
+      toast.error(translateError(error));
+    } finally {
+      setArchiveProject(null);
+      setLinkCounts(null);
+    }
+  };
+
+  const handleUnarchive = async (project: Project) => {
+    const { error } = await supabase
+      .from('projects')
+      .update({ is_archived: false, archived_at: null, archived_by: null })
+      .eq('id', project.id);
+    if (error) { toast.error(translateError(error)); return; }
+    toast.success(`Restored "${project.name}"`);
+    queryClient.invalidateQueries({ queryKey: ['program-projects', programId] });
+  };
+
+  const handleHardDelete = async () => {
+    if (!deleteProject) return;
+    const total = linkCounts ? linkCounts.reports + linkCounts.enrollments + linkCounts.allocations + linkCounts.activities : null;
+    if (total !== 0) {
+      toast.error("This project has linked records and can't be permanently deleted. Archive it instead.");
+      setDeleteProject(null);
+      setLinkCounts(null);
+      return;
+    }
+    try {
+      const { error } = await supabase.from('projects').delete().eq('id', deleteProject.id);
+      if (error) throw error;
+      toast.success('Project permanently deleted');
       queryClient.invalidateQueries({ queryKey: ['program-projects', programId] });
     } catch (error: any) {
       logger.error('Error deleting project:', error);
-      toast.error(error.message || "Failed to delete project");
+      toast.error(translateError(error));
     } finally {
       setDeleteProject(null);
+      setLinkCounts(null);
     }
   };
 
@@ -130,10 +227,16 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
             Manage projects and initiatives under this program
           </p>
         </div>
-        <Button onClick={handleAddNew} className="gap-2 shrink-0 w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          Add Project
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <Switch id="show-archived" checked={showArchived} onCheckedChange={setShowArchived} />
+            <Label htmlFor="show-archived" className="text-xs text-muted-foreground cursor-pointer">Show archived</Label>
+          </div>
+          <Button onClick={handleAddNew} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Project
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -172,10 +275,13 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
               </TableHeader>
               <TableBody>
                 {projects?.map((project) => (
-                  <TableRow key={project.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/projects/dashboard/${project.id}`)}>
+                  <TableRow key={project.id} className={`cursor-pointer hover:bg-muted/50 ${project.is_archived ? 'opacity-60' : ''}`} onClick={() => navigate(`/projects/dashboard/${project.id}`)}>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-primary hover:underline">{project.name}</p>
+                        <p className="font-medium text-primary hover:underline">
+                          {project.name}
+                          {project.is_archived && <Badge variant="outline" className="ml-2 text-[10px]">Archived</Badge>}
+                        </p>
                         {project.project_code && (
                           <p className="text-xs text-muted-foreground">{project.project_code}</p>
                         )}
@@ -254,12 +360,23 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => { e.stopPropagation(); setDeleteProject(project); }}
+                          {project.is_archived ? (
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleUnarchive(project); }}>
+                              <ArchiveRestore className="h-4 w-4 mr-2" />
+                              Unarchive
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openArchive(project); }}>
+                              <Archive className="h-4 w-4 mr-2" />
+                              Archive
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={(e) => { e.stopPropagation(); openDelete(project); }}
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            Delete permanently
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -282,19 +399,68 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
         onSuccess={handleFormSuccess}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteProject} onOpenChange={() => setDeleteProject(null)}>
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog open={!!archiveProject} onOpenChange={(o) => { if (!o) { setArchiveProject(null); setLinkCounts(null); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Project</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{deleteProject?.name}"? This action cannot be undone and will remove all associated data.
+            <AlertDialogTitle>Archive "{archiveProject?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>It will be hidden from active lists but all linked data is preserved. You can restore it later.</p>
+                {countsLoadingFor === archiveProject?.id || !linkCounts ? (
+                  <p className="text-muted-foreground">Counting linked records…</p>
+                ) : (
+                  <ul className="list-disc pl-5 text-muted-foreground">
+                    <li>{linkCounts.enrollments} enrolled beneficiaries</li>
+                    <li>{linkCounts.reports} narrative reports</li>
+                    <li>{linkCounts.allocations} funding allocations</li>
+                    <li>{linkCounts.activities} activities</li>
+                  </ul>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+            <AlertDialogAction onClick={handleArchive}>Archive project</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Hard Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteProject} onOpenChange={(o) => { if (!o) { setDeleteProject(null); setLinkCounts(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{deleteProject?.name}" permanently?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                {countsLoadingFor === deleteProject?.id || !linkCounts ? (
+                  <p className="text-muted-foreground">Checking linked records…</p>
+                ) : (linkCounts.reports + linkCounts.enrollments + linkCounts.allocations + linkCounts.activities) === 0 ? (
+                  <p className="text-destructive font-medium">This project has no linked records. Permanent deletion cannot be undone.</p>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-destructive font-medium">This project has linked records and can't be permanently deleted.</p>
+                    <ul className="list-disc pl-5 text-muted-foreground">
+                      <li>{linkCounts.enrollments} enrolled beneficiaries</li>
+                      <li>{linkCounts.reports} narrative reports</li>
+                      <li>{linkCounts.allocations} funding allocations</li>
+                      <li>{linkCounts.activities} activities</li>
+                    </ul>
+                    <p>Archive it instead to keep this history intact.</p>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleHardDelete}
+              disabled={!linkCounts || (linkCounts.reports + linkCounts.enrollments + linkCounts.allocations + linkCounts.activities) !== 0}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
