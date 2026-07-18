@@ -205,7 +205,6 @@ export default function HouseholdProfile() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1.5 flex-wrap">
               {household.county && <Badge variant="outline"><MapPin className="h-3 w-3 mr-1" />{household.county}</Badge>}
               <span>{members.length} member{members.length !== 1 ? 's' : ''}</span>
-              {head && (<><span>·</span><span><Crown className="h-3 w-3 inline mr-0.5" /> Head: <strong>{head.display_name}</strong></span></>)}
               {head && (<><span>·</span><span>
                 <Crown className="h-3 w-3 inline mr-0.5 text-warning" /> Head: <strong>{head.name}</strong>
                 {head.kind === 'guardian' && <Badge variant="outline" className="ml-1.5 text-[10px] py-0"><Shield className="h-2.5 w-2.5 mr-0.5" />Guardian</Badge>}
