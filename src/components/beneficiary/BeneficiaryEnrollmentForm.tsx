@@ -415,11 +415,11 @@ export const BeneficiaryEnrollmentForm = ({
   };
 
   const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case 'Active': return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
-      case 'Completed': return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
-      case 'Dropped': return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Dropped</Badge>;
-      case 'Transferred': return <Badge className="bg-warning/10 text-warning border-warning/20">Transferred</Badge>;
+    switch ((status || '').toLowerCase()) {
+      case 'active': return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
+      case 'completed': return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
+      case 'dropped': return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Dropped</Badge>;
+      case 'transferred': return <Badge className="bg-warning/10 text-warning border-warning/20">Transferred</Badge>;
       default: return <Badge variant="secondary">{status || 'Unknown'}</Badge>;
     }
   };
