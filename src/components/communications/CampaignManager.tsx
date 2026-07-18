@@ -124,14 +124,16 @@ export function CampaignManager() {
                 </div>
               )}
               {form.channel === "whatsapp" && (
-                <div className="rounded-md border border-warning/30 bg-warning/5 p-2 text-[11px] text-muted-foreground">
-                  WhatsApp Business requires pre-approved templates for messages to users who have not messaged you in the last 24h.
-                  Enter a template name below (leave blank to send as free-form text within an active session).
+                <div className="space-y-2">
+                  <div className="rounded-md border border-warning/30 bg-warning/5 p-2 text-[11px] text-muted-foreground">
+                    WhatsApp Business requires an <strong>approved template</strong> for messages outside a 24h session.
+                    Enter the template name below, or leave blank to send as free-form text (only works if the recipient messaged you in the last 24h).
+                  </div>
+                  <label className="text-xs font-medium mb-1 block">Approved Template Name (optional)</label>
                   <Input
-                    className="mt-2"
-                    placeholder="Template name (optional, e.g. donation_receipt)"
-                    value={(form as any).whatsapp_template_name || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, whatsapp_template_name: e.target.value } as any))}
+                    value={form.subject}
+                    onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))}
+                    placeholder="e.g. donation_receipt"
                   />
                 </div>
               )}
