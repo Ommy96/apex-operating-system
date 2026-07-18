@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Megaphone, Send, Mail, Phone, Plus, Trash2 } from "lucide-react";
+import { Megaphone, Send, Mail, Phone, Plus, Trash2, MessageCircle, Newspaper } from "lucide-react";
 import { useCommunications } from "@/hooks/useCommunications";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -97,6 +97,7 @@ export function CampaignManager() {
                     <SelectContent>
                       <SelectItem value="email">Email</SelectItem>
                       <SelectItem value="sms">SMS</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
                       <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>
@@ -120,6 +121,20 @@ export function CampaignManager() {
                 <div>
                   <label className="text-xs font-medium mb-1 block">Subject</label>
                   <Input value={form.subject} onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Email subject line" />
+                </div>
+              )}
+              {form.channel === "whatsapp" && (
+                <div className="space-y-2">
+                  <div className="rounded-md border border-warning/30 bg-warning/5 p-2 text-[11px] text-muted-foreground">
+                    WhatsApp Business requires an <strong>approved template</strong> for messages outside a 24h session.
+                    Enter the template name below, or leave blank to send as free-form text (only works if the recipient messaged you in the last 24h).
+                  </div>
+                  <label className="text-xs font-medium mb-1 block">Approved Template Name (optional)</label>
+                  <Input
+                    value={form.subject}
+                    onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))}
+                    placeholder="e.g. donation_receipt"
+                  />
                 </div>
               )}
               <div>
@@ -154,6 +169,13 @@ export function CampaignManager() {
                 )}
               </div>
 
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" type="button" onClick={() =>
+                  setForm((f) => ({ ...f, name: f.name || "Monthly Newsletter", channel: "email", target_audience: "all", subject: f.subject || "Our Monthly Newsletter" }))
+                } className="gap-1.5">
+                  <Newspaper className="h-3.5 w-3.5" /> Newsletter preset
+                </Button>
+              </div>
               <Button onClick={handleCreate} disabled={createCampaign.isPending} className="w-full">
                 {createCampaign.isPending ? "Creating..." : "Create Campaign"}
               </Button>
@@ -172,7 +194,9 @@ export function CampaignManager() {
                     <span className="text-sm font-semibold truncate">{c.name}</span>
                     <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusColors[c.status] || ""}`}>{c.status}</Badge>
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      {c.channel === "email" ? <Mail className="h-2.5 w-2.5 mr-1 inline" /> : <Phone className="h-2.5 w-2.5 mr-1 inline" />}
+                      {c.channel === "email" ? <Mail className="h-2.5 w-2.5 mr-1 inline" />
+                        : c.channel === "whatsapp" ? <MessageCircle className="h-2.5 w-2.5 mr-1 inline" />
+                        : <Phone className="h-2.5 w-2.5 mr-1 inline" />}
                       {c.channel}
                     </Badge>
                   </div>

@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Zap, Trash2, Play, History } from "lucide-react";
+import { Plus, Zap, Trash2, Play, History, MessageCircle } from "lucide-react";
 import { useAutomation } from "@/hooks/useAutomation";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { format } from "date-fns";
 
 const triggerEvents = [
@@ -21,11 +23,15 @@ const triggerEvents = [
   { value: "expense_submitted", label: "Expense Submitted" },
   { value: "budget_threshold_reached", label: "Budget Threshold Reached" },
   { value: "report_due", label: "Report Due" },
+  { value: "donation_received", label: "Donation Received" },
+  { value: "visit_scheduled", label: "Visit Scheduled" },
 ];
 
 const actionTypes = [
   { value: "send_notification", label: "Send In-App Notification" },
   { value: "send_email", label: "Send Email Alert" },
+  { value: "send_whatsapp", label: "Send WhatsApp Message" },
+  { value: "send_sms", label: "Send SMS Alert" },
   { value: "create_task", label: "Auto-Create Task" },
   { value: "update_status", label: "Update Record Status" },
   { value: "log_audit", label: "Log Audit Entry" },
@@ -35,18 +41,51 @@ export function WorkflowTriggers() {
   const { rules, createRule, updateRule, deleteRule, automationLogs } = useAutomation();
   const [showCreate, setShowCreate] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", trigger_event: "", action_type: "" });
+  const [form, setForm] = useState({ name: "", description: "", trigger_event: "", action_type: "", wa_template: "", wa_message: "", wa_test_phone: "" });
 
   const handleCreate = () => {
     if (!form.name || !form.trigger_event) return;
+    const actionConfig: Record<string, unknown> = { type: form.action_type };
+    if (form.action_type === "send_whatsapp") {
+      actionConfig.template_name = form.wa_template || undefined;
+      actionConfig.message = form.wa_message || undefined;
+      actionConfig.test_phone = form.wa_test_phone || undefined;
+    }
     createRule.mutate({
       name: form.name,
       description: form.description,
       trigger_event: form.trigger_event,
-      actions: form.action_type ? [{ type: form.action_type }] : [],
+      actions: form.action_type ? [actionConfig] : [],
     }, {
-      onSuccess: () => { setShowCreate(false); setForm({ name: "", description: "", trigger_event: "", action_type: "" }); },
+      onSuccess: () => { setShowCreate(false); setForm({ name: "", description: "", trigger_event: "", action_type: "", wa_template: "", wa_message: "", wa_test_phone: "" }); },
     });
+  };
+
+  const testRunRule = async (rule: any) => {
+    const action = Array.isArray(rule.actions) ? rule.actions[0] : null;
+    if (!action || action.type !== "send_whatsapp") {
+      toast.error("Test Run currently supports WhatsApp actions only");
+      return;
+    }
+    const phone = action.test_phone;
+    if (!phone) {
+      toast.error("Add a test phone number to the rule to run a test");
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("whatsapp-send", {
+      body: {
+        to: phone,
+        recipient_name: `Test: ${rule.name}`,
+        recipient_type: "other",
+        message: action.message || `Automation triggered: ${rule.name}`,
+        template_name: action.template_name || undefined,
+      },
+    });
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error || error?.message || "WhatsApp send failed");
+    } else {
+      toast.success("WhatsApp test sent");
+    }
   };
 
   const logs = automationLogs.data || [];
@@ -110,6 +149,25 @@ export function WorkflowTriggers() {
                     </SelectContent>
                   </Select>
                 </div>
+                {form.action_type === "send_whatsapp" && (
+                  <div className="space-y-2 rounded-md border p-3 bg-muted/30">
+                    <div className="flex items-center gap-2 text-xs font-medium">
+                      <MessageCircle className="h-3.5 w-3.5" /> WhatsApp configuration
+                    </div>
+                    <div>
+                      <Label className="text-xs">Approved template name (optional)</Label>
+                      <Input value={form.wa_template} onChange={(e) => setForm({ ...form, wa_template: e.target.value })} placeholder="e.g. donation_receipt" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Free-text message (used if no template)</Label>
+                      <Textarea rows={2} value={form.wa_message} onChange={(e) => setForm({ ...form, wa_message: e.target.value })} placeholder="Thank you for your donation!" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Test recipient phone (E.164)</Label>
+                      <Input value={form.wa_test_phone} onChange={(e) => setForm({ ...form, wa_test_phone: e.target.value })} placeholder="2547XXXXXXXX" />
+                    </div>
+                  </div>
+                )}
                 <Button onClick={handleCreate} disabled={createRule.isPending} className="w-full">Create Rule</Button>
               </div>
             </DialogContent>
@@ -152,6 +210,11 @@ export function WorkflowTriggers() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Switch checked={rule.is_active} onCheckedChange={(v) => updateRule.mutate({ id: rule.id, is_active: v })} />
+                      {Array.isArray(rule.actions) && rule.actions[0]?.type === "send_whatsapp" && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7" title="Test run" onClick={() => testRunRule(rule)}>
+                          <Play className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteRule.mutate(rule.id)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
