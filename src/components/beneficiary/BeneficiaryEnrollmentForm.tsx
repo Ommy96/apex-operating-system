@@ -223,7 +223,7 @@ export const BeneficiaryEnrollmentForm = ({
             program_id: enrollProgramId,
             project_id: projectId,
             enrolled_date: enrollDate,
-            status: 'Active',
+            status: 'active',
             notes: enrollNotes || null,
             created_by: user?.id,
           }))
@@ -233,7 +233,7 @@ export const BeneficiaryEnrollmentForm = ({
             program_id: enrollProgramId,
             project_id: null,
             enrolled_date: enrollDate,
-            status: 'Active',
+            status: 'active',
             notes: enrollNotes || null,
             created_by: user?.id,
           }];
@@ -624,7 +624,7 @@ export const BeneficiaryEnrollmentForm = ({
                           </Select>
                         ) : (
                           <Button variant="outline" size="sm" className="h-7 text-xs"
-                            onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'Active' })}>
+                            onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'active' })}>
                             Reactivate
                           </Button>
                         )}
