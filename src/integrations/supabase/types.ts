@@ -7868,6 +7868,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           formed_from_relationship_id: string | null
+          head_guardian_id: string | null
           head_of_household_id: string | null
           household_name: string | null
           household_size: number | null
@@ -7889,6 +7890,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           formed_from_relationship_id?: string | null
+          head_guardian_id?: string | null
           head_of_household_id?: string | null
           household_name?: string | null
           household_size?: number | null
@@ -7910,6 +7912,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           formed_from_relationship_id?: string | null
+          head_guardian_id?: string | null
           head_of_household_id?: string | null
           household_name?: string | null
           household_size?: number | null
@@ -7931,6 +7934,13 @@ export type Database = {
             columns: ["formed_from_relationship_id"]
             isOneToOne: false
             referencedRelation: "beneficiary_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "households_head_guardian_id_fkey"
+            columns: ["head_guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
             referencedColumns: ["id"]
           },
           {
