@@ -77,6 +77,8 @@ const ProgramDashboard = () => {
     enabled: !!programId,
   });
 
+  useDocumentTitle((program as any)?.name ?? null);
+
   const { data: projects } = useQuery({
     queryKey: ['program-projects', programId],
     queryFn: async () => {

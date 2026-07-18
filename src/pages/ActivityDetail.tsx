@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -52,6 +53,8 @@ export default function ActivityDetail() {
     },
     enabled: !!id,
   });
+
+  useDocumentTitle((activity as any)?.name ?? null);
 
   const { data: participants = [] } = useQuery({
     queryKey: ["activity-participants", id],
