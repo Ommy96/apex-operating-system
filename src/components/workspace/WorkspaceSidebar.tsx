@@ -177,7 +177,6 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
         { title: "HR & Staff", url: "/hr", icon: UserCog, show: can.viewHR },
-        { title: "Procurement", url: "/procurement", icon: ShoppingCart, show: can.viewFinancials },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches },
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
       ],
