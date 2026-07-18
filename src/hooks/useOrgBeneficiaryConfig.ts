@@ -17,7 +17,7 @@ export type OrgType =
 
 export interface OrgBeneficiaryConfig {
   id: string;
-  org_id: string;
+  organization_id: string;
   org_type: OrgType;
   collect_education_data: boolean;
   collect_health_data: boolean;
@@ -58,14 +58,14 @@ export function useOrgBeneficiaryConfig() {
       const { data, error } = await supabase
         .from('org_beneficiary_config' as any)
         .select('*')
-        .eq('org_id', orgId)
+        .eq('organization_id', orgId)
         .maybeSingle();
 
       if (error) {
         logger.error('Failed to load org beneficiary config', error);
-        return { ...DEFAULT_CONFIG, org_id: orgId } as OrgBeneficiaryConfig;
+        return { ...DEFAULT_CONFIG, organization_id: orgId } as OrgBeneficiaryConfig;
       }
-      if (!data) return { ...DEFAULT_CONFIG, org_id: orgId } as OrgBeneficiaryConfig;
+      if (!data) return { ...DEFAULT_CONFIG, organization_id: orgId } as OrgBeneficiaryConfig;
       return data as unknown as OrgBeneficiaryConfig;
     },
     enabled: !!orgId,
@@ -73,7 +73,7 @@ export function useOrgBeneficiaryConfig() {
   });
 
   return {
-    config: query.data ?? ({ ...DEFAULT_CONFIG, org_id: orgId ?? '' } as OrgBeneficiaryConfig),
+    config: query.data ?? ({ ...DEFAULT_CONFIG, organization_id: orgId ?? '' } as OrgBeneficiaryConfig),
     isLoading: query.isLoading,
     refetch: query.refetch,
   };

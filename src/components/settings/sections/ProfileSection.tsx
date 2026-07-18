@@ -145,10 +145,10 @@ export function ProfileSection() {
       const { error: e2 } = await supabase
         .from('org_beneficiary_config' as any)
         .upsert({
-          org_id: orgId,
+          organization_id: orgId,
           org_type: v.org_type as any,
           beneficiary_terminology: v.beneficiary_terminology,
-        }, { onConflict: 'org_id' });
+        }, { onConflict: 'organization_id' });
       if (e2) throw e2;
     },
     onSaved: () => {
