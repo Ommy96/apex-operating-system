@@ -56,12 +56,14 @@ export default function AllProjects() {
     queryFn: async () => {
       const result: Record<string, number> = {};
       await Promise.all(projects.map(async (p: any) => {
-        const { count } = await supabase
+        const { count, error } = await supabase
           .from("beneficiary_services")
-          .select("*", { count: "exact", head: true })
+          .select("beneficiary_id", { count: "exact", head: true })
           .eq("project_id", p.id)
-          .eq("status", "active")
-          .is("deleted_at", null);
+          .eq("status", "active");
+        if (error) {
+          console.warn("all-projects-bens count error", p.id, error.message);
+        }
         result[p.id] = count || 0;
       }));
       return result;

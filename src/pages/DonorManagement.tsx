@@ -19,7 +19,6 @@ import { Search, Download, DollarSign, Users, TrendingUp, Heart, ArrowUpDown, Ch
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { PageHeroHeader } from '@/components/PageHeroHeader';
-import { SponsorshipMetrics } from '@/components/financial/SponsorshipMetrics';
 import { CampaignsTab } from '@/components/donors/CampaignsTab';
 import { toast } from 'sonner';
 
@@ -287,9 +286,7 @@ export default function DonorManagement() {
         iconColorClass="text-rose-500"
       />
 
-      {/* Org-wide Sponsorship Coverage */}
-      <SponsorshipMetrics />
-
+      {/* Sponsorship coverage widget removed — see Sponsorship tab in Financial Suite */}
       <Tabs defaultValue="donors" className="space-y-4">
         <TabsList>
           <TabsTrigger value="donors">Donors</TabsTrigger>

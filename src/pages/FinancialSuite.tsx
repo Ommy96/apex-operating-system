@@ -7,7 +7,6 @@ import { ExpenseTracking } from "@/components/financial/ExpenseTracking";
 import { GrantManagement } from "@/components/financial/GrantManagement";
 import { CostAnalytics } from "@/components/financial/CostAnalytics";
 import { DonorSupport } from "@/components/financial/DonorSupport";
-import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { PettyCashTab } from "@/components/finance/PettyCashTab";
 import { FundingSchedulesTab } from "@/components/financial/FundingSchedulesTab";
 
@@ -78,11 +77,14 @@ export default function FinancialSuite() {
         </div>
 
         <TabsContent value="overview" className="mt-6 space-y-6">
-          <SponsorshipMetrics />
           <DonorSupport />
         </TabsContent>
         <TabsContent value="sponsorship" className="mt-6">
-          <SponsorshipMetrics />
+          <Card>
+            <CardContent className="p-8 text-center text-sm text-muted-foreground">
+              Sponsorship dashboard is being rebuilt (active sponsorships, coverage health, package distribution). Coming in the next pass.
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="budgets" className="mt-6">
           <BudgetPlanning />

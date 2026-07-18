@@ -53,7 +53,6 @@ const navigationItems = [
   // Operations
   { title: "Financial", url: "/financial", icon: Wallet, group: "Operations" },
   { title: "HR & Staff", url: "/hr", icon: UserCog, group: "Operations" },
-  { title: "Procurement", url: "/procurement", icon: ShoppingCart, group: "Operations" },
   { title: "Branches", url: "/branches", icon: Building2, group: "Operations" },
   { title: "Field Mode", url: "/field-mode", icon: Smartphone, group: "Operations" },
   // Engagement

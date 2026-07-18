@@ -33,7 +33,7 @@ export default function DonorPortal() {
     donorAccount, sponsoredBeneficiaries, donorDocuments,
     fetchBeneficiaryAcademics, fetchBeneficiaryProgression,
     getDocumentDownloadUrl, isLoading, documentsLoading, isDonor,
-    donorAllocations,
+    donorAllocations, lastUpdatedAt, refetchAll,
   } = useDonorPortal();
   const fx = useDonorFx((donorAccount as any)?.preferred_currency);
 
@@ -154,10 +154,20 @@ export default function DonorPortal() {
               <p className="text-xs text-muted-foreground">Welcome, {donorAccount?.donor_name}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
-          </Button>
-          <CurrencySelector />
+          <div className="flex items-center gap-2">
+            {lastUpdatedAt ? (
+              <span className="hidden sm:inline text-[11px] text-muted-foreground">
+                Last updated · {new Date(lastUpdatedAt).toLocaleTimeString()}
+              </span>
+            ) : null}
+            <Button variant="ghost" size="sm" onClick={() => refetchAll?.()} title="Refresh">
+              Refresh
+            </Button>
+            <CurrencySelector />
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

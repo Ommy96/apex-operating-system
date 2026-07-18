@@ -91,7 +91,6 @@ const OrgSetupWizard = lazy(() => import("./pages/OrgSetupWizard"));
 
 // Sprint 6 pages
 const MapView = lazy(() => import("./pages/MapView"));
-const Procurement = lazy(() => import("./pages/Procurement"));
 const MEConsolidated = lazy(() => import("./pages/MEConsolidated"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
@@ -474,11 +473,7 @@ const App = () => (
                 <DashboardLayout><LazyRoute><MapView /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/procurement" element={
-              <ProtectedRoute requirePermission={{ module: 'financial', action: 'view', resource: 'financials' }}>
-                <DashboardLayout><LazyRoute><Procurement /></LazyRoute></DashboardLayout>
-              </ProtectedRoute>
-            } />
+            <Route path="/procurement" element={<Navigate to="/dashboard" replace />} />
 
             <Route path="/admin/infera" element={
               <SuperAdminRoute><LazyRoute><InferaAdminDashboard /></LazyRoute></SuperAdminRoute>
