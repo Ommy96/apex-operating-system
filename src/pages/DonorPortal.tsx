@@ -33,7 +33,7 @@ export default function DonorPortal() {
     donorAccount, sponsoredBeneficiaries, donorDocuments,
     fetchBeneficiaryAcademics, fetchBeneficiaryProgression,
     getDocumentDownloadUrl, isLoading, documentsLoading, isDonor,
-    donorAllocations,
+    donorAllocations, lastUpdatedAt, refetchAll,
   } = useDonorPortal();
   const fx = useDonorFx((donorAccount as any)?.preferred_currency);
 
