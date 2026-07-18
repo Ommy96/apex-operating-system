@@ -23,6 +23,7 @@ import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStor
 import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
 import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
+import { DonorVisitRequestsTab } from '@/components/donor-portal/DonorVisitRequestsTab';
 import { useDonorFx } from '@/hooks/useDonorFx';
 
 export default function DonorPortal() {
@@ -223,6 +224,9 @@ export default function DonorPortal() {
             <TabsTrigger value="reports" className="gap-2">
               <FileText className="h-4 w-4" /> Reports
             </TabsTrigger>
+            <TabsTrigger value="visits" className="gap-2">
+              <Users className="h-4 w-4" /> Visits
+            </TabsTrigger>
             <TabsTrigger value="documents" className="gap-2">
               <FileText className="h-4 w-4" /> Documents
             </TabsTrigger>
@@ -370,6 +374,12 @@ export default function DonorPortal() {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="visits">
+            {donorAccount?.id && donorAccount?.organization_id ? (
+              <DonorVisitRequestsTab donorAccountId={donorAccount.id} organizationId={donorAccount.organization_id} />
+            ) : null}
           </TabsContent>
         </Tabs>
       </main>

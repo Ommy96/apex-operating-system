@@ -37,6 +37,9 @@ import { useBranding } from '@/hooks/useBranding';
 import { usePermissions } from '@/hooks/usePermissions';
 import { InlineEditableField } from '@/components/beneficiary/InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
+import { HomeVisitDialog } from '@/components/visits/HomeVisitDialog';
+import { SchoolVisitDialog } from '@/components/visits/SchoolVisitDialog';
+import { ConsentVaultSection } from '@/components/consent/ConsentVaultSection';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -163,6 +166,8 @@ export default function BeneficiaryProfile() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [homeVisitOpen, setHomeVisitOpen] = useState(false);
+  const [schoolVisitOpen, setSchoolVisitOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [enrolmentOpen, setEnrolmentOpen] = useState(false);
   const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
@@ -449,6 +454,7 @@ export default function BeneficiaryProfile() {
     { value: 'economic', label: 'Economic', icon: Building2, show: (orgConfig.collect_economic_data && !isMinorAge) || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
     { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
     { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
+    { value: 'visits-consent', label: 'Visits & Consent', icon: Home, show: true, legacy: false },
     { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
@@ -803,6 +809,17 @@ export default function BeneficiaryProfile() {
               {/* TAB: Documents */}
               <TabsContent value="documents" className="mt-0 p-6">
                 <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
+              </TabsContent>
+
+              {/* TAB: Visits & Consent */}
+              <TabsContent value="visits-consent" className="mt-0 p-6 space-y-5">
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={() => setHomeVisitOpen(true)}><Home className="h-4 w-4 mr-1" />Record home visit</Button>
+                  <Button size="sm" variant="outline" onClick={() => setSchoolVisitOpen(true)}><GraduationCap className="h-4 w-4 mr-1" />Record school visit</Button>
+                </div>
+                <ConsentVaultSection beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || undefined} />
+                <HomeVisitDialog open={homeVisitOpen} onOpenChange={setHomeVisitOpen} beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || null} />
+                <SchoolVisitDialog open={schoolVisitOpen} onOpenChange={setSchoolVisitOpen} beneficiaryId={beneficiary.id} />
               </TabsContent>
 
               {/* TAB: Notes */}

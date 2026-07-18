@@ -4591,6 +4591,98 @@ export type Database = {
           },
         ]
       }
+      consent_documents: {
+        Row: {
+          beneficiary_id: string | null
+          created_at: string
+          deleted_at: string | null
+          doc_type: string
+          expires_at: string | null
+          file_name: string | null
+          file_url: string | null
+          household_id: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          signed_at: string | null
+          signed_by: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          doc_type?: string
+          expires_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          household_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          signed_at?: string | null
+          signed_by?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          beneficiary_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          doc_type?: string
+          expires_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          household_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          signed_at?: string | null
+          signed_by?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_documents_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_documents_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent_records: {
         Row: {
           beneficiary_id: string | null
@@ -7651,6 +7743,117 @@ export type Database = {
           },
           {
             foreignKeyName: "guardians_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_visits: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          deleted_at: string | null
+          field_log_id: string | null
+          follow_up_needed: boolean
+          gps_lat: number | null
+          gps_lng: number | null
+          health_status: string | null
+          household_id: string | null
+          household_income: number | null
+          id: string
+          living_conditions: string | null
+          notes: string | null
+          organization_id: string
+          photo_urls: string[] | null
+          risk_flags: Json | null
+          risks_observed: string | null
+          synced_from_offline: boolean
+          updated_at: string
+          updated_by: string | null
+          visit_date: string
+          visited_by: string | null
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          deleted_at?: string | null
+          field_log_id?: string | null
+          follow_up_needed?: boolean
+          gps_lat?: number | null
+          gps_lng?: number | null
+          health_status?: string | null
+          household_id?: string | null
+          household_income?: number | null
+          id?: string
+          living_conditions?: string | null
+          notes?: string | null
+          organization_id: string
+          photo_urls?: string[] | null
+          risk_flags?: Json | null
+          risks_observed?: string | null
+          synced_from_offline?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          visit_date?: string
+          visited_by?: string | null
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          field_log_id?: string | null
+          follow_up_needed?: boolean
+          gps_lat?: number | null
+          gps_lng?: number | null
+          health_status?: string | null
+          household_id?: string | null
+          household_income?: number | null
+          id?: string
+          living_conditions?: string | null
+          notes?: string | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          risk_flags?: Json | null
+          risks_observed?: string | null
+          synced_from_offline?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          visit_date?: string
+          visited_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_visits_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_visits_field_log_id_fkey"
+            columns: ["field_log_id"]
+            isOneToOne: false
+            referencedRelation: "field_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_visits_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_visits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
@@ -14266,6 +14469,113 @@ export type Database = {
           },
         ]
       }
+      school_visits: {
+        Row: {
+          academic_average: number | null
+          academic_performance: string | null
+          attendance_rate: number | null
+          behaviour_report: string | null
+          beneficiary_id: string
+          created_at: string
+          current_grade: string | null
+          deleted_at: string | null
+          field_log_id: string | null
+          follow_up_needed: boolean
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          institution_name: string | null
+          notes: string | null
+          organization_id: string
+          photo_urls: string[] | null
+          synced_from_offline: boolean
+          teacher_feedback: string | null
+          updated_at: string
+          updated_by: string | null
+          visit_date: string
+          visited_by: string | null
+        }
+        Insert: {
+          academic_average?: number | null
+          academic_performance?: string | null
+          attendance_rate?: number | null
+          behaviour_report?: string | null
+          beneficiary_id: string
+          created_at?: string
+          current_grade?: string | null
+          deleted_at?: string | null
+          field_log_id?: string | null
+          follow_up_needed?: boolean
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          institution_name?: string | null
+          notes?: string | null
+          organization_id: string
+          photo_urls?: string[] | null
+          synced_from_offline?: boolean
+          teacher_feedback?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_date?: string
+          visited_by?: string | null
+        }
+        Update: {
+          academic_average?: number | null
+          academic_performance?: string | null
+          attendance_rate?: number | null
+          behaviour_report?: string | null
+          beneficiary_id?: string
+          created_at?: string
+          current_grade?: string | null
+          deleted_at?: string | null
+          field_log_id?: string | null
+          follow_up_needed?: boolean
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          institution_name?: string | null
+          notes?: string | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          synced_from_offline?: boolean
+          teacher_feedback?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_date?: string
+          visited_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_visits_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_visits_field_log_id_fkey"
+            columns: ["field_log_id"]
+            isOneToOne: false
+            referencedRelation: "field_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsorship_package_items: {
         Row: {
           cost: number
@@ -15448,6 +15758,117 @@ export type Database = {
           },
         ]
       }
+      visit_requests: {
+        Row: {
+          beneficiary_id: string
+          completed_at: string | null
+          created_at: string
+          decline_reason: string | null
+          deleted_at: string | null
+          donor_account_id: string | null
+          donor_message: string | null
+          home_visit_id: string | null
+          id: string
+          organization_id: string
+          purpose: string | null
+          requested_by_user: string | null
+          requested_date: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scheduled_date: string | null
+          staff_notes: string | null
+          status: string
+          status_history: Json | null
+          updated_at: string
+          updated_by: string | null
+          visit_feedback: string | null
+        }
+        Insert: {
+          beneficiary_id: string
+          completed_at?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          deleted_at?: string | null
+          donor_account_id?: string | null
+          donor_message?: string | null
+          home_visit_id?: string | null
+          id?: string
+          organization_id: string
+          purpose?: string | null
+          requested_by_user?: string | null
+          requested_date?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_date?: string | null
+          staff_notes?: string | null
+          status?: string
+          status_history?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_feedback?: string | null
+        }
+        Update: {
+          beneficiary_id?: string
+          completed_at?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          deleted_at?: string | null
+          donor_account_id?: string | null
+          donor_message?: string | null
+          home_visit_id?: string | null
+          id?: string
+          organization_id?: string
+          purpose?: string | null
+          requested_by_user?: string | null
+          requested_date?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_date?: string | null
+          staff_notes?: string | null
+          status?: string
+          status_history?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          visit_feedback?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_requests_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_requests_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_requests_home_visit_id_fkey"
+            columns: ["home_visit_id"]
+            isOneToOne: false
+            referencedRelation: "home_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_assignments: {
         Row: {
           created_at: string
@@ -16310,6 +16731,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_valid_photo_consent: {
+        Args: { _beneficiary_id: string }
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
