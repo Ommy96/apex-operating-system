@@ -376,6 +376,8 @@ export function AppSidebar() {
       items: [
         { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
         { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: can.viewCompliance },
+        { title: "Consent Vault", url: "/governance/consent", icon: ShieldCheck, show: can.viewCompliance || can.viewBeneficiaries },
+        { title: "Visit Requests", url: "/staff/visits", icon: ClipboardCheck, show: can.viewBeneficiaries },
         { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
         { title: "Learning Log", url: "/lessons-learned", icon: BookOpen, show: can.viewPrograms },
         { title: "Impact Stories", url: "/impact-stories", icon: BookHeart, show: can.viewPrograms },
