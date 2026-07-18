@@ -30,6 +30,7 @@ import { DonorReportPacks } from "@/components/programs/DonorReportPacks";
 import { ProgramCommsPlan } from "@/components/programs/ProgramCommsPlan";
 import { SustainabilityPlan } from "@/components/programs/SustainabilityPlan";
 import { ProjectActivitiesTab } from "@/components/activities/ProjectActivitiesTab";
+import { ProgramOnlyEnrollments } from "@/components/programs/ProgramOnlyEnrollments";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 import { GenerateWithAIButton } from "@/components/ai/GenerateWithAIButton";
@@ -310,6 +311,12 @@ const ProgramDashboard = () => {
 
         {isOldTabActive("overview") && (
           <TabsContent value="overview" forceMount className="mt-6 space-y-6">
+            {programId && currentOrganization?.organization_id && (
+              <ProgramOnlyEnrollments
+                programId={programId}
+                organizationId={currentOrganization.organization_id}
+              />
+            )}
             {programId && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <FundingHealthBadge programId={programId} />
