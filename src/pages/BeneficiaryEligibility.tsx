@@ -42,17 +42,21 @@ export default function BeneficiaryEligibility() {
 
   const { data: scores = [], isLoading } = useBeneficiaryEligibilityScores(id);
 
-  const enroll = async (projectId: string) => {
+  const enroll = async (projectId: string, programId?: string | null) => {
     if (!id || !currentOrganization?.organization_id) return;
     const { error } = await sb.from("beneficiary_services").insert({
       organization_id: currentOrganization.organization_id,
       beneficiary_id: id,
       project_id: projectId,
+      program_id: programId ?? null,
       status: "active",
-      enrolled_at: new Date().toISOString().slice(0, 10),
+      enrolled_date: new Date().toISOString().slice(0, 10),
     });
-    if (error) toast.error(error.message);
-    else toast.success("Enrolled");
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Enrolled");
   };
 
   const eligible = scores.filter((s: any) => s.eligible);
@@ -95,7 +99,7 @@ export default function BeneficiaryEligibility() {
               <p className="text-sm text-muted-foreground">Not eligible for any project yet.</p>
             ) : (
               eligible.map((s: any) => (
-                <ScoreCard key={s.id} score={s} onEnroll={() => enroll(s.project_id)} />
+                <ScoreCard key={s.id} score={s} onEnroll={() => enroll(s.project_id, s.projects?.program_id ?? null)} />
               ))
             )}
           </Section>
