@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users } from 'lucide-react';
+import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -19,6 +19,8 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/hooks/useAuth';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 export default function HouseholdProfile() {
   const { householdId } = useParams<{ householdId: string }>();
@@ -29,6 +31,7 @@ export default function HouseholdProfile() {
   const [addOpen, setAddOpen] = useState(false);
   const [headOpen, setHeadOpen] = useState(false);
   const [pickedHead, setPickedHead] = useState<string | null>(null);
+  const [pickedHeadKind, setPickedHeadKind] = useState<'beneficiary' | 'guardian'>('beneficiary');
   const [savingHead, setSavingHead] = useState(false);
   const queryClient = useQueryClient();
   const { can } = usePermissions();
@@ -37,6 +40,47 @@ export default function HouseholdProfile() {
   const memberIds = members.map((m: any) => m.id);
   const { searchTerm, setSearchTerm, results, isFetching } = useBeneficiarySearch(memberIds, 15);
   const updateHousehold = useUpdateBeneficiaryHousehold();
+
+  // Load primary guardians for any member — candidates for head-of-household
+  const { data: guardians = [] } = useQuery({
+    enabled: memberIds.length > 0,
+    queryKey: ['household-guardians', householdId, memberIds.join(',')],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('beneficiary_guardians')
+        .select('is_primary, beneficiary_id, guardians!inner(id, full_name, guardian_type, phone)')
+        .in('beneficiary_id', memberIds);
+      if (error) throw error;
+      const map = new Map<string, any>();
+      (data || []).forEach((row: any) => {
+        if (!row.guardians) return;
+        const g = { ...row.guardians, is_primary: !!row.is_primary };
+        if (!map.has(g.id) || g.is_primary) map.set(g.id, g);
+      });
+      return Array.from(map.values());
+    },
+  });
+
+  // Programmes each member is enrolled in
+  const { data: memberPrograms = {} } = useQuery({
+    enabled: memberIds.length > 0,
+    queryKey: ['household-member-programs', memberIds.join(',')],
+    queryFn: async (): Promise<Record<string, { id: string; name: string }[]>> => {
+      const { data, error } = await supabase
+        .from('beneficiary_services')
+        .select('beneficiary_id, program_id, programs:program_id(id, name)')
+        .in('beneficiary_id', memberIds)
+        .eq('status', 'active');
+      if (error) throw error;
+      const out: Record<string, { id: string; name: string }[]> = {};
+      (data || []).forEach((r: any) => {
+        if (!r.programs) return;
+        const arr = out[r.beneficiary_id] || (out[r.beneficiary_id] = []);
+        if (!arr.find(p => p.id === r.programs.id)) arr.push({ id: r.programs.id, name: r.programs.name });
+      });
+      return out;
+    },
+  });
 
   const handleAddExisting = async (beneficiaryId: string) => {
     if (!householdId) return;
@@ -70,16 +114,26 @@ export default function HouseholdProfile() {
     );
   }
 
-  const head = members.find((m: any) => m.id === household.head_of_household_id);
+  const guardianHeadId: string | null = (household as any).head_guardian_id ?? null;
+  const beneficiaryHead = members.find((m: any) => m.id === household.head_of_household_id);
+  const guardianHead = guardians.find((g: any) => g.id === guardianHeadId);
+  const head = beneficiaryHead
+    ? { name: beneficiaryHead.display_name, kind: 'beneficiary' as const }
+    : guardianHead
+      ? { name: guardianHead.full_name, kind: 'guardian' as const }
+      : null;
 
   const handleChangeHead = async () => {
     if (!pickedHead || !householdId) return;
     setSavingHead(true);
     try {
       const previousHeadId = household.head_of_household_id || null;
+      const patch: any = pickedHeadKind === 'beneficiary'
+        ? { head_of_household_id: pickedHead, head_guardian_id: null }
+        : { head_of_household_id: null, head_guardian_id: pickedHead };
       const { error } = await supabase
-        .from('households')
-        .update({ head_of_household_id: pickedHead })
+        .from('households' as any)
+        .update(patch)
         .eq('id', householdId);
       if (error) throw error;
       try {
@@ -88,13 +142,15 @@ export default function HouseholdProfile() {
           entity_type: 'household',
           entity_id: householdId,
           user_id: user?.id,
-          old_values: { head_of_household_id: previousHeadId } as any,
-          new_values: { head_of_household_id: pickedHead } as any,
+          old_values: { head_of_household_id: previousHeadId, head_guardian_id: guardianHeadId } as any,
+          new_values: patch as any,
           metadata: { household_name: household.household_name } as any,
         } as any);
       } catch (_) { /* non-fatal */ }
-      const newHead = members.find((m: any) => m.id === pickedHead);
-      toast({ title: `Head of household updated to ${newHead?.display_name || 'new member'}` });
+      const newLabel = pickedHeadKind === 'beneficiary'
+        ? members.find((m: any) => m.id === pickedHead)?.display_name
+        : guardians.find((g: any) => g.id === pickedHead)?.full_name;
+      toast({ title: `Head of household updated to ${newLabel || 'new head'}` });
       queryClient.invalidateQueries({ queryKey: ['household', householdId] });
       queryClient.invalidateQueries({ queryKey: ['household-members', householdId] });
       setHeadOpen(false);
@@ -106,7 +162,20 @@ export default function HouseholdProfile() {
     }
   };
 
-  const eligibleHeads = members.filter((m: any) => m.id !== household.head_of_household_id);
+  const eligibleBeneficiaryHeads = members.filter((m: any) => m.id !== household.head_of_household_id);
+  const eligibleGuardianHeads = guardians.filter((g: any) => g.id !== guardianHeadId);
+
+  // Auto-appoint: if no head set and there is a primary guardian, offer it (silent, on-mount notice only)
+  useEffect(() => {
+    if (!head && guardians.length > 0 && !headOpen) {
+      const primary = guardians.find((g: any) => g.is_primary);
+      if (primary) {
+        setPickedHead(primary.id);
+        setPickedHeadKind('guardian');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [head, guardians.length]);
   const vulnLevels: Record<string, number> = {};
   members.forEach((m: any) => {
     const v = m.vulnerability_level || 'low';
@@ -136,16 +205,19 @@ export default function HouseholdProfile() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1.5 flex-wrap">
               {household.county && <Badge variant="outline"><MapPin className="h-3 w-3 mr-1" />{household.county}</Badge>}
               <span>{members.length} member{members.length !== 1 ? 's' : ''}</span>
-              {head && (<><span>·</span><span><Crown className="h-3 w-3 inline mr-0.5" /> Head: <strong>{head.display_name}</strong></span></>)}
+              {head && (<><span>·</span><span>
+                <Crown className="h-3 w-3 inline mr-0.5 text-warning" /> Head: <strong>{head.name}</strong>
+                {head.kind === 'guardian' && <Badge variant="outline" className="ml-1.5 text-[10px] py-0"><Shield className="h-2.5 w-2.5 mr-0.5" />Guardian</Badge>}
+              </span></>)}
               <span>·</span>
               <span>Created {formatDisplayDate(household.created_at)}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="capitalize">Highest vulnerability: {highestVuln}</Badge>
-            {canEditHead && head && (
+            {canEditHead && (
               <Button variant="outline" size="sm" onClick={() => { setPickedHead(null); setHeadOpen(true); }}>
-                <Pencil className="h-3.5 w-3.5 mr-1.5" /> Change head
+                <Pencil className="h-3.5 w-3.5 mr-1.5" /> {head ? 'Change head' : 'Set head'}
               </Button>
             )}
           </div>
@@ -169,6 +241,7 @@ export default function HouseholdProfile() {
             {members.map((m: any) => {
               const age = calculateAge(m.date_of_birth);
               const isHead = m.id === household.head_of_household_id;
+              const progs = memberPrograms[m.id] || [];
               return (
                 <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-secondary/30 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold">
@@ -184,6 +257,15 @@ export default function HouseholdProfile() {
                       {m.gender ? ` · ${m.gender}` : ''}
                       {m.vulnerability_level ? ` · ${m.vulnerability_level}` : ''}
                     </div>
+                    {progs.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {progs.map(p => (
+                          <Badge key={p.id} variant="outline" className="text-[10px] py-0 font-normal">
+                            <GraduationCap className="h-2.5 w-2.5 mr-0.5" />{p.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <Button size="sm" variant="ghost" onClick={() => navigate(`/beneficiaries/${m.id}`)}>
                     View profile
@@ -219,24 +301,36 @@ export default function HouseholdProfile() {
           <DialogHeader>
             <DialogTitle>Change head of household</DialogTitle>
             <DialogDescription>
-              Pick a household member to promote. The previous head becomes a regular member.
+              Pick a household member or a primary guardian to serve as head.
             </DialogDescription>
           </DialogHeader>
-          {eligibleHeads.length === 0 ? (
+          {eligibleBeneficiaryHeads.length === 0 && eligibleGuardianHeads.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4">
-              No eligible members to promote. Add another member to this household first.
+              No eligible members or guardians available.
             </p>
           ) : (
-            <RadioGroup value={pickedHead || ''} onValueChange={setPickedHead} className="space-y-1 max-h-72 overflow-y-auto">
-              {eligibleHeads.map((m: any) => {
+            <RadioGroup
+              value={pickedHead ? `${pickedHeadKind}:${pickedHead}` : ''}
+              onValueChange={(v) => {
+                const [kind, id] = v.split(':');
+                setPickedHeadKind(kind as any);
+                setPickedHead(id);
+              }}
+              className="space-y-3 max-h-80 overflow-y-auto"
+            >
+              {eligibleBeneficiaryHeads.length > 0 && (
+                <div className="space-y-1">
+                  <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Beneficiaries</Label>
+                  {eligibleBeneficiaryHeads.map((m: any) => {
                 const age = calculateAge(m.date_of_birth);
+                    const id = `beneficiary:${m.id}`;
                 return (
                   <label
                     key={m.id}
-                    htmlFor={`head-${m.id}`}
+                        htmlFor={`head-${id}`}
                     className="flex items-center gap-3 p-2 rounded-md border hover:bg-secondary/40 cursor-pointer"
                   >
-                    <RadioGroupItem id={`head-${m.id}`} value={m.id} />
+                        <RadioGroupItem id={`head-${id}`} value={id} />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{m.display_name}</div>
                       <div className="text-xs text-muted-foreground">
@@ -246,6 +340,34 @@ export default function HouseholdProfile() {
                   </label>
                 );
               })}
+                </div>
+              )}
+              {eligibleGuardianHeads.length > 0 && (
+                <div className="space-y-1">
+                  <Label className="text-[11px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                    <Shield className="h-3 w-3" /> Guardians
+                  </Label>
+                  {eligibleGuardianHeads.map((g: any) => {
+                    const id = `guardian:${g.id}`;
+                    return (
+                      <label
+                        key={g.id}
+                        htmlFor={`head-${id}`}
+                        className="flex items-center gap-3 p-2 rounded-md border hover:bg-secondary/40 cursor-pointer"
+                      >
+                        <RadioGroupItem id={`head-${id}`} value={id} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{g.full_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {g.guardian_type || 'Guardian'}{g.phone ? ` · ${g.phone}` : ''}
+                            {g.is_primary ? ' · primary' : ''}
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </RadioGroup>
           )}
           <DialogFooter>

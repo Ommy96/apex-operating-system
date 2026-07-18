@@ -28,6 +28,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BaselineIndicatorsInput, type BaselineTemplate, type BaselineValueMap, findMissingRequiredBaselines, buildBaselineRows } from '@/components/baselines/BaselineIndicatorsInput';
+import { useSponsorshipPackages } from '@/hooks/useSponsorshipPackages';
+import { useNavigate } from 'react-router-dom';
+import { Users } from 'lucide-react';
 
 interface BeneficiaryEnrollmentFormProps {
   beneficiaryId: string;
@@ -71,6 +74,9 @@ export const BeneficiaryEnrollmentForm = ({
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split('T')[0]);
   const [donationProgramId, setDonationProgramId] = useState('');
   const [donationNotes, setDonationNotes] = useState('');
+  const [donationPackageId, setDonationPackageId] = useState<string>('');
+  const { data: sponsorshipPackages = [] } = useSponsorshipPackages();
+  const navigate = useNavigate();
   // Add donor for specific program (shortcut from enrollment card)
   const [addDonorForProgramId, setAddDonorForProgramId] = useState<string | null>(null);
 
@@ -284,6 +290,7 @@ export const BeneficiaryEnrollmentForm = ({
         organization_id: currentOrganization.organization_id,
         beneficiary_id: beneficiaryId,
         program_id: donationProgramId || null,
+        sponsorship_package_id: donationPackageId || null,
         donor_name: donorName.trim(),
         amount_received: donationAmount ? parseFloat(donationAmount) : null,
         donation_date: donationDate || null,
@@ -379,6 +386,7 @@ export const BeneficiaryEnrollmentForm = ({
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId('');
     setDonationNotes('');
+    setDonationPackageId('');
     setIsDonationOpen(false);
   };
 
@@ -402,6 +410,7 @@ export const BeneficiaryEnrollmentForm = ({
     setDonationDate(new Date().toISOString().split('T')[0]);
     setDonationProgramId(programId || '');
     setDonationNotes('');
+    setDonationPackageId('');
     setIsDonationOpen(true);
   };
 
@@ -934,11 +943,45 @@ export const BeneficiaryEnrollmentForm = ({
               <Label>Notes</Label>
               <Input placeholder="e.g. Term 1 payment, Monthly support..." value={donationNotes} onChange={(e) => setDonationNotes(e.target.value)} />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="space-y-2">
+              <Label>Sponsorship Package <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Select
+                value={donationPackageId}
+                onValueChange={(v) => {
+                  setDonationPackageId(v);
+                  const pkg = sponsorshipPackages.find((p) => p.id === v);
+                  if (pkg && !donationAmount) setDonationAmount(String(pkg.monthly_cost));
+                  if (pkg && !donationNotes) setDonationNotes(`${pkg.name} · monthly ${pkg.monthly_cost} ${pkg.currency}`);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="No package (free amount)" /></SelectTrigger>
+                <SelectContent>
+                  {sponsorshipPackages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} — {p.monthly_cost} {p.currency}/mo
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Selecting a package auto-fills the monthly amount and flows through the Allocation Engine.
+              </p>
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => { setIsDonationOpen(false); navigate('/waitlist'); }}
+              >
+                <Users className="h-3.5 w-3.5 mr-1" /> Add from waiting list
+              </Button>
+              <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={resetDonationForm}>Cancel</Button>
               <Button type="submit" disabled={!donorName.trim() || addDonationMutation.isPending}>
                 {addDonationMutation.isPending ? 'Saving...' : 'Record Donation'}
               </Button>
+              </div>
             </div>
           </form>
         </DialogContent>
