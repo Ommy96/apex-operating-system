@@ -223,7 +223,7 @@ export const BeneficiaryEnrollmentForm = ({
             program_id: enrollProgramId,
             project_id: projectId,
             enrolled_date: enrollDate,
-            status: 'Active',
+            status: 'active',
             notes: enrollNotes || null,
             created_by: user?.id,
           }))
@@ -233,7 +233,7 @@ export const BeneficiaryEnrollmentForm = ({
             program_id: enrollProgramId,
             project_id: null,
             enrolled_date: enrollDate,
-            status: 'Active',
+            status: 'active',
             notes: enrollNotes || null,
             created_by: user?.id,
           }];
@@ -313,7 +313,7 @@ export const BeneficiaryEnrollmentForm = ({
     mutationFn: async ({ id, status, exitDate }: { id: string; status: string; exitDate?: string }) => {
       const updates: Record<string, any> = { status };
       if (exitDate) updates.exit_date = exitDate;
-      if (status === 'Active') updates.exit_date = null;
+      if ((status || '').toLowerCase() === 'active') updates.exit_date = null;
       const { error } = await supabase.from('beneficiary_services').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -415,11 +415,11 @@ export const BeneficiaryEnrollmentForm = ({
   };
 
   const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case 'Active': return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
-      case 'Completed': return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
-      case 'Dropped': return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Dropped</Badge>;
-      case 'Transferred': return <Badge className="bg-warning/10 text-warning border-warning/20">Transferred</Badge>;
+    switch ((status || '').toLowerCase()) {
+      case 'active': return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
+      case 'completed': return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
+      case 'dropped': return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Dropped</Badge>;
+      case 'transferred': return <Badge className="bg-warning/10 text-warning border-warning/20">Transferred</Badge>;
       default: return <Badge variant="secondary">{status || 'Unknown'}</Badge>;
     }
   };
@@ -605,26 +605,26 @@ export const BeneficiaryEnrollmentForm = ({
                         {enrollment.notes && <p className="text-xs text-muted-foreground mt-1">{enrollment.notes}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {enrollment.status === 'Active' ? (
+                        {(enrollment.status || '').toLowerCase() === 'active' ? (
                           <Select onValueChange={(status) => {
                             updateStatusMutation.mutate({
                               id: enrollment.id,
                               status,
-                              exitDate: status !== 'Active' ? new Date().toISOString().split('T')[0] : undefined,
+                              exitDate: (status || '').toLowerCase() !== 'active' ? new Date().toISOString().split('T')[0] : undefined,
                             });
                           }}>
                             <SelectTrigger className="w-[120px] h-7 text-xs">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Completed">Completed</SelectItem>
-                              <SelectItem value="Dropped">Dropped</SelectItem>
-                              <SelectItem value="Transferred">Transferred</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="dropped">Dropped</SelectItem>
+                              <SelectItem value="transferred">Transferred</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
                           <Button variant="outline" size="sm" className="h-7 text-xs"
-                            onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'Active' })}>
+                            onClick={() => updateStatusMutation.mutate({ id: enrollment.id, status: 'active' })}>
                             Reactivate
                           </Button>
                         )}
