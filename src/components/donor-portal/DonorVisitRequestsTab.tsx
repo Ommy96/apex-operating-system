@@ -26,7 +26,7 @@ export function DonorVisitRequestsTab({ donorAccountId, organizationId }: Props)
   const { data: beneficiaries = [] } = useQuery({
     queryKey: ["donor-portal-beneficiaries", donorAccountId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("beneficiary_donors")
         .select("beneficiary:beneficiaries(id, display_name)")
         .eq("donor_account_id", donorAccountId);
