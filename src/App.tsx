@@ -91,7 +91,6 @@ const OrgSetupWizard = lazy(() => import("./pages/OrgSetupWizard"));
 
 // Sprint 6 pages
 const MapView = lazy(() => import("./pages/MapView"));
-const Procurement = lazy(() => import("./pages/Procurement"));
 const MEConsolidated = lazy(() => import("./pages/MEConsolidated"));
 const IndicatorManagement = lazy(() => import("./pages/IndicatorManagement"));
 const IndicatorDetail = lazy(() => import("./pages/IndicatorDetail"));
