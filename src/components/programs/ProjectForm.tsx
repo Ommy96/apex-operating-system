@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useNeedTypes } from "@/hooks/useNeeds";
 
 interface ProjectFormData {
   name: string;
@@ -28,6 +29,7 @@ interface ProjectFormData {
   funding_cycle: string;
   funding_model: 'programme' | 'individual_sponsorship' | 'mixed';
   sponsorship_required: boolean;
+  addresses_need_type_id: string;
 }
 
 interface Project {
@@ -61,6 +63,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
   const { currentOrganization } = useOrganization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProgramId, setSelectedProgramId] = useState<string | "none">(programId ?? "none");
+  const { data: needTypes = [] } = useNeedTypes(false);
 
   useEffect(() => {
     setSelectedProgramId(project?.program_id ?? programId ?? "none");
@@ -95,6 +98,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
       funding_cycle: "annually",
       funding_model: "programme",
       sponsorship_required: false,
+      addresses_need_type_id: "none",
     },
   });
 
@@ -102,6 +106,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
   const fundingModel = watch("funding_model");
   const sponsorshipRequired = fundingModel === "individual_sponsorship" || fundingModel === "mixed";
   const fundingCycle = watch("funding_cycle");
+  const addressesNeed = watch("addresses_need_type_id");
 
   // Populate form when editing
   useEffect(() => {
@@ -121,6 +126,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
         funding_cycle: (project as any).funding_cycle || "annually",
         funding_model: fm,
         sponsorship_required: fm !== 'programme',
+        addresses_need_type_id: (project as any).addresses_need_type_id || "none",
       });
     } else {
       reset({
@@ -137,6 +143,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
         funding_cycle: "annually",
         funding_model: "programme",
         sponsorship_required: false,
+        addresses_need_type_id: "none",
       });
     }
   }, [project, reset]);
@@ -174,6 +181,7 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
         funding_model: data.funding_model || "programme",
         sponsorship_required: data.funding_model !== "programme",
         program_id: selectedProgramId && selectedProgramId !== "none" ? selectedProgramId : null,
+        addresses_need_type_id: data.addresses_need_type_id && data.addresses_need_type_id !== "none" ? data.addresses_need_type_id : null,
         organization_id: currentOrganization.organization_id,
         slug: generateSlug(data.name),
       };
@@ -334,6 +342,22 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
               className="min-h-[80px]"
               {...register("expected_outputs")}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Addresses need type</Label>
+            <Select value={addressesNeed || "none"} onValueChange={(v) => setValue("addresses_need_type_id", v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Which beneficiary need does this project meet?" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— None —</SelectItem>
+                {needTypes.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Enrolling a beneficiary in this project auto-marks the matching need as met.</p>
           </div>
 
           {/* Funding Model */}

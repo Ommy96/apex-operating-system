@@ -25,6 +25,7 @@ import { AcademicProgressionInfo } from '@/components/beneficiary/AcademicProgre
 import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
+import { NeedsSection } from '@/components/beneficiary/NeedsSection';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
@@ -772,6 +773,9 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: Overview */}
               <TabsContent value="overview" className="mt-0 p-6">
+                <div className="mb-5">
+                  <NeedsSection beneficiaryId={beneficiary.id} />
+                </div>
                 <BeneficiaryOverviewTab
                   beneficiary={beneficiary as any}
                   guardians={guardians}

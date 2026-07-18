@@ -2165,6 +2165,104 @@ export type Database = {
           },
         ]
       }
+      beneficiary_needs: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          currency: string | null
+          estimated_cost: number | null
+          id: string
+          met_by_project_id: string | null
+          met_by_sponsorship_id: string | null
+          need_type_id: string
+          notes: string | null
+          organization_id: string
+          priority: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          currency?: string | null
+          estimated_cost?: number | null
+          id?: string
+          met_by_project_id?: string | null
+          met_by_sponsorship_id?: string | null
+          need_type_id: string
+          notes?: string | null
+          organization_id: string
+          priority?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          currency?: string | null
+          estimated_cost?: number | null
+          id?: string
+          met_by_project_id?: string | null
+          met_by_sponsorship_id?: string | null
+          need_type_id?: string
+          notes?: string | null
+          organization_id?: string
+          priority?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_needs_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_met_by_project_id_fkey"
+            columns: ["met_by_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_met_by_project_id_fkey"
+            columns: ["met_by_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_met_by_sponsorship_id_fkey"
+            columns: ["met_by_sponsorship_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_donors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_need_type_id_fkey"
+            columns: ["need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beneficiary_out_of_system_contacts: {
         Row: {
           beneficiary_id: string
@@ -9924,6 +10022,66 @@ export type Database = {
           },
         ]
       }
+      need_types: {
+        Row: {
+          created_at: string
+          default_cost: number | null
+          default_currency: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_cost?: number | null
+          default_currency?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_cost?: number | null
+          default_currency?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "need_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           category: string
@@ -13588,6 +13746,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          addresses_need_type_id: string | null
           allow_partial_sponsorship: boolean | null
           archived_at: string | null
           archived_by: string | null
@@ -13630,6 +13789,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          addresses_need_type_id?: string | null
           allow_partial_sponsorship?: boolean | null
           archived_at?: string | null
           archived_by?: string | null
@@ -13672,6 +13832,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          addresses_need_type_id?: string | null
           allow_partial_sponsorship?: boolean | null
           archived_at?: string | null
           archived_by?: string | null
@@ -13714,6 +13875,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_addresses_need_type_id_fkey"
+            columns: ["addresses_need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_organization_id_fkey"
             columns: ["organization_id"]
@@ -14614,6 +14782,7 @@ export type Database = {
           id: string
           item_label: string
           item_type: string
+          need_type_id: string | null
           organization_id: string
           package_id: string
           sort_order: number
@@ -14625,6 +14794,7 @@ export type Database = {
           id?: string
           item_label: string
           item_type: string
+          need_type_id?: string | null
           organization_id: string
           package_id: string
           sort_order?: number
@@ -14636,12 +14806,20 @@ export type Database = {
           id?: string
           item_label?: string
           item_type?: string
+          need_type_id?: string | null
           organization_id?: string
           package_id?: string
           sort_order?: number
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sponsorship_package_items_need_type_id_fkey"
+            columns: ["need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sponsorship_package_items_organization_id_fkey"
             columns: ["organization_id"]
@@ -16817,6 +16995,7 @@ export type Database = {
           student_id: string
         }[]
       }
+      seed_default_need_types: { Args: { _org_id: string }; Returns: undefined }
       seed_default_org_roles: {
         Args: { _admin_user_id: string; _org_id: string }
         Returns: undefined
