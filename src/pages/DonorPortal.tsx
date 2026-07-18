@@ -374,6 +374,12 @@ export default function DonorPortal() {
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="visits">
+            {donorAccount?.id && donorAccount?.organization_id ? (
+              <DonorVisitRequestsTab donorAccountId={donorAccount.id} organizationId={donorAccount.organization_id} />
+            ) : null}
+          </TabsContent>
         </Tabs>
       </main>
     </div>
