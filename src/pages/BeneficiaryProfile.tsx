@@ -811,6 +811,17 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
               </TabsContent>
 
+              {/* TAB: Visits & Consent */}
+              <TabsContent value="visits-consent" className="mt-0 p-6 space-y-5">
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={() => setHomeVisitOpen(true)}><Home className="h-4 w-4 mr-1" />Record home visit</Button>
+                  <Button size="sm" variant="outline" onClick={() => setSchoolVisitOpen(true)}><GraduationCap className="h-4 w-4 mr-1" />Record school visit</Button>
+                </div>
+                <ConsentVaultSection beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || undefined} />
+                <HomeVisitDialog open={homeVisitOpen} onOpenChange={setHomeVisitOpen} beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || null} />
+                <SchoolVisitDialog open={schoolVisitOpen} onOpenChange={setSchoolVisitOpen} beneficiaryId={beneficiary.id} />
+              </TabsContent>
+
               {/* TAB: Notes */}
               <TabsContent value="notes" className="mt-0 p-6 space-y-4">
                 <ProgramObservations beneficiaryId={beneficiary.id} />
