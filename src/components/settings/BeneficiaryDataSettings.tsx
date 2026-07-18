@@ -216,6 +216,8 @@ export function BeneficiaryDataSettings() {
         </CardContent>
       </Card>
 
+      <BeneficiaryCodeFormatCard />
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Terminology</CardTitle>
