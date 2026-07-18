@@ -22,6 +22,8 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const atApiKey = Deno.env.get("AT_API_KEY");
     const atUsername = Deno.env.get("AT_USERNAME");
+    const waToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+    const waPhoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -99,6 +101,32 @@ const handler = async (req: Request): Promise<Response> => {
           });
           const atResult = await atResponse.json();
           if (!atResponse.ok) throw new Error(`AT SMS failed: ${JSON.stringify(atResult)}`);
+          await supabaseAdmin.from("campaign_recipients")
+            .update({ status: "sent", sent_at: new Date().toISOString() })
+            .eq("id", recipient.id);
+          sentCount++;
+        } else if (recipient.channel === "whatsapp" && recipient.recipient_phone) {
+          if (!waToken || !waPhoneId) throw new Error("WhatsApp not configured (WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID)");
+          const to = recipient.recipient_phone.replace(/[^\d]/g, "");
+          const usingTemplate = !!(campaign as any).whatsapp_template_name;
+          const payload: Record<string, unknown> = { messaging_product: "whatsapp", to };
+          if (usingTemplate) {
+            payload.type = "template";
+            payload.template = {
+              name: (campaign as any).whatsapp_template_name,
+              language: { code: (campaign as any).whatsapp_template_language || "en_US" },
+            };
+          } else {
+            payload.type = "text";
+            payload.text = { preview_url: false, body: campaign.body };
+          }
+          const waRes = await fetch(`https://graph.facebook.com/v20.0/${waPhoneId}/messages`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${waToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const waJson = await waRes.json().catch(() => ({}));
+          if (!waRes.ok) throw new Error(waJson?.error?.message || `WhatsApp API error ${waRes.status}`);
           await supabaseAdmin.from("campaign_recipients")
             .update({ status: "sent", sent_at: new Date().toISOString() })
             .eq("id", recipient.id);
