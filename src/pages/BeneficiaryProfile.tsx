@@ -454,6 +454,7 @@ export default function BeneficiaryProfile() {
     { value: 'economic', label: 'Economic', icon: Building2, show: (orgConfig.collect_economic_data && !isMinorAge) || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
     { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
     { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
+    { value: 'visits-consent', label: 'Visits & Consent', icon: Home, show: true, legacy: false },
     { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
