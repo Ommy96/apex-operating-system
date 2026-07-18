@@ -43,6 +43,7 @@ export default function AllProjects() {
         .select("id, name, status, start_date, end_date, program_id, programs(id, name)")
         .eq("organization_id", orgId!)
         .is("deleted_at", null)
+        .eq("is_archived", false)
         .order("status", { ascending: true })
         .order("start_date", { ascending: false });
       if (error) throw error;
