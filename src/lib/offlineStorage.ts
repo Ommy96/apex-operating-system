@@ -17,6 +17,8 @@ export type OfflineRecordType =
   | 'form_submission'
   | 'gps_point'
   | 'visit'
+  | 'home_visit'
+  | 'school_visit'
   | 'field_log';
 export type SyncStatus = 'pending' | 'syncing' | 'synced' | 'failed' | 'conflict';
 
