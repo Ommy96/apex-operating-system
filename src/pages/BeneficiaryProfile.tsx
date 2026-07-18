@@ -166,6 +166,8 @@ export default function BeneficiaryProfile() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [homeVisitOpen, setHomeVisitOpen] = useState(false);
+  const [schoolVisitOpen, setSchoolVisitOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [enrolmentOpen, setEnrolmentOpen] = useState(false);
   const [showAllVulnerabilityTags, setShowAllVulnerabilityTags] = useState(false);
