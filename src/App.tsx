@@ -67,6 +67,8 @@ const HouseholdProfile = lazy(() => import("./pages/HouseholdProfile"));
 const Households = lazy(() => import("./pages/Households"));
 const WaitlistManagement = lazy(() => import("./pages/WaitlistManagement"));
 const SponsorshipPackages = lazy(() => import("./pages/SponsorshipPackages"));
+const ConsentOverview = lazy(() => import("./pages/ConsentOverview"));
+const VisitManagement = lazy(() => import("./pages/VisitManagement"));
 
 // Sprint 2 pages
 const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
