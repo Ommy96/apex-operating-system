@@ -1910,6 +1910,7 @@ export type Database = {
           notes: string | null
           organization_id: string
           program_id: string | null
+          sponsorship_package_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1923,6 +1924,7 @@ export type Database = {
           notes?: string | null
           organization_id: string
           program_id?: string | null
+          sponsorship_package_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1936,6 +1938,7 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           program_id?: string | null
+          sponsorship_package_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1973,6 +1976,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_program_funding_summary"
             referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "beneficiary_donors_sponsorship_package_id_fkey"
+            columns: ["sponsorship_package_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_packages"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -14256,6 +14266,118 @@ export type Database = {
           },
         ]
       }
+      sponsorship_package_items: {
+        Row: {
+          cost: number
+          created_at: string
+          id: string
+          item_label: string
+          item_type: string
+          organization_id: string
+          package_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          id?: string
+          item_label: string
+          item_type: string
+          organization_id: string
+          package_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          id?: string
+          item_label?: string
+          item_type?: string
+          organization_id?: string
+          package_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_package_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_package_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_package_items_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorship_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          id: string
+          monthly_cost: number
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          monthly_cost?: number
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          monthly_cost?: number
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_packages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_packages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsorship_updates: {
         Row: {
           beneficiary_id: string
@@ -15573,6 +15695,138 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      waitlist_applications: {
+        Row: {
+          applicant_age: number | null
+          applicant_location: string | null
+          applicant_name: string | null
+          applicant_notes: string | null
+          applied_at: string
+          beneficiary_id: string | null
+          created_at: string
+          created_by: string | null
+          enrolled_at: string | null
+          guardian_contact: string | null
+          id: string
+          matched_at: string | null
+          matched_donor_id: string | null
+          matched_package_id: string | null
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          score_details: Json | null
+          scored_at: string | null
+          status: string
+          updated_at: string
+          vulnerability_score: number
+        }
+        Insert: {
+          applicant_age?: number | null
+          applicant_location?: string | null
+          applicant_name?: string | null
+          applicant_notes?: string | null
+          applied_at?: string
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enrolled_at?: string | null
+          guardian_contact?: string | null
+          id?: string
+          matched_at?: string | null
+          matched_donor_id?: string | null
+          matched_package_id?: string | null
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          score_details?: Json | null
+          scored_at?: string | null
+          status?: string
+          updated_at?: string
+          vulnerability_score?: number
+        }
+        Update: {
+          applicant_age?: number | null
+          applicant_location?: string | null
+          applicant_name?: string | null
+          applicant_notes?: string | null
+          applied_at?: string
+          beneficiary_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enrolled_at?: string | null
+          guardian_contact?: string | null
+          id?: string
+          matched_at?: string | null
+          matched_donor_id?: string | null
+          matched_package_id?: string | null
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          score_details?: Json | null
+          scored_at?: string | null
+          status?: string
+          updated_at?: string
+          vulnerability_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_applications_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_matched_package_id_fkey"
+            columns: ["matched_package_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }

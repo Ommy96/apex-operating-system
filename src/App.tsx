@@ -65,6 +65,8 @@ const DonorPortal = lazy(() => import("./pages/DonorPortal"));
 const BoardPortal = lazy(() => import("./pages/BoardPortal"));
 const HouseholdProfile = lazy(() => import("./pages/HouseholdProfile"));
 const Households = lazy(() => import("./pages/Households"));
+const WaitlistManagement = lazy(() => import("./pages/WaitlistManagement"));
+const SponsorshipPackages = lazy(() => import("./pages/SponsorshipPackages"));
 
 // Sprint 2 pages
 const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
@@ -177,6 +179,16 @@ const App = () => (
             <Route path="/households/:householdId" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><HouseholdProfile /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/waitlist" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><WaitlistManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsorship-packages" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><SponsorshipPackages /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/programs/dynamic/:programId" element={
