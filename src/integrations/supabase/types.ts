@@ -1329,6 +1329,7 @@ export type Database = {
           background_image_url: string | null
           background_narrative: string | null
           beneficiary_category: string | null
+          beneficiary_code: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id: string | null
           care_arrangement: Database["public"]["Enums"]["care_arrangement_type"]
@@ -1414,6 +1415,7 @@ export type Database = {
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_category?: string | null
+          beneficiary_code?: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
           care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
@@ -1499,6 +1501,7 @@ export type Database = {
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_category?: string | null
+          beneficiary_code?: string | null
           beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
           branch_id?: string | null
           care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
@@ -10235,6 +10238,9 @@ export type Database = {
           annual_returns_uploaded_at: string | null
           annual_returns_url: string | null
           base_currency: string | null
+          beneficiary_code_format: string
+          beneficiary_code_prefix: string | null
+          beneficiary_code_seq: number
           budget_approval_threshold: number | null
           country: string | null
           county: string | null
@@ -10327,6 +10333,9 @@ export type Database = {
           annual_returns_uploaded_at?: string | null
           annual_returns_url?: string | null
           base_currency?: string | null
+          beneficiary_code_format?: string
+          beneficiary_code_prefix?: string | null
+          beneficiary_code_seq?: number
           budget_approval_threshold?: number | null
           country?: string | null
           county?: string | null
@@ -10419,6 +10428,9 @@ export type Database = {
           annual_returns_uploaded_at?: string | null
           annual_returns_url?: string | null
           base_currency?: string | null
+          beneficiary_code_format?: string
+          beneficiary_code_prefix?: string | null
+          beneficiary_code_seq?: number
           budget_approval_threshold?: number | null
           country?: string | null
           county?: string | null
@@ -16638,6 +16650,7 @@ export type Database = {
       }
     }
     Functions: {
+      _org_initials: { Args: { _org_id: string }; Returns: string }
       accept_invitation: {
         Args: { _invitation_id: string; _user_id: string }
         Returns: boolean
@@ -16757,6 +16770,7 @@ export type Database = {
         }
         Returns: Json
       }
+      next_beneficiary_code: { Args: { _org_id: string }; Returns: string }
       program_funding_health_score: {
         Args: { _program_id: string }
         Returns: Json
