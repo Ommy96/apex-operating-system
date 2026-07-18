@@ -193,6 +193,16 @@ const App = () => (
                 <DashboardLayout><LazyRoute><SponsorshipPackages /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/governance/consent" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><ConsentOverview /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/staff/visits" element={
+              <ProtectedRoute>
+                <DashboardLayout><LazyRoute><VisitManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/programs/dynamic/:programId" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
                 <DashboardLayout><LazyRoute><DynamicProgramPage /></LazyRoute></DashboardLayout>
