@@ -28,6 +28,7 @@ export default function HouseholdProfile() {
   const navigate = useNavigate();
   const { data: household, isLoading } = useHousehold(householdId);
   const { data: members = [] } = useHouseholdMembers(householdId);
+  useDocumentTitle((household as any)?.household_name ?? null);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [headOpen, setHeadOpen] = useState(false);
