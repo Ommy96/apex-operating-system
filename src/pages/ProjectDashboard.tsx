@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { useOrganization } from "@/hooks/useOrganization";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { format } from "date-fns";
+import { ProjectBeneficiariesExport } from "@/components/projects/ProjectBeneficiariesExport";
 
 const AGE_GROUPS = [
   { label: '0-5', min: 0, max: 5 },
@@ -634,10 +635,20 @@ const ProjectDashboard = () => {
         <TabsContent value="beneficiaries" className="mt-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Enrolled Beneficiaries ({totalBeneficiaries})
-              </CardTitle>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Enrolled Beneficiaries ({totalBeneficiaries})
+                </CardTitle>
+                {projectId && currentOrganization?.organization_id && (
+                  <ProjectBeneficiariesExport
+                    projectId={projectId}
+                    projectName={project?.name || "project"}
+                    organizationId={currentOrganization.organization_id}
+                    enrolledCount={totalBeneficiaries}
+                  />
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {totalBeneficiaries === 0 ? (
