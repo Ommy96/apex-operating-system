@@ -23,6 +23,7 @@ import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStor
 import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
 import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
+import { DonorVisitRequestsTab } from '@/components/donor-portal/DonorVisitRequestsTab';
 import { useDonorFx } from '@/hooks/useDonorFx';
 
 export default function DonorPortal() {
