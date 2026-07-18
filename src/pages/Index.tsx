@@ -238,8 +238,8 @@ const Index = () => {
                   onClick={() =>
                     document.getElementById("product")?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="text-white hover:bg-white/5 px-8"
-                  style={{ borderColor: "rgba(255,255,255,0.15)" }}
+                  className="text-white bg-transparent hover:bg-white/10 hover:text-white px-8"
+                  style={{ borderColor: "rgba(255,255,255,0.35)" }}
                 >
                   See the product
                 </Button>
