@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export default function HouseholdProfile() {
   const navigate = useNavigate();
   const { data: household, isLoading } = useHousehold(householdId);
   const { data: members = [] } = useHouseholdMembers(householdId);
+  useDocumentTitle((household as any)?.household_name ?? null);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [headOpen, setHeadOpen] = useState(false);

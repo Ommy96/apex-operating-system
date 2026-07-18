@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { Loader2, Plus, X, GraduationCap, Heart, Briefcase, AlertTriangle, Globe, Users, Accessibility, Baby, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
 
 interface OrgTypePreset {
   value: OrgType;
@@ -214,6 +215,8 @@ export function BeneficiaryDataSettings() {
             checked={form.collect_disability_details} onChange={(v) => update('collect_disability_details', v)} />
         </CardContent>
       </Card>
+
+      <BeneficiaryCodeFormatCard />
 
       <Card>
         <CardHeader>

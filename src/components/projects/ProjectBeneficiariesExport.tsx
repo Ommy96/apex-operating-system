@@ -80,7 +80,7 @@ export function ProjectBeneficiariesExport({ projectId, projectName, organizatio
       .select(
         `enrolled_date, status, beneficiary_id,
          beneficiary:beneficiaries!inner(
-           id, unique_id, first_name, last_name, display_name, gender,
+           id, beneficiary_code, unique_id, first_name, last_name, display_name, gender,
            date_of_birth, county, sub_county, status, consent_given,
            vulnerability_level, care_arrangement, funding_required
          )`
@@ -122,7 +122,7 @@ export function ProjectBeneficiariesExport({ projectId, projectName, organizatio
       const consent = !!b.consent_given;
       const age = ageFromDob(b.date_of_birth);
       return {
-        "Unique ID": b.unique_id || b.id,
+        "Beneficiary ID": b.beneficiary_code || b.unique_id || "—",
         "Full Name": displayName(b, consent),
         Gender: b.gender || "—",
         Age: age ?? "—",
@@ -179,6 +179,13 @@ export function ProjectBeneficiariesExport({ projectId, projectName, organizatio
       } else if (fmt === "xlsx") {
         const ws = XLSX.utils.json_to_sheet(rows);
         ws["!cols"] = Object.keys(rows[0]).map(() => ({ wch: 18 }));
+        // Force the Beneficiary ID column to text so codes like "HTH-26-007" don't get mangled.
+        const range = XLSX.utils.decode_range(ws["!ref"] as string);
+        for (let R = range.s.r + 1; R <= range.e.r; R++) {
+          const addr = XLSX.utils.encode_cell({ c: 0, r: R });
+          const cell = ws[addr];
+          if (cell) { cell.t = "s"; cell.z = "@"; }
+        }
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Beneficiaries");
         XLSX.writeFile(wb, `${name}.xlsx`);

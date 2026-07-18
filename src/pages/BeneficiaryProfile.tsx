@@ -1,6 +1,7 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -181,6 +182,11 @@ export default function BeneficiaryProfile() {
   const [earliestEnrollDate, setEarliestEnrollDate] = useState<string | null>(null);
   const [lastVisitDate, setLastVisitDate] = useState<string | null>(null);
   const [overallStatus, setOverallStatus] = useState<'Good' | 'Review' | 'Critical'>('Good');
+
+  const _titleName = beneficiary
+    ? (beneficiary.display_name || [beneficiary.first_name, beneficiary.last_name].filter(Boolean).join(' ') || (beneficiary as any).beneficiary_code || (beneficiary as any).unique_id || null)
+    : null;
+  useDocumentTitle(_titleName);
 
   const visibility = useFieldVisibility(beneficiary?.date_of_birth ?? null, orgConfig as any);
   const {
