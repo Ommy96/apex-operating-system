@@ -344,6 +344,22 @@ export function ProjectForm({ open, onOpenChange, programId, allowProgramSelecti
             />
           </div>
 
+          <div className="space-y-2">
+            <Label>Addresses need type</Label>
+            <Select value={addressesNeed || "none"} onValueChange={(v) => setValue("addresses_need_type_id", v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Which beneficiary need does this project meet?" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— None —</SelectItem>
+                {needTypes.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Enrolling a beneficiary in this project auto-marks the matching need as met.</p>
+          </div>
+
           {/* Funding Model */}
           <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
             <div>
