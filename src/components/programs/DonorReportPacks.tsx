@@ -159,8 +159,8 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
 
       // Latest narrative draft in scope
       const draftTable = projectId ? "project_report_drafts" : "program_report_drafts";
-      const { data: draftRows } = await supabase
-        .from(draftTable as any)
+      const { data: draftRows } = await (supabase as any)
+        .from(draftTable)
         .select("*")
         .eq(filterCol, filterId)
         .order("created_at", { ascending: false })
