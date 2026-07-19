@@ -119,7 +119,7 @@ export function DonorNeedsBreakdown() {
           {[...metByNeed.entries()].sort((a,b) => b[1] - a[1]).map(([label, amt]) => (
             <div key={label} className="flex items-center justify-between text-sm">
               <span>{label}</span>
-              <span className="font-mono font-semibold">{fx.format(amt)}</span>
+              <span className="font-mono font-semibold">{fx.format(amt, fx.target)}</span>
             </div>
           ))}
           {metByNeed.size === 0 && (
@@ -143,7 +143,7 @@ export function DonorNeedsBreakdown() {
             <p className="text-sm text-muted-foreground">All tracked needs are covered — thank you.</p>
           ) : (
             <>
-              <div className="text-2xl font-bold">{fx.format(totalUnmet)}</div>
+              <div className="text-2xl font-bold">{fx.format(totalUnmet, fx.target)}</div>
               <p className="text-xs text-muted-foreground">
                 Estimated cost to close all outstanding needs across your sponsorships.
               </p>
@@ -153,7 +153,7 @@ export function DonorNeedsBreakdown() {
                   <div className="flex flex-wrap gap-1 mt-1">
                     {needs.map((n) => (
                       <Badge key={n.need_type_id + benId} variant={n.status === "partially_met" ? "secondary" : "outline"}>
-                        {n.need_label} · {fx.format(fx.convert(n.estimated_cost, n.currency))}
+                        {n.need_label} · {fx.format(n.estimated_cost, n.currency)}
                       </Badge>
                     ))}
                   </div>
