@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { CurrencySelector } from '@/components/donor-portal/CurrencySelector';
 import { DonorAllocationsTab } from '@/components/donor-portal/DonorAllocationsTab';
 import { DonorImpactStoriesTab } from '@/components/donor-portal/DonorImpactStoriesTab';
+import { DonorNeedsBreakdown } from '@/components/donor-portal/DonorNeedsBreakdown';
 import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
 import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
