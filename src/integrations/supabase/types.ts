@@ -645,6 +645,94 @@ export type Database = {
           },
         ]
       }
+      allocation_line_items: {
+        Row: {
+          allocation_id: string
+          amount_base: number
+          amount_native: number
+          base_currency: string | null
+          beneficiary_id: string | null
+          created_at: string
+          id: string
+          label: string | null
+          native_currency: string | null
+          need_type_id: string | null
+          organization_id: string
+          package_item_id: string | null
+        }
+        Insert: {
+          allocation_id: string
+          amount_base?: number
+          amount_native?: number
+          base_currency?: string | null
+          beneficiary_id?: string | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          native_currency?: string | null
+          need_type_id?: string | null
+          organization_id: string
+          package_item_id?: string | null
+        }
+        Update: {
+          allocation_id?: string
+          amount_base?: number
+          amount_native?: number
+          base_currency?: string | null
+          beneficiary_id?: string | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          native_currency?: string | null
+          need_type_id?: string | null
+          organization_id?: string
+          package_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocation_line_items_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_line_items_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_line_items_need_type_id_fkey"
+            columns: ["need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_line_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_line_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allocation_line_items_package_item_id_fkey"
+            columns: ["package_item_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_package_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       allocation_overrides: {
         Row: {
           after_beneficiary_id: string | null
@@ -16900,6 +16988,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_program_funding_summary"
             referencedColumns: ["program_id"]
+          },
+        ]
+      }
+      v_unmet_needs_gap: {
+        Row: {
+          beneficiary_id: string | null
+          currency: string | null
+          enrolled_project_id: string | null
+          estimated_cost: number | null
+          need_label: string | null
+          need_type_id: string | null
+          organization_id: string | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_needs_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_need_type_id_fkey"
+            columns: ["need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_services_project_id_fkey"
+            columns: ["enrolled_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_services_project_id_fkey"
+            columns: ["enrolled_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
           },
         ]
       }
