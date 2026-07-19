@@ -273,6 +273,22 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     if (error) throw error;
     await decrementPool(supabase, pool!.id, amountNative, amountBase);
     allocations.push(alloc);
+
+    // --- Itemise by sponsorship package (needs-based breakdown) ------
+    try {
+      await itemiseByPackage(supabase, {
+        organization_id: orgId,
+        allocation_id: alloc.id,
+        beneficiary_id: scopeBen!,
+        donor_account_id: donation.donor_account_id!,
+        amount_native: amountNative,
+        amount_base: amountBase,
+        native_currency: nativeCur,
+        base_currency: baseCur,
+      });
+    } catch (e) {
+      console.error("itemiseByPackage failed:", (e as Error).message);
+    }
   } else if (scope === "project_pool") {
     // Rank active enrolled beneficiaries in the project; allocate until pool empty
     const { data: enrolled } = await supabase
