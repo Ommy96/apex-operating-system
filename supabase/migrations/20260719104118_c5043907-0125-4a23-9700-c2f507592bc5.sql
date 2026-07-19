@@ -1,0 +1,1 @@
+ALTER VIEW public.v_unmet_needs_gap SET (security_invoker = on);

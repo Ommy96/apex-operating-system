@@ -174,6 +174,105 @@ async function decrementPool(
 }
 
 // --- ALLOCATE DONATION --------------------------------------------------
+// Itemise a beneficiary allocation into per-need line items, based on the
+// active sponsorship package attached to the beneficiary_donors record.
+// Also updates beneficiary_needs status (met / partially_met).
+async function itemiseByPackage(
+  supabase: SupabaseClient,
+  args: {
+    organization_id: string;
+    allocation_id: string;
+    beneficiary_id: string;
+    donor_account_id: string;
+    amount_native: number;
+    amount_base: number;
+    native_currency: string;
+    base_currency: string;
+  },
+) {
+  // 1) Locate the sponsorship (beneficiary_donors) with a package.
+  //    donor_account_id link is not on beneficiary_donors, so we match by
+  //    beneficiary_id and prefer records with a package attached.
+  const { data: sponsorships } = await supabase
+    .from("beneficiary_donors")
+    .select("id, sponsorship_package_id, created_at")
+    .eq("organization_id", args.organization_id)
+    .eq("beneficiary_id", args.beneficiary_id)
+    .not("sponsorship_package_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const sponsorship = sponsorships?.[0];
+  if (!sponsorship?.sponsorship_package_id) return; // no package: nothing to itemise
+
+  const { data: items } = await supabase
+    .from("sponsorship_package_items")
+    .select("id, item_label, item_type, cost, need_type_id")
+    .eq("package_id", sponsorship.sponsorship_package_id)
+    .order("sort_order", { ascending: true });
+  if (!items || items.length === 0) return;
+
+  const totalCost = items.reduce((s, i) => s + Number(i.cost || 0), 0);
+  if (totalCost <= 0) return;
+
+  // 2) Distribute the allocation pro-rata across package lines.
+  const lines = items.map((it) => {
+    const ratio = Number(it.cost || 0) / totalCost;
+    return {
+      organization_id: args.organization_id,
+      allocation_id: args.allocation_id,
+      need_type_id: it.need_type_id ?? null,
+      package_item_id: it.id,
+      beneficiary_id: args.beneficiary_id,
+      amount_native: Number((args.amount_native * ratio).toFixed(2)),
+      native_currency: args.native_currency,
+      amount_base: Number((args.amount_base * ratio).toFixed(2)),
+      base_currency: args.base_currency,
+      label: it.item_label,
+    };
+  });
+  const { error: liErr } = await supabase.from("allocation_line_items").insert(lines);
+  if (liErr) throw liErr;
+
+  // 3) Update beneficiary_needs: mark met / partially_met per need_type.
+  //    A need is 'met' when total allocated (base) >= estimated_cost.
+  const needIds = Array.from(new Set(items.map((i) => i.need_type_id).filter(Boolean))) as string[];
+  if (needIds.length === 0) return;
+
+  const { data: existingNeeds } = await supabase
+    .from("beneficiary_needs")
+    .select("id, need_type_id, estimated_cost, status")
+    .eq("organization_id", args.organization_id)
+    .eq("beneficiary_id", args.beneficiary_id)
+    .in("need_type_id", needIds);
+
+  // Aggregate all historical line items for this beneficiary+need_type
+  const { data: history } = await supabase
+    .from("allocation_line_items")
+    .select("need_type_id, amount_base")
+    .eq("organization_id", args.organization_id)
+    .eq("beneficiary_id", args.beneficiary_id)
+    .in("need_type_id", needIds);
+  const totalByNeed = new Map<string, number>();
+  (history ?? []).forEach((h: any) => {
+    if (!h.need_type_id) return;
+    totalByNeed.set(h.need_type_id, (totalByNeed.get(h.need_type_id) ?? 0) + Number(h.amount_base ?? 0));
+  });
+
+  for (const bn of existingNeeds ?? []) {
+    const funded = totalByNeed.get(bn.need_type_id!) ?? 0;
+    const est = Number(bn.estimated_cost ?? 0);
+    let newStatus: string = bn.status;
+    if (est > 0 && funded >= est) newStatus = "met";
+    else if (funded > 0) newStatus = "partially_met";
+    if (newStatus !== bn.status) {
+      await supabase
+        .from("beneficiary_needs")
+        .update({ status: newStatus, met_by_sponsorship_id: sponsorship.id })
+        .eq("id", bn.id);
+    }
+  }
+}
+
 async function allocateDonation(supabase: SupabaseClient, donationId: string, actorId: string | null) {
   const { data: donation, error: dErr } = await supabase
     .from("donations")
@@ -273,6 +372,22 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     if (error) throw error;
     await decrementPool(supabase, pool!.id, amountNative, amountBase);
     allocations.push(alloc);
+
+    // --- Itemise by sponsorship package (needs-based breakdown) ------
+    try {
+      await itemiseByPackage(supabase, {
+        organization_id: orgId,
+        allocation_id: alloc.id,
+        beneficiary_id: scopeBen!,
+        donor_account_id: donation.donor_account_id!,
+        amount_native: amountNative,
+        amount_base: amountBase,
+        native_currency: nativeCur,
+        base_currency: baseCur,
+      });
+    } catch (e) {
+      console.error("itemiseByPackage failed:", (e as Error).message);
+    }
   } else if (scope === "project_pool") {
     // Rank active enrolled beneficiaries in the project; allocate until pool empty
     const { data: enrolled } = await supabase
