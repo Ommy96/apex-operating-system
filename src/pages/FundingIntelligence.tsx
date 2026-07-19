@@ -23,6 +23,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
 import { Lock, LockOpen } from "lucide-react";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
+import { NeedsGapCard } from "@/components/funding/NeedsGapCard";
 import { CHART_PALETTE } from "@/lib/chartPalette";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -229,6 +230,8 @@ export default function FundingIntelligence() {
             <StatTile label="Restricted" value={totals.restricted} />
             <StatTile label="Unrestricted" value={totals.unrestricted} />
           </div>
+
+          <NeedsGapCard />
 
           {/* Compliance-grade split: pools + active allocations, never merged */}
           <Card className="border-amber-500/30 bg-amber-500/[0.03]">
