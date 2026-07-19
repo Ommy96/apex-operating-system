@@ -125,7 +125,8 @@ export default function WaitlistManagement() {
       // eslint-disable-next-line no-alert
       return;
     }
-    const pkg = matchPackageId ? packages.find((p) => p.id === matchPackageId) : undefined;
+    const pkgId = matchPackageId && matchPackageId !== "__none" ? matchPackageId : undefined;
+    const pkg = pkgId ? packages.find((p) => p.id === pkgId) : undefined;
     try {
       await enroll.mutateAsync({
         application: matchFor,
@@ -390,11 +391,7 @@ export default function WaitlistManagement() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setMatchFor(null)}>Cancel</Button>
-            <Button onClick={() => {
-              // Normalise "__none" sentinel to unset
-              if (matchPackageId === "__none") setMatchPackageId("");
-              submitMatch();
-            }} disabled={!matchProjectId || enroll.isPending}>
+            <Button onClick={submitMatch} disabled={!matchProjectId || enroll.isPending}>
               Enroll
             </Button>
           </DialogFooter>
