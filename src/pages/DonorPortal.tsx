@@ -332,7 +332,10 @@ export default function DonorPortal() {
           </TabsContent>
 
           <TabsContent value="impact">
-            <DonorImpactStoriesTab />
+            <div className="space-y-6">
+              <DonorNeedsBreakdown />
+              <DonorImpactStoriesTab />
+            </div>
           </TabsContent>
 
           <TabsContent value="reports">
