@@ -16328,6 +16328,74 @@ export type Database = {
           },
         ]
       }
+      waitlist_application_needs: {
+        Row: {
+          application_id: string
+          created_at: string
+          currency: string | null
+          estimated_cost: number | null
+          id: string
+          need_type_id: string
+          notes: string | null
+          organization_id: string
+          priority: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          currency?: string | null
+          estimated_cost?: number | null
+          id?: string
+          need_type_id: string
+          notes?: string | null
+          organization_id: string
+          priority?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          currency?: string | null
+          estimated_cost?: number | null
+          id?: string
+          need_type_id?: string
+          notes?: string | null
+          organization_id?: string
+          priority?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_application_needs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "waitlist_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_application_needs_need_type_id_fkey"
+            columns: ["need_type_id"]
+            isOneToOne: false
+            referencedRelation: "need_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_application_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_application_needs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_applications: {
         Row: {
           applicant_age: number | null
