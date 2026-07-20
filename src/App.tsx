@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, Component, ReactNode } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -114,11 +114,61 @@ function PageLoader() {
   );
 }
 
+/**
+ * Detects a stale-chunk error (file hash changed after redeploy) and
+ * reloads the page ONCE per chunk per session to pick up the fresh assets.
+ * Falls back to a manual "Reload" button on repeat failures to avoid loops.
+ */
+const CHUNK_ERROR_RE = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i;
+
+class ChunkErrorBoundary extends Component<{ children: ReactNode }, { err: Error | null }> {
+  state = { err: null as Error | null };
+  static getDerivedStateFromError(err: Error) { return { err }; }
+  componentDidCatch(err: Error) {
+    if (!CHUNK_ERROR_RE.test(err?.message || "")) return;
+    try {
+      const key = "__chunk_reload_" + (err.message.match(/[\w-]+\.js/)?.[0] || "any");
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        window.location.reload();
+      }
+    } catch { /* storage disabled — leave fallback UI */ }
+  }
+  render() {
+    if (this.state.err) {
+      const isChunk = CHUNK_ERROR_RE.test(this.state.err.message || "");
+      return (
+        <div className="min-h-[50vh] flex items-center justify-center p-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <h2 className="text-lg font-semibold">
+              {isChunk ? "A newer version is available" : "Something went wrong"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isChunk
+                ? "The page assets have been updated. Reload to get the latest version."
+                : this.state.err.message}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function LazyRoute({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<PageLoader />}>{children}</Suspense>
-    </ErrorBoundary>
+    <ChunkErrorBoundary>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>{children}</Suspense>
+      </ErrorBoundary>
+    </ChunkErrorBoundary>
   );
 }
 
