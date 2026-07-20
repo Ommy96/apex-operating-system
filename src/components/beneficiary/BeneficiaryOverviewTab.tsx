@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User, Phone, Users, Home as HomeIcon, ShieldAlert, FileCheck } from 'lucide-react';
 import { ActivityTimeline } from './ActivityTimeline';
 import { formatDisplayDate } from '@/lib/dateUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -127,7 +127,7 @@ export function BeneficiaryOverviewTab({
             {allOpen ? 'Collapse all' : 'Expand all'}
           </button>
         </div>
-        <PanelSection title="Personal" first open={!!openSections.personal} onToggle={() => toggleSection('personal')}>
+        <PanelSection title="Personal" icon={User} first open={!!openSections.personal} onToggle={() => toggleSection('personal')}>
           <EditableRow label="Full name" value={beneficiary.display_name} canEdit={canSave} type="text"
             onSave={makeSaver('display_name', 'Full name')}
             validate={(v) => !v ? 'Name is required' : null} />
@@ -144,7 +144,7 @@ export function BeneficiaryOverviewTab({
           )}
         </PanelSection>
 
-        <PanelSection title="Contact" open={!!openSections.contact} onToggle={() => toggleSection('contact')}>
+        <PanelSection title="Contact" icon={Phone} open={!!openSections.contact} onToggle={() => toggleSection('contact')}>
           {visibility.showPhone && (
             <EditableRow label="Phone" value={beneficiary.phone} canEdit={canSave} type="phone" mono
               validate={(v) => v && !/^[+\d\s\-()]{7,20}$/.test(String(v)) ? 'Invalid phone number' : null}
@@ -163,7 +163,7 @@ export function BeneficiaryOverviewTab({
           <EditableRow label="Village / Estate" value={beneficiary.estate_village} canEdit={canSave} type="text"
             onSave={makeSaver('estate_village', 'Village / Estate')} />
         </PanelSection>
-        <PanelSection title="Family" open={!!openSections.family} onToggle={() => toggleSection('family')}>
+        <PanelSection title="Family" icon={Users} open={!!openSections.family} onToggle={() => toggleSection('family')}>
           <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
             type="select" options={FAMILY_STATUS_OPTIONS}
             onSave={makeSaver('family_status', 'Family status')} />
@@ -225,12 +225,12 @@ export function BeneficiaryOverviewTab({
               );
             })}
         </PanelSection>
-        <PanelSection title="Household" open={!!openSections.household} onToggle={() => toggleSection('household')}>
+        <PanelSection title="Household" icon={HomeIcon} open={!!openSections.household} onToggle={() => toggleSection('household')}>
           <EditableRow label="Household size" value={beneficiary.household_size} canEdit={canSave} type="number"
             validate={(v) => v != null && Number(v) < 0 ? 'Must be ≥ 0' : null}
             onSave={numSaver('household_size', 'Household size')} />
         </PanelSection>
-        <PanelSection title="Vulnerability" open={!!openSections.vulnerability} onToggle={() => toggleSection('vulnerability')}>
+        <PanelSection title="Vulnerability" icon={ShieldAlert} open={!!openSections.vulnerability} onToggle={() => toggleSection('vulnerability')}>
           <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
             type="select" options={VULNERABILITY_OPTIONS}
             display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : 'No risk recorded'}
@@ -248,7 +248,7 @@ export function BeneficiaryOverviewTab({
             </div>
           </div>
         </PanelSection>
-        <PanelSection title="Consent" open={!!openSections.consent} onToggle={() => toggleSection('consent')}>
+        <PanelSection title="Consent" icon={FileCheck} open={!!openSections.consent} onToggle={() => toggleSection('consent')}>
           <EditableRow label="Consent given" value={beneficiary.consent_given === null || beneficiary.consent_given === undefined ? null : String(!!beneficiary.consent_given)}
             canEdit={canSave} type="select" options={YES_NO}
             display={(v) => v === null || v === '' ? 'Not recorded' : v === 'true' || v === true ? 'Yes' : 'No'}
@@ -265,23 +265,65 @@ export function BeneficiaryOverviewTab({
 }
 
 function PanelSection({
-  title, children, open, onToggle, first = false,
-}: { title: string; children?: React.ReactNode; open: boolean; onToggle: () => void; first?: boolean }) {
-  const wrapStyle: React.CSSProperties = first
-    ? {}
-    : { borderTop: '1px solid #ECE7DE', marginTop: 16, paddingTop: 16 };
+  title, children, open, onToggle, first = false, icon: Icon,
+}: {
+  title: string;
+  children?: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
+  first?: boolean;
+  icon?: React.ComponentType<{ className?: string }>;
+}) {
   return (
-    <div style={wrapStyle}>
+    <div
+      className={`relative rounded-lg transition-all duration-200 ${first ? '' : 'mt-2'} ${
+        open ? 'bg-primary/[0.04] dark:bg-primary/10' : 'bg-transparent'
+      }`}
+    >
+      {open && (
+        <span
+          aria-hidden
+          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary transition-opacity duration-200"
+        />
+      )}
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="w-full flex items-center justify-between py-1 group"
+        className={`w-full flex items-center gap-2 py-2 px-2.5 rounded-lg group transition-colors duration-150 ${
+          open ? '' : 'hover:bg-muted/40'
+        }`}
       >
-        <span className="text-[11px] uppercase tracking-[0.6px]" style={{ color: '#78716C', fontWeight: 600, fontFamily: 'DM Sans, sans-serif' }}>{title}</span>
-        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#A8A29E' }} />
+        {Icon && (
+          <span
+            className={`inline-flex items-center justify-center h-6 w-6 rounded-md transition-colors duration-200 ${
+              open ? 'bg-primary/15 text-primary' : 'bg-muted/60 text-muted-foreground group-hover:text-foreground'
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+          </span>
+        )}
+        <span
+          className={`text-[11px] uppercase tracking-[0.6px] flex-1 text-left transition-colors duration-150 ${
+            open ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
+          }`}
+          style={{ fontWeight: 600, fontFamily: 'DM Sans, sans-serif' }}
+        >
+          {title}
+        </span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180 text-primary' : ''}`}
+        />
       </button>
-      {open && <div className="mt-2">{children}</div>}
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-2.5 pb-3 pt-1">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }
