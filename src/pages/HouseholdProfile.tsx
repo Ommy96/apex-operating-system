@@ -84,6 +84,21 @@ export default function HouseholdProfile() {
     },
   });
 
+  // Auto-suggest head-of-household when none set (must sit with hooks, not after
+  // early returns, or React throws error #310).
+  const guardianHeadId: string | null = (household as any)?.head_guardian_id ?? null;
+  const currentHeadBenId = (household as any)?.head_of_household_id ?? null;
+  useEffect(() => {
+    if (!household) return;
+    if (currentHeadBenId || guardianHeadId) return;
+    if (headOpen) return;
+    const primary = (guardians as any[]).find((g: any) => g.is_primary);
+    if (primary) {
+      setPickedHead(primary.id);
+      setPickedHeadKind('guardian');
+    }
+  }, [household, currentHeadBenId, guardianHeadId, guardians, headOpen]);
+
   const handleAddExisting = async (beneficiaryId: string) => {
     if (!householdId) return;
     try {
@@ -116,7 +131,6 @@ export default function HouseholdProfile() {
     );
   }
 
-  const guardianHeadId: string | null = (household as any).head_guardian_id ?? null;
   const beneficiaryHead = members.find((m: any) => m.id === household.head_of_household_id);
   const guardianHead = guardians.find((g: any) => g.id === guardianHeadId);
   const head = beneficiaryHead
@@ -167,17 +181,6 @@ export default function HouseholdProfile() {
   const eligibleBeneficiaryHeads = members.filter((m: any) => m.id !== household.head_of_household_id);
   const eligibleGuardianHeads = guardians.filter((g: any) => g.id !== guardianHeadId);
 
-  // Auto-appoint: if no head set and there is a primary guardian, offer it (silent, on-mount notice only)
-  useEffect(() => {
-    if (!head && guardians.length > 0 && !headOpen) {
-      const primary = guardians.find((g: any) => g.is_primary);
-      if (primary) {
-        setPickedHead(primary.id);
-        setPickedHeadKind('guardian');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [head, guardians.length]);
   const vulnLevels: Record<string, number> = {};
   members.forEach((m: any) => {
     const v = m.vulnerability_level || 'low';
