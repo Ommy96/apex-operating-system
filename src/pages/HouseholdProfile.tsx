@@ -167,17 +167,6 @@ export default function HouseholdProfile() {
   const eligibleBeneficiaryHeads = members.filter((m: any) => m.id !== household.head_of_household_id);
   const eligibleGuardianHeads = guardians.filter((g: any) => g.id !== guardianHeadId);
 
-  // Auto-appoint: if no head set and there is a primary guardian, offer it (silent, on-mount notice only)
-  useEffect(() => {
-    if (!head && guardians.length > 0 && !headOpen) {
-      const primary = guardians.find((g: any) => g.is_primary);
-      if (primary) {
-        setPickedHead(primary.id);
-        setPickedHeadKind('guardian');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [head, guardians.length]);
   const vulnLevels: Record<string, number> = {};
   members.forEach((m: any) => {
     const v = m.vulnerability_level || 'low';
