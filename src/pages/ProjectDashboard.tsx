@@ -531,10 +531,24 @@ const ProjectDashboard = () => {
                     </div>
                   ))}
                   {unknownAge > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Unknown</span>
-                      <span className="text-sm font-medium text-muted-foreground">{unknownAge}</span>
-                    </div>
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Unknown</span>
+                        <span className="text-sm font-medium text-muted-foreground">{unknownAge}</span>
+                      </div>
+                      <div className="mt-2 rounded-md border border-warning/30 bg-warning/5 px-3 py-2 text-[12px] text-muted-foreground flex items-center justify-between gap-2">
+                        <span>
+                          <strong className="text-foreground">{unknownAge}</strong> beneficiar{unknownAge === 1 ? 'y' : 'ies'} missing date of birth — improve data quality
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/beneficiaries?projectId=${projectId}&missing=date_of_birth`)}
+                          className="text-primary font-medium hover:underline shrink-0"
+                        >
+                          Fix
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
               </CardContent>
