@@ -49,16 +49,58 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
   const segmentIndex = segments.indexOf(segment);
   const previousSegment = segmentIndex > 0 ? segments[segmentIndex - 1] : null;
-  const isProgram = previousSegment === "dynamic" || previousSegment === "dashboard";
+  const twoBack = segmentIndex > 1 ? segments[segmentIndex - 2] : null;
+  const isProject =
+    (previousSegment === "dashboard" && twoBack === "projects") ||
+    previousSegment === "projects";
+  const isProgram =
+    !isProject &&
+    (previousSegment === "dynamic" ||
+      (previousSegment === "dashboard" && twoBack === "programs") ||
+      previousSegment === "programs");
   const isBeneficiary = previousSegment === "beneficiaries";
+  const isHousehold = previousSegment === "households";
+  const isActivity = previousSegment === "activities";
+  const isIndicator = previousSegment === "indicators";
+  const isCase = previousSegment === "cases";
 
   const { data: programName } = useQuery({
     queryKey: ['breadcrumb-program', segment],
     queryFn: async () => {
       const { data } = await supabase.from('programs').select('name').eq('id', segment).single();
-      return data?.name || segment;
+      return data?.name || null;
     },
     enabled: UUID_REGEX.test(segment) && isProgram,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: projectName } = useQuery({
+    queryKey: ['breadcrumb-project', segment],
+    queryFn: async () => {
+      const { data } = await supabase.from('projects').select('name').eq('id', segment).single();
+      return data?.name || null;
+    },
+    enabled: UUID_REGEX.test(segment) && isProject,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: householdName } = useQuery({
+    queryKey: ['breadcrumb-household', segment],
+    queryFn: async () => {
+      const { data } = await supabase.from('households' as any).select('household_name').eq('id', segment).single();
+      return (data as any)?.household_name || null;
+    },
+    enabled: UUID_REGEX.test(segment) && isHousehold,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: activityName } = useQuery({
+    queryKey: ['breadcrumb-activity', segment],
+    queryFn: async () => {
+      const { data } = await supabase.from('activities').select('title').eq('id', segment).single();
+      return (data as any)?.title || null;
+    },
+    enabled: UUID_REGEX.test(segment) && isActivity,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -66,7 +108,7 @@ function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
     queryKey: ['breadcrumb-beneficiary', segment],
     queryFn: async () => {
       const { data } = await supabase.from('beneficiaries').select('display_name').eq('id', segment).single();
-      return data?.display_name || segment;
+      return data?.display_name || null;
     },
     enabled: UUID_REGEX.test(segment) && isBeneficiary,
     staleTime: 5 * 60 * 1000,
@@ -76,9 +118,14 @@ function useDynamicBreadcrumbLabel(segment: string, segments: string[]) {
     return routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
   }
 
-  if (isProgram) return programName || "Loading...";
-  if (isBeneficiary) return beneficiaryName || "Loading...";
-  return segment.slice(0, 8) + "...";
+  if (isProject) return projectName || "Loading…";
+  if (isProgram) return programName || "Loading…";
+  if (isBeneficiary) return beneficiaryName || "Loading…";
+  if (isHousehold) return householdName || "Loading…";
+  if (isActivity) return activityName || "Loading…";
+  if (isIndicator || isCase) return "Loading…";
+  // Unknown UUID context — never expose the raw id.
+  return "Loading…";
 }
 
 function BreadcrumbEntry({ segment, segments, navigateTo, isLast }: { segment: string; segments: string[]; navigateTo: string; isLast: boolean }) {
