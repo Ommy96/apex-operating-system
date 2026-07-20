@@ -131,7 +131,6 @@ export default function HouseholdProfile() {
     );
   }
 
-  const guardianHeadId: string | null = (household as any).head_guardian_id ?? null;
   const beneficiaryHead = members.find((m: any) => m.id === household.head_of_household_id);
   const guardianHead = guardians.find((g: any) => g.id === guardianHeadId);
   const head = beneficiaryHead
