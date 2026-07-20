@@ -84,6 +84,21 @@ export default function HouseholdProfile() {
     },
   });
 
+  // Auto-suggest head-of-household when none set (must sit with hooks, not after
+  // early returns, or React throws error #310).
+  const guardianHeadId: string | null = (household as any)?.head_guardian_id ?? null;
+  const currentHeadBenId = (household as any)?.head_of_household_id ?? null;
+  useEffect(() => {
+    if (!household) return;
+    if (currentHeadBenId || guardianHeadId) return;
+    if (headOpen) return;
+    const primary = (guardians as any[]).find((g: any) => g.is_primary);
+    if (primary) {
+      setPickedHead(primary.id);
+      setPickedHeadKind('guardian');
+    }
+  }, [household, currentHeadBenId, guardianHeadId, guardians, headOpen]);
+
   const handleAddExisting = async (beneficiaryId: string) => {
     if (!householdId) return;
     try {
