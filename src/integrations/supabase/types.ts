@@ -17148,6 +17148,7 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      grant_all_permissions_to_org_admins: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
