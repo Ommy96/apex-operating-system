@@ -32,7 +32,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await supabase
         .rpc('get_user_role', { user_id: userId });
-      return (data as string) || 'staff';
+      const globalRole = (data as string) || 'staff';
+      // If the global user_roles table has no admin row for this user,
+      // fall back to org-level membership: an admin/owner in ANY organization
+      // should be treated as admin so UI gates (isAdmin) unlock. This keeps a
+      // single source of truth without forcing every button to re-check org
+      // membership individually.
+      if (globalRole !== 'admin') {
+        try {
+          const { data: memberships } = await supabase
+            .from('organization_members')
+            .select('role')
+            .eq('user_id', userId);
+          const rows = (memberships as { role: string }[] | null) || [];
+          const isOrgAdmin = rows.some(
+            (m) =>
+              m.role === 'admin' ||
+              m.role === 'owner' ||
+              m.role === 'org_admin'
+          );
+          if (isOrgAdmin) return 'admin';
+          if (globalRole === 'staff' && rows.some((m) => m.role === 'management' || m.role === 'manager')) {
+            return 'management';
+          }
+        } catch (e) {
+          logger.error('Org membership role lookup failed:', e);
+        }
+      }
+      return globalRole;
     } catch (error) {
       logger.error('Error fetching user role:', error);
       return 'staff';
