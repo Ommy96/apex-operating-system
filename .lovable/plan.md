@@ -1,72 +1,89 @@
+## Goal
+Make beneficiary registration + the "All Types" filter/cards sector-aware, driven by the org's chosen sector via the EXISTING dynamic-field system (`org_beneficiary_config`, `beneficiary_field_values`, `entity_types`). Preserve H2HO's current experience exactly.
 
-# Pass 5 — Scope-Aware Donor Reporting
+---
 
-Builds on existing pieces: `useReportAssembly`, `DonorProgressReport`, `beneficiaryReportGenerator`, `useDonorPortal`, Allocation Engine restriction data (Pass 4), and Phase 4 normalization (`indicatorNormalization.ts`, `program_rollup_indicators`). Does **not** rebuild them.
+## 1. Sector field templates (seed data)
 
-## 1. Scope detection — new hook
+Add a single new module `src/lib/sectorFieldTemplates.ts`:
 
-`src/hooks/useDonorScope.ts`
-- Input: `donorId` (or `donorAccountId` for portal).
-- Reads `donation_intents` + `allocations` for that donor, groups by `scope` and target id (`beneficiary_id | project_id | program_id`).
-- Returns:
-  ```ts
-  {
-    scopes: Array<{
-      kind: "beneficiary" | "project" | "program" | "unrestricted";
-      targetId: string | null;
-      targetName: string;
-      restriction: "restricted" | "unrestricted" | "time_restricted";
-      totalGiven: number;
-    }>;
-    hasBeneficiary: boolean;
-    hasProject: boolean;
-    hasProgram: boolean;
-    hasUnrestricted: boolean;
-  }
-  ```
-- Cross-org isolation: query scoped through `useOrganization` (portal path uses donor's org via `donor_accounts.organization_id`).
+- Exports `SECTOR_FIELD_TEMPLATES: Record<SectorKey, SectorFieldTemplate>` where each template = `{ sectionKey, sectionLabel, fields: FieldDef[] }`.
+- `FieldDef = { key, label, type: 'text'|'number'|'select'|'multiselect'|'boolean'|'date', options?, required?, sort_order }`.
+- Templates cover: `education_sponsorship`, `agriculture`, `health`, `humanitarian`, `livelihoods`, `faith_community`, `multi_sector` (empty, universal-core only). Map existing `SectorKey` values from `setupWizardSectors.ts` to these (education → education_sponsorship, faith_based → faith_community, child_protection/wash/etc → nearest match or multi_sector).
+- Fields listed per intent spec: land size + tenure, crops (multi), livestock (multi + counts), farming method, years farming, cooperative membership, inputs received (agriculture); patient no., facility, condition category, treatment status, SHA/insurance, disability, next of kin (health); etc.
+- Non-destructive merger helper: `mergeTemplateIntoConfig(existingCustomFields, template)` — adds only fields whose `key` is not already present.
 
-## 2. Three new report components (+ reuse existing)
+## 2. Wizard wiring
 
-`src/components/reports/`
-- `ProjectDonorReport.tsx` — one project: indicators (from `indicator_values` scoped to project via `project_baseline_indicators` / `indicators.project_id`), enrolled beneficiaries counts by gender, activities delivered in period, budget vs allocated vs spent from `budgets`/`allocations`/`expenses`, field highlights from `field_logs` (top 3), restriction disclosure banner via `RestrictionBadge`. Reuses `GrantFinancialReport` block.
-- `ProgramRolloutDonorReport.tsx` — one program: pulls all projects, aggregates normalized indicator values through `program_rollup_indicators` + `program_rollup_translations` using `aggregateNormalized` from `indicatorNormalization.ts`; combined beneficiary reach; per-project mini summaries (name, reach, %complete, spend); program-level outcomes text.
-- `UnrestrictedDonorReport.tsx` — org-impact summary: total unrestricted given, split of how those pooled funds were re-allocated across programs (join `allocations` where `restriction='unrestricted'` and `source_pool_id` traces to their intents), top 3 outcomes across org, indicator health mix.
-- Beneficiary shape stays `beneficiaryReportGenerator` (magazine) — wrap in `SponsorBeneficiaryReport.tsx` that lists all sponsored beneficiaries for the donor and renders the existing magazine + impact feed per beneficiary.
+`src/pages/OrgSetupWizard.tsx`: when sector is chosen and the wizard completes (or re-runs), after upserting `org_beneficiary_config`, merge the sector template into `custom_fields` via the helper above, then upsert. Never delete existing custom fields. Also persist `sector_key` (new column, see migration below) so profile section labels can pick the right template later.
 
-Each component:
-- Accepts `{ donorId, periodStart, periodEnd, orgId }`.
-- Renders inside a `forwardRef` div so a shared `pdfExport(ref, filename)` helper produces branded PDF (extract current html2canvas+jsPDF logic from `DonorProgressReport` into `src/lib/pdfExport.ts`).
-- Shows restriction badge + FX disclosure on every money figure (use existing `CurrencyAmount` + `RestrictionBadge`).
+## 3. Migration
 
-## 3. Auto-scoped generator UI
+One migration:
 
-Edit `src/components/reports/DonorReportRouter.tsx` (new) — dropdown of donors, selecting one calls `useDonorScope` and:
-- Proposes report shape chips ("Project: Foo", "Program: Bar rollup", "Sponsorship: 3 beneficiaries", "Unrestricted org summary"), each selected by default; user can uncheck / add.
-- Renders the corresponding report components stacked with export buttons.
-- Add a "Donor report" tab to `DonorReports.tsx` (or a new route section in FundingIntelligence) that mounts this router. Keep the existing template-based generator for legacy runs.
+- `ALTER TABLE public.org_beneficiary_config ADD COLUMN IF NOT EXISTS sector_key TEXT;`
+- `ALTER TABLE public.org_beneficiary_config ADD COLUMN IF NOT EXISTS beneficiary_types TEXT[] DEFAULT '{}'::text[];` (holds the wizard-chosen type keys so the Beneficiaries page cards + filter can read them).
+- Backfill: rows with `org_type='child_welfare'` and no `sector_key` → `education_sponsorship` (H2HO stays as-is because their existing custom_fields already contain the education fields; the merger is idempotent).
+- End with `NOTIFY pgrst, 'reload schema';`.
 
-## 4. Donor portal integration
+RLS: table already has policies; no changes needed. GRANTs already present.
 
-Edit `src/pages/DonorPortal.tsx` and add `src/components/donor-portal/DonorReportsTab.tsx`:
-- Uses `useDonorScope(currentDonorAccountId)`.
-- For each detected scope, renders a card linking to the read-only report view (Project / Program rollup / Beneficiary magazine / Unrestricted summary). Uses the same components in "portal" mode (hides admin-only actions, still allows PDF export).
-- RLS: relies on existing donor portal policies — donor sees only rows tied to their `donor_accounts.donor_id`.
+## 4. BeneficiaryForm — sector step
 
-## 5. Export
+`src/components/beneficiary/BeneficiaryForm.tsx`:
 
-`src/lib/pdfExport.ts` — shared helper (extract from `DonorProgressReport`). All four report shapes call it; beneficiary magazine keeps its current styling, others get a clean report layout using existing `Card`/`Separator` design tokens.
+- Add a new "Sector details" step after existing core steps, rendered ONLY when `config.custom_fields.length > 0` (H2HO's flow keeps rendering its education fields via the sector template so nothing visibly changes for them; other orgs get their sector's fields).
+- New component `src/components/beneficiary/SectorFieldsStep.tsx` renders one input per `custom_fields` entry with correct control (`Input`, `Input type=number`, `Select`, multi-select via checkbox grid, `Switch`, date input). Enforces `required` before allowing "Next".
+- On save, values go through the existing `beneficiary_field_values` path (new helper `src/lib/saveBeneficiaryFieldValues.ts` if none exists — otherwise reuse `saveBeneficiaryField.ts`). Wrap in `{ data, error }` with `toast.error` on failure.
 
-## 6. Test path checklist (matches user's)
+## 5. Profile side-panel section
 
-1. Project donor → only project report generated, restriction disclosure visible.
-2. Program donor → rollup with normalized indicators via `aggregateNormalized`.
-3. Sponsor → beneficiary magazine + impact feed (unchanged path, re-exposed through router).
-4. Unrestricted donor → org-impact summary component renders.
-5. Portal: `DonorReportsTab` filters by donor's scope only; cross-org RLS unchanged.
+`src/components/beneficiary/BeneficiaryOverviewTab.tsx`:
 
-## Notes / non-goals
+- Add a new collapsible section titled after `config.sector_key` (e.g. "FARM DETAILS" for agriculture, "HEALTH" for health). Section is hidden when template has no fields.
+- Reads current values from `beneficiary_field_values` (or existing hook) and renders each via existing `InlineEditableField`. Save-through path unchanged.
 
-- No DB migration. All scope data already exists after Pass 4.
-- No new edge functions; assembly happens client-side via existing tables + Phase 4 helpers.
-- Do not modify Allocation Engine or `indicatorNormalization.ts`.
+## 6. "All Types" dropdown + summary cards
+
+`src/pages/Beneficiaries.tsx`:
+
+- Read `config.beneficiary_types` (from wizard) plus `useEntityTypes()` for anything the admin added. Fall back to a sane default (`['individual']`) only when both are empty.
+- Replace hardcoded type array powering the filter `Select` and the summary stat cards.
+- Cards: cap at 5 configured types + one "Active" card; each shows a count from `beneficiaries` filtered by `entity_type_id` / `beneficiary_type` (whichever column exists — verify with a `supabase--read_query`).
+- Grid, search, export code paths already read `beneficiary_type` — no change beyond the filter options.
+
+## 7. Custom Fields settings
+
+Already present in `BeneficiaryDataSettings.tsx`. No behavioural change — just confirm the sector template merged into `custom_fields` shows up there so admins can add/remove.
+
+## Files touched
+
+Created:
+- `src/lib/sectorFieldTemplates.ts`
+- `src/components/beneficiary/SectorFieldsStep.tsx`
+- One migration
+
+Edited:
+- `src/hooks/useOrgBeneficiaryConfig.ts` (add `sector_key`, `beneficiary_types`)
+- `src/pages/OrgSetupWizard.tsx` (merge template on save)
+- `src/components/beneficiary/BeneficiaryForm.tsx` (add sector step)
+- `src/components/beneficiary/BeneficiaryOverviewTab.tsx` (sector section)
+- `src/pages/Beneficiaries.tsx` (dynamic types filter + cards)
+
+## Guardrails honoured
+
+- Existing custom fields never deleted (merge-only).
+- H2HO row untouched (`sector_key` backfilled but their `custom_fields` already contain the education fields).
+- All queries scope by `organization_id` via existing hooks.
+- `{ data, error }` + `toast.error` on every mutation.
+- Uses `useTierLabels` and `beneficiary_terminology` already threaded through the form.
+- Migration ends with `NOTIFY pgrst, 'reload schema';`.
+
+## Test plan (matches intent §4)
+
+1. Reconfigure a test org → Agriculture. Registration shows universal core + "Farm Details" step (land, crops, livestock, method). Save. Profile shows FARM DETAILS.
+2. Same org's Beneficiaries page: filter and cards show Farmer / Farmer group / Cooperative — not Students.
+3. H2HO reload: same form, same fields, same data.
+4. Umazi (or a new org) → Health: form shows Health template.
+5. Custom Fields settings still lets admin add a field on any org.
+6. Cross-org isolation: switching orgs swaps the template.
