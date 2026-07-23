@@ -372,7 +372,7 @@ const Dashboard = () => {
       {/* SECTION 1: GREETING ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h1 style={{ fontSize: 19, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.3px' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.4px' }}>
             {greeting}, {firstName}
           </h1>
           <p style={{ fontSize: 12, color: 'var(--brand-ink-3)', marginTop: 3 }}>
@@ -383,7 +383,7 @@ const Dashboard = () => {
           <button
             onClick={() => navigate('/analytics')}
             style={{ background: 'var(--brand-surface)', border: '1px solid #CDD2DF', color: 'var(--brand-ink-2)', borderRadius: 8, padding: '7px 13px', fontSize: 12, cursor: 'pointer' }}
-            className="hover:bg-gray-50 transition-colors"
+            className="hover:opacity-90 transition-opacity"
           >
             Export report
           </button>
