@@ -40,6 +40,7 @@ import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
+import { SectorFieldsStep } from './SectorFieldsStep';
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
