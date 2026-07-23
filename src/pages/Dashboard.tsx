@@ -585,6 +585,12 @@ const Dashboard = () => {
 
         {/* COLUMN 3: Burn Rates + Deadlines */}
         <div className="flex flex-col gap-[10px]">
+          <IntelligencePanel
+            headline={intelHeadline}
+            subline={intelSubline}
+            signals={intelligenceSignals}
+            isLoading={reportsLoading || indicatorsLoading || snapshotLoading || burnLoading}
+          />
           {/* CARD C: Grant Burn Rates */}
           <DashCard title="Grant burn rates" subtitle="Spend tracking">
             {burnLoading ? (
