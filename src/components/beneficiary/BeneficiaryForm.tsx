@@ -1007,6 +1007,16 @@ export function BeneficiaryForm({
           />
         )}
         {step === 6 && <Step7Notes form={form} update={update} />}
+        {step === 7 && (
+          <SectorFieldsStep
+            fields={(config?.custom_fields as any[]) || []}
+            values={form.sector_data || {}}
+            onChange={(name, value) =>
+              update('sector_data', { ...(form.sector_data || {}), [name]: value })
+            }
+            sectorLabel={config?.org_type}
+          />
+        )}
       </Card>
 
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
