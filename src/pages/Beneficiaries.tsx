@@ -124,6 +124,14 @@ export default function Beneficiaries() {
   const [programFilter, setProgramFilter] = useState('all');
   const [programs, setPrograms] = useState<Program[]>([]);
   const [enrollmentMap, setEnrollmentMap] = useState<Record<string, Set<string>>>({});
+  // Org-configured beneficiary types (from the setup wizard). Used to relabel
+  // the three fixed enum buckets (student / adult / group) so that e.g. an
+  // agriculture org sees "Farmer households" instead of "Students".
+  const [typeLabels, setTypeLabels] = useState<{ student: string; adult: string; group: string }>({
+    student: 'Students',
+    adult: 'Adults',
+    group: 'Groups',
+  });
   const [stats, setStats] = useState<BeneficiaryStats>({
     total: 0,
     students: 0,
@@ -136,6 +144,7 @@ export default function Beneficiaries() {
     if (organizationId) {
       fetchBeneficiaries();
       fetchPrograms();
+      fetchTypeLabels();
     }
   }, [organizationId]);
 
