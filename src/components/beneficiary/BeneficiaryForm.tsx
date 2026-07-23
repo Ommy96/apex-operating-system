@@ -490,6 +490,10 @@ export function BeneficiaryForm({
     if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
+    // Sector-specific step — only when the org configured custom fields
+    if (Array.isArray(config?.custom_fields) && config.custom_fields.length > 0) {
+      steps.push(7);
+    }
     return steps;
   }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
 
