@@ -155,7 +155,7 @@ const Dashboard = () => {
       name: ps.programName.length > 12 ? ps.programName.slice(0, 12) + '…' : ps.programName,
       fullName: ps.programName,
       count: ps.count,
-      color: ps.color || '#1D9E8A',
+      color: ps.color || 'var(--accent-mid)',
     }));
   }, [programStats]);
 
@@ -332,25 +332,25 @@ const Dashboard = () => {
 
   const burnStatusColor = (status: string) => {
     switch (status) {
-      case 'on_track': return '#1D9E8A';
-      case 'at_risk': return '#C97B1A';
-      case 'overspending': return '#C53B6C';
-      case 'underspending': return '#1B5FBB';
-      default: return '#8891A8';
+      case 'on_track': return 'var(--accent-mid)';
+      case 'at_risk': return 'var(--status-warning)';
+      case 'overspending': return 'var(--status-danger)';
+      case 'underspending': return 'var(--status-info)';
+      default: return 'var(--brand-ink-3)';
     }
   };
 
   const deadlineBadge = (days: number) => {
-    if (days < 0) return { bg: '#FDE8F0', color: '#C53B6C', label: 'Overdue' };
-    if (days <= 7) return { bg: '#FDE8F0', color: '#C53B6C', label: `${days}d` };
-    if (days <= 14) return { bg: '#FEF3E2', color: '#C97B1A', label: `${days}d` };
-    return { bg: '#E0F4F1', color: '#0F7B6C', label: `${days}d` };
+    if (days < 0) return { bg: 'var(--status-danger-bg)', color: 'var(--status-danger)', label: 'Overdue' };
+    if (days <= 7) return { bg: 'var(--status-danger-bg)', color: 'var(--status-danger)', label: `${days}d` };
+    if (days <= 14) return { bg: 'var(--status-warning-bg)', color: 'var(--status-warning)', label: `${days}d` };
+    return { bg: 'var(--accent-lt)', color: 'var(--accent-brand)', label: `${days}d` };
   };
 
   const statusDotColor = (status: string) => {
-    if (status === 'on_track') return '#1D9E8A';
-    if (status === 'at_risk') return '#C97B1A';
-    return '#C53B6C';
+    if (status === 'on_track') return 'var(--accent-mid)';
+    if (status === 'at_risk') return 'var(--status-warning)';
+    return 'var(--status-danger)';
   };
 
   const formatKES = (n: number) => {
@@ -360,28 +360,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={{ background: '#F4F5F8', minHeight: '100vh' }} className="p-5 md:p-6">
+    <div style={{ background: 'var(--brand-canvas)', minHeight: '100vh' }} className="p-5 md:p-6">
       {/* SECTION 1: GREETING ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h1 style={{ fontSize: 19, fontWeight: 600, color: '#0A0F1E', letterSpacing: '-0.3px' }}>
+          <h1 style={{ fontSize: 19, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.3px' }}>
             {greeting}, {firstName}
           </h1>
-          <p style={{ fontSize: 12, color: '#8891A8', marginTop: 3 }}>
+          <p style={{ fontSize: 12, color: 'var(--brand-ink-3)', marginTop: 3 }}>
             {formattedDate}{currentOrganization?.organization_id ? ` · ${currentOrganization?.organization_id && (currentOrganization as any)?.organizations?.name ? (currentOrganization as any).organizations.name : ''}` : ''}
           </p>
         </div>
         <div className="flex items-center gap-[7px]">
           <button
             onClick={() => navigate('/analytics')}
-            style={{ background: '#fff', border: '1px solid #CDD2DF', color: '#3D4558', borderRadius: 8, padding: '7px 13px', fontSize: 12, cursor: 'pointer' }}
+            style={{ background: 'var(--brand-surface)', border: '1px solid #CDD2DF', color: 'var(--brand-ink-2)', borderRadius: 8, padding: '7px 13px', fontSize: 12, cursor: 'pointer' }}
             className="hover:bg-gray-50 transition-colors"
           >
             Export report
           </button>
           <button
             onClick={() => navigate('/programs-management')}
-            style={{ background: '#1D9E8A', color: '#fff', borderRadius: 8, padding: '7px 15px', fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer' }}
+            style={{ background: 'var(--accent-mid)', color: 'var(--brand-surface)', borderRadius: 8, padding: '7px 15px', fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer' }}
             className="hover:opacity-90 transition-opacity flex items-center gap-[5px]"
           >
             <Plus size={12} />
@@ -406,7 +406,7 @@ const Dashboard = () => {
           accentColor="#1D9E8A"
           isLoading={statsLoading}
           value={totalBeneficiaries}
-          pill={{ bg: '#E0F4F1', color: '#0F7B6C', text: `+${newThisMonth} this month` }}
+          pill={{ bg: 'var(--accent-lt)', color: 'var(--accent-brand)', text: `+${newThisMonth} this month` }}
         />
         {/* Card 2: Active Grants */}
         <MetricCard
@@ -414,25 +414,25 @@ const Dashboard = () => {
           accentColor="#1B5FBB"
           isLoading={grantsLoading}
           value={grantData?.count || 0}
-          pill={{ bg: '#E8EFFC', color: '#1B5FBB', text: formatKES(grantData?.totalAmount || 0) }}
+          pill={{ bg: 'var(--status-info-bg)', color: 'var(--status-info)', text: formatKES(grantData?.totalAmount || 0) }}
         />
         {/* Card 3: Activities */}
         <div
           className="relative overflow-hidden"
-          style={{ background: '#fff', borderRadius: 12, border: '1px solid #E2E5EF', padding: '14px 16px' }}
+          style={{ background: 'var(--brand-surface)', borderRadius: 12, border: '1px solid #E2E5EF', padding: '14px 16px' }}
         >
-          <div style={{ position: 'absolute', left: 0, top: 0, width: 3, height: '100%', background: '#1D9E8A' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, width: 3, height: '100%', background: 'var(--accent-mid)' }} />
           <div style={{ paddingLeft: 6 }}>
-            <p style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, color: '#8891A8', marginBottom: 8 }}>ACTIVITIES</p>
+            <p style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-ink-3)', marginBottom: 8 }}>ACTIVITIES</p>
             {activitiesLoading ? (
               <><Skeleton className="h-[22px] w-16 mb-[6px]" /><Skeleton className="h-[14px] w-24" /></>
             ) : (
               <>
-                <p style={{ fontSize: 22, fontWeight: 600, color: '#0A0F1E', letterSpacing: '-0.3px', marginBottom: 6 }} className="tabular-nums">
+                <p style={{ fontSize: 22, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.3px', marginBottom: 6 }} className="tabular-nums">
                   {activityData?.completed || 0}
-                  <span style={{ fontSize: 13, fontWeight: 400, color: '#8891A8' }}> / {activityData?.total || 0}</span>
+                  <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--brand-ink-3)' }}> / {activityData?.total || 0}</span>
                 </p>
-                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: '#E0F4F1', color: '#0F7B6C' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: 'var(--accent-lt)', color: 'var(--accent-brand)' }}>
                   {activityData?.total ? Math.round(((activityData?.completed || 0) / activityData.total) * 100) : 0}% completed
                 </span>
               </>
@@ -445,10 +445,10 @@ const Dashboard = () => {
           accentColor="#C97B1A"
           isLoading={reportsLoading}
           value={reportsDue}
-          valueColor={reportsDue > 0 ? '#C97B1A' : undefined}
+          valueColor={reportsDue > 0 ? 'var(--status-warning)' : undefined}
           pill={reportsDue > 0
-            ? { bg: '#FEF3E2', color: '#C97B1A', text: 'Action needed' }
-            : { bg: '#E0F4F1', color: '#0F7B6C', text: 'All clear' }
+            ? { bg: 'var(--status-warning-bg)', color: 'var(--status-warning)', text: 'Action needed' }
+            : { bg: 'var(--accent-lt)', color: 'var(--accent-brand)', text: 'All clear' }
           }
         />
       </div>
@@ -475,11 +475,11 @@ const Dashboard = () => {
           ) : (
             programmeReach.map(p => (
               <div key={p.fullName} className="flex items-center gap-[9px] mb-[8px] last:mb-0">
-                <span style={{ fontSize: 11, color: '#3D4558', width: 72, flexShrink: 0 }} className="truncate" title={p.fullName}>{p.name}</span>
-                <div style={{ flex: 1, height: 7, background: '#F4F5F8', borderRadius: 999, overflow: 'hidden' }}>
+                <span style={{ fontSize: 11, color: 'var(--brand-ink-2)', width: 72, flexShrink: 0 }} className="truncate" title={p.fullName}>{p.name}</span>
+                <div style={{ flex: 1, height: 7, background: 'var(--brand-canvas)', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 999, width: `${Math.max((p.count / maxReach) * 100, 4)}%`, background: p.color, transition: 'width 0.6s ease' }} />
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 500, color: '#0A0F1E', width: 32, textAlign: 'right' }} className="tabular-nums">{p.count}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--brand-ink)', width: 32, textAlign: 'right' }} className="tabular-nums">{p.count}</span>
               </div>
             ))
           )}
@@ -506,11 +506,11 @@ const Dashboard = () => {
               {indicatorStatus.indicators.map((ind: any) => (
                 <div key={ind.id} className="flex items-center gap-[9px] py-[7px]" style={{ borderBottom: '1px solid #E2E5EF' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: statusDotColor(ind.status), flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 11, color: '#3D4558' }} className="truncate">{ind.name}</span>
-                  <div style={{ width: 52, height: 4, background: '#F4F5F8', borderRadius: 999, overflow: 'hidden' }}>
+                  <span style={{ flex: 1, fontSize: 11, color: 'var(--brand-ink-2)' }} className="truncate">{ind.name}</span>
+                  <div style={{ width: 52, height: 4, background: 'var(--brand-canvas)', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', borderRadius: 999, width: `${ind.pct}%`, background: statusDotColor(ind.status) }} />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: '#0A0F1E', width: 30, textAlign: 'right' }} className="tabular-nums">{ind.pct}%</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--brand-ink)', width: 30, textAlign: 'right' }} className="tabular-nums">{ind.pct}%</span>
                 </div>
               ))}
             </>
@@ -529,10 +529,10 @@ const Dashboard = () => {
               burnRates.map((g, i) => (
                 <div key={i} className="mb-[10px] last:mb-0">
                   <div className="flex justify-between mb-[3px]">
-                    <span style={{ fontSize: 11, color: '#3D4558' }} className="truncate">{g.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--brand-ink-2)' }} className="truncate">{g.name}</span>
                     <span style={{ fontSize: 11, fontWeight: 500, color: burnStatusColor(g.status) }} className="tabular-nums">{g.pct}%</span>
                   </div>
-                  <div style={{ height: 5, background: '#F4F5F8', borderRadius: 999, overflow: 'hidden' }}>
+                  <div style={{ height: 5, background: 'var(--brand-canvas)', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', borderRadius: 999, width: `${g.pct}%`, background: burnStatusColor(g.status), transition: 'width 0.6s ease' }} />
                   </div>
                 </div>
@@ -557,8 +557,8 @@ const Dashboard = () => {
                 return (
                   <div key={d.id} className="flex items-center gap-[10px] py-[8px]" style={{ borderBottom: '1px solid #E2E5EF' }}>
                     <div className="flex-1 min-w-0">
-                      <p style={{ fontSize: 12, fontWeight: 500, color: '#0A0F1E' }} className="truncate">{d.title}</p>
-                      <p style={{ fontSize: 10, color: '#8891A8' }} className="truncate">{d.grantName || 'Grant report'}</p>
+                      <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--brand-ink)' }} className="truncate">{d.title}</p>
+                      <p style={{ fontSize: 10, color: 'var(--brand-ink-3)' }} className="truncate">{d.grantName || 'Grant report'}</p>
                     </div>
                     <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: badge.bg, color: badge.color, whiteSpace: 'nowrap' }}>
                       {badge.label}
@@ -596,8 +596,8 @@ const Dashboard = () => {
                   style={{ borderBottom: '1px solid #E2E5EF' }}
                 >
                   <div className="flex-1 min-w-0">
-                    <p style={{ fontSize: 12, fontWeight: 500, color: '#0A0F1E' }} className="truncate">{m.title}</p>
-                    <p style={{ fontSize: 10, color: '#8891A8' }} className="truncate">
+                    <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--brand-ink)' }} className="truncate">{m.title}</p>
+                    <p style={{ fontSize: 10, color: 'var(--brand-ink-3)' }} className="truncate">
                       {m.projectName || m.programName || m.type || 'Milestone'}
                     </p>
                   </div>
@@ -629,16 +629,16 @@ const Dashboard = () => {
 
               {countyData.length > 0 && (
                 <div style={{ borderTop: '1px solid #E2E5EF', marginTop: 12, paddingTop: 10 }}>
-                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5, color: '#8891A8', fontWeight: 500, marginBottom: 7 }}>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-ink-3)', fontWeight: 500, marginBottom: 7 }}>
                     {termPlural} by county
                   </p>
                   {countyData.map(c => (
                     <div key={c.county} className="flex items-center gap-[9px] mb-[8px] last:mb-0">
-                      <span style={{ fontSize: 11, color: '#3D4558', width: 72, flexShrink: 0 }} className="truncate">{c.county}</span>
-                      <div style={{ flex: 1, height: 7, background: '#F4F5F8', borderRadius: 999, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', borderRadius: 999, width: `${(c.count / maxCounty) * 100}%`, background: '#1D9E8A', transition: 'width 0.6s ease' }} />
+                      <span style={{ fontSize: 11, color: 'var(--brand-ink-2)', width: 72, flexShrink: 0 }} className="truncate">{c.county}</span>
+                      <div style={{ flex: 1, height: 7, background: 'var(--brand-canvas)', borderRadius: 999, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', borderRadius: 999, width: `${(c.count / maxCounty) * 100}%`, background: 'var(--accent-mid)', transition: 'width 0.6s ease' }} />
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 500, color: '#0A0F1E', width: 32, textAlign: 'right' }} className="tabular-nums">{c.count}</span>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--brand-ink)', width: 32, textAlign: 'right' }} className="tabular-nums">{c.count}</span>
                     </div>
                   ))}
                 </div>
@@ -660,15 +660,15 @@ function MetricCard({ label, accentColor, isLoading, value, valueColor, pill }: 
   valueColor?: string; pill: { bg: string; color: string; text: string };
 }) {
   return (
-    <div className="relative overflow-hidden" style={{ background: '#fff', borderRadius: 12, border: '1px solid #E2E5EF', padding: '14px 16px' }}>
+    <div className="relative overflow-hidden" style={{ background: 'var(--brand-surface)', borderRadius: 12, border: '1px solid #E2E5EF', padding: '14px 16px' }}>
       <div style={{ position: 'absolute', left: 0, top: 0, width: 3, height: '100%', background: accentColor }} />
       <div style={{ paddingLeft: 6 }}>
-        <p style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, color: '#8891A8', marginBottom: 8 }}>{label}</p>
+        <p style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-ink-3)', marginBottom: 8 }}>{label}</p>
         {isLoading ? (
           <><Skeleton className="h-[22px] w-16 mb-[6px]" /><Skeleton className="h-[14px] w-24" /></>
         ) : (
           <>
-            <p style={{ fontSize: 22, fontWeight: 600, color: valueColor || '#0A0F1E', letterSpacing: '-0.3px', marginBottom: 6 }} className="tabular-nums">{value.toLocaleString()}</p>
+            <p style={{ fontSize: 22, fontWeight: 600, color: valueColor || 'var(--brand-ink)', letterSpacing: '-0.3px', marginBottom: 6 }} className="tabular-nums">{value.toLocaleString()}</p>
             <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: pill.bg, color: pill.color }}>
               {pill.text}
             </span>
@@ -681,10 +681,10 @@ function MetricCard({ label, accentColor, isLoading, value, valueColor, pill }: 
 
 function DashCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E5EF', overflow: 'hidden' }}>
+    <div style={{ background: 'var(--brand-surface)', borderRadius: 14, border: '1px solid #E2E5EF', overflow: 'hidden' }}>
       <div className="flex items-center justify-between" style={{ padding: '13px 16px 10px', borderBottom: '1px solid #E2E5EF' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#0A0F1E' }}>{title}</span>
-        {subtitle && <span style={{ fontSize: 10, color: '#8891A8' }}>{subtitle}</span>}
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--brand-ink)' }}>{title}</span>
+        {subtitle && <span style={{ fontSize: 10, color: 'var(--brand-ink-3)' }}>{subtitle}</span>}
       </div>
       <div style={{ padding: '13px 16px' }}>{children}</div>
     </div>
@@ -695,16 +695,16 @@ function MiniStat({ value, label, color }: { value: number; label: string; color
   return (
     <div className="flex-1 text-center">
       <p style={{ fontSize: 16, fontWeight: 600, color }} className="tabular-nums">{value}</p>
-      <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.4, color: '#8891A8' }}>{label}</p>
+      <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.4, color: 'var(--brand-ink-3)' }}>{label}</p>
     </div>
   );
 }
 
 function SnapshotTile({ value, label, isAlert }: { value: string | number; label: string; isAlert?: boolean }) {
   return (
-    <div style={{ background: '#F4F5F8', borderRadius: 10, padding: '11px 14px', textAlign: 'center' }}>
-      <p style={{ fontSize: 18, fontWeight: 600, color: isAlert ? '#C53B6C' : '#0A0F1E', letterSpacing: '-0.3px' }} className="tabular-nums">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-      <p style={{ fontSize: 10, color: '#8891A8', marginTop: 2 }}>{label}</p>
+    <div style={{ background: 'var(--brand-canvas)', borderRadius: 10, padding: '11px 14px', textAlign: 'center' }}>
+      <p style={{ fontSize: 18, fontWeight: 600, color: isAlert ? 'var(--status-danger)' : 'var(--brand-ink)', letterSpacing: '-0.3px' }} className="tabular-nums">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+      <p style={{ fontSize: 10, color: 'var(--brand-ink-3)', marginTop: 2 }}>{label}</p>
     </div>
   );
 }
@@ -712,8 +712,8 @@ function SnapshotTile({ value, label, isAlert }: { value: string | number; label
 function EmptyState({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-6">
-      <div style={{ width: 24, height: 24, borderRadius: 6, background: '#8891A8', opacity: 0.15, marginBottom: 8 }} />
-      <p style={{ fontSize: 12, color: '#8891A8' }}>{text}</p>
+      <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--brand-ink-3)', opacity: 0.15, marginBottom: 8 }} />
+      <p style={{ fontSize: 12, color: 'var(--brand-ink-3)' }}>{text}</p>
     </div>
   );
 }
