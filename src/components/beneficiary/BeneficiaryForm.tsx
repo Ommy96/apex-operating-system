@@ -711,6 +711,9 @@ export function BeneficiaryForm({
         photo_url: form.photo_url || null,
         status: 'active',
         is_active: true,
+        sector_data: form.sector_data && Object.keys(form.sector_data).length > 0
+          ? form.sector_data
+          : {},
       });
 
       let beneficiaryId = beneficiary?.id;
