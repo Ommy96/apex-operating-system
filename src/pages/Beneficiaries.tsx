@@ -261,6 +261,37 @@ export default function Beneficiaries() {
     }
   };
 
+  const fetchTypeLabels = async () => {
+    if (!organizationId) return;
+    try {
+      const { data } = await supabase
+        .from('organizations')
+        .select('setup_config')
+        .eq('id', organizationId)
+        .maybeSingle();
+      const types: Array<{ key?: string; label?: string } | string> =
+        (data as any)?.setup_config?.beneficiary_types || [];
+      if (!Array.isArray(types) || types.length === 0) return;
+      const norm = types.map((t) =>
+        typeof t === 'string' ? { key: t, label: t } : { key: t.key || '', label: t.label || t.key || '' },
+      );
+      // Map configured types to the three enum buckets we render.
+      const groupKeys = ['farmer_group', 'community_group', 'cooperative', 'school', 'group', 'household'];
+      const studentKeys = ['child', 'youth', 'student'];
+      const groupType = norm.find((t) => groupKeys.includes(t.key));
+      const studentType = norm.find((t) => studentKeys.includes(t.key));
+      const adultType = norm.find((t) => !groupKeys.includes(t.key) && !studentKeys.includes(t.key)) || norm[0];
+      const plural = (s: string) => (!s ? s : /s$/i.test(s) ? s : `${s}s`);
+      setTypeLabels({
+        student: plural(studentType?.label || 'Students'),
+        adult: plural(adultType?.label || 'Adults'),
+        group: plural(groupType?.label || 'Groups'),
+      });
+    } catch (error) {
+      logger.warn('Failed to load configured beneficiary types', error);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
