@@ -295,6 +295,10 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   vulnerability_level: beneficiary?.vulnerability_level ?? '',
   notes: beneficiary?.background_narrative ?? beneficiary?.notes ?? '',
   photo_url: beneficiary?.photo_url ?? '',
+  sector_data:
+    beneficiary?.sector_data && typeof beneficiary.sector_data === 'object'
+      ? { ...beneficiary.sector_data }
+      : {},
 });
 
 const compactPayload = (payload: Record<string, any>) =>
