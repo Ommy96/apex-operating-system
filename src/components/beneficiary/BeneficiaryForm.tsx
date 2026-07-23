@@ -138,6 +138,9 @@ interface FormState {
   // Step 7
   notes: string;
   photo_url: string;
+
+  // Step 8 — dynamic sector-specific fields
+  sector_data: Record<string, any>;
 }
 
 const EMPTY_STATE: FormState = {
@@ -198,6 +201,7 @@ const EMPTY_STATE: FormState = {
   vulnerability_level: '',
   notes: '',
   photo_url: '',
+  sector_data: {},
 };
 
 const DEFAULT_VULN_TAGS = [
