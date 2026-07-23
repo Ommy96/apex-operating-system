@@ -27,10 +27,23 @@ export interface OrgBeneficiaryConfig {
   collect_hiv_status: boolean;
   collect_nutritional_status: boolean;
   collect_disability_details: boolean;
-  custom_fields: any[];
+  custom_fields: SectorField[];
   beneficiary_terminology: string;
   beneficiary_terminology_plural?: string | null;
   custom_vulnerability_tags?: string[] | null;
+}
+
+/** A single sector-specific beneficiary field, produced by the setup wizard
+ *  from the chosen sector's template. Stored in
+ *  org_beneficiary_config.custom_fields and rendered by the dynamic
+ *  "Sector details" step in BeneficiaryForm. */
+export interface SectorField {
+  name: string;               // key inside beneficiaries.sector_data
+  label: string;              // UI label
+  type: string;               // text | number | date | select | textarea | boolean
+  group?: string;             // logical grouping label
+  options?: string[];         // for select
+  helper?: string;
 }
 
 const DEFAULT_CONFIG: Partial<OrgBeneficiaryConfig> = {
