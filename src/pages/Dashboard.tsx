@@ -338,6 +338,76 @@ const Dashboard = () => {
 
   const maxCounty = useMemo(() => Math.max(...countyData.map(c => c.count), 1), [countyData]);
 
+  // Build a compact monthly-total series from the enrollment trend data —
+  // used purely for the sparkline visualisation on the top KPI tiles. No new
+  // queries; drops in gracefully when trendData is empty.
+  const beneficiarySpark = useMemo(() => {
+    if (!Array.isArray(trendData) || trendData.length === 0) return [] as number[];
+    return trendData.slice(-12).map((point: any) => {
+      let total = 0;
+      Object.entries(point).forEach(([key, value]) => {
+        if (key === 'month') return;
+        if (typeof value === 'number') total += value;
+      });
+      return total;
+    });
+  }, [trendData]);
+
+  // ApexOS Intelligence — recommended actions synthesised from existing
+  // dashboard signals only. No new AI calls.
+  const intelligenceSignals = useMemo<IntelSignal[]>(() => {
+    const sig: IntelSignal[] = [];
+    if ((reportsDue || 0) > 0) {
+      sig.push({
+        id: 'reports-due',
+        icon: 'clock',
+        tone: 'warn',
+        title: `${reportsDue} report${reportsDue === 1 ? '' : 's'} due within 30 days`,
+        detail: 'Review upcoming grant deadlines',
+        href: '/program-reports',
+      });
+    }
+    if (indicatorStatus && indicatorStatus.offTrack > 0) {
+      sig.push({
+        id: 'indicators-off',
+        icon: 'trend',
+        tone: 'danger',
+        title: `${indicatorStatus.offTrack} indicator${indicatorStatus.offTrack === 1 ? '' : 's'} off track`,
+        detail: 'Open M&E dashboard',
+        href: '/me',
+      });
+    }
+    if ((snapshot?.complaints || 0) > 0) {
+      sig.push({
+        id: 'open-complaints',
+        icon: 'risk',
+        tone: 'danger',
+        title: `${snapshot!.complaints} open complaint${snapshot!.complaints === 1 ? '' : 's'}`,
+        detail: 'Triage in complaint management',
+        href: '/complaints',
+      });
+    }
+    const overspend = burnRates.find(b => b.status === 'overspending');
+    if (overspend) {
+      sig.push({
+        id: 'burn-overspending',
+        icon: 'trend',
+        tone: 'warn',
+        title: `${overspend.name} is overspending`,
+        detail: 'Review grant burn rates',
+        href: '/financial-suite',
+      });
+    }
+    return sig;
+  }, [reportsDue, indicatorStatus, snapshot, burnRates]);
+
+  const intelHeadline = intelligenceSignals.length === 0
+    ? 'All systems healthy'
+    : `${intelligenceSignals.length} item${intelligenceSignals.length === 1 ? '' : 's'} need your attention`;
+  const intelSubline = intelligenceSignals.length === 0
+    ? 'No outstanding risks detected across programmes, indicators or grants.'
+    : 'Prioritised from indicators, grants and open complaints.';
+
   const burnStatusColor = (status: string) => {
     switch (status) {
       case 'on_track': return 'var(--accent-mid)';
