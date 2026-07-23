@@ -124,6 +124,14 @@ export default function Beneficiaries() {
   const [programFilter, setProgramFilter] = useState('all');
   const [programs, setPrograms] = useState<Program[]>([]);
   const [enrollmentMap, setEnrollmentMap] = useState<Record<string, Set<string>>>({});
+  // Org-configured beneficiary types (from the setup wizard). Used to relabel
+  // the three fixed enum buckets (student / adult / group) so that e.g. an
+  // agriculture org sees "Farmer households" instead of "Students".
+  const [typeLabels, setTypeLabels] = useState<{ student: string; adult: string; group: string }>({
+    student: 'Students',
+    adult: 'Adults',
+    group: 'Groups',
+  });
   const [stats, setStats] = useState<BeneficiaryStats>({
     total: 0,
     students: 0,
@@ -136,6 +144,7 @@ export default function Beneficiaries() {
     if (organizationId) {
       fetchBeneficiaries();
       fetchPrograms();
+      fetchTypeLabels();
     }
   }, [organizationId]);
 
@@ -249,6 +258,37 @@ export default function Beneficiaries() {
       setEnrollmentMap(map);
     } catch (error) {
       logger.error('Error fetching programs:', error);
+    }
+  };
+
+  const fetchTypeLabels = async () => {
+    if (!organizationId) return;
+    try {
+      const { data } = await supabase
+        .from('organizations')
+        .select('setup_config')
+        .eq('id', organizationId)
+        .maybeSingle();
+      const types: Array<{ key?: string; label?: string } | string> =
+        (data as any)?.setup_config?.beneficiary_types || [];
+      if (!Array.isArray(types) || types.length === 0) return;
+      const norm = types.map((t) =>
+        typeof t === 'string' ? { key: t, label: t } : { key: t.key || '', label: t.label || t.key || '' },
+      );
+      // Map configured types to the three enum buckets we render.
+      const groupKeys = ['farmer_group', 'community_group', 'cooperative', 'school', 'group', 'household'];
+      const studentKeys = ['child', 'youth', 'student'];
+      const groupType = norm.find((t) => groupKeys.includes(t.key));
+      const studentType = norm.find((t) => studentKeys.includes(t.key));
+      const adultType = norm.find((t) => !groupKeys.includes(t.key) && !studentKeys.includes(t.key)) || norm[0];
+      const plural = (s: string) => (!s ? s : /s$/i.test(s) ? s : `${s}s`);
+      setTypeLabels({
+        student: plural(studentType?.label || 'Students'),
+        adult: plural(adultType?.label || 'Adults'),
+        group: plural(groupType?.label || 'Groups'),
+      });
+    } catch (error) {
+      logger.warn('Failed to load configured beneficiary types', error);
     }
   };
 
@@ -452,19 +492,19 @@ export default function Beneficiaries() {
           variant="primary"
         />
         <StatCard
-          title="Students"
+          title={typeLabels.student}
           value={stats.students}
           icon={GraduationCap}
           variant="info"
         />
         <StatCard
-          title="Adults"
+          title={typeLabels.adult}
           value={stats.adults}
           icon={UserCheck}
           variant="success"
         />
         <StatCard
-          title="Groups"
+          title={typeLabels.group}
           value={stats.groups}
           icon={UsersRound}
           variant="warning"
@@ -538,9 +578,9 @@ export default function Beneficiaries() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types ({stats.total})</SelectItem>
-              <SelectItem value="student">Students ({stats.students})</SelectItem>
-              <SelectItem value="adult">Adults ({stats.adults})</SelectItem>
-              <SelectItem value="group">Groups ({stats.groups})</SelectItem>
+              <SelectItem value="student">{typeLabels.student} ({stats.students})</SelectItem>
+              <SelectItem value="adult">{typeLabels.adult} ({stats.adults})</SelectItem>
+              <SelectItem value="group">{typeLabels.group} ({stats.groups})</SelectItem>
             </SelectContent>
           </Select>
 

@@ -1482,6 +1482,7 @@ export type Database = {
           primary_need: string | null
           registration_source: string | null
           religion: string | null
+          sector_data: Json
           source_of_income: string | null
           special_needs_details: string | null
           status: string
@@ -1568,6 +1569,7 @@ export type Database = {
           primary_need?: string | null
           registration_source?: string | null
           religion?: string | null
+          sector_data?: Json
           source_of_income?: string | null
           special_needs_details?: string | null
           status?: string
@@ -1654,6 +1656,7 @@ export type Database = {
           primary_need?: string | null
           registration_source?: string | null
           religion?: string | null
+          sector_data?: Json
           source_of_income?: string | null
           special_needs_details?: string | null
           status?: string

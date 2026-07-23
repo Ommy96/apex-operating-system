@@ -40,6 +40,7 @@ import { toDateInputValue } from '@/lib/dateUtils';
 import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
+import { SectorFieldsStep } from './SectorFieldsStep';
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
@@ -138,6 +139,9 @@ interface FormState {
   // Step 7
   notes: string;
   photo_url: string;
+
+  // Step 8 — dynamic sector-specific fields
+  sector_data: Record<string, any>;
 }
 
 const EMPTY_STATE: FormState = {
@@ -198,6 +202,7 @@ const EMPTY_STATE: FormState = {
   vulnerability_level: '',
   notes: '',
   photo_url: '',
+  sector_data: {},
 };
 
 const DEFAULT_VULN_TAGS = [
@@ -229,6 +234,7 @@ const STEP_LABELS = [
   'Health',
   'Vulnerability',
   'Notes',
+  'Sector details',
 ];
 const parseTagArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -291,6 +297,10 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   vulnerability_level: beneficiary?.vulnerability_level ?? '',
   notes: beneficiary?.background_narrative ?? beneficiary?.notes ?? '',
   photo_url: beneficiary?.photo_url ?? '',
+  sector_data:
+    beneficiary?.sector_data && typeof beneficiary.sector_data === 'object'
+      ? { ...beneficiary.sector_data }
+      : {},
 });
 
 const compactPayload = (payload: Record<string, any>) =>
@@ -480,6 +490,10 @@ export function BeneficiaryForm({
     if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
+    // Sector-specific step — only when the org configured custom fields
+    if (Array.isArray(config?.custom_fields) && config.custom_fields.length > 0) {
+      steps.push(7);
+    }
     return steps;
   }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
 
@@ -697,6 +711,9 @@ export function BeneficiaryForm({
         photo_url: form.photo_url || null,
         status: 'active',
         is_active: true,
+        sector_data: form.sector_data && Object.keys(form.sector_data).length > 0
+          ? form.sector_data
+          : {},
       });
 
       let beneficiaryId = beneficiary?.id;
@@ -993,6 +1010,16 @@ export function BeneficiaryForm({
           />
         )}
         {step === 6 && <Step7Notes form={form} update={update} />}
+        {step === 7 && (
+          <SectorFieldsStep
+            fields={(config?.custom_fields as any[]) || []}
+            values={form.sector_data || {}}
+            onChange={(name, value) =>
+              update('sector_data', { ...(form.sector_data || {}), [name]: value })
+            }
+            sectorLabel={config?.org_type}
+          />
+        )}
       </Card>
 
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
