@@ -233,6 +233,7 @@ const STEP_LABELS = [
   'Health',
   'Vulnerability',
   'Notes',
+  'Sector details',
 ];
 const parseTagArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
