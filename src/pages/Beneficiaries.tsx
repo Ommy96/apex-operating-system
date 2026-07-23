@@ -492,19 +492,19 @@ export default function Beneficiaries() {
           variant="primary"
         />
         <StatCard
-          title="Students"
+          title={typeLabels.student}
           value={stats.students}
           icon={GraduationCap}
           variant="info"
         />
         <StatCard
-          title="Adults"
+          title={typeLabels.adult}
           value={stats.adults}
           icon={UserCheck}
           variant="success"
         />
         <StatCard
-          title="Groups"
+          title={typeLabels.group}
           value={stats.groups}
           icon={UsersRound}
           variant="warning"
@@ -578,9 +578,9 @@ export default function Beneficiaries() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types ({stats.total})</SelectItem>
-              <SelectItem value="student">Students ({stats.students})</SelectItem>
-              <SelectItem value="adult">Adults ({stats.adults})</SelectItem>
-              <SelectItem value="group">Groups ({stats.groups})</SelectItem>
+              <SelectItem value="student">{typeLabels.student} ({stats.students})</SelectItem>
+              <SelectItem value="adult">{typeLabels.adult} ({stats.adults})</SelectItem>
+              <SelectItem value="group">{typeLabels.group} ({stats.groups})</SelectItem>
             </SelectContent>
           </Select>
 
