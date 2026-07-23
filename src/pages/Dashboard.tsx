@@ -6,7 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useProgramEnrollmentStats } from "@/hooks/useProgramEnrollmentStats";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, FileText, Search } from "lucide-react";
+import {
+  Plus,
+  Users as UsersIcon,
+  HandCoins,
+  Activity as ActivityIcon,
+  FileText as FileTextIcon,
+} from "lucide-react";
 import { ComplianceAlertBanner } from "@/components/ComplianceAlertBanner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +23,8 @@ import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { formatDistanceToNow } from "date-fns";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
+import { SparklineTile } from "@/components/dashboard/SparklineTile";
+import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
 
 const Dashboard = () => {
   const navigate = useNavigate();
