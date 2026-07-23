@@ -477,57 +477,45 @@ const Dashboard = () => {
       </div>
 
       {/* SECTION 2: METRIC CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-[10px] mb-4">
-        {/* Card 1: Beneficiaries */}
-        <MetricCard
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <SparklineTile
           label={termPlural.toUpperCase()}
-          accentColor="#1D9E8A"
+          icon={UsersIcon}
+          tone="teal"
+          highlight
           isLoading={statsLoading}
-          value={totalBeneficiaries}
-          pill={{ bg: 'var(--accent-lt)', color: 'var(--accent-brand)', text: `+${newThisMonth} this month` }}
+          value={totalBeneficiaries.toLocaleString()}
+          series={beneficiarySpark}
+          delta={
+            totalBeneficiaries > 0 && newThisMonth > 0
+              ? (newThisMonth / Math.max(totalBeneficiaries - newThisMonth, 1)) * 100
+              : undefined
+          }
+          deltaLabel="this month"
         />
-        {/* Card 2: Active Grants */}
-        <MetricCard
+        <SparklineTile
           label="ACTIVE GRANTS"
-          accentColor="#1B5FBB"
+          icon={HandCoins}
+          tone="info"
           isLoading={grantsLoading}
           value={grantData?.count || 0}
-          pill={{ bg: 'var(--status-info-bg)', color: 'var(--status-info)', text: formatKES(grantData?.totalAmount || 0) }}
+          deltaLabel={formatKES(grantData?.totalAmount || 0)}
         />
-        {/* Card 3: Activities */}
-        <div
-          className="relative overflow-hidden"
-          style={{ background: 'var(--brand-surface)', borderRadius: 12, border: '1px solid #E2E5EF', padding: '14px 16px' }}
-        >
-          <div style={{ position: 'absolute', left: 0, top: 0, width: 3, height: '100%', background: 'var(--accent-mid)' }} />
-          <div style={{ paddingLeft: 6 }}>
-            <p style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-ink-3)', marginBottom: 8 }}>ACTIVITIES</p>
-            {activitiesLoading ? (
-              <><Skeleton className="h-[22px] w-16 mb-[6px]" /><Skeleton className="h-[14px] w-24" /></>
-            ) : (
-              <>
-                <p style={{ fontSize: 22, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.3px', marginBottom: 6 }} className="tabular-nums">
-                  {activityData?.completed || 0}
-                  <span style={{ fontSize: 13, fontWeight: 400, color: 'var(--brand-ink-3)' }}> / {activityData?.total || 0}</span>
-                </p>
-                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, background: 'var(--accent-lt)', color: 'var(--accent-brand)' }}>
-                  {activityData?.total ? Math.round(((activityData?.completed || 0) / activityData.total) * 100) : 0}% completed
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-        {/* Card 4: Reports Due */}
-        <MetricCard
+        <SparklineTile
+          label="ACTIVITIES"
+          icon={ActivityIcon}
+          tone="teal"
+          isLoading={activitiesLoading}
+          value={`${activityData?.completed || 0} / ${activityData?.total || 0}`}
+          deltaLabel={`${activityData?.total ? Math.round(((activityData?.completed || 0) / activityData.total) * 100) : 0}% completed`}
+        />
+        <SparklineTile
           label="REPORTS DUE"
-          accentColor="#C97B1A"
+          icon={FileTextIcon}
+          tone={reportsDue > 0 ? "warn" : "teal"}
           isLoading={reportsLoading}
           value={reportsDue}
-          valueColor={reportsDue > 0 ? 'var(--status-warning)' : undefined}
-          pill={reportsDue > 0
-            ? { bg: 'var(--status-warning-bg)', color: 'var(--status-warning)', text: 'Action needed' }
-            : { bg: 'var(--accent-lt)', color: 'var(--accent-brand)', text: 'All clear' }
-          }
+          deltaLabel={reportsDue > 0 ? "Action needed" : "All clear"}
         />
       </div>
 
@@ -536,8 +524,8 @@ const Dashboard = () => {
         <SponsorshipMetrics />
       </div>
 
-      {/* SECTION 3: THREE-COLUMN GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_280px] gap-3 mb-3">
+      {/* SECTION 3: MAIN GRID + INTELLIGENCE RAIL */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_320px] gap-3 mb-3">
         {/* CARD A: Programme Reach */}
         <DashCard title="Programme reach" subtitle={`${programStats.length} active`}>
           {statsLoading ? (
