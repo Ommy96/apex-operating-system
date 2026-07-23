@@ -49,6 +49,34 @@
     --accent-lt: #E0F4F1;
     --accent-text: #0A5449;
 
+    /* Rare highlight — gold. Reserved for one accent per view. */
+    --accent-gold: #D9A441;
+    --accent-gold-strong: #B7861F;
+    --accent-gold-lt: #FBF1D9;
+
+    /* Elevated (dashboard) surfaces — layered navy for dark theme,
+       and a subtly cool white stack for light theme. Both themes
+       expose the same variable names so components stay portable. */
+    --elevated-canvas: #F4F6FB;
+    --elevated-surface: #FFFFFF;
+    --elevated-raised: #FAFBFF;
+    --elevated-hairline: rgba(10, 15, 30, 0.06);
+    --elevated-inner-top: rgba(255, 255, 255, 0.9);
+    --elevated-shadow: 0 1px 2px rgba(10, 15, 30, 0.04), 0 8px 24px -12px rgba(10, 15, 30, 0.08);
+
+    /* Glass panel (used on side rails / overlays only). */
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(10, 15, 30, 0.08);
+    --glass-inner: rgba(255, 255, 255, 0.9);
+    --glass-blur: 14px;
+
+    /* Tile accent tokens — used by SparklineTile gradient wash. */
+    --tile-teal: 29, 158, 138;
+    --tile-gold: 217, 164, 65;
+    --tile-info: 75, 133, 217;
+    --tile-warn: 224, 145, 55;
+    --tile-danger: 224, 92, 138;
+
     /* Status */
     --status-success: #1D9E8A;
     --status-success-bg: #E0F4F1;
@@ -166,6 +194,11 @@
     --shadow-elevation-3: 0 8px 16px rgba(10, 15, 30, 0.08);
     --shadow-glow: 0 0 20px hsl(170 78% 27% / 0.15);
 
+    /* Sidebar active gradient (teal, never purple). */
+    --sidebar-active-gradient: linear-gradient(135deg,
+      rgba(29, 158, 138, 0.28) 0%,
+      rgba(15, 123, 108, 0.18) 100%);
+
     /* Transitions */
     --transition-fast: all 0.15s ease;
     --transition-base: all 0.2s ease;
@@ -187,9 +220,9 @@
     --brand-ink: #F0F2F8;
     --brand-ink-2: #A8B0C2;
     --brand-ink-3: #606980;
-    --brand-canvas: #0D1117;
-    --brand-surface: #161B26;
-    --brand-surface-2: #1E2533;
+    --brand-canvas: #0A0F1E;
+    --brand-surface: #101828;
+    --brand-surface-2: #16202F;
     --brand-border: #252D3D;
     --brand-border-2: #2E3850;
     --sidebar-bg: #080C16;
@@ -198,6 +231,28 @@
     --status-warning: #E09137;
     --status-danger: #E05C8A;
     --status-info: #4B85D9;
+
+    /* Elevated dark palette — never pure black. */
+    --elevated-canvas: #0A0F1E;
+    --elevated-surface: #101828;
+    --elevated-raised: #16202F;
+    --elevated-hairline: rgba(255, 255, 255, 0.06);
+    --elevated-inner-top: rgba(255, 255, 255, 0.06);
+    --elevated-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+
+    /* Glass panel — translucent over navy. */
+    --glass-bg: rgba(22, 32, 47, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-inner: rgba(255, 255, 255, 0.06);
+
+    /* Gold on dark: slightly warmer. */
+    --accent-gold: #E5B357;
+    --accent-gold-strong: #D9A441;
+    --accent-gold-lt: rgba(229, 179, 87, 0.14);
+
+    --sidebar-active-gradient: linear-gradient(135deg,
+      rgba(45, 196, 174, 0.22) 0%,
+      rgba(15, 123, 108, 0.10) 100%);
 
     --background: 224 28% 9%;
     --foreground: 36 18% 94%;
@@ -311,6 +366,73 @@
 }
 
 @layer components {
+  /* Elevated tile — solid card used on Dashboard KPI row + snapshots.
+     Ambient shadow + 1px inner top highlight, gentle diagonal wash. */
+  .elevated-tile {
+    position: relative;
+    background: var(--elevated-surface);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 1px 0 0 var(--elevated-inner-top),
+      var(--elevated-shadow);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .elevated-card {
+    position: relative;
+    background: var(--elevated-surface);
+    border-radius: 16px;
+    box-shadow:
+      inset 0 1px 0 0 var(--elevated-inner-top),
+      var(--elevated-shadow);
+    overflow: hidden;
+  }
+
+  /* Glass panel — reserved for right-rail intelligence + overlays. */
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-inner),
+      0 20px 40px -20px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Diagonal tinted wash for stat tiles — behind content, low opacity. */
+  .tile-wash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(135deg,
+      rgba(var(--tile-rgb), 0.14) 0%,
+      rgba(var(--tile-rgb), 0.02) 55%,
+      transparent 100%);
+  }
+  .tile-content { position: relative; z-index: 1; }
+
+  /* Sidebar active state — teal gradient fill. */
+  .sidebar-nav-active {
+    background: var(--sidebar-active-gradient) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+  }
+
+  /* Soft status pill — 14% tinted bg + solid hue text. */
+  .pill-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(var(--tile-rgb, var(--tile-teal)), 0.14);
+    color: rgb(var(--tile-rgb, var(--tile-teal)));
+  }
+
   /* Workspace Panel */
   .workspace-panel {
     background: var(--brand-surface);
