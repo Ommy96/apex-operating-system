@@ -104,9 +104,10 @@ function MenuItem({ item, isCollapsed, isActive, onClick, isLocked }: MenuItemPr
           : "font-normal"
       )}
       style={{
-        background: active ? 'var(--sidebar-active-bg)' : undefined,
-        border: active ? '1px solid var(--sidebar-active-border)' : '1px solid transparent',
+        background: active ? 'var(--sidebar-active-gradient)' : undefined,
+        border: '1px solid transparent',
         color: active ? '#fff' : 'var(--sidebar-text)',
+        boxShadow: active ? 'inset 0 1px 0 0 rgba(255,255,255,0.06)' : undefined,
       }}
       onMouseEnter={(e) => {
         if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
