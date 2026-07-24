@@ -25,6 +25,7 @@ import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
 import { SparklineTile } from "@/components/dashboard/SparklineTile";
 import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
+import { StaggerGrid } from "@/components/motion/StaggerGrid";
 
 const Dashboard = () => {
   const navigate = useNavigate();
