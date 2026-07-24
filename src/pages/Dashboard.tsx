@@ -477,7 +477,7 @@ const Dashboard = () => {
       </div>
 
       {/* SECTION 2: METRIC CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <SparklineTile
           label={termPlural.toUpperCase()}
           icon={UsersIcon}
@@ -517,7 +517,7 @@ const Dashboard = () => {
           value={reportsDue}
           deltaLabel={reportsDue > 0 ? "Action needed" : "All clear"}
         />
-      </div>
+      </StaggerGrid>
 
       {/* SPONSORSHIP COVERAGE SNAPSHOT */}
       <div className="mb-4">
