@@ -540,6 +540,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </div>
+          </MotionRoot>
           </TooltipProvider>
         </SessionManager>
       </OrganizationProvider>
