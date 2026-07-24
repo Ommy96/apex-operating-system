@@ -25,6 +25,7 @@ import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
 import { SparklineTile } from "@/components/dashboard/SparklineTile";
 import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
+import { StaggerGrid } from "@/components/motion/StaggerGrid";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -477,7 +478,7 @@ const Dashboard = () => {
       </div>
 
       {/* SECTION 2: METRIC CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <SparklineTile
           label={termPlural.toUpperCase()}
           icon={UsersIcon}
@@ -517,7 +518,7 @@ const Dashboard = () => {
           value={reportsDue}
           deltaLabel={reportsDue > 0 ? "Action needed" : "All clear"}
         />
-      </div>
+      </StaggerGrid>
 
       {/* SPONSORSHIP COVERAGE SNAPSHOT */}
       <div className="mb-4">

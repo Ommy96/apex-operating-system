@@ -12,6 +12,7 @@ import { SuperAdminRoute } from "./components/SuperAdminRoute";
 import { SessionManager } from "./components/SessionManager";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { FeatureFlagGuard } from "./components/FeatureFlagGuard";
+import { MotionRoot } from "./components/motion/MotionRoot";
 
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
@@ -178,6 +179,7 @@ const App = () => (
       <OrganizationProvider>
         <SessionManager>
           <TooltipProvider>
+          <MotionRoot>
           <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
           <Toaster />
           <Sonner />
@@ -538,6 +540,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </div>
+          </MotionRoot>
           </TooltipProvider>
         </SessionManager>
       </OrganizationProvider>

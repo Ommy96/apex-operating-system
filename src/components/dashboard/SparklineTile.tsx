@@ -1,6 +1,8 @@
 import { LucideIcon, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { TiltCard } from "@/components/motion/TiltCard";
 
 export type TileTone = "teal" | "gold" | "info" | "warn" | "danger";
 
@@ -71,9 +73,16 @@ export function SparklineTile({
 
   const spark = series && series.length >= 2 ? buildSparklinePath(series, 100, 24) : "";
 
+  // Numeric values count up; strings render as-is (e.g. "12 / 45").
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && /^-?\d[\d,]*$/.test(value)
+        ? Number(value.replace(/,/g, ""))
+        : null;
+
   return (
-    <div
-      className="elevated-tile p-4"
+    <TiltCard className="elevated-tile p-4 hover-lift"
       style={{ ["--tile-rgb" as string]: rgbVar }}
     >
       <div className="tile-wash" />
@@ -111,7 +120,11 @@ export function SparklineTile({
                 letterSpacing: "-0.6px",
               }}
             >
-              {value}
+              {numericValue !== null ? (
+                <AnimatedNumber value={numericValue} />
+              ) : (
+                value
+              )}
             </div>
             {showDelta && (
               <div className={cn("flex items-center gap-1 text-[11px] font-medium", deltaClass)}>
@@ -142,7 +155,7 @@ export function SparklineTile({
           <svg
             viewBox="0 0 100 24"
             preserveAspectRatio="none"
-            className="mt-1 h-6 w-full opacity-70"
+            className="mt-1 h-6 w-full opacity-70 sparkline-draw"
             aria-hidden
           >
             <defs>
@@ -162,10 +175,13 @@ export function SparklineTile({
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
+              pathLength={1}
+              style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
+              className="sparkline-path"
             />
           </svg>
         )}
       </div>
-    </div>
+    </TiltCard>
   );
 }
