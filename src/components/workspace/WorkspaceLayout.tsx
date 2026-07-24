@@ -4,6 +4,7 @@ import { WorkspaceSidebar } from "./WorkspaceSidebar";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { CommandPalette } from "./CommandPalette";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { RouteTransition } from "@/components/motion/RouteTransition";
 
 interface WorkspaceLayoutProps {
   children: ReactNode;
@@ -31,7 +32,7 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
             style={{ background: 'var(--brand-canvas)' }}
           >
             <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
-              {children}
+              <RouteTransition>{children}</RouteTransition>
             </div>
           </main>
         </div>
