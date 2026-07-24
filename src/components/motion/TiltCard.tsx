@@ -4,6 +4,7 @@ import { ReactNode, useRef } from "react";
 interface TiltCardProps {
   children: ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   /** Max rotation in degrees. Spec caps at 4deg. */
   max?: number;
 }
@@ -13,7 +14,7 @@ interface TiltCardProps {
  * this is the single pseudo-3D flourish in the product.
  * Springs back on leave. Disabled under reduced-motion and on touch.
  */
-export function TiltCard({ children, className, max = 4 }: TiltCardProps) {
+export function TiltCard({ children, className, style, max = 4 }: TiltCardProps) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
@@ -23,7 +24,7 @@ export function TiltCard({ children, className, max = 4 }: TiltCardProps) {
   const rx = useSpring(useTransform(my, [-0.5, 0.5], [max, -max]), springCfg);
   const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-max, max]), springCfg);
 
-  if (reduced) return <div className={className}>{children}</div>;
+  if (reduced) return <div className={className} style={style}>{children}</div>;
 
   const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return;
@@ -45,6 +46,7 @@ export function TiltCard({ children, className, max = 4 }: TiltCardProps) {
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
       style={{
+        ...style,
         rotateX: rx,
         rotateY: ry,
         transformPerspective: 900,
