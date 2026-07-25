@@ -25,7 +25,7 @@ import {
   MessageCircle, BrainCircuit, FileText, ShieldCheck, Presentation,
   Heart, Building2, Handshake, Activity, BarChart3, HandCoins, ClipboardList,
   FolderKanban, MapPin, FileCheck2, Home, ShoppingCart, GitBranch,
-  TrendingUp, ListChecks, Coins, Inbox,
+  TrendingUp, ListChecks, Coins, Inbox, ListOrdered,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApexLogo } from "@/components/brand/ApexLogo";
@@ -139,6 +139,7 @@ export function WorkspaceSidebar() {
       items: [
         { title: "Beneficiaries", url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
         { title: "Households", url: "/beneficiaries?view=households", icon: Home, show: can.viewBeneficiaries },
+        { title: "Waiting List", url: "/waitlist", icon: ListOrdered, show: can.viewBeneficiaries },
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],
     },
