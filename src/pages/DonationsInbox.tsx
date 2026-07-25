@@ -10,11 +10,15 @@ import { format } from "date-fns";
 import { allocateDonation, formatMoney } from "@/lib/allocationEngine";
 import { toast } from "sonner";
 import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
+import { WaitlistMatchPicker } from "@/components/waitlist/WaitlistMatchPicker";
+import { useState } from "react";
+import { ListOrdered } from "lucide-react";
 
 export default function DonationsInbox() {
   const { currentOrganization: organization } = useOrganization();
   const qc = useQueryClient();
   const orgId = organization?.organization_id;
+  const [matchFor, setMatchFor] = useState<{ programId?: string | null; donorAccountId?: string | null; donorName?: string | null } | null>(null);
 
   const { data: donations, isLoading } = useQuery({
     queryKey: ["donations-inbox", orgId],
@@ -57,9 +61,14 @@ export default function DonationsInbox() {
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Donations Inbox</h1>
-        <p className="text-sm text-muted-foreground">Incoming donations and their auto-allocation result.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Donations Inbox</h1>
+          <p className="text-sm text-muted-foreground">Incoming donations and their auto-allocation result.</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setMatchFor({})}>
+          <ListOrdered className="h-4 w-4 mr-1" /> Match to a waiting applicant
+        </Button>
       </div>
       <Card>
         <CardHeader><CardTitle className="text-base">Recent donations</CardTitle></CardHeader>
@@ -97,9 +106,23 @@ export default function DonationsInbox() {
                         </TableCell>
                         <TableCell className="text-xs"><Badge variant={c?.active ? "default" : "secondary"} className="text-[10px]">{allocStatus}</Badge></TableCell>
                         <TableCell className="text-right">
-                          {completed && d.donor_account_id && (!c || c.total === 0) && (
-                            <Button size="sm" variant="outline" onClick={() => manualAllocate(d.id)}>Resolve</Button>
-                          )}
+                          <div className="flex justify-end gap-2">
+                            {completed && d.donor_account_id && (!c || c.total === 0) && (
+                              <Button size="sm" variant="outline" onClick={() => manualAllocate(d.id)}>Resolve</Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setMatchFor({
+                                programId: d.donation_intents?.target_program_id ?? null,
+                                donorAccountId: d.donor_account_id ?? null,
+                                donorName: d.donor_accounts?.donor_name ?? d.donor_name ?? null,
+                              })}
+                              title="Match to a waiting applicant"
+                            >
+                              <ListOrdered className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -108,6 +131,13 @@ export default function DonationsInbox() {
               </Table></div>}
         </CardContent>
       </Card>
+      <WaitlistMatchPicker
+        open={!!matchFor}
+        onOpenChange={(o) => !o && setMatchFor(null)}
+        programId={matchFor?.programId ?? null}
+        donorAccountId={matchFor?.donorAccountId ?? null}
+        donorName={matchFor?.donorName ?? null}
+      />
     </div>
   );
 }
