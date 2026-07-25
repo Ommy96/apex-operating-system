@@ -1,89 +1,69 @@
-## Goal
-Make beneficiary registration + the "All Types" filter/cards sector-aware, driven by the org's chosen sector via the EXISTING dynamic-field system (`org_beneficiary_config`, `beneficiary_field_values`, `entity_types`). Preserve H2HO's current experience exactly.
+# Plan: Need Status Automation, Waitlist Home, System-Wide UI Rollout
+
+This is a large, multi-part change. To keep it shippable and reviewable I'll deliver it in **three phases**, each independently testable. If you want to compress or split further, tell me before I start.
 
 ---
 
-## 1. Sector field templates (seed data)
+## Phase 1 — Automatic Need Status (backend + UI)
 
-Add a single new module `src/lib/sectorFieldTemplates.ts`:
+**Migration** (`beneficiary_needs`):
+- Add `status_source TEXT NOT NULL DEFAULT 'auto' CHECK (status_source IN ('auto','manual'))`
+- Add `manual_status_note TEXT`, `funded_amount NUMERIC NOT NULL DEFAULT 0`
+- New SQL function `public.recompute_need_status(p_beneficiary_id uuid)`:
+  - Sum `allocation_line_items.amount` grouped by `need_type_id` for the beneficiary (both direct-need lines and package-derived lines already produced by allocation engine).
+  - Update each row where `status_source='auto'`: set `funded_amount`, then derive `status` per rules (met / partially_met / unmet). Also mark `partially_met` when funded=0 but an active enrollment exists on a project whose `addresses_need_type_id` matches.
+- Triggers on `allocation_line_items`, `allocations`, `sponsorship_*`, `program_beneficiaries` (enrollment table), and `beneficiary_needs` (own cost edits) that call `recompute_need_status(beneficiary_id)`.
+- Backfill: `SELECT recompute_need_status(id) FROM beneficiaries` (org-safe — function is scoped by beneficiary).
+- End with `NOTIFY pgrst, 'reload schema'`.
 
-- Exports `SECTOR_FIELD_TEMPLATES: Record<SectorKey, SectorFieldTemplate>` where each template = `{ sectionKey, sectionLabel, fields: FieldDef[] }`.
-- `FieldDef = { key, label, type: 'text'|'number'|'select'|'multiselect'|'boolean'|'date', options?, required?, sort_order }`.
-- Templates cover: `education_sponsorship`, `agriculture`, `health`, `humanitarian`, `livelihoods`, `faith_community`, `multi_sector` (empty, universal-core only). Map existing `SectorKey` values from `setupWizardSectors.ts` to these (education → education_sponsorship, faith_based → faith_community, child_protection/wash/etc → nearest match or multi_sector).
-- Fields listed per intent spec: land size + tenure, crops (multi), livestock (multi + counts), farming method, years farming, cooperative membership, inputs received (agriculture); patient no., facility, condition category, treatment status, SHA/insurance, disability, next of kin (health); etc.
-- Non-destructive merger helper: `mergeTemplateIntoConfig(existingCustomFields, template)` — adds only fields whose `key` is not already present.
+**UI** (`NeedsSection.tsx` + edit dialog):
+- Show derived status + "Auto" badge + `funded_amount of estimated_cost` line.
+- Status dropdown is disabled until user toggles **Override manually** (checkbox); note becomes required. Save writes `status_source='manual'` + `manual_status_note`.
+- "Return to automatic" button clears manual and calls the recompute RPC.
+- Invalidate `['beneficiary-needs', beneficiaryId]` after mutations and on realtime allocation events.
 
-## 2. Wizard wiring
+---
 
-`src/pages/OrgSetupWizard.tsx`: when sector is chosen and the wizard completes (or re-runs), after upserting `org_beneficiary_config`, merge the sector template into `custom_fields` via the helper above, then upsert. Never delete existing custom fields. Also persist `sector_key` (new column, see migration below) so profile section labels can pick the right template later.
+## Phase 2 — Waiting List Standalone Home
 
-## 3. Migration
+- **Route**: add `/waitlist` in `src/App.tsx`, permission-gated.
+- **Sidebar**: add "Waiting List" under PEOPLE in `WorkspaceSidebar.tsx` (icon `ListOrdered`), after Households.
+- **Page** (`src/pages/WaitlistPipeline.tsx`): reuse existing `WaitlistManagement.tsx` logic. Kanban columns for `application → assessment → scoring → waiting_list → funding_match → enrolled`. Card shows name, age, needs summary, score, days waiting. Stage-appropriate action buttons. "New application" CTA opens existing form.
+- **Shared match component** (`WaitlistMatchPicker.tsx`): ranked list of top eligible applicants for a given programme/package context. Used by both the pipeline's "Match & Enroll" step and the Record Donation dialog.
+- **Record Donation dialog**: relabel "Add from waiting list" → **"Match to a waiting applicant"**; opens `WaitlistMatchPicker` with donation context. Selecting an applicant runs the same match+enroll flow.
+- Update every "N waiting" reference on dashboards to link to `/waitlist`.
 
-One migration:
+---
 
-- `ALTER TABLE public.org_beneficiary_config ADD COLUMN IF NOT EXISTS sector_key TEXT;`
-- `ALTER TABLE public.org_beneficiary_config ADD COLUMN IF NOT EXISTS beneficiary_types TEXT[] DEFAULT '{}'::text[];` (holds the wizard-chosen type keys so the Beneficiaries page cards + filter can read them).
-- Backfill: rows with `org_type='child_welfare'` and no `sector_key` → `education_sponsorship` (H2HO stays as-is because their existing custom_fields already contain the education fields; the merger is idempotent).
-- End with `NOTIFY pgrst, 'reload schema';`.
+## Phase 3 — System-Wide UI Rollout (tokens + motion)
 
-RLS: table already has policies; no changes needed. GRANTs already present.
+Roll the dashboard's design tokens (navy canvas, teal/gold accents, 16px radius, soft elevation with inner top highlight, tinted icon chips, sparkline stat tiles, glass panels, restyled pills/tables/buttons/dialogs) across the app, plus motion (entrance fades, count-ups, chart draws, micro-interactions) with the same reduced-motion + no-replay guardrails.
 
-## 4. BeneficiaryForm — sector step
+**Order** (each group = one commit-sized pass):
+1. Beneficiaries (list, profile, form, dialogs)
+2. Households, Partners, Waiting List
+3. Programmes, Projects, Activities, M&E
+4. Funding (Donors, Funding Intelligence, Allocation Engine, Donations Inbox, Financial Suite)
+5. Intelligence (Analytics, Risk, Grant Discovery, Burn vs Impact)
+6. Donor Portal (high polish)
+7. Operations, Engagement, Governance, Admin/Settings
+8. Auth, Setup Wizard, empty/error states, toasts, dialogs
 
-`src/components/beneficiary/BeneficiaryForm.tsx`:
+**Rules**: tokens only, no invented colours; light-theme parity; dialogs/sheets share the card language; no layout restructure; Field Mode minimal decoration.
 
-- Add a new "Sector details" step after existing core steps, rendered ONLY when `config.custom_fields.length > 0` (H2HO's flow keeps rendering its education fields via the sector template so nothing visibly changes for them; other orgs get their sector's fields).
-- New component `src/components/beneficiary/SectorFieldsStep.tsx` renders one input per `custom_fields` entry with correct control (`Input`, `Input type=number`, `Select`, multi-select via checkbox grid, `Switch`, date input). Enforces `required` before allowing "Next".
-- On save, values go through the existing `beneficiary_field_values` path (new helper `src/lib/saveBeneficiaryFieldValues.ts` if none exists — otherwise reuse `saveBeneficiaryField.ts`). Wrap in `{ data, error }` with `toast.error` on failure.
+---
 
-## 5. Profile side-panel section
+## Delivery cadence
 
-`src/components/beneficiary/BeneficiaryOverviewTab.tsx`:
+Because Phase 3 alone spans ~80+ files and can't reasonably ship in a single turn without regressions, I recommend:
 
-- Add a new collapsible section titled after `config.sector_key` (e.g. "FARM DETAILS" for agriculture, "HEALTH" for health). Section is hidden when template has no fields.
-- Reads current values from `beneficiary_field_values` (or existing hook) and renders each via existing `InlineEditableField`. Save-through path unchanged.
+- **This turn**: Phase 1 (migration + hook + dialog) and Phase 2 (route, sidebar, page, shared picker, dialog rewire). Fully testable.
+- **Next turns**: Phase 3 group-by-group (I'll checkpoint after each of the 8 groups so you can review dark/light parity before I proceed).
 
-## 6. "All Types" dropdown + summary cards
+Reply **"go"** to start with Phase 1+2 now, or tell me to reorder / drop / expand any part.
 
-`src/pages/Beneficiaries.tsx`:
+## Technical notes
 
-- Read `config.beneficiary_types` (from wizard) plus `useEntityTypes()` for anything the admin added. Fall back to a sane default (`['individual']`) only when both are empty.
-- Replace hardcoded type array powering the filter `Select` and the summary stat cards.
-- Cards: cap at 5 configured types + one "Active" card; each shows a count from `beneficiaries` filtered by `entity_type_id` / `beneficiary_type` (whichever column exists — verify with a `supabase--read_query`).
-- Grid, search, export code paths already read `beneficiary_type` — no change beyond the filter options.
-
-## 7. Custom Fields settings
-
-Already present in `BeneficiaryDataSettings.tsx`. No behavioural change — just confirm the sector template merged into `custom_fields` shows up there so admins can add/remove.
-
-## Files touched
-
-Created:
-- `src/lib/sectorFieldTemplates.ts`
-- `src/components/beneficiary/SectorFieldsStep.tsx`
-- One migration
-
-Edited:
-- `src/hooks/useOrgBeneficiaryConfig.ts` (add `sector_key`, `beneficiary_types`)
-- `src/pages/OrgSetupWizard.tsx` (merge template on save)
-- `src/components/beneficiary/BeneficiaryForm.tsx` (add sector step)
-- `src/components/beneficiary/BeneficiaryOverviewTab.tsx` (sector section)
-- `src/pages/Beneficiaries.tsx` (dynamic types filter + cards)
-
-## Guardrails honoured
-
-- Existing custom fields never deleted (merge-only).
-- H2HO row untouched (`sector_key` backfilled but their `custom_fields` already contain the education fields).
-- All queries scope by `organization_id` via existing hooks.
-- `{ data, error }` + `toast.error` on every mutation.
-- Uses `useTierLabels` and `beneficiary_terminology` already threaded through the form.
-- Migration ends with `NOTIFY pgrst, 'reload schema';`.
-
-## Test plan (matches intent §4)
-
-1. Reconfigure a test org → Agriculture. Registration shows universal core + "Farm Details" step (land, crops, livestock, method). Save. Profile shows FARM DETAILS.
-2. Same org's Beneficiaries page: filter and cards show Farmer / Farmer group / Cooperative — not Students.
-3. H2HO reload: same form, same fields, same data.
-4. Umazi (or a new org) → Health: form shows Health template.
-5. Custom Fields settings still lets admin add a field on any org.
-6. Cross-org isolation: switching orgs swaps the template.
+- Auto-derivation lives in SQL (single source of truth) — hooks just call the RPC; triggers keep it fresh even for non-UI writes.
+- `WaitlistMatchPicker` is the one shared codepath — dialog is a thin wrapper.
+- Design tokens already live in `src/index.css`; the rollout is mostly swapping ad-hoc classes for existing tokens + wrapping metric grids in `StaggerGrid` / `SparklineTile`.
