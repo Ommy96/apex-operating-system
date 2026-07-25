@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Pencil, HeartHandshake, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, HeartHandshake, Loader2, Sparkles, UserCog, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
-import { useBeneficiaryNeeds, useNeedTypes, useSaveBeneficiaryNeed, useDeleteBeneficiaryNeed, type BeneficiaryNeed, type NeedType } from '@/hooks/useNeeds';
+import { useBeneficiaryNeeds, useNeedTypes, useSaveBeneficiaryNeed, useDeleteBeneficiaryNeed, useReturnNeedToAuto, type BeneficiaryNeed, type NeedType } from '@/hooks/useNeeds';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const STATUS_STYLES: Record<string, string> = {
   unmet: 'bg-red-50 text-red-700 border-red-200',
@@ -31,7 +32,9 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
   const { data: types = [] } = useNeedTypes(false);
   const save = useSaveBeneficiaryNeed();
   const remove = useDeleteBeneficiaryNeed();
+  const returnToAuto = useReturnNeedToAuto();
   const [editing, setEditing] = useState<Partial<BeneficiaryNeed> | null>(null);
+  const [overrideOn, setOverrideOn] = useState(false);
 
   const summary = useMemo(() => {
     const total = needs.length;
@@ -47,8 +50,8 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
     return types.filter((t) => editing?.need_type_id === t.id || !used.has(t.id));
   }, [types, needs, editing]);
 
-  const openAdd = () => setEditing({ status: 'unmet', priority: 'normal' });
-  const openEdit = (n: BeneficiaryNeed) => setEditing({ ...n });
+  const openAdd = () => { setOverrideOn(false); setEditing({ status: 'unmet', priority: 'normal', status_source: 'auto' } as any); };
+  const openEdit = (n: BeneficiaryNeed) => { setOverrideOn(n.status_source === 'manual'); setEditing({ ...n }); };
 
   const onPickType = (id: string) => {
     const t = types.find((x) => x.id === id);
@@ -62,12 +65,17 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
 
   const onSave = async () => {
     if (!editing?.need_type_id) return toast.error('Select a need type');
+    if (overrideOn && !((editing.manual_status_note || '').trim())) {
+      return toast.error('Add a note explaining the manual override');
+    }
     try {
       await save.mutateAsync({
         id: editing.id,
         beneficiary_id: beneficiaryId,
         need_type_id: editing.need_type_id,
-        status: (editing.status as any) || 'unmet',
+        status: overrideOn ? ((editing.status as any) || 'unmet') : ((editing.status as any) || 'unmet'),
+        status_source: overrideOn ? 'manual' : 'auto',
+        manual_status_note: overrideOn ? (editing.manual_status_note || null) : null,
         priority: (editing.priority as any) || 'normal',
         estimated_cost: editing.estimated_cost ?? null,
         currency: editing.currency || 'KES',
@@ -111,6 +119,9 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
           <ul className="divide-y">
             {needs.map((n) => {
               const t = (n as any).need_type as NeedType | undefined;
+              const isManual = n.status_source === 'manual';
+              const funded = Number(n.funded_amount || 0);
+              const cost = Number(n.estimated_cost || 0);
               return (
                 <li key={n.id} className="py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
@@ -118,13 +129,36 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                       <span className="font-medium text-sm">{t?.label || 'Unknown'}</span>
                       <Badge variant="outline" className={`text-[10px] ${STATUS_STYLES[n.status]}`}>{STATUS_LABEL[n.status]}</Badge>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded ${PRIORITY_STYLES[n.priority]}`}>{n.priority}</span>
+                      {isManual ? (
+                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                          <UserCog className="h-3 w-3" /> Manual
+                        </span>
+                      ) : (
+                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
+                          <Sparkles className="h-3 w-3" /> Auto
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      {n.estimated_cost != null ? `${n.currency || 'KES'} ${Number(n.estimated_cost).toLocaleString()}` : 'No cost set'}
-                      {n.met_by_project_id ? ' · met by project' : ''}
-                      {n.met_by_sponsorship_id ? ' · met by sponsorship' : ''}
+                      {cost > 0
+                        ? `${n.currency || 'KES'} ${funded.toLocaleString()} of ${cost.toLocaleString()} funded`
+                        : funded > 0
+                          ? `${n.currency || 'KES'} ${funded.toLocaleString()} funded · no cost set`
+                          : 'No cost set'}
+                      {isManual && n.manual_status_note ? ` · "${n.manual_status_note}"` : ''}
                     </div>
                   </div>
+                  {isManual && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => returnToAuto.mutate({ id: n.id, beneficiary_id: beneficiaryId })}
+                      title="Return to automatic status"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5 mr-1" /> Auto
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" onClick={() => openEdit(n)}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => onDelete(n)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </li>
@@ -177,14 +211,48 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                 </div>
                 <div>
                   <Label>Status</Label>
-                  <Select value={editing.status || 'unmet'} onValueChange={(v) => setEditing({ ...editing, status: v as any })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={editing.status || 'unmet'}
+                    onValueChange={(v) => setEditing({ ...editing, status: v as any })}
+                    disabled={!overrideOn}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unmet">Unmet</SelectItem>
                       <SelectItem value="partially_met">Partially met</SelectItem>
                       <SelectItem value="met">Met</SelectItem>
                     </SelectContent>
                   </Select>
+                  {!overrideOn && (
+                    <p className="text-[10px] text-muted-foreground mt-1 inline-flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" /> Auto — derived from funding & enrolments
+                      {editing.id && Number(editing.estimated_cost || 0) > 0
+                        ? ` (${editing.currency || 'KES'} ${Number((editing as any).funded_amount || 0).toLocaleString()} of ${Number(editing.estimated_cost).toLocaleString()})`
+                        : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-start gap-2 rounded-md border border-dashed p-2">
+                <Checkbox
+                  id="override-manual"
+                  checked={overrideOn}
+                  onCheckedChange={(v) => setOverrideOn(!!v)}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="override-manual" className="text-xs font-medium cursor-pointer">Override manually</Label>
+                  <p className="text-[10px] text-muted-foreground">Pick a status yourself. A note is required.</p>
+                  {overrideOn && (
+                    <Textarea
+                      rows={2}
+                      placeholder="Why is a manual status needed?"
+                      className="mt-2"
+                      value={editing.manual_status_note || ''}
+                      onChange={(e) => setEditing({ ...editing, manual_status_note: e.target.value })}
+                    />
+                  )}
                 </div>
               </div>
               <div>

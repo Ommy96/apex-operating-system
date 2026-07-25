@@ -2262,7 +2262,9 @@ export type Database = {
           created_at: string
           currency: string | null
           estimated_cost: number | null
+          funded_amount: number
           id: string
+          manual_status_note: string | null
           met_by_project_id: string | null
           met_by_sponsorship_id: string | null
           need_type_id: string
@@ -2270,6 +2272,7 @@ export type Database = {
           organization_id: string
           priority: string
           status: string
+          status_source: string
           updated_at: string
         }
         Insert: {
@@ -2277,7 +2280,9 @@ export type Database = {
           created_at?: string
           currency?: string | null
           estimated_cost?: number | null
+          funded_amount?: number
           id?: string
+          manual_status_note?: string | null
           met_by_project_id?: string | null
           met_by_sponsorship_id?: string | null
           need_type_id: string
@@ -2285,6 +2290,7 @@ export type Database = {
           organization_id: string
           priority?: string
           status?: string
+          status_source?: string
           updated_at?: string
         }
         Update: {
@@ -2292,7 +2298,9 @@ export type Database = {
           created_at?: string
           currency?: string | null
           estimated_cost?: number | null
+          funded_amount?: number
           id?: string
+          manual_status_note?: string | null
           met_by_project_id?: string | null
           met_by_sponsorship_id?: string | null
           need_type_id?: string
@@ -2300,6 +2308,7 @@ export type Database = {
           organization_id?: string
           priority?: string
           status?: string
+          status_source?: string
           updated_at?: string
         }
         Relationships: [
@@ -17177,6 +17186,10 @@ export type Database = {
       program_funding_health_score: {
         Args: { _program_id: string }
         Returns: Json
+      }
+      recompute_need_status: {
+        Args: { p_beneficiary_id: string }
+        Returns: undefined
       }
       register_organization: {
         Args: {

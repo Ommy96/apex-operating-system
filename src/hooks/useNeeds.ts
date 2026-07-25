@@ -27,6 +27,9 @@ export interface BeneficiaryNeed {
   notes: string | null;
   met_by_project_id: string | null;
   met_by_sponsorship_id: string | null;
+  status_source: 'auto' | 'manual';
+  manual_status_note: string | null;
+  funded_amount: number;
   need_type?: NeedType;
 }
 
@@ -118,6 +121,26 @@ export function useDeleteBeneficiaryNeed() {
     mutationFn: async (p: { id: string; beneficiary_id: string }) => {
       const { error } = await supabase.from('beneficiary_needs' as any).delete().eq('id', p.id);
       if (error) throw error;
+    },
+    onSuccess: (_, v) => qc.invalidateQueries({ queryKey: ['beneficiary-needs', v.beneficiary_id] }),
+  });
+}
+
+/**
+ * Clear a manual override on a need so its status is derived automatically again.
+ * Immediately recomputes the derived status via the recompute_need_status RPC.
+ */
+export function useReturnNeedToAuto() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { id: string; beneficiary_id: string }) => {
+      const { error } = await supabase
+        .from('beneficiary_needs' as any)
+        .update({ status_source: 'auto', manual_status_note: null } as any)
+        .eq('id', p.id);
+      if (error) throw error;
+      // Trigger on the update fires recompute automatically, but call RPC as belt-and-braces.
+      await supabase.rpc('recompute_need_status' as any, { p_beneficiary_id: p.beneficiary_id });
     },
     onSuccess: (_, v) => qc.invalidateQueries({ queryKey: ['beneficiary-needs', v.beneficiary_id] }),
   });
