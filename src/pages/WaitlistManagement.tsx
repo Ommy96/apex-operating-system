@@ -27,7 +27,7 @@ function applicantName(a: WaitlistApplication) {
 type DraftNeed = { need_type_id: string; estimated_cost: string; priority: 'low' | 'normal' | 'high' | 'urgent' };
 const PRIORITY_STYLE: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
-  normal: 'status-badge-neutral',
+  normal: 'status-badge-muted',
   high: 'status-badge-warning',
   urgent: 'status-badge-danger',
 };
