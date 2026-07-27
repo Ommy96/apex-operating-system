@@ -1,69 +1,46 @@
-# Plan: Need Status Automation, Waitlist Home, System-Wide UI Rollout
 
-This is a large, multi-part change. To keep it shippable and reviewable I'll deliver it in **three phases**, each independently testable. If you want to compress or split further, tell me before I start.
+# Phase 3 — System-Wide UI Rollout
 
----
+"All" is ~100 pages and ~200 components. Rather than one mega-turn that risks visual regressions, I'll do it in 8 focused batches — each shippable, each verifiable in the preview — matching your prescribed order. You'll see progress after every batch and can steer.
 
-## Phase 1 — Automatic Need Status (backend + UI)
+## Rollout method (applied to every batch)
 
-**Migration** (`beneficiary_needs`):
-- Add `status_source TEXT NOT NULL DEFAULT 'auto' CHECK (status_source IN ('auto','manual'))`
-- Add `manual_status_note TEXT`, `funded_amount NUMERIC NOT NULL DEFAULT 0`
-- New SQL function `public.recompute_need_status(p_beneficiary_id uuid)`:
-  - Sum `allocation_line_items.amount` grouped by `need_type_id` for the beneficiary (both direct-need lines and package-derived lines already produced by allocation engine).
-  - Update each row where `status_source='auto'`: set `funded_amount`, then derive `status` per rules (met / partially_met / unmet). Also mark `partially_met` when funded=0 but an active enrollment exists on a project whose `addresses_need_type_id` matches.
-- Triggers on `allocation_line_items`, `allocations`, `sponsorship_*`, `program_beneficiaries` (enrollment table), and `beneficiary_needs` (own cost edits) that call `recompute_need_status(beneficiary_id)`.
-- Backfill: `SELECT recompute_need_status(id) FROM beneficiaries` (org-safe — function is scoped by beneficiary).
-- End with `NOTIFY pgrst, 'reload schema'`.
+Instead of rewriting every page, I lift the design system into shared primitives so pages inherit it automatically, then hand-tune the pages that render heavy custom chrome.
 
-**UI** (`NeedsSection.tsx` + edit dialog):
-- Show derived status + "Auto" badge + `funded_amount of estimated_cost` line.
-- Status dropdown is disabled until user toggles **Override manually** (checkbox); note becomes required. Save writes `status_source='manual'` + `manual_status_note`.
-- "Return to automatic" button clears manual and calls the recompute RPC.
-- Invalidate `['beneficiary-needs', beneficiaryId]` after mutations and on realtime allocation events.
+1. **Token audit per page group** — grep for hardcoded `text-white`, `bg-black`, `bg-red-500`, `text-*-700`, `border-gray-*`, raw hex — replace with semantic tokens (`bg-card`, `text-foreground`, `bg-destructive/10`, `border-border`, status pill utilities).
+2. **Card language** — replace bare `<Card>` in headers/stat rows with the `sparkline-tile`, `glass-panel`, and `elevated-surface` utilities already defined in `index.css`.
+3. **Motion pass** — wrap top stat grids in `<StaggerGrid>`, wrap KPI numbers in `<AnimatedNumber>`, apply `.card-hover` and press-scale utilities. Respect the no-replay guard already in `motion.ts`.
+4. **Dialogs & sheets** — apply `glass-panel` / elevated card variants to the same primitives Record Donation and Edit Need use.
+5. **Verify** — build + Playwright screenshot the group's flagship page in dark and light, spot-check contrast.
 
----
+## Batches
 
-## Phase 2 — Waiting List Standalone Home
+1. **Beneficiaries** — `Beneficiaries.tsx`, `BeneficiaryProfile.tsx`, `BeneficiaryForm.tsx`, `NeedsSection`, `BeneficiaryOverviewTab`, `SectorFieldsStep`, `DuplicatePreSaveDialog`, `DeduplicationReview`.
+2. **Households / Partners / Waiting List** — `Households`, `HouseholdProfile`, `PartnerCollaboration`, `WaitlistManagement`, `WaitlistMatchPicker` (already token-clean, verify).
+3. **Programmes / Projects / Activities / M&E** — `ProgramsManagement`, `ProgramDashboard`, `ProgramManagerWorkspace`, `AllProjects`, `Activities`, `ActivityDetail`, `MEConsolidated`, `MECalendar`, `IndicatorManagement`, `IndicatorsDashboard`, `RiskDashboard` (has hardcoded reds/oranges → soft-pill utilities).
+4. **Funding** — `DonorManagement`, `FundingIntelligence`, `AllocationEngine`, `DonationsInbox`, `FinancialSuite`, `CashTransfers`, `ExpenseClaims`, financial sub-components.
+5. **Intelligence** — `Analytics`, `RiskIntelligence`, `GrantDiscovery`, `BurnVsImpact`, `AIInsights`, `MapView`, `BoardReporting`, `BoardPortal`.
+6. **Donor Portal** — `DonorPortal.tsx` and all `src/components/donor-portal/*` (highest polish priority — full glass rail, gradient tiles, sparklines).
+7. **Operations / Engagement / Governance / Admin** — `HRManagement`, `VolunteerManagement`, `CommunicationsHub`, `AutomationEngine`, `ComplianceGovernance`, `ComplaintManagement`, `DocumentManagement`, `Documents`, `ConsentOverview`, `DataQualityDashboard`, `SafeguardingDashboard`, `RoleManagement`, `BranchManagement`, `StakeholderAccessManagement`, `OrganizationSettings`, `InferaAdminDashboard`.
+8. **Auth / Setup / Shell** — `Auth`, `DonorAuth`, `ResetPassword`, `Setup2FA`, `SuperAdminLogin`, `RegisterOrganization`, `OrgSetupWizard`, `NotFound`, `WhistleblowerForm`, plus a sweep of toast / error / empty-state variants. Field Mode gets tokens with minimal decoration per battery guardrail.
 
-- **Route**: add `/waitlist` in `src/App.tsx`, permission-gated.
-- **Sidebar**: add "Waiting List" under PEOPLE in `WorkspaceSidebar.tsx` (icon `ListOrdered`), after Households.
-- **Page** (`src/pages/WaitlistPipeline.tsx`): reuse existing `WaitlistManagement.tsx` logic. Kanban columns for `application → assessment → scoring → waiting_list → funding_match → enrolled`. Card shows name, age, needs summary, score, days waiting. Stage-appropriate action buttons. "New application" CTA opens existing form.
-- **Shared match component** (`WaitlistMatchPicker.tsx`): ranked list of top eligible applicants for a given programme/package context. Used by both the pipeline's "Match & Enroll" step and the Record Donation dialog.
-- **Record Donation dialog**: relabel "Add from waiting list" → **"Match to a waiting applicant"**; opens `WaitlistMatchPicker` with donation context. Selecting an applicant runs the same match+enroll flow.
-- Update every "N waiting" reference on dashboards to link to `/waitlist`.
+## Guardrails held across all batches
 
----
+- Tokens only — no per-page invented colours or purple.
+- Light-theme parity verified after each batch.
+- No layout restructure; no removed elements; no logic touches.
+- Motion follows `prefers-reduced-motion` and never replays on refetch.
+- Field Mode: tokens applied, decoration minimal.
 
-## Phase 3 — System-Wide UI Rollout (tokens + motion)
+## Technical detail
 
-Roll the dashboard's design tokens (navy canvas, teal/gold accents, 16px radius, soft elevation with inner top highlight, tinted icon chips, sparkline stat tiles, glass panels, restyled pills/tables/buttons/dialogs) across the app, plus motion (entrance fades, count-ups, chart draws, micro-interactions) with the same reduced-motion + no-replay guardrails.
-
-**Order** (each group = one commit-sized pass):
-1. Beneficiaries (list, profile, form, dialogs)
-2. Households, Partners, Waiting List
-3. Programmes, Projects, Activities, M&E
-4. Funding (Donors, Funding Intelligence, Allocation Engine, Donations Inbox, Financial Suite)
-5. Intelligence (Analytics, Risk, Grant Discovery, Burn vs Impact)
-6. Donor Portal (high polish)
-7. Operations, Engagement, Governance, Admin/Settings
-8. Auth, Setup Wizard, empty/error states, toasts, dialogs
-
-**Rules**: tokens only, no invented colours; light-theme parity; dialogs/sheets share the card language; no layout restructure; Field Mode minimal decoration.
-
----
+- Grep patterns per batch: `rg -n "text-(white|black|red|green|blue|yellow|orange|purple|indigo|gray|slate)-[0-9]|bg-\[#|from-purple|to-indigo" src/pages/<group>` etc.
+- Reusable utilities to apply: `.sparkline-tile`, `.glass-panel`, `.elevated-surface`, `.status-pill-*`, `.card-hover`, `.tabular-nums`, plus `<StaggerGrid>`, `<AnimatedNumber>`, `<TiltCard>`, `<SparklineTile>`.
+- Any hardcoded severity colours (e.g. `RiskDashboard`'s red/orange/amber/blue map) become semantic destructive/warning/success/info tokens (add `--warning` / `--success` HSL vars to `index.css` if missing, keep dark+light parity).
+- Verification per batch: `bun run build` + Playwright screenshot of the flagship page in both themes; attach to the batch's closing note.
 
 ## Delivery cadence
 
-Because Phase 3 alone spans ~80+ files and can't reasonably ship in a single turn without regressions, I recommend:
+Each batch is one turn: I ship the batch, screenshot the flagship page, and stop. You say "next" (or point me at a specific batch) and I move on. If nothing needs approval between batches, say "run all straight through" and I'll chain them without pausing.
 
-- **This turn**: Phase 1 (migration + hook + dialog) and Phase 2 (route, sidebar, page, shared picker, dialog rewire). Fully testable.
-- **Next turns**: Phase 3 group-by-group (I'll checkpoint after each of the 8 groups so you can review dark/light parity before I proceed).
-
-Reply **"go"** to start with Phase 1+2 now, or tell me to reorder / drop / expand any part.
-
-## Technical notes
-
-- Auto-derivation lives in SQL (single source of truth) — hooks just call the RPC; triggers keep it fresh even for non-UI writes.
-- `WaitlistMatchPicker` is the one shared codepath — dialog is a thin wrapper.
-- Design tokens already live in `src/index.css`; the rollout is mostly swapping ad-hoc classes for existing tokens + wrapping metric grids in `StaggerGrid` / `SparklineTile`.
+Ready to start Batch 1 (Beneficiaries) on approval.
