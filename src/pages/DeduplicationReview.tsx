@@ -281,7 +281,7 @@ export default function DeduplicationReview() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" /> Confirm merge
+              <AlertTriangle className="h-5 w-5" style={{ color: 'var(--status-warning)' }} /> Confirm merge
             </DialogTitle>
             <DialogDescription>
               Pick the canonical record. The other record will be soft-deleted and all
