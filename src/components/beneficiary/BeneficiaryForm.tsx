@@ -1623,7 +1623,7 @@ function Step3Family({
           })}
         </div>
         {!form.care_arrangement && (
-          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+          <p className="text-[11px]" style={{ color: 'var(--status-warning)' }}>
             Please choose — this affects what details we capture below.
           </p>
         )}

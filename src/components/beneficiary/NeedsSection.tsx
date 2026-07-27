@@ -13,18 +13,18 @@ import { useBeneficiaryNeeds, useNeedTypes, useSaveBeneficiaryNeed, useDeleteBen
 import { Checkbox } from '@/components/ui/checkbox';
 
 const STATUS_STYLES: Record<string, string> = {
-  unmet: 'bg-red-50 text-red-700 border-red-200',
-  partially_met: 'bg-amber-50 text-amber-800 border-amber-200',
-  met: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  unmet: 'status-badge status-badge-danger border-transparent',
+  partially_met: 'status-badge status-badge-warning border-transparent',
+  met: 'status-badge status-badge-success border-transparent',
 };
 const STATUS_LABEL: Record<string, string> = {
   unmet: 'Unmet', partially_met: 'Partially met', met: 'Met',
 };
 const PRIORITY_STYLES: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
-  normal: 'bg-slate-100 text-slate-700',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800',
+  normal: 'status-badge status-badge-muted',
+  high: 'status-badge status-badge-warning',
+  urgent: 'status-badge status-badge-danger',
 };
 
 export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
@@ -130,11 +130,11 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                       <Badge variant="outline" className={`text-[10px] ${STATUS_STYLES[n.status]}`}>{STATUS_LABEL[n.status]}</Badge>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded ${PRIORITY_STYLES[n.priority]}`}>{n.priority}</span>
                       {isManual ? (
-                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded status-badge-warning">
                           <UserCog className="h-3 w-3" /> Manual
                         </span>
                       ) : (
-                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
+                        <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded status-badge-success">
                           <Sparkles className="h-3 w-3" /> Auto
                         </span>
                       )}

@@ -931,9 +931,9 @@ export default function Beneficiaries() {
           const TypeIcon = getTypeIcon(selectedBeneficiary.beneficiary_type);
           const age = calculateAge(selectedBeneficiary.date_of_birth);
           const typeColors: Record<string, string> = {
-            student: 'from-blue-600/90 to-indigo-700/90',
-            adult: 'from-emerald-600/90 to-teal-700/90',
-            group: 'from-amber-600/90 to-orange-700/90',
+            student: 'from-primary/90 to-primary/70',
+            adult: 'from-accent/90 to-primary/70',
+            group: 'from-primary/80 to-accent/80',
           };
           const gradientClass = typeColors[selectedBeneficiary.beneficiary_type] || typeColors.student;
 
@@ -964,11 +964,11 @@ export default function Beneficiaries() {
                       </span>
                       <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-0.5 ${
                         selectedBeneficiary.status === 'active'
-                          ? 'bg-green-400/20 text-green-100'
+                          ? 'bg-white/25 text-white'
                           : 'bg-white/15 text-white/70'
                       }`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${
-                          selectedBeneficiary.status === 'active' ? 'bg-green-300' : 'bg-white/50'
+                          selectedBeneficiary.status === 'active' ? 'bg-white' : 'bg-white/50'
                         }`} />
                         <span className="capitalize">{selectedBeneficiary.status}</span>
                       </span>
