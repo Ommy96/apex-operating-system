@@ -16,11 +16,11 @@ import { useTierLabels } from "@/hooks/useTierLabels";
 import { Plus } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  planned: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  on_hold: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  completed: "bg-muted text-muted-foreground",
-  cancelled: "bg-destructive/10 text-destructive",
+  active: "status-badge-success",
+  planned: "status-badge-info",
+  on_hold: "status-badge-warning",
+  completed: "status-badge-muted",
+  cancelled: "status-badge-danger",
 };
 
 export default function AllProjects() {

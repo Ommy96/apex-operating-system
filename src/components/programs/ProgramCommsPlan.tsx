@@ -33,10 +33,10 @@ const OUTPUT_TYPES = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  planned: "bg-muted text-muted-foreground",
-  in_progress: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  published: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  cancelled: "bg-destructive/10 text-destructive",
+  planned: "status-badge-muted",
+  in_progress: "status-badge-warning",
+  published: "status-badge-success",
+  cancelled: "status-badge-danger",
 };
 
 const emptyForm = {

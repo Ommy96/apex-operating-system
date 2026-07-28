@@ -41,11 +41,11 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  not_started: "bg-muted text-muted-foreground",
-  in_progress: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  blocked: "bg-destructive/10 text-destructive",
-  cancelled: "bg-muted text-muted-foreground line-through",
+  not_started: "status-badge-muted",
+  in_progress: "status-badge-warning",
+  completed: "status-badge-success",
+  blocked: "status-badge-danger",
+  cancelled: "status-badge-muted line-through",
 };
 
 const emptyMilestone = {
@@ -300,11 +300,11 @@ export function SustainabilityPlan({ programId, projectId, orgId }: Props) {
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Completed</div>
-          <div className="text-2xl font-semibold text-emerald-600">{completed}</div>
+          <div className="text-2xl font-semibold" style={{ color: "var(--status-success)" }}>{completed}</div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">In Progress</div>
-          <div className="text-2xl font-semibold text-amber-600">{inProgress}</div>
+          <div className="text-2xl font-semibold" style={{ color: "var(--status-warning)" }}>{inProgress}</div>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Avg Progress</div>

@@ -38,11 +38,11 @@ type Milestone = {
 };
 
 const statusStyle = (m: Milestone) => {
-  if (m.status === "completed") return { dot: "bg-teal-600", text: "text-teal-700", label: "Completed" };
+  if (m.status === "completed") return { dot: "bg-[var(--status-success)]", text: "text-[var(--status-success)]", label: "Completed" };
   if (m.status === "cancelled") return { dot: "bg-muted-foreground", text: "text-muted-foreground", label: "Cancelled" };
   if (isPast(new Date(m.due_date)) && m.status !== "completed")
-    return { dot: "bg-rose-600", text: "text-rose-700", label: "Overdue" };
-  return { dot: "bg-amber-500", text: "text-amber-700", label: "Upcoming" };
+    return { dot: "bg-[var(--status-danger)]", text: "text-[var(--status-danger)]", label: "Overdue" };
+  return { dot: "bg-[var(--status-warning)]", text: "text-[var(--status-warning)]", label: "Upcoming" };
 };
 
 export function ProgramMilestones({ programId, projectId }: { programId?: string; projectId?: string }) {
@@ -232,12 +232,12 @@ export function ProgramMilestones({ programId, projectId }: { programId?: string
                             <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> Due {format(due, "MMM d, yyyy")}</span>
                             {m.project_id && <span>• {projectsMap[m.project_id] || "Project"}</span>}
                             {m.status !== "completed" && (
-                              <span className={daysDiff < 0 ? "text-rose-600 font-medium" : daysDiff <= 14 ? "text-amber-600" : ""}>
+                              <span className={daysDiff < 0 ? "text-[var(--status-danger)] font-medium" : daysDiff <= 14 ? "text-[var(--status-warning)]" : ""}>
                                 {daysDiff < 0 ? `${-daysDiff}d overdue` : daysDiff === 0 ? "Today" : `in ${daysDiff}d`}
                               </span>
                             )}
                             {m.status === "completed" && m.completed_date && (
-                              <span className="text-teal-600">Completed {format(new Date(m.completed_date), "MMM d, yyyy")}</span>
+                              <span className="text-[var(--status-success)]">Completed {format(new Date(m.completed_date), "MMM d, yyyy")}</span>
                             )}
                           </div>
                         </div>
