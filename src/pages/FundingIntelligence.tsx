@@ -234,32 +234,32 @@ export default function FundingIntelligence() {
           <NeedsGapCard />
 
           {/* Compliance-grade split: pools + active allocations, never merged */}
-          <Card className="border-amber-500/30 bg-amber-500/[0.03]">
+          <Card className="border-[var(--status-warning)]/40 bg-[var(--status-warning-bg)]/40">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <Lock className="h-4 w-4 text-amber-600" /> Restricted vs Unrestricted balances
+                <Lock className="h-4 w-4 text-[var(--status-warning)]" /> Restricted vs Unrestricted balances
               </CardTitle>
               <CardDescription>
                 Compliance view — restricted funds must be used for their stated purpose and are reported separately.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-amber-800 dark:text-amber-300">
+              <div className="rounded-md border border-[var(--status-warning)]/40 bg-[var(--status-warning-bg)] p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-[var(--status-warning)]">
                   <Lock className="h-3.5 w-3.5" /> Restricted
                 </div>
                 <p className="text-2xl font-semibold mt-1">{fmt(compliance.restrictedTotal)}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">Must be used for stated purpose.</p>
               </div>
-              <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+              <div className="rounded-md border border-[var(--status-success)]/40 bg-[var(--status-success-bg)] p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-[var(--status-success)]">
                   <LockOpen className="h-3.5 w-3.5" /> Unrestricted
                 </div>
                 <p className="text-2xl font-semibold mt-1">{fmt(compliance.unrestrictedTotal)}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">Available wherever most needed.</p>
               </div>
-              <div className="rounded-md border border-sky-500/40 bg-sky-500/10 p-3">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-sky-800 dark:text-sky-300">
+              <div className="rounded-md border border-[var(--status-info)]/40 bg-[var(--status-info-bg)] p-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-[var(--status-info)]">
                   <CalendarClock className="h-3.5 w-3.5" /> Time-restricted
                 </div>
                 <p className="text-2xl font-semibold mt-1">{fmt(compliance.timeRestrictedTotal)}</p>

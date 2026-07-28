@@ -16,9 +16,9 @@ interface BurnRateGaugeProps {
 }
 
 const STATUS_COLORS: Record<BurnRateResult['status'], string> = {
-  on_track: 'bg-emerald-500',
-  underspending: 'bg-amber-500',
-  at_risk: 'bg-amber-600',
+  on_track: 'bg-[var(--status-success)]',
+  underspending: 'bg-[var(--status-warning-bg)]0',
+  at_risk: 'bg-[var(--status-warning)]',
   overspending: 'bg-destructive',
 };
 
@@ -100,7 +100,7 @@ export function BurnRateGauge({ grantId, grantName, totalBudget, currency, start
       )}
 
       {result.status === 'underspending' && (
-        <p className="text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="text-[11px] text-[var(--status-warning)]">
           Spending is behind schedule — risk of underspending
         </p>
       )}

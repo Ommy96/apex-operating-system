@@ -283,7 +283,7 @@ export default function DonorManagement() {
         title="Donor Management"
         description="Track all donors, contributions, and program sponsorships across your organization"
         icon={Heart}
-        iconColorClass="text-rose-500"
+        iconColorClass="text-[var(--status-danger)]"
       />
 
       {/* Sponsorship coverage widget removed — see Sponsorship tab in Financial Suite */}
@@ -311,8 +311,8 @@ export default function DonorManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-emerald-600" />
+            <div className="h-10 w-10 rounded-lg bg-[var(--status-success-bg)] flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-[var(--status-success)]" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Total Contributions</p>
@@ -322,8 +322,8 @@ export default function DonorManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 rounded-lg bg-[var(--status-info-bg)] flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-[var(--status-info)]" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Total Transactions</p>
@@ -417,7 +417,7 @@ export default function DonorManagement() {
                       </TableCell>
                       <TableCell className="text-center hidden sm:table-cell">
                         {donorAccountMap.has(donor.name.trim().toLowerCase()) ? (
-                          <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600">
+                          <Badge variant="secondary" className="text-xs bg-[var(--status-success-bg)] text-[var(--status-success)]">
                             <CheckCircle2 className="h-3 w-3 mr-1" /> Active
                           </Badge>
                         ) : (
@@ -458,7 +458,7 @@ export default function DonorManagement() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-rose-500" />
+              <Heart className="h-5 w-5 text-[var(--status-danger)]" />
               {selectedDonor?.name}
             </DialogTitle>
           </DialogHeader>
@@ -486,8 +486,8 @@ export default function DonorManagement() {
                 const acct = donorAccountMap.get(selectedDonor.name.trim().toLowerCase());
                 if (acct) {
                   return (
-                    <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <div className="flex items-center gap-2 p-3 bg-[var(--status-success-bg)] rounded-lg border border-[var(--status-success)]/20">
+                      <CheckCircle2 className="h-4 w-4 text-[var(--status-success)] shrink-0" />
                       <div className="text-sm">
                         <span className="font-medium">Portal Account Active</span>
                         <span className="text-muted-foreground ml-2">({acct.email})</span>

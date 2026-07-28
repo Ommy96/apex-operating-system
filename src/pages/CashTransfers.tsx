@@ -23,9 +23,9 @@ import { BeneficiarySelector } from "@/components/BeneficiarySelector";
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
   approved: "bg-primary/10 text-primary",
-  processing: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  partial: "bg-amber-100 text-amber-800",
+  processing: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:text-[var(--status-warning)]",
+  completed: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:text-[var(--status-success)]",
+  partial: "bg-[var(--status-warning-bg)] text-[var(--status-warning)]",
   failed: "bg-destructive/10 text-destructive",
   pending: "bg-muted text-muted-foreground",
 };
@@ -191,10 +191,10 @@ export default function CashTransfers() {
       </div>
 
       {/* Sandbox Banner */}
-      <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+      <Card className="border-[var(--status-warning)]/40 bg-[var(--status-warning-bg)] dark:border-[var(--status-warning)]/40">
         <CardContent className="flex items-center gap-3 py-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
-          <p className="text-sm text-amber-800 dark:text-amber-300">
+          <AlertTriangle className="h-5 w-5 text-[var(--status-warning)]" />
+          <p className="text-sm text-[var(--status-warning)]">
             M-Pesa is in sandbox mode. Configure production credentials in Settings to go live.
           </p>
         </CardContent>
