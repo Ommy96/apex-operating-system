@@ -506,7 +506,7 @@ const ProgramsManagement = () => {
                         )}
                         {/* Avatar Stack */}
                         {(() => {
-                          const AVATAR_COLORS = ['bg-teal-100 text-teal-700','bg-purple-100 text-purple-700','bg-amber-100 text-amber-700','bg-orange-100 text-orange-700','bg-blue-100 text-blue-700'];
+                          const AVATAR_COLORS = ['bg-primary/10 text-primary','bg-accent/10 text-accent','status-badge-warning','status-badge-info','status-badge-success'];
                           const members = teamMembersMap?.[program.id] || [];
                           if (members.length === 0) return null;
                           const shown = members.slice(0, 3);

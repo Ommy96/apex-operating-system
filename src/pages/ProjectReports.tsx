@@ -189,9 +189,9 @@ export default function ProjectReports() {
 
 function StatusBadge({ status }: { status: Draft["status"] }) {
   const map: Record<Draft["status"], string> = {
-    draft: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-    submitted: "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
-    approved: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
+    draft: "status-badge-warning",
+    submitted: "status-badge-info",
+    approved: "status-badge-success",
   };
   return <span className={`rounded-full px-2 py-0.5 text-xs ${map[status]}`}>{status}</span>;
 }

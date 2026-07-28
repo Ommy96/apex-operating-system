@@ -17,13 +17,13 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 const ROLE_OPTIONS = [
-  { value: "programme_manager", label: "Programme Manager", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  { value: "project_manager", label: "Project Manager", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  { value: "me_officer", label: "M&E Officer", color: "bg-teal-100 text-teal-700 border-teal-200" },
-  { value: "field_officer", label: "Field Officer", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  { value: "finance_officer", label: "Finance Officer", color: "bg-amber-100 text-amber-700 border-amber-200" },
-  { value: "data_entry", label: "Data Entry", color: "bg-slate-100 text-slate-700 border-slate-200" },
-  { value: "advisor", label: "Advisor", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  { value: "programme_manager", label: "Programme Manager", color: "bg-primary/10 text-primary border-primary/20" },
+  { value: "project_manager", label: "Project Manager", color: "status-badge-info" },
+  { value: "me_officer", label: "M&E Officer", color: "bg-accent/10 text-accent border-accent/20" },
+  { value: "field_officer", label: "Field Officer", color: "status-badge-success" },
+  { value: "finance_officer", label: "Finance Officer", color: "status-badge-warning" },
+  { value: "data_entry", label: "Data Entry", color: "status-badge-muted" },
+  { value: "advisor", label: "Advisor", color: "bg-primary/10 text-primary border-primary/20" },
   { value: "other", label: "Other", color: "bg-muted text-muted-foreground" },
 ];
 
@@ -219,7 +219,7 @@ export function ProgramTeam({ programId }: { programId?: string }) {
                         <div>
                           <div className="text-sm font-medium flex items-center gap-1">
                             {profile?.full_name || "Unknown"}
-                            {m.is_lead && <Crown className="h-3 w-3 text-amber-500" />}
+                            {m.is_lead && <Crown className="h-3 w-3 text-[var(--status-warning)]" />}
                           </div>
                           <div className="text-xs text-muted-foreground">{profile?.email}</div>
                         </div>
