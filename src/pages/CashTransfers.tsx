@@ -23,8 +23,8 @@ import { BeneficiarySelector } from "@/components/BeneficiarySelector";
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
   approved: "bg-primary/10 text-primary",
-  processing: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:bg-amber-900/30 dark:text-[var(--status-warning)]",
-  completed: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:bg-emerald-900/30 dark:text-[var(--status-success)]",
+  processing: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:text-[var(--status-warning)]",
+  completed: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:text-[var(--status-success)]",
   partial: "bg-[var(--status-warning-bg)] text-[var(--status-warning)]",
   failed: "bg-destructive/10 text-destructive",
   pending: "bg-muted text-muted-foreground",

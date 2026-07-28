@@ -118,8 +118,8 @@ export function PettyCashTab() {
   const getFundStatus = (fund: any) => {
     const pct = Number(fund.current_balance) / Number(fund.opening_balance);
     if (pct <= 0) return { label: "Depleted", className: "bg-destructive/10 text-destructive" };
-    if (pct < 0.2) return { label: "Low", className: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:bg-amber-900/30 dark:text-[var(--status-warning)]" };
-    return { label: "Active", className: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:bg-emerald-900/30 dark:text-[var(--status-success)]" };
+    if (pct < 0.2) return { label: "Low", className: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:text-[var(--status-warning)]" };
+    return { label: "Active", className: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:text-[var(--status-success)]" };
   };
 
   const selectedFundData = (funds.data || []).find(f => f.id === selectedFund);

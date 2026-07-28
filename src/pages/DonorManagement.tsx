@@ -486,7 +486,7 @@ export default function DonorManagement() {
                 const acct = donorAccountMap.get(selectedDonor.name.trim().toLowerCase());
                 if (acct) {
                   return (
-                    <div className="flex items-center gap-2 p-3 bg-[var(--status-success-bg)] rounded-lg border border-emerald-500/20">
+                    <div className="flex items-center gap-2 p-3 bg-[var(--status-success-bg)] rounded-lg border border-[var(--status-success)]/20">
                       <CheckCircle2 className="h-4 w-4 text-[var(--status-success)] shrink-0" />
                       <div className="text-sm">
                         <span className="font-medium">Portal Account Active</span>
