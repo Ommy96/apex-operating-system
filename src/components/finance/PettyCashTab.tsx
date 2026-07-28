@@ -118,8 +118,8 @@ export function PettyCashTab() {
   const getFundStatus = (fund: any) => {
     const pct = Number(fund.current_balance) / Number(fund.opening_balance);
     if (pct <= 0) return { label: "Depleted", className: "bg-destructive/10 text-destructive" };
-    if (pct < 0.2) return { label: "Low", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
-    return { label: "Active", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
+    if (pct < 0.2) return { label: "Low", className: "bg-[var(--status-warning-bg)] text-[var(--status-warning)] dark:bg-amber-900/30 dark:text-[var(--status-warning)]" };
+    return { label: "Active", className: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:bg-emerald-900/30 dark:text-[var(--status-success)]" };
   };
 
   const selectedFundData = (funds.data || []).find(f => f.id === selectedFund);
@@ -167,7 +167,7 @@ export function PettyCashTab() {
                       </Badge>
                     </TableCell>
                     <TableCell>{txn.description}</TableCell>
-                    <TableCell className={`text-right font-medium ${txn.transaction_type === 'disbursement' ? 'text-destructive' : 'text-emerald-600'}`}>
+                    <TableCell className={`text-right font-medium ${txn.transaction_type === 'disbursement' ? 'text-destructive' : 'text-[var(--status-success)]'}`}>
                       {txn.transaction_type === 'disbursement' ? '-' : '+'}{fmtAmount(Number(txn.amount))}
                     </TableCell>
                   </TableRow>

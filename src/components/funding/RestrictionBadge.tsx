@@ -8,19 +8,19 @@ const META: Record<Restriction, { label: string; icon: any; className: string; h
   restricted: {
     label: "Restricted",
     icon: Lock,
-    className: "border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/10",
+    className: "border-[var(--status-warning)]/40 text-[var(--status-warning)] bg-[var(--status-warning-bg)]",
     help: "Restricted funds — must be used only for the stated purpose.",
   },
   unrestricted: {
     label: "Unrestricted",
     icon: LockOpen,
-    className: "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10",
+    className: "border-[var(--status-success)]/40 text-[var(--status-success)] bg-[var(--status-success-bg)]",
     help: "Unrestricted funds — may be applied wherever most needed.",
   },
   time_restricted: {
     label: "Time-restricted",
     icon: Clock,
-    className: "border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10",
+    className: "border-[var(--status-info)]/40 text-[var(--status-info)] bg-[var(--status-info-bg)]",
     help: "Time-restricted funds — usable only within a defined period.",
   },
 };

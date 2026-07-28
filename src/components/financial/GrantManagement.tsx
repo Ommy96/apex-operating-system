@@ -149,10 +149,10 @@ export function GrantManagement() {
 
   const getStatusColor = (status: string) => {
     const map: Record<string, string> = {
-      pipeline: "bg-muted text-muted-foreground", application: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      submitted: "bg-accent/20 text-accent-foreground", under_review: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-      approved: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", active: "bg-primary/15 text-primary",
-      completed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", rejected: "bg-destructive/15 text-destructive",
+      pipeline: "bg-muted text-muted-foreground", application: "bg-[var(--status-info-bg)] text-[var(--status-info)]",
+      submitted: "bg-accent/20 text-accent-foreground", under_review: "bg-[var(--status-warning-bg)] text-[var(--status-warning)]",
+      approved: "bg-[var(--status-success-bg)] text-[var(--status-success)]", active: "bg-primary/15 text-primary",
+      completed: "bg-[var(--status-success-bg)] text-[var(--status-success)]", rejected: "bg-destructive/15 text-destructive",
       expired: "bg-muted text-muted-foreground",
     };
     return map[status] || map.pipeline;
@@ -208,7 +208,7 @@ export function GrantManagement() {
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Received</p>
-            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{grant.currency} {Number(grant.amount_received || 0).toLocaleString()}</p>
+            <p className="text-lg font-bold text-[var(--status-success)]">{grant.currency} {Number(grant.amount_received || 0).toLocaleString()}</p>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Spent</p>
@@ -328,7 +328,7 @@ export function GrantManagement() {
                   </CardContent></Card>
                   <Card><CardContent className="p-4 text-center">
                     <p className="text-xs text-muted-foreground">Remaining</p>
-                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{grant.currency} {(util.totalAllocated - util.totalSpent).toLocaleString()}</p>
+                    <p className="text-lg font-bold text-[var(--status-success)]">{grant.currency} {(util.totalAllocated - util.totalSpent).toLocaleString()}</p>
                   </CardContent></Card>
                 </div>
                 <Card>
@@ -439,11 +439,11 @@ export function GrantManagement() {
                   const isOverdue = report.status === 'pending' && isPast(new Date(report.due_date));
                   const isDueSoon = report.status === 'pending' && daysUntil <= 7 && daysUntil >= 0;
                   return (
-                    <Card key={report.id} className={`${isOverdue ? 'border-destructive/50' : isDueSoon ? 'border-yellow-500/50' : ''}`}>
+                    <Card key={report.id} className={`${isOverdue ? 'border-destructive/50' : isDueSoon ? 'border-[var(--status-warning)]/40' : ''}`}>
                       <CardContent className="p-4 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${isOverdue ? 'bg-destructive/10' : isDueSoon ? 'bg-yellow-500/10' : 'bg-primary/10'}`}>
-                            {isOverdue ? <AlertTriangle className="h-4 w-4 text-destructive" /> : <FileText className={`h-4 w-4 ${isDueSoon ? 'text-yellow-600 dark:text-yellow-400' : 'text-primary'}`} />}
+                          <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${isOverdue ? 'bg-destructive/10' : isDueSoon ? 'bg-[var(--status-warning-bg)]' : 'bg-primary/10'}`}>
+                            {isOverdue ? <AlertTriangle className="h-4 w-4 text-destructive" /> : <FileText className={`h-4 w-4 ${isDueSoon ? 'text-[var(--status-warning)]' : 'text-primary'}`} />}
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-foreground truncate">{report.report_title}</p>
@@ -455,9 +455,9 @@ export function GrantManagement() {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {isOverdue && <Badge variant="destructive" className="text-[10px]">Overdue</Badge>}
-                          {isDueSoon && !isOverdue && <Badge className="bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 text-[10px]">Due Soon</Badge>}
+                          {isDueSoon && !isOverdue && <Badge className="bg-[var(--status-warning-bg)]0/15 text-[var(--status-warning)] text-[10px]">Due Soon</Badge>}
                           {report.status === 'submitted' ? (
-                            <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]">Submitted</Badge>
+                            <Badge className="bg-[var(--status-success-bg)] text-[var(--status-success)] text-[10px]">Submitted</Badge>
                           ) : (
                             <Button size="sm" variant="outline" onClick={() => markReportSubmitted(report.id)}>Mark Submitted</Button>
                           )}
@@ -593,24 +593,24 @@ export function GrantManagement() {
           <div><p className="text-xs text-muted-foreground">Total Grant Value</p><p className="text-lg font-bold text-foreground">KES {totalGrantValue.toLocaleString()}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10"><CheckSquare className="h-5 w-5 text-emerald-600 dark:text-emerald-400" /></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--status-success-bg)]"><CheckSquare className="h-5 w-5 text-[var(--status-success)]" /></div>
           <div><p className="text-xs text-muted-foreground">Active Grants</p><p className="text-lg font-bold text-foreground">{activeGrants}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10"><Landmark className="h-5 w-5 text-blue-600 dark:text-blue-400" /></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--status-info-bg)]"><Landmark className="h-5 w-5 text-[var(--status-info)]" /></div>
           <div><p className="text-xs text-muted-foreground">Received</p><p className="text-lg font-bold text-foreground">KES {totalReceived.toLocaleString()}</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10"><Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" /></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--status-warning-bg)]"><Clock className="h-5 w-5 text-[var(--status-warning)]" /></div>
           <div><p className="text-xs text-muted-foreground">Reports Due</p><p className="text-lg font-bold text-foreground">{upcomingReports.length}</p></div>
         </CardContent></Card>
       </div>
 
       {/* Upcoming Report Alerts */}
       {upcomingReports.length > 0 && (
-        <Card className="border-yellow-500/30">
+        <Card className="border-[var(--status-warning)]/40">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" /> Upcoming Report Deadlines</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[var(--status-warning)]" /> Upcoming Report Deadlines</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {upcomingReports.slice(0, 5).map(report => {
@@ -625,7 +625,7 @@ export function GrantManagement() {
                       <p className="text-xs text-muted-foreground">{(report as any).grants?.grant_name}</p>
                     </div>
                   </div>
-                  <Badge className={isOverdue ? 'bg-destructive/15 text-destructive' : daysUntil <= 7 ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' : 'bg-muted text-muted-foreground'} variant="outline">
+                  <Badge className={isOverdue ? 'bg-destructive/15 text-destructive' : daysUntil <= 7 ? 'bg-[var(--status-warning-bg)]0/15 text-[var(--status-warning)]' : 'bg-muted text-muted-foreground'} variant="outline">
                     {isOverdue ? 'Overdue' : `${daysUntil}d left`}
                   </Badge>
                 </div>

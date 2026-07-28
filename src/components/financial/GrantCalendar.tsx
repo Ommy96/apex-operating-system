@@ -10,13 +10,13 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval, getDay, isSameMonth, isToday, isBefore } from "date-fns";
 
 const REPORT_COLORS: Record<string, string> = {
-  narrative: "bg-blue-500",
-  financial: "bg-amber-500",
-  impact: "bg-blue-500",
-  compliance: "bg-amber-500",
-  m_and_e: "bg-blue-500",
-  annual: "bg-amber-500",
-  audit: "bg-red-500",
+  narrative: "bg-[var(--status-info)]",
+  financial: "bg-[var(--status-warning-bg)]0",
+  impact: "bg-[var(--status-info)]",
+  compliance: "bg-[var(--status-warning-bg)]0",
+  m_and_e: "bg-[var(--status-info)]",
+  annual: "bg-[var(--status-warning-bg)]0",
+  audit: "bg-[var(--status-danger)]",
 };
 
 export function GrantCalendar() {
@@ -61,8 +61,8 @@ export function GrantCalendar() {
 
   const getEventColor = (report: any) => {
     const isOverdue = report.status !== "submitted" && report.status !== "approved" && isBefore(new Date(report.due_date), new Date());
-    if (isOverdue) return "bg-red-800";
-    return REPORT_COLORS[report.report_type] || "bg-blue-500";
+    if (isOverdue) return "bg-[var(--status-danger)]";
+    return REPORT_COLORS[report.report_type] || "bg-[var(--status-info)]";
   };
 
   return (
@@ -128,10 +128,10 @@ export function GrantCalendar() {
 
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-4 mt-4 text-xs">
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Narrative</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Financial</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Audit</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-800" /> Overdue</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[var(--status-info)]" /> Narrative</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[var(--status-warning-bg)]0" /> Financial</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[var(--status-danger)]" /> Audit</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[var(--status-danger)]" /> Overdue</span>
           </div>
         </CardContent>
       </Card>

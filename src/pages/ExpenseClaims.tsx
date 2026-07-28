@@ -22,9 +22,9 @@ import { usePermissions } from "@/hooks/usePermissions";
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
   submitted: "bg-primary/10 text-primary",
-  approved: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+  approved: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:bg-emerald-900/30 dark:text-[var(--status-success)]",
   rejected: "bg-destructive/10 text-destructive",
-  paid: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+  paid: "bg-[var(--status-success-bg)] text-[var(--status-success)] dark:bg-emerald-900/30 dark:text-[var(--status-success)]",
 };
 
 const CATEGORIES = ["transport", "accommodation", "meals", "supplies", "communication", "other"];

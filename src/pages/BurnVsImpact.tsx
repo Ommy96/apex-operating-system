@@ -274,7 +274,7 @@ export default function BurnVsImpact() {
                           <p>Impact: {(d.y * 100).toFixed(1)}%</p>
                           <p>Volume: {Math.round(d.z).toLocaleString()}</p>
                           {d.flagCount > 0 && (
-                            <p className="text-amber-600 mt-1">
+                            <p className="text-[var(--status-warning)] mt-1">
                               {d.flagCount} open flag{d.flagCount === 1 ? "" : "s"}
                             </p>
                           )}
@@ -323,7 +323,7 @@ export default function BurnVsImpact() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500" /> Open anomaly flags
+            <AlertTriangle className="h-4 w-4 text-[var(--status-warning)]" /> Open anomaly flags
           </CardTitle>
         </CardHeader>
         <CardContent>
