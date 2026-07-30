@@ -28,10 +28,10 @@ export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
             id="main-content"
             role="main"
             aria-label="Page content"
-            className="flex-1 overflow-auto p-6 pb-24 md:pb-6 workspace-scroll"
+            className="flex-1 overflow-auto py-[var(--space-md)] pb-24 md:pb-[var(--space-md)] workspace-scroll"
             style={{ background: 'var(--brand-canvas)' }}
           >
-            <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
+            <div className="fluid-shell animate-fade-in">
               <RouteTransition>{children}</RouteTransition>
             </div>
           </main>
