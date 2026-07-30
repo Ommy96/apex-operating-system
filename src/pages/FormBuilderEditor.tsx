@@ -188,12 +188,12 @@ export default function FormBuilderEditor() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{f.field_label}</span>
                         <Badge variant="outline" className="text-[10px]">{f.field_type}</Badge>
-                        {f.is_required && <Badge className="bg-rose-100 text-rose-700 text-[10px]">required</Badge>}
+                        {f.is_required && <Badge className="bg-destructive/10 text-destructive text-[10px]">required</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">key: {f.field_key} {f.helper_text ? `· ${f.helper_text}` : ""}</p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => setEditing(f)}>Edit</Button>
-                    <Button variant="ghost" size="sm" className="text-rose-600" onClick={() => {
+                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => {
                       if (confirm(`Delete field "${f.field_label}"?`)) deleteField.mutate({ id: f.id, formId: form.id });
                     }}><Trash2 className="h-4 w-4" /></Button>
                   </CardContent>
@@ -326,7 +326,7 @@ function FieldPreview({ field }: { field: MEFormField }) {
   }
   return (
     <div className="space-y-1">
-      <Label>{field.field_label}{field.is_required && <span className="text-rose-500"> *</span>}</Label>
+      <Label>{field.field_label}{field.is_required && <span className="text-destructive"> *</span>}</Label>
       {field.field_type === "text" && <Input disabled placeholder="Text input" />}
       {field.field_type === "number" && <Input type="number" disabled placeholder="0" />}
       {field.field_type === "decimal" && <Input type="number" step="0.01" disabled placeholder="0.00" />}

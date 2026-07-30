@@ -56,7 +56,7 @@ export default function CaseDetail() {
               </h1>
               <Badge>{kase.case_status.replace(/_/g," ")}</Badge>
               <Badge variant="outline">{kase.case_type.replace(/_/g," ")}</Badge>
-              <Badge className={kase.priority === "critical" ? "bg-rose-100 text-rose-700" : kase.priority === "high" ? "bg-amber-100 text-amber-700" : ""}>{kase.priority}</Badge>
+              <Badge className={kase.priority === "critical" ? "bg-destructive/10 text-destructive" : kase.priority === "high" ? "bg-warning/10 text-warning" : ""}>{kase.priority}</Badge>
             </div>
             <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
               <User className="h-3 w-3" />
@@ -108,18 +108,18 @@ export default function CaseDetail() {
                           <Badge variant="outline" className="text-[10px]">{e.concern_level} concern</Badge>
                         )}
                         {e.follow_up_date && !e.follow_up_completed && (
-                          <Badge className="bg-amber-100 text-amber-700 text-[10px]">follow-up {e.follow_up_date}</Badge>
+                          <Badge className="bg-warning/10 text-warning text-[10px]">follow-up {e.follow_up_date}</Badge>
                         )}
                         {e.follow_up_completed && (
-                          <Badge className="bg-teal-100 text-teal-700 text-[10px]">follow-up done</Badge>
+                          <Badge className="bg-success/10 text-success text-[10px]">follow-up done</Badge>
                         )}
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{e.summary}</p>
                       {e.action_required && (
-                        <p className="text-xs text-amber-700">Action: {e.action_required}</p>
+                        <p className="text-xs text-warning">Action: {e.action_required}</p>
                       )}
                       {(e.referral_to || e.referral_organisation) && (
-                        <p className="text-xs text-purple-700">Referred to {e.referral_to ?? "—"} {e.referral_organisation ? `(${e.referral_organisation})` : ""}</p>
+                        <p className="text-xs text-info">Referred to {e.referral_to ?? "—"} {e.referral_organisation ? `(${e.referral_organisation})` : ""}</p>
                       )}
                       {e.follow_up_date && !e.follow_up_completed && (
                         <Button size="sm" variant="outline" onClick={() => completeFollowUp.mutate({ entryId: e.id, caseId: kase.id })}>

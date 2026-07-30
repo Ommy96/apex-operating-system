@@ -333,15 +333,15 @@ interface AlertCardProps {
 
 function AlertCard({ tone, icon: Icon, title, body, isLoading }: AlertCardProps) {
   const toneClasses = {
-    teal: "border-teal-200/70 bg-teal-50/60 text-teal-900 dark:border-teal-900/40 dark:bg-teal-950/30 dark:text-teal-100",
+    teal: "border-success/70 bg-success/60 text-success",
     amber:
-      "border-amber-200/70 bg-amber-50/60 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100",
-    rose: "border-rose-200/70 bg-rose-50/60 text-rose-900 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-100",
+      "border-warning/70 bg-warning/60 text-warning",
+    rose: "border-destructive/70 bg-destructive/60 text-destructive",
   };
   const iconClasses = {
-    teal: "text-teal-600 dark:text-teal-300",
-    amber: "text-amber-600 dark:text-amber-300",
-    rose: "text-rose-600 dark:text-rose-300",
+    teal: "text-success",
+    amber: "text-warning",
+    rose: "text-destructive",
   };
 
   return (

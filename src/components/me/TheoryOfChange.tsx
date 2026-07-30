@@ -11,12 +11,12 @@ import { Plus, Trash2, FileText, ArrowRight } from "lucide-react";
 import { useME } from "@/hooks/useME";
 
 const NODE_COLORS: Record<string, string> = {
-  activity: "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700",
-  output: "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700",
-  outcome: "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700",
-  impact: "bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700",
+  activity: "bg-success/10 border-success/30",
+  output: "bg-warning/10 border-warning/30",
+  outcome: "bg-info/10 border-info/30",
+  impact: "bg-info/10 border-info/30",
   assumption: "bg-muted border-border",
-  risk: "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700",
+  risk: "bg-destructive/10 border-destructive/30",
 };
 
 export function TheoryOfChange() {

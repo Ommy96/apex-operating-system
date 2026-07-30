@@ -144,7 +144,7 @@ export function ProgramMilestones({ programId, projectId }: { programId?: string
   return (
     <div className="space-y-4">
       {counts.overdue > 0 && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 flex items-center gap-2">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" /> {counts.overdue} milestone{counts.overdue > 1 ? "s" : ""} overdue
         </div>
       )}

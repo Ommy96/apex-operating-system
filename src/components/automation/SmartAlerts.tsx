@@ -23,17 +23,17 @@ const conditionTypes = [
 ];
 
 const severityColors: Record<string, string> = {
-  info: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  info: "bg-info/10 text-info",
+  warning: "bg-warning/10 text-warning",
   critical: "bg-destructive/10 text-destructive",
 };
 
 const categoryColors: Record<string, string> = {
-  budget: "bg-green-500/10 text-green-600",
-  staff: "bg-violet-500/10 text-violet-600",
-  beneficiary: "bg-blue-500/10 text-blue-600",
-  program: "bg-emerald-500/10 text-emerald-600",
-  compliance: "bg-amber-500/10 text-amber-600",
+  budget: "bg-success/10 text-success",
+  staff: "bg-info/10 text-info",
+  beneficiary: "bg-info/10 text-info",
+  program: "bg-success/10 text-success",
+  compliance: "bg-warning/10 text-warning",
   general: "bg-muted text-muted-foreground",
 };
 
@@ -154,7 +154,7 @@ export function SmartAlerts() {
                           <CheckCircle className="h-3.5 w-3.5 mr-1" /> Resolve
                         </Button>
                       )}
-                      {a.is_resolved && <Badge variant="outline" className="text-emerald-600">Resolved</Badge>}
+                      {a.is_resolved && <Badge variant="outline" className="text-success">Resolved</Badge>}
                     </div>
                   </div>
                 </CardContent>

@@ -97,9 +97,9 @@ export function ProgramPerformanceSection({ programs, programData, reportsData, 
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-xs text-muted-foreground">Enrolled</p>
                   <div className="flex items-center gap-1">
-                    {program.trend > 0 ? <TrendingUp className="h-3 w-3 text-emerald-500" /> 
-                      : program.trend < 0 ? <TrendingDown className="h-3 w-3 text-red-500" /> : null}
-                    <span className={`text-xs font-medium ${program.trend > 0 ? 'text-emerald-500' : program.trend < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    {program.trend > 0 ? <TrendingUp className="h-3 w-3 text-success" /> 
+                      : program.trend < 0 ? <TrendingDown className="h-3 w-3 text-destructive" /> : null}
+                    <span className={`text-xs font-medium ${program.trend > 0 ? 'text-success' : program.trend < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                       {program.trend > 0 ? '+' : ''}{program.trend}%
                     </span>
                   </div>

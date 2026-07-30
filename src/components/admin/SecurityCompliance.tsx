@@ -15,26 +15,26 @@ function ComplianceCard({ title, value, status, icon: Icon, description }: {
   title: string; value: number; status: 'ok' | 'warning' | 'danger'; icon: any; description: string;
 }) {
   const statusStyles = {
-    ok: 'border-emerald-500/20 from-emerald-500/10 to-emerald-600/5',
-    warning: 'border-amber-500/20 from-amber-500/10 to-amber-600/5',
-    danger: 'border-red-500/20 from-red-500/10 to-red-600/5',
+    ok: 'border-success/20 from-success/10 to-success/5',
+    warning: 'border-warning/20 from-warning/10 to-warning/5',
+    danger: 'border-destructive/20 from-destructive/10 to-destructive/5',
   };
   const iconStyles = {
-    ok: 'text-emerald-400',
-    warning: 'text-amber-400',
-    danger: 'text-red-400',
+    ok: 'text-success',
+    warning: 'text-warning',
+    danger: 'text-destructive',
   };
   return (
     <div className={`p-4 rounded-lg bg-gradient-to-br border ${statusStyles[status]}`}>
       <div className="flex items-center justify-between mb-2">
         <Icon className={`h-5 w-5 ${iconStyles[status]}`} />
-        {status === 'ok' && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
-        {status === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-400" />}
-        {status === 'danger' && <XCircle className="h-4 w-4 text-red-400" />}
+        {status === 'ok' && <CheckCircle2 className="h-4 w-4 text-success" />}
+        {status === 'warning' && <AlertTriangle className="h-4 w-4 text-warning" />}
+        {status === 'danger' && <XCircle className="h-4 w-4 text-destructive" />}
       </div>
-      <div className="text-2xl font-bold text-slate-100 font-mono">{value}</div>
-      <h4 className="text-sm font-medium text-slate-200 mt-1">{title}</h4>
-      <p className="text-[10px] text-slate-500 mt-0.5">{description}</p>
+      <div className="text-2xl font-bold text-muted-foreground font-mono">{value}</div>
+      <h4 className="text-sm font-medium text-muted-foreground mt-1">{title}</h4>
+      <p className="text-[10px] text-muted-foreground mt-0.5">{description}</p>
     </div>
   );
 }
@@ -107,7 +107,7 @@ export function SecurityCompliance() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning" />
       </div>
     );
   }
@@ -115,9 +115,9 @@ export function SecurityCompliance() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <Shield className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">SECURITY & COMPLIANCE OVERSIGHT</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <Shield className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">SECURITY & COMPLIANCE OVERSIGHT</span>
         <div className="ml-auto flex gap-2">
           {['overview', 'suspicious', 'compliance', 'exports'].map(s => (
             <Button
@@ -126,8 +126,8 @@ export function SecurityCompliance() {
               variant={activeSection === s ? 'default' : 'ghost'}
               onClick={() => setActiveSection(s as any)}
               className={`text-xs h-7 ${activeSection === s
-                ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'}`}
+                ? 'bg-warning hover:bg-warning text-white'
+                : 'text-muted-foreground hover:text-muted-foreground hover:bg-muted-foreground'}`}
             >
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </Button>
@@ -171,49 +171,49 @@ export function SecurityCompliance() {
 
           {/* Security Activity Summary */}
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+            <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                 Security Event Breakdown
               </h3>
               <div className="space-y-3">
                 {[
-                  { label: 'Role Changes', count: complianceMetrics.roleChanges.length, icon: UserX, accent: 'text-amber-400' },
-                  { label: 'Permission Modifications', count: complianceMetrics.permissionChanges.length, icon: Shield, accent: 'text-purple-400' },
-                  { label: 'Data Deletions', count: complianceMetrics.deletionEvents.length, icon: XCircle, accent: 'text-red-400' },
-                  { label: 'Data Exports', count: complianceMetrics.dataExports.length, icon: Download, accent: 'text-blue-400' },
+                  { label: 'Role Changes', count: complianceMetrics.roleChanges.length, icon: UserX, accent: 'text-warning' },
+                  { label: 'Permission Modifications', count: complianceMetrics.permissionChanges.length, icon: Shield, accent: 'text-info' },
+                  { label: 'Data Deletions', count: complianceMetrics.deletionEvents.length, icon: XCircle, accent: 'text-destructive' },
+                  { label: 'Data Exports', count: complianceMetrics.dataExports.length, icon: Download, accent: 'text-info' },
                 ].map(item => (
-                  <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/30">
+                  <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                     <div className="flex items-center gap-3">
                       <item.icon className={`h-4 w-4 ${item.accent}`} />
-                      <span className="text-sm text-slate-300">{item.label}</span>
+                      <span className="text-sm text-muted-foreground">{item.label}</span>
                     </div>
-                    <span className="text-lg font-bold font-mono text-slate-200">{item.count}</span>
+                    <span className="text-lg font-bold font-mono text-muted-foreground">{item.count}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* High Risk Tenants */}
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+            <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                 High-Risk Tenants
               </h3>
               <div className="space-y-2 max-h-[260px] overflow-y-auto">
                 {organizations?.filter(o => o.risk_level === 'high').map(org => (
-                  <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-red-900/10 border border-red-800/20">
-                    <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
+                  <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm text-slate-200 block truncate">{org.name}</span>
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-sm text-muted-foreground block truncate">{org.name}</span>
+                      <span className="text-[10px] text-muted-foreground">
                         Health: {org.health_score}% · {org.suspended_at ? 'Suspended' : org.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-[10px] border-red-700 text-red-400">High</Badge>
+                    <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">High</Badge>
                   </div>
                 ))}
                 {(!organizations?.some(o => o.risk_level === 'high')) && (
-                  <div className="text-center py-8 text-slate-500 text-sm">
-                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald-500/50" />
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success" />
                     No high-risk tenants
                   </div>
                 )}
@@ -226,44 +226,44 @@ export function SecurityCompliance() {
       {/* Suspicious Activity */}
       {activeSection === 'suspicious' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+          <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Recent Role & Permission Changes
             </h3>
-            <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+            <div className="rounded-lg border border-border/50 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-800/80 border-slate-700 hover:bg-slate-800/80">
-                    <TableHead className="text-slate-400 text-xs">Time</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Event</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Entity</TableHead>
-                    <TableHead className="text-slate-400 text-xs">User</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Details</TableHead>
+                  <TableRow className="bg-muted-foreground/80 border-border hover:bg-muted-foreground/80">
+                    <TableHead className="text-muted-foreground text-xs">Time</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Event</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Entity</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">User</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {complianceMetrics?.roleChanges.slice(0, 20).map(log => (
-                    <TableRow key={log.id} className="border-slate-700/50 hover:bg-slate-800/30">
-                      <TableCell className="text-xs text-slate-400 font-mono whitespace-nowrap">
+                    <TableRow key={log.id} className="border-border/50 hover:bg-muted-foreground/30">
+                      <TableCell className="text-xs text-muted-foreground font-mono whitespace-nowrap">
                         {format(new Date(log.created_at), 'MMM d, HH:mm')}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs border-amber-700 text-amber-300">
+                        <Badge variant="outline" className="text-xs border-warning/30 text-warning">
                           {log.event_type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-300">{log.entity_type}</TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
+                      <TableCell className="text-xs text-muted-foreground">{log.entity_type}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground font-mono">
                         {log.user_id?.slice(0, 8)}…
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500 max-w-[200px] truncate">
+                      <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
                         {log.metadata ? JSON.stringify(log.metadata).slice(0, 50) : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
                   {(!complianceMetrics?.roleChanges.length) && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         No suspicious activity detected
                       </TableCell>
                     </TableRow>
@@ -274,38 +274,38 @@ export function SecurityCompliance() {
           </div>
 
           {/* Deletion Events */}
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+          <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Recent Data Deletions
             </h3>
-            <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+            <div className="rounded-lg border border-border/50 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-800/80 border-slate-700 hover:bg-slate-800/80">
-                    <TableHead className="text-slate-400 text-xs">Time</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Entity Type</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Entity ID</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Deleted By</TableHead>
+                  <TableRow className="bg-muted-foreground/80 border-border hover:bg-muted-foreground/80">
+                    <TableHead className="text-muted-foreground text-xs">Time</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Entity Type</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Entity ID</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Deleted By</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {complianceMetrics?.deletionEvents.slice(0, 15).map(log => (
-                    <TableRow key={log.id} className="border-slate-700/50 hover:bg-slate-800/30">
-                      <TableCell className="text-xs text-slate-400 font-mono whitespace-nowrap">
+                    <TableRow key={log.id} className="border-border/50 hover:bg-muted-foreground/30">
+                      <TableCell className="text-xs text-muted-foreground font-mono whitespace-nowrap">
                         {format(new Date(log.created_at), 'MMM d, HH:mm')}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-300">{log.entity_type}</TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
+                      <TableCell className="text-xs text-muted-foreground">{log.entity_type}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground font-mono">
                         {log.entity_id?.slice(0, 8)}…
                       </TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
+                      <TableCell className="text-xs text-muted-foreground font-mono">
                         {log.user_id?.slice(0, 8)}…
                       </TableCell>
                     </TableRow>
                   ))}
                   {(!complianceMetrics?.deletionEvents.length) && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                         No deletion events recorded
                       </TableCell>
                     </TableRow>
@@ -321,54 +321,54 @@ export function SecurityCompliance() {
       {activeSection === 'compliance' && (
         <div className="space-y-4">
           {/* Stale Organizations */}
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+          <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Organizations Without Recent Activity (60+ days)
             </h3>
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {complianceMetrics?.staleOrgs.map(org => (
-                <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/30">
-                  <Clock className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
+                  <Clock className="h-4 w-4 text-warning flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-slate-200 block truncate">{org.name}</span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-sm text-muted-foreground block truncate">{org.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
                       Last activity: {org.last_activity ? format(new Date(org.last_activity), 'MMM d, yyyy') : 'Never'}
                       {' · '}{org.member_count} members · {org.beneficiary_count} beneficiaries
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">
+                  <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">
                     {org.subscription_tier || 'free'}
                   </Badge>
                 </div>
               ))}
               {(!complianceMetrics?.staleOrgs.length) && (
-                <div className="text-center py-8 text-slate-500 text-sm">All organizations are active</div>
+                <div className="text-center py-8 text-muted-foreground text-sm">All organizations are active</div>
               )}
             </div>
           </div>
 
           {/* Free Tier Overuse */}
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+          <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
               Free Tier Organizations Exceeding Soft Limits
             </h3>
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {complianceMetrics?.overusingFreeOrgs.map(org => (
-                <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-amber-900/10 border border-amber-800/20">
-                  <FileWarning className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                  <FileWarning className="h-4 w-4 text-warning flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-slate-200 block truncate">{org.name}</span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-sm text-muted-foreground block truncate">{org.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
                       {org.beneficiary_count} beneficiaries · {org.member_count} members · {org.program_count} programs
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] border-amber-700 text-amber-400">
+                  <Badge variant="outline" className="text-[10px] border-warning/30 text-warning">
                     Upgrade candidate
                   </Badge>
                 </div>
               ))}
               {(!complianceMetrics?.overusingFreeOrgs.length) && (
-                <div className="text-center py-8 text-slate-500 text-sm">No free tier overuse detected</div>
+                <div className="text-center py-8 text-muted-foreground text-sm">No free tier overuse detected</div>
               )}
             </div>
           </div>
@@ -377,30 +377,30 @@ export function SecurityCompliance() {
 
       {/* Data Exports & Audit Trail */}
       {activeSection === 'exports' && (
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Data Export Activity Log
           </h3>
           {complianceMetrics?.dataExports.length ? (
-            <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+            <div className="rounded-lg border border-border/50 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-800/80 border-slate-700 hover:bg-slate-800/80">
-                    <TableHead className="text-slate-400 text-xs">Time</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Event</TableHead>
-                    <TableHead className="text-slate-400 text-xs">User</TableHead>
-                    <TableHead className="text-slate-400 text-xs">Details</TableHead>
+                  <TableRow className="bg-muted-foreground/80 border-border hover:bg-muted-foreground/80">
+                    <TableHead className="text-muted-foreground text-xs">Time</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Event</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">User</TableHead>
+                    <TableHead className="text-muted-foreground text-xs">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {complianceMetrics.dataExports.map(log => (
-                    <TableRow key={log.id} className="border-slate-700/50 hover:bg-slate-800/30">
-                      <TableCell className="text-xs text-slate-400 font-mono">
+                    <TableRow key={log.id} className="border-border/50 hover:bg-muted-foreground/30">
+                      <TableCell className="text-xs text-muted-foreground font-mono">
                         {format(new Date(log.created_at), 'MMM d, HH:mm')}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-300">{log.event_type}</TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">{log.user_id?.slice(0, 8)}…</TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-muted-foreground">{log.event_type}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground font-mono">{log.user_id?.slice(0, 8)}…</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
                         {log.metadata ? JSON.stringify(log.metadata).slice(0, 60) : '—'}
                       </TableCell>
                     </TableRow>
@@ -409,7 +409,7 @@ export function SecurityCompliance() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               <Download className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No data export events recorded</p>
             </div>

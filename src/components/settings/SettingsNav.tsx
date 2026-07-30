@@ -67,10 +67,10 @@ export function SettingsNav({ active, onChange, badges = {}, planLabel }: Props)
                         </span>
                       )}
                       {badge?.kind === 'amber' && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning" />
                       )}
                       {badge?.kind === 'rose' && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
                       )}
                       {badge?.kind === 'count' && badge.value !== undefined && (
                         <span className="text-[10px] rounded-full bg-white/10 px-1.5 py-0.5">
@@ -78,7 +78,7 @@ export function SettingsNav({ active, onChange, badges = {}, planLabel }: Props)
                         </span>
                       )}
                       {item.id === 'danger' && (
-                        <AlertTriangle className="h-3 w-3 text-rose-400" />
+                        <AlertTriangle className="h-3 w-3 text-destructive" />
                       )}
                     </button>
                   );

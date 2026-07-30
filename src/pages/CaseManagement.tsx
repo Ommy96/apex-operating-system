@@ -18,18 +18,18 @@ import { useBeneficiarySearch } from "@/hooks/useBeneficiarySearch";
 import { useNavigate } from "react-router-dom";
 
 const statusBadge: Record<string, string> = {
-  open: "bg-blue-100 text-blue-700",
-  in_progress: "bg-amber-100 text-amber-700",
-  referred: "bg-purple-100 text-purple-700",
-  resolved: "bg-teal-100 text-teal-700",
+  open: "bg-info/10 text-info",
+  in_progress: "bg-warning/10 text-warning",
+  referred: "bg-info/10 text-info",
+  resolved: "bg-success/10 text-success",
   closed: "bg-muted text-muted-foreground",
-  lost_to_follow_up: "bg-rose-100 text-rose-700",
+  lost_to_follow_up: "bg-destructive/10 text-destructive",
 };
 const priorityBadge: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
-  normal: "bg-blue-100 text-blue-700",
-  high: "bg-amber-100 text-amber-700",
-  critical: "bg-rose-100 text-rose-700",
+  normal: "bg-info/10 text-info",
+  high: "bg-warning/10 text-warning",
+  critical: "bg-destructive/10 text-destructive",
 };
 
 const CASE_TYPES: CaseType[] = ["general_support","protection","health","education","livelihoods","emergency","referral","follow_up","other"];
@@ -100,7 +100,7 @@ export default function CaseManagement() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">{name}</span>
                       <span className="text-xs text-muted-foreground">{c.case_number}</span>
-                      {c.priority === "critical" && <AlertTriangle className="h-4 w-4 text-rose-600" />}
+                      {c.priority === "critical" && <AlertTriangle className="h-4 w-4 text-destructive" />}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
                       {c.summary ?? <em>No summary</em>} · opened {c.opened_date}

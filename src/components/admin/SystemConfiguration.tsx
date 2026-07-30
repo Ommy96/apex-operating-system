@@ -87,21 +87,21 @@ export function SystemConfiguration() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">System Configuration</h2>
-          <p className="text-sm text-slate-400">Manage platform-wide settings, resource limits, and policies</p>
+          <h2 className="text-xl font-bold text-muted-foreground">System Configuration</h2>
+          <p className="text-sm text-muted-foreground">Manage platform-wide settings, resource limits, and policies</p>
         </div>
         <div className="flex items-center gap-2">
           {hasChanges && (
-            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+            <Badge className="bg-warning/20 text-warning border-warning/30">
               <AlertTriangle className="h-3 w-3 mr-1" /> Unsaved Changes
             </Badge>
           )}
           <Button variant="outline" size="sm" onClick={handleReset} disabled={!hasChanges}
-            className="border-slate-600 text-slate-300 hover:bg-slate-700">
+            className="border-border text-muted-foreground hover:bg-muted-foreground">
             <RotateCcw className="h-4 w-4 mr-1" /> Reset
           </Button>
           <Button size="sm" onClick={handleSave} disabled={!hasChanges}
-            className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:opacity-90">
+            className="bg-gradient-to-r from-warning to-warning text-white hover:opacity-90">
             <Save className="h-4 w-4 mr-1" /> Save Changes
           </Button>
         </div>
@@ -116,14 +116,14 @@ export function SystemConfiguration() {
               onClick={() => setActiveSection(section.key)}
               className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
                 activeSection === section.key
-                  ? 'bg-slate-700/80 text-amber-400 border border-amber-500/30'
-                  : 'bg-slate-800/30 text-slate-400 hover:bg-slate-800/60 border border-transparent'
+                  ? 'bg-muted-foreground/80 text-warning border border-warning/30'
+                  : 'bg-muted-foreground/30 text-muted-foreground hover:bg-muted-foreground/60 border border-transparent'
               }`}
             >
               <section.icon className="h-4 w-4 flex-shrink-0" />
               <div>
                 <div className="text-sm font-medium">{section.label}</div>
-                <div className="text-xs text-slate-500">{section.description}</div>
+                <div className="text-xs text-muted-foreground">{section.description}</div>
               </div>
             </button>
           ))}
@@ -132,27 +132,27 @@ export function SystemConfiguration() {
         {/* Config Content */}
         <div className="space-y-4">
           {activeSection === 'general' && (
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-muted-foreground/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-slate-100 flex items-center gap-2"><Settings className="h-5 w-5 text-amber-400" /> General Settings</CardTitle>
-                <CardDescription className="text-slate-400">Core platform identity and regional defaults</CardDescription>
+                <CardTitle className="text-muted-foreground flex items-center gap-2"><Settings className="h-5 w-5 text-warning" /> General Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">Core platform identity and regional defaults</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Platform Name</Label>
+                    <Label className="text-muted-foreground">Platform Name</Label>
                     <Input value={config.platformName} onChange={e => updateConfig('platformName', e.target.value)}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Support Email</Label>
+                    <Label className="text-muted-foreground">Support Email</Label>
                     <Input value={config.supportEmail} onChange={e => updateConfig('supportEmail', e.target.value)}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Default Timezone</Label>
+                    <Label className="text-muted-foreground">Default Timezone</Label>
                     <Select value={config.defaultTimezone} onValueChange={v => updateConfig('defaultTimezone', v)}>
-                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+                      <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -166,9 +166,9 @@ export function SystemConfiguration() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Default Currency</Label>
+                    <Label className="text-muted-foreground">Default Currency</Label>
                     <Select value={config.defaultCurrency} onValueChange={v => updateConfig('defaultCurrency', v)}>
-                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+                      <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -182,44 +182,44 @@ export function SystemConfiguration() {
                     </Select>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                   <div>
-                    <div className="text-sm font-medium text-slate-200">Open Registration</div>
-                    <div className="text-xs text-slate-400">Allow new organizations to self-register</div>
+                    <div className="text-sm font-medium text-muted-foreground">Open Registration</div>
+                    <div className="text-xs text-muted-foreground">Allow new organizations to self-register</div>
                   </div>
                   <Switch checked={config.signupsEnabled} onCheckedChange={v => updateConfig('signupsEnabled', v)} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Free Trial Duration (days)</Label>
+                  <Label className="text-muted-foreground">Free Trial Duration (days)</Label>
                   <Input type="number" value={config.trialDays} onChange={e => updateConfig('trialDays', parseInt(e.target.value))}
-                    className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                    className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                 </div>
               </CardContent>
             </Card>
           )}
 
           {activeSection === 'auth' && (
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-muted-foreground/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-slate-100 flex items-center gap-2"><Lock className="h-5 w-5 text-amber-400" /> Authentication & Security</CardTitle>
-                <CardDescription className="text-slate-400">Login policies, session management, password rules</CardDescription>
+                <CardTitle className="text-muted-foreground flex items-center gap-2"><Lock className="h-5 w-5 text-warning" /> Authentication & Security</CardTitle>
+                <CardDescription className="text-muted-foreground">Login policies, session management, password rules</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Max Login Attempts</Label>
+                    <Label className="text-muted-foreground">Max Login Attempts</Label>
                     <Input type="number" value={config.maxLoginAttempts} onChange={e => updateConfig('maxLoginAttempts', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Session Timeout (minutes)</Label>
+                    <Label className="text-muted-foreground">Session Timeout (minutes)</Label>
                     <Input type="number" value={config.sessionTimeout} onChange={e => updateConfig('sessionTimeout', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Min Password Length</Label>
+                    <Label className="text-muted-foreground">Min Password Length</Label>
                     <Input type="number" value={config.passwordMinLength} onChange={e => updateConfig('passwordMinLength', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -227,10 +227,10 @@ export function SystemConfiguration() {
                     { key: 'enforce2FA', label: 'Enforce 2FA for Admin Roles', desc: 'Require two-factor authentication for all admin and management users' },
                     { key: 'requireSpecialChars', label: 'Require Special Characters', desc: 'Passwords must contain at least one special character' },
                   ].map(item => (
-                    <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                    <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                       <div>
-                        <div className="text-sm font-medium text-slate-200">{item.label}</div>
-                        <div className="text-xs text-slate-400">{item.desc}</div>
+                        <div className="text-sm font-medium text-muted-foreground">{item.label}</div>
+                        <div className="text-xs text-muted-foreground">{item.desc}</div>
                       </div>
                       <Switch checked={(config as any)[item.key]} onCheckedChange={v => updateConfig(item.key, v)} />
                     </div>
@@ -241,44 +241,44 @@ export function SystemConfiguration() {
           )}
 
           {activeSection === 'storage' && (
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-muted-foreground/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-slate-100 flex items-center gap-2"><HardDrive className="h-5 w-5 text-amber-400" /> Storage & Resource Limits</CardTitle>
-                <CardDescription className="text-slate-400">Configure per-tier resource quotas</CardDescription>
+                <CardTitle className="text-muted-foreground flex items-center gap-2"><HardDrive className="h-5 w-5 text-warning" /> Storage & Resource Limits</CardTitle>
+                <CardDescription className="text-muted-foreground">Configure per-tier resource quotas</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Max File Upload (MB)</Label>
+                    <Label className="text-muted-foreground">Max File Upload (MB)</Label>
                     <Input type="number" value={config.maxFileUploadMB} onChange={e => updateConfig('maxFileUploadMB', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Max Storage / Org (GB)</Label>
+                    <Label className="text-muted-foreground">Max Storage / Org (GB)</Label>
                     <Input type="number" value={config.maxStoragePerOrgGB} onChange={e => updateConfig('maxStoragePerOrgGB', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-slate-300">Per-Tier Limits</h4>
+                  <h4 className="text-sm font-semibold text-muted-foreground">Per-Tier Limits</h4>
                   {[
                     { tier: 'Free', users: 'maxUsersFreeTier', beneficiaries: 'maxBeneficiariesFreeTier', color: 'slate' },
                     { tier: 'Starter', users: 'maxUsersStarterTier', beneficiaries: 'maxBeneficiariesStarterTier', color: 'blue' },
                     { tier: 'Professional', users: 'maxUsersProfessionalTier', beneficiaries: 'maxBeneficiariesProfessionalTier', color: 'purple' },
                   ].map(({ tier, users, beneficiaries, color }) => (
-                    <div key={tier} className="p-4 rounded-lg bg-slate-700/30 border border-slate-600/30">
-                      <div className="text-sm font-medium text-slate-200 mb-3">{tier} Tier</div>
+                    <div key={tier} className="p-4 rounded-lg bg-muted-foreground/30 border border-border/30">
+                      <div className="text-sm font-medium text-muted-foreground mb-3">{tier} Tier</div>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1">
-                          <Label className="text-xs text-slate-400">Max Users</Label>
+                          <Label className="text-xs text-muted-foreground">Max Users</Label>
                           <Input type="number" value={(config as any)[users]} onChange={e => updateConfig(users, parseInt(e.target.value))}
-                            className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                            className="bg-muted-foreground/50 border-border text-muted-foreground" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs text-slate-400">Max Beneficiaries</Label>
+                          <Label className="text-xs text-muted-foreground">Max Beneficiaries</Label>
                           <Input type="number" value={(config as any)[beneficiaries]} onChange={e => updateConfig(beneficiaries, parseInt(e.target.value))}
-                            className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                            className="bg-muted-foreground/50 border-border text-muted-foreground" />
                         </div>
                       </div>
                     </div>
@@ -289,17 +289,17 @@ export function SystemConfiguration() {
           )}
 
           {activeSection === 'email' && (
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-muted-foreground/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-slate-100 flex items-center gap-2"><Mail className="h-5 w-5 text-amber-400" /> Email Configuration</CardTitle>
-                <CardDescription className="text-slate-400">Email delivery provider, sender identity, and templates</CardDescription>
+                <CardTitle className="text-muted-foreground flex items-center gap-2"><Mail className="h-5 w-5 text-warning" /> Email Configuration</CardTitle>
+                <CardDescription className="text-muted-foreground">Email delivery provider, sender identity, and templates</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Email Provider</Label>
+                    <Label className="text-muted-foreground">Email Provider</Label>
                     <Select value={config.emailProvider} onValueChange={v => updateConfig('emailProvider', v)}>
-                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+                      <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -310,19 +310,19 @@ export function SystemConfiguration() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Rate Limit (per hour)</Label>
+                    <Label className="text-muted-foreground">Rate Limit (per hour)</Label>
                     <Input type="number" value={config.emailRateLimit} onChange={e => updateConfig('emailRateLimit', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">From Name</Label>
+                    <Label className="text-muted-foreground">From Name</Label>
                     <Input value={config.emailFromName} onChange={e => updateConfig('emailFromName', e.target.value)}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">From Address</Label>
+                    <Label className="text-muted-foreground">From Address</Label>
                     <Input value={config.emailFromAddress} onChange={e => updateConfig('emailFromAddress', e.target.value)}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground" />
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -330,10 +330,10 @@ export function SystemConfiguration() {
                     { key: 'enableWelcomeEmail', label: 'Welcome Emails', desc: 'Send welcome email on new user registration' },
                     { key: 'enableDigestEmails', label: 'Weekly Digest', desc: 'Send weekly activity digest to organization admins' },
                   ].map(item => (
-                    <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                    <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                       <div>
-                        <div className="text-sm font-medium text-slate-200">{item.label}</div>
-                        <div className="text-xs text-slate-400">{item.desc}</div>
+                        <div className="text-sm font-medium text-muted-foreground">{item.label}</div>
+                        <div className="text-xs text-muted-foreground">{item.desc}</div>
                       </div>
                       <Switch checked={(config as any)[item.key]} onCheckedChange={v => updateConfig(item.key, v)} />
                     </div>
@@ -344,32 +344,32 @@ export function SystemConfiguration() {
           )}
 
           {activeSection === 'maintenance' && (
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-muted-foreground/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-slate-100 flex items-center gap-2"><Server className="h-5 w-5 text-amber-400" /> Maintenance & Operations</CardTitle>
-                <CardDescription className="text-slate-400">Maintenance mode, backups, and log retention</CardDescription>
+                <CardTitle className="text-muted-foreground flex items-center gap-2"><Server className="h-5 w-5 text-warning" /> Maintenance & Operations</CardTitle>
+                <CardDescription className="text-muted-foreground">Maintenance mode, backups, and log retention</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/30 bg-red-500/5">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
                   <div>
-                    <div className="text-sm font-medium text-red-300">Maintenance Mode</div>
-                    <div className="text-xs text-slate-400">Show maintenance page to all non-admin users</div>
+                    <div className="text-sm font-medium text-destructive">Maintenance Mode</div>
+                    <div className="text-xs text-muted-foreground">Show maintenance page to all non-admin users</div>
                   </div>
                   <Switch checked={config.maintenanceMode} onCheckedChange={v => updateConfig('maintenanceMode', v)} />
                 </div>
                 {config.maintenanceMode && (
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Maintenance Message</Label>
+                    <Label className="text-muted-foreground">Maintenance Message</Label>
                     <Textarea value={config.maintenanceMessage} onChange={e => updateConfig('maintenanceMessage', e.target.value)}
                       placeholder="We're performing scheduled maintenance. We'll be back shortly."
-                      className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground" />
                   </div>
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Backup Frequency</Label>
+                    <Label className="text-muted-foreground">Backup Frequency</Label>
                     <Select value={config.backupFrequency} onValueChange={v => updateConfig('backupFrequency', v)}>
-                      <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+                      <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -380,15 +380,15 @@ export function SystemConfiguration() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Log Retention (days)</Label>
+                    <Label className="text-muted-foreground">Log Retention (days)</Label>
                     <Input type="number" value={config.logRetentionDays} onChange={e => updateConfig('logRetentionDays', parseInt(e.target.value))}
-                      className="bg-slate-700/50 border-slate-600 text-slate-200 w-32" />
+                      className="bg-muted-foreground/50 border-border text-muted-foreground w-32" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Scheduled Maintenance Window</Label>
+                  <Label className="text-muted-foreground">Scheduled Maintenance Window</Label>
                   <Input type="datetime-local" value={config.scheduledMaintenanceAt} onChange={e => updateConfig('scheduledMaintenanceAt', e.target.value)}
-                    className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                    className="bg-muted-foreground/50 border-border text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>

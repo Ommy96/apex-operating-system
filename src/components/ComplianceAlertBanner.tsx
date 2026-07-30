@@ -54,7 +54,7 @@ export function ComplianceAlertBanner() {
   return (
     <div className="space-y-2">
       {alerts.map((a, i) => (
-        <Alert key={i} variant={a.type === 'danger' ? 'destructive' : 'default'} className={a.type === 'warning' ? 'border-orange-300 bg-orange-50 dark:bg-orange-950/20' : ''}>
+        <Alert key={i} variant={a.type === 'danger' ? 'destructive' : 'default'} className={a.type === 'warning' ? 'border-warning/30 bg-warning/10' : ''}>
           {a.type === 'danger' ? <ShieldAlert className="h-4 w-4" /> : a.type === 'warning' ? <AlertTriangle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
           <AlertDescription>{a.message}</AlertDescription>
         </Alert>

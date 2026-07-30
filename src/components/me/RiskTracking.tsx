@@ -5,10 +5,10 @@ import { AlertTriangle, TrendingDown, TrendingUp, Activity, Shield } from "lucid
 import { useME } from "@/hooks/useME";
 
 const RISK_COLORS: Record<string, string> = {
-  low: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
-  medium: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
-  high: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/30",
-  critical: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30",
+  low: "bg-success/10 text-success border-success/30",
+  medium: "bg-warning/10 text-warning border-warning/30",
+  high: "bg-warning/10 text-warning border-warning/30",
+  critical: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 export function RiskTracking() {
@@ -79,7 +79,7 @@ export function RiskTracking() {
                   <div className="text-center">
                     <p className="text-muted-foreground">Dropout</p>
                     <p className="font-semibold flex items-center gap-0.5">
-                      {(score.dropout_risk_score ?? 0) > 60 ? <TrendingDown className="h-3 w-3 text-destructive" /> : <TrendingUp className="h-3 w-3 text-emerald-500" />}
+                      {(score.dropout_risk_score ?? 0) > 60 ? <TrendingDown className="h-3 w-3 text-destructive" /> : <TrendingUp className="h-3 w-3 text-success" />}
                       {score.dropout_risk_score ?? "-"}
                     </p>
                   </div>

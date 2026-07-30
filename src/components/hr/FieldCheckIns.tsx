@@ -13,10 +13,10 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 
 const typeColors: Record<string, string> = {
-  field_visit: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  office: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  meeting: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  training: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  field_visit: "bg-success/10 text-success",
+  office: "bg-info/10 text-info",
+  meeting: "bg-info/10 text-info",
+  training: "bg-warning/10 text-warning",
   other: "bg-muted text-muted-foreground",
 };
 

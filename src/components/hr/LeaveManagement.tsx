@@ -13,8 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { format, differenceInCalendarDays } from "date-fns";
 
 const statusColors: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  approved: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  pending: "bg-warning/10 text-warning",
+  approved: "bg-success/10 text-success",
   rejected: "bg-destructive/10 text-destructive",
   cancelled: "bg-muted text-muted-foreground",
 };
@@ -146,7 +146,7 @@ export function LeaveManagement() {
                       <Badge className={statusColors[r.status] || ""}>{r.status}</Badge>
                       {r.status === "pending" && (isAdmin || isManagement) && (
                         <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-600" onClick={() => updateLeaveRequest.mutate({ id: r.id, status: "approved" })}>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 text-success" onClick={() => updateLeaveRequest.mutate({ id: r.id, status: "approved" })}>
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => updateLeaveRequest.mutate({ id: r.id, status: "rejected" })}>

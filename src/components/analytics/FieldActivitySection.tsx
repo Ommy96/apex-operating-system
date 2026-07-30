@@ -161,8 +161,8 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
                 <p className="text-xs font-medium text-muted-foreground">Total Visits</p>
                 <p className="text-2xl font-bold mt-1">{totalVisits}</p>
               </div>
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Home className="h-5 w-5 text-blue-500" />
+              <div className="p-2 rounded-lg bg-info/10">
+                <Home className="h-5 w-5 text-info" />
               </div>
             </div>
           </CardContent>
@@ -175,8 +175,8 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
                 <p className="text-xs font-medium text-muted-foreground">Coverage Rate</p>
                 <p className="text-2xl font-bold mt-1">{visitCoverageRate}%</p>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-500/10">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <CheckCircle2 className="h-5 w-5 text-success" />
               </div>
             </div>
             <Progress value={visitCoverageRate} className="h-2 mt-2" />
@@ -190,8 +190,8 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
                 <p className="text-xs font-medium text-muted-foreground">Pending Follow-ups</p>
                 <p className="text-2xl font-bold mt-1">{pendingFollowUps}</p>
               </div>
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <Clock className="h-5 w-5 text-amber-500" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <Clock className="h-5 w-5 text-warning" />
               </div>
             </div>
           </CardContent>
@@ -204,8 +204,8 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
                 <p className="text-xs font-medium text-muted-foreground">Overdue (90+ days)</p>
                 <p className="text-2xl font-bold mt-1">{overdueBeneficiaries.length}</p>
               </div>
-              <div className="p-2 rounded-lg bg-red-500/10">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
               </div>
             </div>
           </CardContent>
@@ -335,7 +335,7 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
               Beneficiaries Overdue for Visits
             </CardTitle>
             <CardDescription>Active beneficiaries not visited in over 90 days</CardDescription>
@@ -377,7 +377,7 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
               </ScrollArea>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
-                <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-emerald-500" />
+                <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-success" />
                 <p className="font-medium">All beneficiaries have been visited recently!</p>
               </div>
             )}

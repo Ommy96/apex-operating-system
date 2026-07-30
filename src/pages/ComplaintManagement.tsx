@@ -16,17 +16,17 @@ import { toast } from '@/hooks/use-toast';
 import { MessageSquare, Filter } from 'lucide-react';
 
 const priorityColors: Record<string, string> = {
-  low: 'bg-slate-100 text-slate-700',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800',
+  low: 'bg-muted text-foreground',
+  medium: 'bg-warning/10 text-warning',
+  high: 'bg-warning/10 text-warning',
+  urgent: 'bg-destructive/10 text-destructive',
 };
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-800',
-  under_review: 'bg-yellow-100 text-yellow-800',
-  resolved: 'bg-green-100 text-green-800',
-  closed: 'bg-slate-100 text-slate-700',
+  new: 'bg-info/10 text-info',
+  under_review: 'bg-warning/10 text-warning',
+  resolved: 'bg-success/10 text-success',
+  closed: 'bg-muted text-foreground',
 };
 
 export default function ComplaintManagement() {

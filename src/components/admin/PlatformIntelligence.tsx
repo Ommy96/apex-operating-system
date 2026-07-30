@@ -22,24 +22,24 @@ function MetricCard({ label, value, icon: Icon, accent, subtitle }: {
   label: string; value: string | number; icon: any; accent: string; subtitle?: string;
 }) {
   const colors: Record<string, { bg: string; icon: string; text: string }> = {
-    amber: { bg: 'from-amber-500/15 to-amber-600/5 border-amber-500/20', icon: 'text-amber-400', text: 'text-amber-400' },
-    emerald: { bg: 'from-emerald-500/15 to-emerald-600/5 border-emerald-500/20', icon: 'text-emerald-400', text: 'text-emerald-400' },
-    blue: { bg: 'from-blue-500/15 to-blue-600/5 border-blue-500/20', icon: 'text-blue-400', text: 'text-blue-400' },
-    purple: { bg: 'from-purple-500/15 to-purple-600/5 border-purple-500/20', icon: 'text-purple-400', text: 'text-purple-400' },
-    cyan: { bg: 'from-cyan-500/15 to-cyan-600/5 border-cyan-500/20', icon: 'text-cyan-400', text: 'text-cyan-400' },
-    red: { bg: 'from-red-500/15 to-red-600/5 border-red-500/20', icon: 'text-red-400', text: 'text-red-400' },
-    rose: { bg: 'from-rose-500/15 to-rose-600/5 border-rose-500/20', icon: 'text-rose-400', text: 'text-rose-400' },
-    slate: { bg: 'from-slate-500/15 to-slate-600/5 border-slate-500/20', icon: 'text-slate-400', text: 'text-slate-300' },
+    amber: { bg: 'from-warning/15 to-warning/5 border-warning/20', icon: 'text-warning', text: 'text-warning' },
+    emerald: { bg: 'from-success/15 to-success/5 border-success/20', icon: 'text-success', text: 'text-success' },
+    blue: { bg: 'from-info/15 to-info/5 border-info/20', icon: 'text-info', text: 'text-info' },
+    purple: { bg: 'from-info/15 to-info/5 border-info/20', icon: 'text-info', text: 'text-info' },
+    cyan: { bg: 'from-info/15 to-info/5 border-info/20', icon: 'text-info', text: 'text-info' },
+    red: { bg: 'from-destructive/15 to-destructive/5 border-destructive/20', icon: 'text-destructive', text: 'text-destructive' },
+    rose: { bg: 'from-destructive/15 to-destructive/5 border-destructive/20', icon: 'text-destructive', text: 'text-destructive' },
+    slate: { bg: 'from-slate-500/15 to-slate-600/5 border-border/20', icon: 'text-muted-foreground', text: 'text-muted-foreground' },
   };
   const c = colors[accent] || colors.slate;
   return (
     <div className={`p-4 rounded-lg bg-gradient-to-br border ${c.bg}`}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">{label}</span>
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
         <Icon className={`h-4 w-4 ${c.icon}`} />
       </div>
       <div className={`text-2xl font-bold font-mono ${c.text}`}>{value}</div>
-      {subtitle && <p className="text-[10px] text-slate-500 mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-[10px] text-muted-foreground mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -53,7 +53,7 @@ export function PlatformIntelligence() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning" />
       </div>
     );
   }
@@ -122,15 +122,15 @@ export function PlatformIntelligence() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <Activity className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">PLATFORM INTELLIGENCE DASHBOARD</span>
-        <span className="ml-auto text-xs text-slate-500">Real-time metrics</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <Activity className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">PLATFORM INTELLIGENCE DASHBOARD</span>
+        <span className="ml-auto text-xs text-muted-foreground">Real-time metrics</span>
       </div>
 
       {/* Global Usage Metrics */}
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Global Usage Metrics</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Global Usage Metrics</h3>
         <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
           <MetricCard label="Organizations" value={stats?.totalOrganizations || 0} icon={Globe} accent="amber" />
           <MetricCard label="Platform Users" value={stats?.totalUsers || 0} icon={Users} accent="blue" />
@@ -145,8 +145,8 @@ export function PlatformIntelligence() {
       {/* Charts Row */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Onboarding Trend */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Organization Growth (12 months)
           </h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -161,8 +161,8 @@ export function PlatformIntelligence() {
         </div>
 
         {/* Health Distribution */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Tenant Health Distribution
           </h3>
           {healthChartData.length > 0 ? (
@@ -187,13 +187,13 @@ export function PlatformIntelligence() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[220px] text-slate-500 text-sm">No data</div>
+            <div className="flex items-center justify-center h-[220px] text-muted-foreground text-sm">No data</div>
           )}
         </div>
 
         {/* Country Distribution */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Geographic Distribution
           </h3>
           {countryData.length > 0 ? (
@@ -218,14 +218,14 @@ export function PlatformIntelligence() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[220px] text-slate-500 text-sm">No data</div>
+            <div className="flex items-center justify-center h-[220px] text-muted-foreground text-sm">No data</div>
           )}
         </div>
       </div>
 
       {/* Top Organizations by Data Volume */}
-      <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+      <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
           Top Organizations by Data Volume
         </h3>
         {topOrgsByBeneficiaries.length > 0 ? (
@@ -241,25 +241,25 @@ export function PlatformIntelligence() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[280px] text-slate-500 text-sm">No data</div>
+          <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">No data</div>
         )}
       </div>
 
       {/* Risk & System Summary */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Risk Summary */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Platform Risk Overview</h3>
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Platform Risk Overview</h3>
           <div className="space-y-3">
             {[
-              { level: 'Low Risk', count: riskDistribution.low, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-              { level: 'Medium Risk', count: riskDistribution.medium, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-              { level: 'High Risk', count: riskDistribution.high, color: 'text-red-400', bg: 'bg-red-500/20' },
+              { level: 'Low Risk', count: riskDistribution.low, color: 'text-success', bg: 'bg-success/20' },
+              { level: 'Medium Risk', count: riskDistribution.medium, color: 'text-warning', bg: 'bg-warning/20' },
+              { level: 'High Risk', count: riskDistribution.high, color: 'text-destructive', bg: 'bg-destructive/20' },
             ].map(r => (
-              <div key={r.level} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/30">
+              <div key={r.level} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                 <div className="flex items-center gap-3">
                   <div className={`h-3 w-3 rounded-full ${r.bg}`} />
-                  <span className="text-sm text-slate-300">{r.level}</span>
+                  <span className="text-sm text-muted-foreground">{r.level}</span>
                 </div>
                 <span className={`text-lg font-bold font-mono ${r.color}`}>{r.count}</span>
               </div>
@@ -268,15 +268,15 @@ export function PlatformIntelligence() {
         </div>
 
         {/* System Activity Summary */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">System Summary</h3>
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">System Summary</h3>
           <div className="space-y-3">
             {[
-              { label: 'Active Organizations', value: stats?.activeOrganizations || 0, total: totalOrgs, icon: Zap, accent: 'text-emerald-400' },
-              { label: 'Suspended', value: stats?.suspendedOrganizations || 0, total: totalOrgs, icon: Server, accent: 'text-red-400' },
-              { label: 'Onboarding Complete', value: stats?.onboardingCompleted || 0, total: totalOrgs, icon: Eye, accent: 'text-blue-400' },
-              { label: 'Onboarding Pending', value: stats?.onboardingPending || 0, total: totalOrgs, icon: Clock, accent: 'text-amber-400' },
-              { label: 'Trial Accounts', value: stats?.trialOrganizations || 0, total: totalOrgs, icon: Clock, accent: 'text-cyan-400' },
+              { label: 'Active Organizations', value: stats?.activeOrganizations || 0, total: totalOrgs, icon: Zap, accent: 'text-success' },
+              { label: 'Suspended', value: stats?.suspendedOrganizations || 0, total: totalOrgs, icon: Server, accent: 'text-destructive' },
+              { label: 'Onboarding Complete', value: stats?.onboardingCompleted || 0, total: totalOrgs, icon: Eye, accent: 'text-info' },
+              { label: 'Onboarding Pending', value: stats?.onboardingPending || 0, total: totalOrgs, icon: Clock, accent: 'text-warning' },
+              { label: 'Trial Accounts', value: stats?.trialOrganizations || 0, total: totalOrgs, icon: Clock, accent: 'text-info' },
             ].map(item => {
               const pct = totalOrgs > 0 ? (item.value / totalOrgs) * 100 : 0;
               return (
@@ -284,16 +284,16 @@ export function PlatformIntelligence() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <item.icon className={`h-3.5 w-3.5 ${item.accent}`} />
-                      <span className="text-xs text-slate-300">{item.label}</span>
+                      <span className="text-xs text-muted-foreground">{item.label}</span>
                     </div>
-                    <span className="text-xs font-mono text-slate-400">{item.value} / {item.total}</span>
+                    <span className="text-xs font-mono text-muted-foreground">{item.value} / {item.total}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-muted-foreground overflow-hidden">
                     <div className={`h-full rounded-full transition-all ${
-                      item.accent.includes('emerald') ? 'bg-emerald-500' :
-                      item.accent.includes('red') ? 'bg-red-500' :
-                      item.accent.includes('blue') ? 'bg-blue-500' :
-                      item.accent.includes('amber') ? 'bg-amber-500' : 'bg-cyan-500'
+                      item.accent.includes('emerald') ? 'bg-success' :
+                      item.accent.includes('red') ? 'bg-destructive' :
+                      item.accent.includes('blue') ? 'bg-info' :
+                      item.accent.includes('amber') ? 'bg-warning' : 'bg-info'
                     }`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>

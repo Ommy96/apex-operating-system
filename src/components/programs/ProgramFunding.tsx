@@ -345,10 +345,10 @@ export function ProgramFunding({ programId }: Props) {
 
       {/* Program-to-project top up from unrestricted pool */}
       {(unrestrictedPools.length > 0 || projectHealth.length > 0) && (
-        <Card className="border-emerald-500/30 bg-emerald-500/[0.03]">
+        <Card className="border-success/30 bg-success/[0.03]">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <ArrowDownToLine className="h-4 w-4 text-emerald-600" />
+              <ArrowDownToLine className="h-4 w-4 text-success" />
               Top up projects from unrestricted program funds
               <RestrictionBadge restriction="unrestricted" />
             </CardTitle>

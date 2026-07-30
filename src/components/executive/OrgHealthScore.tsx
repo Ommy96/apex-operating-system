@@ -80,15 +80,15 @@ function computeHealthDimensions(
 }
 
 function getScoreColor(score: number) {
-  if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
-  if (score >= 60) return "text-amber-600 dark:text-amber-400";
-  return "text-red-600 dark:text-red-400";
+  if (score >= 80) return "text-success";
+  if (score >= 60) return "text-warning";
+  return "text-destructive";
 }
 
 function getScoreBg(score: number) {
-  if (score >= 80) return "bg-emerald-500";
-  if (score >= 60) return "bg-amber-500";
-  return "bg-red-500";
+  if (score >= 80) return "bg-success";
+  if (score >= 60) return "bg-warning";
+  return "bg-destructive";
 }
 
 function getScoreLabel(score: number) {
@@ -126,7 +126,7 @@ export function OrgHealthScore({ summary, staffMetrics, beneficiaryImpact, donor
                   cx="60" cy="60" r="52" fill="none" strokeWidth="10"
                   strokeDasharray={`${(overallScore / 100) * 327} 327`}
                   strokeLinecap="round"
-                  className={overallScore >= 80 ? "stroke-emerald-500" : overallScore >= 60 ? "stroke-amber-500" : "stroke-red-500"}
+                  className={overallScore >= 80 ? "stroke-success" : overallScore >= 60 ? "stroke-warning" : "stroke-destructive"}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">

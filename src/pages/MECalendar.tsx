@@ -123,8 +123,8 @@ export default function MECalendar() {
   };
 
   const statusColors: Record<string, string> = {
-    collected: "bg-emerald-500",
-    due_soon: "bg-amber-500",
+    collected: "bg-success",
+    due_soon: "bg-warning",
     overdue: "bg-destructive",
     not_due: "bg-muted-foreground/40",
   };
@@ -206,8 +206,8 @@ export default function MECalendar() {
 
       {/* Summary */}
       <div className="flex gap-4 text-sm">
-        <Badge variant="outline" className="gap-1"><CheckCircle className="h-3 w-3 text-emerald-500" />{summary.collected} collected</Badge>
-        <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3 text-amber-500" />{summary.dueSoon} due soon</Badge>
+        <Badge variant="outline" className="gap-1"><CheckCircle className="h-3 w-3 text-success" />{summary.collected} collected</Badge>
+        <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3 text-warning" />{summary.dueSoon} due soon</Badge>
         <Badge variant="outline" className="gap-1"><AlertTriangle className="h-3 w-3 text-destructive" />{summary.overdue} overdue</Badge>
       </div>
 
@@ -244,8 +244,8 @@ export default function MECalendar() {
             })}
           </div>
           <div className="flex gap-4 mt-3 text-xs">
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Collected</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Due Soon</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-success" /> Collected</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-warning" /> Due Soon</span>
             <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-destructive" /> Overdue</span>
             <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" /> Not Due</span>
           </div>

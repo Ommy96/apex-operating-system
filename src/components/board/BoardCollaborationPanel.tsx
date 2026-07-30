@@ -183,8 +183,8 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
 
   const priorityColors: Record<string, string> = {
     low: "bg-muted text-muted-foreground",
-    medium: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-    high: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
+    medium: "bg-warning/10 text-warning",
+    high: "bg-warning/10 text-warning",
     urgent: "bg-destructive/10 text-destructive",
   };
 
@@ -244,7 +244,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
       <TabsContent value="approvals" className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
           <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{approvalSummary.approved}</p>
+            <p className="text-2xl font-bold text-success">{approvalSummary.approved}</p>
             <p className="text-xs text-muted-foreground">Approved</p>
           </Card>
           <Card className="p-3 text-center">
@@ -261,7 +261,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
           <div className="space-y-2">
             {approvals.map((a: any) => (
               <div key={a.id} className="flex items-center gap-3 text-sm p-2 rounded-lg bg-muted/30">
-                {a.decision === "approved" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                {a.decision === "approved" && <CheckCircle2 className="h-4 w-4 text-success" />}
                 {a.decision === "rejected" && <XCircle className="h-4 w-4 text-destructive" />}
                 {a.decision === "abstained" && <Minus className="h-4 w-4 text-muted-foreground" />}
                 <span className="font-medium flex-1">{a.board_members?.full_name || "Unknown"}</span>
@@ -333,9 +333,9 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
         {actionItems.map((item: any) => (
           <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
             <div className={`h-2 w-2 rounded-full mt-1.5 ${
-              item.status === "completed" ? "bg-emerald-500" :
-              item.status === "in_progress" ? "bg-amber-500" :
-              item.status === "cancelled" ? "bg-muted-foreground" : "bg-blue-500"
+              item.status === "completed" ? "bg-success" :
+              item.status === "in_progress" ? "bg-warning" :
+              item.status === "cancelled" ? "bg-muted-foreground" : "bg-info"
             }`} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium">{item.title}</p>

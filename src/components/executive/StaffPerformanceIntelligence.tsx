@@ -29,13 +29,13 @@ interface StaffPerformanceIntelligenceProps {
 const CHART_COLORS = ['hsl(222, 47%, 31%)', 'hsl(217, 91%, 60%)', 'hsl(142, 72%, 42%)', 'hsl(38, 92%, 50%)', 'hsl(270, 70%, 50%)', 'hsl(350, 80%, 50%)'];
 
 const scoreColor = (score: number) =>
-  score >= 75 ? 'text-emerald-600 dark:text-emerald-400' :
-  score >= 50 ? 'text-amber-600 dark:text-amber-400' :
-  score >= 25 ? 'text-orange-600 dark:text-orange-400' :
-  'text-red-600 dark:text-red-400';
+  score >= 75 ? 'text-success' :
+  score >= 50 ? 'text-warning' :
+  score >= 25 ? 'text-warning' :
+  'text-destructive';
 
 const scoreBadge = (score: number) =>
-  score >= 75 ? { label: 'Excellent', variant: 'default' as const, className: 'bg-emerald-500 hover:bg-emerald-600' } :
+  score >= 75 ? { label: 'Excellent', variant: 'default' as const, className: 'bg-success hover:bg-success' } :
   score >= 50 ? { label: 'Good', variant: 'secondary' as const, className: '' } :
   score >= 25 ? { label: 'Moderate', variant: 'outline' as const, className: '' } :
   { label: 'Needs Improvement', variant: 'destructive' as const, className: '' };
@@ -43,7 +43,7 @@ const scoreBadge = (score: number) =>
 const workloadBadge = (level: string) => {
   switch (level) {
     case 'overloaded': return <Badge variant="destructive" className="text-[10px]"><UserX className="h-3 w-3 mr-1" />Overloaded</Badge>;
-    case 'high': return <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px]"><Activity className="h-3 w-3 mr-1" />High</Badge>;
+    case 'high': return <Badge className="bg-warning hover:bg-warning text-[10px]"><Activity className="h-3 w-3 mr-1" />High</Badge>;
     case 'moderate': return <Badge variant="secondary" className="text-[10px]"><UserCheck className="h-3 w-3 mr-1" />Moderate</Badge>;
     default: return <Badge variant="outline" className="text-[10px]">Low</Badge>;
   }
@@ -147,7 +147,7 @@ export function StaffPerformanceIntelligence({
                 <p className="text-xs font-medium text-muted-foreground">Active Staff</p>
                 <p className="text-2xl font-bold mt-1">{totalStaff}</p>
               </div>
-              <div className="p-2 rounded-lg bg-blue-500/10"><Users className="h-5 w-5 text-blue-500" /></div>
+              <div className="p-2 rounded-lg bg-info/10"><Users className="h-5 w-5 text-info" /></div>
             </div>
           </CardContent>
         </Card>
@@ -158,7 +158,7 @@ export function StaffPerformanceIntelligence({
                 <p className="text-xs font-medium text-muted-foreground">Avg Performance</p>
                 <p className={`text-2xl font-bold mt-1 ${scoreColor(avgScore)}`}>{avgScore}<span className="text-sm font-normal text-muted-foreground">/100</span></p>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-500/10"><Gauge className="h-5 w-5 text-emerald-500" /></div>
+              <div className="p-2 rounded-lg bg-success/10"><Gauge className="h-5 w-5 text-success" /></div>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +169,7 @@ export function StaffPerformanceIntelligence({
                 <p className="text-xs font-medium text-muted-foreground">Total Reports</p>
                 <p className="text-2xl font-bold mt-1">{totalReports}</p>
               </div>
-              <div className="p-2 rounded-lg bg-amber-500/10"><BarChart3 className="h-5 w-5 text-amber-500" /></div>
+              <div className="p-2 rounded-lg bg-warning/10"><BarChart3 className="h-5 w-5 text-warning" /></div>
             </div>
           </CardContent>
         </Card>
@@ -178,10 +178,10 @@ export function StaffPerformanceIntelligence({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Overloaded Staff</p>
-                <p className={`text-2xl font-bold mt-1 ${overloaded > 0 ? 'text-red-600' : 'text-green-600'}`}>{overloaded}</p>
+                <p className={`text-2xl font-bold mt-1 ${overloaded > 0 ? 'text-destructive' : 'text-success'}`}>{overloaded}</p>
               </div>
-              <div className={`p-2 rounded-lg ${overloaded > 0 ? 'bg-red-500/10' : 'bg-green-500/10'}`}>
-                <ShieldAlert className={`h-5 w-5 ${overloaded > 0 ? 'text-red-500' : 'text-green-500'}`} />
+              <div className={`p-2 rounded-lg ${overloaded > 0 ? 'bg-destructive/10' : 'bg-success/10'}`}>
+                <ShieldAlert className={`h-5 w-5 ${overloaded > 0 ? 'text-destructive' : 'text-success'}`} />
               </div>
             </div>
           </CardContent>
@@ -211,7 +211,7 @@ export function StaffPerformanceIntelligence({
             {/* Leaderboard */}
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Award className="h-4 w-4 text-amber-500" />Performance Leaderboard</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2"><Award className="h-4 w-4 text-warning" />Performance Leaderboard</CardTitle>
                 <CardDescription>Staff ranked by composite performance score</CardDescription>
               </CardHeader>
               <CardContent>
@@ -427,13 +427,13 @@ export function StaffPerformanceIntelligence({
         <TabsContent value="alerts">
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-red-500" />HR Alerts & Risk Monitoring</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-destructive" />HR Alerts & Risk Monitoring</CardTitle>
               <CardDescription>Automated alerts for staff performance issues</CardDescription>
             </CardHeader>
             <CardContent>
               {hrAlerts.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-green-500" />
+                  <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-success" />
                   <p className="font-medium">All Clear</p>
                   <p className="text-sm">No HR risk alerts detected</p>
                 </div>
@@ -443,14 +443,14 @@ export function StaffPerformanceIntelligence({
                     <div
                       key={i}
                       className={`flex items-start gap-3 p-3 rounded-lg border ${
-                        alert.type === 'danger' ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800' :
-                        alert.type === 'warning' ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800' :
-                        'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+                        alert.type === 'danger' ? 'bg-destructive/10 border-destructive/30' :
+                        alert.type === 'warning' ? 'bg-warning/10 border-warning/30' :
+                        'bg-info/10 border-info/30'
                       }`}
                     >
-                      {alert.type === 'danger' ? <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" /> :
-                       alert.type === 'warning' ? <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" /> :
-                       <Activity className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />}
+                      {alert.type === 'danger' ? <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" /> :
+                       alert.type === 'warning' ? <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" /> :
+                       <Activity className="h-4 w-4 text-info mt-0.5 shrink-0" />}
                       <div>
                         <p className="text-sm font-medium">{alert.title}</p>
                         <p className="text-xs text-muted-foreground">{alert.description}</p>

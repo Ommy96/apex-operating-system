@@ -67,8 +67,8 @@ const SparklineCard = ({
           <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{value}</p>
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-          trend === 'up' ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
-            : 'bg-red-500/10 text-red-600 dark:text-red-400'
+          trend === 'up' ? 'bg-success/10 text-success' 
+            : 'bg-destructive/10 text-destructive'
         }`}>
           {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
           {change}

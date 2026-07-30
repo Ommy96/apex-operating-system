@@ -23,10 +23,10 @@ interface RiskItem {
 }
 
 const severityConfig = {
-  critical: { color: "text-red-700 dark:text-red-400", bg: "bg-red-500/10", border: "border-red-200 dark:border-red-800", badge: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300" },
-  high: { color: "text-orange-700 dark:text-orange-400", bg: "bg-orange-500/10", border: "border-orange-200 dark:border-orange-800", badge: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300" },
-  medium: { color: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-200 dark:border-amber-800", badge: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300" },
-  low: { color: "text-blue-700 dark:text-blue-400", bg: "bg-blue-500/10", border: "border-blue-200 dark:border-blue-800", badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300" },
+  critical: { color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", badge: "bg-destructive/10 text-destructive" },
+  high: { color: "text-warning", bg: "bg-warning/10", border: "border-warning/30", badge: "bg-warning/10 text-warning" },
+  medium: { color: "text-warning", bg: "bg-warning/10", border: "border-warning/30", badge: "bg-warning/10 text-warning" },
+  low: { color: "text-info", bg: "bg-info/10", border: "border-info/30", badge: "bg-info/10 text-info" },
 };
 
 function computeRisks(

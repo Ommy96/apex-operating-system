@@ -17,8 +17,8 @@ export function UnsavedBar({ isDirty, isSaving, onSave, onReset, disabled }: Pro
   return (
     <div className="flex items-center justify-end gap-3">
       {isDirty && (
-        <span className="flex items-center gap-2 text-xs text-amber-600">
-          <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+        <span className="flex items-center gap-2 text-xs text-warning">
+          <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
           Unsaved changes
         </span>
       )}

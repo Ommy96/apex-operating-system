@@ -13,16 +13,16 @@ import { format } from "date-fns";
 
 const priorityColors: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
-  medium: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  high: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  medium: "bg-info/10 text-info",
+  high: "bg-warning/10 text-warning",
   urgent: "bg-destructive/10 text-destructive",
 };
 
 const statusColors: Record<string, string> = {
   todo: "bg-muted text-muted-foreground",
-  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  in_progress: "bg-info/10 text-info",
   blocked: "bg-destructive/10 text-destructive",
-  completed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  completed: "bg-success/10 text-success",
   cancelled: "bg-muted text-muted-foreground line-through",
 };
 

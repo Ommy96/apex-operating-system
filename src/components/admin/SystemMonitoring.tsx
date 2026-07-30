@@ -8,15 +8,15 @@ import { Flag, Loader2, Activity, AlertTriangle, Database, Zap, Clock } from 'lu
 
 function HealthCard({ label, value, color, icon: Icon }: { label: string; value: string | number; color: 'green' | 'amber' | 'red' | 'slate'; icon: any }) {
   const colorMap = {
-    green: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-    amber: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-    red: 'border-red-500/30 bg-red-500/10 text-red-400',
-    slate: 'border-slate-600/30 bg-slate-700/30 text-slate-300',
+    green: 'border-success/30 bg-success/10 text-success',
+    amber: 'border-warning/30 bg-warning/10 text-warning',
+    red: 'border-destructive/30 bg-destructive/10 text-destructive',
+    slate: 'border-border/30 bg-muted-foreground/30 text-muted-foreground',
   };
   return (
     <div className={`p-4 rounded-lg border ${colorMap[color]}`}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="text-xs text-muted-foreground uppercase tracking-wider">{label}</span>
         <Icon className="h-4 w-4" />
       </div>
       <div className="text-xl font-bold font-mono">{value}</div>
@@ -91,9 +91,9 @@ export function SystemMonitoring() {
   return (
     <div className="space-y-4">
       {/* System Health */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <Activity className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">SYSTEM HEALTH</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <Activity className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">SYSTEM HEALTH</span>
       </div>
 
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
@@ -125,59 +125,59 @@ export function SystemMonitoring() {
 
       {/* Edge Function Stats */}
       {edgeStats.length > 0 && (
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Edge Function Invocations (7 Days)</h3>
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Edge Function Invocations (7 Days)</h3>
           <div className="space-y-2">
             {edgeStats.map(s => (
               <div key={s.event_type} className="flex items-center justify-between text-sm">
-                <span className="text-slate-300 font-mono text-xs">{s.event_type}</span>
-                <Badge variant="outline" className="border-slate-600 text-slate-300 font-mono">{s.count}</Badge>
+                <span className="text-muted-foreground font-mono text-xs">{s.event_type}</span>
+                <Badge variant="outline" className="border-border text-muted-foreground font-mono">{s.count}</Badge>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="p-3 rounded-lg bg-slate-800/30 border border-slate-700/30 text-xs text-slate-500">
+      <div className="p-3 rounded-lg bg-muted-foreground/30 border border-border/30 text-xs text-muted-foreground">
         Last updated: {new Date().toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}
       </div>
 
       {/* Feature Flag Management */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <Flag className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">FEATURE FLAG MANAGEMENT</span>
-        <span className="ml-auto text-xs text-slate-500">{featureFlags?.length || 0} flags</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <Flag className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">FEATURE FLAG MANAGEMENT</span>
+        <span className="ml-auto text-xs text-muted-foreground">{featureFlags?.length || 0} flags</span>
       </div>
 
       {flagsLoading ? (
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-warning" />
         </div>
       ) : (
         <div className="space-y-2">
           {featureFlags?.map((flag) => (
-            <div key={flag.id} className="flex items-center gap-4 p-4 rounded-lg bg-slate-800/30 border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+            <div key={flag.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted-foreground/30 border border-border/30 hover:border-border/50 transition-colors">
               <Switch
                 checked={flag.is_enabled}
                 onCheckedChange={(checked) => toggleFlag.mutate({ flagId: flag.id, isEnabled: checked })}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-slate-200 text-sm">{flag.flag_name}</h4>
-                  <Badge variant="outline" className="text-[10px] font-mono border-slate-600 text-slate-400">
+                  <h4 className="font-medium text-muted-foreground text-sm">{flag.flag_name}</h4>
+                  <Badge variant="outline" className="text-[10px] font-mono border-border text-muted-foreground">
                     {flag.flag_key}
                   </Badge>
                   {flag.is_enabled ? (
-                    <Badge variant="outline" className="text-[10px] border-emerald-700 text-emerald-400">Active</Badge>
+                    <Badge variant="outline" className="text-[10px] border-success/30 text-success">Active</Badge>
                   ) : (
-                    <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-500">Inactive</Badge>
+                    <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Inactive</Badge>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">{flag.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{flag.description}</p>
               </div>
               <div className="flex flex-wrap gap-1">
                 {flag.target_tiers.map((tier) => (
-                  <Badge key={tier} variant="outline" className="text-[10px] border-slate-600 text-slate-400">
+                  <Badge key={tier} variant="outline" className="text-[10px] border-border text-muted-foreground">
                     {tier}
                   </Badge>
                 ))}
@@ -185,7 +185,7 @@ export function SystemMonitoring() {
             </div>
           ))}
           {(!featureFlags || featureFlags.length === 0) && (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               No feature flags configured
             </div>
           )}

@@ -23,8 +23,8 @@ export default function SuperAdminLogin() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-500/20 border-t-amber-500"></div>
-          <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-amber-500 animate-pulse" />
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-warning/20 border-t-amber-500"></div>
+          <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-warning animate-pulse" />
         </div>
       </div>
     );
@@ -37,22 +37,22 @@ export default function SuperAdminLogin() {
   if (user && !isSuperAdmin(user.email)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-        <Card className="w-full max-w-md border-0 shadow-2xl bg-slate-800/80 backdrop-blur-xl">
+        <Card className="w-full max-w-md border-0 shadow-2xl bg-muted-foreground/80 backdrop-blur-xl">
           <CardHeader className="text-center pt-8 pb-4">
             <div className="flex justify-center mb-4">
-              <div className="p-4 bg-red-500/20 rounded-2xl">
-                <AlertCircle className="h-8 w-8 text-red-500" />
+              <div className="p-4 bg-destructive/20 rounded-2xl">
+                <AlertCircle className="h-8 w-8 text-destructive" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-red-400">Access Denied</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-2xl font-bold text-destructive">Access Denied</CardTitle>
+            <CardDescription className="text-muted-foreground">
               This portal is restricted to system administrators only.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-6 pb-8">
             <Button
               variant="outline"
-              className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="w-full border-border text-muted-foreground hover:bg-muted-foreground"
               onClick={() => navigate('/dashboard')}
             >
               Return to Dashboard
@@ -114,28 +114,28 @@ export default function SuperAdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-warning/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-warning/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-warning/5 to-warning/5 rounded-full blur-3xl" />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-slate-800/80 backdrop-blur-xl overflow-hidden">
-        <div className="h-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500" />
+      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl bg-muted-foreground/80 backdrop-blur-xl overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-warning via-warning to-warning" />
 
         <CardHeader className="text-center pt-8 pb-4">
           <div className="flex justify-center mb-4">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-              <div className="relative p-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning to-warning rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+              <div className="relative p-4 bg-gradient-to-br from-warning to-warning rounded-2xl shadow-lg">
                 <Shield className="h-8 w-8 text-white" />
               </div>
             </div>
           </div>
 
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-warning to-warning bg-clip-text text-transparent">
             {isRegistering ? 'First-Time Setup' : 'System Administrator'}
           </CardTitle>
-          <CardDescription className="text-slate-400">
+          <CardDescription className="text-muted-foreground">
             {isRegistering
               ? 'Create your super admin account to get started'
               : 'Infera Platform Administration Portal'}
@@ -144,7 +144,7 @@ export default function SuperAdminLogin() {
 
         <CardContent className="px-6 pb-8">
           {error && (
-            <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-500/30">
+            <Alert variant="destructive" className="mb-4 bg-destructive/10 border-destructive/30">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -152,43 +152,43 @@ export default function SuperAdminLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-300 font-medium">Admin Email</Label>
+              <Label className="text-muted-foreground font-medium">Admin Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
                   value={SUPER_ADMIN_EMAIL}
                   disabled
-                  className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20 disabled:opacity-70"
+                  className="pl-10 h-12 rounded-xl border-border bg-muted-foreground/50 text-muted-foreground placeholder:text-muted-foreground focus:border-warning/30 focus:ring-warning/20 disabled:opacity-70"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-300 font-medium">Password</Label>
+              <Label className="text-muted-foreground font-medium">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder={isRegistering ? "Create a strong password" : "Enter password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20"
+                  className="pl-10 h-12 rounded-xl border-border bg-muted-foreground/50 text-muted-foreground placeholder:text-muted-foreground focus:border-warning/30 focus:ring-warning/20"
                 />
               </div>
             </div>
 
             {isRegistering && (
               <div className="space-y-2">
-                <Label className="text-slate-300 font-medium">Confirm Password</Label>
+                <Label className="text-muted-foreground font-medium">Confirm Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 h-12 rounded-xl border-slate-600 bg-slate-700/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/20"
+                    className="pl-10 h-12 rounded-xl border-border bg-muted-foreground/50 text-muted-foreground placeholder:text-muted-foreground focus:border-warning/30 focus:ring-warning/20"
                   />
                 </div>
               </div>
@@ -196,7 +196,7 @@ export default function SuperAdminLogin() {
 
             <Button
               type="submit"
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 transition-opacity font-semibold shadow-lg text-white"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-warning to-warning hover:opacity-90 transition-opacity font-semibold shadow-lg text-white"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -213,7 +213,7 @@ export default function SuperAdminLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-slate-700">
+          <div className="mt-6 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => {
@@ -221,13 +221,13 @@ export default function SuperAdminLogin() {
                 setError(null);
                 setConfirmPassword('');
               }}
-              className="w-full text-center text-sm text-amber-400 hover:text-amber-300 transition-colors"
+              className="w-full text-center text-sm text-warning hover:text-warning transition-colors"
             >
               {isRegistering
                 ? '← Back to Sign In'
                 : 'First time? Set up your admin account →'}
             </button>
-            <p className="text-center text-xs text-slate-500 mt-3">
+            <p className="text-center text-xs text-muted-foreground mt-3">
               This portal is exclusively for Infera system administrators.
               <br />
               Unauthorized access attempts are logged.
@@ -235,7 +235,7 @@ export default function SuperAdminLogin() {
           </div>
         </CardContent>
 
-        <div className="h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+        <div className="h-1 bg-gradient-to-r from-transparent via-warning/50 to-transparent" />
       </Card>
     </div>
   );

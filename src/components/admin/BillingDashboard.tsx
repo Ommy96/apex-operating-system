@@ -51,7 +51,7 @@ export function BillingDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning" />
       </div>
     );
   }
@@ -80,54 +80,54 @@ export function BillingDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <CreditCard className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">REVENUE & BILLING CENTER</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <CreditCard className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">REVENUE & BILLING CENTER</span>
       </div>
 
       {/* Revenue Cards */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400">MRR</span>
-            <DollarSign className="h-4 w-4 text-emerald-400" />
+            <span className="text-xs text-muted-foreground">MRR</span>
+            <DollarSign className="h-4 w-4 text-success" />
           </div>
-          <div className="text-2xl font-bold text-emerald-400 font-mono">{fmtKES(mrr)}</div>
-          <p className="text-xs text-slate-500 mt-1">{payingOrgs} paying orgs</p>
+          <div className="text-2xl font-bold text-success font-mono">{fmtKES(mrr)}</div>
+          <p className="text-xs text-muted-foreground mt-1">{payingOrgs} paying orgs</p>
         </div>
 
-        <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400">ARR</span>
-            <TrendingUp className="h-4 w-4 text-blue-400" />
+            <span className="text-xs text-muted-foreground">ARR</span>
+            <TrendingUp className="h-4 w-4 text-info" />
           </div>
-          <div className="text-2xl font-bold text-blue-400 font-mono">{fmtKES(arr)}</div>
-          <p className="text-xs text-slate-500 mt-1">Annual run rate</p>
+          <div className="text-2xl font-bold text-info font-mono">{fmtKES(arr)}</div>
+          <p className="text-xs text-muted-foreground mt-1">Annual run rate</p>
         </div>
 
-        <div className="p-4 rounded-lg bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400">Trial / Free</span>
-            <Clock className="h-4 w-4 text-cyan-400" />
+            <span className="text-xs text-muted-foreground">Trial / Free</span>
+            <Clock className="h-4 w-4 text-info" />
           </div>
-          <div className="text-2xl font-bold text-cyan-400 font-mono">{trialOrgs}</div>
-          <p className="text-xs text-slate-500 mt-1">Conversion targets</p>
+          <div className="text-2xl font-bold text-info font-mono">{trialOrgs}</div>
+          <p className="text-xs text-muted-foreground mt-1">Conversion targets</p>
         </div>
 
-        <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+        <div className="p-4 rounded-lg bg-gradient-to-br from-warning/10 to-warning/5 border border-warning/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400">Paying Orgs</span>
-            <CreditCard className="h-4 w-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">Paying Orgs</span>
+            <CreditCard className="h-4 w-4 text-warning" />
           </div>
-          <div className="text-2xl font-bold text-amber-400 font-mono">{payingOrgs}</div>
-          <p className="text-xs text-slate-500 mt-1">Active subscriptions</p>
+          <div className="text-2xl font-bold text-warning font-mono">{payingOrgs}</div>
+          <p className="text-xs text-muted-foreground mt-1">Active subscriptions</p>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Orgs by Plan - Bar Chart */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Organizations by Plan</h3>
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Organizations by Plan</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={barData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -146,8 +146,8 @@ export function BillingDashboard() {
         </div>
 
         {/* Growth Trend - Line Chart */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">New Organizations (Last 12 Months)</h3>
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">New Organizations (Last 12 Months)</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={growthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -161,8 +161,8 @@ export function BillingDashboard() {
       </div>
 
       {/* Plan Breakdown */}
-      <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Plan Breakdown</h3>
+      <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Plan Breakdown</h3>
         <div className="space-y-3">
           {[
             { tier: 'Free', price: 0, orgs: tierCounts['free'] || 0 },
@@ -170,16 +170,16 @@ export function BillingDashboard() {
             { tier: 'Professional', price: 15000, orgs: proCount },
             { tier: 'Enterprise', price: 45000, orgs: entCount },
           ].map((plan) => (
-            <div key={plan.tier} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/30">
+            <div key={plan.tier} className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-slate-200">{plan.tier}</span>
-                  <span className="text-sm font-bold text-amber-400 font-mono">
+                  <span className="text-sm font-medium text-muted-foreground">{plan.tier}</span>
+                  <span className="text-sm font-bold text-warning font-mono">
                     {plan.price === 0 ? 'Free' : `${fmtKES(plan.price)}/mo`}
                   </span>
                 </div>
               </div>
-              <Badge variant="outline" className="border-slate-600 text-slate-300 font-mono text-sm px-3">
+              <Badge variant="outline" className="border-border text-muted-foreground font-mono text-sm px-3">
                 {plan.orgs}
               </Badge>
             </div>

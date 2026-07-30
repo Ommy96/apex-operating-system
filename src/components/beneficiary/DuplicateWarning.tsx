@@ -57,10 +57,10 @@ export function DuplicateWarning({ firstName, lastName, dateOfBirth, phone, nati
   };
 
   return (
-    <Alert className="border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20">
-      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+    <Alert className="border-warning/30 bg-warning/10">
+      <AlertTriangle className="h-4 w-4 text-warning" />
       <AlertDescription>
-        <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Possible duplicate beneficiaries found</p>
+        <p className="font-medium text-warning mb-2">Possible duplicate beneficiaries found</p>
         <div className="space-y-1">
           {duplicates.map((d: any) => (
             <div key={d.id} className="flex items-center justify-between text-sm">

@@ -194,7 +194,7 @@ export function SessionManager({ children }: SessionManagerProps) {
       return {
         title: "Privileges Upgraded",
         description: `Your role has been upgraded from ${privilegeDialog.oldRole} to ${privilegeDialog.newRole}. You now have access to additional features and data.`,
-        icon: <Shield className="h-6 w-6 text-green-500" />,
+        icon: <Shield className="h-6 w-6 text-success" />,
         buttonText: "Continue with New Privileges",
         variant: "default" as const
       };
@@ -202,7 +202,7 @@ export function SessionManager({ children }: SessionManagerProps) {
       return {
         title: "Privileges Reduced",
         description: `Your role has been changed from ${privilegeDialog.oldRole} to ${privilegeDialog.newRole}. Some features may no longer be accessible. The page will reload to apply changes.`,
-        icon: <AlertTriangle className="h-6 w-6 text-orange-500" />,
+        icon: <AlertTriangle className="h-6 w-6 text-warning" />,
         buttonText: "Acknowledge Changes",
         variant: "destructive" as const
       };
@@ -253,7 +253,7 @@ export function SessionManager({ children }: SessionManagerProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Clock className="h-6 w-6 text-orange-500" />
+              <Clock className="h-6 w-6 text-warning" />
               Session Timeout Warning
             </AlertDialogTitle>
             <AlertDialogDescription>

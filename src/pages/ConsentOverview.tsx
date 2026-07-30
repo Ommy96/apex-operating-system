@@ -39,8 +39,8 @@ export default function ConsentOverview() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Active</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-emerald-600">{active.length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-1"><Clock className="h-4 w-4" /> Expiring (30d)</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{expiring.length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Active</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-success">{active.length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-1"><Clock className="h-4 w-4" /> Expiring (30d)</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-warning">{expiring.length}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> Expired</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-destructive">{expired.length}</div></CardContent></Card>
       </div>
 

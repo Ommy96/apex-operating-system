@@ -176,7 +176,7 @@ export function ComplianceDocumentsSettings() {
             <div className="flex items-center gap-3">
               <Input type="date" value={kraExpiry} onChange={(e) => setKraExpiry(e.target.value)} className="max-w-xs" />
               {kraStatus && (
-                <Badge variant={kraStatus.variant} className={kraStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : kraStatus.status === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' : ''}>
+                <Badge variant={kraStatus.variant} className={kraStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : kraStatus.status === 'warning' ? 'bg-warning/10 text-warning' : ''}>
                   {kraStatus.status === 'expired' && <ShieldAlert className="h-3 w-3 mr-1" />}
                   {kraStatus.status === 'warning' && <AlertTriangle className="h-3 w-3 mr-1" />}
                   {kraStatus.label}
@@ -246,7 +246,7 @@ export function ComplianceDocumentsSettings() {
             <div className="flex items-center gap-3">
               <Input type="date" value={ngoExpiry} onChange={(e) => setNgoExpiry(e.target.value)} className="max-w-xs" />
               {ngoStatus && (
-                <Badge variant={ngoStatus.variant} className={ngoStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : ngoStatus.status === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' : ''}>
+                <Badge variant={ngoStatus.variant} className={ngoStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : ngoStatus.status === 'warning' ? 'bg-warning/10 text-warning' : ''}>
                   {ngoStatus.status === 'expired' && <ShieldAlert className="h-3 w-3 mr-1" />}
                   {ngoStatus.status === 'warning' && <AlertTriangle className="h-3 w-3 mr-1" />}
                   {ngoStatus.label}
@@ -276,7 +276,7 @@ export function ComplianceDocumentsSettings() {
             <div className="flex items-center gap-3">
               <Input type="date" value={pboExpiry} onChange={(e) => setPboExpiry(e.target.value)} className="max-w-xs" />
               {pboStatus && (
-                <Badge variant={pboStatus.variant} className={pboStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : pboStatus.status === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' : ''}>
+                <Badge variant={pboStatus.variant} className={pboStatus.status === 'expired' ? 'bg-destructive text-destructive-foreground' : pboStatus.status === 'warning' ? 'bg-warning/10 text-warning' : ''}>
                   {pboStatus.status === 'expired' && <ShieldAlert className="h-3 w-3 mr-1" />}
                   {pboStatus.status === 'warning' && <AlertTriangle className="h-3 w-3 mr-1" />}
                   {pboStatus.label}

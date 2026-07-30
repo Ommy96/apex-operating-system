@@ -159,12 +159,12 @@ export default function DocumentManagement() {
 
   const getCategoryColor = (cat: string) => {
     const colors: Record<string, string> = {
-      policy: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
-      report: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-      contract: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-      template: "bg-green-500/10 text-green-700 dark:text-green-400",
-      financial: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-      legal: "bg-red-500/10 text-red-700 dark:text-red-400",
+      policy: "bg-info/10 text-info",
+      report: "bg-info/10 text-info",
+      contract: "bg-warning/10 text-warning",
+      template: "bg-success/10 text-success",
+      financial: "bg-success/10 text-success",
+      legal: "bg-destructive/10 text-destructive",
     };
     return colors[cat] || "bg-muted text-muted-foreground";
   };
@@ -197,7 +197,7 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" />
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-success shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">
                 {documents.filter((d) => d.category === "policy").length}
@@ -208,7 +208,7 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <History className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 shrink-0" />
+            <History className="h-6 w-6 sm:h-8 sm:w-8 text-info shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">
                 {documents.reduce((s, d) => s + d.current_version, 0)}
@@ -219,7 +219,7 @@ export default function DocumentManagement() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <FolderOpen className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 shrink-0" />
+            <FolderOpen className="h-6 w-6 sm:h-8 sm:w-8 text-warning shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">
                 {new Set(documents.map((d) => d.category)).size}

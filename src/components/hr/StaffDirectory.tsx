@@ -50,10 +50,10 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
 
 const EMPLOYMENT_TYPE_COLORS: Record<string, string> = {
   full_time: 'bg-primary/10 text-primary',
-  part_time: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  contract: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
-  volunteer: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
-  intern: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300',
+  part_time: 'bg-info/10 text-info',
+  contract: 'bg-warning/10 text-warning',
+  volunteer: 'bg-info/10 text-info',
+  intern: 'bg-info/10 text-info',
 };
 
 export function StaffDirectory() {
@@ -307,7 +307,7 @@ export function StaffDirectory() {
                         </TableCell>
                         <TableCell>
                           {status === 'active' && <Badge className="bg-primary/10 text-primary text-xs">Active</Badge>}
-                          {status === 'pending' && <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 text-xs">Pending</Badge>}
+                          {status === 'pending' && <Badge className="bg-warning/10 text-warning text-xs">Pending</Badge>}
                           {status === 'inactive' && <Badge variant="secondary" className="text-xs">Inactive</Badge>}
                         </TableCell>
                         {canManageStaff && (
@@ -354,7 +354,7 @@ export function StaffDirectory() {
                 {/* Status badge */}
                 <div className="flex gap-2">
                   {getStatus(selectedStaff) === 'pending' && (
-                    <Badge className="bg-amber-100 text-amber-700">Pending — never logged in</Badge>
+                    <Badge className="bg-warning/10 text-warning">Pending — never logged in</Badge>
                   )}
                   {getStatus(selectedStaff) === 'active' && (
                     <Badge className="bg-primary/10 text-primary">Active</Badge>

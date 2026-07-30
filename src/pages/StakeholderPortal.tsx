@@ -9,9 +9,9 @@ import { AlertCircle, Download, Building2, Target, Banknote, Users } from "lucid
 import { format } from "date-fns";
 
 function StatusBadge({ pct }: { pct: number }) {
-  if (pct >= 80) return <Badge className="bg-emerald-500/10 text-emerald-700">On track</Badge>;
-  if (pct >= 50) return <Badge className="bg-amber-500/10 text-amber-700">At risk</Badge>;
-  return <Badge className="bg-rose-500/10 text-rose-700">Off track</Badge>;
+  if (pct >= 80) return <Badge className="bg-success/10 text-success">On track</Badge>;
+  if (pct >= 50) return <Badge className="bg-warning/10 text-warning">At risk</Badge>;
+  return <Badge className="bg-destructive/10 text-destructive">Off track</Badge>;
 }
 
 export default function StakeholderPortal() {

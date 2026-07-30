@@ -4,21 +4,21 @@ import { cn } from "@/lib/utils";
 type AccentTone = "teal" | "amber" | "rose" | "blue" | "violet" | "slate";
 
 const TONE_BAR: Record<AccentTone, string> = {
-  teal: "bg-teal-500",
-  amber: "bg-amber-500",
-  rose: "bg-rose-500",
-  blue: "bg-blue-500",
-  violet: "bg-violet-500",
-  slate: "bg-slate-500",
+  teal: "bg-success",
+  amber: "bg-warning",
+  rose: "bg-destructive",
+  blue: "bg-info",
+  violet: "bg-info",
+  slate: "bg-muted-foreground",
 };
 
 const TONE_ICON: Record<AccentTone, string> = {
-  teal: "text-teal-600 bg-teal-100/70 dark:bg-teal-950/40 dark:text-teal-300",
-  amber: "text-amber-700 bg-amber-100/70 dark:bg-amber-950/40 dark:text-amber-300",
-  rose: "text-rose-600 bg-rose-100/70 dark:bg-rose-950/40 dark:text-rose-300",
-  blue: "text-blue-600 bg-blue-100/70 dark:bg-blue-950/40 dark:text-blue-300",
-  violet: "text-violet-600 bg-violet-100/70 dark:bg-violet-950/40 dark:text-violet-300",
-  slate: "text-slate-600 bg-slate-100/70 dark:bg-slate-900/40 dark:text-slate-300",
+  teal: "text-success bg-success/70",
+  amber: "text-warning bg-warning/70",
+  rose: "text-destructive bg-destructive/70",
+  blue: "text-info bg-info/70",
+  violet: "text-info bg-info/70",
+  slate: "text-foreground bg-muted/70",
 };
 
 export interface AnalyticsKpiCardProps {
@@ -57,8 +57,8 @@ export function AnalyticsKpiCard({
   const deltaClass = isNeutral
     ? "text-muted-foreground"
     : (isPositive && positiveIsGood) || (!isPositive && !positiveIsGood)
-      ? "text-emerald-600 dark:text-emerald-400"
-      : "text-rose-600 dark:text-rose-400";
+      ? "text-success"
+      : "text-destructive";
 
   const DeltaIcon = isNeutral ? Minus : isPositive ? ArrowUpRight : ArrowDownRight;
 

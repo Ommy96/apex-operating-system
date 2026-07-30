@@ -164,7 +164,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Outputs</p><p className="text-2xl font-semibold">{stats.total}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Published</p><p className="text-2xl font-semibold text-emerald-600">{stats.published}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Published</p><p className="text-2xl font-semibold text-success">{stats.published}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Planned</p><p className="text-2xl font-semibold">{stats.planned}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Reach</p><p className="text-2xl font-semibold">{stats.reach.toLocaleString()}</p></CardContent></Card>
       </div>

@@ -217,7 +217,7 @@ function PortfolioPanel({ programId, orgId }: { programId: string; orgId: string
                   <TableCell>
                     {total === 0 ? <span className="text-xs text-muted-foreground">—</span> : (
                       <span className="text-xs">
-                        <span className="text-emerald-600 font-medium">{ind.on}</span>
+                        <span className="text-success font-medium">{ind.on}</span>
                         {" / "}
                         <span className="text-destructive font-medium">{ind.off}</span>
                       </span>

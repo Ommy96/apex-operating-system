@@ -33,16 +33,16 @@ const ANNOUNCEMENTS: Announcement[] = [
 ];
 
 const TYPE_STYLES = {
-  info: { color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/30', icon: Bell },
-  warning: { color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', icon: AlertTriangle },
-  critical: { color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30', icon: AlertTriangle },
-  maintenance: { color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/30', icon: Clock },
+  info: { color: 'text-info', bg: 'bg-info/10 border-info/30', icon: Bell },
+  warning: { color: 'text-warning', bg: 'bg-warning/10 border-warning/30', icon: AlertTriangle },
+  critical: { color: 'text-destructive', bg: 'bg-destructive/10 border-destructive/30', icon: AlertTriangle },
+  maintenance: { color: 'text-info', bg: 'bg-info/10 border-info/30', icon: Clock },
 };
 
 const STATUS_STYLES = {
-  draft: 'border-slate-500/30 text-slate-400',
-  sent: 'border-emerald-500/30 text-emerald-400',
-  scheduled: 'border-amber-500/30 text-amber-400',
+  draft: 'border-border/30 text-muted-foreground',
+  sent: 'border-success/30 text-success',
+  scheduled: 'border-warning/30 text-warning',
 };
 
 export function PlatformCommunications() {
@@ -75,11 +75,11 @@ export function PlatformCommunications() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">Platform Communications</h2>
-          <p className="text-sm text-slate-400">System announcements, maintenance notices, and broadcast messages</p>
+          <h2 className="text-xl font-bold text-muted-foreground">Platform Communications</h2>
+          <p className="text-sm text-muted-foreground">System announcements, maintenance notices, and broadcast messages</p>
         </div>
         <Button size="sm" onClick={() => setActiveView('compose')}
-          className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:opacity-90">
+          className="bg-gradient-to-r from-warning to-warning text-white hover:opacity-90">
           <Plus className="h-4 w-4 mr-1" /> New Announcement
         </Button>
       </div>
@@ -87,17 +87,17 @@ export function PlatformCommunications() {
       {/* KPI Strip */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
-          { label: 'Total Sent', value: ANNOUNCEMENTS.filter(a => a.status === 'sent').length, icon: Send, accent: 'text-emerald-400' },
-          { label: 'Scheduled', value: ANNOUNCEMENTS.filter(a => a.status === 'scheduled').length, icon: Clock, accent: 'text-amber-400' },
-          { label: 'Drafts', value: ANNOUNCEMENTS.filter(a => a.status === 'draft').length, icon: MessageSquare, accent: 'text-slate-400' },
-          { label: 'Total Reach', value: ANNOUNCEMENTS.reduce((s, a) => s + a.recipientCount, 0), icon: Users, accent: 'text-blue-400' },
+          { label: 'Total Sent', value: ANNOUNCEMENTS.filter(a => a.status === 'sent').length, icon: Send, accent: 'text-success' },
+          { label: 'Scheduled', value: ANNOUNCEMENTS.filter(a => a.status === 'scheduled').length, icon: Clock, accent: 'text-warning' },
+          { label: 'Drafts', value: ANNOUNCEMENTS.filter(a => a.status === 'draft').length, icon: MessageSquare, accent: 'text-muted-foreground' },
+          { label: 'Total Reach', value: ANNOUNCEMENTS.reduce((s, a) => s + a.recipientCount, 0), icon: Users, accent: 'text-info' },
         ].map(({ label, value, icon: Icon, accent }) => (
-          <div key={label} className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div key={label} className="p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-slate-400">{label}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
               <Icon className={`h-4 w-4 ${accent}`} />
             </div>
-            <div className="text-xl font-bold text-slate-100 font-mono">{value}</div>
+            <div className="text-xl font-bold text-muted-foreground font-mono">{value}</div>
           </div>
         ))}
       </div>
@@ -112,8 +112,8 @@ export function PlatformCommunications() {
           <Button key={key} variant={activeView === key ? 'default' : 'outline'} size="sm"
             onClick={() => setActiveView(key as any)}
             className={activeView === key
-              ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30'
-              : 'border-slate-600 text-slate-400 hover:bg-slate-700'
+              ? 'bg-warning/20 text-warning border-warning/30 hover:bg-warning/30'
+              : 'border-border text-muted-foreground hover:bg-muted-foreground'
             }>
             <Icon className="h-4 w-4 mr-1" /> {label}
           </Button>
@@ -126,22 +126,22 @@ export function PlatformCommunications() {
             const typeStyle = TYPE_STYLES[ann.type];
             const TypeIcon = typeStyle.icon;
             return (
-              <div key={ann.id} className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
+              <div key={ann.id} className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
                 <div className="flex items-start gap-3">
                   <div className={`p-2 rounded-lg ${typeStyle.bg}`}>
                     <TypeIcon className={`h-4 w-4 ${typeStyle.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="text-sm font-medium text-slate-200">{ann.title}</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">{ann.title}</h4>
                       <Badge variant="outline" className={`text-xs ${STATUS_STYLES[ann.status]}`}>
                         {ann.status === 'sent' && <CheckCircle2 className="h-3 w-3 mr-1" />}
                         {ann.status === 'scheduled' && <Clock className="h-3 w-3 mr-1" />}
                         {ann.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-400 mb-2">{ann.message}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground mb-2">{ann.message}</p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         {ann.audience === 'all' ? <Globe className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
                         {ann.audience === 'all' ? 'All tenants' : 'Admins only'}
@@ -159,27 +159,27 @@ export function PlatformCommunications() {
       )}
 
       {activeView === 'compose' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">Compose Announcement</CardTitle>
-            <CardDescription className="text-slate-400">Broadcast a message to tenants across the platform</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">Compose Announcement</CardTitle>
+            <CardDescription className="text-muted-foreground">Broadcast a message to tenants across the platform</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-300">Title</Label>
+              <Label className="text-muted-foreground">Title</Label>
               <Input value={composeTitle} onChange={e => setComposeTitle(e.target.value)} placeholder="Announcement title"
-                className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                className="bg-muted-foreground/50 border-border text-muted-foreground" />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Message</Label>
+              <Label className="text-muted-foreground">Message</Label>
               <Textarea value={composeMessage} onChange={e => setComposeMessage(e.target.value)} placeholder="Write your announcement..."
-                className="bg-slate-700/50 border-slate-600 text-slate-200 min-h-[120px]" />
+                className="bg-muted-foreground/50 border-border text-muted-foreground min-h-[120px]" />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
-                <Label className="text-slate-300">Type</Label>
+                <Label className="text-muted-foreground">Type</Label>
                 <Select value={composeType} onValueChange={setComposeType}>
-                  <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="info">Informational</SelectItem>
                     <SelectItem value="warning">Warning</SelectItem>
@@ -189,9 +189,9 @@ export function PlatformCommunications() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Audience</Label>
+                <Label className="text-muted-foreground">Audience</Label>
                 <Select value={composeAudience} onValueChange={setComposeAudience}>
-                  <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Tenants</SelectItem>
                     <SelectItem value="admins">Org Admins Only</SelectItem>
@@ -200,9 +200,9 @@ export function PlatformCommunications() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Channel</Label>
+                <Label className="text-muted-foreground">Channel</Label>
                 <Select value={composeChannel} onValueChange={setComposeChannel}>
-                  <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="in-app">In-App Notification</SelectItem>
                     <SelectItem value="email">Email</SelectItem>
@@ -211,27 +211,27 @@ export function PlatformCommunications() {
                 </Select>
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
               <div>
-                <div className="text-sm font-medium text-slate-200">Schedule for Later</div>
-                <div className="text-xs text-slate-400">Send at a specific date and time</div>
+                <div className="text-sm font-medium text-muted-foreground">Schedule for Later</div>
+                <div className="text-xs text-muted-foreground">Send at a specific date and time</div>
               </div>
               <Switch checked={scheduleEnabled} onCheckedChange={setScheduleEnabled} />
             </div>
             {scheduleEnabled && (
               <div className="space-y-2">
-                <Label className="text-slate-300">Scheduled Date & Time</Label>
+                <Label className="text-muted-foreground">Scheduled Date & Time</Label>
                 <Input type="datetime-local" value={scheduledTime} onChange={e => setScheduledTime(e.target.value)}
-                  className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                  className="bg-muted-foreground/50 border-border text-muted-foreground" />
               </div>
             )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setActiveView('announcements')}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                className="border-border text-muted-foreground hover:bg-muted-foreground">
                 Cancel
               </Button>
               <Button onClick={handleSend}
-                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:opacity-90">
+                className="bg-gradient-to-r from-warning to-warning text-white hover:opacity-90">
                 <Send className="h-4 w-4 mr-1" /> {scheduleEnabled ? 'Schedule' : 'Send Now'}
               </Button>
             </div>
@@ -240,25 +240,25 @@ export function PlatformCommunications() {
       )}
 
       {activeView === 'banners' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">System-Wide Banner</CardTitle>
-            <CardDescription className="text-slate-400">Display a persistent banner across all tenant dashboards</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">System-Wide Banner</CardTitle>
+            <CardDescription className="text-muted-foreground">Display a persistent banner across all tenant dashboards</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-slate-600/30 bg-slate-700/20">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/30 bg-muted-foreground/20">
               <div>
-                <div className="text-sm font-medium text-slate-200">Show System Banner</div>
-                <div className="text-xs text-slate-400">Visible to all users across all organizations</div>
+                <div className="text-sm font-medium text-muted-foreground">Show System Banner</div>
+                <div className="text-xs text-muted-foreground">Visible to all users across all organizations</div>
               </div>
               <Switch checked={showBanner} onCheckedChange={setShowBanner} />
             </div>
             {showBanner && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Banner Type</Label>
+                  <Label className="text-muted-foreground">Banner Type</Label>
                   <Select value={bannerType} onValueChange={setBannerType}>
-                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="info">Info (Blue)</SelectItem>
                       <SelectItem value="warning">Warning (Amber)</SelectItem>
@@ -268,20 +268,20 @@ export function PlatformCommunications() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Banner Message</Label>
+                  <Label className="text-muted-foreground">Banner Message</Label>
                   <Textarea value={bannerMessage} onChange={e => setBannerMessage(e.target.value)} placeholder="Enter the banner message..."
-                    className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                    className="bg-muted-foreground/50 border-border text-muted-foreground" />
                 </div>
                 {bannerMessage && (
                   <div>
-                    <Label className="text-slate-300 text-xs mb-2 block">Preview</Label>
+                    <Label className="text-muted-foreground text-xs mb-2 block">Preview</Label>
                     <div className={`p-3 rounded-lg text-sm ${TYPE_STYLES[bannerType as keyof typeof TYPE_STYLES]?.bg || TYPE_STYLES.info.bg} ${TYPE_STYLES[bannerType as keyof typeof TYPE_STYLES]?.color || TYPE_STYLES.info.color}`}>
                       {bannerMessage}
                     </div>
                   </div>
                 )}
                 <Button onClick={() => toast({ title: 'Banner Updated', description: 'System banner is now visible to all users.' })}
-                  className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:opacity-90">
+                  className="bg-gradient-to-r from-warning to-warning text-white hover:opacity-90">
                   <Globe className="h-4 w-4 mr-1" /> Publish Banner
                 </Button>
               </>

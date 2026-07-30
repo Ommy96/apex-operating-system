@@ -265,13 +265,13 @@ export default function LessonsLearned() {
                 )}
                 {lesson.what_worked && (
                   <div className="flex items-start gap-2">
-                    <Lightbulb className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                    <Lightbulb className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
                     <p className="text-xs text-muted-foreground line-clamp-2">{lesson.what_worked}</p>
                   </div>
                 )}
                 {lesson.what_didnt_work && (
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
                     <p className="text-xs text-muted-foreground line-clamp-2">{lesson.what_didnt_work}</p>
                   </div>
                 )}

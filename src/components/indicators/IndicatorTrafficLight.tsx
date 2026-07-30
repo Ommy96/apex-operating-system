@@ -13,17 +13,17 @@ export function getTrafficLightStatus(actual: number | null | undefined, target:
 }
 
 const dotColors: Record<string, string> = {
-  green: 'bg-green-500',
-  amber: 'bg-yellow-500',
-  red: 'bg-red-500',
-  grey: 'bg-slate-300',
+  green: 'bg-success',
+  amber: 'bg-warning',
+  red: 'bg-destructive',
+  grey: 'bg-muted-foreground',
 };
 
 const labelColors: Record<string, string> = {
-  green: 'text-green-700',
-  amber: 'text-yellow-700',
-  red: 'text-red-700',
-  grey: 'text-slate-500',
+  green: 'text-success',
+  amber: 'text-warning',
+  red: 'text-destructive',
+  grey: 'text-muted-foreground',
 };
 
 export function IndicatorTrafficLight({ actual, target, size = 'sm' }: TrafficLightProps) {
@@ -48,22 +48,22 @@ export function TrafficLightSummaryBar({ indicators }: { indicators: Array<{ act
   return (
     <div className="flex items-center gap-4 text-sm flex-wrap">
       <span className="flex items-center gap-1.5 cursor-pointer">
-        <span className="h-3 w-3 rounded-full bg-green-500 inline-block" />
+        <span className="h-3 w-3 rounded-full bg-success inline-block" />
         <span className="font-medium">{counts.green} On Track</span>
       </span>
       <span className="text-muted-foreground">|</span>
       <span className="flex items-center gap-1.5 cursor-pointer">
-        <span className="h-3 w-3 rounded-full bg-yellow-500 inline-block" />
+        <span className="h-3 w-3 rounded-full bg-warning inline-block" />
         <span className="font-medium">{counts.amber} At Risk</span>
       </span>
       <span className="text-muted-foreground">|</span>
       <span className="flex items-center gap-1.5 cursor-pointer">
-        <span className="h-3 w-3 rounded-full bg-red-500 inline-block" />
+        <span className="h-3 w-3 rounded-full bg-destructive inline-block" />
         <span className="font-medium">{counts.red} Off Track</span>
       </span>
       <span className="text-muted-foreground">|</span>
       <span className="flex items-center gap-1.5 cursor-pointer">
-        <span className="h-3 w-3 rounded-full bg-slate-300 inline-block" />
+        <span className="h-3 w-3 rounded-full bg-muted-foreground inline-block" />
         <span className="font-medium">{counts.grey} No Data</span>
       </span>
     </div>

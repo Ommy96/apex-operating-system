@@ -11,9 +11,9 @@ import { format } from "date-fns";
 import { NewActivitySheet } from "./NewActivitySheet";
 
 const STATUS_CLS: Record<string, string> = {
-  planned: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  in_progress: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  planned: "bg-info/10 text-info",
+  in_progress: "bg-warning/10 text-warning",
+  completed: "bg-success/10 text-success",
   cancelled: "bg-destructive/10 text-destructive",
 };
 
@@ -76,8 +76,8 @@ export function ProjectActivitiesTab({ projectId, programId, orgId, readOnly }: 
               >
                 <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   {a.type === "disbursement"
-                    ? <HandCoins className="h-4 w-4 text-amber-600" />
-                    : <Calendar className="h-4 w-4 text-blue-600" />}
+                    ? <HandCoins className="h-4 w-4 text-warning" />
+                    : <Calendar className="h-4 w-4 text-info" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{a.name}</p>

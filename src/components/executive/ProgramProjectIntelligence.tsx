@@ -460,9 +460,9 @@ function MiniStat({ label, value, icon, color }: { label: string; value: number 
   const colorMap: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
     accent: "bg-accent/10 text-accent",
-    success: "bg-green-500/10 text-green-600",
-    info: "bg-blue-500/10 text-blue-600",
-    warning: "bg-amber-500/10 text-amber-600",
+    success: "bg-success/10 text-success",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
   };
   return (
     <Card>

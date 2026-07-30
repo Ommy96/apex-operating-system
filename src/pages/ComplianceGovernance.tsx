@@ -31,14 +31,14 @@ const DATA_CATEGORIES = ["beneficiary_data", "financial_records", "staff_records
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    active: "bg-green-500/10 text-green-700 dark:text-green-400",
-    declined: "bg-red-500/10 text-red-700 dark:text-red-400",
-    withdrawn: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    active: "bg-success/10 text-success",
+    declined: "bg-destructive/10 text-destructive",
+    withdrawn: "bg-warning/10 text-warning",
     expired: "bg-muted text-muted-foreground",
-    pending: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-    in_progress: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    completed: "bg-green-500/10 text-green-700 dark:text-green-400",
-    rejected: "bg-red-500/10 text-red-700 dark:text-red-400",
+    pending: "bg-warning/10 text-warning",
+    in_progress: "bg-info/10 text-info",
+    completed: "bg-success/10 text-success",
+    rejected: "bg-destructive/10 text-destructive",
   };
   return (
     <Badge variant="secondary" className={colors[status] || "bg-muted text-muted-foreground"}>
@@ -170,7 +170,7 @@ export default function ComplianceGovernance() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 shrink-0" />
+            <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-success shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">{activeConsents}</p>
               <p className="text-xs text-muted-foreground">Active Consents</p>
@@ -179,7 +179,7 @@ export default function ComplianceGovernance() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 shrink-0" />
+            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-warning shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">{pendingRequests}</p>
               <p className="text-xs text-muted-foreground">Pending Requests</p>
@@ -197,7 +197,7 @@ export default function ComplianceGovernance() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <FileDown className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 shrink-0" />
+            <FileDown className="h-6 w-6 sm:h-8 sm:w-8 text-info shrink-0" />
             <div className="min-w-0">
               <p className="text-lg sm:text-2xl font-bold">{exports.length}</p>
               <p className="text-xs text-muted-foreground">Exports Generated</p>
@@ -261,7 +261,7 @@ export default function ComplianceGovernance() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-amber-600"
+                            className="text-warning"
                             onClick={() => {
                               if (confirm("Withdraw this consent?")) {
                                 withdrawConsent.mutate({ id: c.id, reason: "User requested withdrawal" });
@@ -303,7 +303,7 @@ export default function ComplianceGovernance() {
                         <h3 className="font-semibold">{p.name}</h3>
                         <Badge variant="outline">{p.data_category.replace("_", " ")}</Badge>
                         {p.is_active ? (
-                          <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">Active</Badge>
+                          <Badge variant="secondary" className="bg-success/10 text-success">Active</Badge>
                         ) : (
                           <Badge variant="secondary" className="bg-muted text-muted-foreground">Inactive</Badge>
                         )}
@@ -376,7 +376,7 @@ export default function ComplianceGovernance() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-green-600"
+                              className="h-7 w-7 text-success"
                               onClick={() => reviewAccessRequest.mutate({ id: r.id, status: "in_progress" })}
                             >
                               <CheckCircle className="h-4 w-4" />
@@ -384,7 +384,7 @@ export default function ComplianceGovernance() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-red-600"
+                              className="h-7 w-7 text-destructive"
                               onClick={() => reviewAccessRequest.mutate({ id: r.id, status: "rejected", reviewer_notes: "Rejected by admin" })}
                             >
                               <XCircle className="h-4 w-4" />
@@ -414,7 +414,7 @@ export default function ComplianceGovernance() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => handleExport("consent_records")}>
               <CardContent className="p-6 text-center">
-                <ShieldCheck className="h-10 w-10 text-green-500 mx-auto mb-3" />
+                <ShieldCheck className="h-10 w-10 text-success mx-auto mb-3" />
                 <h3 className="font-semibold">Consent Records</h3>
                 <p className="text-xs text-muted-foreground mt-1">Export all consent tracking data</p>
                 <Button variant="outline" size="sm" className="mt-3">
@@ -424,7 +424,7 @@ export default function ComplianceGovernance() {
             </Card>
             <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => handleExport("access_requests")}>
               <CardContent className="p-6 text-center">
-                <UserX className="h-10 w-10 text-blue-500 mx-auto mb-3" />
+                <UserX className="h-10 w-10 text-info mx-auto mb-3" />
                 <h3 className="font-semibold">Data Access Requests</h3>
                 <p className="text-xs text-muted-foreground mt-1">Export all SAR/deletion requests</p>
                 <Button variant="outline" size="sm" className="mt-3">

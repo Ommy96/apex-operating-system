@@ -39,18 +39,18 @@ export function SubscriptionSettings({ section }: Props) {
       <div className="space-y-6">
         {/* Partner Access Banner */}
         {isPartner && (
-          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-warning to-warning border border-warning/30 rounded-lg p-4">
             <div className="flex items-center gap-3">
-              <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              <Crown className="h-6 w-6 text-warning" />
               <div>
-                <h3 className="font-semibold text-amber-800 dark:text-amber-300">Partner Access — Full platform access granted by Infera Tech Solutions</h3>
+                <h3 className="font-semibold text-warning">Partner Access — Full platform access granted by Infera Tech Solutions</h3>
                 {(org as any)?.partner_granted_at && (
-                  <p className="text-sm text-amber-600 dark:text-amber-400/70 mt-0.5">
+                  <p className="text-sm text-warning mt-0.5">
                     Granted on {new Date((org as any).partner_granted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 )}
                 {(org as any)?.partner_notes && (
-                  <p className="text-xs text-amber-600/70 dark:text-amber-400/50 mt-1">{(org as any).partner_notes}</p>
+                  <p className="text-xs text-warning mt-1">{(org as any).partner_notes}</p>
                 )}
               </div>
             </div>
@@ -66,7 +66,7 @@ export function SubscriptionSettings({ section }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 {isPartner ? (
-                  <Badge className="bg-amber-100 text-amber-800 border-amber-300">Partner</Badge>
+                  <Badge className="bg-warning/10 text-warning border-warning/30">Partner</Badge>
                 ) : (
                   <Badge className="capitalize">{tier}</Badge>
                 )}

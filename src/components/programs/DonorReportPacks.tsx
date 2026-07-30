@@ -25,7 +25,7 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
   finalized: "bg-primary/10 text-primary",
-  sent: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  sent: "bg-success/10 text-success",
 };
 
 export function DonorReportPacks({ programId, projectId, orgId }: Props) {

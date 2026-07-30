@@ -17,10 +17,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { toast } from 'sonner';
 
-const riskColors = { high: 'text-destructive', medium: 'text-orange-500', low: 'text-green-600' };
-const riskBg = { high: 'bg-destructive/10 border-destructive/30', medium: 'bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800', low: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' };
-const severityColors = { critical: 'text-destructive', warning: 'text-orange-500', healthy: 'text-green-600' };
-const severityBg = { critical: 'bg-destructive/10 border-destructive/30', warning: 'bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800', healthy: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' };
+const riskColors = { high: 'text-destructive', medium: 'text-warning', low: 'text-success' };
+const riskBg = { high: 'bg-destructive/10 border-destructive/30', medium: 'bg-warning/10 border-warning/30', low: 'bg-success/10 border-success/30' };
+const severityColors = { critical: 'text-destructive', warning: 'text-warning', healthy: 'text-success' };
+const severityBg = { critical: 'bg-destructive/10 border-destructive/30', warning: 'bg-warning/10 border-warning/30', healthy: 'bg-success/10 border-success/30' };
 
 const interventionIcons: Record<string, any> = {
   academic_support: BookOpen, counseling: Brain, financial_support: DollarSign,
@@ -43,7 +43,7 @@ function BeneficiaryRiskCard({ risk }: { risk: BeneficiaryRisk }) {
     <div className={`p-4 rounded-xl border ${riskBg[risk.riskLevel]} transition-all hover:shadow-md`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${risk.riskLevel === 'high' ? 'bg-destructive/20' : risk.riskLevel === 'medium' ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${risk.riskLevel === 'high' ? 'bg-destructive/20' : risk.riskLevel === 'medium' ? 'bg-warning/10' : 'bg-success/10'}`}>
             <Icon className={`h-5 w-5 ${riskColors[risk.riskLevel]}`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -153,7 +153,7 @@ function DonorOpportunityCard({ opp }: { opp: DonorOpportunity }) {
             {opp.potentialAmount && (
               <div>
                 <p className="text-[10px] text-muted-foreground">Potential</p>
-                <p className="text-sm font-semibold text-green-600">${opp.potentialAmount.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-success">${opp.potentialAmount.toLocaleString()}</p>
               </div>
             )}
             {opp.historicalContribution != null && (
@@ -174,7 +174,7 @@ function DonorOpportunityCard({ opp }: { opp: DonorOpportunity }) {
                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none" stroke="currentColor" strokeWidth="3"
                       strokeDasharray={`${opp.matchScore}, 100`}
-                      className={opp.matchScore >= 70 ? 'text-green-500' : opp.matchScore >= 40 ? 'text-orange-500' : 'text-destructive'}
+                      className={opp.matchScore >= 70 ? 'text-success' : opp.matchScore >= 40 ? 'text-warning' : 'text-destructive'}
                     />
                   </svg>
                   <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">{opp.matchScore}</span>
@@ -273,10 +273,10 @@ export default function SmartInsightsDashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-orange-300/30">
+          <Card className="border-warning/30">
             <CardContent className="pt-4 pb-4 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/30">
-                <TrendingDown className="h-6 w-6 text-orange-500" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
+                <TrendingDown className="h-6 w-6 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{criticalGaps}</p>
@@ -284,10 +284,10 @@ export default function SmartInsightsDashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-green-300/30">
+          <Card className="border-success/30">
             <CardContent className="pt-4 pb-4 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/30">
-                <HandHeart className="h-6 w-6 text-green-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
+                <HandHeart className="h-6 w-6 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{highOpps}</p>
