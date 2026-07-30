@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
@@ -8,8 +8,13 @@ import {
   Heart, Users, FileText, Download, GraduationCap, MapPin,
   Calendar, LogOut, User, ChevronRight, School, Building2,
   BookOpen, TrendingUp, Eye, ArrowLeft, ShieldAlert, Wallet, Sparkles,
+  Search, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +31,7 @@ import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
 import { DonorVisitRequestsTab } from '@/components/donor-portal/DonorVisitRequestsTab';
 import { useDonorFx } from '@/hooks/useDonorFx';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export default function DonorPortal() {
   const { user, loading } = useAuth();
@@ -42,6 +48,31 @@ export default function DonorPortal() {
   const [academics, setAcademics] = useState<any[]>([]);
   const [progression, setProgression] = useState<any[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'recent'>('name');
+  const debouncedSearch = useDebouncedValue(search, 200);
+
+  const visibleBeneficiaries = useMemo(() => {
+    const list = (sponsoredBeneficiaries || []).filter((bd: any) => bd.beneficiary);
+    const term = debouncedSearch.trim().toLowerCase();
+    const filtered = term
+      ? list.filter((bd: any) => {
+          const b = bd.beneficiary;
+          return (
+            (b.display_name || '').toLowerCase().includes(term) ||
+            (b.first_name || '').toLowerCase().includes(term) ||
+            (b.last_name || '').toLowerCase().includes(term) ||
+            (b.beneficiary_code || '').toLowerCase().includes(term)
+          );
+        })
+      : list;
+    return [...filtered].sort((a: any, b: any) => {
+      if (sortBy === 'recent') {
+        return new Date(b.donation_date || 0).getTime() - new Date(a.donation_date || 0).getTime();
+      }
+      return (a.beneficiary.display_name || '').localeCompare(b.beneficiary.display_name || '');
+    });
+  }, [sponsoredBeneficiaries, debouncedSearch, sortBy]);
 
   if (loading || isLoading) {
     return (
@@ -259,9 +290,51 @@ export default function DonorPortal() {
                 <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">
                   Sponsored Beneficiaries
                 </h3>
-                <ScrollArea className="h-[600px]">
+
+                {totalSponsored > 0 && (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search by name or code"
+                        aria-label="Search sponsored beneficiaries"
+                        className="pl-9 pr-10 min-h-[44px]"
+                      />
+                      {search && (
+                        <button
+                          type="button"
+                          onClick={() => setSearch('')}
+                          aria-label="Clear search"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 grid place-items-center rounded-md text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {visibleBeneficiaries.length} of {totalSponsored} shown
+                      </span>
+                      {totalSponsored > 10 && (
+                        <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                          <SelectTrigger className="h-9 w-[150px] text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="name">Name A–Z</SelectItem>
+                            <SelectItem value="recent">Recently added</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <ScrollArea className="h-[min(60dvh,600px)]">
                   <div className="space-y-2 pr-2">
-                    {sponsoredBeneficiaries?.map((bd) => {
+                    {visibleBeneficiaries.map((bd: any) => {
                       const b = bd.beneficiary as any;
                       if (!b) return null;
                       const isSelected = selectedBeneficiary === b.id;
@@ -284,6 +357,11 @@ export default function DonorPortal() {
                               <p className="font-medium text-foreground text-sm truncate">
                                 {b.display_name}
                               </p>
+                              {b.beneficiary_code && (
+                                <p className="text-[11px] text-muted-foreground font-mono truncate">
+                                  {b.beneficiary_code}
+                                </p>
+                              )}
                               <div className="flex items-center gap-2 mt-0.5">
                                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                                   {b.beneficiary_type}
@@ -296,6 +374,17 @@ export default function DonorPortal() {
                         </Card>
                       );
                     })}
+                    {totalSponsored > 0 && visibleBeneficiaries.length === 0 && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">
+                          No sponsored beneficiaries match “{debouncedSearch}”
+                        </p>
+                        <Button variant="link" size="sm" onClick={() => setSearch('')}>
+                          Clear search
+                        </Button>
+                      </div>
+                    )}
                     {totalSponsored === 0 && (
                       <div className="text-center py-12 text-muted-foreground">
                         <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
