@@ -46,6 +46,10 @@ import {
   ExternalLink
 } from "lucide-react";
 import { format } from "date-fns";
+import { SecureDocumentViewer, SecureDocument } from "@/components/documents/SecureDocumentViewer";
+import { beneficiaryDocumentPath, toStoragePath } from "@/lib/secureDocuments";
+
+const BUCKET = "beneficiary-documents";
 
 interface BeneficiaryUploadsTabProps {
   beneficiaryId: string;
@@ -120,6 +124,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [viewing, setViewing] = useState<SecureDocument | null>(null);
   
   // Form state
   const [documentName, setDocumentName] = useState("");
@@ -154,12 +159,10 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
         .eq("id", id);
       if (error) throw error;
 
-      // Try to delete from storage if it's a Supabase storage URL
-      if (upload?.file_url && upload.file_url.includes('supabase')) {
-        const path = upload.file_url.split('/').pop();
-        if (path) {
-          await supabase.storage.from('beneficiary-documents').remove([path]);
-        }
+      // Remove the underlying object too (best-effort)
+      const path = upload?.file_url ? toStoragePath(upload.file_url, BUCKET) : null;
+      if (path) {
+        await supabase.storage.from(BUCKET).remove([path]);
       }
     },
     onSuccess: () => {
@@ -178,39 +181,38 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
       return;
     }
 
+    const orgId = currentOrganization?.organization_id;
+    if (!orgId) {
+      toast.error("No active organization — cannot upload");
+      return;
+    }
+
     setUploading(true);
 
     try {
-      // Generate unique file name
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${beneficiaryId}/${Date.now()}-${documentName.replace(/\s+/g, '-')}.${fileExt}`;
+      // Org-scoped object path: <org_id>/<beneficiary_id>/<timestamp>-<name>
+      // The first segment is what the storage RLS policies check.
+      const path = beneficiaryDocumentPath(orgId, beneficiaryId, selectedFile.name);
 
-      // Upload file to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('beneficiary-documents')
-        .upload(fileName, selectedFile);
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, selectedFile, {
+          contentType: selectedFile.type || undefined,
+          upsert: false,
+        });
 
       if (uploadError) {
-        // If bucket doesn't exist, use a placeholder URL
-        logger.warn('Storage upload failed, using placeholder:', uploadError);
+        logger.error("Storage upload failed", uploadError);
+        throw new Error(uploadError.message);
       }
 
-      // Get public URL or use placeholder
-      let fileUrl = '';
-      if (uploadData) {
-        const { data: urlData } = supabase.storage
-          .from('beneficiary-documents')
-          .getPublicUrl(fileName);
-        fileUrl = urlData.publicUrl;
-      } else {
-        // Create a placeholder URL (the actual file URL would be set up with proper storage)
-        fileUrl = `placeholder://${fileName}`;
-      }
+      // The bucket is PRIVATE — store the object path, never a public URL.
+      const fileUrl = path;
 
       // Save record to database
       const { error: dbError } = await supabase.from("beneficiary_uploads").insert({
         beneficiary_id: beneficiaryId,
-        organization_id: currentOrganization?.organization_id,
+        organization_id: orgId,
         document_name: documentName,
         document_type: documentType,
         file_url: fileUrl,
@@ -219,7 +221,11 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
         uploaded_by: user?.id || null,
       });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        // Roll back the orphaned object so storage stays consistent
+        await supabase.storage.from(BUCKET).remove([path]);
+        throw dbError;
+      }
 
       queryClient.invalidateQueries({ queryKey: ["beneficiary-uploads", beneficiaryId] });
       toast.success("Document uploaded successfully");
@@ -436,11 +442,11 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
               {uploads.map((upload) => {
                 const DocIcon = getDocumentIcon(upload.document_type);
                 return (
-                  <div
+                   <div
                     key={upload.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border hover:border-primary/30 transition-colors"
+                    className="flex flex-wrap sm:flex-nowrap items-start sm:items-center justify-between gap-3 p-4 rounded-lg bg-muted/50 border hover:border-primary/30 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
                       <div className="p-2 rounded-lg bg-primary/10">
                         <DocIcon className="h-5 w-5 text-primary" />
                       </div>
@@ -462,23 +468,30 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {!upload.file_url.startsWith('placeholder://') && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <a href={upload.file_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="min-h-[44px] min-w-[44px]"
+                        aria-label={`Open ${upload.document_name}`}
+                        onClick={() =>
+                          setViewing({
+                            id: upload.id,
+                            name: upload.document_name,
+                            fileUrl: upload.file_url,
+                            bucket: BUCKET,
+                            organizationId: upload.organization_id,
+                          })
+                        }
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setDeleteId(upload.id)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive min-h-[44px] min-w-[44px]"
+                        aria-label="Delete document"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -490,6 +503,12 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           )}
         </CardContent>
       </Card>
+
+      <SecureDocumentViewer
+        document={viewing}
+        open={!!viewing}
+        onOpenChange={(o) => !o && setViewing(null)}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
