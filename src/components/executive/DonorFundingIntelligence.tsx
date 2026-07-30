@@ -57,14 +57,14 @@ export function DonorFundingIntelligence({ data, isLoading }: Props) {
   }
 
   const kpiCards = [
-    { label: "Total Donor Funds", value: formatCurrency(data.totalFunds), icon: DollarSign, color: "text-emerald-600" },
-    { label: "Unique Donors", value: data.uniqueDonors.toString(), icon: Users, color: "text-blue-600" },
-    { label: "Cost Per Beneficiary", value: formatCurrency(data.costPerBeneficiary), icon: BarChart3, color: "text-amber-600" },
+    { label: "Total Donor Funds", value: formatCurrency(data.totalFunds), icon: DollarSign, color: "text-success" },
+    { label: "Unique Donors", value: data.uniqueDonors.toString(), icon: Users, color: "text-info" },
+    { label: "Cost Per Beneficiary", value: formatCurrency(data.costPerBeneficiary), icon: BarChart3, color: "text-warning" },
     {
       label: "Funding Growth",
       value: `${data.fundingGrowth >= 0 ? '+' : ''}${data.fundingGrowth}%`,
       icon: data.fundingGrowth >= 0 ? ArrowUpRight : ArrowDownRight,
-      color: data.fundingGrowth >= 0 ? "text-emerald-600" : "text-red-600",
+      color: data.fundingGrowth >= 0 ? "text-success" : "text-destructive",
     },
   ];
 

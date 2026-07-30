@@ -144,7 +144,7 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{(m.profiles as any)?.full_name}</p>
               <div className="flex items-center gap-2">
-                {m.role_on_project === "lead" && <Star className="h-3 w-3 text-amber-500" />}
+                {m.role_on_project === "lead" && <Star className="h-3 w-3 text-warning" />}
                 <Badge variant="outline" className="text-[10px]">{roleLabels[m.role_on_project] || m.role_on_project}</Badge>
               </div>
             </div>

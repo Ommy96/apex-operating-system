@@ -27,9 +27,9 @@ import { DonorReportRouter } from "@/components/reports/DonorReportRouter";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  generating: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  completed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  sent: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  generating: "bg-warning/10 text-warning",
+  completed: "bg-success/10 text-success",
+  sent: "bg-info/10 text-info",
   failed: "bg-destructive/10 text-destructive",
 };
 

@@ -356,10 +356,10 @@ function KpiCard({ label, value, icon, color }: { label: string; value: string |
   const colorMap: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
     accent: "bg-accent/10 text-accent",
-    success: "bg-green-500/10 text-green-600",
-    info: "bg-blue-500/10 text-blue-600",
-    warning: "bg-amber-500/10 text-amber-600",
-    danger: "bg-red-500/10 text-red-600",
+    success: "bg-success/10 text-success",
+    info: "bg-info/10 text-info",
+    warning: "bg-warning/10 text-warning",
+    danger: "bg-destructive/10 text-destructive",
   };
   return (
     <Card>
@@ -378,9 +378,9 @@ function KpiCard({ label, value, icon, color }: { label: string; value: string |
 
 function InsightRow({ label, value, status }: { label: string; value: string; status: 'good' | 'neutral' | 'warning' }) {
   const statusColor = {
-    good: 'text-green-600 bg-green-500/10',
+    good: 'text-success bg-success/10',
     neutral: 'text-muted-foreground bg-muted/50',
-    warning: 'text-amber-600 bg-amber-500/10',
+    warning: 'text-warning bg-warning/10',
   };
   return (
     <div className="flex items-center justify-between">
@@ -396,9 +396,9 @@ function VulnerabilityCard({ icon, title, count, color, description }: {
   icon: React.ReactNode; title: string; count: number; color: string; description: string;
 }) {
   const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-    warning: { bg: 'bg-amber-500/5', text: 'text-amber-600', border: 'border-amber-500/20' },
-    danger: { bg: 'bg-red-500/5', text: 'text-red-600', border: 'border-red-500/20' },
-    info: { bg: 'bg-blue-500/5', text: 'text-blue-600', border: 'border-blue-500/20' },
+    warning: { bg: 'bg-warning/5', text: 'text-warning', border: 'border-warning/20' },
+    danger: { bg: 'bg-destructive/5', text: 'text-destructive', border: 'border-destructive/20' },
+    info: { bg: 'bg-info/5', text: 'text-info', border: 'border-info/20' },
     neutral: { bg: 'bg-muted/30', text: 'text-muted-foreground', border: 'border-border/50' },
   };
   const c = colorMap[color] || colorMap.neutral;

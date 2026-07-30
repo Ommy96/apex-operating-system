@@ -46,24 +46,24 @@ export function WhiteLabelManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-100">White-Label Management</h2>
-        <p className="text-sm text-slate-400">Manage tenant branding, custom domains, and theme customization</p>
+        <h2 className="text-xl font-bold text-muted-foreground">White-Label Management</h2>
+        <p className="text-sm text-muted-foreground">Manage tenant branding, custom domains, and theme customization</p>
       </div>
 
       {/* KPI Strip */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
-          { label: 'White-Labeled', value: whiteLabeledCount, icon: Paintbrush, accent: 'text-amber-400' },
-          { label: 'Custom Domains', value: `${verifiedDomainCount}/${customDomainCount}`, icon: Globe, accent: 'text-blue-400' },
-          { label: 'Custom Themes', value: customThemeCount, icon: Palette, accent: 'text-purple-400' },
-          { label: 'Total Tenants', value: TENANT_BRANDING.length, icon: Layout, accent: 'text-emerald-400' },
+          { label: 'White-Labeled', value: whiteLabeledCount, icon: Paintbrush, accent: 'text-warning' },
+          { label: 'Custom Domains', value: `${verifiedDomainCount}/${customDomainCount}`, icon: Globe, accent: 'text-info' },
+          { label: 'Custom Themes', value: customThemeCount, icon: Palette, accent: 'text-info' },
+          { label: 'Total Tenants', value: TENANT_BRANDING.length, icon: Layout, accent: 'text-success' },
         ].map(({ label, value, icon: Icon, accent }) => (
-          <div key={label} className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div key={label} className="p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-slate-400">{label}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
               <Icon className={`h-4 w-4 ${accent}`} />
             </div>
-            <div className="text-xl font-bold text-slate-100 font-mono">{value}</div>
+            <div className="text-xl font-bold text-muted-foreground font-mono">{value}</div>
           </div>
         ))}
       </div>
@@ -79,8 +79,8 @@ export function WhiteLabelManagement() {
           <Button key={key} variant={activeView === key ? 'default' : 'outline'} size="sm"
             onClick={() => setActiveView(key as any)}
             className={activeView === key
-              ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30'
-              : 'border-slate-600 text-slate-400 hover:bg-slate-700'
+              ? 'bg-warning/20 text-warning border-warning/30 hover:bg-warning/30'
+              : 'border-border text-muted-foreground hover:bg-muted-foreground'
             }>
             <Icon className="h-4 w-4 mr-1" /> {label}
           </Button>
@@ -90,13 +90,13 @@ export function WhiteLabelManagement() {
       {activeView === 'overview' && (
         <div className="space-y-3">
           {TENANT_BRANDING.map(tenant => (
-            <div key={tenant.orgName} className="flex items-center gap-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
+            <div key={tenant.orgName} className="flex items-center gap-4 p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
               <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: tenant.primaryColor }}>
                 {tenant.orgName.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-slate-200">{tenant.orgName}</div>
-                <div className="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
+                <div className="text-sm font-medium text-muted-foreground">{tenant.orgName}</div>
+                <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                   {tenant.customDomain && (
                     <span className="flex items-center gap-1">
                       <Globe className="h-3 w-3" /> {tenant.customDomain}
@@ -107,12 +107,12 @@ export function WhiteLabelManagement() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 {tenant.whiteLabeled && (
-                  <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">White-Labeled</Badge>
+                  <Badge className="bg-warning/20 text-warning border-warning/30 text-xs">White-Labeled</Badge>
                 )}
                 {tenant.customDomain && (
                   <Badge variant="outline" className={tenant.domainVerified
-                    ? 'border-emerald-500/30 text-emerald-400 text-xs'
-                    : 'border-amber-500/30 text-amber-400 text-xs'
+                    ? 'border-success/30 text-success text-xs'
+                    : 'border-warning/30 text-warning text-xs'
                   }>
                     {tenant.domainVerified ? <><CheckCircle2 className="h-3 w-3 mr-1" /> Verified</> : 'Pending DNS'}
                   </Badge>
@@ -124,26 +124,26 @@ export function WhiteLabelManagement() {
       )}
 
       {activeView === 'domains' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">Custom Domain Registry</CardTitle>
-            <CardDescription className="text-slate-400">All tenant custom domains and their verification status</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">Custom Domain Registry</CardTitle>
+            <CardDescription className="text-muted-foreground">All tenant custom domains and their verification status</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {TENANT_BRANDING.filter(t => t.customDomain).map(tenant => (
-                <div key={tenant.orgName} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                <div key={tenant.orgName} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                   <div>
-                    <div className="text-sm text-slate-200 font-mono">{tenant.customDomain}</div>
-                    <div className="text-xs text-slate-500">{tenant.orgName}</div>
+                    <div className="text-sm text-muted-foreground font-mono">{tenant.customDomain}</div>
+                    <div className="text-xs text-muted-foreground">{tenant.orgName}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {tenant.domainVerified ? (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      <Badge className="bg-success/20 text-success border-success/30 text-xs">
                         <CheckCircle2 className="h-3 w-3 mr-1" /> Active
                       </Badge>
                     ) : (
-                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                      <Badge className="bg-warning/20 text-warning border-warning/30 text-xs">
                         Pending Verification
                       </Badge>
                     )}
@@ -151,8 +151,8 @@ export function WhiteLabelManagement() {
                 </div>
               ))}
               {TENANT_BRANDING.filter(t => !t.customDomain).length > 0 && (
-                <div className="p-3 rounded-lg bg-slate-700/20 border border-dashed border-slate-600/30 text-center">
-                  <span className="text-xs text-slate-500">{TENANT_BRANDING.filter(t => !t.customDomain).length} tenants using default domain</span>
+                <div className="p-3 rounded-lg bg-muted-foreground/20 border border-dashed border-border/30 text-center">
+                  <span className="text-xs text-muted-foreground">{TENANT_BRANDING.filter(t => !t.customDomain).length} tenants using default domain</span>
                 </div>
               )}
             </div>
@@ -161,27 +161,27 @@ export function WhiteLabelManagement() {
       )}
 
       {activeView === 'themes' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">Theme Registry</CardTitle>
-            <CardDescription className="text-slate-400">Custom brand colors and themes per tenant</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">Theme Registry</CardTitle>
+            <CardDescription className="text-muted-foreground">Custom brand colors and themes per tenant</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {TENANT_BRANDING.map(tenant => (
-                <div key={tenant.orgName} className="p-4 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                <div key={tenant.orgName} className="p-4 rounded-lg bg-muted-foreground/30 border border-border/30">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-8 w-8 rounded-md" style={{ backgroundColor: tenant.primaryColor }} />
                     <div>
-                      <div className="text-sm text-slate-200">{tenant.orgName}</div>
-                      <div className="text-xs text-slate-500 font-mono">{tenant.primaryColor}</div>
+                      <div className="text-sm text-muted-foreground">{tenant.orgName}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{tenant.primaryColor}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={tenant.hasCustomTheme ? 'border-purple-500/30 text-purple-400 text-xs' : 'border-slate-500/30 text-slate-500 text-xs'}>
+                    <Badge variant="outline" className={tenant.hasCustomTheme ? 'border-info/30 text-info text-xs' : 'border-border/30 text-muted-foreground text-xs'}>
                       {tenant.hasCustomTheme ? 'Custom' : 'Default'}
                     </Badge>
-                    {tenant.logoUrl && <Badge variant="outline" className="border-blue-500/30 text-blue-400 text-xs">Has Logo</Badge>}
+                    {tenant.logoUrl && <Badge variant="outline" className="border-info/30 text-info text-xs">Has Logo</Badge>}
                   </div>
                 </div>
               ))}
@@ -191,10 +191,10 @@ export function WhiteLabelManagement() {
       )}
 
       {activeView === 'defaults' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">Platform Branding Defaults</CardTitle>
-            <CardDescription className="text-slate-400">Default branding applied to new tenants</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">Platform Branding Defaults</CardTitle>
+            <CardDescription className="text-muted-foreground">Default branding applied to new tenants</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
@@ -203,10 +203,10 @@ export function WhiteLabelManagement() {
                 { key: 'allowCustomDomains', label: 'Allow Custom Domains', desc: 'Let tenants connect their own domains', state: allowCustomDomains, setter: setAllowCustomDomains },
                 { key: 'hidePoweredBy', label: 'Hide "Powered By" Badge', desc: 'Remove platform attribution (enterprise tier only)', state: hidePoweredBy, setter: setHidePoweredBy },
               ].map(item => (
-                <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                   <div>
-                    <div className="text-sm font-medium text-slate-200">{item.label}</div>
-                    <div className="text-xs text-slate-400">{item.desc}</div>
+                    <div className="text-sm font-medium text-muted-foreground">{item.label}</div>
+                    <div className="text-xs text-muted-foreground">{item.desc}</div>
                   </div>
                   <Switch checked={item.state} onCheckedChange={item.setter} />
                 </div>
@@ -214,17 +214,17 @@ export function WhiteLabelManagement() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-slate-300">Default Primary Color</Label>
+                <Label className="text-muted-foreground">Default Primary Color</Label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={defaultPrimaryColor} onChange={e => setDefaultPrimaryColor(e.target.value)} className="h-9 w-12 rounded cursor-pointer bg-transparent border-0" />
                   <Input value={defaultPrimaryColor} onChange={e => setDefaultPrimaryColor(e.target.value)}
-                    className="bg-slate-700/50 border-slate-600 text-slate-200 font-mono" />
+                    className="bg-muted-foreground/50 border-border text-muted-foreground font-mono" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">"Powered By" Text</Label>
+                <Label className="text-muted-foreground">"Powered By" Text</Label>
                 <Input value={poweredByText} onChange={e => setPoweredByText(e.target.value)}
-                  className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                  className="bg-muted-foreground/50 border-border text-muted-foreground" />
               </div>
             </div>
           </CardContent>

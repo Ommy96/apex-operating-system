@@ -12,9 +12,9 @@ import { Plus, Trash2, ClipboardList, HelpCircle } from "lucide-react";
 import { useME } from "@/hooks/useME";
 
 const TYPE_BADGE: Record<string, string> = {
-  baseline: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  endline: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  midterm: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  baseline: "bg-info/10 text-info",
+  endline: "bg-success/10 text-success",
+  midterm: "bg-warning/10 text-warning",
   custom: "bg-muted text-muted-foreground",
 };
 

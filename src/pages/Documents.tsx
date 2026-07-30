@@ -357,23 +357,23 @@ export default function Documents() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-success" />
                   Complete
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{childrenComplete}</div>
+                <div className="text-2xl font-bold text-success">{childrenComplete}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTriangle className="h-4 w-4 text-warning" />
                   Missing Documents
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{childrenMissingDocs}</div>
+                <div className="text-2xl font-bold text-warning">{childrenMissingDocs}</div>
               </CardContent>
             </Card>
           </div>
@@ -459,7 +459,7 @@ export default function Documents() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
+                  <CheckCircle className="h-12 w-12 text-success mb-4" />
                   <p className="text-lg font-medium">All students have required documents</p>
                   <p className="text-sm text-muted-foreground">
                     Every active student has uploaded the required document categories

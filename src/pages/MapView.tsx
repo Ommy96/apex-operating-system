@@ -65,7 +65,7 @@ function FieldCheckInsMap({ checkIns }: { checkIns: any[] }) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-16 text-center">
-          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-amber-500" />
+          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-warning" />
           <h3 className="font-medium mb-1">Map unavailable</h3>
           <p className="text-sm text-muted-foreground">Configure VITE_MAPBOX_TOKEN to enable maps.</p>
         </CardContent>
@@ -90,7 +90,7 @@ function FieldCheckInsMap({ checkIns }: { checkIns: any[] }) {
       >
         {validCheckins.map((c: any) => (
           <Marker key={c.id} latitude={Number(c.latitude)} longitude={Number(c.longitude)}>
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow" title={new Date(c.check_in_time).toLocaleString()} />
+            <div className="w-2.5 h-2.5 rounded-full bg-success border border-white shadow" title={new Date(c.check_in_time).toLocaleString()} />
           </Marker>
         ))}
       </MapGL>

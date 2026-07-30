@@ -110,7 +110,7 @@ export function QuickVisitFlow({ open, onOpenChange }: Props) {
         <DialogHeader className="px-4 pt-4 pb-2">
           <DialogTitle className="flex items-center justify-between gap-2 text-base">
             <span className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> Quick Visit</span>
-            <Badge variant="outline" className={elapsed > 60 ? 'border-yellow-500 text-yellow-600' : 'border-emerald-500 text-emerald-600'}>
+            <Badge variant="outline" className={elapsed > 60 ? 'border-warning/30 text-warning' : 'border-success/30 text-success'}>
               {elapsed}s {elapsed <= 60 ? '· goal' : ''}
             </Badge>
           </DialogTitle>
@@ -199,7 +199,7 @@ export function QuickVisitFlow({ open, onOpenChange }: Props) {
 
           {step === 'done' && (
             <div className="text-center space-y-3 py-8">
-              <CheckCircle2 className="h-14 w-14 text-emerald-500 mx-auto" />
+              <CheckCircle2 className="h-14 w-14 text-success mx-auto" />
               <p className="font-semibold">Visit saved {beneficiaryName ? `for ${beneficiaryName}` : ''}</p>
               <p className="text-xs text-muted-foreground">Captured in {elapsed}s · queued for sync</p>
               <Button className="w-full h-12" onClick={() => onOpenChange(false)}>Done</Button>

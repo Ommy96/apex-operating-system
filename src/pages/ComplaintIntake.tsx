@@ -69,7 +69,7 @@ export default function ComplaintIntake() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center space-y-4">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+            <CheckCircle className="h-16 w-16 text-success mx-auto" />
             <h2 className="text-xl font-bold">Feedback Submitted</h2>
             <p className="text-muted-foreground">Your feedback has been recorded. Thank you for helping us improve.</p>
             <div className="bg-muted rounded-lg p-3">

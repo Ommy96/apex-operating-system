@@ -89,7 +89,7 @@ export default function Setup2FA() {
           )}
           {step === "verify" && (
             <div className="text-center space-y-3">
-              <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto" />
+              <CheckCircle className="h-12 w-12 text-success mx-auto" />
               <p className="font-medium text-foreground">2FA Enabled Successfully!</p>
               <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
             </div>

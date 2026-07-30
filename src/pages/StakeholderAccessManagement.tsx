@@ -197,7 +197,7 @@ export default function StakeholderAccessManagement() {
                     <TableCell><Badge variant="secondary">{s.stakeholder_type}</Badge></TableCell>
                     <TableCell><Badge>{s.access_level}</Badge></TableCell>
                     <TableCell>
-                      {s.is_active ? <Badge className="bg-emerald-500/10 text-emerald-700">Active</Badge>
+                      {s.is_active ? <Badge className="bg-success/10 text-success">Active</Badge>
                                    : <Badge variant="outline">Revoked</Badge>}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">

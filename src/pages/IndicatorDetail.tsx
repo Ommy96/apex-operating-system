@@ -401,7 +401,7 @@ function IndicatorQualityTab({ indicatorId }: { indicatorId: string }) {
                 <div className="flex items-center gap-2">
                   <Badge variant={f.flag_severity === "error" ? "destructive" : "secondary"} className="capitalize">{f.flag_severity}</Badge>
                   <span className="text-xs text-muted-foreground capitalize">{f.flag_type}</span>
-                  {f.is_resolved && <Badge className="text-xs bg-emerald-100 text-emerald-700">Resolved</Badge>}
+                  {f.is_resolved && <Badge className="text-xs bg-success/10 text-success">Resolved</Badge>}
                 </div>
                 <p className="mt-1">{f.flag_message}</p>
               </div>

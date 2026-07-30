@@ -253,8 +253,8 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
 
       {/* Warnings */}
       {warnings.map((w, i) => (
-        <Alert key={i} className="border-amber-500/50 bg-amber-500/10">
-          {w.includes('zero') ? <Info className="h-4 w-4 text-blue-600" /> : <AlertTriangle className="h-4 w-4 text-amber-600" />}
+        <Alert key={i} className="border-warning/50 bg-warning/10">
+          {w.includes('zero') ? <Info className="h-4 w-4 text-info" /> : <AlertTriangle className="h-4 w-4 text-warning" />}
           <AlertDescription className="text-sm">{w}</AlertDescription>
         </Alert>
       ))}

@@ -15,9 +15,9 @@ import { format } from "date-fns";
 import { NewActivitySheet } from "@/components/activities/NewActivitySheet";
 
 const STATUS_CLS: Record<string, string> = {
-  planned: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  in_progress: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  planned: "bg-info/10 text-info",
+  in_progress: "bg-warning/10 text-warning",
+  completed: "bg-success/10 text-success",
   cancelled: "bg-destructive/10 text-destructive",
 };
 
@@ -146,8 +146,8 @@ export default function Activities() {
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 text-xs">
                           {a.type === "disbursement"
-                            ? <><HandCoins className="h-3.5 w-3.5 text-amber-600" /> Disbursement</>
-                            : <><Calendar className="h-3.5 w-3.5 text-blue-600" /> Event</>}
+                            ? <><HandCoins className="h-3.5 w-3.5 text-warning" /> Disbursement</>
+                            : <><Calendar className="h-3.5 w-3.5 text-info" /> Event</>}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{a.projects?.name || "—"}</td>

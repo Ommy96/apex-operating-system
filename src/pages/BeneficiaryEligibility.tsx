@@ -94,7 +94,7 @@ export default function BeneficiaryEligibility() {
         <Skeleton className="h-40 w-full" />
       ) : (
         <>
-          <Section title={`Eligible for ${eligible.length} project(s)`} icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />}>
+          <Section title={`Eligible for ${eligible.length} project(s)`} icon={<CheckCircle2 className="h-4 w-4 text-success" />}>
             {eligible.length === 0 ? (
               <p className="text-sm text-muted-foreground">Not eligible for any project yet.</p>
             ) : (

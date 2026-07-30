@@ -78,14 +78,14 @@ export function DangerZoneSection() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-rose-200 bg-rose-50/50 p-3 flex items-start gap-3">
-        <AlertTriangle className="h-4 w-4 text-rose-600 mt-0.5" />
-        <p className="text-xs text-rose-700">
+      <div className="rounded-lg border border-destructive/30 bg-destructive/50 p-3 flex items-start gap-3">
+        <AlertTriangle className="h-4 w-4 text-destructive mt-0.5" />
+        <p className="text-xs text-destructive">
           Actions in this section cannot be undone. Proceed with extreme caution.
         </p>
       </div>
 
-      <Card className="border-rose-200">
+      <Card className="border-destructive/30">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Download className="h-4 w-4" /> Export all organisation data</CardTitle>
           <CardDescription>Download a JSON snapshot of beneficiaries, programmes, financial records, and key tables.</CardDescription>
@@ -97,7 +97,7 @@ export function DangerZoneSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-rose-200">
+      <Card className="border-destructive/30">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><ArrowRightLeft className="h-4 w-4" /> Transfer organisation ownership</CardTitle>
           <CardDescription>Hand over admin ownership to another staff member.</CardDescription>
@@ -109,7 +109,7 @@ export function DangerZoneSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-rose-200">
+      <Card className="border-destructive/30">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Power className="h-4 w-4" /> Deactivate organisation</CardTitle>
           <CardDescription>Suspend access. Data is preserved. Contact support to reactivate.</CardDescription>
@@ -119,19 +119,19 @@ export function DangerZoneSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-rose-300 bg-rose-50/30">
+      <Card className="border-destructive/30 bg-destructive/30">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2 text-rose-700">
+          <CardTitle className="text-base flex items-center gap-2 text-destructive">
             <Trash2 className="h-4 w-4" /> Delete organisation
           </CardTitle>
-          <CardDescription className="text-rose-700/80">
+          <CardDescription className="text-destructive">
             Permanently delete this organisation and ALL its data. This cannot be undone. Requires confirmation by Infera Tech Solutions.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-rose-400 text-rose-700 hover:bg-rose-100 hover:text-rose-700">
+              <Button variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive">
                 Request deletion
               </Button>
             </DialogTrigger>

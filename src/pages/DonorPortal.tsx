@@ -354,13 +354,13 @@ export default function DonorPortal() {
               />
               <DocumentSection
                 title="Thank You Letters"
-                icon={<Heart className="h-5 w-5 text-pink-500" />}
+                icon={<Heart className="h-5 w-5 text-destructive" />}
                 docs={docsByType.thank_you_letter}
                 onDownload={handleDownload}
               />
               <DocumentSection
                 title="Audit Reports"
-                icon={<FileText className="h-5 w-5 text-amber-500" />}
+                icon={<FileText className="h-5 w-5 text-warning" />}
                 docs={docsByType.audit_report}
                 onDownload={handleDownload}
               />

@@ -55,7 +55,7 @@ export function BeneficiaryMap({ orgId }: BeneficiaryMapProps) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-16 text-center">
-          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-amber-500" />
+          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-warning" />
           <h3 className="font-medium mb-1">Map unavailable</h3>
           <p className="text-sm text-muted-foreground">Configure VITE_MAPBOX_TOKEN in your environment to enable maps.</p>
         </CardContent>

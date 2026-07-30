@@ -90,17 +90,17 @@ const getDocumentIcon = (type: string | null) => {
 const getDocumentTypeColor = (type: string | null) => {
   switch (type) {
     case "consent_form":
-      return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
+      return "bg-success/10 text-success";
     case "intake_form":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      return "bg-info/10 text-info";
     case "appreciation_letter":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+      return "bg-info/10 text-info";
     case "birth_certificate":
-      return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
+      return "bg-warning/10 text-warning";
     case "school_report":
-      return "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300";
+      return "bg-info/10 text-info";
     case "medical_record":
-      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      return "bg-destructive/10 text-destructive";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -275,15 +275,15 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-emerald-500/20">
-                <FileCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 rounded-full bg-success/20">
+                <FileCheck className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Required Docs</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-2xl font-bold text-success">
                   {completedRequired}/{requiredDocs.length}
                 </p>
               </div>
@@ -291,15 +291,15 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
+        <Card className="bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-amber-500/20">
-                <Upload className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="p-2 rounded-full bg-warning/20">
+                <Upload className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Storage Used</p>
-                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                <p className="text-2xl font-bold text-warning">
                   {formatFileSize(uploads.reduce((acc, u) => acc + (u.file_size || 0), 0))}
                 </p>
               </div>
@@ -309,9 +309,9 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
       </div>
 
       {/* Required Documents Checklist */}
-      <Card className="border-amber-500/20">
-        <CardHeader className="bg-gradient-to-r from-amber-500/5 to-transparent">
-          <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+      <Card className="border-warning/20">
+        <CardHeader className="bg-gradient-to-r from-warning/5 to-transparent">
+          <CardTitle className="flex items-center gap-2 text-warning">
             <FileWarning className="h-5 w-5" />
             Required Documents
           </CardTitle>
@@ -324,7 +324,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                 <Badge
                   key={docType}
                   variant={isUploaded ? "default" : "outline"}
-                  className={isUploaded ? "bg-emerald-500 text-white" : "border-dashed"}
+                  className={isUploaded ? "bg-success text-white" : "border-dashed"}
                 >
                   {isUploaded && <FileCheck className="h-3 w-3 mr-1" />}
                   {getDocumentLabel(docType)}

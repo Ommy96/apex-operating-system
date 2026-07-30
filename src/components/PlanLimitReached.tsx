@@ -20,18 +20,18 @@ export function PlanLimitReached({ resourceName, currentCount, limitKey }: PlanL
   if (currentCount < max) return null;
 
   return (
-    <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
-      <AlertTriangle className="h-5 w-5 text-amber-600" />
-      <AlertTitle className="text-amber-800 dark:text-amber-300">Plan limit reached</AlertTitle>
+    <Alert className="border-warning/30 bg-warning/10">
+      <AlertTriangle className="h-5 w-5 text-warning" />
+      <AlertTitle className="text-warning">Plan limit reached</AlertTitle>
       <AlertDescription className="space-y-3">
-        <p className="text-amber-700 dark:text-amber-400">
+        <p className="text-warning">
           Your <span className="font-semibold capitalize">{tier}</span> plan includes up to{' '}
           <span className="font-semibold">{max.toLocaleString()}</span> {resourceName.toLowerCase()}. 
           Upgrade your plan to add more.
         </p>
         <Button
           size="sm"
-          className="bg-amber-600 hover:bg-amber-700 text-white"
+          className="bg-warning hover:bg-warning text-white"
           onClick={() => navigate('/organization-settings?tab=billing')}
         >
           Upgrade Plan <ArrowRight className="h-4 w-4 ml-1" />

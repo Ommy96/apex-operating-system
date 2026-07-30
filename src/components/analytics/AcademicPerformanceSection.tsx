@@ -364,7 +364,7 @@ function StatTile({
     tone === 'primary'
       ? 'border-primary/30 bg-primary/5'
       : tone === 'warning'
-        ? 'border-amber-300/40 bg-amber-50 dark:bg-amber-950/20'
+        ? 'border-warning/40 bg-warning/10'
         : 'border-border bg-card';
   return (
     <div className={`rounded-lg border ${toneClasses} p-3`}>
@@ -503,9 +503,9 @@ function ExportDialog({
           )}
 
           {requiresConsent && (
-            <div className="rounded-md border border-amber-300/40 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
+            <div className="rounded-md border border-warning/40 bg-warning/10 p-3 text-xs">
               <p className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                 <span>
                   This export contains individual beneficiary data. Handle securely and in line with the Kenya Data
                   Protection Act 2019. Only share with authorised staff.

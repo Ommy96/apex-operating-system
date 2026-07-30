@@ -10,8 +10,8 @@ import { useGrantDiscovery, DiscoveredOpportunity } from '@/hooks/useGrantDiscov
 import { format } from 'date-fns';
 
 function scoreColor(s: number) {
-  if (s >= 80) return 'text-green-600';
-  if (s >= 60) return 'text-amber-600';
+  if (s >= 80) return 'text-success';
+  if (s >= 60) return 'text-warning';
   return 'text-muted-foreground';
 }
 

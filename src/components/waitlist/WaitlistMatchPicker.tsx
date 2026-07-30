@@ -106,7 +106,7 @@ export function WaitlistMatchPicker({
               return (
                 <li
                   key={a.id}
-                  className={`p-3 cursor-pointer transition-colors ${isSel ? 'bg-teal-50 dark:bg-teal-950/20' : 'hover:bg-muted/50'}`}
+                  className={`p-3 cursor-pointer transition-colors ${isSel ? 'bg-success/10' : 'hover:bg-muted/50'}`}
                   onClick={() => setSelected(a)}
                 >
                   <div className="flex items-center gap-3">

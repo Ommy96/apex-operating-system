@@ -253,7 +253,7 @@ export function IndicatorDetailView({
                     <div className={cn(
                       'flex items-center gap-1 mt-2',
                       trendPercentage === 0 ? 'text-muted-foreground' :
-                      isTrendGood ? 'text-emerald-600' : 'text-destructive'
+                      isTrendGood ? 'text-success' : 'text-destructive'
                     )}>
                       {trendPercentage === 0 ? (
                         <Minus className="h-4 w-4" />
@@ -279,8 +279,8 @@ export function IndicatorDetailView({
                         <div 
                           className={cn(
                             'h-full rounded-full',
-                            (currentValue / currentTarget.target_value) >= 1 ? 'bg-emerald-500' :
-                            (currentValue / currentTarget.target_value) >= 0.8 ? 'bg-accent' : 'bg-amber-500'
+                            (currentValue / currentTarget.target_value) >= 1 ? 'bg-success' :
+                            (currentValue / currentTarget.target_value) >= 0.8 ? 'bg-accent' : 'bg-warning'
                           )}
                           style={{ width: `${Math.min((currentValue / currentTarget.target_value) * 100, 100)}%` }}
                         />
@@ -513,7 +513,7 @@ export function IndicatorDetailView({
                         )}
                         <span className="font-medium">Target: {formatValue(target.target_value)}</span>
                         {target.stretch_value && (
-                          <span className="text-emerald-600">Stretch: {formatValue(target.stretch_value)}</span>
+                          <span className="text-success">Stretch: {formatValue(target.stretch_value)}</span>
                         )}
                       </div>
                     </div>

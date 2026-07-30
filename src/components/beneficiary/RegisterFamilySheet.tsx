@@ -607,7 +607,7 @@ export function RegisterFamilySheet({ open, onOpenChange, onSuccess }: RegisterF
                                 {memberCounty(m) || county}
                               </div>
                               {inOtherHh && (
-                                <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-1 flex items-center gap-1">
+                                <div className="text-[11px] text-warning mt-1 flex items-center gap-1">
                                   <AlertTriangle className="h-3 w-3" /> Currently in another household
                                 </div>
                               )}
@@ -662,8 +662,8 @@ export function RegisterFamilySheet({ open, onOpenChange, onSuccess }: RegisterF
                 </div>
 
                 {allExistingSameHousehold && (
-                  <Card className="p-3 border-amber-300 bg-amber-50 dark:bg-amber-950/20">
-                    <div className="text-xs text-amber-800 dark:text-amber-300 flex gap-2">
+                  <Card className="p-3 border-warning/30 bg-warning/10">
+                    <div className="text-xs text-warning flex gap-2">
                       <AlertTriangle className="h-4 w-4 shrink-0" />
                       All selected members are already in the same household. No changes are needed.
                     </div>

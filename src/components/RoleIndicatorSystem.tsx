@@ -27,9 +27,9 @@ export function RoleIndicator({
         return {
           label: 'Administrator',
           icon: Crown,
-          color: 'from-red-500 to-red-600',
-          bgColor: 'bg-red-500',
-          textColor: 'text-red-600',
+          color: 'from-destructive to-destructive',
+          bgColor: 'bg-destructive',
+          textColor: 'text-destructive',
           badgeVariant: 'destructive' as const,
           permissions: ['Full System Access', 'User Management', 'Role Assignment', 'Data Export'],
           description: 'Complete system control and user management'
@@ -38,9 +38,9 @@ export function RoleIndicator({
         return {
           label: 'Management',
           icon: Shield,
-          color: 'from-blue-500 to-blue-600',
-          bgColor: 'bg-blue-500',
-          textColor: 'text-blue-600',
+          color: 'from-info to-info',
+          bgColor: 'bg-info',
+          textColor: 'text-info',
           badgeVariant: 'default' as const,
           permissions: ['Report Access', 'Program Management', 'Data Viewing', 'Limited User Access'],
           description: 'Operational oversight and reporting'
@@ -49,9 +49,9 @@ export function RoleIndicator({
         return {
           label: 'Staff',
           icon: User,
-          color: 'from-green-500 to-green-600',
-          bgColor: 'bg-green-500',
-          textColor: 'text-green-600',
+          color: 'from-success to-success',
+          bgColor: 'bg-success',
+          textColor: 'text-success',
           badgeVariant: 'secondary' as const,
           permissions: ['Data Entry', 'Report Creation', 'Child Management', 'Activity Logging'],
           description: 'Day-to-day operations and data management'
@@ -61,8 +61,8 @@ export function RoleIndicator({
           label: 'Unknown',
           icon: User,
           color: 'from-gray-500 to-gray-600',
-          bgColor: 'bg-gray-500',
-          textColor: 'text-gray-600',
+          bgColor: 'bg-muted-foreground',
+          textColor: 'text-foreground',
           badgeVariant: 'outline' as const,
           permissions: [],
           description: 'No defined permissions'
@@ -222,13 +222,13 @@ export function AccessLevelIndicator({
     <div className={cn('flex items-center gap-2', className)}>
       {hasAccess ? (
         <>
-          <Eye className="h-4 w-4 text-green-500" />
-          <span className="text-sm text-green-600">Access Granted</span>
+          <Eye className="h-4 w-4 text-success" />
+          <span className="text-sm text-success">Access Granted</span>
         </>
       ) : (
         <>
-          <Lock className="h-4 w-4 text-red-500" />
-          <span className="text-sm text-red-600">Access Denied</span>
+          <Lock className="h-4 w-4 text-destructive" />
+          <span className="text-sm text-destructive">Access Denied</span>
         </>
       )}
     </div>
@@ -306,18 +306,18 @@ export function RoleComparison({
       </div>
       
       {isEscalation && (
-        <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-          <Users className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm text-yellow-700">
+        <div className="flex items-center gap-2 p-2 bg-warning/10 rounded border border-warning/30">
+          <Users className="h-4 w-4 text-warning" />
+          <span className="text-sm text-warning">
             This is a privilege escalation - user will gain additional permissions
           </span>
         </div>
       )}
       
       {isReduction && (
-        <div className="flex items-center gap-2 p-2 bg-red-50 rounded border border-red-200">
-          <Database className="h-4 w-4 text-red-600" />
-          <span className="text-sm text-red-700">
+        <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded border border-destructive/30">
+          <Database className="h-4 w-4 text-destructive" />
+          <span className="text-sm text-destructive">
             This is a privilege reduction - user will lose some permissions
           </span>
         </div>

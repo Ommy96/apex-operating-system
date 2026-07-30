@@ -236,7 +236,7 @@ export default function LeadWorkspace() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" /> Needs attention
+              <AlertTriangle className="h-4 w-4 text-warning" /> Needs attention
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -311,7 +311,7 @@ export default function LeadWorkspace() {
               <Skeleton className="h-16 w-full" />
             ) : data.workQueue.length === 0 ? (
               <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> All caught up.
+                <CheckCircle2 className="h-4 w-4 text-success" /> All caught up.
               </p>
             ) : (
               <ul className="space-y-2">

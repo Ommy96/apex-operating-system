@@ -172,7 +172,7 @@ export function ChildLifecycleSection({ children: beneficiaries, replacements, d
                 <p className="text-xs font-medium text-muted-foreground">Total Beneficiaries</p>
                 <p className="text-2xl font-bold mt-1">{statusDistribution.total}</p>
               </div>
-              <div className="p-2 rounded-lg bg-blue-500/10"><Users className="h-5 w-5 text-blue-500" /></div>
+              <div className="p-2 rounded-lg bg-info/10"><Users className="h-5 w-5 text-info" /></div>
             </div>
           </CardContent>
         </Card>
@@ -183,7 +183,7 @@ export function ChildLifecycleSection({ children: beneficiaries, replacements, d
                 <p className="text-xs font-medium text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold mt-1">{statusDistribution.active}</p>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-500/10"><CheckCircle2 className="h-5 w-5 text-emerald-500" /></div>
+              <div className="p-2 rounded-lg bg-success/10"><CheckCircle2 className="h-5 w-5 text-success" /></div>
             </div>
           </CardContent>
         </Card>
@@ -194,7 +194,7 @@ export function ChildLifecycleSection({ children: beneficiaries, replacements, d
                 <p className="text-xs font-medium text-muted-foreground">Inactive</p>
                 <p className="text-2xl font-bold mt-1">{statusDistribution.inactive}</p>
               </div>
-              <div className="p-2 rounded-lg bg-red-500/10"><XCircle className="h-5 w-5 text-red-500" /></div>
+              <div className="p-2 rounded-lg bg-destructive/10"><XCircle className="h-5 w-5 text-destructive" /></div>
             </div>
           </CardContent>
         </Card>
@@ -205,7 +205,7 @@ export function ChildLifecycleSection({ children: beneficiaries, replacements, d
                 <p className="text-xs font-medium text-muted-foreground">Retention Rate</p>
                 <p className="text-2xl font-bold mt-1">{retentionRate}%</p>
               </div>
-              <div className="p-2 rounded-lg bg-amber-500/10"><Activity className="h-5 w-5 text-amber-500" /></div>
+              <div className="p-2 rounded-lg bg-warning/10"><Activity className="h-5 w-5 text-warning" /></div>
             </div>
             <Progress value={retentionRate} className="h-2 mt-2" />
           </CardContent>
@@ -282,7 +282,7 @@ export function ChildLifecycleSection({ children: beneficiaries, replacements, d
         {inactiveReasons.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-amber-500" />Reasons for Inactivity</CardTitle>
+              <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-warning" />Reasons for Inactivity</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>

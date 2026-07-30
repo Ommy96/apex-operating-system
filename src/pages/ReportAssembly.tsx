@@ -11,9 +11,9 @@ import { useReportAssembly, type AssembledReport } from "@/hooks/useReportAssemb
 import { toast } from "@/hooks/use-toast";
 
 function statusColor(s: string) {
-  if (s === "on_track") return "bg-emerald-100 text-emerald-700 hover:bg-emerald-100";
-  if (s === "at_risk") return "bg-amber-100 text-amber-700 hover:bg-amber-100";
-  if (s === "off_track") return "bg-red-100 text-red-700 hover:bg-red-100";
+  if (s === "on_track") return "bg-success/10 text-success hover:bg-success/10";
+  if (s === "at_risk") return "bg-warning/10 text-warning hover:bg-warning/10";
+  if (s === "off_track") return "bg-destructive/10 text-destructive hover:bg-destructive/10";
   return "bg-muted text-muted-foreground hover:bg-muted";
 }
 
@@ -195,7 +195,7 @@ export default function ReportAssembly() {
                   <CardHeader><CardTitle className="text-base">Data quality</CardTitle></CardHeader>
                   <CardContent className="flex gap-6 text-sm">
                     <div><span className="text-muted-foreground">Open flags:</span> <strong className="text-destructive">{report.dataQuality.open}</strong></div>
-                    <div><span className="text-muted-foreground">Resolved flags:</span> <strong className="text-emerald-600">{report.dataQuality.resolved}</strong></div>
+                    <div><span className="text-muted-foreground">Resolved flags:</span> <strong className="text-success">{report.dataQuality.resolved}</strong></div>
                   </CardContent>
                 </Card>
               )}

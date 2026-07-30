@@ -59,13 +59,13 @@ export function AIGatewayOversight() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">AI Gateway Oversight</h2>
-          <p className="text-sm text-slate-400">Monitor Lovable AI usage, costs, and rate limits across all tenants</p>
+          <h2 className="text-xl font-bold text-muted-foreground">AI Gateway Oversight</h2>
+          <p className="text-sm text-muted-foreground">Monitor Lovable AI usage, costs, and rate limits across all tenants</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border ${aiEnabled ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-            <div className={`h-2 w-2 rounded-full ${aiEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-            <span className={`text-xs ${aiEnabled ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border ${aiEnabled ? 'bg-success/10 border-success/30' : 'bg-destructive/10 border-destructive/30'}`}>
+            <div className={`h-2 w-2 rounded-full ${aiEnabled ? 'bg-success animate-pulse' : 'bg-destructive'}`} />
+            <span className={`text-xs ${aiEnabled ? 'text-success' : 'text-destructive'}`}>
               {aiEnabled ? 'AI Gateway Active' : 'AI Gateway Disabled'}
             </span>
           </div>
@@ -75,18 +75,18 @@ export function AIGatewayOversight() {
       {/* KPI Strip */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-5">
         {[
-          { label: 'Total Requests', value: totalRequests.toLocaleString(), icon: Zap, accent: 'text-blue-400' },
-          { label: 'Total Tokens', value: `${(totalTokens / 1000000).toFixed(1)}M`, icon: Cpu, accent: 'text-purple-400' },
-          { label: 'Total Cost', value: `$${totalCost.toFixed(2)}`, icon: DollarSign, accent: 'text-emerald-400' },
-          { label: 'Avg Latency', value: '340ms', icon: Clock, accent: 'text-amber-400' },
-          { label: 'Rate Limit Hits', value: RATE_LIMIT_EVENTS.reduce((s, e) => s + e.count, 0), icon: AlertTriangle, accent: 'text-red-400' },
+          { label: 'Total Requests', value: totalRequests.toLocaleString(), icon: Zap, accent: 'text-info' },
+          { label: 'Total Tokens', value: `${(totalTokens / 1000000).toFixed(1)}M`, icon: Cpu, accent: 'text-info' },
+          { label: 'Total Cost', value: `$${totalCost.toFixed(2)}`, icon: DollarSign, accent: 'text-success' },
+          { label: 'Avg Latency', value: '340ms', icon: Clock, accent: 'text-warning' },
+          { label: 'Rate Limit Hits', value: RATE_LIMIT_EVENTS.reduce((s, e) => s + e.count, 0), icon: AlertTriangle, accent: 'text-destructive' },
         ].map(({ label, value, icon: Icon, accent }) => (
-          <div key={label} className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div key={label} className="p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-slate-400">{label}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
               <Icon className={`h-4 w-4 ${accent}`} />
             </div>
-            <div className="text-xl font-bold text-slate-100 font-mono">{value}</div>
+            <div className="text-xl font-bold text-muted-foreground font-mono">{value}</div>
           </div>
         ))}
       </div>
@@ -102,8 +102,8 @@ export function AIGatewayOversight() {
           <Button key={key} variant={activeView === key ? 'default' : 'outline'} size="sm"
             onClick={() => setActiveView(key as any)}
             className={activeView === key
-              ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30'
-              : 'border-slate-600 text-slate-400 hover:bg-slate-700'
+              ? 'bg-warning/20 text-warning border-warning/30 hover:bg-warning/30'
+              : 'border-border text-muted-foreground hover:bg-muted-foreground'
             }>
             <Icon className="h-4 w-4 mr-1" /> {label}
           </Button>
@@ -112,9 +112,9 @@ export function AIGatewayOversight() {
 
       {activeView === 'usage' && (
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2 bg-slate-800/50 border-slate-700/50">
+          <Card className="lg:col-span-2 bg-muted-foreground/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-slate-100 text-sm">Daily AI Requests & Cost (14 days)</CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Daily AI Requests & Cost (14 days)</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -132,19 +132,19 @@ export function AIGatewayOversight() {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="bg-muted-foreground/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-slate-100 text-sm">Top Consumers</CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Top Consumers</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {TOP_CONSUMERS.map((org, i) => (
-                <div key={org.org} className="flex items-center gap-3 p-2 rounded-lg bg-slate-700/30">
-                  <span className="text-xs font-mono text-slate-500 w-5">{i + 1}</span>
+                <div key={org.org} className="flex items-center gap-3 p-2 rounded-lg bg-muted-foreground/30">
+                  <span className="text-xs font-mono text-muted-foreground w-5">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-slate-200 truncate">{org.org}</div>
-                    <div className="text-xs text-slate-500">{org.requests.toLocaleString()} req · {org.model}</div>
+                    <div className="text-sm text-muted-foreground truncate">{org.org}</div>
+                    <div className="text-xs text-muted-foreground">{org.requests.toLocaleString()} req · {org.model}</div>
                   </div>
-                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-xs font-mono">${org.cost}</Badge>
+                  <Badge variant="outline" className="border-success/30 text-success text-xs font-mono">${org.cost}</Badge>
                 </div>
               ))}
             </CardContent>
@@ -154,9 +154,9 @@ export function AIGatewayOversight() {
 
       {activeView === 'models' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="bg-muted-foreground/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-slate-100 text-sm">Request Distribution by Model</CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Request Distribution by Model</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -171,9 +171,9 @@ export function AIGatewayOversight() {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="bg-muted-foreground/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-slate-100 text-sm">Cost by Model</CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Cost by Model</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -192,26 +192,26 @@ export function AIGatewayOversight() {
       )}
 
       {activeView === 'limits' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">Rate Limit Events</CardTitle>
-            <CardDescription className="text-slate-400">Organizations hitting rate limits</CardDescription>
+            <CardTitle className="text-muted-foreground text-sm">Rate Limit Events</CardTitle>
+            <CardDescription className="text-muted-foreground">Organizations hitting rate limits</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {RATE_LIMIT_EVENTS.map(event => (
-                <div key={event.org} className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                <div key={event.org} className="flex items-center justify-between p-3 rounded-lg bg-muted-foreground/30 border border-border/30">
                   <div className="flex items-center gap-3">
-                    <AlertTriangle className={`h-4 w-4 ${event.status === 'critical' ? 'text-red-400' : event.status === 'warning' ? 'text-amber-400' : 'text-slate-400'}`} />
+                    <AlertTriangle className={`h-4 w-4 ${event.status === 'critical' ? 'text-destructive' : event.status === 'warning' ? 'text-warning' : 'text-muted-foreground'}`} />
                     <div>
-                      <div className="text-sm text-slate-200">{event.org}</div>
-                      <div className="text-xs text-slate-500">{event.count} hits · Last: {event.lastAt}</div>
+                      <div className="text-sm text-muted-foreground">{event.org}</div>
+                      <div className="text-xs text-muted-foreground">{event.count} hits · Last: {event.lastAt}</div>
                     </div>
                   </div>
                   <Badge variant="outline" className={
-                    event.status === 'critical' ? 'border-red-500/30 text-red-400' :
-                    event.status === 'warning' ? 'border-amber-500/30 text-amber-400' :
-                    'border-slate-500/30 text-slate-400'
+                    event.status === 'critical' ? 'border-destructive/30 text-destructive' :
+                    event.status === 'warning' ? 'border-warning/30 text-warning' :
+                    'border-border/30 text-muted-foreground'
                   }>
                     {event.status}
                   </Badge>
@@ -223,23 +223,23 @@ export function AIGatewayOversight() {
       )}
 
       {activeView === 'config' && (
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-muted-foreground/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-slate-100 text-sm">AI Gateway Configuration</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm">AI Gateway Configuration</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-slate-600/30 bg-slate-700/20">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/30 bg-muted-foreground/20">
               <div>
-                <div className="text-sm font-medium text-slate-200">Enable AI Gateway</div>
-                <div className="text-xs text-slate-400">Toggle AI features platform-wide</div>
+                <div className="text-sm font-medium text-muted-foreground">Enable AI Gateway</div>
+                <div className="text-xs text-muted-foreground">Toggle AI features platform-wide</div>
               </div>
               <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Default Model</label>
+                <label className="text-sm text-muted-foreground">Default Model</label>
                 <Select value={defaultModel} onValueChange={setDefaultModel}>
-                  <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+                  <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -252,14 +252,14 @@ export function AIGatewayOversight() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Global Rate Limit (req/min)</label>
+                <label className="text-sm text-muted-foreground">Global Rate Limit (req/min)</label>
                 <Input type="number" value={globalRateLimit} onChange={e => setGlobalRateLimit(parseInt(e.target.value))}
-                  className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                  className="bg-muted-foreground/50 border-border text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-300">Max Tokens per Request</label>
+                <label className="text-sm text-muted-foreground">Max Tokens per Request</label>
                 <Input type="number" value={maxTokensPerRequest} onChange={e => setMaxTokensPerRequest(parseInt(e.target.value))}
-                  className="bg-slate-700/50 border-slate-600 text-slate-200" />
+                  className="bg-muted-foreground/50 border-border text-muted-foreground" />
               </div>
             </div>
           </CardContent>

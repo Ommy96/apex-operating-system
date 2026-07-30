@@ -84,7 +84,7 @@ export function ConsentVaultSection({ beneficiaryId, householdId }: Props) {
                   <Badge variant="outline" className="text-[10px]">{DOC_TYPES.find(t => t.value === d.doc_type)?.label || d.doc_type}</Badge>
                   {isExpired && <Badge variant="destructive" className="text-[10px]"><AlertTriangle className="h-3 w-3 mr-1" />Expired</Badge>}
                   {!isExpired && isSoon && <Badge variant="secondary" className="text-[10px]">Expires in {expiring}d</Badge>}
-                  {!isExpired && !isSoon && d.status === "active" && <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-800">Active</Badge>}
+                  {!isExpired && !isSoon && d.status === "active" && <Badge variant="secondary" className="text-[10px] bg-success/10 text-success">Active</Badge>}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {d.signed_at && `Signed ${format(parseISO(d.signed_at), "MMM d, yyyy")}`}

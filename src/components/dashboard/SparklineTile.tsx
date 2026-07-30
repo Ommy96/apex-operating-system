@@ -67,8 +67,8 @@ export function SparklineTile({
     (delta ?? 0) === 0
       ? "text-muted-foreground"
       : goodDirection
-        ? "text-emerald-500"
-        : "text-rose-500";
+        ? "text-success"
+        : "text-destructive";
   const DeltaIcon = positive ? ArrowUpRight : ArrowDownRight;
 
   const spark = series && series.length >= 2 ? buildSparklinePath(series, 100, 24) : "";

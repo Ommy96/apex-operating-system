@@ -36,34 +36,34 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const TIER_COLORS: Record<string, string> = {
-  free: 'bg-slate-700 text-slate-300 border-slate-600',
-  starter: 'bg-blue-900/50 text-blue-300 border-blue-700',
-  professional: 'bg-purple-900/50 text-purple-300 border-purple-700',
-  enterprise: 'bg-amber-900/50 text-amber-300 border-amber-700',
+  free: 'bg-muted-foreground text-muted-foreground border-border',
+  starter: 'bg-info/50 text-info border-info/30',
+  professional: 'bg-info/50 text-info border-info/30',
+  enterprise: 'bg-warning/50 text-warning border-warning/30',
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-emerald-900/50 text-emerald-300 border-emerald-700',
-  trial: 'bg-cyan-900/50 text-cyan-300 border-cyan-700',
-  suspended: 'bg-red-900/50 text-red-300 border-red-700',
-  cancelled: 'bg-slate-700 text-slate-400 border-slate-600',
-  past_due: 'bg-orange-900/50 text-orange-300 border-orange-700',
+  active: 'bg-success/50 text-success border-success/30',
+  trial: 'bg-info/50 text-info border-info/30',
+  suspended: 'bg-destructive/50 text-destructive border-destructive/30',
+  cancelled: 'bg-muted-foreground text-muted-foreground border-border',
+  past_due: 'bg-warning/50 text-warning border-warning/30',
 };
 
 const RISK_COLORS: Record<string, string> = {
-  low: 'text-emerald-400',
-  medium: 'text-amber-400',
-  high: 'text-red-400',
+  low: 'text-success',
+  medium: 'text-warning',
+  high: 'text-destructive',
 };
 
 function HealthBar({ score }: { score: number }) {
-  const color = score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-red-500';
+  const color = score >= 70 ? 'bg-success' : score >= 40 ? 'bg-warning' : 'bg-destructive';
   return (
     <div className="flex items-center gap-2 w-full">
-      <div className="flex-1 h-2 rounded-full bg-slate-700 overflow-hidden">
+      <div className="flex-1 h-2 rounded-full bg-muted-foreground overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${score}%` }} />
       </div>
-      <span className="text-xs font-mono text-slate-400 w-8 text-right">{score}</span>
+      <span className="text-xs font-mono text-muted-foreground w-8 text-right">{score}</span>
     </div>
   );
 }
@@ -71,7 +71,7 @@ function HealthBar({ score }: { score: number }) {
 function PlanBadge({ org }: { org: OrganizationWithSubscription }) {
   if (org.is_partner) {
     return (
-      <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
         <Crown className="h-3 w-3 mr-1" />
         Partner
       </Badge>
@@ -214,7 +214,7 @@ export function OrganizationManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning" />
       </div>
     );
   }
@@ -231,14 +231,14 @@ export function OrganizationManagement() {
     <div className="space-y-4">
       {/* Partner Orgs Summary */}
       {partnerCount > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-900/20 border border-amber-700/30">
-          <Crown className="h-4 w-4 text-amber-400" />
-          <span className="text-xs text-amber-400 font-medium">
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/20 border border-warning/30">
+          <Crown className="h-4 w-4 text-warning" />
+          <span className="text-xs text-warning font-medium">
             {partnerCount} Partner org{partnerCount !== 1 ? 's' : ''}:
           </span>
           <div className="flex flex-wrap gap-1">
             {organizations?.filter(o => o.is_partner).map(o => (
-              <Badge key={o.id} variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-[10px]">
+              <Badge key={o.id} variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
                 {o.name}
               </Badge>
             ))}
@@ -247,21 +247,21 @@ export function OrganizationManagement() {
       )}
 
       {/* Risk Summary Bar */}
-      <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <Shield className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">RISK OVERVIEW</span>
+      <div className="flex items-center gap-4 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <Shield className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">RISK OVERVIEW</span>
         <div className="flex items-center gap-4 ml-auto">
           <button onClick={() => setFilterRisk(filterRisk === 'high' ? 'all' : 'high')} className="flex items-center gap-1.5 hover:opacity-80">
-            <div className="h-2 w-2 rounded-full bg-red-500" />
-            <span className="text-xs text-red-400 font-medium">{riskCounts.high} High</span>
+            <div className="h-2 w-2 rounded-full bg-destructive" />
+            <span className="text-xs text-destructive font-medium">{riskCounts.high} High</span>
           </button>
           <button onClick={() => setFilterRisk(filterRisk === 'medium' ? 'all' : 'medium')} className="flex items-center gap-1.5 hover:opacity-80">
-            <div className="h-2 w-2 rounded-full bg-amber-500" />
-            <span className="text-xs text-amber-400 font-medium">{riskCounts.medium} Medium</span>
+            <div className="h-2 w-2 rounded-full bg-warning" />
+            <span className="text-xs text-warning font-medium">{riskCounts.medium} Medium</span>
           </button>
           <button onClick={() => setFilterRisk(filterRisk === 'low' ? 'all' : 'low')} className="flex items-center gap-1.5 hover:opacity-80">
-            <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-emerald-400 font-medium">{riskCounts.low} Low</span>
+            <div className="h-2 w-2 rounded-full bg-success" />
+            <span className="text-xs text-success font-medium">{riskCounts.low} Low</span>
           </button>
         </div>
       </div>
@@ -269,19 +269,19 @@ export function OrganizationManagement() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search organizations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-slate-800/50 border-slate-700 text-slate-200 placeholder:text-slate-500"
+            className="pl-10 bg-muted-foreground/50 border-border text-muted-foreground placeholder:text-muted-foreground"
           />
         </div>
         <Select value={filterTier} onValueChange={setFilterTier}>
-          <SelectTrigger className="w-[140px] bg-slate-800/50 border-slate-700 text-slate-300">
+          <SelectTrigger className="w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Tier" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
+          <SelectContent className="bg-muted-foreground border-border">
             <SelectItem value="all">All Tiers</SelectItem>
             <SelectItem value="free">Free</SelectItem>
             <SelectItem value="starter">Starter</SelectItem>
@@ -290,10 +290,10 @@ export function OrganizationManagement() {
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[140px] bg-slate-800/50 border-slate-700 text-slate-300">
+          <SelectTrigger className="w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
+          <SelectContent className="bg-muted-foreground border-border">
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="trial">Trial</SelectItem>
@@ -304,18 +304,18 @@ export function OrganizationManagement() {
       </div>
 
       {/* Organizations List */}
-      <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+      <div className="rounded-lg border border-border/50 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-800/80 border-slate-700 hover:bg-slate-800/80">
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Organization</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Plan</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Status</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider text-center">Users</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider text-center">Beneficiaries</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider text-center">Programs</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider w-[140px]">Health</TableHead>
-              <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider w-[50px]"></TableHead>
+            <TableRow className="bg-muted-foreground/80 border-border hover:bg-muted-foreground/80">
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Organization</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Plan</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-center">Users</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-center">Beneficiaries</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-center">Programs</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider w-[140px]">Health</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -323,22 +323,22 @@ export function OrganizationManagement() {
               <>
                 <TableRow 
                   key={org.id} 
-                  className="group border-slate-700/50 hover:bg-slate-800/30 cursor-pointer transition-colors"
+                  className="group border-border/50 hover:bg-muted-foreground/30 cursor-pointer transition-colors"
                   onClick={() => setExpandedOrg(expandedOrg === org.id ? null : org.id)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className={`h-2 w-2 rounded-full ${org.risk_level === 'high' ? 'bg-red-500' : org.risk_level === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      <div className={`h-2 w-2 rounded-full ${org.risk_level === 'high' ? 'bg-destructive' : org.risk_level === 'medium' ? 'bg-warning' : 'bg-success'}`} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-200">{org.name}</span>
+                          <span className="font-medium text-muted-foreground">{org.name}</span>
                           {org.is_partner && (
-                            <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wide">
+                            <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wide">
                               Partner
                             </Badge>
                           )}
                         </div>
-                        <div className="text-xs text-slate-500 flex items-center gap-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
                           {org.country && <><Globe className="h-3 w-3" />{org.country}</>}
                           {!org.country && <span>/{org.slug}</span>}
                         </div>
@@ -354,13 +354,13 @@ export function OrganizationManagement() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-sm text-slate-300 font-mono">{org.member_count}</span>
+                    <span className="text-sm text-muted-foreground font-mono">{org.member_count}</span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-sm text-slate-300 font-mono">{org.beneficiary_count}</span>
+                    <span className="text-sm text-muted-foreground font-mono">{org.beneficiary_count}</span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-sm text-slate-300 font-mono">{org.program_count}</span>
+                    <span className="text-sm text-muted-foreground font-mono">{org.program_count}</span>
                   </TableCell>
                   <TableCell>
                     <HealthBar score={org.health_score} />
@@ -368,23 +368,23 @@ export function OrganizationManagement() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {expandedOrg === org.id ? (
-                        <ChevronUp className="h-4 w-4 text-slate-500" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-slate-500" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-200">
+                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-muted-foreground">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
-                          <DropdownMenuLabel className="text-slate-400">Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-slate-700" />
+                        <DropdownMenuContent align="end" className="bg-muted-foreground border-border">
+                          <DropdownMenuLabel className="text-muted-foreground">Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-muted-foreground" />
                           
                           {/* Partner Access */}
                           {org.is_partner ? (
-                            <DropdownMenuItem className="text-red-400 focus:bg-slate-700 focus:text-red-300" onClick={(e) => {
+                            <DropdownMenuItem className="text-destructive focus:bg-muted-foreground focus:text-destructive" onClick={(e) => {
                               e.stopPropagation();
                               setSelectedOrg(org);
                               setPartnerAction('revoke');
@@ -394,7 +394,7 @@ export function OrganizationManagement() {
                               <Crown className="h-4 w-4 mr-2" />Revoke Partner Access
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem className="text-amber-400 focus:bg-slate-700 focus:text-amber-300" onClick={(e) => {
+                            <DropdownMenuItem className="text-warning focus:bg-muted-foreground focus:text-warning" onClick={(e) => {
                               e.stopPropagation();
                               setSelectedOrg(org);
                               setPartnerAction('grant');
@@ -405,11 +405,11 @@ export function OrganizationManagement() {
                             </DropdownMenuItem>
                           )}
                           
-                          <DropdownMenuSeparator className="bg-slate-700" />
-                          <DropdownMenuItem className="text-slate-300 focus:bg-slate-700 focus:text-slate-200" onClick={(e) => { e.stopPropagation(); setSelectedOrg(org); setNewTier(org.subscription_tier || 'free'); setTierDialogOpen(true); }}>
+                          <DropdownMenuSeparator className="bg-muted-foreground" />
+                          <DropdownMenuItem className="text-muted-foreground focus:bg-muted-foreground focus:text-muted-foreground" onClick={(e) => { e.stopPropagation(); setSelectedOrg(org); setNewTier(org.subscription_tier || 'free'); setTierDialogOpen(true); }}>
                             <Settings2 className="h-4 w-4 mr-2" />Change Plan
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-slate-300 focus:bg-slate-700 focus:text-slate-200" onClick={(e) => { 
+                          <DropdownMenuItem className="text-muted-foreground focus:bg-muted-foreground focus:text-muted-foreground" onClick={(e) => { 
                             e.stopPropagation(); 
                             setSelectedOrg(org); 
                             setMaxUsers(String((org.features_enabled as any)?.max_users || 5));
@@ -418,21 +418,21 @@ export function OrganizationManagement() {
                           }}>
                             <SlidersHorizontal className="h-4 w-4 mr-2" />Adjust Limits
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-700" />
-                          <DropdownMenuItem className="text-amber-400 focus:bg-slate-700 focus:text-amber-300" onClick={(e) => {
+                          <DropdownMenuSeparator className="bg-muted-foreground" />
+                          <DropdownMenuItem className="text-warning focus:bg-muted-foreground focus:text-warning" onClick={(e) => {
                             e.stopPropagation();
                             sessionStorage.setItem('impersonating_org', JSON.stringify({ orgId: org.id, orgName: org.name }));
                             navigate('/dashboard');
                           }}>
                             <UserCheck className="h-4 w-4 mr-2" />Impersonate
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-700" />
+                          <DropdownMenuSeparator className="bg-muted-foreground" />
                           {org.suspended_at ? (
-                            <DropdownMenuItem className="text-emerald-400 focus:bg-slate-700 focus:text-emerald-300" onClick={(e) => { e.stopPropagation(); handleActivate(org); }}>
+                            <DropdownMenuItem className="text-success focus:bg-muted-foreground focus:text-success" onClick={(e) => { e.stopPropagation(); handleActivate(org); }}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />Reactivate
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem className="text-red-400 focus:bg-slate-700 focus:text-red-300" onClick={(e) => { e.stopPropagation(); setSelectedOrg(org); setSuspendDialogOpen(true); }}>
+                            <DropdownMenuItem className="text-destructive focus:bg-muted-foreground focus:text-destructive" onClick={(e) => { e.stopPropagation(); setSelectedOrg(org); setSuspendDialogOpen(true); }}>
                               <Ban className="h-4 w-4 mr-2" />Suspend
                             </DropdownMenuItem>
                           )}
@@ -442,7 +442,7 @@ export function OrganizationManagement() {
                   </TableCell>
                 </TableRow>
                 {expandedOrg === org.id && (
-                  <TableRow key={`${org.id}-detail`} className="border-slate-700/50 bg-slate-800/20">
+                  <TableRow key={`${org.id}-detail`} className="border-border/50 bg-muted-foreground/20">
                     <TableCell colSpan={8} className="p-0">
                       <OrgDetailPanel org={org} />
                     </TableCell>
@@ -452,7 +452,7 @@ export function OrganizationManagement() {
             ))}
             {(!filteredOrgs || filteredOrgs.length === 0) && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                   No organizations found
                 </TableCell>
               </TableRow>
@@ -461,16 +461,16 @@ export function OrganizationManagement() {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-slate-500">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Showing {filteredOrgs?.length || 0} of {organizations?.length || 0} tenants</span>
       </div>
 
       {/* Suspend Dialog */}
       <Dialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-slate-200">
+        <DialogContent className="bg-muted-foreground border-border text-muted-foreground">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Suspend Organization</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-muted-foreground">Suspend Organization</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               This will prevent all users from accessing {selectedOrg?.name}.
             </DialogDescription>
           </DialogHeader>
@@ -479,11 +479,11 @@ export function OrganizationManagement() {
               placeholder="Reason for suspension..."
               value={suspendReason}
               onChange={(e) => setSuspendReason(e.target.value)}
-              className="bg-slate-700/50 border-slate-600 text-slate-200"
+              className="bg-muted-foreground/50 border-border text-muted-foreground"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSuspendDialogOpen(false)} className="border-slate-600 text-slate-300">Cancel</Button>
+            <Button variant="outline" onClick={() => setSuspendDialogOpen(false)} className="border-border text-muted-foreground">Cancel</Button>
             <Button variant="destructive" onClick={handleSuspend} disabled={!suspendReason || suspendOrganization.isPending}>
               {suspendOrganization.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Suspend
@@ -494,18 +494,18 @@ export function OrganizationManagement() {
 
       {/* Change Tier Dialog */}
       <Dialog open={tierDialogOpen} onOpenChange={setTierDialogOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-slate-200">
+        <DialogContent className="bg-muted-foreground border-border text-muted-foreground">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Change Subscription Plan</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-muted-foreground">Change Subscription Plan</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Update plan for {selectedOrg?.name}
             </DialogDescription>
           </DialogHeader>
           <Select value={newTier} onValueChange={setNewTier}>
-            <SelectTrigger className="bg-slate-700/50 border-slate-600 text-slate-200">
+            <SelectTrigger className="bg-muted-foreground/50 border-border text-muted-foreground">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700">
+            <SelectContent className="bg-muted-foreground border-border">
               <SelectItem value="free">Free — $0/mo</SelectItem>
               <SelectItem value="starter">Starter — $29/mo</SelectItem>
               <SelectItem value="professional">Professional — $99/mo</SelectItem>
@@ -513,8 +513,8 @@ export function OrganizationManagement() {
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setTierDialogOpen(false)} className="border-slate-600 text-slate-300">Cancel</Button>
-            <Button onClick={handleUpdateTier} disabled={!newTier || updateSubscription.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Button variant="outline" onClick={() => setTierDialogOpen(false)} className="border-border text-muted-foreground">Cancel</Button>
+            <Button onClick={handleUpdateTier} disabled={!newTier || updateSubscription.isPending} className="bg-warning hover:bg-warning text-white">
               {updateSubscription.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Update Plan
             </Button>
@@ -524,26 +524,26 @@ export function OrganizationManagement() {
 
       {/* Limits Dialog */}
       <Dialog open={limitsDialogOpen} onOpenChange={setLimitsDialogOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-slate-200">
+        <DialogContent className="bg-muted-foreground border-border text-muted-foreground">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Adjust Limits</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-muted-foreground">Adjust Limits</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Set usage limits for {selectedOrg?.name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-slate-400 mb-1 block">Max Users</label>
-              <Input type="number" value={maxUsers} onChange={(e) => setMaxUsers(e.target.value)} className="bg-slate-700/50 border-slate-600 text-slate-200" />
+              <label className="text-sm text-muted-foreground mb-1 block">Max Users</label>
+              <Input type="number" value={maxUsers} onChange={(e) => setMaxUsers(e.target.value)} className="bg-muted-foreground/50 border-border text-muted-foreground" />
             </div>
             <div>
-              <label className="text-sm text-slate-400 mb-1 block">Max Beneficiaries</label>
-              <Input type="number" value={maxBeneficiaries} onChange={(e) => setMaxBeneficiaries(e.target.value)} className="bg-slate-700/50 border-slate-600 text-slate-200" />
+              <label className="text-sm text-muted-foreground mb-1 block">Max Beneficiaries</label>
+              <Input type="number" value={maxBeneficiaries} onChange={(e) => setMaxBeneficiaries(e.target.value)} className="bg-muted-foreground/50 border-border text-muted-foreground" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLimitsDialogOpen(false)} className="border-slate-600 text-slate-300">Cancel</Button>
-            <Button onClick={handleUpdateLimits} disabled={updateFeatureLimits.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Button variant="outline" onClick={() => setLimitsDialogOpen(false)} className="border-border text-muted-foreground">Cancel</Button>
+            <Button onClick={handleUpdateLimits} disabled={updateFeatureLimits.isPending} className="bg-warning hover:bg-warning text-white">
               {updateFeatureLimits.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Update Limits
             </Button>
@@ -553,13 +553,13 @@ export function OrganizationManagement() {
 
       {/* Partner Access Dialog */}
       <Dialog open={partnerDialogOpen} onOpenChange={setPartnerDialogOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-slate-200">
+        <DialogContent className="bg-muted-foreground border-border text-muted-foreground">
           <DialogHeader>
-            <DialogTitle className="text-slate-100 flex items-center gap-2">
-              <Crown className="h-5 w-5 text-amber-400" />
+            <DialogTitle className="text-muted-foreground flex items-center gap-2">
+              <Crown className="h-5 w-5 text-warning" />
               {partnerAction === 'grant' ? `Grant Partner Access to ${selectedOrg?.name}?` : `Revoke partner access from ${selectedOrg?.name}?`}
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               {partnerAction === 'grant'
                 ? `This gives ${selectedOrg?.name} unlimited access to ALL features on the platform, regardless of their subscription plan. This is intended for design partners and pilot organisations.`
                 : `This will revert ${selectedOrg?.name} to their paid subscription plan. Features not included in their plan will be locked.`}
@@ -567,21 +567,21 @@ export function OrganizationManagement() {
           </DialogHeader>
           {partnerAction === 'grant' && (
             <div className="space-y-2 py-2">
-              <label className="text-sm text-slate-400">Add a note about why partner access is being granted (optional)</label>
+              <label className="text-sm text-muted-foreground">Add a note about why partner access is being granted (optional)</label>
               <Textarea
                 placeholder="e.g. Design partner — 6 month pilot"
                 value={partnerNotes}
                 onChange={(e) => setPartnerNotes(e.target.value)}
-                className="bg-slate-700/50 border-slate-600 text-slate-200"
+                className="bg-muted-foreground/50 border-border text-muted-foreground"
               />
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPartnerDialogOpen(false)} className="border-slate-600 text-slate-300">
+            <Button variant="outline" onClick={() => setPartnerDialogOpen(false)} className="border-border text-muted-foreground">
               Cancel
             </Button>
             {partnerAction === 'grant' ? (
-              <Button onClick={handlePartnerAccess} disabled={partnerLoading} className="bg-amber-600 hover:bg-amber-700 text-white">
+              <Button onClick={handlePartnerAccess} disabled={partnerLoading} className="bg-warning hover:bg-warning text-white">
                 {partnerLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Grant Access
               </Button>
@@ -602,10 +602,10 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
   const features = org.features_enabled as Record<string, any> || {};
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-850/50">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted-foreground/50">
       {/* Organization Info */}
       <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Organization Details</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Organization Details</h4>
         <div className="space-y-2">
           <InfoRow icon={<Building2 className="h-3.5 w-3.5" />} label="Type" value={org.organization_type || 'Not set'} />
           <InfoRow icon={<Globe className="h-3.5 w-3.5" />} label="Country" value={org.country || 'Not set'} />
@@ -616,16 +616,16 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 
         {/* Partner Info */}
         {org.is_partner && (
-          <div className="mt-3 p-3 rounded-lg bg-amber-900/20 border border-amber-700/30">
+          <div className="mt-3 p-3 rounded-lg bg-warning/20 border border-warning/30">
             <div className="flex items-center gap-2 mb-2">
-              <Crown className="h-4 w-4 text-amber-400" />
-              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Partner Access</span>
+              <Crown className="h-4 w-4 text-warning" />
+              <span className="text-xs font-semibold text-warning uppercase tracking-wide">Partner Access</span>
             </div>
             {org.partner_granted_at && (
-              <p className="text-xs text-amber-300/70">Granted {format(new Date(org.partner_granted_at), 'MMM d, yyyy')}</p>
+              <p className="text-xs text-warning">Granted {format(new Date(org.partner_granted_at), 'MMM d, yyyy')}</p>
             )}
             {org.partner_notes && (
-              <p className="text-xs text-slate-400 mt-1">{org.partner_notes}</p>
+              <p className="text-xs text-muted-foreground mt-1">{org.partner_notes}</p>
             )}
           </div>
         )}
@@ -633,7 +633,7 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 
       {/* Usage & Limits */}
       <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Usage & Limits</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Usage & Limits</h4>
         <div className="space-y-3">
           <UsageRow label="Users" current={org.member_count} max={org.is_partner ? null : (features.max_users || 5)} />
           <UsageRow label="Beneficiaries" current={org.beneficiary_count} max={org.is_partner ? null : (features.max_beneficiaries || 100)} />
@@ -643,18 +643,18 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 
       {/* Status & Health */}
       <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Health & Risk</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Health & Risk</h4>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400">Health Score</span>
-            <span className={`text-sm font-bold ${org.health_score >= 70 ? 'text-emerald-400' : org.health_score >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+            <span className="text-xs text-muted-foreground">Health Score</span>
+            <span className={`text-sm font-bold ${org.health_score >= 70 ? 'text-success' : org.health_score >= 40 ? 'text-warning' : 'text-destructive'}`}>
               {org.health_score}/100
             </span>
           </div>
           <HealthBar score={org.health_score} />
           
           <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-slate-400">Risk Level</span>
+            <span className="text-xs text-muted-foreground">Risk Level</span>
             <div className={`flex items-center gap-1 ${RISK_COLORS[org.risk_level]}`}>
               {org.risk_level === 'high' && <AlertTriangle className="h-3.5 w-3.5" />}
               <span className="text-sm font-medium capitalize">{org.risk_level}</span>
@@ -662,18 +662,18 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400">Onboarding</span>
-            <Badge variant="outline" className={org.onboarding_completed ? 'border-emerald-700 text-emerald-400 text-xs' : 'border-slate-600 text-slate-400 text-xs'}>
+            <span className="text-xs text-muted-foreground">Onboarding</span>
+            <Badge variant="outline" className={org.onboarding_completed ? 'border-success/30 text-success text-xs' : 'border-border text-muted-foreground text-xs'}>
               {org.onboarding_completed ? 'Complete' : 'Pending'}
             </Badge>
           </div>
 
           {org.suspended_at && (
-            <div className="mt-2 p-2 rounded bg-red-900/20 border border-red-800/30">
-              <p className="text-xs text-red-400">
+            <div className="mt-2 p-2 rounded bg-destructive/20 border border-destructive/30">
+              <p className="text-xs text-destructive">
                 <strong>Suspended:</strong> {org.suspended_reason || 'No reason provided'}
               </p>
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-destructive mt-1">
                 {format(new Date(org.suspended_at), 'MMM d, yyyy')}
               </p>
             </div>
@@ -681,10 +681,10 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 
           {/* Feature Flags Summary */}
           <div className="mt-2 flex flex-wrap gap-1">
-            {org.is_partner && <Badge variant="outline" className="text-[10px] border-amber-600 text-amber-400">Full Access</Badge>}
-            {features.reports_enabled && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Reports</Badge>}
-            {features.indicators_enabled && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Indicators</Badge>}
-            {features.custom_entities && <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">Custom Entities</Badge>}
+            {org.is_partner && <Badge variant="outline" className="text-[10px] border-warning/30 text-warning">Full Access</Badge>}
+            {features.reports_enabled && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Reports</Badge>}
+            {features.indicators_enabled && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Indicators</Badge>}
+            {features.custom_entities && <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">Custom Entities</Badge>}
           </div>
         </div>
       </div>
@@ -695,9 +695,9 @@ function OrgDetailPanel({ org }: { org: OrganizationWithSubscription }) {
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="text-slate-500">{icon}</span>
-      <span className="text-slate-400 w-20">{label}</span>
-      <span className="text-slate-200 truncate">{value}</span>
+      <span className="text-muted-foreground">{icon}</span>
+      <span className="text-muted-foreground w-20">{label}</span>
+      <span className="text-muted-foreground truncate">{value}</span>
     </div>
   );
 }
@@ -709,15 +709,15 @@ function UsageRow({ label, current, max }: { label: string; current: number; max
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-400">{label}</span>
-        <span className={`text-xs font-mono ${isOverLimit ? 'text-red-400' : 'text-slate-300'}`}>
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className={`text-xs font-mono ${isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}>
           {current}{max ? ` / ${max}` : ' (∞)'}
         </span>
       </div>
       {max && (
-        <div className="h-1.5 rounded-full bg-slate-700 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-muted-foreground overflow-hidden">
           <div 
-            className={`h-full rounded-full transition-all ${isOverLimit ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+            className={`h-full rounded-full transition-all ${isOverLimit ? 'bg-destructive' : pct > 80 ? 'bg-warning' : 'bg-success'}`} 
             style={{ width: `${pct}%` }} 
           />
         </div>

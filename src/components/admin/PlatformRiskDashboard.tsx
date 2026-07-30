@@ -60,7 +60,7 @@ export function PlatformRiskDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning" />
       </div>
     );
   }
@@ -70,9 +70,9 @@ export function PlatformRiskDashboard() {
   const riskLevel = riskAnalysis.overallRiskScore > 15 ? 'Critical' :
     riskAnalysis.overallRiskScore > 8 ? 'Elevated' :
     riskAnalysis.overallRiskScore > 3 ? 'Moderate' : 'Low';
-  const riskColor = riskLevel === 'Critical' ? 'text-red-400' :
-    riskLevel === 'Elevated' ? 'text-amber-400' :
-    riskLevel === 'Moderate' ? 'text-yellow-400' : 'text-emerald-400';
+  const riskColor = riskLevel === 'Critical' ? 'text-destructive' :
+    riskLevel === 'Elevated' ? 'text-warning' :
+    riskLevel === 'Moderate' ? 'text-warning' : 'text-success';
 
   const flags = [
     { label: 'High-risk tenants', count: riskAnalysis.highRisk.length, icon: AlertTriangle, threshold: 0, accent: 'red' },
@@ -85,11 +85,11 @@ export function PlatformRiskDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <AlertTriangle className="h-4 w-4 text-slate-400" />
-        <span className="text-xs text-slate-400 font-medium">PLATFORM RISK DASHBOARD</span>
+      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
+        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">PLATFORM RISK DASHBOARD</span>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-slate-500">Overall Risk:</span>
+          <span className="text-xs text-muted-foreground">Overall Risk:</span>
           <Badge variant="outline" className={`text-xs ${riskColor} border-current`}>
             {riskLevel} ({riskAnalysis.overallRiskScore})
           </Badge>
@@ -101,24 +101,24 @@ export function PlatformRiskDashboard() {
         {flags.map(flag => {
           const isOk = flag.count === 0;
           const colorMap: Record<string, string> = {
-            red: 'border-red-500/20 from-red-500/10 to-red-600/5',
-            amber: 'border-amber-500/20 from-amber-500/10 to-amber-600/5',
-            purple: 'border-purple-500/20 from-purple-500/10 to-purple-600/5',
-            blue: 'border-blue-500/20 from-blue-500/10 to-blue-600/5',
-            cyan: 'border-cyan-500/20 from-cyan-500/10 to-cyan-600/5',
+            red: 'border-destructive/20 from-destructive/10 to-destructive/5',
+            amber: 'border-warning/20 from-warning/10 to-warning/5',
+            purple: 'border-info/20 from-info/10 to-info/5',
+            blue: 'border-info/20 from-info/10 to-info/5',
+            cyan: 'border-info/20 from-info/10 to-info/5',
           };
           const iconColorMap: Record<string, string> = {
-            red: 'text-red-400', amber: 'text-amber-400', purple: 'text-purple-400',
-            blue: 'text-blue-400', cyan: 'text-cyan-400',
+            red: 'text-destructive', amber: 'text-warning', purple: 'text-info',
+            blue: 'text-info', cyan: 'text-info',
           };
           return (
-            <div key={flag.label} className={`p-4 rounded-lg bg-gradient-to-br border ${isOk ? 'border-emerald-500/20 from-emerald-500/10 to-emerald-600/5' : colorMap[flag.accent]}`}>
+            <div key={flag.label} className={`p-4 rounded-lg bg-gradient-to-br border ${isOk ? 'border-success/20 from-success/10 to-success/5' : colorMap[flag.accent]}`}>
               <div className="flex items-center justify-between mb-2">
-                <flag.icon className={`h-4 w-4 ${isOk ? 'text-emerald-400' : iconColorMap[flag.accent]}`} />
-                {isOk ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> : <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />}
+                <flag.icon className={`h-4 w-4 ${isOk ? 'text-success' : iconColorMap[flag.accent]}`} />
+                {isOk ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <AlertTriangle className="h-3.5 w-3.5 text-warning" />}
               </div>
-              <div className="text-2xl font-bold font-mono text-slate-100">{flag.count}</div>
-              <p className="text-[10px] text-slate-500 mt-1">{flag.label}</p>
+              <div className="text-2xl font-bold font-mono text-muted-foreground">{flag.count}</div>
+              <p className="text-[10px] text-muted-foreground mt-1">{flag.label}</p>
             </div>
           );
         })}
@@ -126,8 +126,8 @@ export function PlatformRiskDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Health Score Distribution */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Health Score Distribution
           </h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -147,36 +147,36 @@ export function PlatformRiskDashboard() {
         </div>
 
         {/* High Risk Tenant List */}
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <div className="p-4 rounded-lg bg-muted-foreground/50 border border-border/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
             Flagged Tenants
           </h3>
           <div className="space-y-2 max-h-[250px] overflow-y-auto">
             {riskAnalysis.highRisk.map(org => (
-              <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-red-900/10 border border-red-800/20">
-                <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
+              <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-slate-200 truncate block">{org.name}</span>
-                  <span className="text-[10px] text-slate-500">
+                  <span className="text-sm text-muted-foreground truncate block">{org.name}</span>
+                  <span className="text-[10px] text-muted-foreground">
                     Score: {org.health_score}% · {org.suspended_at ? 'Suspended' : 'Active'} · {org.subscription_tier}
                   </span>
                 </div>
               </div>
             ))}
             {riskAnalysis.mediumRisk.slice(0, 5).map(org => (
-              <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-amber-900/10 border border-amber-800/20">
-                <Zap className="h-4 w-4 text-amber-400 flex-shrink-0" />
+              <div key={org.id} className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                <Zap className="h-4 w-4 text-warning flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-slate-200 truncate block">{org.name}</span>
-                  <span className="text-[10px] text-slate-500">
+                  <span className="text-sm text-muted-foreground truncate block">{org.name}</span>
+                  <span className="text-[10px] text-muted-foreground">
                     Score: {org.health_score}% · {org.subscription_tier}
                   </span>
                 </div>
               </div>
             ))}
             {riskAnalysis.highRisk.length === 0 && riskAnalysis.mediumRisk.length === 0 && (
-              <div className="text-center py-8 text-slate-500">
-                <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald-500/50" />
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success" />
                 <p className="text-sm">No flagged tenants</p>
               </div>
             )}

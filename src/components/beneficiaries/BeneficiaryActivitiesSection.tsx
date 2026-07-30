@@ -54,8 +54,8 @@ export function BeneficiaryActivitiesSection({ beneficiaryId }: { beneficiaryId:
             >
               <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                 {row.kind === "disbursement"
-                  ? <HandCoins className="h-4 w-4 text-amber-600" />
-                  : <Calendar className="h-4 w-4 text-blue-600" />}
+                  ? <HandCoins className="h-4 w-4 text-warning" />
+                  : <Calendar className="h-4 w-4 text-info" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">{row.activity?.name || "Activity"}</div>

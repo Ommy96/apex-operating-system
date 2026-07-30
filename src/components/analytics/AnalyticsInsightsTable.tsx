@@ -316,14 +316,14 @@ export function AnalyticsInsightsTable({ data, isLoading }: AnalyticsInsightsTab
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        <Badge variant="outline" className="bg-info/10 text-info">
                           M: {program.maleCount}
                         </Badge>
-                        <Badge variant="outline" className="bg-pink-50 text-pink-700">
+                        <Badge variant="outline" className="bg-destructive/10 text-destructive">
                           F: {program.femaleCount}
                         </Badge>
                         {program.otherCount > 0 && (
-                          <Badge variant="outline" className="bg-gray-50 text-gray-700">
+                          <Badge variant="outline" className="bg-muted text-foreground">
                             O: {program.otherCount}
                           </Badge>
                         )}
@@ -342,7 +342,7 @@ export function AnalyticsInsightsTable({ data, isLoading }: AnalyticsInsightsTab
                   <TableCell className="text-center">
                     <Badge 
                       variant={program.status === 'active' ? 'default' : 'secondary'}
-                      className={program.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                      className={program.status === 'active' ? 'bg-success/10 text-success' : ''}
                     >
                       {program.status}
                     </Badge>

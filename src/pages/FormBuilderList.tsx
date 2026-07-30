@@ -16,8 +16,8 @@ import { useMEForms, useCreateForm, useDeleteForm } from "@/hooks/useMEForms";
 import { useNavigate } from "react-router-dom";
 
 const statusColor: Record<string, string> = {
-  draft: "bg-amber-100 text-amber-700",
-  active: "bg-teal-100 text-teal-700",
+  draft: "bg-warning/10 text-warning",
+  active: "bg-success/10 text-success",
   retired: "bg-muted text-muted-foreground",
 };
 
@@ -101,7 +101,7 @@ export default function FormBuilderList() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-rose-600 opacity-0 group-hover:opacity-100"
+                    className="text-destructive opacity-0 group-hover:opacity-100"
                     onClick={() => {
                       if (confirm(`Delete "${f.name}"?`)) deleteForm.mutate(f.id);
                     }}

@@ -222,8 +222,8 @@ export function IndicatorsDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <TrendingUp className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
@@ -237,8 +237,8 @@ export function IndicatorsDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                <Target className="h-5 w-5 text-amber-600" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <Target className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{categories.length}</p>

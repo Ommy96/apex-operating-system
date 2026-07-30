@@ -155,8 +155,8 @@ export function AnswerArea({
             <span
               className={cn(
                 "inline-flex items-center gap-1 text-[13px]",
-                di.tone === "good" && "text-emerald-600 dark:text-emerald-400",
-                di.tone === "bad" && "text-amber-600 dark:text-amber-400",
+                di.tone === "good" && "text-success",
+                di.tone === "bad" && "text-warning",
                 di.tone === "muted" && "text-muted-foreground"
               )}
             >

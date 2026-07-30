@@ -32,17 +32,17 @@ const INCIDENT_TYPES = [
 ];
 
 const severityColors: Record<string, string> = {
-  low: 'bg-slate-100 text-slate-700',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  critical: 'bg-red-100 text-red-800',
+  low: 'bg-muted text-foreground',
+  medium: 'bg-warning/10 text-warning',
+  high: 'bg-warning/10 text-warning',
+  critical: 'bg-destructive/10 text-destructive',
 };
 
 const statusColors: Record<string, string> = {
-  reported: 'bg-blue-100 text-blue-800',
-  under_investigation: 'bg-yellow-100 text-yellow-800',
-  closed: 'bg-green-100 text-green-800',
-  referred_externally: 'bg-purple-100 text-purple-800',
+  reported: 'bg-info/10 text-info',
+  under_investigation: 'bg-warning/10 text-warning',
+  closed: 'bg-success/10 text-success',
+  referred_externally: 'bg-info/10 text-info',
 };
 
 export default function SafeguardingDashboard() {

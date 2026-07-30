@@ -21,9 +21,9 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 
 const STATUS_CLS: Record<string, string> = {
-  planned: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  in_progress: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  planned: "bg-info/10 text-info",
+  in_progress: "bg-warning/10 text-warning",
+  completed: "bg-success/10 text-success",
   cancelled: "bg-destructive/10 text-destructive",
 };
 
@@ -111,8 +111,8 @@ export default function ActivityDetail() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 {activity.type === "disbursement"
-                  ? <HandCoins className="h-5 w-5 text-amber-600" />
-                  : <Calendar className="h-5 w-5 text-blue-600" />}
+                  ? <HandCoins className="h-5 w-5 text-warning" />
+                  : <Calendar className="h-5 w-5 text-info" />}
                 <span className="text-xs uppercase tracking-wide text-muted-foreground">{activity.type}</span>
                 <Badge variant="secondary" className={`text-[10px] capitalize ${STATUS_CLS[activity.status] || ""}`}>
                   {activity.status?.replace("_", " ")}
@@ -249,7 +249,7 @@ function ParticipantsPanel({ activityId, orgId, userId, participants, onChange }
                   </Link>
                   <div className="text-xs text-muted-foreground">{p.beneficiaries?.beneficiary_code || ""}</div>
                 </div>
-                {p.attendance_status === "attended" && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                {p.attendance_status === "attended" && <CheckCircle2 className="h-4 w-4 text-success" />}
                 <Button variant="ghost" size="icon" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4 text-muted-foreground" /></Button>
               </div>
             ))}
@@ -331,7 +331,7 @@ function DisbursementsPanel({ activityId, orgId, userId, disbursements, onChange
           <div className="divide-y">
             {disbursements.map((d: any) => (
               <div key={d.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="h-8 w-8 rounded bg-amber-500/10 flex items-center justify-center"><HandCoins className="h-4 w-4 text-amber-600" /></div>
+                <div className="h-8 w-8 rounded bg-warning/10 flex items-center justify-center"><HandCoins className="h-4 w-4 text-warning" /></div>
                 <div className="flex-1 min-w-0">
                   <Link to={`/beneficiaries/${d.beneficiary_id}`} className="text-sm font-medium hover:underline">
                     {d.beneficiaries?.display_name || "Beneficiary"}

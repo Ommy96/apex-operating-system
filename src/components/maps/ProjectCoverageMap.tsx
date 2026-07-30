@@ -31,7 +31,7 @@ export function ProjectCoverageMap({ orgId }: ProjectCoverageMapProps) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-16 text-center">
-          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-amber-500" />
+          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-warning" />
           <h3 className="font-medium mb-1">Map unavailable</h3>
           <p className="text-sm text-muted-foreground">Configure VITE_MAPBOX_TOKEN to enable maps.</p>
         </CardContent>
@@ -70,7 +70,7 @@ function ProjectMapInner({ MapGL, Marker, Popup, token, projects }: any) {
         {markers.map((p: any) => (
           <Marker key={p.id} latitude={Number(p.latitude)} longitude={Number(p.longitude)}
             onClick={(e: any) => { e.originalEvent?.stopPropagation(); setPopup(p); }}>
-            <div className="w-4 h-4 rounded-sm bg-blue-600 border-2 border-white shadow-md cursor-pointer rotate-45" />
+            <div className="w-4 h-4 rounded-sm bg-info border-2 border-white shadow-md cursor-pointer rotate-45" />
           </Marker>
         ))}
         {popup && (

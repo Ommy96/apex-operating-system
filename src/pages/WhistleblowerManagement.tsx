@@ -56,10 +56,10 @@ export function WhistleblowerInner() {
   });
 
   const statusColors: Record<string, string> = {
-    received: 'bg-blue-100 text-blue-800',
-    under_review: 'bg-yellow-100 text-yellow-800',
-    closed: 'bg-green-100 text-green-800',
-    referred: 'bg-purple-100 text-purple-800',
+    received: 'bg-info/10 text-info',
+    under_review: 'bg-warning/10 text-warning',
+    closed: 'bg-success/10 text-success',
+    referred: 'bg-info/10 text-info',
   };
 
   return (

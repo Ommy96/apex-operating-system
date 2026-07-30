@@ -50,7 +50,7 @@ const PLANS = [
     name: 'Enterprise',
     price: 'Custom',
     icon: Shield,
-    color: 'text-violet-500',
+    color: 'text-info',
     features: ['Unlimited beneficiaries', 'Unlimited users', 'Executive dashboards', 'Dedicated support', 'Custom modules', 'API access'],
     limits: { beneficiaries: -1, users: -1, storage: 'Unlimited' },
   },
@@ -524,7 +524,7 @@ export default function RegisterOrganization() {
                         {[1, 2, 3, 4, 5].map(i => (
                           <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${
                             i <= passwordStrength
-                              ? passwordStrength <= 2 ? 'bg-destructive' : passwordStrength <= 3 ? 'bg-yellow-500' : 'bg-green-500'
+                              ? passwordStrength <= 2 ? 'bg-destructive' : passwordStrength <= 3 ? 'bg-warning' : 'bg-success'
                               : 'bg-muted'
                           }`} />
                         ))}

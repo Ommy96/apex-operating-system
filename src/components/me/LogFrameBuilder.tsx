@@ -13,9 +13,9 @@ import { IndicatorTrafficLight } from "@/components/indicators/IndicatorTrafficL
 
 const LEVEL_COLORS: Record<string, string> = {
   goal: "bg-primary/10 text-primary border-primary/20",
-  outcome: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-  output: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-  activity: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+  outcome: "bg-info/10 text-info border-info/20",
+  output: "bg-warning/10 text-warning border-warning/20",
+  activity: "bg-success/10 text-success border-success/20",
 };
 
 export function LogFrameBuilder() {

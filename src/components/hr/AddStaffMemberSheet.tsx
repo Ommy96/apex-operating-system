@@ -332,7 +332,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                     <Switch checked={sendInvite} onCheckedChange={setSendInvite} />
                   </div>
                   {!sendInvite && (
-                    <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400 rounded-md p-2">
+                    <p className="text-xs text-warning bg-warning/10 rounded-md p-2">
                       A temporary password will be generated. You'll need to share it with the staff member securely.
                     </p>
                   )}
@@ -380,9 +380,9 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <Alert variant="destructive" className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-700 dark:text-amber-400">
+            <Alert variant="destructive" className="bg-warning/10 border-warning/30">
+              <AlertCircle className="h-4 w-4 text-warning" />
+              <AlertDescription className="text-warning">
                 This password will not be shown again. Make sure to copy it now.
               </AlertDescription>
             </Alert>

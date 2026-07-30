@@ -120,7 +120,7 @@ export function SystemIntelligenceSection({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-medium text-muted-foreground">Data Completeness</p>
-              <Database className="h-4 w-4 text-blue-500" />
+              <Database className="h-4 w-4 text-info" />
             </div>
             <p className="text-2xl font-bold">{dataCompleteness.score}%</p>
             <Progress value={dataCompleteness.score} className="h-2 mt-2" />
@@ -130,7 +130,7 @@ export function SystemIntelligenceSection({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-medium text-muted-foreground">Enrollment Coverage</p>
-              <Users className="h-4 w-4 text-emerald-500" />
+              <Users className="h-4 w-4 text-success" />
             </div>
             <p className="text-2xl font-bold">{enrollmentCoverage}%</p>
             <Progress value={enrollmentCoverage} className="h-2 mt-2" />
@@ -140,7 +140,7 @@ export function SystemIntelligenceSection({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-medium text-muted-foreground">Active Programs</p>
-              <Layers className="h-4 w-4 text-amber-500" />
+              <Layers className="h-4 w-4 text-warning" />
             </div>
             <p className="text-2xl font-bold">{programs.length}</p>
             <p className="text-xs text-muted-foreground mt-1">configured programs</p>
@@ -150,7 +150,7 @@ export function SystemIntelligenceSection({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-medium text-muted-foreground">Total Activity</p>
-              <Activity className="h-4 w-4 text-purple-500" />
+              <Activity className="h-4 w-4 text-info" />
             </div>
             <p className="text-2xl font-bold">{totalReports}</p>
             <Badge variant={totalReports > 100 ? 'default' : totalReports > 50 ? 'secondary' : 'destructive'} className="mt-2">

@@ -19,8 +19,8 @@ import { formatDisplayDate } from "@/lib/dateUtils";
 
 function severityIcon(s: string) {
   if (s === "error") return <AlertCircle className="h-4 w-4 text-destructive" />;
-  if (s === "warning") return <AlertTriangle className="h-4 w-4 text-amber-500" />;
-  return <Info className="h-4 w-4 text-blue-500" />;
+  if (s === "warning") return <AlertTriangle className="h-4 w-4 text-warning" />;
+  return <Info className="h-4 w-4 text-info" />;
 }
 
 export default function DataQualityDashboard() {
@@ -62,7 +62,7 @@ export default function DataQualityDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Total flags</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{summary.total}</CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Open</CardTitle></CardHeader><CardContent className="text-2xl font-semibold text-destructive">{summary.open}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Resolved</CardTitle></CardHeader><CardContent className="text-2xl font-semibold text-emerald-600">{summary.resolved}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Resolved</CardTitle></CardHeader><CardContent className="text-2xl font-semibold text-success">{summary.resolved}</CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Errors</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{summary.bySeverity.error}</CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Warnings</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{summary.bySeverity.warning}</CardContent></Card>
       </div>
@@ -109,7 +109,7 @@ export default function DataQualityDashboard() {
             <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
           ) : flags.length === 0 ? (
             <div className="text-center py-12 text-sm text-muted-foreground">
-              <CheckCircle2 className="h-10 w-10 mx-auto text-emerald-500 mb-2" />
+              <CheckCircle2 className="h-10 w-10 mx-auto text-success mb-2" />
               No flags match the current filters.
             </div>
           ) : (
@@ -121,7 +121,7 @@ export default function DataQualityDashboard() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className="text-xs capitalize">{f.entity_type.replace(/_/g, " ")}</Badge>
                       <Badge variant="secondary" className="text-xs capitalize">{f.flag_type}</Badge>
-                      {f.is_resolved && <Badge className="text-xs bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Resolved</Badge>}
+                      {f.is_resolved && <Badge className="text-xs bg-success/10 text-success hover:bg-success/10">Resolved</Badge>}
                     </div>
                     <p className="text-sm mt-1">{f.flag_message ?? "No message"}</p>
                     <p className="text-xs text-muted-foreground mt-1">

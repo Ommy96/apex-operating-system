@@ -434,7 +434,7 @@ export const ProgramForm = ({
 
         {/* Custom Fields Tab */}
         <TabsContent value="fields" className="mt-6">
-          <Card className="border-0 shadow-none bg-gradient-to-br from-purple-500/5 to-transparent">
+          <Card className="border-0 shadow-none bg-gradient-to-br from-info/5 to-transparent">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Settings2 className="h-5 w-5 text-primary" />

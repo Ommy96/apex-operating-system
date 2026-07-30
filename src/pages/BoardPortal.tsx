@@ -149,9 +149,9 @@ export default function BoardPortal() {
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
-    published: { label: "Published", color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" },
-    in_review: { label: "In Review", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400" },
-    approved: { label: "Approved", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+    published: { label: "Published", color: "bg-success/10 text-success" },
+    in_review: { label: "In Review", color: "bg-warning/10 text-warning" },
+    approved: { label: "Approved", color: "bg-info/10 text-info" },
   };
 
   const myApproval = approvals.find((a: any) => a.board_member_id === member?.id);
@@ -335,7 +335,7 @@ export default function BoardPortal() {
                   <div className="space-y-2">
                     {approvals.map((a: any) => (
                       <div key={a.id} className="flex items-center gap-3 text-sm">
-                        {a.decision === "approved" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                        {a.decision === "approved" && <CheckCircle2 className="h-4 w-4 text-success" />}
                         {a.decision === "rejected" && <XCircle className="h-4 w-4 text-destructive" />}
                         {a.decision === "abstained" && <Minus className="h-4 w-4 text-muted-foreground" />}
                         <span className="font-medium">{a.board_members?.full_name || "Unknown"}</span>
@@ -391,9 +391,9 @@ export default function BoardPortal() {
                   {actionItems.map((item: any) => (
                     <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
                       <div className={`h-2 w-2 rounded-full mt-1.5 ${
-                        item.status === "completed" ? "bg-emerald-500" :
-                        item.status === "in_progress" ? "bg-amber-500" :
-                        item.status === "cancelled" ? "bg-muted-foreground" : "bg-blue-500"
+                        item.status === "completed" ? "bg-success" :
+                        item.status === "in_progress" ? "bg-warning" :
+                        item.status === "cancelled" ? "bg-muted-foreground" : "bg-info"
                       }`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{item.title}</p>

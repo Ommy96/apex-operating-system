@@ -99,7 +99,7 @@ export function IndicatorCard({
                   <span className="text-xs font-medium">On Track</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-amber-600">
+                <div className="flex items-center gap-1 text-warning">
                   <Target className="h-4 w-4" />
                   <span className="text-xs font-medium">Behind</span>
                 </div>

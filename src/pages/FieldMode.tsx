@@ -174,10 +174,10 @@ export default function FieldMode() {
           {/* ════════ DASHBOARD TAB ════════ */}
           <TabsContent value="dashboard" className="mt-4 space-y-4">
             {/* Connection Status */}
-            <Card className={isOnline ? 'border-emerald-500/30' : 'border-destructive/30'}>
+            <Card className={isOnline ? 'border-success/30' : 'border-destructive/30'}>
               <CardContent className="p-4 flex items-center gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${isOnline ? 'bg-emerald-500/10' : 'bg-destructive/10'}`}>
-                  {isOnline ? <Signal className="h-6 w-6 text-emerald-600 dark:text-emerald-400" /> : <WifiOff className="h-6 w-6 text-destructive" />}
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${isOnline ? 'bg-success/10' : 'bg-destructive/10'}`}>
+                  {isOnline ? <Signal className="h-6 w-6 text-success" /> : <WifiOff className="h-6 w-6 text-destructive" />}
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-foreground">{isOnline ? 'Connected' : 'Offline Mode'}</p>
@@ -191,12 +191,12 @@ export default function FieldMode() {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               <Card><CardContent className="p-4 text-center">
-                <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mx-auto mb-1" />
+                <Clock className="h-5 w-5 text-warning mx-auto mb-1" />
                 <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.pending}</p>
                 <p className="text-xs text-muted-foreground">Pending Sync</p>
               </CardContent></Card>
               <Card><CardContent className="p-4 text-center">
-                <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto mb-1" />
+                <CheckCircle className="h-5 w-5 text-success mx-auto mb-1" />
                 <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.synced}</p>
                 <p className="text-xs text-muted-foreground">Synced</p>
               </CardContent></Card>
@@ -285,7 +285,7 @@ export default function FieldMode() {
                           <p className="text-xs text-muted-foreground">{format(new Date(r.createdAt), 'dd MMM HH:mm')}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-[10px] text-yellow-600 dark:text-yellow-400 border-yellow-500/30">Pending</Badge>
+                      <Badge variant="outline" className="text-[10px] text-warning border-warning/30">Pending</Badge>
                     </div>
                   ))}
                 </CardContent>
@@ -320,7 +320,7 @@ export default function FieldMode() {
               <CardContent className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-foreground">Sync Status</p>
-                  <Badge variant="outline" className={isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>
+                  <Badge variant="outline" className={isOnline ? 'text-success' : 'text-destructive'}>
                     {isOnline ? 'Online' : 'Offline'}
                   </Badge>
                 </div>
@@ -371,10 +371,10 @@ export default function FieldMode() {
                         </div>
                       </div>
                       <Badge variant="outline" className={`text-[10px] shrink-0 ${
-                        r.status === 'synced' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30' :
+                        r.status === 'synced' ? 'text-success border-success/30' :
                         r.status === 'failed' ? 'text-destructive border-destructive/30' :
-                        r.status === 'syncing' ? 'text-blue-600 dark:text-blue-400 border-blue-500/30' :
-                        'text-yellow-600 dark:text-yellow-400 border-yellow-500/30'
+                        r.status === 'syncing' ? 'text-info border-info/30' :
+                        'text-warning border-warning/30'
                       }`}>
                         {r.status}
                       </Badge>

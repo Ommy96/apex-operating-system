@@ -120,11 +120,11 @@ export function GrantFinancialReport({ grantId, reportingPeriodStart, reportingP
   const grantData = grant.data;
   const bd = budgetData.data;
 
-  const getVarianceColor = (variance: number) => variance >= 0 ? 'text-emerald-600' : 'text-destructive';
+  const getVarianceColor = (variance: number) => variance >= 0 ? 'text-success' : 'text-destructive';
   const getUtilColor = (pct: number) => {
     if (pct >= 100) return 'text-destructive';
-    if (pct >= 90) return 'text-amber-600';
-    return 'text-emerald-600';
+    if (pct >= 90) return 'text-warning';
+    return 'text-success';
   };
 
   const exportToPdf = async () => {
