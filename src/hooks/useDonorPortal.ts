@@ -43,7 +43,7 @@ export function useDonorPortal() {
           notes,
           program_id,
           beneficiary:beneficiaries!beneficiary_donors_beneficiary_id_fkey(
-            id, display_name, first_name, last_name, photo_url,
+            id, display_name, first_name, last_name, photo_url, beneficiary_code,
             beneficiary_type, gender, grade, academic_level,
             institution_name, status, date_of_birth, county
           )
