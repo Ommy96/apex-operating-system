@@ -304,7 +304,7 @@ export function AppSidebar() {
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
         { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
         { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
-        { title: "Visits", url: "/visits", icon: CalendarCheck, show: can.viewVisits },
+        { title: "Visits", url: "/staff/visits", icon: CalendarCheck, show: can.viewVisits },
         { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
       ],
     },
