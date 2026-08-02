@@ -191,6 +191,14 @@ export function usePermissions() {
   const isLoading = permissionsLoading || rolesLoading;
   const primaryRole = roles.length > 0 ? roles[0] : null;
 
+  // Capture-first field roles: the user holds only field_officer / data_entry
+  // roles in this org (and no org-wide elevation). Used to render the reduced,
+  // capture-first shell instead of the full management UI.
+  const isFieldOfficer =
+    !fullAccess &&
+    roles.length > 0 &&
+    roles.every((r) => r.role_name === 'field_officer' || r.role_name === 'data_entry');
+
   return {
     permissions,
     roles,
@@ -202,5 +210,6 @@ export function usePermissions() {
     isLoading,
     isSuperAdmin: superAdmin,
     isOrgAdmin: orgAdmin,
+    isFieldOfficer,
   };
 }
