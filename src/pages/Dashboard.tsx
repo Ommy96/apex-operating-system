@@ -33,6 +33,7 @@ const Dashboard = () => {
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
   const { can } = usePermissions();
+  const { isFieldOfficer, isLoading: permLoading } = usePermissions();
   const { term, termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
 
@@ -41,10 +42,14 @@ const Dashboard = () => {
   useEffect(() => {
     if (leadLoading) return;
     if (isAdmin || isManagement) return;
+    if (!permLoading && isFieldOfficer) {
+      navigate("/field-mode", { replace: true });
+      return;
+    }
     if (isProjectLead) {
       navigate("/workspace/lead", { replace: true });
     }
-  }, [leadLoading, isAdmin, isManagement, isProjectLead, navigate]);
+  }, [leadLoading, isAdmin, isManagement, isProjectLead, isFieldOfficer, permLoading, navigate]);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const firstName = userName.split(' ')[0];
