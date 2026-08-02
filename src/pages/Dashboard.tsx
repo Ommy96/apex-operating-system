@@ -32,8 +32,7 @@ const Dashboard = () => {
   const { isAdmin, isManagement, user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
-  const { can } = usePermissions();
-  const { isFieldOfficer, isLoading: permLoading } = usePermissions();
+  const { can, isFieldOfficer, isLoading: permLoading } = usePermissions();
   const { term, termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
 
