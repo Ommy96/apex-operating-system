@@ -161,7 +161,7 @@ interface MenuGroup {
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const { signOut, user } = useAuth();
-  const { can, isSuperAdmin: superAdmin } = usePermissions();
+  const { can, isSuperAdmin: superAdmin, isFieldOfficer } = usePermissions();
   const { currentOrganization } = useOrganization();
   const { logoUrl, orgName } = useBranding();
   const { termPlural } = useBeneficiaryTerminology();
@@ -296,7 +296,29 @@ export function AppSidebar() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const initials = userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
-  const menuGroups: MenuGroup[] = [
+  // Capture-first shell for field officers: only the surfaces they capture into.
+  const fieldOfficerGroups: MenuGroup[] = [
+    {
+      label: "Capture",
+      items: [
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+        { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
+        { title: "Visits", url: "/visits", icon: CalendarCheck, show: can.viewVisits },
+        { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
+      ],
+    },
+    {
+      label: "My work",
+      items: [
+        { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
+        { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
+        { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
+      ],
+    },
+  ];
+
+  const fullMenuGroups: MenuGroup[] = [
     {
       label: "Home",
       items: [
@@ -391,6 +413,8 @@ export function AppSidebar() {
       ],
     },
   ];
+
+  const menuGroups: MenuGroup[] = isFieldOfficer ? fieldOfficerGroups : fullMenuGroups;
 
   return (
     <TooltipProvider>
