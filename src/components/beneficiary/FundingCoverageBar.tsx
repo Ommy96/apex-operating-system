@@ -45,7 +45,7 @@ export function FundingCoverageBar({ totalReceived, totalRequired, className = '
         <span className="text-sm font-medium">{getStatusLabel()}</span>
       </div>
       <Progress value={coverage} className="h-3" />
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
         <div>
           <p className="text-xs text-muted-foreground">Total Required</p>
           <p className="text-sm font-bold text-foreground">KES {required.toLocaleString()}</p>

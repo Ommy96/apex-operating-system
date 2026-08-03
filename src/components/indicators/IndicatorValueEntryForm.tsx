@@ -220,7 +220,7 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
           {categories.map(cat => (
             <div key={cat.id} className="space-y-2">
               <h4 className="font-medium text-sm text-foreground">{cat.name}</h4>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(cat.values || []).map(val => (
                   <div key={val} className="flex items-center gap-2">
                     <Label className="w-24 text-xs text-muted-foreground shrink-0">{val}</Label>

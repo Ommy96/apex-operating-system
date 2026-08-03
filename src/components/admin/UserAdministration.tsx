@@ -78,7 +78,7 @@ export function UserAdministration() {
           />
         </div>
         <Select value={filterRole} onValueChange={setFilterRole}>
-          <SelectTrigger className="w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
+          <SelectTrigger className="w-full sm:w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent className="bg-muted-foreground border-border">

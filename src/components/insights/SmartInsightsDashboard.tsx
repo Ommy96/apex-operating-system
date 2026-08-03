@@ -93,7 +93,7 @@ function FundingGapCard({ gap }: { gap: FundingGap }) {
             <h4 className="font-semibold text-sm text-foreground">{gap.programName}</h4>
             <Badge variant="outline" className={`${severityColors[gap.severity]} text-[10px] uppercase`}>{gap.severity}</Badge>
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
             <div>
               <p className="text-[10px] text-muted-foreground">Budget</p>
               <p className="text-sm font-semibold">${(gap.totalBudget || 0).toLocaleString()}</p>
@@ -319,7 +319,7 @@ export default function SmartInsightsDashboard() {
             <div className="flex items-center justify-between">
               <CardDescription>Beneficiaries identified as needing intervention</CardDescription>
               <Select value={riskFilter} onValueChange={setRiskFilter}>
-                <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Levels</SelectItem>
                   <SelectItem value="high">High Risk</SelectItem>

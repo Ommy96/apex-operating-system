@@ -101,7 +101,7 @@ export function SiblingSelector({ selectedSiblings, onChange, excludeId }: Sibli
             />
           </div>
           <Select value={selectedRelationship} onValueChange={setSelectedRelationship}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Relationship" />
             </SelectTrigger>
             <SelectContent>

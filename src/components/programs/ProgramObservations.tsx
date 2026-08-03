@@ -219,7 +219,7 @@ export const ProgramObservations = ({ beneficiaryId, programId, showAddButton = 
                 <DialogTitle>Record Observation</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Date *</Label>
                     <Input
@@ -247,7 +247,7 @@ export const ProgramObservations = ({ beneficiaryId, programId, showAddButton = 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Program</Label>
                     <Select
@@ -304,7 +304,7 @@ export const ProgramObservations = ({ beneficiaryId, programId, showAddButton = 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Follow-up Date</Label>
                     <Input

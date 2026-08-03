@@ -121,7 +121,7 @@ export function RiskDashboard({ summary, staffMetrics, hrAlerts, beneficiaryImpa
   return (
     <div className="space-y-4">
       {/* Severity Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-3">
         {(["critical", "high", "medium", "low"] as const).map((sev) => {
           const cfg = severityConfig[sev];
           return (

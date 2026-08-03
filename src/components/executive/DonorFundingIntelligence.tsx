@@ -48,7 +48,7 @@ export function DonorFundingIntelligence({ data, isLoading }: Props) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
         <Skeleton className="h-80" />
@@ -81,7 +81,7 @@ export function DonorFundingIntelligence({ data, isLoading }: Props) {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {kpiCards.map((kpi) => (
           <Card key={kpi.label} className="border-border/50">
             <CardContent className="pt-4 pb-3 px-4">

@@ -484,7 +484,7 @@ export default function Beneficiaries() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <StatCard
           title="Total"
           value={stats.total}
@@ -983,7 +983,7 @@ export default function Beneficiaries() {
               {/* Content */}
               <div className="px-6 space-y-5">
                 {/* Quick Stats Row */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {age !== null && (
                     <div className="bg-muted/40 rounded-xl p-3 text-center">
                       <p className="text-lg font-bold text-foreground">{age}</p>

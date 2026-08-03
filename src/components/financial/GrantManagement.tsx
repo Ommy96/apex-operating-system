@@ -201,7 +201,7 @@ export function GrantManagement() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Total Amount</p>
             <p className="text-lg font-bold text-foreground">{grant.currency} {Number(grant.grant_amount).toLocaleString()}</p>
@@ -420,7 +420,7 @@ export function GrantManagement() {
                       </Select>
                     </div>
                     <div><Label>Due Date *</Label><Input type="date" value={reportForm.due_date} onChange={e => setReportForm(p => ({ ...p, due_date: e.target.value }))} /></div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div><Label>Period Start</Label><Input type="date" value={reportForm.reporting_period_start} onChange={e => setReportForm(p => ({ ...p, reporting_period_start: e.target.value }))} /></div>
                       <div><Label>Period End</Label><Input type="date" value={reportForm.reporting_period_end} onChange={e => setReportForm(p => ({ ...p, reporting_period_end: e.target.value }))} /></div>
                     </div>
@@ -587,7 +587,7 @@ export function GrantManagement() {
   return (
     <div className="space-y-6">
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card><CardContent className="flex items-center gap-4 p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><Landmark className="h-5 w-5 text-primary" /></div>
           <div><p className="text-xs text-muted-foreground">Total Grant Value</p><p className="text-lg font-bold text-foreground">KES {totalGrantValue.toLocaleString()}</p></div>
@@ -646,7 +646,7 @@ export function GrantManagement() {
               <div><Label>Grant Name *</Label><Input value={form.grant_name} onChange={e => setForm(p => ({ ...p, grant_name: e.target.value }))} placeholder="e.g. USAID Education Grant 2026" /></div>
               <div><Label>Donor Name *</Label><Input value={form.donor_name} onChange={e => setForm(p => ({ ...p, donor_name: e.target.value }))} placeholder="e.g. USAID" /></div>
               <div><Label>Donor Email</Label><Input type="email" value={form.donor_contact_email} onChange={e => setForm(p => ({ ...p, donor_contact_email: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Grant Amount *</Label><Input type="number" value={form.grant_amount} onChange={e => setForm(p => ({ ...p, grant_amount: e.target.value }))} placeholder="0.00" /></div>
                 <div><Label>Currency</Label>
                   <Select value={form.currency} onValueChange={v => setForm(p => ({ ...p, currency: v }))}>
@@ -661,7 +661,7 @@ export function GrantManagement() {
                   <SelectContent>{GRANT_STATUSES.map(s => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Application Deadline</Label><Input type="date" value={form.application_deadline} onChange={e => setForm(p => ({ ...p, application_deadline: e.target.value }))} /></div>
                 <div><Label>Reporting Frequency</Label>
                   <Select value={form.reporting_frequency} onValueChange={v => setForm(p => ({ ...p, reporting_frequency: v }))}>
@@ -673,7 +673,7 @@ export function GrantManagement() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} /></div>
                 <div><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(p => ({ ...p, end_date: e.target.value }))} /></div>
               </div>

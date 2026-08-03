@@ -186,7 +186,7 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Estimated cost</Label>
                   <Input type="number" value={editing.estimated_cost ?? ''} onChange={(e) => setEditing({ ...editing, estimated_cost: e.target.value ? Number(e.target.value) : null })} />
@@ -196,7 +196,7 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                   <Input value={editing.currency || 'KES'} onChange={(e) => setEditing({ ...editing, currency: e.target.value })} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Priority</Label>
                   <Select value={editing.priority || 'normal'} onValueChange={(v) => setEditing({ ...editing, priority: v as any })}>

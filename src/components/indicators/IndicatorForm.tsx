@@ -140,7 +140,7 @@ export function IndicatorForm({ open, onOpenChange, indicator, categories }: Ind
 
             {/* Basic Info Tab */}
             <TabsContent value="basic" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name *</Label>
                   <Input
@@ -197,7 +197,7 @@ export function IndicatorForm({ open, onOpenChange, indicator, categories }: Ind
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="unit">Unit</Label>
                   <Select

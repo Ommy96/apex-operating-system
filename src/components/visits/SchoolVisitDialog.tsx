@@ -126,7 +126,7 @@ export function SchoolVisitDialog({ open, onOpenChange, beneficiaryId, onSaved }
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Visit date</Label>
               <Input type="date" value={form.visit_date} onChange={(e) => setForm({ ...form, visit_date: e.target.value })} />
@@ -137,7 +137,7 @@ export function SchoolVisitDialog({ open, onOpenChange, beneficiaryId, onSaved }
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <Label>Attendance %</Label>
               <Input type="number" value={form.attendance_rate} onChange={(e) => setForm({ ...form, attendance_rate: e.target.value })} />

@@ -222,7 +222,7 @@ export function ProjectBaselineIndicatorsManager({ projectId, orgId }: Props) {
               <Input value={form.indicator_key} onChange={(e) => setForm((f) => ({ ...f, indicator_key: slugify(e.target.value) }))} placeholder="academic_average" disabled={!!editing} className="font-mono text-xs" />
               <p className="text-[11px] text-muted-foreground">Stable identifier used in reports. Cannot change after creation.</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Value type *</Label>
                 <Select value={form.value_type} onValueChange={(v) => setForm((f) => ({ ...f, value_type: v }))}>

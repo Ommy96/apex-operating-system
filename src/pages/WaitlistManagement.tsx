@@ -169,7 +169,7 @@ export default function WaitlistManagement() {
             <div className="space-y-3">
               <div><Label>Applicant name</Label>
                 <Input value={form.applicant_name} onChange={(e) => setForm({ ...form, applicant_name: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Age</Label>
                   <Input type="number" value={form.applicant_age} onChange={(e) => setForm({ ...form, applicant_age: e.target.value })} /></div>
                 <div><Label>Location</Label>

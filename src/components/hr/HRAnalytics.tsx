@@ -69,7 +69,7 @@ export function HRAnalytics() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-24" />
           ))}
@@ -85,7 +85,7 @@ export function HRAnalytics() {
   return (
     <div className="space-y-6">
       {/* KPI grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <AnalyticsKpiCard label="Total Staff" value={data?.totalStaff ?? 0} icon={Users} tone="teal" />
         <AnalyticsKpiCard
           label="Active Volunteers"

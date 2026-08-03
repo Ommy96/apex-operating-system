@@ -114,7 +114,7 @@ export function NewActivitySheet({ open, onOpenChange, orgId, projectId, navigat
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Type *</Label>
               <Select value={form.type} onValueChange={(v: any) => setForm((p) => ({ ...p, type: v }))}>

@@ -102,7 +102,7 @@ export default function VolunteerManagement() {
       />
 
       {/* Unified Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Staff", value: staffMembers.length, icon: Building2, color: "primary" },
           { label: "Active Volunteers", value: activeVols, icon: Heart, color: "success" },
@@ -187,7 +187,7 @@ export default function VolunteerManagement() {
                 <DialogHeader><DialogTitle>Add Volunteer</DialogTitle></DialogHeader>
                 <div className="space-y-3">
                   <div><Label>Full Name *</Label><Input value={volForm.full_name} onChange={(e) => setVolForm((p) => ({ ...p, full_name: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Email</Label><Input type="email" value={volForm.email} onChange={(e) => setVolForm((p) => ({ ...p, email: e.target.value }))} /></div>
                     <div><Label>Phone</Label><Input value={volForm.phone} onChange={(e) => setVolForm((p) => ({ ...p, phone: e.target.value }))} /></div>
                   </div>
@@ -327,7 +327,7 @@ export default function VolunteerManagement() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Date *</Label><Input type="date" value={hoursForm.log_date} onChange={(e) => setHoursForm((p) => ({ ...p, log_date: e.target.value }))} /></div>
                     <div><Label>Hours *</Label><Input type="number" step="0.5" min="0.5" value={hoursForm.hours} onChange={(e) => setHoursForm((p) => ({ ...p, hours: e.target.value }))} /></div>
                   </div>

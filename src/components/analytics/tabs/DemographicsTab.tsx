@@ -39,7 +39,7 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-[300px]" />
@@ -49,7 +49,7 @@ export default function DemographicsTab({ filters }: { filters: AnalyticsFilters
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <AnalyticsKpiCard label="In scope" value={data?.total ?? 0} icon={Users} tone="teal" />
         <AnalyticsKpiCard label="With disability" value={data?.disabilityCount ?? 0} icon={Accessibility} tone="violet" />
         <AnalyticsKpiCard label="Special needs" value={data?.specialNeedsCount ?? 0} icon={Heart} tone="rose" />

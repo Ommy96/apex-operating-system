@@ -46,7 +46,7 @@ export function VolunteerDirectory() {
             <DialogHeader><DialogTitle>Add Volunteer</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>Full Name *</Label><Input value={volForm.full_name} onChange={(e) => setVolForm((p) => ({ ...p, full_name: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Email</Label><Input type="email" value={volForm.email} onChange={(e) => setVolForm((p) => ({ ...p, email: e.target.value }))} /></div>
                 <div><Label>Phone</Label><Input value={volForm.phone} onChange={(e) => setVolForm((p) => ({ ...p, phone: e.target.value }))} /></div>
               </div>

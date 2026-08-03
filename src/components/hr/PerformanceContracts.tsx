@@ -69,7 +69,7 @@ export function PerformanceContracts() {
                 <Label>Contract Title</Label>
                 <Input value={form.contract_title} onChange={(e) => setForm({ ...form, contract_title: e.target.value })} placeholder="e.g. Q1 2026 Performance Contract" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Start Date</Label><Input type="date" value={form.contract_period_start} onChange={(e) => setForm({ ...form, contract_period_start: e.target.value })} /></div>
                 <div><Label>End Date</Label><Input type="date" value={form.contract_period_end} onChange={(e) => setForm({ ...form, contract_period_end: e.target.value })} /></div>
               </div>
@@ -154,7 +154,7 @@ export function PerformanceContracts() {
                       <div className="space-y-3">
                         <div><Label>Objective</Label><Input value={objForm.objective_title} onChange={(e) => setObjForm({ ...objForm, objective_title: e.target.value })} /></div>
                         <div><Label>Description</Label><Textarea value={objForm.description} onChange={(e) => setObjForm({ ...objForm, description: e.target.value })} /></div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           <div><Label>Weight (%)</Label><Input type="number" value={objForm.weight} onChange={(e) => setObjForm({ ...objForm, weight: +e.target.value })} /></div>
                           <div><Label>Target</Label><Input type="number" value={objForm.target_value} onChange={(e) => setObjForm({ ...objForm, target_value: +e.target.value })} /></div>
                           <div><Label>Unit</Label><Input value={objForm.unit} onChange={(e) => setObjForm({ ...objForm, unit: e.target.value })} placeholder="e.g. %" /></div>

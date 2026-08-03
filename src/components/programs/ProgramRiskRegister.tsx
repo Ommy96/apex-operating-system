@@ -323,7 +323,7 @@ export const ProgramRiskRegister = ({ programId, orgId, projectId }: Props) => {
                 <div className="space-y-3 mt-4">
                   <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
                   <div><Label>Description</Label><Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Category</Label>
                       <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
@@ -339,7 +339,7 @@ export const ProgramRiskRegister = ({ programId, orgId, projectId }: Props) => {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Likelihood (1-5)</Label>
                       <Select value={String(form.likelihood)} onValueChange={(v) => setForm({ ...form, likelihood: Number(v) })}>

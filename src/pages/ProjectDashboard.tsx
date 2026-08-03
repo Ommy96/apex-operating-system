@@ -406,7 +406,7 @@ const ProjectDashboard = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-primary/10">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-1.5 text-primary mb-1">
@@ -455,7 +455,7 @@ const ProjectDashboard = () => {
             </span>
           </div>
           <Progress value={fundingCoverage} className="h-3" />
-          <div className="grid grid-cols-3 gap-4 mt-3 text-center text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3 text-center text-xs">
             <div>
               <p className="text-muted-foreground">Required</p>
               <p className="font-bold text-foreground">{formatCurrency(totalFundingRequired)}</p>

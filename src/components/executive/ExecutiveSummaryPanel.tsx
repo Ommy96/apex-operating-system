@@ -48,7 +48,7 @@ function formatNumber(value: number, format?: boolean, prefix?: string, suffix?:
 export function ExecutiveSummaryPanel({ summary, isLoading }: ExecutiveSummaryPanelProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {Array.from({ length: 10 }).map((_, i) => (
           <Card key={i} className="border-0 shadow-sm">
             <CardContent className="p-4">
@@ -62,7 +62,7 @@ export function ExecutiveSummaryPanel({ summary, isLoading }: ExecutiveSummaryPa
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {kpiConfig.map((kpi) => {
         const value = summary[kpi.key as keyof ExecutiveSummary] as number;
         const Icon = kpi.icon;

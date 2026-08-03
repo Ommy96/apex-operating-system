@@ -94,12 +94,12 @@ export default function PortfolioRollupView() {
   };
 
   if (isLoading) {
-    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>;
+    return <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Programs" value={sortedRows.length} icon={Target} variant="primary" description={`${data?.totals.projects ?? 0} projects`} />
         <StatCard title="Total Budget" value={fmtCurrency(data?.totals.budget || 0)} icon={DollarSign} variant="info" description={`${fmtCurrency(data?.totals.spend || 0)} spent`} />
         <StatCard title="Active Beneficiaries" value={data?.totals.beneficiaries ?? 0} icon={Users} variant="success" />

@@ -59,7 +59,7 @@ export default function DataQualityDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Total flags</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{summary.total}</CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Open</CardTitle></CardHeader><CardContent className="text-2xl font-semibold text-destructive">{summary.open}</CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Resolved</CardTitle></CardHeader><CardContent className="text-2xl font-semibold text-success">{summary.resolved}</CardContent></Card>
@@ -73,7 +73,7 @@ export default function DataQualityDashboard() {
             <CardTitle className="text-base">Flags</CardTitle>
             <div className="flex gap-2">
               <Select value={resolved} onValueChange={(v: any) => setResolved(v)}>
-                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[140px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
@@ -81,7 +81,7 @@ export default function DataQualityDashboard() {
                 </SelectContent>
               </Select>
               <Select value={severity} onValueChange={setSeverity}>
-                <SelectTrigger className="w-[140px]"><SelectValue placeholder="Severity" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Severity" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All severities</SelectItem>
                   <SelectItem value="error">Error</SelectItem>
@@ -90,7 +90,7 @@ export default function DataQualityDashboard() {
                 </SelectContent>
               </Select>
               <Select value={entityType} onValueChange={setEntityType}>
-                <SelectTrigger className="w-[170px]"><SelectValue placeholder="Entity type" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[170px]"><SelectValue placeholder="Entity type" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All entities</SelectItem>
                   <SelectItem value="indicator_value">Indicator value</SelectItem>

@@ -236,7 +236,7 @@ export default function InferaAdminDashboard() {
                         </div>
                         <div className="text-3xl font-bold text-info font-mono">${stats?.annualRevenue?.toLocaleString() || 0}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-3 rounded-lg bg-muted-foreground/50 border border-border/50">
                           <span className="text-xs text-muted-foreground block mb-1">Trial</span>
                           <span className="text-lg font-bold text-info font-mono">{stats?.trialOrganizations || 0}</span>

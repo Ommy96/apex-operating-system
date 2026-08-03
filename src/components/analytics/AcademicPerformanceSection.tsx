@@ -212,7 +212,7 @@ export default function AcademicPerformanceSection() {
       </div>
 
       {/* Enrollment overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <StatTile label="In a level" value={stats.enrolled} tone="primary" />
         <StatTile label="Total beneficiaries" value={stats.total} tone="muted" />
         <StatTile label="Unknown level" value={stats.unknown} tone="warning" />

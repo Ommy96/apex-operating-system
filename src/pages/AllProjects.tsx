@@ -124,7 +124,7 @@ export default function AllProjects() {
           <Input className="pl-9" placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={programFilter} onValueChange={setProgramFilter}>
-          <SelectTrigger className="w-[200px]"><SelectValue placeholder={T.program} /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder={T.program} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All {T.programPluralLower}</SelectItem>
             <SelectItem value="__none__">Standalone (no {T.programLower})</SelectItem>
@@ -132,7 +132,7 @@ export default function AllProjects() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="active">Active</SelectItem>

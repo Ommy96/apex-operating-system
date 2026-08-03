@@ -237,7 +237,7 @@ export default function IndicatorDetail() {
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">{indicator.data_source_description || "—"}</p>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs uppercase text-muted-foreground">Baseline</Label>
                   {editing ? (

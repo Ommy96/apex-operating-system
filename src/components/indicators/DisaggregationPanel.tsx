@@ -25,7 +25,7 @@ export function DisaggregationPanel({ indicatorId }: Props) {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <CardTitle className="text-base">Disaggregation</CardTitle>
           <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Category" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[220px]"><SelectValue placeholder="Category" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
               {categories.map((c) => (

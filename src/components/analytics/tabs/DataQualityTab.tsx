@@ -36,7 +36,7 @@ export default function DataQualityTab({ filters }: { filters: AnalyticsFilters 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-[300px]" />
@@ -66,7 +66,7 @@ export default function DataQualityTab({ filters }: { filters: AnalyticsFilters 
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <AnalyticsKpiCard
           label="Duplicate names"
           value={data?.duplicateGroupsCount ?? 0}

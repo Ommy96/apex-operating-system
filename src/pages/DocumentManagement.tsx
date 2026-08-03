@@ -185,7 +185,7 @@ export default function DocumentManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />

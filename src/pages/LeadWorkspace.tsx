@@ -146,7 +146,7 @@ export default function LeadWorkspace() {
               value={projectId ?? undefined}
               onValueChange={(v) => setProjectId(v)}
             >
-              <SelectTrigger className="w-[260px]">
+              <SelectTrigger className="w-full sm:w-[260px]">
                 <SelectValue placeholder="Switch project" />
               </SelectTrigger>
               <SelectContent>

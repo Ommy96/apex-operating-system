@@ -247,7 +247,7 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
       {tableConfig && tableConfig.filterFields.length > 0 && (
         <div className="space-y-3">
           <Label>Filters</Label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {tableConfig.filterFields.map((filter) => (
               <div key={filter.key} className="space-y-1">
                 <Label className="text-xs">{filter.label}</Label>
@@ -307,7 +307,7 @@ function DataSourceSelector({
       </Select>
 
       {tableConfig && tableConfig.filterFields.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {tableConfig.filterFields.map((filter) => (
             <Select
               key={filter.key}

@@ -189,7 +189,7 @@ export default function FieldMode() {
             </Card>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Card><CardContent className="p-4 text-center">
                 <Clock className="h-5 w-5 text-warning mx-auto mb-1" />
                 <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.pending}</p>
@@ -220,7 +220,7 @@ export default function FieldMode() {
             >
               <Zap className="h-5 w-5" /> Quick Visit (under 60s)
             </Button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 size="lg"
                 className="h-20 flex-col gap-2 rounded-xl text-sm"
@@ -327,7 +327,7 @@ export default function FieldMode() {
                 {stats.total > 0 && (
                   <Progress value={stats.total > 0 ? (stats.synced / stats.total) * 100 : 0} className="h-2" />
                 )}
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-center text-xs">
                   <div><p className="font-bold text-foreground">{stats.pending}</p><p className="text-muted-foreground">Pending</p></div>
                   <div><p className="font-bold text-foreground">{stats.synced}</p><p className="text-muted-foreground">Synced</p></div>
                   <div><p className="font-bold text-foreground">{stats.failed}</p><p className="text-muted-foreground">Failed</p></div>
@@ -335,7 +335,7 @@ export default function FieldMode() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button onClick={syncAll} disabled={isSyncing || !isOnline || stats.pending === 0} className="gap-2">
                 <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
                 {isSyncing ? 'Syncing...' : 'Sync Now'}
@@ -392,11 +392,11 @@ export default function FieldMode() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Register Beneficiary</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>First Name *</Label><Input value={benForm.first_name} onChange={e => setBenForm(p => ({ ...p, first_name: e.target.value }))} placeholder="First name" /></div>
               <div><Label>Last Name *</Label><Input value={benForm.last_name} onChange={e => setBenForm(p => ({ ...p, last_name: e.target.value }))} placeholder="Last name" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Date of Birth</Label><Input type="date" value={benForm.date_of_birth} onChange={e => setBenForm(p => ({ ...p, date_of_birth: e.target.value }))} /></div>
               <div><Label>Gender</Label>
                 <Select value={benForm.gender} onValueChange={v => setBenForm(p => ({ ...p, gender: v }))}>
@@ -409,7 +409,7 @@ export default function FieldMode() {
               </div>
             </div>
             <div><Label>Location</Label><Input value={benForm.location} onChange={e => setBenForm(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Nairobi, Kibera" /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>School/Institution</Label><Input value={benForm.institution_name} onChange={e => setBenForm(p => ({ ...p, institution_name: e.target.value }))} /></div>
               <div><Label>Grade/Class</Label><Input value={benForm.grade} onChange={e => setBenForm(p => ({ ...p, grade: e.target.value }))} /></div>
             </div>
@@ -458,7 +458,7 @@ export default function FieldMode() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Category</Label>
                 <Select value={obsForm.observation_category} onValueChange={v => setObsForm(p => ({ ...p, observation_category: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

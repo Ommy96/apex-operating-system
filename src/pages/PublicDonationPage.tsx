@@ -150,7 +150,7 @@ export default function PublicDonationPage() {
           </div>
           <Card><CardContent className="p-5 space-y-3">
             <Progress value={pct} className="h-3" />
-            <div className="grid grid-cols-3 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-center">
               <div>
                 <p className="text-xs text-muted-foreground">Raised</p>
                 <p className="font-bold text-success">{c.currency} {Number(c.raised_amount).toLocaleString()}</p>

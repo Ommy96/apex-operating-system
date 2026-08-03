@@ -613,7 +613,7 @@ export const BeneficiaryEnrollmentForm = ({
                               exitDate: (status || '').toLowerCase() !== 'active' ? new Date().toISOString().split('T')[0] : undefined,
                             });
                           }}>
-                            <SelectTrigger className="w-[120px] h-7 text-xs">
+                            <SelectTrigger className="w-full sm:w-[120px] h-7 text-xs">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -906,7 +906,7 @@ export const BeneficiaryEnrollmentForm = ({
                 onChange={setDonorName}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Amount (KES)</Label>
                 <Input type="number" placeholder="0" value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} />
@@ -1005,7 +1005,7 @@ export const BeneficiaryEnrollmentForm = ({
                 onChange={setEditDonorName}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Amount (KES)</Label>
                 <Input type="number" placeholder="0" value={editDonorAmount} onChange={(e) => setEditDonorAmount(e.target.value)} />

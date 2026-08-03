@@ -93,7 +93,7 @@ export function ExpenseTracking() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px] h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[150px] h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
@@ -113,7 +113,7 @@ export function ExpenseTracking() {
             <div className="space-y-4">
               <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} placeholder="e.g. Transport to field visit" /></div>
               <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Amount *</Label><Input type="number" value={form.amount} onChange={e => setForm(p => ({...p, amount: e.target.value}))} placeholder="0.00" /></div>
                 <div><Label>Currency</Label>
                   <Select value={form.currency} onValueChange={v => setForm(p => ({...p, currency: v}))}>
@@ -126,7 +126,7 @@ export function ExpenseTracking() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Date</Label><Input type="date" value={form.expense_date} onChange={e => setForm(p => ({...p, expense_date: e.target.value}))} /></div>
                 <div><Label>Vendor</Label><Input value={form.vendor} onChange={e => setForm(p => ({...p, vendor: e.target.value}))} placeholder="Vendor name" /></div>
               </div>
@@ -142,7 +142,7 @@ export function ExpenseTracking() {
                   <SelectContent>{budgets.data?.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Payment Method</Label><Input value={form.payment_method} onChange={e => setForm(p => ({...p, payment_method: e.target.value}))} placeholder="e.g. MPesa, Cash" /></div>
                 <div><Label>Reference No.</Label><Input value={form.reference_number} onChange={e => setForm(p => ({...p, reference_number: e.target.value}))} /></div>
               </div>

@@ -308,7 +308,7 @@ export function AddRelationshipSheet({
                 <p className="text-xs text-muted-foreground mt-1">
                   Pick the relationship from {currentBeneficiary.display_name}'s perspective.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
                   {RELATIONSHIP_PICKER.map((r) => (
                     <button
                       key={r.type}

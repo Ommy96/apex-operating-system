@@ -328,7 +328,7 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Role</Label>
                       <Select value={pForm.role} onValueChange={(v) => setPForm({ ...pForm, role: v })}>
@@ -349,12 +349,12 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Contribution Type</Label><Input value={pForm.contribution_type} onChange={(e) => setPForm({ ...pForm, contribution_type: e.target.value })} placeholder="Funding, Staff, Equipment..." /></div>
                     <div><Label>Contribution Value</Label><Input type="number" value={pForm.contribution_value} onChange={(e) => setPForm({ ...pForm, contribution_value: e.target.value })} /></div>
                   </div>
                   <div><Label>MoU Reference</Label><Input value={pForm.mou_reference} onChange={(e) => setPForm({ ...pForm, mou_reference: e.target.value })} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>MoU Start</Label><Input type="date" value={pForm.mou_start_date} onChange={(e) => setPForm({ ...pForm, mou_start_date: e.target.value })} /></div>
                     <div><Label>MoU End</Label><Input type="date" value={pForm.mou_end_date} onChange={(e) => setPForm({ ...pForm, mou_end_date: e.target.value })} /></div>
                   </div>
@@ -427,7 +427,7 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
                 <SheetHeader><SheetTitle>{editingStakeholder ? "Edit Stakeholder" : "New Stakeholder"}</SheetTitle></SheetHeader>
                 <div className="space-y-3 mt-4">
                   <div><Label>Name *</Label><Input value={sForm.name} onChange={(e) => setSForm({ ...sForm, name: e.target.value })} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Organization</Label><Input value={sForm.organization_name} onChange={(e) => setSForm({ ...sForm, organization_name: e.target.value })} /></div>
                     <div><Label>Role / Title</Label><Input value={sForm.role_title} onChange={(e) => setSForm({ ...sForm, role_title: e.target.value })} /></div>
                   </div>
@@ -438,7 +438,7 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
                       <SelectContent>{STAKEHOLDER_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Influence (1-5)</Label>
                       <Select value={String(sForm.influence)} onValueChange={(v) => setSForm({ ...sForm, influence: Number(v) })}>
@@ -455,7 +455,7 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
                     </div>
                   </div>
                   <div><Label>Engagement Strategy</Label><Textarea rows={2} value={sForm.engagement_strategy} onChange={(e) => setSForm({ ...sForm, engagement_strategy: e.target.value })} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Email</Label><Input type="email" value={sForm.contact_email} onChange={(e) => setSForm({ ...sForm, contact_email: e.target.value })} /></div>
                     <div><Label>Phone</Label><Input value={sForm.contact_phone} onChange={(e) => setSForm({ ...sForm, contact_phone: e.target.value })} /></div>
                   </div>
@@ -470,7 +470,7 @@ export const ProgramPartners = ({ programId, orgId, projectId }: Props) => {
 
           {/* 2x2 Power-Interest Grid */}
           {stakeholders.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
               {[
                 { label: "Keep Satisfied", filter: (s: any) => s.influence >= 4 && s.interest < 4, color: "bg-warning/5 border-warning/30" },
                 { label: "Manage Closely", filter: (s: any) => s.influence >= 4 && s.interest >= 4, color: "bg-destructive/5 border-destructive/30" },

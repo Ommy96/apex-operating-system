@@ -323,7 +323,7 @@ export function DonorSupport() {
               <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
             </Button>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px] h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[180px] h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="beneficiary_support">Donor Support</SelectItem>

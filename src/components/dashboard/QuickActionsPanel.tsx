@@ -33,7 +33,7 @@ export function QuickActionsPanel() {
   const visibleActions = actions.filter(a => a.show);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2">
       {visibleActions.map((action) => (
         <Button
           key={action.id}

@@ -237,7 +237,7 @@ function RollupEditor({
           <DialogDescription>Define a program-level KPI fed by project indicators.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Key</Label>
               <Input
@@ -263,7 +263,7 @@ function RollupEditor({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Normalized scale</Label>
               <Select
@@ -428,7 +428,7 @@ function TranslationEditor({
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Source project</Label>
               <Select
@@ -463,7 +463,7 @@ function TranslationEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Source type</Label>
               <Select
@@ -540,7 +540,7 @@ function MappingPicker({
       ? (mapping as any)
       : defaults;
     return (
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:grid-cols-6 gap-2">
         {Object.keys(defaults).map((letter) => (
           <div key={letter} className="space-y-1">
             <Label className="text-xs">{letter}</Label>
@@ -589,7 +589,7 @@ function MappingPicker({
       <p className="text-xs text-muted-foreground">
         Map a numeric range linearly onto 0–100%.
       </p>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <div>
           <Label className="text-xs">Source min</Label>
           <Input type="number" value={m.from[0]} onChange={(e) => onChange({ ...m, from: [Number(e.target.value), m.from[1]] })} />

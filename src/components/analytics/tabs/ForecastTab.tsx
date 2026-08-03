@@ -41,7 +41,7 @@ export default function ForecastTab({ filters }: { filters: AnalyticsFilters }) 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-[300px]" />
@@ -76,7 +76,7 @@ export default function ForecastTab({ filters }: { filters: AnalyticsFilters }) 
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <AnalyticsKpiCard
           label="Avg monthly enrolment growth"
           value={`${(data?.beneficiaryAvgGrowth ?? 0).toFixed(1)}%`}

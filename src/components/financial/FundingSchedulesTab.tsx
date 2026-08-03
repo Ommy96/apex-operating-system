@@ -116,7 +116,7 @@ export function FundingSchedulesTab() {
             <SheetHeader><SheetTitle>New Funding Schedule</SheetTitle></SheetHeader>
             <div className="space-y-4 mt-4">
               <div><Label>Donor Name *</Label><Input value={form.donor_name} onChange={e => setForm(p => ({ ...p, donor_name: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Amount *</Label><Input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} /></div>
                 <div><Label>Currency</Label>
                   <Select value={form.currency} onValueChange={v => setForm(p => ({ ...p, currency: v }))}>
@@ -133,7 +133,7 @@ export function FundingSchedulesTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Start Date *</Label><Input type="date" value={form.start_date} onChange={e => setForm(p => ({ ...p, start_date: e.target.value }))} /></div>
                 <div><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(p => ({ ...p, end_date: e.target.value }))} /></div>
               </div>
@@ -151,7 +151,7 @@ export function FundingSchedulesTab() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <Card className="workspace-card">
           <CardContent className="p-4 text-center">
             <CalendarDays className="h-5 w-5 mx-auto mb-1 text-primary" />

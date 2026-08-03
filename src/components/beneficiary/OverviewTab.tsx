@@ -42,7 +42,7 @@ export function OverviewTab({ beneficiaryId, beneficiary, guardians, donors }: O
   return (
     <div className="space-y-4">
       {/* Summary Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-primary/20">
           <CardContent className="p-4 text-center">
             <FolderKanban className="h-5 w-5 text-primary mx-auto mb-1" />

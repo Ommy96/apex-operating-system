@@ -176,7 +176,7 @@ export default function BranchManagement() {
     <div className="space-y-6">
       <PageHeroHeader title="Branches & Regions" description="Manage multi-branch operations, regional groupings, and staff assignments across locations." icon={Building2} />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Regions", value: regions.length, icon: Globe, color: "primary" },
           { label: "Total Branches", value: branches.length, icon: Building2, color: "info" },
@@ -213,7 +213,7 @@ export default function BranchManagement() {
               <DialogContent>
                 <DialogHeader><DialogTitle>Add Branch</DialogTitle></DialogHeader>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Branch Name *</Label><Input value={branchForm.name} onChange={e => setBranchForm(p => ({ ...p, name: e.target.value }))} /></div>
                     <div><Label>Code</Label><Input value={branchForm.code} onChange={e => setBranchForm(p => ({ ...p, code: e.target.value }))} placeholder="NBO-01" /></div>
                   </div>
@@ -225,7 +225,7 @@ export default function BranchManagement() {
                     </Select>
                   </div>
                   <div><Label>Address</Label><Input value={branchForm.address} onChange={e => setBranchForm(p => ({ ...p, address: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Phone</Label><Input value={branchForm.phone} onChange={e => setBranchForm(p => ({ ...p, phone: e.target.value }))} /></div>
                     <div><Label>Email</Label><Input value={branchForm.email} onChange={e => setBranchForm(p => ({ ...p, email: e.target.value }))} /></div>
                   </div>
@@ -270,7 +270,7 @@ export default function BranchManagement() {
                 <div className="space-y-3">
                   <div><Label>Region Name *</Label><Input value={regionForm.name} onChange={e => setRegionForm(p => ({ ...p, name: e.target.value }))} /></div>
                   <div><Label>Description</Label><Textarea value={regionForm.description} onChange={e => setRegionForm(p => ({ ...p, description: e.target.value }))} rows={2} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Country</Label><Input value={regionForm.country} onChange={e => setRegionForm(p => ({ ...p, country: e.target.value }))} /></div>
                     <div><Label>County</Label><Input value={regionForm.county} onChange={e => setRegionForm(p => ({ ...p, county: e.target.value }))} /></div>
                   </div>

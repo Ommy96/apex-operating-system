@@ -85,7 +85,7 @@ export default function ProgramManagerWorkspace() {
         </div>
         <div className="flex items-center gap-2">
           <Select value={programId ?? ""} onValueChange={setProgramId}>
-            <SelectTrigger className="w-[280px]"><SelectValue placeholder="Choose programme…" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[280px]"><SelectValue placeholder="Choose programme…" /></SelectTrigger>
             <SelectContent>
               {programs.map((p) => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>

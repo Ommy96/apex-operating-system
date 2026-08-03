@@ -115,7 +115,7 @@ export function SystemIntelligenceSection({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} border-l-4 border-l-blue-500`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">

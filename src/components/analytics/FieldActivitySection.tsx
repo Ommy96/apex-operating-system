@@ -153,7 +153,7 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className={`${getCardStyles(0 as CardVariant)} border-l-4 border-l-blue-500`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -214,7 +214,7 @@ export function FieldActivitySection({ visitations, beneficiaries, dateRange, is
 
       {/* Visit Type Breakdown */}
       {visitsByType.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-3">
           {visitsByType.map(vt => {
             const config = VISIT_TYPE_CONFIG[vt.type];
             const Icon = config?.icon || Home;

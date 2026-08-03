@@ -224,7 +224,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                     <Label htmlFor="email">Email address *</Label>
                     <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.org" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="phone">Phone number</Label>
                       <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+254 7XX XXX XXX" />
@@ -234,7 +234,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                       <Input id="nationalId" value={nationalId} onChange={e => setNationalId(e.target.value)} placeholder="e.g. 12345678" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="dob">Date of birth</Label>
                       <Input id="dob" type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
@@ -268,7 +268,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                     <Label htmlFor="jobTitle">Job title *</Label>
                     <Input id="jobTitle" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g. Programme Officer" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="department">Department</Label>
                       <Input id="department" value={department} onChange={e => setDepartment(e.target.value)} placeholder="e.g. Programs" />
@@ -287,7 +287,7 @@ export function AddStaffMemberSheet({ open, onOpenChange }: AddStaffMemberSheetP
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="startDate">Start date</Label>
                       <Input id="startDate" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />

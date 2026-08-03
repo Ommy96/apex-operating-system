@@ -72,7 +72,7 @@ export function StakeholderMessages() {
               <DialogTitle>Log Communication</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 mt-2">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium mb-1 block">Channel</label>
                   <Select value={form.channel} onValueChange={(v) => setForm(f => ({ ...f, channel: v }))}>

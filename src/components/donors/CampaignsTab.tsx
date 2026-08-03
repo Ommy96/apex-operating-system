@@ -174,7 +174,7 @@ function CampaignDetail({ campaign, publicUrl, onArchive }: { campaign: Donation
       </div>
       <Card><CardContent className="p-4 space-y-2">
         <Progress value={pct} className="h-3" />
-        <div className="grid grid-cols-3 text-center text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-center text-sm">
           <div><p className="text-xs text-muted-foreground">Raised</p><p className="font-bold text-success">{campaign.currency} {Number(campaign.raised_amount).toLocaleString()}</p></div>
           <div><p className="text-xs text-muted-foreground">Goal</p><p className="font-bold">{campaign.currency} {Number(campaign.target_amount).toLocaleString()}</p></div>
           <div><p className="text-xs text-muted-foreground">Donors</p><p className="font-bold">{campaign.donor_count}</p></div>

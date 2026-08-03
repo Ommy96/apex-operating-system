@@ -80,7 +80,7 @@ export default function ReportAssembly() {
               <Label className="text-xs uppercase text-muted-foreground">Title (optional)</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Quarterly M&E Report" />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs uppercase text-muted-foreground">From</Label>
                 <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />

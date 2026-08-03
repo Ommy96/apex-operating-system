@@ -66,7 +66,7 @@ export function AuditLogViewer() {
           />
         </div>
         <Select value={eventFilter} onValueChange={setEventFilter}>
-          <SelectTrigger className="w-[180px] bg-muted-foreground/50 border-border text-muted-foreground">
+          <SelectTrigger className="w-full sm:w-[180px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Event Type" />
           </SelectTrigger>
           <SelectContent className="bg-muted-foreground border-border">
