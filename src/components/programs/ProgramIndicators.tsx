@@ -291,7 +291,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Type</Label>
                     <Select
@@ -331,7 +331,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Target Value</Label>
                     <Input
@@ -352,7 +352,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Program</Label>
                     <Select
@@ -388,7 +388,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Reporting Frequency</Label>
                     <Select

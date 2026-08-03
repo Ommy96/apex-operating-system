@@ -154,7 +154,7 @@ const ProgramDashboard = () => {
           </div>
         </div>
         <Skeleton className="h-40 w-full rounded-2xl" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
@@ -263,7 +263,7 @@ const ProgramDashboard = () => {
       </div>
 
       {/* ─── Stat Cards ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Users}
           label="Beneficiaries"

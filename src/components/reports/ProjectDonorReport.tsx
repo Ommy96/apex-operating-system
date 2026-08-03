@@ -166,7 +166,7 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
         <Card>
           <CardHeader><CardTitle className="text-base">Reach</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center text-sm">
               <div><p className="text-2xl font-bold">{totalBens}</p><p className="text-muted-foreground">Beneficiaries</p></div>
               <div><p className="text-2xl font-bold">{male}</p><p className="text-muted-foreground">Male</p></div>
               <div><p className="text-2xl font-bold">{female}</p><p className="text-muted-foreground">Female</p></div>
@@ -177,7 +177,7 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
         <Card>
           <CardHeader><CardTitle className="text-base">Financials</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground text-xs">Project budget</p>
                 <p className="font-semibold"><CurrencyAmount amount={budget} currency="KES" /></p>

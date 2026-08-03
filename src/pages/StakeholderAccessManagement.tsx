@@ -101,7 +101,7 @@ export default function StakeholderAccessManagement() {
                 <Label>Email</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Type</Label>
                   <Select value={form.stakeholder_type} onValueChange={(v) => setForm({ ...form, stakeholder_type: v })}>

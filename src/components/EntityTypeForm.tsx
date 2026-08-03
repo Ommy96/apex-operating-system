@@ -82,7 +82,7 @@ export function EntityTypeForm({ entityType, onSubmit, onCancel, isSubmitting }:
 
         <TabsContent value="basic" className="space-y-4 mt-4">
           {/* Name & Slug */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Entity Type Name *</Label>
               <Input
@@ -105,7 +105,7 @@ export function EntityTypeForm({ entityType, onSubmit, onCancel, isSubmitting }:
           </div>
 
           {/* Icon & Color */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="icon">Icon</Label>
               <Select

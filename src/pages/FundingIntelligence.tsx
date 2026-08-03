@@ -222,7 +222,7 @@ export default function FundingIntelligence() {
 
         {/* ===== Overview ===== */}
         <TabsContent value="overview" className="mt-6 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <StatTile label="Total budget" value={totals.budget} />
             <StatTile label="Committed" value={totals.committed} />
             <StatTile label="Received" value={totals.received} />
@@ -375,7 +375,7 @@ export default function FundingIntelligence() {
                           {Math.round(coverage)}% covered
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <KV label="Budget" value={fmt(budget)} />
                         <KV label="Committed" value={fmt(committed)} />
                         <KV label="Received" value={fmt(received)} />

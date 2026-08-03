@@ -66,13 +66,13 @@ export default function CaseDetail() {
           </div>
           <div className="flex items-center gap-2">
             <Select value={kase.case_status} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { case_status: v as CaseStatus } })}>
-              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {(["open","in_progress","referred","resolved","closed","lost_to_follow_up"] as CaseStatus[]).map(s => <SelectItem key={s} value={s}>{s.replace(/_/g," ")}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
-              <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[120px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {(["low","normal","high","critical"] as CasePriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
@@ -180,7 +180,7 @@ function NewEntrySheet({ open, onOpenChange, caseId, beneficiaryId }: { open: bo
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader><SheetTitle>Record case entry</SheetTitle></SheetHeader>
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Entry type</Label>
               <Select value={entryType} onValueChange={(v) => setEntryType(v as EntryType)}>
@@ -197,7 +197,7 @@ function NewEntrySheet({ open, onOpenChange, caseId, beneficiaryId }: { open: bo
             <Label>Summary *</Label>
             <Textarea rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="What happened?" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Concern level</Label>
               <Select value={concernLevel} onValueChange={setConcernLevel}>
@@ -217,7 +217,7 @@ function NewEntrySheet({ open, onOpenChange, caseId, beneficiaryId }: { open: bo
             <Input value={actionRequired} onChange={(e) => setActionRequired(e.target.value)} placeholder="What action needs to happen next?" />
           </div>
           {isReferral && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>Referred to (person)</Label>
                 <Input value={referralTo} onChange={(e) => setReferralTo(e.target.value)} />

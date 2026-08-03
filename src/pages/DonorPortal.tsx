@@ -522,7 +522,7 @@ function BeneficiaryDetail({ data, academics, progression, loading }: {
         <Separator />
 
         {/* Info Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           {b.gender && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wider">Gender</p>

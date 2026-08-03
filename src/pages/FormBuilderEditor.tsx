@@ -249,7 +249,7 @@ export default function FormBuilderEditor() {
             <Card><CardContent className="p-0">
               <div className="divide-y">
                 {submissions.map((s) => (
-                  <div key={s.id} className="p-4 text-sm grid grid-cols-3 gap-2">
+                  <div key={s.id} className="p-4 text-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                     <div><span className="text-muted-foreground">Date:</span> {s.submission_date}</div>
                     <div><span className="text-muted-foreground">Beneficiaries:</span> {s.beneficiary_ids?.length ?? 0}</div>
                     <div><span className="text-muted-foreground">Location:</span> {s.location_county ?? "—"}</div>

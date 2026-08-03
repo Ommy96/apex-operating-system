@@ -189,7 +189,7 @@ export function QuickVisitFlow({ open, onOpenChange }: Props) {
           {step === 'attendance' && (
             <div className="space-y-3">
               <Label className="text-sm flex items-center gap-2"><ClipboardCheck className="h-4 w-4" /> Attendance</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Button variant={present === true ? 'default' : 'outline'} className="h-14" onClick={() => setPresent(true)}>Present</Button>
                 <Button variant={present === false ? 'default' : 'outline'} className="h-14" onClick={() => setPresent(false)}>Absent</Button>
               </div>

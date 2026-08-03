@@ -128,7 +128,7 @@ export function ProgramProjectIntelligence({ data, isLoading }: Props) {
           <h3 className="text-lg font-semibold text-foreground">Program & Project Intelligence</h3>
         </div>
         <Select value={selectedProgram} onValueChange={setSelectedProgram}>
-          <SelectTrigger className="w-[240px]">
+          <SelectTrigger className="w-full sm:w-[240px]">
             <SelectValue placeholder="All Programs" />
           </SelectTrigger>
           <SelectContent>
@@ -141,7 +141,7 @@ export function ProgramProjectIntelligence({ data, isLoading }: Props) {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         <MiniStat
           label="Programs"
           value={data.programCoverage.filter(p => p.isActive).length}
@@ -234,7 +234,7 @@ export function ProgramProjectIntelligence({ data, isLoading }: Props) {
                       </div>
                       <span className="text-lg font-bold text-primary">{p.activeEnrolled}</span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 text-xs text-muted-foreground">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs text-muted-foreground">
                       <div><span className="block font-medium text-foreground">{p.totalEnrolled}</span>Total</div>
                       <div><span className="block font-medium text-foreground">{p.newEnrollments}</span>New</div>
                       <div><span className="block font-medium text-foreground">{p.projectCount}</span>Projects</div>

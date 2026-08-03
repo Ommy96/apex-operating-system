@@ -173,7 +173,7 @@ export function RoleIndicator({
               <Key className="h-3 w-3" />
               Permissions
             </h4>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
               {config.permissions.map((permission, index) => (
                 <div key={index} className="flex items-center gap-1 text-xs text-muted-foreground">
                   <div className={cn('w-1 h-1 rounded-full', config.bgColor)} />

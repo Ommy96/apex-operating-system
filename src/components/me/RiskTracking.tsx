@@ -32,7 +32,7 @@ export function RiskTracking() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         {(["low", "medium", "high", "critical"] as const).map(level => (
           <Card key={level} className={`${RISK_COLORS[level]} border`}>
             <CardContent className="p-4 text-center">

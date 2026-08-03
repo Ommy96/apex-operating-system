@@ -43,7 +43,7 @@ export function SponsorshipFundingTab({ donors, fundingRequired }: SponsorshipFu
 
       {/* Breakdown by Program */}
       {Object.keys(programBreakdown).length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {Object.entries(programBreakdown).map(([prog, amount]) => (
             <Card key={prog} className="border-muted">
               <CardContent className="p-4 text-center">

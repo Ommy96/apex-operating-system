@@ -313,7 +313,7 @@ export default function OrgSetupWizard() {
               title="Who do you serve?"
               subtitle="Select all the beneficiary types your organisation works with."
             >
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-2">
                 {BENEFICIARY_TYPES.map((t) => {
                   const on = bTypes.includes(t.key);
                   return (

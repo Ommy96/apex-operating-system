@@ -278,7 +278,7 @@ export function OrganizationManagement() {
           />
         </div>
         <Select value={filterTier} onValueChange={setFilterTier}>
-          <SelectTrigger className="w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
+          <SelectTrigger className="w-full sm:w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Tier" />
           </SelectTrigger>
           <SelectContent className="bg-muted-foreground border-border">
@@ -290,7 +290,7 @@ export function OrganizationManagement() {
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
+          <SelectTrigger className="w-full sm:w-[140px] bg-muted-foreground/50 border-border text-muted-foreground">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-muted-foreground border-border">

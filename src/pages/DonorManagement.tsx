@@ -464,7 +464,7 @@ export default function DonorManagement() {
           </DialogHeader>
           {selectedDonor && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                 <div className="text-center p-2 sm:p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm sm:text-lg font-bold truncate">KES {selectedDonor.totalAmount.toLocaleString()}</p>
                   <p className="text-xs text-muted-foreground">Total Given</p>

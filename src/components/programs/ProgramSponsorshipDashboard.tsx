@@ -44,7 +44,7 @@ export function ProgramSponsorshipDashboard({ programId }: Props) {
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -99,7 +99,7 @@ export function ProgramSponsorshipDashboard({ programId }: Props) {
             <span className="text-sm font-bold text-primary">{coverage.coverageRate}%</span>
           </div>
           <Progress value={coverage.coverageRate} className="h-3" />
-          <div className="grid grid-cols-3 gap-4 mt-3 text-center text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3 text-center text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Received</p>
               <p className="font-bold text-success">KES {coverage.totalReceived.toLocaleString()}</p>

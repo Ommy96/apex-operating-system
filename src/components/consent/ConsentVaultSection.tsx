@@ -186,7 +186,7 @@ function UploadDialog({ open, onOpenChange, beneficiaryId, householdId, onDone }
             <Label>Title (optional)</Label>
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><Label>Signed on</Label><Input type="date" value={form.signed_at} onChange={(e) => setForm({ ...form, signed_at: e.target.value })} /></div>
             <div><Label>Expires on</Label><Input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} /></div>
           </div>

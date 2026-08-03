@@ -353,7 +353,7 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
                 <Label>Donor Name</Label>
                 <Input value={form.donor_name} onChange={e => setForm({ ...form, donor_name: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <Label>Period Start *</Label>
                   <Input type="date" value={form.period_start} onChange={e => setForm({ ...form, period_start: e.target.value })} />
@@ -427,7 +427,7 @@ export function DonorReportPacks({ programId, projectId, orgId }: Props) {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div><p className="text-xs text-muted-foreground">Beneficiaries</p><p className="font-semibold">{snap.beneficiaries_total ?? "—"}</p></div>
                     <div><p className="text-xs text-muted-foreground">Activities</p><p className="font-semibold">{snap.activities_completed ?? 0}/{snap.activities_planned ?? 0}</p></div>
                     <div><p className="text-xs text-muted-foreground">Income</p><p className="font-semibold">KES {Number(snap.income ?? 0).toLocaleString()}</p></div>

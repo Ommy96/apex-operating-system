@@ -293,7 +293,7 @@ export function SustainabilityPlan({ programId, projectId, orgId }: Props) {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="p-4">
           <div className="text-xs text-muted-foreground">Total Milestones</div>
           <div className="text-2xl font-semibold">{total}</div>
@@ -319,14 +319,14 @@ export function SustainabilityPlan({ programId, projectId, orgId }: Props) {
           <CardTitle className="text-base">Transition Milestones</CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[160px] h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px] h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[140px] h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 {STATUS_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
@@ -350,7 +350,7 @@ export function SustainabilityPlan({ programId, projectId, orgId }: Props) {
                     <Textarea rows={3} value={form.description}
                       onChange={e => setForm({ ...form, description: e.target.value })} />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Category</Label>
                       <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
@@ -372,7 +372,7 @@ export function SustainabilityPlan({ programId, projectId, orgId }: Props) {
                       onChange={e => setForm({ ...form, responsible_party: e.target.value })}
                       placeholder="Person, team, or organisation" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Due Date</Label>
                       <Input type="date" value={form.due_date}

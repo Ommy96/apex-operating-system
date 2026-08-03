@@ -175,7 +175,7 @@ export function ProgramReachTargets({ programId, orgId, projectId }: Props) {
               <div><Label>Segment</Label><Input value={form.segment} onChange={(e) => setForm({ ...form, segment: e.target.value })} placeholder="e.g. Female, 6-17, Nairobi" /></div>
               <div><Label>Location (optional)</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
               <div><Label>Target count</Label><Input type="number" value={form.target_count} onChange={(e) => setForm({ ...form, target_count: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div><Label>Period start</Label><Input type="date" value={form.period_start} onChange={(e) => setForm({ ...form, period_start: e.target.value })} /></div>
                 <div><Label>Period end</Label><Input type="date" value={form.period_end} onChange={(e) => setForm({ ...form, period_end: e.target.value })} /></div>
               </div>

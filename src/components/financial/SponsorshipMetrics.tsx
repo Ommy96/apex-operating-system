@@ -30,7 +30,7 @@ export function SponsorshipMetrics() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <DollarSign className="h-5 w-5 text-primary mx-auto mb-1" />
             <p className="text-lg font-bold text-foreground">KES {metrics.totalRequired.toLocaleString()}</p>

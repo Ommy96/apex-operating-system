@@ -242,7 +242,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
 
       {/* Approvals Tab */}
       <TabsContent value="approvals" className="space-y-4">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <Card className="p-3 text-center">
             <p className="text-2xl font-bold text-success">{approvalSummary.approved}</p>
             <p className="text-xs text-muted-foreground">Approved</p>
@@ -298,7 +298,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
               <Label>Description</Label>
               <Textarea value={actionForm.description} onChange={(e) => setActionForm(p => ({ ...p, description: e.target.value }))} rows={2} />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
                 <Label>Assigned To</Label>
                 <Input value={actionForm.assigned_to} onChange={(e) => setActionForm(p => ({ ...p, assigned_to: e.target.value }))} placeholder="Name" />
@@ -347,7 +347,7 @@ export function BoardCollaborationPanel({ reportId, reportStatus }: BoardCollabo
               </div>
             </div>
             <Select value={item.status} onValueChange={(v) => updateActionStatus.mutate({ id: item.id, status: v })}>
-              <SelectTrigger className="w-[120px] h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[120px] h-7 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>

@@ -23,7 +23,7 @@ export function QuantitativeView({ data }: { data: QuantitativeReport }) {
     <div className="space-y-6">
       <section>
         <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">Activity totals</h3>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {stat("Visits", formatNumber(t.visits))}
           {stat("Observations", formatNumber(t.observations))}
           {stat("Activities completed", formatNumber(t.activities_completed))}
@@ -35,7 +35,7 @@ export function QuantitativeView({ data }: { data: QuantitativeReport }) {
 
       <section>
         <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">Beneficiaries</h3>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-4">
           {stat("Active", formatNumber(b.active))}
           {stat("Newly enrolled", formatNumber(b.newly_enrolled))}
           {stat("Exited", formatNumber(b.exited))}

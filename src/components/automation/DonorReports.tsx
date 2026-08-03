@@ -88,7 +88,7 @@ export function DonorReports() {
             <div className="space-y-3">
               <div><Label>Template Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. USAID Quarterly Report" /></div>
               <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Report Type</Label>
                   <Select value={form.template_type} onValueChange={(v) => setForm({ ...form, template_type: v })}>
@@ -153,7 +153,7 @@ export function DonorReports() {
                         <DialogContent>
                           <DialogHeader><DialogTitle>Generate Report: {t.name}</DialogTitle></DialogHeader>
                           <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div><Label>Period Start</Label><Input type="date" value={genForm.report_period_start} onChange={(e) => setGenForm({ ...genForm, report_period_start: e.target.value })} /></div>
                               <div><Label>Period End</Label><Input type="date" value={genForm.report_period_end} onChange={(e) => setGenForm({ ...genForm, report_period_end: e.target.value })} /></div>
                             </div>
@@ -203,7 +203,7 @@ export function DonorReports() {
                             <DialogHeader><DialogTitle>{r.template_name} — Report Preview</DialogTitle></DialogHeader>
                             {data?.summary && (
                               <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div className="p-3 rounded-lg bg-muted/50">
                                     <p className="text-xs text-muted-foreground">Total Beneficiaries</p>
                                     <p className="text-lg font-bold">{data.summary.total_beneficiaries}</p>

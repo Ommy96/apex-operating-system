@@ -344,7 +344,7 @@ export function IndicatorDetailView({
                   </CardTitle>
                   {disaggPeriods.length > 1 && (
                     <Select value={activePeriod} onValueChange={setSelectedDisaggPeriod}>
-                      <SelectTrigger className="w-[160px] h-8 text-xs">
+                      <SelectTrigger className="w-full sm:w-[160px] h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -384,7 +384,7 @@ export function IndicatorDetailView({
               <CardTitle className="text-sm">Configuration</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Formula Type</p>
                   <p className="font-medium capitalize">{indicator.formula_type}</p>

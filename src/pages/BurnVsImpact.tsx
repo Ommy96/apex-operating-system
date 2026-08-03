@@ -203,7 +203,7 @@ export default function BurnVsImpact() {
         </div>
         <div className="flex items-center gap-2">
           <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -303,7 +303,7 @@ export default function BurnVsImpact() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4">
             {QUADRANTS.map((q) => (
               <div key={q.name} className="flex items-center gap-2 text-xs">
                 <span

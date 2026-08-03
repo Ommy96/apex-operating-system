@@ -158,7 +158,7 @@ export function NarrativeReportsTab({ projectId, projectName }: { projectId: str
             <SheetHeader><SheetTitle>New Narrative Report</SheetTitle></SheetHeader>
             <div className="space-y-4 mt-4">
               <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Period Start *</Label><Input type="date" value={form.report_period_start} onChange={e => setForm(p => ({ ...p, report_period_start: e.target.value }))} /></div>
                 <div><Label>Period End *</Label><Input type="date" value={form.report_period_end} onChange={e => setForm(p => ({ ...p, report_period_end: e.target.value }))} /></div>
               </div>

@@ -117,7 +117,7 @@ export function NeedTypesSettings() {
                 <Label>Description</Label>
                 <Textarea rows={2} value={editing.description || ''} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Default cost</Label>
                   <Input type="number" value={editing.default_cost ?? ''} onChange={(e) => setEditing({ ...editing, default_cost: e.target.value ? Number(e.target.value) : null })} />

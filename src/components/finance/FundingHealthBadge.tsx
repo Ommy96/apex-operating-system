@@ -47,7 +47,7 @@ export function FundingHealthBadge({ programId, compact = false }: { programId: 
             <Activity className={cn("h-7 w-7", scoreColor(score))} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <SubScore icon={TrendingUp} label="Coverage" value={data.coverage} />
           <SubScore icon={Activity} label="Burn rate" value={data.burn} />
           <SubScore icon={Users} label="Donor diversity" value={data.diversity} />

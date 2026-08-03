@@ -80,7 +80,7 @@ export default function OverviewTab({ filters }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <AnalyticsKpiCard
           label="Total beneficiaries"
           value={formatNumber(kpis.totalBeneficiaries)}

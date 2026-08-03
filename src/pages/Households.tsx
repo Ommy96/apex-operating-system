@@ -123,7 +123,7 @@ export default function Households() {
         }
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard title="Households" value={households.length} icon={Home} variant="primary" />
         <StatCard title="Total members" value={totalMembers} icon={Users} variant="success" />
         <StatCard

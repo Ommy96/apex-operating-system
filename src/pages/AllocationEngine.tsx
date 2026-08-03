@@ -86,7 +86,7 @@ export default function AllocationEngine() {
         <p className="text-sm text-muted-foreground">Donors decoupled from beneficiaries via dynamic pools.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <SummaryCard label="Committed" value={formatMoney(totals.committedTotal, totals.baseCur)} />
         <SummaryCard label="Received" value={formatMoney(totals.receivedTotal, totals.baseCur)} />
         <SummaryCard label="Allocated (active)" value={formatMoney(totals.allocatedBase, totals.baseCur)} />

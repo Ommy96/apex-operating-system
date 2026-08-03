@@ -58,21 +58,21 @@ export default function CaseManagement() {
           <Input className="pl-9" placeholder="Search beneficiary, case #, summary…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {Object.keys(statusBadge).map(s => <SelectItem key={s} value={s}>{s.replace(/_/g," ")}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Priority" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All priorities</SelectItem>
             {Object.keys(priorityBadge).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={caseType} onValueChange={(v) => setCaseType(v as any)}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {CASE_TYPES.map(t => <SelectItem key={t} value={t}>{t.replace(/_/g," ")}</SelectItem>)}
@@ -183,7 +183,7 @@ function NewCaseSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
               </>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Case type</Label>
               <Select value={caseType} onValueChange={(v) => setCaseType(v as CaseType)}>

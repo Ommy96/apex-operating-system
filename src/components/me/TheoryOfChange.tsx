@@ -141,7 +141,7 @@ export function TheoryOfChange() {
               </div>
               {/* Assumptions & Risks */}
               {(grouped.assumption?.length > 0 || grouped.risk?.length > 0) && (
-                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t">
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-1">Assumptions</p>
                     {grouped.assumption?.map((n: any) => (

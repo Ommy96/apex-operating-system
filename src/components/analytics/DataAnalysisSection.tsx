@@ -214,7 +214,7 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Skeleton className="h-80" />
           <Skeleton className="h-80" />
         </div>
@@ -248,7 +248,7 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Sponsor:</span>
               <Select value={selectedDonor} onValueChange={setSelectedDonor}>
-                <SelectTrigger className="w-[200px] h-9">
+                <SelectTrigger className="w-full sm:w-[200px] h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -262,7 +262,7 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Break down by:</span>
               <Select value={donorBreakdown} onValueChange={(v) => setDonorBreakdown(v as BreakdownKey)}>
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-full sm:w-[180px] h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,7 +275,7 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="border-border/50">
               <CardContent className="pt-4 pb-3 px-4">
                 <span className="text-xs text-muted-foreground">Total Sponsors</span>
@@ -397,7 +397,7 @@ export function DataAnalysisSection({ beneficiaries, donors, isLoading }: Props)
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Cross-tabulate by:</span>
               <Select value={academicBreakdown} onValueChange={(v) => setAcademicBreakdown(v as BreakdownKey)}>
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-full sm:w-[180px] h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

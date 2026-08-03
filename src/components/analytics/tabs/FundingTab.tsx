@@ -47,7 +47,7 @@ export default function FundingTab({ filters }: { filters: AnalyticsFilters }) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-[300px]" />
@@ -57,7 +57,7 @@ export default function FundingTab({ filters }: { filters: AnalyticsFilters }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <AnalyticsKpiCard label="Total Income" value={fmt(data?.totalIncome ?? 0)} icon={DollarSign} tone="teal" />
         <AnalyticsKpiCard label="Total Expenses" value={fmt(data?.totalExpenses ?? 0)} icon={TrendingDown} tone="amber" />
         <AnalyticsKpiCard

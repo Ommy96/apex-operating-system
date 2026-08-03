@@ -144,7 +144,7 @@ export default function SafeguardingDashboard() {
                 <AlertDescription>This report is confidential and will only be visible to authorised staff.</AlertDescription>
               </Alert>
               <form onSubmit={e => { e.preventDefault(); createMutation.mutate(reportForm); }} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label>Date *</Label>
                     <Input type="date" value={reportForm.incident_date} onChange={e => setReportForm(p => ({ ...p, incident_date: e.target.value }))} required />

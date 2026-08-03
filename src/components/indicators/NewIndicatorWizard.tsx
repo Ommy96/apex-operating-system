@@ -208,7 +208,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
                 <p className="text-xs text-muted-foreground">Write this so that two different field officers would collect the same data independently.</p>
                 {errors.definition && <ErrorMsg msg={errors.definition} />}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Unit of measurement *</Label>
                   <Select value={unit} onValueChange={setUnit}>
@@ -236,7 +236,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
               </div>
               <div className="space-y-2">
                 <Label>Disaggregation dimensions</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {DISAGG_OPTIONS.map((opt) => (
                     <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox
@@ -256,7 +256,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
           {step === 2 && (
             <>
               <h3 className="font-medium">Set your targets and starting point</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Baseline value</Label>
                   <Input type="number" value={baselineValue} onChange={(e) => setBaselineValue(e.target.value)} />
@@ -270,7 +270,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
                 <Label>Baseline source</Label>
                 <Input value={baselineSource} onChange={(e) => setBaselineSource(e.target.value)} placeholder="Where did the baseline come from?" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Target value *</Label>
                   <Input type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} />
@@ -308,7 +308,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
               </div>
               <div className="space-y-2">
                 <Label>Validation rule (optional)</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input type="number" placeholder="Min value" value={validationMin} onChange={(e) => setValidationMin(e.target.value)} />
                   <Input type="number" placeholder="Max value" value={validationMax} onChange={(e) => setValidationMax(e.target.value)} />
                 </div>
@@ -363,7 +363,7 @@ function ErrorMsg({ msg }: { msg: string }) {
 }
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
       <span className="text-muted-foreground">{label}</span>
       <span className="col-span-2 font-medium break-words">{value || "—"}</span>
     </div>

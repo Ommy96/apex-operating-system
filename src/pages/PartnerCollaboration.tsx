@@ -65,7 +65,7 @@ export default function PartnerCollaboration() {
     <div className="space-y-6">
       <PageHeroHeader title="Partner Collaboration" description="Manage partnerships, shared resources, and joint activities with collaborating organizations." icon={Handshake} />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Partners", value: partners.length, icon: Building, color: "primary" },
           { label: "Active", value: activePartners, icon: Handshake, color: "success" },
@@ -100,7 +100,7 @@ export default function PartnerCollaboration() {
                 <DialogHeader><DialogTitle>Add Partner Organization</DialogTitle></DialogHeader>
                 <div className="space-y-3">
                   <div><Label>Organization Name *</Label><Input value={partnerForm.partner_name} onChange={(e) => setPartnerForm((p) => ({ ...p, partner_name: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Type</Label>
                       <Select value={partnerForm.partner_type} onValueChange={(v) => setPartnerForm((p) => ({ ...p, partner_type: v }))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -110,7 +110,7 @@ export default function PartnerCollaboration() {
                     <div><Label>Country</Label><Input value={partnerForm.country} onChange={(e) => setPartnerForm((p) => ({ ...p, country: e.target.value }))} /></div>
                   </div>
                   <div><Label>Contact Person</Label><Input value={partnerForm.contact_person} onChange={(e) => setPartnerForm((p) => ({ ...p, contact_person: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Email</Label><Input type="email" value={partnerForm.contact_email} onChange={(e) => setPartnerForm((p) => ({ ...p, contact_email: e.target.value }))} /></div>
                     <div><Label>Phone</Label><Input value={partnerForm.contact_phone} onChange={(e) => setPartnerForm((p) => ({ ...p, contact_phone: e.target.value }))} /></div>
                   </div>
@@ -163,7 +163,7 @@ export default function PartnerCollaboration() {
                     </Select>
                   </div>
                   <div><Label>Title *</Label><Input value={resourceForm.title} onChange={(e) => setResourceForm((p) => ({ ...p, title: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Type</Label>
                       <Select value={resourceForm.resource_type} onValueChange={(v) => setResourceForm((p) => ({ ...p, resource_type: v }))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -227,7 +227,7 @@ export default function PartnerCollaboration() {
                     </Select>
                   </div>
                   <div><Label>Activity Title *</Label><Input value={activityForm.title} onChange={(e) => setActivityForm((p) => ({ ...p, title: e.target.value }))} /></div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><Label>Date</Label><Input type="date" value={activityForm.activity_date} onChange={(e) => setActivityForm((p) => ({ ...p, activity_date: e.target.value }))} /></div>
                     <div><Label>Participants</Label><Input type="number" value={activityForm.participants_count} onChange={(e) => setActivityForm((p) => ({ ...p, participants_count: e.target.value }))} /></div>
                   </div>

@@ -64,7 +64,7 @@ export default function IndicatorManagement() {
                 <Input placeholder="Search indicators..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8" />
               </div>
               <Select value={levelFilter} onValueChange={setLevelFilter}>
-                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Level" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Level" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All levels</SelectItem>
                   <SelectItem value="output">Output</SelectItem>
@@ -74,7 +74,7 @@ export default function IndicatorManagement() {
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>

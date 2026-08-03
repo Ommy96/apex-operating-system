@@ -101,7 +101,7 @@ export function BudgetPlanning() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <Card><CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Total Budget</p>
             <p className="text-lg font-bold text-foreground"><CurrencyAmount amount={Number(budget.total_amount)} currency={budget.currency} /></p>
@@ -136,7 +136,7 @@ export function BudgetPlanning() {
                 <DialogHeader><DialogTitle>Add Budget Line Item</DialogTitle></DialogHeader>
                 <div className="space-y-4">
                   <div><Label>Description</Label><Input value={lineForm.description} onChange={e => setLineForm(p => ({...p, description: e.target.value}))} placeholder="e.g. Staff salaries" /></div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label>Quantity</Label><Input type="number" value={lineForm.quantity} onChange={e => setLineForm(p => ({...p, quantity: e.target.value}))} /></div>
                     <div><Label>Unit Cost ({budget.currency})</Label><Input type="number" value={lineForm.unit_cost} onChange={e => setLineForm(p => ({...p, unit_cost: e.target.value}))} /></div>
                   </div>
@@ -215,7 +215,7 @@ export function BudgetPlanning() {
             <div className="space-y-4">
               <div><Label>Budget Name</Label><Input value={form.name} onChange={e => setForm(p => ({...p, name: e.target.value}))} placeholder="e.g. Q1 2026 Operations" /></div>
               <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Fiscal Year</Label><Input type="number" value={form.fiscal_year} onChange={e => setForm(p => ({...p, fiscal_year: parseInt(e.target.value)}))} /></div>
                 <div><Label>Currency</Label>
                   <Select value={form.currency} onValueChange={v => setForm(p => ({...p, currency: v}))}>

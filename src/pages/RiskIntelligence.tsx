@@ -40,7 +40,7 @@ export default function RiskIntelligence() {
     return (
       <div className="space-y-6">
         <PageHeroHeader title="Risk Intelligence" description="Automated risk detection across finances, programmes, compliance, and data" icon={ShieldAlert} iconColorClass="text-destructive" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>
         <Skeleton className="h-96" />
       </div>
     );
@@ -61,7 +61,7 @@ export default function RiskIntelligence() {
       <PageHeroHeader title="Risk Intelligence" description="Automated risk detection across finances, programmes, compliance, and data" icon={ShieldAlert} iconColorClass="text-destructive" />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Critical", count: counts.critical, icon: AlertTriangle, color: "destructive" },
           { label: "High", count: counts.high, icon: ShieldAlert, color: "destructive" },

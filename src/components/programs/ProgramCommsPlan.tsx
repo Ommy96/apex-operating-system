@@ -162,7 +162,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
         <Button size="sm" onClick={startNew}><Plus className="h-4 w-4 mr-1" /> New Output</Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Outputs</p><p className="text-2xl font-semibold">{stats.total}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Published</p><p className="text-2xl font-semibold text-success">{stats.published}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Planned</p><p className="text-2xl font-semibold">{stats.planned}</p></CardContent></Card>
@@ -257,7 +257,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
               <Label>Title *</Label>
               <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Type</Label>
                 <Select value={form.output_type} onValueChange={v => setForm({ ...form, output_type: v })}>
@@ -282,7 +282,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
               <Label>Description</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Channel</Label>
                 <Input placeholder="e.g. Twitter, Daily Nation, YouTube" value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value })} />
@@ -292,7 +292,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
                 <Input placeholder="Donor name (if applicable)" value={form.donor_name} onChange={e => setForm({ ...form, donor_name: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Planned Date</Label>
                 <Input type="date" value={form.planned_date} onChange={e => setForm({ ...form, planned_date: e.target.value })} />
@@ -302,7 +302,7 @@ export function ProgramCommsPlan({ programId, projectId, orgId }: Props) {
                 <Input type="date" value={form.published_date} onChange={e => setForm({ ...form, published_date: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Audience Reach</Label>
                 <Input type="number" min="0" value={form.audience_reach} onChange={e => setForm({ ...form, audience_reach: e.target.value })} />

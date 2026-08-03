@@ -119,7 +119,7 @@ export default function BoardReporting() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="workspace-card">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -204,7 +204,7 @@ export default function BoardReporting() {
                     <Label>Description</Label>
                     <Textarea value={reportForm.description} onChange={(e) => setReportForm((p) => ({ ...p, description: e.target.value }))} placeholder="Summary for the board..." />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label>Period Start</Label>
                       <Input type="date" value={reportForm.report_period_start} onChange={(e) => setReportForm((p) => ({ ...p, report_period_start: e.target.value }))} />
@@ -433,7 +433,7 @@ function ReportDetail({
             <div><Label>Title</Label><Input value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} /></div>
             <div><Label>Description</Label><Textarea value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} rows={2} /></div>
             <div><Label>Executive Summary</Label><Textarea value={editForm.executive_summary} onChange={e => setEditForm(p => ({ ...p, executive_summary: e.target.value }))} rows={3} /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Meeting Date</Label><Input type="date" value={editForm.meeting_date} onChange={e => setEditForm(p => ({ ...p, meeting_date: e.target.value }))} /></div>
               <div><Label>Meeting Agenda</Label><Input value={editForm.meeting_agenda} onChange={e => setEditForm(p => ({ ...p, meeting_agenda: e.target.value }))} /></div>
             </div>

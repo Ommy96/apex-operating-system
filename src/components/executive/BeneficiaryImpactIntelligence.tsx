@@ -80,7 +80,7 @@ export function BeneficiaryImpactIntelligence({ data, isLoading }: Props) {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         <KpiCard label="Avg Services/Beneficiary" value={data.avgServicesPerBenef} icon={<Activity className="h-4 w-4" />} color="primary" />
         <KpiCard label="Multi-Service Beneficiaries" value={data.multiServiceBenefs} icon={<Users className="h-4 w-4" />} color="accent" />
         <KpiCard label="Avg Visits/Beneficiary" value={data.avgVisitsPerBenef} icon={<Eye className="h-4 w-4" />} color="info" />
@@ -333,7 +333,7 @@ export function BeneficiaryImpactIntelligence({ data, isLoading }: Props) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div className="text-center p-3 rounded-lg bg-muted/50">
                     <p className="text-2xl font-bold text-foreground">{data.totalBeneficiariesWithVisits}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">Beneficiaries Visited</p>

@@ -122,7 +122,7 @@ export default function ActivityDetail() {
               {activity.description && <p className="text-sm text-muted-foreground mt-2">{activity.description}</p>}
             </div>
             <Select value={activity.status} onValueChange={(v) => updateStatus.mutate(v)}>
-              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="planned">Planned</SelectItem>
                 <SelectItem value="in_progress">In progress</SelectItem>
@@ -132,7 +132,7 @@ export default function ActivityDetail() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-2 border-t">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-2 border-t">
             <div>
               <div className="text-xs text-muted-foreground">Project</div>
               {activity.projects ? (
@@ -309,11 +309,11 @@ function DisbursementsPanel({ activityId, orgId, userId, disbursements, onChange
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div><Label>Quantity</Label><Input type="number" value={form.quantity} onChange={(e) => setForm((p) => ({ ...p, quantity: e.target.value }))} /></div>
                 <div><Label>Unit</Label><Input value={form.unit} onChange={(e) => setForm((p) => ({ ...p, unit: e.target.value }))} placeholder="e.g. kg, set" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div><Label>Monetary value</Label><Input type="number" value={form.monetary_value} onChange={(e) => setForm((p) => ({ ...p, monetary_value: e.target.value }))} /></div>
                 <div><Label>Currency</Label><Input value={form.currency} onChange={(e) => setForm((p) => ({ ...p, currency: e.target.value }))} /></div>
               </div>

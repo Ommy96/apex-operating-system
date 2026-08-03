@@ -482,7 +482,7 @@ const Dashboard = () => {
       </div>
 
       {/* SECTION 2: METRIC CARDS */}
-      <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <SparklineTile
           label={termPlural.toUpperCase()}
           icon={UsersIcon}
@@ -690,12 +690,12 @@ const Dashboard = () => {
         {/* CARD F: Organisation Snapshot */}
         <DashCard title="Organisation snapshot" subtitle="Key metrics at a glance">
           {snapshotLoading ? (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[60px] rounded-[10px]" />)}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 <SnapshotTile value={snapshot?.beneficiaries || 0} label={termPlural} />
                 <SnapshotTile value={snapshot?.programmes || 0} label="Programmes" />
                 <SnapshotTile value={snapshot?.projects || 0} label="Projects" />

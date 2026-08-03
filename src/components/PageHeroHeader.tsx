@@ -55,7 +55,7 @@ export function PageHeroHeader({
           </div>
           
           {stats && stats.length > 0 && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
