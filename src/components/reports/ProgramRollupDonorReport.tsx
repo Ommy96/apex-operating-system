@@ -131,7 +131,7 @@ export function ProgramRollupDonorReport({
         <Card>
           <CardHeader><CardTitle className="text-base">Programme reach & spend</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center text-sm">
+            <div className="grid grid-cols-3 gap-4 text-center text-sm">
               <div><p className="text-2xl font-bold">{projects.length}</p><p className="text-muted-foreground">Projects</p></div>
               <div><p className="text-2xl font-bold">{combinedReach}</p><p className="text-muted-foreground">Combined reach</p></div>
               <div><p className="text-2xl font-bold"><CurrencyAmount amount={combinedSpend} currency="KES" /></p><p className="text-muted-foreground">Spent in period</p></div>

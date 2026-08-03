@@ -187,7 +187,7 @@ export function DonorProgressReport({ projectId, grantId, reportingPeriodStart, 
         <Card>
           <CardHeader><CardTitle className="text-base">3. Beneficiaries Reached</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center text-sm">
+            <div className="grid grid-cols-3 gap-4 text-center text-sm">
               <div><p className="text-2xl font-bold text-foreground">{totalBeneficiaries}</p><p className="text-muted-foreground">Total</p></div>
               <div><p className="text-2xl font-bold text-foreground">{maleCount}</p><p className="text-muted-foreground">Male</p></div>
               <div><p className="text-2xl font-bold text-foreground">{femaleCount}</p><p className="text-muted-foreground">Female</p></div>

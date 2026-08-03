@@ -98,7 +98,7 @@ export function UnrestrictedDonorReport({
         <Card>
           <CardHeader><CardTitle className="text-base">Your flexible funding</CardTitle></CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-sm">
+            <div className="grid grid-cols-2 gap-4 text-center text-sm">
               <div>
                 <p className="text-2xl font-bold"><CurrencyAmount amount={contributed.data || 0} currency="KES" /></p>
                 <p className="text-muted-foreground">Total unrestricted contributed</p>
