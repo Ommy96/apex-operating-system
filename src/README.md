@@ -1,4 +1,4 @@
-# ApexOS / Ufanisi DMS — Architecture Notes
+# ApexOS — Architecture Notes
 
 _Updated by the 17 Jun 2026 structural cleanup pass._
 

@@ -150,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const appUrl = req.headers.get("origin") ?? "https://ufanisi-dms.lovable.app";
+    const appUrl = req.headers.get("origin") ?? "https://apexos-dms.lovable.app";
     const results: { id: string; status: string; recipients: number; error?: string }[] = [];
 
     for (const sub of subs) {
@@ -168,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         await resend.emails.send({
-          from: "Ufanisi Analytics <onboarding@resend.dev>",
+          from: "ApexOS Analytics <onboarding@resend.dev>",
           to: sub.recipients,
           subject: `${sub.name} — ${tabLabel} (${sub.frequency})`,
           html,

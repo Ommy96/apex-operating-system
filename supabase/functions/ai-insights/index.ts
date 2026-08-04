@@ -286,7 +286,7 @@ ${JSON.stringify(expenses?.slice(0, 20).map(e => ({ title: e.title, amount: e.am
 `;
     }
 
-    const systemPrompt = `You are Ufanisi AI — an intelligent analytics assistant for an NGO data management platform. You have access to the organization's LIVE data pulled in real-time from the database.
+    const systemPrompt = `You are ApexOS AI — an intelligent analytics assistant for an NGO data management platform. You have access to the organization's LIVE data pulled in real-time from the database.
 
 Your capabilities:
 - Answer questions about program performance, beneficiary demographics, financial analysis, and staff activity using REAL data
