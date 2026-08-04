@@ -1,4 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +26,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 export default function HouseholdProfile() {
-  const { householdId } = useParams<{ householdId: string }>();
+  const { householdId: routeParam } = useParams<{ householdId: string }>();
+  const { id: householdId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "household", {
+    toPath: (ref) => `/households/${ref}`,
+  });
   const navigate = useNavigate();
   const { data: household, isLoading } = useHousehold(householdId);
   const { data: members = [] } = useHouseholdMembers(householdId);

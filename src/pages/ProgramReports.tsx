@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -29,7 +31,10 @@ type Draft = {
 };
 
 export default function ProgramReports() {
-  const { programId } = useParams<{ programId: string }>();
+  const { programId: routeParam } = useParams<{ programId: string }>();
+  const { id: programId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "program", {
+    toPath: (ref) => `/programs/${ref}/reports`,
+  });
   const navigate = useNavigate();
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();

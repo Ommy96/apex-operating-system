@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +52,10 @@ const OPERATORS: { value: EligibilityOperator; label: string }[] = [
 ];
 
 export default function ProjectEligibility() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId: routeParam } = useParams<{ projectId: string }>();
+  const { id: projectId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "project", {
+    toPath: (ref) => `/projects/${ref}/eligibility`,
+  });
   const navigate = useNavigate();
   const sb = supabase as any;
 

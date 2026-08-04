@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +35,10 @@ const DISBURSEMENT_KINDS = [
 ];
 
 export default function ActivityDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeParam } = useParams<{ id: string }>();
+  const { id: id, notFound: recordNotFound } = useResolvedRecordId(routeParam, "activity", {
+    toPath: (ref) => `/activities/${ref}`,
+  });
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { currentOrganization } = useOrganization();

@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import {
   ArrowLeft, Users, MapPin, DollarSign, Calendar, Target,
   TrendingUp, BarChart3, Eye, Loader2, Star, UserPlus, X, FileText, Plus, Settings, Flag, CalendarClock
@@ -166,7 +168,10 @@ function ProjectWorkplanTab({ projectId, orgId }: { projectId: string; programId
 }
 
 const ProjectDashboard = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId: routeParam } = useParams<{ projectId: string }>();
+  const { id: projectId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "project", {
+    toPath: (ref) => `/projects/dashboard/${ref}`,
+  });
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
   const [activeTab, setActiveTab] = useState("overview");
