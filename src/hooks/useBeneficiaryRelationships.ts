@@ -130,7 +130,7 @@ export function useHouseholds() {
       if (!orgId) return [] as HouseholdRow[];
       const { data, error } = await supabase
         .from('households' as any)
-        .select('id, household_name, county, sub_county, head_of_household_id, member_count, created_at')
+        .select('id, household_code, household_name, county, sub_county, head_of_household_id, member_count, created_at')
         .eq('organization_id', orgId)
         .order('created_at', { ascending: false });
       if (error) {

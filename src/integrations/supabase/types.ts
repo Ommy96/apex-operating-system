@@ -159,9 +159,11 @@ export type Database = {
           name: string
           notes: string | null
           organization_id: string
+          previous_slugs: string[]
           program_id: string | null
           project_id: string
           scheduled_at: string | null
+          slug: string | null
           status: Database["public"]["Enums"]["activity_status"]
           sub_county: string | null
           type: Database["public"]["Enums"]["activity_type"]
@@ -180,9 +182,11 @@ export type Database = {
           name: string
           notes?: string | null
           organization_id: string
+          previous_slugs?: string[]
           program_id?: string | null
           project_id: string
           scheduled_at?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["activity_status"]
           sub_county?: string | null
           type: Database["public"]["Enums"]["activity_type"]
@@ -201,9 +205,11 @@ export type Database = {
           name?: string
           notes?: string | null
           organization_id?: string
+          previous_slugs?: string[]
           program_id?: string | null
           project_id?: string
           scheduled_at?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["activity_status"]
           sub_county?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
@@ -8071,6 +8077,7 @@ export type Database = {
           formed_from_relationship_id: string | null
           head_guardian_id: string | null
           head_of_household_id: string | null
+          household_code: string | null
           household_name: string | null
           household_size: number | null
           id: string
@@ -8093,6 +8100,7 @@ export type Database = {
           formed_from_relationship_id?: string | null
           head_guardian_id?: string | null
           head_of_household_id?: string | null
+          household_code?: string | null
           household_name?: string | null
           household_size?: number | null
           id?: string
@@ -8115,6 +8123,7 @@ export type Database = {
           formed_from_relationship_id?: string | null
           head_guardian_id?: string | null
           head_of_household_id?: string | null
+          household_code?: string | null
           household_name?: string | null
           household_size?: number | null
           id?: string
@@ -13268,6 +13277,7 @@ export type Database = {
           name: string
           objectives: string | null
           organization_id: string
+          previous_slugs: string[]
           primary_sector: string | null
           program_id: string | null
           program_manager_id: string | null
@@ -13303,6 +13313,7 @@ export type Database = {
           name: string
           objectives?: string | null
           organization_id?: string
+          previous_slugs?: string[]
           primary_sector?: string | null
           program_id?: string | null
           program_manager_id?: string | null
@@ -13338,6 +13349,7 @@ export type Database = {
           name?: string
           objectives?: string | null
           organization_id?: string
+          previous_slugs?: string[]
           primary_sector?: string | null
           program_id?: string | null
           program_manager_id?: string | null
@@ -13871,6 +13883,7 @@ export type Database = {
           longitude: number | null
           name: string
           organization_id: string
+          previous_slugs: string[]
           program_id: string | null
           project_code: string | null
           project_lead_id: string | null
@@ -13914,6 +13927,7 @@ export type Database = {
           longitude?: number | null
           name: string
           organization_id: string
+          previous_slugs?: string[]
           program_id?: string | null
           project_code?: string | null
           project_lead_id?: string | null
@@ -13957,6 +13971,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           organization_id?: string
+          previous_slugs?: string[]
           program_id?: string | null
           project_code?: string | null
           project_lead_id?: string | null
@@ -17183,6 +17198,16 @@ export type Database = {
         Returns: Json
       }
       next_beneficiary_code: { Args: { _org_id: string }; Returns: string }
+      next_household_code: { Args: { _org_id: string }; Returns: string }
+      next_unique_slug: {
+        Args: {
+          _base: string
+          _exclude_id: string
+          _org_id: string
+          _table: string
+        }
+        Returns: string
+      }
       program_funding_health_score: {
         Args: { _program_id: string }
         Returns: Json
@@ -17243,6 +17268,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      slugify: { Args: { _txt: string }; Returns: string }
       soundex: { Args: { "": string }; Returns: string }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }

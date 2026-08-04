@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
           if (!resendApiKey) throw new Error("RESEND_API_KEY not configured");
           const resend = new Resend(resendApiKey);
           await resend.emails.send({
-            from: "Ufanisi <noreply@ufanisi.inferatechs.com>",
+            from: "ApexOS <noreply@ufanisi.inferatechs.com>",
             to: [recipient.recipient_email],
             subject: campaign.subject || campaign.name,
             html: `
@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <h2 style="color: #333;">${campaign.subject || campaign.name}</h2>
                 <div style="color: #666; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${campaign.body}</div>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-                <p style="color: #999; font-size: 12px; text-align: center;">Sent via Ufanisi Platform</p>
+                <p style="color: #999; font-size: 12px; text-align: center;">Sent via ApexOS</p>
               </div>
             `,
           });

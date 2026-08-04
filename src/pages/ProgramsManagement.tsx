@@ -15,6 +15,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { Badge } from "@/components/ui/badge";
 import { FieldDefinition } from "@/components/ProgramFieldBuilder";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { programPath } from "@/lib/recordUrls";
 import { ProgramForm, ProgramFormData } from "@/components/programs/ProgramForm";
 import { Json } from "@/integrations/supabase/types";
 import { PageHeader, StatCard, WorkspacePanel, StatusBadge, getStatusVariant } from "@/components/workspace";
@@ -592,7 +593,7 @@ const ProgramsManagement = () => {
                           variant="ghost"
                           size="sm"
                           className="h-8 text-xs px-2"
-                          onClick={() => navigate(`/programs/dashboard/${program.id}`)}
+                          onClick={() => navigate(programPath(program))}
                         >
                           <Eye className="h-3.5 w-3.5" />
                         </Button>

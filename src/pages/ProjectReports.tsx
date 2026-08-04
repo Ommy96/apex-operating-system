@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -31,7 +33,10 @@ type Draft = {
 };
 
 export default function ProjectReports() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId: routeParam } = useParams<{ projectId: string }>();
+  const { id: projectId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "project", {
+    toPath: (ref) => `/projects/${ref}/reports`,
+  });
   const navigate = useNavigate();
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
@@ -100,6 +105,8 @@ export default function ProjectReports() {
   };
 
   const selected = drafts.find((d) => d.id === selectedId) || null;
+
+  if (recordNotFound) return <RecordNotFound label="Project" backTo="/projects" />;
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-6">

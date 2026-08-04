@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +15,10 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useBeneficiaryEligibilityScores, useRecomputeEligibility } from "@/hooks/useEligibility";
 
 export default function BeneficiaryEligibility() {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeParam } = useParams<{ id: string }>();
+  const { id: id, notFound: recordNotFound } = useResolvedRecordId(routeParam, "beneficiary", {
+    toPath: (ref) => `/beneficiaries/${ref}/eligibility`,
+  });
   const navigate = useNavigate();
   const sb = supabase as any;
   const { currentOrganization } = useOrganization();
@@ -61,6 +66,8 @@ export default function BeneficiaryEligibility() {
 
   const eligible = scores.filter((s: any) => s.eligible);
   const ineligible = scores.filter((s: any) => !s.eligible);
+
+  if (recordNotFound) return <RecordNotFound label="Beneficiary" backTo="/beneficiaries" />;
 
   return (
     <div className="container mx-auto max-w-5xl space-y-6 p-6">

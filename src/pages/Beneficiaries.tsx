@@ -2,6 +2,7 @@ import { logger } from "@/lib/logger";
 import { useState, useEffect, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { beneficiaryPath } from "@/lib/recordUrls";
 import { 
   Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
@@ -751,7 +752,7 @@ export default function Beneficiaries() {
                             title="View profile"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/beneficiaries/${beneficiary.id}`);
+                              navigate(beneficiaryPath(beneficiary));
                             }}
                           >
                             <Eye className="h-4 w-4" />
@@ -917,7 +918,7 @@ export default function Beneficiaries() {
               className="flex-1"
               onClick={() => {
                 if (selectedBeneficiary) {
-                  navigate(`/beneficiaries/${selectedBeneficiary.id}`);
+                  navigate(beneficiaryPath(selectedBeneficiary));
                 }
               }}
             >

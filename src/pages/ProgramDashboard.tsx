@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import {
   ArrowLeft, BarChart3, Target, MessageSquare, FolderKanban,
@@ -44,7 +46,10 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
 };
 
 const ProgramDashboard = () => {
-  const { programId } = useParams<{ programId: string }>();
+  const { programId: routeParam } = useParams<{ programId: string }>();
+  const { id: programId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "program", {
+    toPath: (ref) => `/programs/dashboard/${ref}`,
+  });
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
   const [activeTab, setActiveTab] = useState("overview");
@@ -143,6 +148,7 @@ const ProgramDashboard = () => {
 
   const status = statusConfig[program?.status || "planning"] || statusConfig.planning;
 
+  if (recordNotFound) return <RecordNotFound label="Programme" backTo="/programs-management" />;
   if (isLoading) {
     return (
       <div className="space-y-6">

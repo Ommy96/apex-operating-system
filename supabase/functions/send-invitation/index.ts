@@ -101,9 +101,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send invitation email
     const emailResponse = await resend.emails.send({
-      from: "Ufanisi <noreply@ufanisi.inferatechs.com>",
+      from: "ApexOS <noreply@ufanisi.inferatechs.com>",
       to: [email],
-      subject: `You've been invited to join ${organization_name} on Ufanisi`,
+      subject: `You've been invited to join ${organization_name} on ApexOS`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -113,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           <h1 style="color: #333; margin-bottom: 20px; text-align: center;">You've Been Invited!</h1>
           <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
-            You've been invited to join <strong>${organization_name}</strong> as a <strong>${role}</strong> on Ufanisi.
+            You've been invited to join <strong>${organization_name}</strong> as a <strong>${role}</strong> on ApexOS.
           </p>
           <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
             Click the button below to accept your invitation and create your account.
@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
           </p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
           <p style="color: #999; font-size: 12px; text-align: center;">
-            Ufanisi - NGO Management Platform
+            ApexOS — The Impact Operating System
           </p>
         </div>
       `,

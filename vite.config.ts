@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
-        name: 'Ufanisi Data Management System',
-        short_name: 'Ufanisi',
-        description: 'Comprehensive data management for NGOs and CBOs',
+        name: 'ApexOS — The Impact Operating System',
+        short_name: 'ApexOS',
+        description: 'A unified intelligence platform for social impact organizations',
         theme_color: '#1e3a5f',
         background_color: '#f5f6f8',
         display: 'standalone',

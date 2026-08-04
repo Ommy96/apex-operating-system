@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { projectPath } from "@/lib/recordUrls";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -40,7 +41,7 @@ export default function AllProjects() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, status, start_date, end_date, program_id, programs(id, name)")
+        .select("id, slug, name, status, start_date, end_date, program_id, programs(id, slug, name)")
         .eq("organization_id", orgId!)
         .is("deleted_at", null)
         .eq("is_archived", false)
@@ -177,7 +178,7 @@ export default function AllProjects() {
                         </td>
                       </tr>
                       {g.items.map((p: any) => (
-                        <tr key={p.id} onClick={() => navigate(`/projects/dashboard/${p.id}`)}
+                        <tr key={p.id} onClick={() => navigate(projectPath(p))}
                           className="border-t hover:bg-muted/30 cursor-pointer transition-colors">
                           <td className="px-4 py-3 font-medium">{p.name}</td>
                           <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{p.programs?.name || "—"}</td>
@@ -197,7 +198,7 @@ export default function AllProjects() {
                         </td>
                       </tr>
                       {grouped.standalone.map((p: any) => (
-                        <tr key={p.id} onClick={() => navigate(`/projects/dashboard/${p.id}`)}
+                        <tr key={p.id} onClick={() => navigate(projectPath(p))}
                           className="border-t hover:bg-muted/30 cursor-pointer transition-colors">
                           <td className="px-4 py-3 font-medium">{p.name}</td>
                           <td className="px-4 py-3 text-muted-foreground hidden md:table-cell italic">Standalone</td>

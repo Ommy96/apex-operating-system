@@ -1,6 +1,8 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -149,7 +151,10 @@ interface Donor {
 }
 
 export default function BeneficiaryProfile() {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeParam } = useParams<{ id: string }>();
+  const { id: id, notFound: recordNotFound } = useResolvedRecordId(routeParam, "beneficiary", {
+    toPath: (ref) => `/beneficiaries/${ref}`,
+  });
   const navigate = useNavigate();
   const { isAdmin, user } = useAuth();
   const { currentOrganization } = useOrganization();
@@ -388,6 +393,7 @@ export default function BeneficiaryProfile() {
     return `${(days / 365).toFixed(1)}y ago`;
   };
 
+  if (recordNotFound) return <RecordNotFound label="Beneficiary" backTo="/beneficiaries" />;
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">

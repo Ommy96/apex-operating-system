@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { RecordNotFound } from "@/components/RecordNotFound";
 import { Plus, Search, Edit, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +33,10 @@ interface Child {
 }
 
 const DynamicProgramPage = () => {
-  const { programId } = useParams<{ programId: string }>();
+  const { programId: routeParam } = useParams<{ programId: string }>();
+  const { id: programId, notFound: recordNotFound } = useResolvedRecordId(routeParam, "program", {
+    toPath: (ref) => `/programs/dynamic/${ref}`,
+  });
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,6 +155,7 @@ const DynamicProgramPage = () => {
     toast.success('Data exported successfully');
   };
 
+  if (recordNotFound) return <RecordNotFound label="Programme" backTo="/programs-management" />;
   if (programLoading) {
     return (
       <div className="flex justify-center py-12">

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { householdPath } from "@/lib/recordUrls";
 import { useNavigate } from "react-router-dom";
 import { Home, Plus, Search, Users } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -193,7 +194,7 @@ export default function Households() {
               <button
                 key={h.id}
                 type="button"
-                onClick={() => navigate(`/households/${h.id}`)}
+                onClick={() => navigate(householdPath(h))}
                 className="w-full text-left rounded-lg border bg-card hover:border-primary/40 hover:bg-secondary/30 transition-colors px-4 py-3 flex items-center gap-4"
               >
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

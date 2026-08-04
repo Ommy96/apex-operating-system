@@ -2,6 +2,7 @@ import { logger } from "@/lib/logger";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { projectPath } from "@/lib/recordUrls";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -275,7 +276,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
               </TableHeader>
               <TableBody>
                 {projects?.map((project) => (
-                  <TableRow key={project.id} className={`cursor-pointer hover:bg-muted/50 ${project.is_archived ? 'opacity-60' : ''}`} onClick={() => navigate(`/projects/dashboard/${project.id}`)}>
+                  <TableRow key={project.id} className={`cursor-pointer hover:bg-muted/50 ${project.is_archived ? 'opacity-60' : ''}`} onClick={() => navigate(projectPath(project))}>
                     <TableCell>
                       <div>
                         <p className="font-medium text-primary hover:underline">
@@ -352,7 +353,7 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/projects/dashboard/${project.id}`); }}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(projectPath(project)); }}>
                             <Eye className="h-4 w-4 mr-2" />
                             View Dashboard
                           </DropdownMenuItem>
