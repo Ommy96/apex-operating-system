@@ -116,6 +116,7 @@ export default function HouseholdProfile() {
     }
   };
 
+  if (recordNotFound) return <RecordNotFound label="Household" backTo="/households" />;
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">

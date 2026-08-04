@@ -155,6 +155,7 @@ const DynamicProgramPage = () => {
     toast.success('Data exported successfully');
   };
 
+  if (recordNotFound) return <RecordNotFound label="Programme" backTo="/programs-management" />;
   if (programLoading) {
     return (
       <div className="flex justify-center py-12">

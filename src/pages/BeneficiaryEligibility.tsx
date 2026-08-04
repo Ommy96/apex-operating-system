@@ -67,6 +67,8 @@ export default function BeneficiaryEligibility() {
   const eligible = scores.filter((s: any) => s.eligible);
   const ineligible = scores.filter((s: any) => !s.eligible);
 
+  if (recordNotFound) return <RecordNotFound label="Beneficiary" backTo="/beneficiaries" />;
+
   return (
     <div className="container mx-auto max-w-5xl space-y-6 p-6">
       <div className="flex items-center justify-between gap-2">

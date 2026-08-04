@@ -148,6 +148,7 @@ const ProgramDashboard = () => {
 
   const status = statusConfig[program?.status || "planning"] || statusConfig.planning;
 
+  if (recordNotFound) return <RecordNotFound label="Programme" backTo="/programs-management" />;
   if (isLoading) {
     return (
       <div className="space-y-6">

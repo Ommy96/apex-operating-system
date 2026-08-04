@@ -132,6 +132,8 @@ export default function ProgramReports() {
 
   const selected = drafts.find((d) => d.id === selectedId) || null;
 
+  if (recordNotFound) return <RecordNotFound label="Programme" backTo="/programs-management" />;
+
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-6">
       <div className="flex items-center gap-3">

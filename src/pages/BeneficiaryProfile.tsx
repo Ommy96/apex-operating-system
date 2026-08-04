@@ -393,6 +393,7 @@ export default function BeneficiaryProfile() {
     return `${(days / 365).toFixed(1)}y ago`;
   };
 
+  if (recordNotFound) return <RecordNotFound label="Beneficiary" backTo="/beneficiaries" />;
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">

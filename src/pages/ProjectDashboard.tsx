@@ -345,6 +345,7 @@ const ProjectDashboard = () => {
     return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', maximumFractionDigits: 0 }).format(amount);
   };
 
+  if (recordNotFound) return <RecordNotFound label="Project" backTo="/projects" />;
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">

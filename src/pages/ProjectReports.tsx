@@ -106,6 +106,8 @@ export default function ProjectReports() {
 
   const selected = drafts.find((d) => d.id === selectedId) || null;
 
+  if (recordNotFound) return <RecordNotFound label="Project" backTo="/projects" />;
+
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-6">
       <div className="flex items-center justify-between">
