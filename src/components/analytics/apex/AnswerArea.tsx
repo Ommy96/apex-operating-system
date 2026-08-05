@@ -17,6 +17,9 @@ import { AnalyticsQuestion, TABS, metricDef, dimensionKind } from "@/lib/analyti
 import { AnalyticsResult } from "@/hooks/useAnalyticsQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "./EmptyState";
+import { CrossTabPanel } from "./CrossTabPanel";
+import { DistributionPanel } from "./DistributionPanel";
+import { StatsStrip } from "./StatsStrip";
 import { buildSuggestions } from "@/lib/analyticsSuggestions";
 import { cn } from "@/lib/utils";
 import { toCsv } from "@/lib/analyticsExport";
@@ -99,6 +102,9 @@ export function AnswerArea({
   const tabCfg = TABS[question.tab];
   const mdef = metricDef(question.tab, question.metric);
   const kind = dimensionKind(question.tab, question.dimension);
+  const dimLabel = (k?: string) =>
+    (k ? tabCfg.dimensions.find((d) => d.key === k)?.label : undefined) ?? k ?? "";
+  const suggestions = useMemo(() => buildSuggestions(question), [question]);
 
   const handleCopyCsv = () => {
     if (!result?.series.length) return;
@@ -136,8 +142,6 @@ export function AnswerArea({
   const lastUpdated = result?.headline.lastUpdated
     ? formatDistanceToNow(new Date(result.headline.lastUpdated), { addSuffix: true })
     : null;
-
-  const suggestions = useMemo(() => buildSuggestions(question), [question]);
 
   return (
     <div className="space-y-6">
@@ -247,6 +251,24 @@ export function AnswerArea({
           )}
         </div>
       </div>
+
+      {/* Statistical context */}
+      {!isLoading && <StatsStrip stats={result?.stats} />}
+
+      {/* Cross-tabulation */}
+      {!isLoading && result?.matrix && result.matrix.rows.length > 0 && (
+        <CrossTabPanel
+          matrix={result.matrix}
+          dimALabel={dimLabel(question.dimension)}
+          dimBLabel={dimLabel(question.dimension2)}
+          onDrillDown={(dimension, value) => onDrillDown(dimension, value)}
+        />
+      )}
+
+      {/* Distribution panel */}
+      {!isLoading && result?.distributions && (
+        <DistributionPanel distributions={result.distributions} accent={accent} />
+      )}
 
       {/* Breakdown chips */}
       <div>
