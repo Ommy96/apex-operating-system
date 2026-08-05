@@ -7,6 +7,8 @@ function readFromParams(params: URLSearchParams): AnalyticsQuestion {
   const base = defaultQuestion(TABS[tab] ? tab : "people");
   const metric = params.get("metric") || base.metric;
   const dimension = params.get("dim") || base.dimension;
+  const dimension2 = params.get("dim2") || undefined;
+  const mode = (params.get("mode") as "cumulative" | "new") || base.mode;
   const range = (params.get("range") as RangeKey) || base.range;
   const filters: Record<string, string> = {};
   params.forEach((value, key) => {
@@ -19,6 +21,8 @@ function readFromParams(params: URLSearchParams): AnalyticsQuestion {
     tab,
     metric,
     dimension,
+    dimension2,
+    mode,
     range,
     filters,
     breakdowns,
@@ -31,6 +35,8 @@ function writeToParams(q: AnalyticsQuestion): URLSearchParams {
   p.set("tab", q.tab);
   if (q.metric) p.set("metric", q.metric);
   if (q.dimension) p.set("dim", q.dimension);
+  if (q.dimension2) p.set("dim2", q.dimension2);
+  if (q.mode && q.mode !== "cumulative") p.set("mode", q.mode);
   if (q.range) p.set("range", q.range);
   Object.entries(q.filters).forEach(([k, v]) => { if (v) p.set(`filter.${k}`, v); });
   if (q.breakdowns.length) p.set("break", q.breakdowns.join(","));
