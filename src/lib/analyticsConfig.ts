@@ -263,6 +263,10 @@ export interface AnalyticsQuestion {
   tab: TabKey;
   metric: string;
   dimension: string;
+  /** Optional second dimension → cross-tabulation */
+  dimension2?: string;
+  /** Time-series accumulation mode */
+  mode?: "cumulative" | "new";
   filters: Record<string, string>;
   range: RangeKey;
   breakdowns: string[];
@@ -273,7 +277,7 @@ export function defaultQuestion(tab: TabKey): AnalyticsQuestion {
   const cfg = TABS[tab];
   const metric = cfg.metrics[0]?.key ?? "";
   const dimension = cfg.metrics[0]?.defaultDimension ?? cfg.dimensions[0]?.key ?? "month";
-  return { tab, metric, dimension, filters: {}, range: "12mo", breakdowns: [] };
+  return { tab, metric, dimension, dimension2: undefined, mode: "cumulative", filters: {}, range: "12mo", breakdowns: [] };
 }
 
 export function dimensionKind(tab: TabKey, dimensionKey: string): DimensionKind {
