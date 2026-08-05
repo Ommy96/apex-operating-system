@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RotateCcw, Save } from "lucide-react";
-import { AnalyticsQuestion, RANGES, TABS } from "@/lib/analyticsConfig";
+import { AnalyticsQuestion, RANGES, TABS, dimensionKind } from "@/lib/analyticsConfig";
 import { cn } from "@/lib/utils";
 
 interface PillProps {
@@ -106,6 +106,13 @@ interface Props {
 
 export function QuestionBuilder({ question, onChange, onReset, onSave }: Props) {
   const tabCfg = TABS[question.tab];
+  const isTimeDim = dimensionKind(question.tab, question.dimension) === "time";
+  const secondOptions = [
+    { key: "__none", label: "Nothing" },
+    ...tabCfg.dimensions
+      .filter((d) => d.key !== question.dimension)
+      .map((d) => ({ key: d.key, label: d.label })),
+  ];
   return (
     <div className="rounded-xl bg-muted/40 border border-border/60 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -123,6 +130,13 @@ export function QuestionBuilder({ question, onChange, onReset, onSave }: Props) 
           options={tabCfg.dimensions.map((d) => ({ key: d.key, label: d.label }))}
           onChange={(dimension) => onChange({ dimension })}
         />
+        <span className="text-sm text-muted-foreground">and</span>
+        <Pill
+          label="cross by"
+          value={question.dimension2 ?? "__none"}
+          options={secondOptions}
+          onChange={(key) => onChange({ dimension2: key === "__none" ? undefined : key })}
+        />
         <FilterPill
           tab={question.tab}
           filters={question.filters}
@@ -135,6 +149,25 @@ export function QuestionBuilder({ question, onChange, onReset, onSave }: Props) 
           options={RANGES.map((r) => ({ key: r.key, label: r.label }))}
           onChange={(range) => onChange({ range: range as AnalyticsQuestion["range"] })}
         />
+        {isTimeDim && (
+          <div className="inline-flex items-center rounded-full border border-border bg-background p-0.5">
+            {(["cumulative", "new"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => onChange({ mode: m })}
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors",
+                  (question.mode ?? "cumulative") === m
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {m === "cumulative" ? "Running total" : "New in period"}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={onReset} className="h-8 px-2 text-xs">
             <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reset
