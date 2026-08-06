@@ -147,21 +147,58 @@ export function UserAccessSettings({ section }: Props) {
   });
 
   const sendInviteMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentOrganization?.organization_id || !inviteEmail) throw new Error('Missing data');
+    mutationFn: async (opts?: { email?: string; role?: string; invitationId?: string }) => {
+      const email = opts?.email ?? inviteEmail;
+      if (!currentOrganization?.organization_id || !email) throw new Error('Missing data');
       const { data, error } = await supabase.functions.invoke('send-invitation', {
-        body: { email: inviteEmail, role: inviteRole, organization_id: currentOrganization.organization_id, organization_name: currentOrganization.organization_name },
+        body: {
+          email,
+          role: opts?.role ?? inviteRole,
+          invitation_id: opts?.invitationId,
+          organization_id: currentOrganization.organization_id,
+          organization_name: currentOrganization.organization_name,
+        },
       });
-      if (error) throw error;
+      if (error) {
+        const context = (error as any)?.context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            throw new Error(body?.error || error.message);
+          } catch (e: any) {
+            if (e.message !== error.message) throw e;
+          }
+        }
+        throw error;
+      }
       if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
-      toast({ title: 'Invitation sent' });
+      toast({ title: 'Invitation email sent' });
       queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
       setInviteDialogOpen(false);
       setInviteEmail('');
     },
+    onError: (err: any) => {
+      toast({ title: 'Invitation could not be sent', description: err.message, variant: 'destructive' });
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
+    },
   });
+
+  const copyInviteLink = async (token: string) => {
+    const url = `${window.location.origin}/auth?invite=${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Invite link copied', description: 'Share it via WhatsApp or SMS.' });
+    } catch {
+      toast({ title: 'Could not copy link', description: url, variant: 'destructive' });
+    }
+  };
+
+  const RESEND_COOLDOWN_MS = 2 * 60 * 1000;
+  const canResend = (inv: any) =>
+    !inv.last_sent_at || Date.now() - new Date(inv.last_sent_at).getTime() > RESEND_COOLDOWN_MS;
 
   const createMemberMutation = useMutation({
     mutationFn: async () => {
