@@ -487,23 +487,55 @@ export function UserAccessSettings({ section }: Props) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Pending Invitations</span>
+                  <span className="text-sm font-medium">Invitations</span>
                   <Badge variant="secondary" className="text-xs">{invitations.length}</Badge>
                 </div>
-                {invitations.map((inv: any) => (
-                  <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9"><AvatarFallback><Mail className="h-4 w-4" /></AvatarFallback></Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{inv.email}</p>
-                        <p className="text-xs text-muted-foreground">Invited as {inv.role} • Expires {new Date(inv.expires_at).toLocaleDateString()}</p>
+                {invitations.map((inv: any) => {
+                  const failed = inv.delivery_status === 'failed';
+                  return (
+                    <div key={inv.id} className="flex items-start justify-between gap-3 p-3 rounded-lg bg-muted/20 border flex-wrap">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-9 w-9"><AvatarFallback><Mail className="h-4 w-4" /></AvatarFallback></Avatar>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium truncate">{inv.email}</p>
+                            {failed ? (
+                              <Badge variant="destructive" className="text-xs">Failed to send</Badge>
+                            ) : inv.delivery_status === 'sending' ? (
+                              <Badge variant="secondary" className="text-xs">Sending…</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">Pending acceptance</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Invited as {inv.role} • Expires {new Date(inv.expires_at).toLocaleDateString()}
+                          </p>
+                          {failed && inv.delivery_error && (
+                            <p className="text-xs text-destructive mt-0.5">{inv.delivery_error}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          disabled={sendInviteMutation.isPending || !canResend(inv)}
+                          title={canResend(inv) ? 'Resend invitation email' : 'Please wait a couple of minutes before resending'}
+                          onClick={() => sendInviteMutation.mutate({ email: inv.email, role: inv.role, invitationId: inv.id })}
+                        >
+                          <Send className="h-3 w-3" /> {failed ? 'Retry' : 'Resend'}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => copyInviteLink(inv.token)}>
+                          <ExternalLink className="h-3 w-3" /> Copy link
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => cancelInviteMutation.mutate(inv.id)}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => cancelInviteMutation.mutate(inv.id)}>
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}
