@@ -420,7 +420,7 @@ export function UserAccessSettings({ section }: Props) {
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
-                      <Button onClick={() => sendInviteMutation.mutate()} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
+                      <Button onClick={() => sendInviteMutation.mutate({})} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
                         {sendInviteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         Send Invitation
                       </Button>
