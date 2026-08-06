@@ -10387,36 +10387,48 @@ export type Database = {
         Row: {
           accepted_at: string | null
           created_at: string
+          delivery_error: string | null
+          delivery_status: string
           email: string
           expires_at: string
           id: string
           invited_by: string
+          last_sent_at: string | null
           organization_id: string
           role: string
+          send_attempts: number
           status: string
           token: string
         }
         Insert: {
           accepted_at?: string | null
           created_at?: string
+          delivery_error?: string | null
+          delivery_status?: string
           email: string
           expires_at?: string
           id?: string
           invited_by: string
+          last_sent_at?: string | null
           organization_id: string
           role?: string
+          send_attempts?: number
           status?: string
           token?: string
         }
         Update: {
           accepted_at?: string | null
           created_at?: string
+          delivery_error?: string | null
+          delivery_status?: string
           email?: string
           expires_at?: string
           id?: string
           invited_by?: string
+          last_sent_at?: string | null
           organization_id?: string
           role?: string
+          send_attempts?: number
           status?: string
           token?: string
         }
