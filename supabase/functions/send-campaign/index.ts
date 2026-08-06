@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
           if (!resendApiKey) throw new Error("RESEND_API_KEY not configured");
           const resend = new Resend(resendApiKey);
           await resend.emails.send({
-            from: "ApexOS <noreply@ufanisi.inferatechs.com>",
+            from: "ApexOS <noreply@apex.inferatechs.com>",
             to: [recipient.recipient_email],
             subject: campaign.subject || campaign.name,
             html: `

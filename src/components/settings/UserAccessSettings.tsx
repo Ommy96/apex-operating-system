@@ -147,21 +147,58 @@ export function UserAccessSettings({ section }: Props) {
   });
 
   const sendInviteMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentOrganization?.organization_id || !inviteEmail) throw new Error('Missing data');
+    mutationFn: async (opts?: { email?: string; role?: string; invitationId?: string }) => {
+      const email = opts?.email ?? inviteEmail;
+      if (!currentOrganization?.organization_id || !email) throw new Error('Missing data');
       const { data, error } = await supabase.functions.invoke('send-invitation', {
-        body: { email: inviteEmail, role: inviteRole, organization_id: currentOrganization.organization_id, organization_name: currentOrganization.organization_name },
+        body: {
+          email,
+          role: opts?.role ?? inviteRole,
+          invitation_id: opts?.invitationId,
+          organization_id: currentOrganization.organization_id,
+          organization_name: currentOrganization.organization_name,
+        },
       });
-      if (error) throw error;
+      if (error) {
+        const context = (error as any)?.context;
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json();
+            throw new Error(body?.error || error.message);
+          } catch (e: any) {
+            if (e.message !== error.message) throw e;
+          }
+        }
+        throw error;
+      }
       if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
-      toast({ title: 'Invitation sent' });
+      toast({ title: 'Invitation email sent' });
       queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
       setInviteDialogOpen(false);
       setInviteEmail('');
     },
+    onError: (err: any) => {
+      toast({ title: 'Invitation could not be sent', description: err.message, variant: 'destructive' });
+      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
+    },
   });
+
+  const copyInviteLink = async (token: string) => {
+    const url = `${window.location.origin}/auth?invite=${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Invite link copied', description: 'Share it via WhatsApp or SMS.' });
+    } catch {
+      toast({ title: 'Could not copy link', description: url, variant: 'destructive' });
+    }
+  };
+
+  const RESEND_COOLDOWN_MS = 2 * 60 * 1000;
+  const canResend = (inv: any) =>
+    !inv.last_sent_at || Date.now() - new Date(inv.last_sent_at).getTime() > RESEND_COOLDOWN_MS;
 
   const createMemberMutation = useMutation({
     mutationFn: async () => {
@@ -383,7 +420,7 @@ export function UserAccessSettings({ section }: Props) {
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
-                      <Button onClick={() => sendInviteMutation.mutate()} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
+                      <Button onClick={() => sendInviteMutation.mutate({})} disabled={sendInviteMutation.isPending || !inviteEmail} className="gap-2">
                         {sendInviteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         Send Invitation
                       </Button>
@@ -450,23 +487,55 @@ export function UserAccessSettings({ section }: Props) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Pending Invitations</span>
+                  <span className="text-sm font-medium">Invitations</span>
                   <Badge variant="secondary" className="text-xs">{invitations.length}</Badge>
                 </div>
-                {invitations.map((inv: any) => (
-                  <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9"><AvatarFallback><Mail className="h-4 w-4" /></AvatarFallback></Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{inv.email}</p>
-                        <p className="text-xs text-muted-foreground">Invited as {inv.role} • Expires {new Date(inv.expires_at).toLocaleDateString()}</p>
+                {invitations.map((inv: any) => {
+                  const failed = inv.delivery_status === 'failed';
+                  return (
+                    <div key={inv.id} className="flex items-start justify-between gap-3 p-3 rounded-lg bg-muted/20 border flex-wrap">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-9 w-9"><AvatarFallback><Mail className="h-4 w-4" /></AvatarFallback></Avatar>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium truncate">{inv.email}</p>
+                            {failed ? (
+                              <Badge variant="destructive" className="text-xs">Failed to send</Badge>
+                            ) : inv.delivery_status === 'sending' ? (
+                              <Badge variant="secondary" className="text-xs">Sending…</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">Pending acceptance</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Invited as {inv.role} • Expires {new Date(inv.expires_at).toLocaleDateString()}
+                          </p>
+                          {failed && inv.delivery_error && (
+                            <p className="text-xs text-destructive mt-0.5">{inv.delivery_error}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          disabled={sendInviteMutation.isPending || !canResend(inv)}
+                          title={canResend(inv) ? 'Resend invitation email' : 'Please wait a couple of minutes before resending'}
+                          onClick={() => sendInviteMutation.mutate({ email: inv.email, role: inv.role, invitationId: inv.id })}
+                        >
+                          <Send className="h-3 w-3" /> {failed ? 'Retry' : 'Resend'}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => copyInviteLink(inv.token)}>
+                          <ExternalLink className="h-3 w-3" /> Copy link
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => cancelInviteMutation.mutate(inv.id)}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => cancelInviteMutation.mutate(inv.id)}>
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

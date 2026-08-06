@@ -168,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         await resend.emails.send({
-          from: "ApexOS Analytics <onboarding@resend.dev>",
+          from: "ApexOS Analytics <noreply@apex.inferatechs.com>",
           to: sub.recipients,
           subject: `${sub.name} — ${tabLabel} (${sub.frequency})`,
           html,

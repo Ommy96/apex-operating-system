@@ -1,164 +1,147 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { Resend } from "npm:resend@2.0.0";
+import { invitationEmail } from "../_shared/invitation-email.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const FROM = "ApexOS <noreply@apex.inferatechs.com>";
+const REPLY_TO = "support@apex.inferatechs.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface InvitationRequest {
-  email: string;
-  role: string;
-  organization_id: string;
-  organization_name: string;
-}
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
 
-const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
-    // Get the authorization header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendKey = Deno.env.get("RESEND_API_KEY");
 
-    // Create Supabase client with service role for admin operations
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Create client with user's token to verify their identity
-    const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return json({ error: "Unauthorized" });
+
+    const admin = createClient(supabaseUrl, serviceKey);
+    const caller = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Get the current user
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
+    const { data: { user }, error: userError } = await caller.auth.getUser();
+    if (userError || !user) return json({ error: "Unauthorized" });
 
-    const { email, role, organization_id, organization_name }: InvitationRequest = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { email, role, organization_id, organization_name, invitation_id } = body as Record<string, string>;
 
-    console.log(`Processing invitation for ${email} to ${organization_name} as ${role}`);
+    if (!email || !organization_id) return json({ error: "email and organization_id are required" });
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: `"${email}" is not a valid email address` });
 
-    // Check if user already exists in the organization
-    const { data: existingMember } = await supabaseAdmin
+    // Caller must belong to the organization (org-scoped)
+    const { data: membership } = await admin
       .from("organization_members")
-      .select("id")
-      .eq("organization_id", organization_id)
+      .select("role")
       .eq("user_id", user.id)
-      .single();
-
-    // Check if there's already a pending invitation
-    // If a pending invitation already exists, reset it so we can resend
-    const { data: existingInvite } = await supabaseAdmin
-      .from("organization_invitations")
-      .select("id, status")
       .eq("organization_id", organization_id)
-      .eq("email", email)
-      .single();
+      .maybeSingle();
 
-    if (existingInvite && existingInvite.status === "pending") {
-      // Update expiry and resend — don't block the user
-      console.log("Resending existing pending invitation for", email);
+    const { data: isSuperAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+    if (!membership && !isSuperAdmin) return json({ error: "You do not have access to this organization" });
+
+    if (!resendKey) {
+      return json({ error: "Email is not configured (RESEND_API_KEY missing). Contact your administrator." });
     }
 
-    // Create the invitation
-    const { data: invitation, error: inviteError } = await supabaseAdmin
-      .from("organization_invitations")
-      .upsert({
-        organization_id,
-        email,
-        role,
-        invited_by: user.id,
-        status: "pending",
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      }, {
-        onConflict: "organization_id,email"
-      })
-      .select()
-      .single();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    if (inviteError) {
-      console.error("Error creating invitation:", inviteError);
-      throw new Error("Failed to create invitation");
+    // Create/refresh the invitation record, marked as sending until we know the outcome
+    let invitation: any;
+    if (invitation_id) {
+      const { data, error } = await admin
+        .from("organization_invitations")
+        .update({ status: "pending", delivery_status: "sending", expires_at: expiresAt })
+        .eq("id", invitation_id)
+        .eq("organization_id", organization_id)
+        .select()
+        .single();
+      if (error) return json({ error: `Could not update invitation: ${error.message}` });
+      invitation = data;
+    } else {
+      const { data, error } = await admin
+        .from("organization_invitations")
+        .upsert({
+          organization_id,
+          email: email.trim().toLowerCase(),
+          role: role || "member",
+          invited_by: user.id,
+          status: "pending",
+          delivery_status: "sending",
+          delivery_error: null,
+          expires_at: expiresAt,
+        }, { onConflict: "organization_id,email" })
+        .select()
+        .single();
+      if (error) return json({ error: `Could not create invitation: ${error.message}` });
+      invitation = data;
     }
 
-    console.log(`Invitation created with token: ${invitation.token}`);
+    // Inviter + org display info
+    const { data: profile } = await admin
+      .from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
+    const { data: org } = await admin
+      .from("organizations").select("name").eq("id", organization_id).maybeSingle();
 
-    // Generate invitation URL
-    const appUrl = req.headers.get("origin") || "https://heart-2-heart-database.lovable.app";
+    const inviterName = profile?.full_name || profile?.email || "A colleague";
+    const orgName = org?.name || organization_name || "your organization";
+
+    const appUrl = req.headers.get("origin") || "https://apexos-dms.lovable.app";
     const inviteUrl = `${appUrl}/auth?invite=${invitation.token}`;
 
-    // Send invitation email
-    const emailResponse = await resend.emails.send({
-      from: "ApexOS <noreply@ufanisi.inferatechs.com>",
-      to: [email],
-      subject: `You've been invited to join ${organization_name} on ApexOS`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <div style="display: inline-block; background: linear-gradient(135deg, #10b981, #0d9488); padding: 16px; border-radius: 16px;">
-              <span style="font-size: 24px; color: white;">✨</span>
-            </div>
-          </div>
-          <h1 style="color: #333; margin-bottom: 20px; text-align: center;">You've Been Invited!</h1>
-          <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
-            You've been invited to join <strong>${organization_name}</strong> as a <strong>${role}</strong> on ApexOS.
-          </p>
-          <p style="color: #666; font-size: 16px; line-height: 1.5; text-align: center;">
-            Click the button below to accept your invitation and create your account.
-          </p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteUrl}" 
-               style="display: inline-block; background: linear-gradient(135deg, #10b981, #0d9488); color: white; padding: 14px 28px; 
-                      text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
-              Accept Invitation
-            </a>
-          </div>
-          <p style="color: #999; font-size: 14px; margin-top: 30px; text-align: center;">
-            This invitation will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
-          </p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-          <p style="color: #999; font-size: 12px; text-align: center;">
-            ApexOS — The Impact Operating System
-          </p>
-        </div>
-      `,
+    const { html, text, subject } = invitationEmail({
+      inviterName,
+      orgName,
+      role: invitation.role,
+      inviteUrl,
+      expiresAt,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    const resend = new Resend(resendKey);
+    const { data: sent, error: sendError } = await resend.emails.send({
+      from: FROM,
+      to: [invitation.email],
+      reply_to: REPLY_TO,
+      subject,
+      html,
+      text,
+    });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Invitation sent successfully",
-        invitation_id: invitation.id 
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    if (sendError) {
+      const reason = (sendError as any)?.message || "Unknown email provider error";
+      console.error("send-invitation resend error:", JSON.stringify(sendError));
+      await admin.from("organization_invitations").update({
+        delivery_status: "failed",
+        delivery_error: reason,
+        send_attempts: (invitation.send_attempts ?? 0) + 1,
+      }).eq("id", invitation.id);
+      return json({ error: `Email could not be delivered: ${reason}`, invitation_id: invitation.id });
+    }
+
+    await admin.from("organization_invitations").update({
+      delivery_status: "sent",
+      delivery_error: null,
+      last_sent_at: new Date().toISOString(),
+      send_attempts: (invitation.send_attempts ?? 0) + 1,
+    }).eq("id", invitation.id);
+
+    console.log("Invitation email sent", { to: invitation.email, id: (sent as any)?.id });
+
+    return json({ success: true, invitation_id: invitation.id, invite_url: inviteUrl });
   } catch (error: any) {
-    console.error("Error in send-invitation function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    console.error("send-invitation fatal:", error?.message, error);
+    return json({ error: error?.message || "Unexpected error sending invitation" });
   }
-};
-
-serve(handler);
+});
