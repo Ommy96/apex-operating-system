@@ -7882,6 +7882,98 @@ export type Database = {
           },
         ]
       }
+      group_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          deleted_at: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          group_beneficiary_id: string
+          id: string
+          joined_date: string | null
+          linked_beneficiary_id: string | null
+          national_id: string | null
+          organization_id: string
+          phone: string | null
+          role_in_group: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          group_beneficiary_id: string
+          id?: string
+          joined_date?: string | null
+          linked_beneficiary_id?: string | null
+          national_id?: string | null
+          organization_id: string
+          phone?: string | null
+          role_in_group?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          group_beneficiary_id?: string
+          id?: string
+          joined_date?: string | null
+          linked_beneficiary_id?: string | null
+          national_id?: string | null
+          organization_id?: string
+          phone?: string | null
+          role_in_group?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_beneficiary_id_fkey"
+            columns: ["group_beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_linked_beneficiary_id_fkey"
+            columns: ["linked_beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           address: string | null
