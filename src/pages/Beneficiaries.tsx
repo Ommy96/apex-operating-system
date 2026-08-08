@@ -276,12 +276,24 @@ export default function Beneficiaries() {
       const norm = types.map((t) =>
         typeof t === 'string' ? { key: t, label: t } : { key: t.key || '', label: t.label || t.key || '' },
       );
-      // Map configured types to the three enum buckets we render.
-      const groupKeys = ['farmer_group', 'community_group', 'cooperative', 'school', 'group', 'household'];
-      const studentKeys = ['child', 'youth', 'student'];
+      // Map the org's configured types onto the three enum buckets we actually
+      // count (beneficiary_type = student | adult | group).
+      //
+      // "household" is deliberately NOT treated as a group label: households
+      // are a separate record type with their own page, so labelling the
+      // group bucket "Households" made the dropdown lie about what it counts.
+      const groupKeys = ['farmer_group', 'community_group', 'cooperative', 'school', 'group', 'self_help_group'];
+      const studentKeys = ['child', 'youth', 'student', 'learner', 'pupil'];
+      const excludedKeys = ['household', 'households'];
       const groupType = norm.find((t) => groupKeys.includes(t.key));
       const studentType = norm.find((t) => studentKeys.includes(t.key));
-      const adultType = norm.find((t) => !groupKeys.includes(t.key) && !studentKeys.includes(t.key)) || norm[0];
+      const adultType =
+        norm.find(
+          (t) =>
+            !groupKeys.includes(t.key) &&
+            !studentKeys.includes(t.key) &&
+            !excludedKeys.includes(t.key),
+        ) || null;
       const plural = (s: string) => (!s ? s : /s$/i.test(s) ? s : `${s}s`);
       setTypeLabels({
         student: plural(studentType?.label || 'Students'),
