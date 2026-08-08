@@ -90,11 +90,12 @@ const Dashboard = () => {
           toast({ title: `New ${term} Added`, description: `A new ${term.toLowerCase()} record has been created`, duration: 3000 });
         }
         refetch();
+        refetchCounts();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services' }, () => { refetch(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services' }, () => { refetch(); refetchCounts(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, refetch, toast]);
+  }, [user, refetch, refetchCounts, toast]);
 
   // === ADDITIONAL DATA QUERIES ===
 
