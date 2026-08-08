@@ -57,6 +57,7 @@ import {
   PaginationControls,
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
+import { isActiveStatus } from '@/lib/statusHelpers';
 
 interface Beneficiary {
   id: string;
