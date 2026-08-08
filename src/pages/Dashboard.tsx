@@ -20,6 +20,7 @@ import { GlobalSearchBar } from "@/components/dashboard/GlobalSearchBar";
 import { FloatingCreateButton } from "@/components/dashboard/FloatingCreateButton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
+import { useCanonicalCounts } from "@/hooks/useCanonicalCounts";
 import { formatDistanceToNow } from "date-fns";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
@@ -55,12 +56,17 @@ const Dashboard = () => {
 
   const {
     programStats,
-    totalBeneficiaries,
     trendData,
     statsLoading,
     trendsLoading,
     refetch,
   } = useProgramEnrollmentStats();
+
+  // Canonical counts — the single source of truth shared with the
+  // Beneficiaries page, Analytics and reports so tiles can never disagree.
+  const { counts, isLoading: countsLoading, refetch: refetchCounts } = useCanonicalCounts();
+  const totalBeneficiaries = counts.totalBeneficiaries;
+  const activeBeneficiaries = counts.activeBeneficiaries;
 
   // Greeting based on time of day
   const greeting = useMemo(() => {
@@ -84,11 +90,12 @@ const Dashboard = () => {
           toast({ title: `New ${term} Added`, description: `A new ${term.toLowerCase()} record has been created`, duration: 3000 });
         }
         refetch();
+        refetchCounts();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services' }, () => { refetch(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services' }, () => { refetch(); refetchCounts(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, refetch, toast]);
+  }, [user, refetch, refetchCounts, toast]);
 
   // === ADDITIONAL DATA QUERIES ===
 
@@ -488,7 +495,7 @@ const Dashboard = () => {
           icon={UsersIcon}
           tone="teal"
           highlight
-          isLoading={statsLoading}
+          isLoading={countsLoading}
           value={totalBeneficiaries.toLocaleString()}
           series={beneficiarySpark}
           delta={
@@ -496,7 +503,7 @@ const Dashboard = () => {
               ? (newThisMonth / Math.max(totalBeneficiaries - newThisMonth, 1)) * 100
               : undefined
           }
-          deltaLabel="this month"
+          deltaLabel={`this month · ${activeBeneficiaries.toLocaleString()} active`}
         />
         <SparklineTile
           label="ACTIVE GRANTS"

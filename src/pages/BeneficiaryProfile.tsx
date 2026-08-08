@@ -28,6 +28,7 @@ import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { NeedsSection } from '@/components/beneficiary/NeedsSection';
+import { GroupMembersTab } from '@/components/beneficiary/GroupMembersTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
@@ -461,6 +462,7 @@ export default function BeneficiaryProfile() {
 
   const tabs = [
     { value: 'overview', label: 'Overview', icon: Clock, show: true, legacy: false },
+    { value: 'members', label: 'Members', icon: Users, show: beneficiary.beneficiary_type === 'group', legacy: false },
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
     { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data && (isMinorAge || isTertiary || hasEducationData), legacy: !orgConfig.collect_education_data && hasEducationData },
     { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
@@ -755,6 +757,13 @@ export default function BeneficiaryProfile() {
                   );
                 })}
               </div>
+
+              {/* TAB: Members (group beneficiaries only) */}
+              {beneficiary.beneficiary_type === 'group' && (
+                <TabsContent value="members" className="mt-0 p-6">
+                  <GroupMembersTab groupBeneficiaryId={beneficiary.id} canEdit={canEditInline} />
+                </TabsContent>
+              )}
 
               {/* TAB: Programmes */}
               <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
