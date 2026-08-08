@@ -222,10 +222,10 @@ export default function Beneficiaries() {
       
       setStats({
         total: allData.length,
-        students: allData.filter(b => b.beneficiary_type === 'student').length,
-        adults: allData.filter(b => b.beneficiary_type === 'adult').length,
-        groups: allData.filter(b => b.beneficiary_type === 'group').length,
-        active: allData.filter(b => b.status === 'active').length,
+        students: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
+        adults: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
+        groups: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
+        active: allData.filter(b => isActiveStatus(b.status)).length,
       });
     } catch (error) {
       logger.error('Error fetching beneficiaries:', error);
