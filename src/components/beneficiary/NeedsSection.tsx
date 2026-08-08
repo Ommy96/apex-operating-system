@@ -9,8 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Pencil, HeartHandshake, Loader2, Sparkles, UserCog, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
-import { useBeneficiaryNeeds, useNeedTypes, useSaveBeneficiaryNeed, useDeleteBeneficiaryNeed, useReturnNeedToAuto, type BeneficiaryNeed, type NeedType } from '@/hooks/useNeeds';
+import { useBeneficiaryNeeds, useNeedTypes, useSaveNeedType, useSaveBeneficiaryNeed, useDeleteBeneficiaryNeed, useReturnNeedToAuto, type BeneficiaryNeed, type NeedType } from '@/hooks/useNeeds';
 import { Checkbox } from '@/components/ui/checkbox';
+import { usePermissions } from '@/hooks/usePermissions';
+
+/** Sentinel value used by the type <Select> to open the inline creator. */
+const CREATE_TYPE_VALUE = '__create_need_type__';
 
 const STATUS_STYLES: Record<string, string> = {
   unmet: 'status-badge status-badge-danger border-transparent',
@@ -31,10 +35,14 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
   const { data: needs = [], isLoading } = useBeneficiaryNeeds(beneficiaryId);
   const { data: types = [] } = useNeedTypes(false);
   const save = useSaveBeneficiaryNeed();
+  const saveType = useSaveNeedType();
   const remove = useDeleteBeneficiaryNeed();
   const returnToAuto = useReturnNeedToAuto();
+  const { can } = usePermissions();
+  const canCreateTypes = !!can?.manageSettings;
   const [editing, setEditing] = useState<Partial<BeneficiaryNeed> | null>(null);
   const [overrideOn, setOverrideOn] = useState(false);
+  const [newType, setNewType] = useState<{ label: string; default_cost: string; default_currency: string; icon: string } | null>(null);
 
   const summary = useMemo(() => {
     const total = needs.length;
@@ -50,10 +58,14 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
     return types.filter((t) => editing?.need_type_id === t.id || !used.has(t.id));
   }, [types, needs, editing]);
 
-  const openAdd = () => { setOverrideOn(false); setEditing({ status: 'unmet', priority: 'normal', status_source: 'auto' } as any); };
-  const openEdit = (n: BeneficiaryNeed) => { setOverrideOn(n.status_source === 'manual'); setEditing({ ...n }); };
+  const openAdd = () => { setOverrideOn(false); setNewType(null); setEditing({ status: 'unmet', priority: 'normal', status_source: 'auto' } as any); };
+  const openEdit = (n: BeneficiaryNeed) => { setOverrideOn(n.status_source === 'manual'); setNewType(null); setEditing({ ...n }); };
 
   const onPickType = (id: string) => {
+    if (id === CREATE_TYPE_VALUE) {
+      setNewType({ label: '', default_cost: '', default_currency: 'KES', icon: '' });
+      return;
+    }
     const t = types.find((x) => x.id === id);
     setEditing((p) => ({
       ...p,
@@ -61,6 +73,40 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
       estimated_cost: p?.id ? p.estimated_cost : (t?.default_cost ?? null),
       currency: p?.currency || t?.default_currency || 'KES',
     }));
+  };
+
+  /**
+   * Creates a brand-new need type in the org catalogue and immediately
+   * selects it for this beneficiary — one step, no trip to Settings.
+   */
+  const onCreateType = async () => {
+    const label = (newType?.label || '').trim();
+    if (!label) return toast.error('Give the need type a name');
+    const key = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+    const cost = newType?.default_cost ? Number(newType.default_cost) : null;
+    const currency = (newType?.default_currency || 'KES').trim() || 'KES';
+    try {
+      const created = await saveType.mutateAsync({
+        key,
+        label,
+        default_cost: cost,
+        default_currency: currency,
+        icon: (newType?.icon || '').trim() || null,
+        is_active: true,
+        sort_order: types.length + 1,
+      } as any);
+      if (!created?.id) throw new Error('Need type was not returned by the server');
+      setEditing((p) => ({
+        ...p,
+        need_type_id: created.id,
+        estimated_cost: p?.estimated_cost ?? cost,
+        currency: p?.currency || currency,
+      }));
+      setNewType(null);
+      toast.success(`"${label}" added to your need types`);
+    } catch (e: any) {
+      toast.error(e?.message || 'Could not create the need type');
+    }
   };
 
   const onSave = async () => {
