@@ -757,6 +757,13 @@ export default function BeneficiaryProfile() {
                 })}
               </div>
 
+              {/* TAB: Members (group beneficiaries only) */}
+              {beneficiary.beneficiary_type === 'group' && (
+                <TabsContent value="members" className="mt-0 p-6">
+                  <GroupMembersTab groupBeneficiaryId={beneficiary.id} canEdit={canEditInline} />
+                </TabsContent>
+              )}
+
               {/* TAB: Programmes */}
               <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
                 <ProgrammeCardsView
