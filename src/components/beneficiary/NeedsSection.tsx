@@ -229,9 +229,69 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
                     {availableTypes.map((t) => (
                       <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
                     ))}
+                    {canCreateTypes && !editing.id && (
+                      <SelectItem value={CREATE_TYPE_VALUE} className="text-primary">
+                        + Create new need type…
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
+                {!canCreateTypes && !editing.id && (
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Need a type that isn't listed? Ask an administrator to add it in Settings › Needs.
+                  </p>
+                )}
               </div>
+
+              {newType && (
+                <div className="rounded-md border border-dashed p-3 space-y-3 bg-muted/30">
+                  <div className="text-xs font-semibold">New need type</div>
+                  <div>
+                    <Label className="text-xs">Name *</Label>
+                    <Input
+                      autoFocus
+                      value={newType.label}
+                      placeholder="e.g. Psychosocial Support"
+                      onChange={(e) => setNewType({ ...newType, label: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-xs">Default cost</Label>
+                      <Input
+                        type="number"
+                        value={newType.default_cost}
+                        onChange={(e) => setNewType({ ...newType, default_cost: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Currency</Label>
+                      <Input
+                        value={newType.default_currency}
+                        onChange={(e) => setNewType({ ...newType, default_currency: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Icon</Label>
+                      <Input
+                        value={newType.icon}
+                        placeholder="GraduationCap"
+                        onChange={(e) => setNewType({ ...newType, icon: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    This is added to the organisation's catalogue and appears in Settings › Needs / Support types.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => setNewType(null)}>Cancel</Button>
+                    <Button size="sm" onClick={onCreateType} disabled={saveType.isPending}>
+                      {saveType.isPending && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
+                      Create &amp; select
+                    </Button>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Estimated cost</Label>
