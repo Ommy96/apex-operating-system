@@ -194,24 +194,70 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
     return Object.values(groups);
   }, [enrollments]);
 
+  /**
+   * Unified programme + sponsorship model.
+   *
+   * Previously the profile rendered two disconnected lists: "Programme
+   * enrolments" and, far below, a "Sponsorship" strip — so nobody could tell
+   * WHO was paying for WHICH programme. Now each programme card carries its
+   * own funding: the sponsors attributed to that programme, what they have
+   * given this year, and the coverage bar. Sponsors with no programme
+   * attribution are collected into a single "General sponsorship" card so
+   * nothing is hidden.
+   */
+  const cards = useMemo(() => {
+    const attributed = new Set<string>();
+
+    const programmeCards = programmes.map(({ program, entries }) => {
+      const linked = donors.filter((d) => (d.program_id || d.program?.id) === program?.id);
+      linked.forEach((d) => attributed.add(d.id));
+      return { kind: 'programme' as const, program, entries, donorRows: linked };
+    });
+
+    const orphanDonors = donors.filter((d) => !attributed.has(d.id));
+    if (orphanDonors.length > 0) {
+      programmeCards.push({
+        kind: 'general' as any,
+        program: null,
+        entries: [],
+        donorRows: orphanDonors,
+      } as any);
+    }
+    return programmeCards;
+  }, [programmes, donors]);
+
+  const totalLifetime = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
+
   return (
-    <div className="space-y-6">
-      {/* PROGRAMME GRID (primary story) */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-[14px] font-semibold" style={{ color: '#1C1917' }}>Programme enrolments</h3>
-        {canEdit && programmes.length > 0 && (
-          <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={onEnrol}>
-            <Plus className="h-3.5 w-3.5" /> Enrol in programme
-          </Button>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h3 className="text-[14px] font-semibold text-foreground">Programmes &amp; funding</h3>
+          <p className="text-[12px] text-muted-foreground">
+            {programmes.length} programme{programmes.length === 1 ? '' : 's'}
+            {donors.length > 0 && ` · KES ${totalLifetime.toLocaleString()} received lifetime`}
+          </p>
+        </div>
+        {canEdit && (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={onEnrol}>
+              <Plus className="h-3.5 w-3.5" /> Enrol
+            </Button>
+            {onAddDonor && (
+              <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={onAddDonor}>
+                <Heart className="h-3.5 w-3.5" /> Add sponsor
+              </Button>
+            )}
+          </div>
         )}
       </div>
 
       {enrollLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Skeleton className="h-44" />
-          <Skeleton className="h-44" />
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+          <Skeleton className="h-56" />
+          <Skeleton className="h-56" />
         </div>
-      ) : programmes.length === 0 ? (
+      ) : cards.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-10 text-center text-muted-foreground">
             <FolderKanban className="h-10 w-10 mx-auto mb-3 opacity-50" />
@@ -224,18 +270,27 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {programmes.map(({ program, entries }) => {
-            const primaryEntry = entries.find((e) => (e.status || '').toLowerCase() === 'active') || entries[0];
-            const tone = statusTone(primaryEntry?.status);
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+          {cards.map((card: any) => {
+            const { program, entries, donorRows } = card;
+            const isGeneral = card.kind === 'general';
+            const primaryEntry =
+              entries.find((e: EnrollmentRow) => (e.status || '').toLowerCase() === 'active') || entries[0];
+            const tone = statusTone(isGeneral ? 'active' : primaryEntry?.status);
             const enrolled = primaryEntry?.enrolled_date;
-            const exited = primaryEntry?.exit_date;
+            const accent = program?.color || null;
+            const projects = entries.filter((e: EnrollmentRow) => e.projects).map((e: EnrollmentRow) => e.projects!.name);
+
+            const lifetime = donorRows.reduce((s: number, d: DonorRow) => s + (d.amount_received || 0), 0);
+            const thisYear = donorRows
+              .filter((d: DonorRow) => d.donation_date && d.donation_date >= yearStart)
+              .reduce((s: number, d: DonorRow) => s + (d.amount_received || 0), 0);
+            const sponsorNames = Array.from(
+              new Set(donorRows.map((d: DonorRow) => (d.donor_name || 'Unknown').trim())),
+            ) as string[];
+
             const start = program?.start_date;
             const end = program?.end_date;
-            const accent = program?.color || null;
-            const projects = entries.filter((e) => e.projects).map((e) => e.projects!.name);
-
-            // Progress
             let progress: number | null = null;
             let progressLabel = 'Ongoing';
             if (start && end) {
@@ -245,270 +300,219 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
                 progress = Math.max(0, Math.min(100, Math.round((elapsed / total) * 100)));
                 progressLabel = `${progress}% of programme timeline`;
               }
-            } else if (enrolled && exited) {
+            } else if (enrolled && primaryEntry?.exit_date) {
               progress = 100;
               progressLabel = 'Completed';
             }
 
-            const visitKey = program?.id || '';
-            const lastVisit = lastVisits[visitKey] || lastVisits._latest;
+            const lastVisit = lastVisits._latest;
             const latestActivity = lastVisit
               ? `Last visit ${formatDistanceToNow(new Date(lastVisit), { addSuffix: true })}`
               : entries.length > 0
                 ? `${entries.length} service${entries.length !== 1 ? 's' : ''} received`
                 : 'No recent activity';
 
+            const openProgramme = () => {
+              if (!isGeneral && program?.id) navigate(`/programs/dashboard/${program.id}`);
+            };
+
             return (
               <Card
-                key={program?.id || 'none'}
-                role="button"
-                tabIndex={0}
-                onClick={() => program?.id && navigate(`/programs/dashboard/${program.id}`)}
-                onKeyDown={(e) => {
-                  if ((e.key === 'Enter' || e.key === ' ') && program?.id) {
-                    e.preventDefault();
-                    navigate(`/programs/dashboard/${program.id}`);
-                  }
-                }}
+                key={isGeneral ? 'general-sponsorship' : program?.id || 'none'}
                 className={cn(
-                  'cursor-pointer transition-all hover:shadow-elevation-3 border-l-[3px]',
-                  !accent && 'border-l-border',
+                  'overflow-hidden border-l-[3px] transition-all',
+                  !isGeneral && 'hover:shadow-elevation-3',
+                  !accent && !isGeneral && 'border-l-border',
+                  isGeneral && 'border-l-primary border-dashed',
                 )}
-                style={accent ? { borderLeftColor: accent } : undefined}
+                style={accent && !isGeneral ? { borderLeftColor: accent } : undefined}
               >
-                <CardContent className="p-4">
-                  <div style={CARD_GRID_STYLE}>
-                    {/* avatar */}
+                <CardContent className="p-4 space-y-3">
+                  {/* ── Header: identity + status ── */}
+                  <div className="flex items-start gap-3">
                     <div
-                      style={{ gridArea: 'avatar', width: 40, height: 40 }}
-                      className="rounded-lg flex items-center justify-center shrink-0 self-start"
+                      className="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: isGeneral ? 'hsl(var(--primary) / 0.1)' : accent ? `${accent}1a` : 'hsl(var(--muted))',
+                        color: isGeneral ? 'hsl(var(--primary))' : accent || 'hsl(var(--muted-foreground))',
+                      }}
                     >
-                      <div
-                        className="h-10 w-10 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: accent ? `${accent}1a` : 'hsl(var(--muted))',
-                          color: accent || 'hsl(var(--muted-foreground))',
-                        }}
+                      {isGeneral ? <Heart className="h-4 w-4" /> : renderProgramIcon(program?.icon)}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <button
+                        type="button"
+                        onClick={openProgramme}
+                        disabled={isGeneral || !program?.id}
+                        title={isGeneral ? 'General sponsorship' : program?.name || 'Unknown programme'}
+                        className={cn(
+                          'text-[14px] font-semibold leading-[1.2] truncate max-w-full text-left',
+                          !isGeneral && program?.id && 'hover:underline',
+                        )}
                       >
-                        {renderProgramIcon(program?.icon)}
+                        {isGeneral ? 'General sponsorship' : program?.name || 'Unknown programme'}
+                      </button>
+                      <div className="text-[12px] text-muted-foreground leading-[1.3] truncate">
+                        {isGeneral
+                          ? 'Support not tied to a specific programme'
+                          : (
+                            <>
+                              {enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : '—'}
+                              <span className="mx-1.5 text-muted-foreground/60">·</span>
+                              {latestActivity}
+                            </>
+                          )}
                       </div>
                     </div>
 
-                    {/* name */}
-                    <div
-                      style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
-                      title={program?.name || 'Unknown programme'}
-                      className="text-[14px] font-semibold leading-[1.2] truncate min-w-0"
+                    <Badge
+                      variant="outline"
+                      className={cn('h-[22px] px-2 text-[10px] leading-none flex items-center shrink-0', tone.cls)}
                     >
-                      {program?.name || 'Unknown programme'}
-                    </div>
+                      {isGeneral ? 'Sponsorship' : tone.label}
+                    </Badge>
+                  </div>
 
-                    {/* status */}
-                    <div style={{ gridArea: 'status' }} className="justify-self-end">
-                      <Badge
-                        variant="outline"
-                        className={cn('h-[22px] px-2 text-[10px] leading-none flex items-center', tone.cls)}
-                      >
-                        {tone.label}
-                      </Badge>
-                    </div>
-
-                    {/* meta */}
-                    <div
-                      style={{ gridArea: 'meta' }}
-                      className="text-[12px] text-muted-foreground leading-[1.2] truncate"
-                      title={[
-                        enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : null,
-                        latestActivity,
-                      ].filter(Boolean).join(' · ')}
-                    >
-                      {enrolled ? `Enrolled ${format(new Date(enrolled), 'MMM d, yyyy')}` : '—'}
-                      <span className="mx-1.5 text-muted-foreground/60">·</span>
-                      {latestActivity}
-                    </div>
-
-                    {/* stats — two equal tiles */}
-                    <div
-                      style={{ gridArea: 'stats', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}
-                    >
-                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
-                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Enrolments</div>
-                        <div className="font-semibold text-[13px] tabular-nums font-mono">{entries.length}</div>
-                      </div>
+                  {/* ── Delivery + funding in one row of tiles ── */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {!isGeneral && (
                       <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
                         <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Projects</div>
                         <div className="font-semibold text-[13px] tabular-nums font-mono">{projects.length}</div>
                       </div>
+                    )}
+                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Sponsors</div>
+                      <div className="font-semibold text-[13px] tabular-nums font-mono">{sponsorNames.length}</div>
                     </div>
-
-                    {/* progress (within stats area as a thin line) */}
-                    <div style={{ gridArea: 'actions' }} className="space-y-2">
-                      {progress !== null && (
-                        <div className="space-y-1">
-                          <Progress value={progress} className="h-1.5" />
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                            <ActivityIcon className="h-3 w-3" />
-                            {progressLabel}
-                          </div>
-                        </div>
-                      )}
-                      {canEdit && program?.id && (onAddDonorForProgramme || onAddDonor) && (
-                        <div className="flex justify-end gap-2">
-                          <BeneficiaryBaselinesPopover
-                            beneficiaryId={beneficiaryId}
-                            programId={program.id}
-                            projectIds={entries.map((e) => e.projects?.id).filter(Boolean) as string[]}
-                            onCaptureNow={onEnrol}
-                          />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-[11px] gap-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (onAddDonorForProgramme) {
-                                onAddDonorForProgramme(program.id!, entries[0]?.projects?.id ?? null);
-                              } else if (onAddDonor) {
-                                onAddDonor();
-                              }
-                            }}
-                          >
-                            <Heart className="h-3 w-3" /> Add donor
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* SPONSORSHIP STRIP (supporting context) */}
-      <div className="flex items-center justify-between pt-2">
-        <h3 className="text-[14px] font-semibold" style={{ color: '#1C1917' }}>Sponsorship</h3>
-        {canEdit && sponsorships.length > 0 && onAddDonor && (
-          <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={onAddDonor}>
-            <Heart className="h-3.5 w-3.5" /> Add sponsor
-          </Button>
-        )}
-      </div>
-      {sponsorships.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {sponsorships.map((s) => {
-            const thisYear = s.entries
-              .filter((e) => e.donation_date && e.donation_date >= yearStart)
-              .reduce((sum, e) => sum + (e.amount_received || 0), 0);
-            const programmeName = s.entries.find(e => e.program?.name)?.program?.name;
-            const range = s.first
-              ? `${format(new Date(s.first), 'MMM yyyy')} – ${s.last ? format(new Date(s.last), 'MMM yyyy') : 'present'}`
-              : null;
-            const subline = [programmeName, range].filter(Boolean).join(' · ');
-            return (
-              <Card key={s.name} className="border-l-[3px]" style={{ borderLeftColor: 'hsl(var(--primary))' }}>
-                <CardContent className="p-4">
-                  <div style={CARD_GRID_STYLE}>
-                    {/* avatar */}
-                    <div style={{ gridArea: 'avatar', width: 40, height: 40 }} className="self-start">
-                      <div
-                        className="h-10 w-10 rounded-full flex items-center justify-center text-[12px] font-semibold"
-                        style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}
-                      >
-                        {initials(s.name) || <Heart className="h-4 w-4" />}
+                    <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
+                      <div className="text-muted-foreground text-[10px] uppercase tracking-wide">This year</div>
+                      <div className="font-semibold text-[13px] tabular-nums font-mono">
+                        <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
+                        {thisYear.toLocaleString()}
                       </div>
                     </div>
-
-                    {/* name */}
-                    <div
-                      style={{ gridArea: 'name', fontFamily: 'DM Sans, sans-serif' }}
-                      title={s.name}
-                      className="text-[14px] font-semibold leading-[1.2] truncate min-w-0"
-                    >
-                      {s.name}
-                    </div>
-
-                    {/* status */}
-                    <div style={{ gridArea: 'status' }} className="justify-self-end">
-                      <Badge variant="outline" className="h-[22px] px-2 text-[10px] leading-none flex items-center">
-                        Sponsor
-                      </Badge>
-                    </div>
-
-                    {/* meta */}
-                    <div
-                      style={{ gridArea: 'meta' }}
-                      title={subline || ''}
-                      className="text-[12px] text-muted-foreground leading-[1.2] truncate"
-                    >
-                      {subline || '—'}
-                    </div>
-
-                    {/* stats */}
-                    <div style={{ gridArea: 'stats', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
-                        <div className="text-muted-foreground text-[10px] uppercase tracking-wide">This year</div>
-                        <div className="font-semibold text-[13px] tabular-nums font-mono">
-                          <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
-                          {thisYear.toLocaleString()}
-                        </div>
-                      </div>
+                    {isGeneral && (
                       <div className="rounded-md bg-muted/40 px-3 py-2 h-[52px] flex flex-col justify-center">
                         <div className="text-muted-foreground text-[10px] uppercase tracking-wide">Lifetime</div>
                         <div className="font-semibold text-[13px] tabular-nums font-mono">
                           <span className="text-muted-foreground font-normal text-[10px] mr-1">KES</span>
-                          {s.total.toLocaleString()}
+                          {lifetime.toLocaleString()}
                         </div>
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* actions */}
-                    <div style={{ gridArea: 'actions' }} className="flex justify-end gap-2">
-                      {canEdit && (
-                        <>
-                          <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
-                            <Send className="h-3 w-3" /> Send update
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" disabled title="Coming soon">
-                            <FileText className="h-3 w-3" /> Report
-                          </Button>
-                        </>
+                  {/* ── Who is funding this programme ── */}
+                  {sponsorNames.length > 0 ? (
+                    <div className="rounded-md border border-border/70 bg-background/60 px-3 py-2">
+                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                        <Heart className="h-3 w-3" /> Funded by
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {sponsorNames.slice(0, 4).map((n) => (
+                          <span
+                            key={n}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 pl-1 pr-2 py-0.5 text-[11px]"
+                          >
+                            <span
+                              className="h-4 w-4 rounded-full flex items-center justify-center text-[8px] font-semibold"
+                              style={{ background: 'hsl(var(--primary) / 0.15)', color: 'hsl(var(--primary))' }}
+                            >
+                              {initials(n) || '?'}
+                            </span>
+                            <span className="truncate max-w-[120px]">{n}</span>
+                          </span>
+                        ))}
+                        {sponsorNames.length > 4 && (
+                          <span className="text-[11px] text-muted-foreground self-center">
+                            +{sponsorNames.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                      <FundingCoverageBar totalReceived={lifetime} className="mt-2" compact />
+                    </div>
+                  ) : (
+                    <div className="rounded-md border border-dashed border-primary/30 bg-primary/5 px-3 py-2 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="text-[11px] text-muted-foreground truncate">
+                          No sponsor funding this programme yet
+                        </span>
+                      </div>
+                      {canEdit && (onAddDonorForProgramme || onAddDonor) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] gap-1 shrink-0"
+                          onClick={() =>
+                            program?.id && onAddDonorForProgramme
+                              ? onAddDonorForProgramme(program.id, entries[0]?.projects?.id ?? null)
+                              : onAddDonor?.()
+                          }
+                        >
+                          <Heart className="h-3 w-3" /> Find sponsor
+                        </Button>
                       )}
+                    </div>
+                  )}
+
+                  {/* ── Timeline + actions ── */}
+                  {!isGeneral && progress !== null && (
+                    <div className="space-y-1">
+                      <Progress value={progress} className="h-1.5" />
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <ActivityIcon className="h-3 w-3" />
+                        {progressLabel}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap justify-end gap-2 pt-1">
+                    {!isGeneral && canEdit && program?.id && (
+                      <BeneficiaryBaselinesPopover
+                        beneficiaryId={beneficiaryId}
+                        programId={program.id}
+                        projectIds={entries.map((e: EnrollmentRow) => e.projects?.id).filter(Boolean) as string[]}
+                        onCaptureNow={onEnrol}
+                      />
+                    )}
+                    {canEdit && sponsorNames.length > 0 && (onAddDonorForProgramme || onAddDonor) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[11px] gap-1"
+                        onClick={() =>
+                          !isGeneral && program?.id && onAddDonorForProgramme
+                            ? onAddDonorForProgramme(program.id, entries[0]?.projects?.id ?? null)
+                            : onAddDonor?.()
+                        }
+                      >
+                        <Heart className="h-3 w-3" /> Add sponsor
+                      </Button>
+                    )}
+                    {sponsorNames.length > 0 && (
                       <Button
                         size="sm"
                         variant="outline"
                         className="h-7 text-[11px] gap-1"
                         onClick={() => navigate('/donors')}
                       >
-                        <ExternalLink className="h-3 w-3" /> View
+                        <ExternalLink className="h-3 w-3" /> Donors
                       </Button>
-                    </div>
+                    )}
+                    {!isGeneral && program?.id && (
+                      <Button size="sm" variant="ghost" className="h-7 text-[11px] gap-1" onClick={openProgramme}>
+                        <CalendarDays className="h-3 w-3" /> Open programme
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
-      ) : (
-        <Card className="border-dashed border-primary/30 bg-primary/5">
-          <CardContent className="p-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold">Available for sponsorship</div>
-                <p className="text-xs text-muted-foreground">No sponsor linked yet — match this beneficiary with a donor.</p>
-              </div>
-            </div>
-            {canEdit && onAddDonor && (
-              <Button size="sm" variant="primary" onClick={onAddDonor} className="gap-1">
-                <Heart className="h-3.5 w-3.5" /> Find sponsor
-              </Button>
-            )}
-          </CardContent>
-        </Card>
       )}
     </div>
   );
