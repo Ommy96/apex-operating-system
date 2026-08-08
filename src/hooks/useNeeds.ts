@@ -57,11 +57,22 @@ export function useSaveNeedType() {
     mutationFn: async (t: Partial<NeedType> & { id?: string }) => {
       const payload: any = { ...t, organization_id: orgId };
       if (t.id) {
-        const { error } = await supabase.from('need_types' as any).update(payload).eq('id', t.id);
+        const { data, error } = await supabase
+          .from('need_types' as any)
+          .update(payload)
+          .eq('id', t.id)
+          .select('*')
+          .maybeSingle();
         if (error) throw error;
+        return data as unknown as NeedType;
       } else {
-        const { error } = await supabase.from('need_types' as any).insert(payload);
+        const { data, error } = await supabase
+          .from('need_types' as any)
+          .insert(payload)
+          .select('*')
+          .single();
         if (error) throw error;
+        return data as unknown as NeedType;
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['need-types'] }),
