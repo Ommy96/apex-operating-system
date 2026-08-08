@@ -152,7 +152,7 @@ export function NeedsSection({ beneficiaryId }: { beneficiaryId: string }) {
               : `${summary.met} of ${summary.total} met · ${summary.currency} ${summary.unmetCost.toLocaleString()} unmet`}
           </p>
         </div>
-        <Button size="sm" onClick={openAdd} disabled={availableTypes.length === 0 && !editing}>
+        <Button size="sm" onClick={openAdd} disabled={availableTypes.length === 0 && !canCreateTypes && !editing}>
           <Plus className="h-4 w-4 mr-1" /> Add need
         </Button>
       </CardHeader>
