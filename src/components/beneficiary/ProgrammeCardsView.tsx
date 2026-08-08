@@ -13,8 +13,6 @@ import {
   FolderKanban,
   Heart,
   Plus,
-  Send,
-  FileText,
   ExternalLink,
   Sparkles,
   CalendarDays,
@@ -164,22 +162,6 @@ export function ProgrammeCardsView({ beneficiaryId, organizationId, canEdit, onE
     },
     enabled: !!beneficiaryId,
   });
-
-  // ---- Sponsorship grouping ----
-  const sponsorships = useMemo(() => {
-    const byDonor: Record<string, { name: string; entries: DonorRow[]; total: number; first?: string; last?: string }> = {};
-    donors.forEach((d) => {
-      const key = (d.donor_name || 'Unknown').trim();
-      if (!byDonor[key]) byDonor[key] = { name: key, entries: [], total: 0 };
-      byDonor[key].entries.push(d);
-      byDonor[key].total += d.amount_received || 0;
-      if (d.donation_date) {
-        if (!byDonor[key].first || d.donation_date < byDonor[key].first!) byDonor[key].first = d.donation_date;
-        if (!byDonor[key].last || d.donation_date > byDonor[key].last!) byDonor[key].last = d.donation_date;
-      }
-    });
-    return Object.values(byDonor);
-  }, [donors]);
 
   const yearStart = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
 
