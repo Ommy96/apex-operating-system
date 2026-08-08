@@ -461,6 +461,7 @@ export default function BeneficiaryProfile() {
 
   const tabs = [
     { value: 'overview', label: 'Overview', icon: Clock, show: true, legacy: false },
+    { value: 'members', label: 'Members', icon: Users, show: beneficiary.beneficiary_type === 'group', legacy: false },
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
     { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data && (isMinorAge || isTertiary || hasEducationData), legacy: !orgConfig.collect_education_data && hasEducationData },
     { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
