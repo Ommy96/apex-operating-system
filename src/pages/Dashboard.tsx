@@ -20,6 +20,7 @@ import { GlobalSearchBar } from "@/components/dashboard/GlobalSearchBar";
 import { FloatingCreateButton } from "@/components/dashboard/FloatingCreateButton";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
+import { useCanonicalCounts } from "@/hooks/useCanonicalCounts";
 import { formatDistanceToNow } from "date-fns";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
 import { useLeadProjects } from "@/hooks/useLeadProjects";
@@ -55,12 +56,17 @@ const Dashboard = () => {
 
   const {
     programStats,
-    totalBeneficiaries,
     trendData,
     statsLoading,
     trendsLoading,
     refetch,
   } = useProgramEnrollmentStats();
+
+  // Canonical counts — the single source of truth shared with the
+  // Beneficiaries page, Analytics and reports so tiles can never disagree.
+  const { counts, isLoading: countsLoading, refetch: refetchCounts } = useCanonicalCounts();
+  const totalBeneficiaries = counts.totalBeneficiaries;
+  const activeBeneficiaries = counts.activeBeneficiaries;
 
   // Greeting based on time of day
   const greeting = useMemo(() => {
