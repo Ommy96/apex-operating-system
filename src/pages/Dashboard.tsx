@@ -494,7 +494,7 @@ const Dashboard = () => {
           icon={UsersIcon}
           tone="teal"
           highlight
-          isLoading={statsLoading}
+          isLoading={countsLoading}
           value={totalBeneficiaries.toLocaleString()}
           series={beneficiarySpark}
           delta={
@@ -502,7 +502,7 @@ const Dashboard = () => {
               ? (newThisMonth / Math.max(totalBeneficiaries - newThisMonth, 1)) * 100
               : undefined
           }
-          deltaLabel="this month"
+          deltaLabel={`this month · ${activeBeneficiaries.toLocaleString()} active`}
         />
         <SparklineTile
           label="ACTIVE GRANTS"
