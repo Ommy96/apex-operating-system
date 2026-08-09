@@ -57,20 +57,53 @@ function applyPrivacy(b: any) {
 }
 
 export async function exportBeneficiariesToExcel(filters: ExportFilters) {
-  const { organizationId, beneficiaryIds } = filters;
-
-  let beneficiariesQuery = supabase
-    .from('beneficiaries')
-    .select('*')
-    .eq('organization_id', organizationId)
-    .is('deleted_at', null);
-
-  if (beneficiaryIds?.length) {
-    beneficiariesQuery = beneficiariesQuery.in('id', beneficiaryIds);
+  const CHUNK = 100;
+  function chunked(arr: string[]): string[][] {
+    const out: string[][] = [];
+    for (let i = 0; i < arr.length; i += CHUNK) out.push(arr.slice(i, i + CHUNK));
+    return out;
+  }
+  async function fetchIn(table: string, select: string, column: string, values: string[]) {
+    const rows: any[] = [];
+    for (const chunk of chunked(values)) {
+      const { data, error } = await supabase.from(table as any).select(select).in(column, chunk);
+      if (error) throw error;
+      rows.push(...((data as any[]) || []));
+    }
+    return { data: rows };
   }
 
-  const { data: beneficiaries, error } = await beneficiariesQuery;
-  if (error) throw error;
+  const { organizationId, beneficiaryIds } = filters;
+
+  // Fetch in pages: PostgREST caps at 1000 rows per request, and long `in()`
+  // lists blow past the URL length limit (which surfaces as "Bad request").
+  const beneficiaries: any[] = [];
+  if (beneficiaryIds?.length) {
+    for (const chunk of chunked(beneficiaryIds)) {
+      const { data, error } = await supabase
+        .from('beneficiaries')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .is('deleted_at', null)
+        .in('id', chunk);
+      if (error) throw error;
+      beneficiaries.push(...(data || []));
+    }
+  } else {
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from('beneficiaries')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      beneficiaries.push(...(data || []));
+      if (!data || data.length < PAGE) break;
+    }
+  }
   if (!beneficiaries || beneficiaries.length === 0) {
     throw new Error('No beneficiaries to export');
   }
@@ -79,18 +112,14 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
 
   const [bgRes, oosRes, servicesRes, programsRes, projectsRes, configRes, orgRes, needsRes] =
     await Promise.all([
-      supabase
-        .from('beneficiary_guardians')
-        .select('beneficiary_id, relationship, guardian_id')
-        .in('beneficiary_id', ids),
-      supabase
-        .from('beneficiary_out_of_system_contacts' as any)
-        .select('*')
-        .in('beneficiary_id', ids),
-      supabase
-        .from('beneficiary_services')
-        .select('beneficiary_id, status, enrolled_date, exit_date, program_id, project_id, project_name')
-        .in('beneficiary_id', ids),
+      fetchIn('beneficiary_guardians', 'beneficiary_id, relationship, guardian_id', 'beneficiary_id', ids),
+      fetchIn('beneficiary_out_of_system_contacts', '*', 'beneficiary_id', ids),
+      fetchIn(
+        'beneficiary_services',
+        'beneficiary_id, status, enrolled_date, exit_date, program_id, project_id, project_name',
+        'beneficiary_id',
+        ids,
+      ),
       supabase.from('programs').select('id, name').eq('organization_id', organizationId),
       supabase.from('projects').select('id, name').eq('organization_id', organizationId),
       supabase
@@ -99,15 +128,17 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
         .eq('organization_id', organizationId)
         .maybeSingle(),
       supabase.from('organizations').select('name').eq('id', organizationId).maybeSingle(),
-      supabase
-        .from('beneficiary_needs' as any)
-        .select('beneficiary_id, status, estimated_cost, funded_amount, currency, priority, need_type:need_types(label)')
-        .in('beneficiary_id', ids),
+      fetchIn(
+        'beneficiary_needs',
+        'beneficiary_id, status, estimated_cost, funded_amount, currency, priority, need_type:need_types(label)',
+        'beneficiary_id',
+        ids,
+      ),
     ]);
 
   const guardianIds = Array.from(new Set((bgRes.data || []).map((g: any) => g.guardian_id).filter(Boolean)));
   const guardiansRes = guardianIds.length
-    ? await supabase.from('guardians').select('id, full_name, guardian_type, phone, email, is_alive').in('id', guardianIds)
+    ? await fetchIn('guardians', 'id, full_name, guardian_type, phone, email, is_alive', 'id', guardianIds)
     : { data: [] as any[] };
   const guardianById = new Map((guardiansRes.data || []).map((g: any) => [g.id, g]));
   const programById = new Map((programsRes.data || []).map((p: any) => [p.id, p.name]));
