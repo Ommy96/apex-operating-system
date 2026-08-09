@@ -57,6 +57,22 @@ function applyPrivacy(b: any) {
 }
 
 export async function exportBeneficiariesToExcel(filters: ExportFilters) {
+  const CHUNK = 100;
+  function chunked(arr: string[]): string[][] {
+    const out: string[][] = [];
+    for (let i = 0; i < arr.length; i += CHUNK) out.push(arr.slice(i, i + CHUNK));
+    return out;
+  }
+  async function fetchIn(table: string, select: string, column: string, values: string[]) {
+    const rows: any[] = [];
+    for (const chunk of chunked(values)) {
+      const { data, error } = await supabase.from(table as any).select(select).in(column, chunk);
+      if (error) throw error;
+      rows.push(...((data as any[]) || []));
+    }
+    return { data: rows };
+  }
+
   const { organizationId, beneficiaryIds } = filters;
 
   // Fetch in pages: PostgREST caps at 1000 rows per request, and long `in()`
