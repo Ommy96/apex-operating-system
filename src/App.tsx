@@ -19,6 +19,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const RegisterOrganization = lazy(() => import("./pages/RegisterOrganization"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Legal = lazy(() => import("./pages/Legal"));
 const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -189,6 +190,8 @@ const App = () => (
             <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
             <Route path="/register-organization" element={<LazyRoute><RegisterOrganization /></LazyRoute>} />
             <Route path="/reset-password" element={<LazyRoute><ResetPassword /></LazyRoute>} />
+            <Route path="/privacy" element={<LazyRoute><Legal /></LazyRoute>} />
+            <Route path="/terms" element={<LazyRoute><Legal /></LazyRoute>} />
             <Route path="/super-admin" element={<LazyRoute><SuperAdminLogin /></LazyRoute>} />
 
             {/* Public intake forms (no auth) */}

@@ -1,6 +1,6 @@
 import { logger } from "@/lib/logger";
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -101,6 +101,9 @@ const STEPS = [
 export default function RegisterOrganization() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const location = useLocation();
+  const prefill = (location.state as { prefill?: { fullName?: string; email?: string; password?: string } } | null)
+    ?.prefill;
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [registrationComplete, setRegistrationComplete] = useState(false);
@@ -115,8 +118,8 @@ export default function RegisterOrganization() {
       organizationName: '', organizationSlug: '', organizationType: '',
       description: '', email: '', phone: '', website: '', address: '',
       country: '', county: '', registrationNumber: '',
-      adminFullName: '', adminEmail: '', adminPhone: '',
-      adminPassword: '', confirmPassword: '', plan: 'free',
+      adminFullName: prefill?.fullName ?? '', adminEmail: prefill?.email ?? '', adminPhone: '',
+      adminPassword: prefill?.password ?? '', confirmPassword: prefill?.password ?? '', plan: 'free',
     },
   });
 
