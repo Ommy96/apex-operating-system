@@ -188,8 +188,8 @@ export function AuthShell({
                   animate={{ left: accentSide === "right" ? "0%" : "50%" }}
                   transition={{ duration, ease }}
                 >
-                  <div ref={formRef} className="flex h-full items-center px-8 py-10 lg:px-12">
-                    <div className="w-full">{children}</div>
+                  <div className="flex h-full items-center px-8 py-10 lg:px-12">
+                    <div ref={formRef} className="w-full">{children}</div>
                   </div>
                 </motion.div>
                 <motion.div
