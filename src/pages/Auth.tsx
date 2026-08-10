@@ -1,43 +1,22 @@
 import { logger } from "@/lib/logger";
-import { useState, useEffect } from 'react';
-import { Navigate, useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, CheckCircle2, Mail, Lock, User, Sparkles, Building2, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { ApexLogo } from '@/components/brand/ApexLogo';
-import { PRODUCT_NAME, PRODUCT_TAGLINE } from '@/config/brand';
+import { useState, useEffect, useMemo } from "react";
+import { Navigate, useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Mail, Lock, User, ArrowLeft, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
+import { AuthShell } from "@/components/auth/AuthShell";
+import {
+  AuthInput,
+  AuthPasswordInput,
+  AuthSubmit,
+  AuthDivider,
+  GoogleButton,
+  RULES,
+} from "@/components/auth/AuthFields";
+import { PRODUCT_NAME } from "@/config/brand";
 
-const signInSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const inviteSignUpSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-});
-
-type SignInFormData = z.infer<typeof signInSchema>;
-type InviteSignUpFormData = z.infer<typeof inviteSignUpSchema>;
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+type Mode = "signin" | "signup" | "forgot";
 
 interface InvitationData {
   id: string;
@@ -46,586 +25,663 @@ interface InvitationData {
   organization_id: string;
   status: string;
   expires_at: string;
-  organization?: {
-    name: string;
-  };
+  organization?: { name: string };
+}
+
+/** Map raw Supabase auth errors to specific, human messages. */
+function humanAuthError(message?: string): string {
+  const m = (message || "").toLowerCase();
+  if (!m) return "Something went wrong. Please try again.";
+  if (m.includes("invalid login credentials"))
+    return "That email and password don't match an account. Check the password and try again.";
+  if (m.includes("email not confirmed"))
+    return "Your email isn't verified yet. Open the confirmation link we emailed you, then sign in.";
+  if (m.includes("too many") || m.includes("rate limit"))
+    return "Too many attempts. Please wait a few minutes before trying again.";
+  if (m.includes("failed to fetch") || m.includes("network"))
+    return "We couldn't reach the server. Check your connection and try again.";
+  if (m.includes("provider is not enabled") || m.includes("unsupported provider"))
+    return "Google sign-in isn't enabled for this workspace yet. Please sign in with email, or ask your administrator to enable Google in Supabase Auth settings.";
+  if (m.includes("already registered")) return "That email is already registered. Sign in instead.";
+  return message as string;
 }
 
 export default function Auth() {
   const { user, signIn, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const inviteToken = searchParams.get('invite');
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
-  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
-  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  
-  // Invitation state
+  const inviteToken = searchParams.get("invite");
+  const reduced = useReducedMotion();
+
+  const [mode, setMode] = useState<Mode>(
+    searchParams.get("mode") === "signup" ? "signup" : "signin",
+  );
+
+  // ── Sign in ────────────────────────────────────────────────────────────
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
+  const [signInErrors, setSignInErrors] = useState<Record<string, string>>({});
+  const [signInBusy, setSignInBusy] = useState(false);
+
+  // ── Sign up ────────────────────────────────────────────────────────────
+  const [suName, setSuName] = useState("");
+  const [suEmail, setSuEmail] = useState("");
+  const [suPassword, setSuPassword] = useState("");
+  const [suConfirm, setSuConfirm] = useState("");
+  const [suErrors, setSuErrors] = useState<Record<string, string>>({});
+
+  // ── Forgot ─────────────────────────────────────────────────────────────
+  const [fpEmail, setFpEmail] = useState("");
+  const [fpError, setFpError] = useState<string | null>(null);
+  const [fpBusy, setFpBusy] = useState(false);
+  const [fpSent, setFpSent] = useState(false);
+
+  // ── Google ─────────────────────────────────────────────────────────────
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  // ── Invitation ─────────────────────────────────────────────────────────
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [invitationLoading, setInvitationLoading] = useState(false);
   const [invitationError, setInvitationError] = useState<string | null>(null);
+  const [invName, setInvName] = useState("");
+  const [invPassword, setInvPassword] = useState("");
+  const [invConfirm, setInvConfirm] = useState("");
+  const [invErrors, setInvErrors] = useState<Record<string, string>>({});
+  const [invBusy, setInvBusy] = useState(false);
 
-  const signInForm = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const inviteSignUpForm = useForm<InviteSignUpFormData>({
-    resolver: zodResolver(inviteSignUpSchema),
-    defaultValues: {
-      fullName: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
-
-  const forgotPasswordForm = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
-  });
-
-  // Fetch invitation details when token is present
   useEffect(() => {
-    if (inviteToken) {
-      fetchInvitation(inviteToken);
-    }
+    if (!inviteToken) return;
+    const fetchInvitation = async (token: string) => {
+      setInvitationLoading(true);
+      setInvitationError(null);
+      try {
+        const { data, error } = await supabase
+          .from("organization_invitations")
+          .select(
+            `id, email, role, organization_id, status, expires_at, organizations:organization_id (name)`,
+          )
+          .eq("token", token)
+          .single();
+
+        if (error) {
+          setInvitationError("Invalid invitation link");
+          return;
+        }
+        if (!data) {
+          setInvitationError("Invitation not found");
+          return;
+        }
+        if (data.status !== "pending") {
+          setInvitationError("This invitation has already been used or cancelled");
+          return;
+        }
+        if (new Date(data.expires_at) < new Date()) {
+          setInvitationError("This invitation has expired");
+          return;
+        }
+        setInvitation({
+          ...data,
+          organization: data.organizations as unknown as { name: string },
+        });
+      } catch {
+        setInvitationError("Failed to load invitation");
+      } finally {
+        setInvitationLoading(false);
+      }
+    };
+    fetchInvitation(inviteToken);
   }, [inviteToken]);
 
-  const fetchInvitation = async (token: string) => {
-    setInvitationLoading(true);
-    setInvitationError(null);
-    
-    try {
-      const { data, error } = await supabase
-        .from('organization_invitations')
-        .select(`
-          id,
-          email,
-          role,
-          organization_id,
-          status,
-          expires_at,
-          organizations:organization_id (name)
-        `)
-        .eq('token', token)
-        .single();
+  const accent = useMemo(() => {
+    if (mode === "signup")
+      return {
+        key: "signin-cta",
+        pill: PRODUCT_NAME.toUpperCase(),
+        headline: "Already have an account?",
+        body: "Sign in to pick up where you left off.",
+        ctaLabel: "Sign in",
+        onCta: () => switchMode("signin"),
+      };
+    if (mode === "forgot")
+      return {
+        key: "forgot-cta",
+        pill: PRODUCT_NAME.toUpperCase(),
+        headline: "Remembered it?",
+        body: "Head back to sign in and continue managing your programmes.",
+        ctaLabel: "Back to sign in",
+        onCta: () => switchMode("signin"),
+      };
+    return {
+      key: "signup-cta",
+      pill: PRODUCT_NAME.toUpperCase(),
+      headline: `New to ${PRODUCT_NAME}?`,
+      body: "Create your organisation account and start managing your programmes in minutes.",
+      ctaLabel: "Create account",
+      onCta: () => switchMode("signup"),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
-      if (error) {
-        setInvitationError('Invalid invitation link');
-        return;
-      }
-
-      if (!data) {
-        setInvitationError('Invitation not found');
-        return;
-      }
-
-      if (data.status !== 'pending') {
-        setInvitationError('This invitation has already been used or cancelled');
-        return;
-      }
-
-      if (new Date(data.expires_at) < new Date()) {
-        setInvitationError('This invitation has expired');
-        return;
-      }
-
-      setInvitation({
-        ...data,
-        organization: data.organizations as unknown as { name: string }
-      });
-    } catch (err) {
-      setInvitationError('Failed to load invitation');
-    } finally {
-      setInvitationLoading(false);
-    }
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setSignInErrors({});
+    setSuErrors({});
+    setFpError(null);
+    setGoogleError(null);
   };
 
   if (loading || invitationLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary"></div>
-          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-success animate-pulse" />
-        </div>
+      <div
+        className="auth-scope flex min-h-screen items-center justify-center"
+        style={{ background: "var(--auth-canvas)" }}
+      >
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/15 border-t-[var(--auth-teal-lt)]" />
       </div>
     );
   }
 
-  if (user) {
+  if (user && !inviteToken) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handleSignIn = async (data: SignInFormData) => {
-    setIsLoading(true);
-    await signIn(data.email, data.password);
-    setIsLoading(false);
+  const focusFirstError = () => {
+    requestAnimationFrame(() => {
+      const el = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+      el?.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+      el?.focus?.();
+    });
   };
 
-  const handleInviteSignUp = async (data: InviteSignUpFormData) => {
+  const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  // ── Handlers (auth logic unchanged) ────────────────────────────────────
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!isEmail(email)) errs.email = "Please enter a valid email";
+    if (password.length < 6) errs.password = "Password must be at least 6 characters";
+    setSignInErrors(errs);
+    if (Object.keys(errs).length) return focusFirstError();
+
+    setSignInBusy(true);
+    const { error } = await signIn(email, password);
+    setSignInBusy(false);
+    if (error) {
+      const msg = humanAuthError(error.message);
+      setSignInErrors({
+        password: msg,
+      });
+      focusFirstError();
+    }
+  };
+
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    if (suName.trim().length < 2) errs.name = "Full name must be at least 2 characters";
+    if (!isEmail(suEmail)) errs.email = "Please enter a valid email";
+    if (RULES.some((r) => !r.test(suPassword)))
+      errs.password = "Password must meet all the requirements below";
+    if (suConfirm !== suPassword) errs.confirm = "Passwords don't match";
+    setSuErrors(errs);
+    if (Object.keys(errs).length) return focusFirstError();
+
+    // Account + organisation are created together in the next step.
+    navigate("/register-organization", {
+      state: {
+        prefill: { fullName: suName.trim(), email: suEmail.trim(), password: suPassword },
+      },
+    });
+  };
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isEmail(fpEmail)) {
+      setFpError("Please enter a valid email");
+      return focusFirstError();
+    }
+    setFpError(null);
+    setFpBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(fpEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setFpBusy(false);
+    if (error) {
+      logger.error("Error sending password reset email:", error);
+      setFpError(humanAuthError(error.message));
+      return;
+    }
+    setFpSent(true);
+  };
+
+  const handleGoogle = async () => {
+    setGoogleBusy(true);
+    setGoogleError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (error) {
+      setGoogleBusy(false);
+      setGoogleError(humanAuthError(error.message));
+    }
+  };
+
+  const handleInviteSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!invitation) return;
-    
-    setIsLoading(true);
+    const errs: Record<string, string> = {};
+    if (invName.trim().length < 2) errs.name = "Full name must be at least 2 characters";
+    if (invPassword.length < 6) errs.password = "Password must be at least 6 characters";
+    if (invConfirm !== invPassword) errs.confirm = "Passwords don't match";
+    setInvErrors(errs);
+    if (Object.keys(errs).length) return focusFirstError();
+
+    setInvBusy(true);
     try {
-      // Create the user account
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: invitation.email,
-        password: data.password,
+        password: invPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: data.fullName,
-          }
-        }
+          data: { full_name: invName.trim() },
+        },
       });
-
       if (signUpError) throw signUpError;
 
       if (authData.user) {
-        // Note: handle_new_user trigger creates the base profile.
-        // Update it with org details.
         const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            full_name: data.fullName,
-            organization_id: invitation.organization_id,
-          })
-          .eq('user_id', authData.user.id);
+          .from("profiles")
+          .update({ full_name: invName.trim(), organization_id: invitation.organization_id })
+          .eq("user_id", authData.user.id);
+        if (profileError) logger.error("Profile update error:", profileError);
 
-        if (profileError) {
-          logger.error('Profile update error:', profileError);
-        }
-
-        // Accept invitation via SECURITY DEFINER function (bypasses RLS)
-        const { error: acceptError } = await supabase.rpc('accept_invitation', {
+        const { error: acceptError } = await supabase.rpc("accept_invitation", {
           _invitation_id: invitation.id,
           _user_id: authData.user.id,
         });
+        if (acceptError) logger.error("Accept invitation error:", acceptError);
 
-        if (acceptError) {
-          logger.error('Accept invitation error:', acceptError);
-        }
-
-        // Create user role (handle_new_user trigger may already create this)
         const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'staff',
-          });
+          .from("user_roles")
+          .insert({ user_id: authData.user.id, role: "staff" });
+        if (roleError) logger.error("Role creation error:", roleError);
 
-        if (roleError) {
-          logger.error('Role creation error:', roleError);
-        }
-
-        toast.success('Account created successfully! Please check your email to verify your account.');
-        navigate('/auth');
+        navigate("/auth");
       }
     } catch (error: any) {
-      logger.error('Signup error:', error);
-      toast.error(error.message || 'Failed to create account');
+      logger.error("Signup error:", error);
+      setInvErrors({ password: humanAuthError(error?.message) });
+      focusFirstError();
     } finally {
-      setIsLoading(false);
+      setInvBusy(false);
     }
   };
 
-  const handleForgotPassword = async (data: ForgotPasswordFormData) => {
-    setIsForgotPasswordLoading(true);
-    
-    const redirectUrl = `${window.location.origin}/reset-password`;
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: redirectUrl,
-    });
-    
-    setIsForgotPasswordLoading(false);
-    
-    if (error) {
-      logger.error('Error sending password reset email:', error);
-    } else {
-      setForgotPasswordSuccess(true);
-      forgotPasswordForm.reset();
-    }
-  };
-
-  const handleGoBack = () => {
-    navigate('/');
-  };
-
-  // Invitation-based signup view
+  // ── Invitation screen ──────────────────────────────────────────────────
   if (inviteToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
-        </div>
+      <AuthShell
+        showAccent={false}
+        accent={{ key: "invite", headline: "", body: "" }}
+      >
+        <div className="mx-auto w-full max-w-md space-y-6">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--auth-text)]">
+              Accept your invitation
+            </h1>
+            <p className="text-sm text-[var(--auth-muted)]">
+              Set a password to activate your {PRODUCT_NAME} account.
+            </p>
+          </div>
 
-        <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
-            <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
-          
-          <CardHeader className="text-center pt-8 pb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-4 top-6 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => navigate('/auth')}
+          {invitationError ? (
+            <div
+              className="flex items-start gap-2 rounded-xl border p-4 text-sm"
+              style={{ borderColor: "var(--auth-danger)", color: "var(--auth-danger)" }}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Sign In
-            </Button>
-            
-            <div className="flex justify-center mb-4">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: 'var(--accent-brand)' }} />
-                <div className="relative p-4 rounded-2xl shadow-lg" style={{ background: 'var(--accent-brand)' }}>
-                  <Building2 className="h-8 w-8 text-white" />
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{invitationError}</span>
+            </div>
+          ) : invitation ? (
+            <>
+              <div
+                className="rounded-xl border p-4"
+                style={{ borderColor: "var(--auth-border)", background: "var(--auth-surface-2)" }}
+              >
+                <div className="flex items-start gap-3">
+                  <Building2 className="mt-0.5 h-4 w-4 text-[var(--auth-teal-lt)]" />
+                  <div className="text-sm">
+                    <p className="text-[var(--auth-text)]">
+                      You&apos;ve been invited to join{" "}
+                      <span className="font-semibold">{invitation.organization?.name}</span> as{" "}
+                      <span className="font-semibold capitalize">
+                        {invitation.role.replace(/_/g, " ")}
+                      </span>
+                      .
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
-              Accept Invitation
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Join your organization on ApexOS
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="px-6 pb-8">
-            {invitationError ? (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{invitationError}</AlertDescription>
-              </Alert>
-            ) : invitation ? (
-              <>
-                <div className="mb-6 p-4 bg-muted/50 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-1">You've been invited to join</p>
-                  <p className="font-semibold text-lg">{invitation.organization?.name}</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Role: <span className="font-medium capitalize">{invitation.role}</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Email: <span className="font-medium">{invitation.email}</span>
-                  </p>
-                </div>
 
-                <Form {...inviteSignUpForm}>
-                  <form onSubmit={inviteSignUpForm.handleSubmit(handleInviteSignUp)} className="space-y-4">
-                    <FormField
-                      control={inviteSignUpForm.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-foreground font-medium">Full Name</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input 
-                                placeholder="Enter your full name" 
-                                className="pl-10 h-12 rounded-xl border-border/50 bg-muted/30 focus:bg-background transition-colors" 
-                                {...field} 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={inviteSignUpForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-foreground font-medium">Password</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input 
-                                type="password" 
-                                placeholder="Create a password" 
-                                className="pl-10 h-12 rounded-xl border-border/50 bg-muted/30 focus:bg-background transition-colors" 
-                                {...field} 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={inviteSignUpForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-foreground font-medium">Confirm Password</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input 
-                                type="password" 
-                                placeholder="Confirm your password" 
-                                className="pl-10 h-12 rounded-xl border-border/50 bg-muted/30 focus:bg-background transition-colors" 
-                                {...field} 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
-                      style={{ background: 'var(--accent-brand)' }}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Creating Account...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4" />
-                          Accept & Create Account
-                        </div>
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </>
-            ) : null}
-          </CardContent>
-          
-          <div className="h-px" style={{ background: 'var(--brand-border)' }} />
-        </Card>
-      </div>
+              <form onSubmit={handleInviteSignUp} className="space-y-4" noValidate>
+                <AuthInput
+                  label="Email"
+                  icon={<Mail className="h-4 w-4" />}
+                  type="email"
+                  value={invitation.email}
+                  readOnly
+                  className="cursor-not-allowed opacity-80"
+                />
+                <AuthInput
+                  label="Full name"
+                  icon={<User className="h-4 w-4" />}
+                  autoComplete="name"
+                  placeholder="Your full name"
+                  value={invName}
+                  error={invErrors.name}
+                  onChange={(e) => setInvName(e.target.value)}
+                  onBlur={() =>
+                    setInvErrors((p) => ({
+                      ...p,
+                      name: invName.trim().length < 2 ? "Full name must be at least 2 characters" : "",
+                    }))
+                  }
+                />
+                <AuthPasswordInput
+                  label="Password"
+                  icon={<Lock className="h-4 w-4" />}
+                  autoComplete="new-password"
+                  placeholder="Create a password"
+                  showStrength
+                  value={invPassword}
+                  error={invErrors.password}
+                  onChange={(e) => setInvPassword(e.target.value)}
+                />
+                <AuthPasswordInput
+                  label="Confirm password"
+                  icon={<Lock className="h-4 w-4" />}
+                  autoComplete="new-password"
+                  placeholder="Repeat your password"
+                  matchValue={invPassword}
+                  value={invConfirm}
+                  error={invErrors.confirm}
+                  onChange={(e) => setInvConfirm(e.target.value)}
+                />
+                <AuthSubmit loading={invBusy}>
+                  {invBusy ? "Creating account…" : "Accept & create account"}
+                </AuthSubmit>
+              </form>
+            </>
+          ) : null}
+
+          <Link
+            to="/auth"
+            className="inline-flex items-center gap-2 text-sm text-[var(--auth-muted)] transition-colors hover:text-[var(--auth-text)]"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to sign in
+          </Link>
+        </div>
+      </AuthShell>
     );
   }
 
-  // Default sign-in view
+  // ── Main split-panel screens ───────────────────────────────────────────
+  const panelTransition = { duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] as const };
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--brand-canvas)' }}>
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(15,123,108,0.08)' }} />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(29,158,138,0.06)' }} />
-      </div>
+    <AuthShell accent={accent} accentSide={mode === "signup" ? "left" : "right"}>
+      <div className="mx-auto w-full max-w-md">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={panelTransition}
+            className="space-y-6"
+          >
+            {mode === "signin" && (
+              <>
+                <div className="space-y-1.5">
+                  <h1 className="text-2xl font-semibold tracking-tight text-[var(--auth-text)]">
+                    Sign in
+                  </h1>
+                  <p className="text-sm text-[var(--auth-muted)]">
+                    Welcome back. Access your organisation workspace.
+                  </p>
+                </div>
 
-      <Card className="w-full max-w-md relative z-10 shadow-elevation-3 overflow-hidden" style={{ background: 'var(--brand-surface)', border: '1px solid var(--brand-border)' }}>
-        <div className="relative">
-          <div className="h-1.5 rounded-t-lg" style={{ background: 'var(--accent-brand)' }} />
-          
-          <CardHeader className="text-center pt-8 pb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-4 top-6 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={handleGoBack}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            
-            <div className="flex justify-center mb-4">
-              <ApexLogo variant="mark" className="scale-150" />
-            </div>
+                <GoogleButton onClick={handleGoogle} loading={googleBusy} />
+                {googleError && (
+                  <p className="text-xs text-[var(--auth-danger)]">{googleError}</p>
+                )}
+                <AuthDivider />
 
-            <CardTitle className="text-2xl font-semibold" style={{ color: 'var(--accent-brand)' }}>
-              {PRODUCT_NAME}
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {PRODUCT_TAGLINE} · Sign in to your account
-            </CardDescription>
-          </CardHeader>
-        </div>
-        
-        <CardContent className="px-6 pb-8">
-          <Form {...signInForm}>
-            <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-              <FormField
-                control={signInForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground font-medium">Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          type="email" 
-                          placeholder="Enter your email" 
-                          className="pl-10 h-12 rounded-xl border-border/50 bg-muted/30 focus:bg-background transition-colors" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                <form onSubmit={handleSignIn} className="space-y-4" noValidate>
+                  <AuthInput
+                    label="Email"
+                    icon={<Mail className="h-4 w-4" />}
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    placeholder="you@organisation.org"
+                    value={email}
+                    error={signInErrors.email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() =>
+                      setSignInErrors((p) => ({
+                        ...p,
+                        email: isEmail(email) || !email ? "" : "Please enter a valid email",
+                      }))
+                    }
+                  />
+                  <AuthPasswordInput
+                    label="Password"
+                    icon={<Lock className="h-4 w-4" />}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    value={password}
+                    error={signInErrors.password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--auth-muted)]">
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(e) => setRemember(e.target.checked)}
+                        className="h-4 w-4 rounded border-[var(--auth-border)] accent-[var(--auth-teal-lt)]"
+                      />
+                      Remember me
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => switchMode("forgot")}
+                      className="text-sm text-[var(--auth-teal-lt)] underline-offset-4 hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+
+                  <AuthSubmit loading={signInBusy}>
+                    {signInBusy ? "Signing in…" : "Sign in"}
+                  </AuthSubmit>
+                </form>
+
+                <p className="text-center text-sm text-[var(--auth-muted)] lg:hidden">
+                  New to {PRODUCT_NAME}?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="font-semibold text-[var(--auth-teal-lt)] underline-offset-4 hover:underline"
+                  >
+                    Create account
+                  </button>
+                </p>
+              </>
+            )}
+
+            {mode === "signup" && (
+              <>
+                <div className="space-y-1.5">
+                  <h1 className="text-2xl font-semibold tracking-tight text-[var(--auth-text)]">
+                    Create your account
+                  </h1>
+                  <p className="text-sm text-[var(--auth-muted)]">
+                    Start managing programmes, funding and impact in one system.
+                  </p>
+                </div>
+
+                <GoogleButton onClick={handleGoogle} loading={googleBusy} label="Sign up with Google" />
+                {googleError && (
+                  <p className="text-xs text-[var(--auth-danger)]">{googleError}</p>
                 )}
-              />
-              
-              <FormField
-                control={signInForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground font-medium">Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          type="password" 
-                          placeholder="Enter your password" 
-                          className="pl-10 h-12 rounded-xl border-border/50 bg-muted/30 focus:bg-background transition-colors" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button 
-                type="submit" 
-                className="w-full h-12 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-lg text-white" 
-                style={{ background: 'var(--accent-brand)' }}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Signing In...
+                <AuthDivider />
+
+                <form onSubmit={handleSignUp} className="space-y-4" noValidate>
+                  <AuthInput
+                    label="Full name"
+                    icon={<User className="h-4 w-4" />}
+                    autoComplete="name"
+                    placeholder="Your full name"
+                    value={suName}
+                    error={suErrors.name}
+                    onChange={(e) => setSuName(e.target.value)}
+                    onBlur={() =>
+                      setSuErrors((p) => ({
+                        ...p,
+                        name:
+                          suName.trim().length >= 2 || !suName
+                            ? ""
+                            : "Full name must be at least 2 characters",
+                      }))
+                    }
+                  />
+                  <AuthInput
+                    label="Work email"
+                    icon={<Mail className="h-4 w-4" />}
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    placeholder="you@organisation.org"
+                    value={suEmail}
+                    error={suErrors.email}
+                    onChange={(e) => setSuEmail(e.target.value)}
+                    onBlur={() =>
+                      setSuErrors((p) => ({
+                        ...p,
+                        email: isEmail(suEmail) || !suEmail ? "" : "Please enter a valid email",
+                      }))
+                    }
+                  />
+                  <AuthPasswordInput
+                    label="Password"
+                    icon={<Lock className="h-4 w-4" />}
+                    autoComplete="new-password"
+                    placeholder="Create a strong password"
+                    showStrength
+                    value={suPassword}
+                    error={suErrors.password}
+                    onChange={(e) => setSuPassword(e.target.value)}
+                  />
+                  <AuthPasswordInput
+                    label="Confirm password"
+                    icon={<Lock className="h-4 w-4" />}
+                    autoComplete="new-password"
+                    placeholder="Repeat your password"
+                    matchValue={suPassword}
+                    value={suConfirm}
+                    error={suErrors.confirm}
+                    onChange={(e) => setSuConfirm(e.target.value)}
+                  />
+
+                  <AuthSubmit>Create account</AuthSubmit>
+                  <p className="text-center text-xs text-[var(--auth-muted)]">
+                    You&apos;ll create your organisation in the next step.
+                  </p>
+                </form>
+
+                <p className="text-center text-sm text-[var(--auth-muted)] lg:hidden">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signin")}
+                    className="font-semibold text-[var(--auth-teal-lt)] underline-offset-4 hover:underline"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </>
+            )}
+
+            {mode === "forgot" && (
+              <>
+                <div className="space-y-1.5">
+                  <h1 className="text-2xl font-semibold tracking-tight text-[var(--auth-text)]">
+                    Reset your password
+                  </h1>
+                  <p className="text-sm text-[var(--auth-muted)]">
+                    We&apos;ll email you a secure link to set a new password.
+                  </p>
+                </div>
+
+                {fpSent ? (
+                  <div
+                    className="flex items-start gap-3 rounded-xl border p-4 text-sm"
+                    style={{
+                      borderColor: "var(--auth-teal-lt)",
+                      background: "rgba(31,168,145,0.10)",
+                      color: "var(--auth-text)",
+                    }}
+                  >
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--auth-teal-lt)]" />
+                    <span>
+                      If an account exists for that address, we&apos;ve sent a reset link. Check your
+                      inbox and spam folder.
+                    </span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Sign In
-                  </div>
+                  <form onSubmit={handleForgot} className="space-y-4" noValidate>
+                    <AuthInput
+                      label="Email"
+                      icon={<Mail className="h-4 w-4" />}
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="you@organisation.org"
+                      value={fpEmail}
+                      error={fpError ?? undefined}
+                      onChange={(e) => setFpEmail(e.target.value)}
+                      onBlur={() =>
+                        setFpError(isEmail(fpEmail) || !fpEmail ? null : "Please enter a valid email")
+                      }
+                    />
+                    <AuthSubmit loading={fpBusy}>
+                      {fpBusy ? "Sending…" : "Send reset link"}
+                    </AuthSubmit>
+                  </form>
                 )}
-              </Button>
-              
-              <div className="text-center pt-2">
-                <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="link" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      Forgot your password?
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md border-0 shadow-2xl bg-background/95 backdrop-blur-xl">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                     <div className="p-2 rounded-lg" style={{ background: 'var(--accent-lt)' }}>
-                           <Mail className="h-5 w-5" style={{ color: 'var(--accent-brand)' }} />
-                        </div>
-                        Reset Password
-                      </DialogTitle>
-                      <DialogDescription>
-                        Enter your email address and we'll send you a link to reset your password.
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    {forgotPasswordSuccess ? (
-                    <Alert style={{ borderColor: 'var(--status-success)', background: 'var(--status-success-bg)' }}>
-                         <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--status-success)' }} />
-                         <AlertDescription style={{ color: 'var(--status-success)' }}>
-                          Password reset email sent! Check your inbox and follow the instructions to reset your password.
-                        </AlertDescription>
-                      </Alert>
-                    ) : (
-                      <Form {...forgotPasswordForm}>
-                        <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
-                          <FormField
-                            control={forgotPasswordForm.control}
-                            name="email"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
-                                      type="email" 
-                                      placeholder="Enter your email address" 
-                                      className="pl-10 h-12 rounded-xl"
-                                      {...field} 
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <div className="flex gap-3">
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              className="flex-1 h-12 rounded-xl"
-                              onClick={() => {
-                                setForgotPasswordOpen(false);
-                                setForgotPasswordSuccess(false);
-                                forgotPasswordForm.reset();
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              type="submit" 
-                              className="flex-1 h-12 rounded-xl text-white" 
-                              style={{ background: 'var(--accent-brand)' }}
-                              disabled={isForgotPasswordLoading}
-                            >
-                              {isForgotPasswordLoading ? 'Sending...' : 'Send Reset Email'}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </form>
-          </Form>
 
-          {/* Registration options */}
-          <div className="mt-6 pt-6 border-t border-border/50">
-            <p className="text-sm text-center text-muted-foreground mb-4">
-              New to ApexOS?
-            </p>
-            <Link to="/register-organization" className="block">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full h-12 rounded-xl hover:bg-primary/5"
-                style={{ borderColor: 'rgba(15,123,108,0.3)', color: 'var(--accent-brand)' }}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Register Your Organization
-              </Button>
-            </Link>
-            <p className="text-xs text-center text-muted-foreground mt-3">
-              Already invited? Check your email for the invitation link
-            </p>
-          </div>
-        </CardContent>
-        
-        <div className="h-px" style={{ background: 'var(--brand-border)' }} />
-      </Card>
-    </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFpSent(false);
+                    switchMode("signin");
+                  }}
+                  className="inline-flex items-center gap-2 text-sm text-[var(--auth-muted)] transition-colors hover:text-[var(--auth-text)]"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back to sign in
+                </button>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </AuthShell>
   );
 }

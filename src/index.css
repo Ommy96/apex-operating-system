@@ -776,3 +776,30 @@ html, body { max-width: 100%; overflow-x: hidden; }
     margin-top: 0.5rem;
   }
 }
+
+/* ── Auth surfaces ────────────────────────────────────────────────────────
+   Auth screens are intentionally rendered on the ApexOS navy canvas in both
+   light and dark themes (institutional first impression). Tokens are scoped
+   so they never leak into the app shell. All pairings meet WCAG AA. */
+.auth-scope {
+  --auth-canvas: #0A0F1E;
+  --auth-canvas-2: #070B14;
+  --auth-surface: #101828;
+  --auth-surface-2: #16202F;
+  --auth-border: #263149;
+  --auth-input: rgba(255, 255, 255, 0.045);
+  --auth-text: #F2F5FA;
+  --auth-muted: #A3B0C6;
+  --auth-teal: #0F7B6C;
+  --auth-teal-lt: #1FA891;
+  --auth-teal-deep: #0A5A50;
+  --auth-gold: #E0B255;
+  --auth-danger: #FF8FA9;
+  color: var(--auth-text);
+}
+.auth-scope input:-webkit-autofill,
+.auth-scope input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--auth-text);
+  -webkit-box-shadow: 0 0 0 1000px #16202F inset;
+  caret-color: var(--auth-text);
+}
