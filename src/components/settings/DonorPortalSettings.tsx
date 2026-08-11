@@ -110,7 +110,11 @@ export function DonorPortalSettings() {
       toast.success('Donor account removed');
       setShowDelete(null);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) =>
+      toast.error(
+        humanizeDbError(e, { entity: 'donor account', action: 'remove' }) +
+          ' Deactivate the account instead to keep the giving history intact.',
+      ),
   });
 
   const handleCreate = async () => {
