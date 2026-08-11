@@ -635,6 +635,18 @@ export default function Beneficiaries() {
               <X className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Archived visibility */}
+          <Button
+            variant={showArchived ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setShowArchived(v => !v)}
+            className="h-9 px-2.5 gap-1.5"
+            title="Archived records are hidden from active lists, counts and analytics"
+          >
+            <Archive className="h-4 w-4" />
+            {showArchived ? 'Hide archived' : 'Show archived'}
+          </Button>
         </div>
       </WorkspacePanel>
 
