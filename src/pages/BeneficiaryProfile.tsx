@@ -310,18 +310,7 @@ export default function BeneficiaryProfile() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!id) return;
-    try {
-      const { error } = await supabase.from('beneficiaries').update({ deleted_at: new Date().toISOString() } as any).eq('id', id).eq('organization_id', currentOrganization?.organization_id);
-      if (error) throw error;
-      toast({ title: "Success", description: `${term} deleted successfully` });
-      navigate('/beneficiaries');
-    } catch (error) {
-      logger.error('Error deleting beneficiary:', error);
-      toast({ title: "Error", description: `Failed to delete ${term.toLowerCase()}`, variant: "destructive" });
-    }
-  };
+  const [archiveTarget, setArchiveTarget] = useState<any>(null);
 
   const handleEdit = () => {
     if (!beneficiary) return;
