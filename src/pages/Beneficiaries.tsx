@@ -1074,23 +1074,14 @@ export default function Beneficiaries() {
         })()}
       </DetailPanel>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this beneficiary? This action cannot be undone and will remove all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Archive / delete flow */}
+      <ArchiveBeneficiaryDialog
+        target={archiveTarget as any}
+        onOpenChange={(open) => !open && setArchiveTarget(null)}
+        onDone={() => { setArchiveTarget(null); fetchBeneficiaries(); }}
+        isAdmin={isAdmin}
+        termSingular={term.toLowerCase()}
+      />
 
       <RegisterFamilySheet
         open={registerFamilyOpen}
