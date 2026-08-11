@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { humanizeDbError } from '@/lib/dbErrors';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -110,7 +111,11 @@ export function DonorPortalSettings() {
       toast.success('Donor account removed');
       setShowDelete(null);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) =>
+      toast.error(
+        humanizeDbError(e, { entity: 'donor account', action: 'remove' }) +
+          ' Deactivate the account instead to keep the giving history intact.',
+      ),
   });
 
   const handleCreate = async () => {

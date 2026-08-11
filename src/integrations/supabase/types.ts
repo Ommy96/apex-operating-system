@@ -1420,6 +1420,9 @@ export type Database = {
             | null
           address: string | null
           amount_given: number | null
+          archive_note: string | null
+          archive_reason: string | null
+          archived_by: string | null
           background_image_url: string | null
           background_narrative: string | null
           beneficiary_category: string | null
@@ -1507,6 +1510,9 @@ export type Database = {
             | null
           address?: string | null
           amount_given?: number | null
+          archive_note?: string | null
+          archive_reason?: string | null
+          archived_by?: string | null
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_category?: string | null
@@ -1594,6 +1600,9 @@ export type Database = {
             | null
           address?: string | null
           amount_given?: number | null
+          archive_note?: string | null
+          archive_reason?: string | null
+          archived_by?: string | null
           background_image_url?: string | null
           background_narrative?: string | null
           beneficiary_category?: string | null
@@ -17185,7 +17194,15 @@ export type Database = {
         Args: { _invitation_id: string; _user_id: string }
         Returns: boolean
       }
+      archive_beneficiary: {
+        Args: { _beneficiary_id: string; _note?: string; _reason?: string }
+        Returns: Json
+      }
       auto_approve_request: { Args: { request_id: string }; Returns: boolean }
+      beneficiary_link_counts: {
+        Args: { _beneficiary_id: string }
+        Returns: Json
+      }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
         Returns: boolean
@@ -17280,6 +17297,14 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       grant_all_permissions_to_org_admins: { Args: never; Returns: number }
+      hard_delete_beneficiary: {
+        Args: {
+          _beneficiary_id: string
+          _force?: boolean
+          _justification?: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
@@ -17379,6 +17404,10 @@ export type Database = {
         Returns: boolean
       }
       text_soundex: { Args: { "": string }; Returns: string }
+      unarchive_beneficiary: {
+        Args: { _beneficiary_id: string }
+        Returns: Json
+      }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean

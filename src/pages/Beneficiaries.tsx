@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { beneficiaryPath } from "@/lib/recordUrls";
 import { 
-  Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
+  Users, Plus, Search, Eye, Edit2, Archive, ArchiveRestore, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
   List, LayoutGrid, Download, Home
 } from 'lucide-react';
@@ -58,6 +58,8 @@ import {
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
+import { humanizeDbError } from '@/lib/dbErrors';
 
 interface Beneficiary {
   id: string;
@@ -117,7 +119,8 @@ export default function Beneficiaries() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
   const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Beneficiary | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [registerFamilyOpen, setRegisterFamilyOpen] = useState(false);
   const [householdsOpen, setHouseholdsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
@@ -148,7 +151,7 @@ export default function Beneficiaries() {
       fetchPrograms();
       fetchTypeLabels();
     }
-  }, [organizationId]);
+  }, [organizationId, showArchived]);
 
   // Real-time: auto-refresh when beneficiaries or enrollments change
   useEffect(() => {
@@ -200,11 +203,13 @@ export default function Beneficiaries() {
       let hasMore = true;
 
       while (hasMore) {
-        const { data, error } = await supabase
+        let q = supabase
           .from('beneficiaries')
           .select('*')
-          .eq('organization_id', organizationId)
-          .is('deleted_at', null)
+          .eq('organization_id', organizationId);
+        // Archived records (deleted_at set) are hidden unless explicitly requested.
+        if (!showArchived) q = q.is('deleted_at', null);
+        const { data, error } = await q
           .order('display_name', { ascending: true })
           .range(offset, offset + batchSize - 1);
 
@@ -220,13 +225,16 @@ export default function Beneficiaries() {
       }
 
       setBeneficiaries(allData);
-      
+
+      // Headline stats always describe the ACTIVE (non-archived) population so
+      // they keep agreeing with the Dashboard and Analytics counts.
+      const activeOnly = allData.filter((b: any) => !b.deleted_at);
       setStats({
-        total: allData.length,
-        students: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
-        adults: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
-        groups: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
-        active: allData.filter(b => isActiveStatus(b.status)).length,
+        total: activeOnly.length,
+        students: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
+        adults: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
+        groups: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
+        active: activeOnly.filter(b => isActiveStatus(b.status)).length,
       });
     } catch (error) {
       logger.error('Error fetching beneficiaries:', error);
@@ -306,31 +314,18 @@ export default function Beneficiaries() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      const { error } = await supabase
-        .from('beneficiaries')
-        .delete()
-        .eq('id', deleteId);
-
-      if (error) throw error;
-
+  const handleUnarchive = async (b: Beneficiary) => {
+    const { error } = await supabase.rpc('unarchive_beneficiary', { _beneficiary_id: b.id });
+    if (error) {
       toast({
-        title: "Success",
-        description: "Beneficiary deleted successfully",
+        title: 'Could not restore',
+        description: humanizeDbError(error, { entity: term.toLowerCase(), action: 'restore' }),
+        variant: 'destructive',
       });
-      
-      setDeleteId(null);
-      fetchBeneficiaries();
-    } catch (error) {
-      logger.error('Error deleting beneficiary:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete beneficiary",
-        variant: "destructive",
-      });
+      return;
     }
+    toast({ title: 'Restored', description: `${b.display_name} is back in the active list.` });
+    fetchBeneficiaries();
   };
 
   const getFilteredBeneficiaries = () => {
@@ -640,6 +635,18 @@ export default function Beneficiaries() {
               <X className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Archived visibility */}
+          <Button
+            variant={showArchived ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setShowArchived(v => !v)}
+            className="h-9 px-2.5 gap-1.5"
+            title="Archived records are hidden from active lists, counts and analytics"
+          >
+            <Archive className="h-4 w-4" />
+            {showArchived ? 'Hide archived' : 'Show archived'}
+          </Button>
         </div>
       </WorkspacePanel>
 
@@ -784,20 +791,27 @@ export default function Beneficiaries() {
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          {isAdmin && (
+                          {isAdmin && ((beneficiary as any).deleted_at ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-foreground/70 hover:text-primary hover:bg-primary/10"
+                              title="Unarchive"
+                              onClick={(e) => { e.stopPropagation(); handleUnarchive(beneficiary); }}
+                            >
+                              <ArchiveRestore className="h-4 w-4" />
+                            </Button>
+                          ) : (
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-foreground/70 hover:text-destructive hover:bg-destructive/10"
-                              title="Delete"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteId(beneficiary.id);
-                              }}
+                              title="Archive"
+                              onClick={(e) => { e.stopPropagation(); setArchiveTarget(beneficiary); }}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Archive className="h-4 w-4" />
                             </Button>
-                          )}
+                          ))}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1072,23 +1086,14 @@ export default function Beneficiaries() {
         })()}
       </DetailPanel>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Beneficiary</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this beneficiary? This action cannot be undone and will remove all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Archive / delete flow */}
+      <ArchiveBeneficiaryDialog
+        target={archiveTarget as any}
+        onOpenChange={(open) => !open && setArchiveTarget(null)}
+        onDone={() => { setArchiveTarget(null); fetchBeneficiaries(); }}
+        isAdmin={isAdmin}
+        termSingular={term.toLowerCase()}
+      />
 
       <RegisterFamilySheet
         open={registerFamilyOpen}

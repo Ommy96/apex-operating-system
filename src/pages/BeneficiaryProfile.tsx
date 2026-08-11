@@ -4,7 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { ArrowLeft, Edit2, Trash2, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Edit2, Archive, ArchiveRestore, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical } from 'lucide-react';
+import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
+import { humanizeDbError } from '@/lib/dbErrors';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -171,7 +173,7 @@ export default function BeneficiaryProfile() {
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // legacy, unused
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [homeVisitOpen, setHomeVisitOpen] = useState(false);
@@ -310,17 +312,21 @@ export default function BeneficiaryProfile() {
     }
   };
 
-  const handleDelete = async () => {
+  const [archiveTarget, setArchiveTarget] = useState<any>(null);
+
+  const handleUnarchive = async () => {
     if (!id) return;
-    try {
-      const { error } = await supabase.from('beneficiaries').update({ deleted_at: new Date().toISOString() } as any).eq('id', id).eq('organization_id', currentOrganization?.organization_id);
-      if (error) throw error;
-      toast({ title: "Success", description: `${term} deleted successfully` });
-      navigate('/beneficiaries');
-    } catch (error) {
-      logger.error('Error deleting beneficiary:', error);
-      toast({ title: "Error", description: `Failed to delete ${term.toLowerCase()}`, variant: "destructive" });
+    const { error } = await supabase.rpc('unarchive_beneficiary', { _beneficiary_id: id });
+    if (error) {
+      toast({
+        title: 'Could not restore',
+        description: humanizeDbError(error, { entity: term.toLowerCase(), action: 'restore' }),
+        variant: 'destructive',
+      });
+      return;
     }
+    toast({ title: 'Restored', description: `${term} is back in the active list.` });
+    fetchBeneficiaryData();
   };
 
   const handleEdit = () => {
@@ -660,11 +666,15 @@ export default function BeneficiaryProfile() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {isAdmin && (
-                            <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
-                              <Trash2 className="h-4 w-4 mr-2" /> Delete {term.toLowerCase()}
+                          {isAdmin && ((beneficiary as any).deleted_at ? (
+                            <DropdownMenuItem onClick={handleUnarchive}>
+                              <ArchiveRestore className="h-4 w-4 mr-2" /> Unarchive {term.toLowerCase()}
                             </DropdownMenuItem>
-                          )}
+                          ) : (
+                            <DropdownMenuItem onClick={() => setArchiveTarget(beneficiary)} className="text-destructive">
+                              <Archive className="h-4 w-4 mr-2" /> Archive {term.toLowerCase()}
+                            </DropdownMenuItem>
+                          ))}
                           <DropdownMenuItem onClick={handleDownloadReport}>
                             <Printer className="h-4 w-4 mr-2" /> Print record
                           </DropdownMenuItem>
@@ -691,6 +701,9 @@ export default function BeneficiaryProfile() {
                     <HeroChip accent={visitChip.accent} onClick={() => setActiveTab('history-risk')}>{visitChip.label}</HeroChip>
                     <HeroChip accent={progChip.accent} onClick={() => setActiveTab('programmes')}>{progChip.label}</HeroChip>
                     <HeroChip accent="#78716C">{stageChipValue}</HeroChip>
+                    {(beneficiary as any).deleted_at && (
+                      <HeroChip accent="#B45309">Archived</HeroChip>
+                    )}
                     {beneficiary.inactive_date && (
                       <HeroChip accent="#BE185D">Exited {formatDisplayDate(beneficiary.inactive_date)}</HeroChip>
                     )}
@@ -984,21 +997,14 @@ export default function BeneficiaryProfile() {
         </SheetContent>
       </Sheet>
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {term}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {beneficiary.display_name}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Archive / delete flow */}
+      <ArchiveBeneficiaryDialog
+        target={archiveTarget}
+        onOpenChange={(open) => !open && setArchiveTarget(null)}
+        onDone={() => { setArchiveTarget(null); navigate('/beneficiaries'); }}
+        isAdmin={isAdmin}
+        termSingular={term.toLowerCase()}
+      />
     </div>
     </TooltipProvider>
   );

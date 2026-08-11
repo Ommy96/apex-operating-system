@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Edit, Archive, MapPin, Eye, Settings2, Calendar, Users, Target, BookOpen, MoreHorizontal } from "lucide-react";
+import { humanizeDbError } from "@/lib/dbErrors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +96,7 @@ const ProgramsManagement = () => {
         .from('programs')
         .select('*')
         .eq('organization_id', currentOrganization.organization_id)
+        .is('deleted_at', null)
         .order('name');
       if (error) throw error;
       return data.map(p => ({
@@ -200,19 +202,43 @@ const ProgramsManagement = () => {
     },
   });
 
+  // Programmes carry project, enrolment and funding history, so the destructive
+  // action archives (soft-deletes) rather than removing the row.
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('programs').delete().eq('id', id);
+      const { error } = await supabase
+        .from('programs')
+        .update({ deleted_at: new Date().toISOString() } as any)
+        .eq('id', id)
+        .eq('organization_id', currentOrganization?.organization_id || '');
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ['programs-management'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['dynamic-programs'] });
-      toast.success('Program deleted successfully');
+      toast.success('Programme archived — its projects and history are preserved', {
+        duration: 10000,
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const { error } = await supabase
+              .from('programs')
+              .update({ deleted_at: null } as any)
+              .eq('id', id);
+            if (error) {
+              toast.error(humanizeDbError(error, { entity: 'programme', action: 'restore' }));
+              return;
+            }
+            queryClient.invalidateQueries({ queryKey: ['programs-management'] });
+            toast.success('Programme restored');
+          },
+        },
+      });
     },
     onError: (error) => {
-      toast.error('Failed to delete program: ' + error.message);
+      toast.error(humanizeDbError(error, { entity: 'programme', action: 'archive' }));
     },
   });
 
@@ -612,12 +638,12 @@ const ProgramsManagement = () => {
                               size="sm"
                               className="h-8 text-xs px-2 hover:bg-destructive/10 hover:text-destructive"
                               onClick={() => {
-                                if (confirm('Are you sure you want to delete this program?')) {
+                                if (confirm('Archive this programme? It will be hidden from active lists, but its projects, enrolments and funding history are preserved and it can be restored.')) {
                                   deleteMutation.mutate(program.id);
                                 }
                               }}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Archive className="h-3.5 w-3.5" />
                             </Button>
                           </>
                         )}
