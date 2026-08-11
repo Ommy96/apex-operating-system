@@ -973,21 +973,14 @@ export default function BeneficiaryProfile() {
         </SheetContent>
       </Sheet>
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {term}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {beneficiary.display_name}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Archive / delete flow */}
+      <ArchiveBeneficiaryDialog
+        target={archiveTarget}
+        onOpenChange={(open) => !open && setArchiveTarget(null)}
+        onDone={() => { setArchiveTarget(null); navigate('/beneficiaries'); }}
+        isAdmin={isAdmin}
+        termSingular={term.toLowerCase()}
+      />
     </div>
     </TooltipProvider>
   );
