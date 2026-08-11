@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { beneficiaryPath } from "@/lib/recordUrls";
 import { 
-  Users, Plus, Search, Eye, Edit2, Trash2, GraduationCap, 
+  Users, Plus, Search, Eye, Edit2, Archive, ArchiveRestore, GraduationCap, 
   UserCheck, UsersRound, X, Loader2,
   List, LayoutGrid, Download, Home
 } from 'lucide-react';
@@ -58,6 +58,8 @@ import {
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
+import { humanizeDbError } from '@/lib/dbErrors';
 
 interface Beneficiary {
   id: string;
