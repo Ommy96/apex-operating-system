@@ -779,20 +779,27 @@ export default function Beneficiaries() {
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          {isAdmin && (
+                          {isAdmin && ((beneficiary as any).deleted_at ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-foreground/70 hover:text-primary hover:bg-primary/10"
+                              title="Unarchive"
+                              onClick={(e) => { e.stopPropagation(); handleUnarchive(beneficiary); }}
+                            >
+                              <ArchiveRestore className="h-4 w-4" />
+                            </Button>
+                          ) : (
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-foreground/70 hover:text-destructive hover:bg-destructive/10"
-                              title="Delete"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteId(beneficiary.id);
-                              }}
+                              title="Archive"
+                              onClick={(e) => { e.stopPropagation(); setArchiveTarget(beneficiary); }}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Archive className="h-4 w-4" />
                             </Button>
-                          )}
+                          ))}
                         </div>
                       </TableCell>
                     </TableRow>
