@@ -119,7 +119,8 @@ export default function Beneficiaries() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'student' | 'adult' | 'group'>('student');
   const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Beneficiary | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [registerFamilyOpen, setRegisterFamilyOpen] = useState(false);
   const [householdsOpen, setHouseholdsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
@@ -150,7 +151,7 @@ export default function Beneficiaries() {
       fetchPrograms();
       fetchTypeLabels();
     }
-  }, [organizationId]);
+  }, [organizationId, showArchived]);
 
   // Real-time: auto-refresh when beneficiaries or enrollments change
   useEffect(() => {
@@ -202,11 +203,13 @@ export default function Beneficiaries() {
       let hasMore = true;
 
       while (hasMore) {
-        const { data, error } = await supabase
+        let q = supabase
           .from('beneficiaries')
           .select('*')
-          .eq('organization_id', organizationId)
-          .is('deleted_at', null)
+          .eq('organization_id', organizationId);
+        // Archived records (deleted_at set) are hidden unless explicitly requested.
+        if (!showArchived) q = q.is('deleted_at', null);
+        const { data, error } = await q
           .order('display_name', { ascending: true })
           .range(offset, offset + batchSize - 1);
 
@@ -222,13 +225,16 @@ export default function Beneficiaries() {
       }
 
       setBeneficiaries(allData);
-      
+
+      // Headline stats always describe the ACTIVE (non-archived) population so
+      // they keep agreeing with the Dashboard and Analytics counts.
+      const activeOnly = allData.filter((b: any) => !b.deleted_at);
       setStats({
-        total: allData.length,
-        students: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
-        adults: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
-        groups: allData.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
-        active: allData.filter(b => isActiveStatus(b.status)).length,
+        total: activeOnly.length,
+        students: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
+        adults: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
+        groups: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
+        active: activeOnly.filter(b => isActiveStatus(b.status)).length,
       });
     } catch (error) {
       logger.error('Error fetching beneficiaries:', error);
@@ -308,31 +314,18 @@ export default function Beneficiaries() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      const { error } = await supabase
-        .from('beneficiaries')
-        .delete()
-        .eq('id', deleteId);
-
-      if (error) throw error;
-
+  const handleUnarchive = async (b: Beneficiary) => {
+    const { error } = await supabase.rpc('unarchive_beneficiary', { _beneficiary_id: b.id });
+    if (error) {
       toast({
-        title: "Success",
-        description: "Beneficiary deleted successfully",
+        title: 'Could not restore',
+        description: humanizeDbError(error, { entity: term.toLowerCase(), action: 'restore' }),
+        variant: 'destructive',
       });
-      
-      setDeleteId(null);
-      fetchBeneficiaries();
-    } catch (error) {
-      logger.error('Error deleting beneficiary:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete beneficiary",
-        variant: "destructive",
-      });
+      return;
     }
+    toast({ title: 'Restored', description: `${b.display_name} is back in the active list.` });
+    fetchBeneficiaries();
   };
 
   const getFilteredBeneficiaries = () => {
