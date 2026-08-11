@@ -173,7 +173,7 @@ export default function BeneficiaryProfile() {
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // legacy, unused
   const [generatingReport, setGeneratingReport] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [homeVisitOpen, setHomeVisitOpen] = useState(false);
@@ -701,6 +701,9 @@ export default function BeneficiaryProfile() {
                     <HeroChip accent={visitChip.accent} onClick={() => setActiveTab('history-risk')}>{visitChip.label}</HeroChip>
                     <HeroChip accent={progChip.accent} onClick={() => setActiveTab('programmes')}>{progChip.label}</HeroChip>
                     <HeroChip accent="#78716C">{stageChipValue}</HeroChip>
+                    {(beneficiary as any).deleted_at && (
+                      <HeroChip accent="#B45309">Archived</HeroChip>
+                    )}
                     {beneficiary.inactive_date && (
                       <HeroChip accent="#BE185D">Exited {formatDisplayDate(beneficiary.inactive_date)}</HeroChip>
                     )}
