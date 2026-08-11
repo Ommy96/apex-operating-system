@@ -314,6 +314,21 @@ export default function BeneficiaryProfile() {
 
   const [archiveTarget, setArchiveTarget] = useState<any>(null);
 
+  const handleUnarchive = async () => {
+    if (!id) return;
+    const { error } = await supabase.rpc('unarchive_beneficiary', { _beneficiary_id: id });
+    if (error) {
+      toast({
+        title: 'Could not restore',
+        description: humanizeDbError(error, { entity: term.toLowerCase(), action: 'restore' }),
+        variant: 'destructive',
+      });
+      return;
+    }
+    toast({ title: 'Restored', description: `${term} is back in the active list.` });
+    fetchBeneficiaryData();
+  };
+
   const handleEdit = () => {
     if (!beneficiary) return;
     setEditOpen(true);
