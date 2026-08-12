@@ -1,6 +1,6 @@
 import {
   Building2, Palette, ShieldCheck, Users, Target, Sliders,
-  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle, Type, HeartHandshake,
+  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle, Type, HeartHandshake, HeartPulse, FileText,
 } from 'lucide-react';
 
 export type SettingsGroup = 'Organisation' | 'Data collection' | 'System' | 'Account';
@@ -24,6 +24,8 @@ export const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   { id: 'programmes',  label: 'Programmes & M&E',    description: 'Indicators, visitation, reports', icon: Target,       group: 'Data collection' },
   { id: 'fields',      label: 'Custom fields',       description: 'Org-specific extra fields',       icon: Sliders,      group: 'Data collection' },
   { id: 'needs',       label: 'Needs / Support types', description: 'Kinds of support you provide',  icon: HeartHandshake, group: 'Data collection' },
+  { id: 'lifeevents', label: 'Life event types',   description: 'What can happen to the people you serve', icon: HeartPulse, group: 'Data collection' },
+  { id: 'doctypes',   label: 'Document types',     description: 'Kinds of document you collect',   icon: FileText,   group: 'Data collection' },
   { id: 'terminology', label: 'Terminology',         description: 'Rename Programme / Project / Activity tiers', icon: Type, group: 'Data collection' },
 
   // System

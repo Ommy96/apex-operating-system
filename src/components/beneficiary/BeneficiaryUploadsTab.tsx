@@ -48,6 +48,7 @@ import {
 import { format } from "date-fns";
 import { SecureDocumentViewer, SecureDocument } from "@/components/documents/SecureDocumentViewer";
 import { beneficiaryDocumentPath, toStoragePath } from "@/lib/secureDocuments";
+import { useDocumentTypes } from "@/hooks/useDocumentTypes";
 
 const BUCKET = "beneficiary-documents";
 
@@ -68,47 +69,7 @@ interface UploadRecord {
   created_at: string;
 }
 
-const DOCUMENT_TYPES = [
-  { value: "consent_form", label: "Consent Form" },
-  { value: "intake_form", label: "Signed Intake Form" },
-  { value: "appreciation_letter", label: "Appreciation Letter" },
-  { value: "birth_certificate", label: "Birth Certificate" },
-  { value: "school_report", label: "School Report" },
-  { value: "medical_record", label: "Medical Record" },
-  { value: "photo", label: "Photo" },
-  { value: "other", label: "Other" },
-];
-
-const getDocumentIcon = (type: string | null) => {
-  switch (type) {
-    case "consent_form":
-    case "intake_form":
-      return FileCheck;
-    case "medical_record":
-      return FileWarning;
-    default:
-      return FileText;
-  }
-};
-
-const getDocumentTypeColor = (type: string | null) => {
-  switch (type) {
-    case "consent_form":
-      return "bg-success/10 text-success";
-    case "intake_form":
-      return "bg-info/10 text-info";
-    case "appreciation_letter":
-      return "bg-info/10 text-info";
-    case "birth_certificate":
-      return "bg-warning/10 text-warning";
-    case "school_report":
-      return "bg-info/10 text-info";
-    case "medical_record":
-      return "bg-destructive/10 text-destructive";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
+const getDocumentIcon = (isConsent: boolean) => (isConsent ? FileCheck : FileText);
 
 const formatFileSize = (bytes: number | null) => {
   if (!bytes) return "Unknown size";
@@ -125,6 +86,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<SecureDocument | null>(null);
+  const { data: docTypes = [] } = useDocumentTypes();
   
   // Form state
   const [documentName, setDocumentName] = useState("");
@@ -245,14 +207,12 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
     setSelectedFile(null);
   };
 
-  const getDocumentLabel = (type: string | null) => {
-    return DOCUMENT_TYPES.find(d => d.value === type)?.label || type || 'Unknown';
-  };
+  const getDocumentLabel = (type: string | null) =>
+    docTypes.find((d) => d.key === type)?.label || type || 'Unspecified';
+  const isConsentType = (type: string | null) =>
+    !!docTypes.find((d) => d.key === type)?.is_consent_type;
 
-  // Count documents by type
-  const requiredDocs = ["consent_form", "intake_form", "appreciation_letter"];
-  const uploadedTypes = uploads.map(u => u.document_type);
-  const completedRequired = requiredDocs.filter(t => uploadedTypes.includes(t)).length;
+  const distinctTypes = new Set(uploads.map((u) => u.document_type).filter(Boolean)).size;
 
   if (isLoading) {
     return (
@@ -288,10 +248,8 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                 <FileCheck className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Required Docs</p>
-                <p className="text-2xl font-bold text-success">
-                  {completedRequired}/{requiredDocs.length}
-                </p>
+                <p className="text-sm text-muted-foreground">Document Types</p>
+                <p className="text-2xl font-bold text-success">{distinctTypes}</p>
               </div>
             </div>
           </CardContent>
@@ -313,33 +271,6 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           </CardContent>
         </Card>
       </div>
-
-      {/* Required Documents Checklist */}
-      <Card className="border-warning/20">
-        <CardHeader className="bg-gradient-to-r from-warning/5 to-transparent">
-          <CardTitle className="flex items-center gap-2 text-warning">
-            <FileWarning className="h-5 w-5" />
-            Required Documents
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {requiredDocs.map((docType) => {
-              const isUploaded = uploadedTypes.includes(docType);
-              return (
-                <Badge
-                  key={docType}
-                  variant={isUploaded ? "default" : "outline"}
-                  className={isUploaded ? "bg-success text-white" : "border-dashed"}
-                >
-                  {isUploaded && <FileCheck className="h-3 w-3 mr-1" />}
-                  {getDocumentLabel(docType)}
-                </Badge>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Uploads Section */}
       <Card className="border-primary/20">
@@ -379,8 +310,8 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DOCUMENT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                      {docTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.key}>
                           {type.label}
                         </SelectItem>
                       ))}
@@ -440,7 +371,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           ) : (
             <div className="grid gap-3">
               {uploads.map((upload) => {
-                const DocIcon = getDocumentIcon(upload.document_type);
+                const DocIcon = getDocumentIcon(isConsentType(upload.document_type));
                 return (
                    <div
                     key={upload.id}
@@ -453,7 +384,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                       <div>
                         <p className="font-medium">{upload.document_name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge className={getDocumentTypeColor(upload.document_type)}>
+                          <Badge variant="outline" className="text-[11px]">
                             {getDocumentLabel(upload.document_type)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
