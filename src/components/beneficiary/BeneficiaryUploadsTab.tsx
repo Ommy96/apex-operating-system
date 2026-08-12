@@ -248,10 +248,8 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                 <FileCheck className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Required Docs</p>
-                <p className="text-2xl font-bold text-success">
-                  {completedRequired}/{requiredDocs.length}
-                </p>
+                <p className="text-sm text-muted-foreground">Document Types</p>
+                <p className="text-2xl font-bold text-success">{distinctTypes}</p>
               </div>
             </div>
           </CardContent>
@@ -273,33 +271,6 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           </CardContent>
         </Card>
       </div>
-
-      {/* Required Documents Checklist */}
-      <Card className="border-warning/20">
-        <CardHeader className="bg-gradient-to-r from-warning/5 to-transparent">
-          <CardTitle className="flex items-center gap-2 text-warning">
-            <FileWarning className="h-5 w-5" />
-            Required Documents
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {requiredDocs.map((docType) => {
-              const isUploaded = uploadedTypes.includes(docType);
-              return (
-                <Badge
-                  key={docType}
-                  variant={isUploaded ? "default" : "outline"}
-                  className={isUploaded ? "bg-success text-white" : "border-dashed"}
-                >
-                  {isUploaded && <FileCheck className="h-3 w-3 mr-1" />}
-                  {getDocumentLabel(docType)}
-                </Badge>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Uploads Section */}
       <Card className="border-primary/20">
@@ -339,8 +310,8 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DOCUMENT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                      {docTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.key}>
                           {type.label}
                         </SelectItem>
                       ))}
@@ -400,7 +371,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
           ) : (
             <div className="grid gap-3">
               {uploads.map((upload) => {
-                const DocIcon = getDocumentIcon(upload.document_type);
+                const DocIcon = getDocumentIcon(isConsentType(upload.document_type));
                 return (
                    <div
                     key={upload.id}
@@ -413,7 +384,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                       <div>
                         <p className="font-medium">{upload.document_name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge className={getDocumentTypeColor(upload.document_type)}>
+                          <Badge variant="outline" className="text-[11px]">
                             {getDocumentLabel(upload.document_type)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
