@@ -5441,6 +5441,63 @@ export type Database = {
           },
         ]
       }
+      document_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_consent_type: boolean
+          key: string
+          label: string
+          organization_id: string
+          requires_expiry: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_consent_type?: boolean
+          key: string
+          label: string
+          organization_id: string
+          requires_expiry?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_consent_type?: boolean
+          key?: string
+          label?: string
+          organization_id?: string
+          requires_expiry?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_versions: {
         Row: {
           change_notes: string | null
@@ -9237,6 +9294,167 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_project_funding_summary"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      life_event_types: {
+        Row: {
+          created_at: string
+          default_severity: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_sensitive_default: boolean
+          key: string
+          label: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_severity?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_sensitive_default?: boolean
+          key: string
+          label: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_severity?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_sensitive_default?: boolean
+          key?: string
+          label?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_event_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_event_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_events: {
+        Row: {
+          attachment_urls: string[]
+          beneficiary_id: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          event_type: string
+          follow_up_due: string | null
+          follow_up_status: string | null
+          id: string
+          is_sensitive: boolean
+          life_event_type_id: string | null
+          occurred_on: string
+          organization_id: string
+          recorded_at: string
+          recorded_by: string | null
+          related_person: string | null
+          requires_follow_up: boolean
+          severity: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          attachment_urls?: string[]
+          beneficiary_id: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          event_type: string
+          follow_up_due?: string | null
+          follow_up_status?: string | null
+          id?: string
+          is_sensitive?: boolean
+          life_event_type_id?: string | null
+          occurred_on?: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by?: string | null
+          related_person?: string | null
+          requires_follow_up?: boolean
+          severity?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          attachment_urls?: string[]
+          beneficiary_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          event_type?: string
+          follow_up_due?: string | null
+          follow_up_status?: string | null
+          id?: string
+          is_sensitive?: boolean
+          life_event_type_id?: string | null
+          occurred_on?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          related_person?: string | null
+          requires_follow_up?: boolean
+          severity?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_events_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_events_life_event_type_id_fkey"
+            columns: ["life_event_type_id"]
+            isOneToOne: false
+            referencedRelation: "life_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -17203,6 +17421,10 @@ export type Database = {
         Args: { _beneficiary_id: string }
         Returns: Json
       }
+      can_view_sensitive_life_events: {
+        Args: { _org_id: string }
+        Returns: boolean
+      }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
         Returns: boolean
@@ -17377,6 +17599,14 @@ export type Database = {
           last_name: string
           student_id: string
         }[]
+      }
+      seed_default_document_types: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
+      seed_default_life_event_types: {
+        Args: { _org_id: string }
+        Returns: undefined
       }
       seed_default_need_types: { Args: { _org_id: string }; Returns: undefined }
       seed_default_org_roles: {
