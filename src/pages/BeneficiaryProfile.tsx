@@ -474,9 +474,9 @@ export default function BeneficiaryProfile() {
     { value: 'health', label: 'Health', icon: Heart, show: orgConfig.collect_health_data || hasHealthData, legacy: !orgConfig.collect_health_data && hasHealthData },
     { value: 'economic', label: 'Economic', icon: Building2, show: (orgConfig.collect_economic_data && !isMinorAge) || hasEconomicData, legacy: !orgConfig.collect_economic_data && hasEconomicData },
     { value: 'history-risk', label: 'History & Risk', icon: Clock, show: true, legacy: false },
+    { value: 'visits', label: 'Visits', icon: Home, show: true, legacy: false },
+    { value: 'life-notes', label: 'Life & Notes', icon: MessageSquare, show: true, legacy: false },
     { value: 'documents', label: 'Documents', icon: FileText, show: true, legacy: false },
-    { value: 'visits-consent', label: 'Visits & Consent', icon: Home, show: true, legacy: false },
-    { value: 'notes', label: 'Notes', icon: MessageSquare, show: true, legacy: false },
   ].filter(tab => tab.show);
 
   return (
@@ -844,25 +844,27 @@ export default function BeneficiaryProfile() {
                 <BeneficiaryRiskPanel beneficiaryId={beneficiary.id} />
               </TabsContent>
 
-              {/* TAB: Documents */}
-              <TabsContent value="documents" className="mt-0 p-6">
-                <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
-              </TabsContent>
-
-              {/* TAB: Visits & Consent */}
-              <TabsContent value="visits-consent" className="mt-0 p-6 space-y-5">
+              {/* TAB: Visits — what the organisation did */}
+              <TabsContent value="visits" className="mt-0 p-6 space-y-5">
                 <div className="flex gap-2 flex-wrap">
                   <Button size="sm" onClick={() => setHomeVisitOpen(true)}><Home className="h-4 w-4 mr-1" />Record home visit</Button>
                   <Button size="sm" variant="outline" onClick={() => setSchoolVisitOpen(true)}><GraduationCap className="h-4 w-4 mr-1" />Record school visit</Button>
                 </div>
-                <ConsentVaultSection beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || undefined} />
                 <HomeVisitDialog open={homeVisitOpen} onOpenChange={setHomeVisitOpen} beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || null} />
                 <SchoolVisitDialog open={schoolVisitOpen} onOpenChange={setSchoolVisitOpen} beneficiaryId={beneficiary.id} />
               </TabsContent>
 
-              {/* TAB: Notes */}
-              <TabsContent value="notes" className="mt-0 p-6 space-y-4">
+              {/* TAB: Life & Notes — what happened TO them, plus staff commentary */}
+              <TabsContent value="life-notes" className="mt-0 p-6 space-y-5">
+                <LifeEventsSection beneficiaryId={beneficiary.id} />
+                <BeneficiaryNotesSection beneficiaryId={beneficiary.id} />
                 <ProgramObservations beneficiaryId={beneficiary.id} />
+              </TabsContent>
+
+              {/* TAB: Documents — files and consent, together */}
+              <TabsContent value="documents" className="mt-0 p-6 space-y-5">
+                <BeneficiaryUploadsTab beneficiaryId={beneficiary.id} />
+                <ConsentVaultSection beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || undefined} />
               </TabsContent>
 
               {tabs.some(t => t.value === 'health') && (
