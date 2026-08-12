@@ -86,6 +86,7 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<SecureDocument | null>(null);
+  const { data: docTypes = [] } = useDocumentTypes();
   
   // Form state
   const [documentName, setDocumentName] = useState("");
@@ -206,14 +207,12 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
     setSelectedFile(null);
   };
 
-  const getDocumentLabel = (type: string | null) => {
-    return DOCUMENT_TYPES.find(d => d.value === type)?.label || type || 'Unknown';
-  };
+  const getDocumentLabel = (type: string | null) =>
+    docTypes.find((d) => d.key === type)?.label || type || 'Unspecified';
+  const isConsentType = (type: string | null) =>
+    !!docTypes.find((d) => d.key === type)?.is_consent_type;
 
-  // Count documents by type
-  const requiredDocs = ["consent_form", "intake_form", "appreciation_letter"];
-  const uploadedTypes = uploads.map(u => u.document_type);
-  const completedRequired = requiredDocs.filter(t => uploadedTypes.includes(t)).length;
+  const distinctTypes = new Set(uploads.map((u) => u.document_type).filter(Boolean)).size;
 
   if (isLoading) {
     return (
