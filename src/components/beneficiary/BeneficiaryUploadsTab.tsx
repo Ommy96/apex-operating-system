@@ -48,6 +48,7 @@ import {
 import { format } from "date-fns";
 import { SecureDocumentViewer, SecureDocument } from "@/components/documents/SecureDocumentViewer";
 import { beneficiaryDocumentPath, toStoragePath } from "@/lib/secureDocuments";
+import { useDocumentTypes } from "@/hooks/useDocumentTypes";
 
 const BUCKET = "beneficiary-documents";
 
@@ -68,47 +69,7 @@ interface UploadRecord {
   created_at: string;
 }
 
-const DOCUMENT_TYPES = [
-  { value: "consent_form", label: "Consent Form" },
-  { value: "intake_form", label: "Signed Intake Form" },
-  { value: "appreciation_letter", label: "Appreciation Letter" },
-  { value: "birth_certificate", label: "Birth Certificate" },
-  { value: "school_report", label: "School Report" },
-  { value: "medical_record", label: "Medical Record" },
-  { value: "photo", label: "Photo" },
-  { value: "other", label: "Other" },
-];
-
-const getDocumentIcon = (type: string | null) => {
-  switch (type) {
-    case "consent_form":
-    case "intake_form":
-      return FileCheck;
-    case "medical_record":
-      return FileWarning;
-    default:
-      return FileText;
-  }
-};
-
-const getDocumentTypeColor = (type: string | null) => {
-  switch (type) {
-    case "consent_form":
-      return "bg-success/10 text-success";
-    case "intake_form":
-      return "bg-info/10 text-info";
-    case "appreciation_letter":
-      return "bg-info/10 text-info";
-    case "birth_certificate":
-      return "bg-warning/10 text-warning";
-    case "school_report":
-      return "bg-info/10 text-info";
-    case "medical_record":
-      return "bg-destructive/10 text-destructive";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
+const getDocumentIcon = (isConsent: boolean) => (isConsent ? FileCheck : FileText);
 
 const formatFileSize = (bytes: number | null) => {
   if (!bytes) return "Unknown size";
