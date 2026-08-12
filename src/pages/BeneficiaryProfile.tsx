@@ -47,6 +47,8 @@ import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import { HomeVisitDialog } from '@/components/visits/HomeVisitDialog';
 import { SchoolVisitDialog } from '@/components/visits/SchoolVisitDialog';
 import { ConsentVaultSection } from '@/components/consent/ConsentVaultSection';
+import { LifeEventsSection } from '@/components/beneficiary/LifeEventsSection';
+import { BeneficiaryNotesSection } from '@/components/beneficiary/BeneficiaryNotesSection';
 import {
   AlertDialog,
   AlertDialogAction,
