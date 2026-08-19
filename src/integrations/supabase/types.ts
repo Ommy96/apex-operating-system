@@ -8226,6 +8226,69 @@ export type Database = {
           },
         ]
       }
+      household_memberships: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          household_id: string
+          id: string
+          joined_at: string
+          left_at: string | null
+          left_note: string | null
+          left_reason: string | null
+          organization_id: string
+          relationship_to_head: string | null
+          removed_by: string | null
+          role_in_household: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          household_id: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          left_note?: string | null
+          left_reason?: string | null
+          organization_id: string
+          relationship_to_head?: string | null
+          removed_by?: string | null
+          role_in_household?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          household_id?: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          left_note?: string | null
+          left_reason?: string | null
+          organization_id?: string
+          relationship_to_head?: string | null
+          removed_by?: string | null
+          role_in_household?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_memberships_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_memberships_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       households: {
         Row: {
           county: string | null
@@ -17583,6 +17646,24 @@ export type Database = {
           _registration_number?: string
           _subscription_tier?: string
           _website?: string
+        }
+        Returns: Json
+      }
+      remove_household_member: {
+        Args: {
+          _beneficiary_id: string
+          _household_id: string
+          _note?: string
+          _reason: string
+        }
+        Returns: Json
+      }
+      restore_household_member: {
+        Args: {
+          _beneficiary_id: string
+          _household_id: string
+          _life_event_id?: string
+          _restore_as_head?: boolean
         }
         Returns: Json
       }
