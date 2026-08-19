@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap, UserMinus, History, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { RemoveHouseholdMemberDialog } from '@/components/beneficiary/RemoveHouseholdMemberDialog';
+import {
+  usePastHouseholdMembers,
+  useRestoreHouseholdMember,
+  leaveReasonLabel,
+} from '@/hooks/useHouseholdMemberships';
 
 export default function HouseholdProfile() {
   const { householdId: routeParam } = useParams<{ householdId: string }>();
@@ -40,6 +46,8 @@ export default function HouseholdProfile() {
   const [pickedHead, setPickedHead] = useState<string | null>(null);
   const [pickedHeadKind, setPickedHeadKind] = useState<'beneficiary' | 'guardian'>('beneficiary');
   const [savingHead, setSavingHead] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<any | null>(null);
+  const [showPast, setShowPast] = useState(false);
   const queryClient = useQueryClient();
   const { can } = usePermissions();
   const { user } = useAuth();
@@ -47,6 +55,8 @@ export default function HouseholdProfile() {
   const memberIds = members.map((m: any) => m.id);
   const { searchTerm, setSearchTerm, results, isFetching } = useBeneficiarySearch(memberIds, 15);
   const updateHousehold = useUpdateBeneficiaryHousehold();
+  const { data: pastMembers = [] } = usePastHouseholdMembers(householdId);
+  const restoreMember = useRestoreHouseholdMember();
 
   // Load primary guardians for any member — candidates for head-of-household
   const { data: guardians = [] } = useQuery({
