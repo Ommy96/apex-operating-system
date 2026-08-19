@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap, UserMinus, History, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { RemoveHouseholdMemberDialog } from '@/components/beneficiary/RemoveHouseholdMemberDialog';
+import {
+  usePastHouseholdMembers,
+  useRestoreHouseholdMember,
+  leaveReasonLabel,
+} from '@/hooks/useHouseholdMemberships';
 
 export default function HouseholdProfile() {
   const { householdId: routeParam } = useParams<{ householdId: string }>();
@@ -40,6 +46,8 @@ export default function HouseholdProfile() {
   const [pickedHead, setPickedHead] = useState<string | null>(null);
   const [pickedHeadKind, setPickedHeadKind] = useState<'beneficiary' | 'guardian'>('beneficiary');
   const [savingHead, setSavingHead] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<any | null>(null);
+  const [showPast, setShowPast] = useState(false);
   const queryClient = useQueryClient();
   const { can } = usePermissions();
   const { user } = useAuth();
@@ -47,6 +55,8 @@ export default function HouseholdProfile() {
   const memberIds = members.map((m: any) => m.id);
   const { searchTerm, setSearchTerm, results, isFetching } = useBeneficiarySearch(memberIds, 15);
   const updateHousehold = useUpdateBeneficiaryHousehold();
+  const { data: pastMembers = [] } = usePastHouseholdMembers(householdId);
+  const restoreMember = useRestoreHouseholdMember();
 
   // Load primary guardians for any member — candidates for head-of-household
   const { data: guardians = [] } = useQuery({
@@ -281,10 +291,74 @@ export default function HouseholdProfile() {
                   <Button size="sm" variant="ghost" onClick={() => navigate(`/beneficiaries/${m.id}`)}>
                     View profile
                   </Button>
+                  {canEditHead && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      title="Remove from household"
+                      aria-label={`Remove ${m.display_name || 'member'} from household`}
+                      onClick={() => setRemoveTarget(m)}
+                    >
+                      <UserMinus className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
               );
             })}
           </div>
+
+          {pastMembers.length > 0 && (
+            <div className="mt-5 pt-4 border-t">
+              <button
+                type="button"
+                onClick={() => setShowPast((v) => !v)}
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <History className="h-3.5 w-3.5" />
+                {showPast ? 'Hide' : 'Show'} past members ({pastMembers.length})
+              </button>
+              {showPast && (
+                <div className="space-y-2 mt-3">
+                  {pastMembers.map((pm: any) => (
+                    <div key={pm.id} className="flex items-center gap-3 p-3 rounded-lg border border-dashed bg-muted/30">
+                      <div className="h-9 w-9 rounded-full bg-secondary/70 flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                        {(pm.beneficiary?.display_name || '?').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{pm.beneficiary?.display_name || 'Unknown'}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {leaveReasonLabel(pm.left_reason)}
+                          {pm.left_at ? ` · ${formatDisplayDate(pm.left_at)}` : ''}
+                          {pm.left_note ? ` · ${pm.left_note}` : ''}
+                        </div>
+                      </div>
+                      {pm.beneficiary?.id && (
+                        <Button size="sm" variant="ghost" onClick={() => navigate(`/beneficiaries/${pm.beneficiary.id}`)}>
+                          View profile
+                        </Button>
+                      )}
+                      {canEditHead && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={restoreMember.isPending}
+                          onClick={() =>
+                            restoreMember
+                              .mutateAsync({ beneficiaryId: pm.beneficiary_id, householdId: householdId! })
+                              .then(() => toast({ title: 'Member returned to the household' }))
+                              .catch((e: any) => toast({ title: 'Could not restore member', description: e?.message, variant: 'destructive' }))
+                          }
+                        >
+                          <Undo2 className="h-3.5 w-3.5 mr-1" /> Bring back
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </Card>
 
         <div className="space-y-3">
@@ -305,6 +379,16 @@ export default function HouseholdProfile() {
       <RegisterFamilySheet
         open={registerOpen}
         onOpenChange={setRegisterOpen}
+      />
+
+      <RemoveHouseholdMemberDialog
+        open={!!removeTarget}
+        onOpenChange={(o) => !o && setRemoveTarget(null)}
+        householdId={householdId!}
+        householdName={household.household_name}
+        member={removeTarget}
+        isHead={!!removeTarget && removeTarget.id === household.head_of_household_id}
+        onChangeHead={() => { setPickedHead(null); setHeadOpen(true); }}
       />
 
       <Dialog open={headOpen} onOpenChange={setHeadOpen}>
