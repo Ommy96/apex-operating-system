@@ -18,6 +18,13 @@ import { isActiveStatus } from '@/lib/statusHelpers';
 export interface CanonicalCounts {
   totalBeneficiaries: number;
   activeBeneficiaries: number;
+  /** lifecycle_stage counts — alumni/exited are never folded into active or total */
+  waitingListBeneficiaries: number;
+  pausedBeneficiaries: number;
+  alumniBeneficiaries: number;
+  exitedBeneficiaries: number;
+  applicantBeneficiaries: number;
+  beneficiariesByStage: Record<string, number>;
   beneficiariesByType: Record<string, number>;
   totalProgrammes: number;
   activeProgrammes: number;
@@ -30,6 +37,12 @@ export interface CanonicalCounts {
 const EMPTY: CanonicalCounts = {
   totalBeneficiaries: 0,
   activeBeneficiaries: 0,
+  waitingListBeneficiaries: 0,
+  pausedBeneficiaries: 0,
+  alumniBeneficiaries: 0,
+  exitedBeneficiaries: 0,
+  applicantBeneficiaries: 0,
+  beneficiariesByStage: {},
   beneficiariesByType: {},
   totalProgrammes: 0,
   activeProgrammes: 0,
@@ -41,13 +54,13 @@ const EMPTY: CanonicalCounts = {
 
 /** Reads every non-deleted beneficiary row in batches (the Data API caps at 1000). */
 async function fetchAllBeneficiaryFacts(orgId: string) {
-  const rows: Array<{ status: string | null; beneficiary_type: string | null }> = [];
+  const rows: Array<{ status: string | null; beneficiary_type: string | null; lifecycle_stage: string | null }> = [];
   const batch = 1000;
   let offset = 0;
   for (;;) {
     const { data, error } = await supabase
       .from('beneficiaries')
-      .select('status, beneficiary_type')
+      .select('status, beneficiary_type, lifecycle_stage')
       .eq('organization_id', orgId)
       .is('deleted_at', null)
       .range(offset, offset + batch - 1);
@@ -59,6 +72,7 @@ async function fetchAllBeneficiaryFacts(orgId: string) {
   }
   return rows;
 }
+
 
 export function useCanonicalCounts() {
   const { currentOrganization } = useOrganization();
