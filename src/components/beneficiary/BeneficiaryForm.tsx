@@ -1030,6 +1030,15 @@ export function BeneficiaryForm({
             sectorLabel={config?.org_type}
           />
         )}
+        {step === 8 && (
+          <EnrollmentReadinessStep
+            choice={enrollmentChoice}
+            onChoiceChange={setEnrollmentChoice}
+            selectedNeedIds={waitlistNeedIds}
+            onNeedsChange={setWaitlistNeedIds}
+          />
+        )}
+
       </Card>
 
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
