@@ -218,6 +218,9 @@ export function BeneficiaryDataSettings() {
 
       <BeneficiaryCodeFormatCard />
 
+      <SponsorshipFundingModelCard />
+
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Terminology</CardTitle>
