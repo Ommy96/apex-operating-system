@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { ArrowLeft, Edit2, Archive, ArchiveRestore, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Edit2, Archive, ArchiveRestore, GraduationCap, Users, MapPin, Building2, Heart, Loader2, FolderKanban, MessageSquare, FileText, Clock, Printer, Home, User, Check, X, Shield, MoreVertical, BookOpen, Share2 } from 'lucide-react';
 import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
 import { humanizeDbError } from '@/lib/dbErrors';
 import { Button } from '@/components/ui/button';
