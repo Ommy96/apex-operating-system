@@ -41,6 +41,8 @@ import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import { SectorFieldsStep } from './SectorFieldsStep';
+import { EnrollmentReadinessStep, type EnrollmentChoice } from './EnrollmentReadinessStep';
+
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
