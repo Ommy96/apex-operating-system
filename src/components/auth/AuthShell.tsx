@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ApexLogo } from "@/components/brand/ApexLogo";
 import { PRODUCT_TAGLINE, VENDOR } from "@/config/brand";
