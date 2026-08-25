@@ -467,6 +467,10 @@ export function useMatchAndEnroll() {
       qc.invalidateQueries({ queryKey: ["beneficiary-needs", res?.beneficiaryId] });
       qc.invalidateQueries({ queryKey: ["beneficiary_services"] });
       qc.invalidateQueries({ queryKey: ["project-beneficiary-count"] });
+      qc.invalidateQueries({ queryKey: ["sponsor-relationships"] });
+      qc.invalidateQueries({ queryKey: ["sponsor-relationships-active"] });
+      qc.invalidateQueries({ queryKey: ["canonical-counts"] });
+
       toast.success(res?.createdBeneficiary ? "Beneficiary created & enrolled" : "Enrolled");
     },
     onError: (e: any) => toast.error(e.message || "Enrollment failed"),
