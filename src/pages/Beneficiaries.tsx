@@ -58,6 +58,12 @@ import {
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { LIFECYCLE_LABELS, normaliseStage, type LifecycleStage } from '@/lib/lifecycle';
+
+/** Lifecycle is authoritative; legacy `status` only backfills older rows. */
+const stageOf = (b: any): LifecycleStage =>
+  normaliseStage(b?.lifecycle_stage ?? (isActiveStatus(b?.status) ? 'active' : 'exited'));
+
 import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
 import { humanizeDbError } from '@/lib/dbErrors';
 
