@@ -317,6 +317,9 @@ export function useMatchAndEnroll() {
             sub_county: application.applicant_location || null,
             location: application.applicant_location || null,
             status: "active",
+            lifecycle_stage: "active",
+            lifecycle_changed_at: new Date().toISOString(),
+
             year_enrolled: new Date().getFullYear(),
             background_narrative: application.applicant_notes || null,
           })
@@ -409,6 +412,35 @@ export function useMatchAndEnroll() {
         sponsorshipId = sponsor.id;
       }
 
+      // 4b) Sponsor RELATIONSHIP — who is personally connected (separate from the money)
+      if (donorAccountId || donorName) {
+        const { error: srErr } = await sb.from("sponsor_relationships").insert({
+          organization_id: orgId,
+          beneficiary_id: beneficiaryId,
+          donor_account_id: donorAccountId || null,
+          donor_name: donorName || null,
+          package_id: packageId || null,
+          relationship_type: "primary",
+          started_on: new Date().toISOString().slice(0, 10),
+          status: "active",
+          notes: `Matched from waiting list (application ${application.id})`,
+        });
+        if (srErr) throw new Error(`Failed to create sponsor relationship: ${srErr.message}`);
+      }
+
+      // 4c) Lifecycle — the applicant is now an active beneficiary
+      const { error: lErr } = await sb
+        .from("beneficiaries")
+        .update({
+          lifecycle_stage: "active",
+          lifecycle_changed_at: new Date().toISOString(),
+          status: "active",
+        })
+        .eq("id", beneficiaryId);
+      if (lErr) throw new Error(`Failed to activate beneficiary: ${lErr.message}`);
+
+
+
       // 5) Finally, mark the application enrolled with everything linked
       const { data, error } = await sb
         .from("waitlist_applications")
@@ -435,6 +467,10 @@ export function useMatchAndEnroll() {
       qc.invalidateQueries({ queryKey: ["beneficiary-needs", res?.beneficiaryId] });
       qc.invalidateQueries({ queryKey: ["beneficiary_services"] });
       qc.invalidateQueries({ queryKey: ["project-beneficiary-count"] });
+      qc.invalidateQueries({ queryKey: ["sponsor-relationships"] });
+      qc.invalidateQueries({ queryKey: ["sponsor-relationships-active"] });
+      qc.invalidateQueries({ queryKey: ["canonical-counts"] });
+
       toast.success(res?.createdBeneficiary ? "Beneficiary created & enrolled" : "Enrolled");
     },
     onError: (e: any) => toast.error(e.message || "Enrollment failed"),

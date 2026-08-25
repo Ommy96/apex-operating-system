@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { normaliseStage } from '@/lib/lifecycle';
+
 
 /**
  * THE canonical counting definitions for the organisation.
@@ -18,6 +20,13 @@ import { isActiveStatus } from '@/lib/statusHelpers';
 export interface CanonicalCounts {
   totalBeneficiaries: number;
   activeBeneficiaries: number;
+  /** lifecycle_stage counts — alumni/exited are never folded into active or total */
+  waitingListBeneficiaries: number;
+  pausedBeneficiaries: number;
+  alumniBeneficiaries: number;
+  exitedBeneficiaries: number;
+  applicantBeneficiaries: number;
+  beneficiariesByStage: Record<string, number>;
   beneficiariesByType: Record<string, number>;
   totalProgrammes: number;
   activeProgrammes: number;
@@ -30,6 +39,12 @@ export interface CanonicalCounts {
 const EMPTY: CanonicalCounts = {
   totalBeneficiaries: 0,
   activeBeneficiaries: 0,
+  waitingListBeneficiaries: 0,
+  pausedBeneficiaries: 0,
+  alumniBeneficiaries: 0,
+  exitedBeneficiaries: 0,
+  applicantBeneficiaries: 0,
+  beneficiariesByStage: {},
   beneficiariesByType: {},
   totalProgrammes: 0,
   activeProgrammes: 0,
@@ -41,13 +56,13 @@ const EMPTY: CanonicalCounts = {
 
 /** Reads every non-deleted beneficiary row in batches (the Data API caps at 1000). */
 async function fetchAllBeneficiaryFacts(orgId: string) {
-  const rows: Array<{ status: string | null; beneficiary_type: string | null }> = [];
+  const rows: Array<{ status: string | null; beneficiary_type: string | null; lifecycle_stage: string | null }> = [];
   const batch = 1000;
   let offset = 0;
   for (;;) {
     const { data, error } = await supabase
       .from('beneficiaries')
-      .select('status, beneficiary_type')
+      .select('status, beneficiary_type, lifecycle_stage')
       .eq('organization_id', orgId)
       .is('deleted_at', null)
       .range(offset, offset + batch - 1);
@@ -59,6 +74,7 @@ async function fetchAllBeneficiaryFacts(orgId: string) {
   }
   return rows;
 }
+
 
 export function useCanonicalCounts() {
   const { currentOrganization } = useOrganization();
@@ -90,19 +106,31 @@ export function useCanonicalCounts() {
       if (projectsRes.error) throw projectsRes.error;
 
       const beneficiariesByType: Record<string, number> = {};
-      let activeBeneficiaries = 0;
+      const beneficiariesByStage: Record<string, number> = {};
       for (const b of beneficiaryRows) {
         const type = (b.beneficiary_type || 'unknown').toLowerCase();
         beneficiariesByType[type] = (beneficiariesByType[type] || 0) + 1;
-        if (isActiveStatus(b.status)) activeBeneficiaries += 1;
+        // Lifecycle is authoritative; legacy `status` is the fallback for rows
+        // that predate the lifecycle column.
+        const stage = normaliseStage(b.lifecycle_stage ?? (isActiveStatus(b.status) ? 'active' : 'exited'));
+        beneficiariesByStage[stage] = (beneficiariesByStage[stage] || 0) + 1;
       }
 
       const programmes = programmesRes.data || [];
       const projects = projectsRes.data || [];
 
+      // "Total" = all non-archived. Alumni and exited are reported separately.
+      const totalBeneficiaries = beneficiaryRows.length - (beneficiariesByStage.archived || 0);
+
       return {
-        totalBeneficiaries: beneficiaryRows.length,
-        activeBeneficiaries,
+        totalBeneficiaries,
+        activeBeneficiaries: beneficiariesByStage.active || 0,
+        waitingListBeneficiaries: beneficiariesByStage.waiting_list || 0,
+        pausedBeneficiaries: beneficiariesByStage.paused || 0,
+        alumniBeneficiaries: beneficiariesByStage.alumni || 0,
+        exitedBeneficiaries: beneficiariesByStage.exited || 0,
+        applicantBeneficiaries: beneficiariesByStage.applicant || 0,
+        beneficiariesByStage,
         beneficiariesByType,
         totalProgrammes: programmes.length,
         activeProgrammes: programmes.filter((p: any) => p.is_active !== false).length,
@@ -111,6 +139,7 @@ export function useCanonicalCounts() {
         totalDonors: donorsRes.count || 0,
         totalHouseholds: householdsRes.count || 0,
       };
+
     },
   });
 

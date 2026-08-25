@@ -1419,6 +1419,12 @@ export type Database = {
             | Database["public"]["Enums"]["academic_level_type"]
             | null
           address: string | null
+          alumni_contact_consent: boolean
+          alumni_contact_email: string | null
+          alumni_contact_phone: string | null
+          alumni_outcome: string | null
+          alumni_outcome_note: string | null
+          alumni_since: string | null
           amount_given: number | null
           archive_note: string | null
           archive_reason: string | null
@@ -1478,6 +1484,9 @@ export type Database = {
           leader_name: string | null
           leader_phone: string | null
           legacy_child_id: string | null
+          lifecycle_changed_at: string | null
+          lifecycle_changed_by: string | null
+          lifecycle_stage: string
           location: string | null
           longitude: number | null
           marital_status: string | null
@@ -1509,6 +1518,12 @@ export type Database = {
             | Database["public"]["Enums"]["academic_level_type"]
             | null
           address?: string | null
+          alumni_contact_consent?: boolean
+          alumni_contact_email?: string | null
+          alumni_contact_phone?: string | null
+          alumni_outcome?: string | null
+          alumni_outcome_note?: string | null
+          alumni_since?: string | null
           amount_given?: number | null
           archive_note?: string | null
           archive_reason?: string | null
@@ -1568,6 +1583,9 @@ export type Database = {
           leader_name?: string | null
           leader_phone?: string | null
           legacy_child_id?: string | null
+          lifecycle_changed_at?: string | null
+          lifecycle_changed_by?: string | null
+          lifecycle_stage?: string
           location?: string | null
           longitude?: number | null
           marital_status?: string | null
@@ -1599,6 +1617,12 @@ export type Database = {
             | Database["public"]["Enums"]["academic_level_type"]
             | null
           address?: string | null
+          alumni_contact_consent?: boolean
+          alumni_contact_email?: string | null
+          alumni_contact_phone?: string | null
+          alumni_outcome?: string | null
+          alumni_outcome_note?: string | null
+          alumni_since?: string | null
           amount_given?: number | null
           archive_note?: string | null
           archive_reason?: string | null
@@ -1658,6 +1682,9 @@ export type Database = {
           leader_name?: string | null
           leader_phone?: string | null
           legacy_child_id?: string | null
+          lifecycle_changed_at?: string | null
+          lifecycle_changed_by?: string | null
+          lifecycle_stage?: string
           location?: string | null
           longitude?: number | null
           marital_status?: string | null
@@ -10970,6 +10997,7 @@ export type Database = {
           setup_config: Json
           show_name_in_sidebar: boolean | null
           slug: string
+          sponsorship_funding_model: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           sub_county: string | null
@@ -11065,6 +11093,7 @@ export type Database = {
           setup_config?: Json
           show_name_in_sidebar?: boolean | null
           slug: string
+          sponsorship_funding_model?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           sub_county?: string | null
@@ -11160,6 +11189,7 @@ export type Database = {
           setup_config?: Json
           show_name_in_sidebar?: boolean | null
           slug?: string
+          sponsorship_funding_model?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           sub_county?: string | null
@@ -15280,6 +15310,109 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_relationships: {
+        Row: {
+          beneficiary_id: string
+          correspondence_enabled: boolean
+          created_at: string
+          created_by: string | null
+          donor_account_id: string | null
+          donor_name: string | null
+          end_reason: string | null
+          ended_on: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          package_id: string | null
+          relationship_type: string
+          started_on: string
+          status: string
+          transferred_to_beneficiary_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          correspondence_enabled?: boolean
+          created_at?: string
+          created_by?: string | null
+          donor_account_id?: string | null
+          donor_name?: string | null
+          end_reason?: string | null
+          ended_on?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          package_id?: string | null
+          relationship_type?: string
+          started_on?: string
+          status?: string
+          transferred_to_beneficiary_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          correspondence_enabled?: boolean
+          created_at?: string
+          created_by?: string | null
+          donor_account_id?: string | null
+          donor_name?: string | null
+          end_reason?: string | null
+          ended_on?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          package_id?: string | null
+          relationship_type?: string
+          started_on?: string
+          status?: string
+          transferred_to_beneficiary_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_relationships_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_relationships_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_relationships_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorship_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_relationships_transferred_to_beneficiary_id_fkey"
+            columns: ["transferred_to_beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
             referencedColumns: ["id"]
           },
         ]

@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation,
-  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
+  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins, GraduationCap,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
   Layers, FolderKanban, GanttChart as GanttIcon,
@@ -333,6 +333,8 @@ export function AppSidebar() {
         { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
         { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
         { title: "Waiting list", url: "/waitlist", icon: UserPlus, show: can.viewBeneficiaries },
+        { title: "Alumni", url: "/alumni", icon: GraduationCap, show: can.viewBeneficiaries },
+
         { title: "Sponsorship packages", url: "/sponsorship-packages", icon: Package, show: can.viewBeneficiaries },
         { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],

@@ -30,6 +30,9 @@ import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { NeedsSection } from '@/components/beneficiary/NeedsSection';
+import { BeneficiaryLifecycleCard } from '@/components/beneficiary/BeneficiaryLifecycleCard';
+import { SponsorshipRelationshipSection } from '@/components/beneficiary/SponsorshipRelationshipSection';
+
 import { GroupMembersTab } from '@/components/beneficiary/GroupMembersTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
@@ -782,6 +785,21 @@ export default function BeneficiaryProfile() {
 
               {/* TAB: Programmes */}
               <TabsContent value="programmes" className="mt-0 p-6 space-y-4">
+                <BeneficiaryLifecycleCard
+                  beneficiaryId={beneficiary.id}
+                  lifecycleStage={(beneficiary as any).lifecycle_stage}
+                  lifecycleChangedAt={(beneficiary as any).lifecycle_changed_at}
+                  alumniSince={(beneficiary as any).alumni_since}
+                  alumniOutcome={(beneficiary as any).alumni_outcome}
+                  exitReason={(beneficiary as any).exit_reason}
+                  canEdit={canEditInline}
+                />
+                <SponsorshipRelationshipSection
+                  beneficiaryId={beneficiary.id}
+                  beneficiaryName={beneficiary.display_name || beneficiary.first_name}
+                  programmeName={null}
+                />
+
                 <ProgrammeCardsView
                   beneficiaryId={beneficiary.id}
                   organizationId={currentOrganization?.organization_id ?? null}

@@ -41,6 +41,8 @@ import { useFieldVisibility } from '@/hooks/useFieldVisibility';
 import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import { SectorFieldsStep } from './SectorFieldsStep';
+import { EnrollmentReadinessStep, type EnrollmentChoice } from './EnrollmentReadinessStep';
+
 import {
   GuardianFields,
   EMPTY_GUARDIAN,
@@ -235,7 +237,9 @@ const STEP_LABELS = [
   'Vulnerability',
   'Notes',
   'Sector details',
+  'Enrollment',
 ];
+
 const parseTagArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   if (typeof value === 'string') {
@@ -323,6 +327,9 @@ export function BeneficiaryForm({
   const queryClient = useQueryClient();
 
   const [step, setStep] = useState(0);
+  const [enrollmentChoice, setEnrollmentChoice] = useState<EnrollmentChoice>('enroll');
+  const [waitlistNeedIds, setWaitlistNeedIds] = useState<string[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
@@ -494,8 +501,11 @@ export function BeneficiaryForm({
     if (Array.isArray(config?.custom_fields) && config.custom_fields.length > 0) {
       steps.push(7);
     }
+    // Enrollment vs waiting list — only when registering someone new.
+    if (!beneficiary?.id) steps.push(8);
     return steps;
-  }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+  }, [config, beneficiary?.id, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+
 
   const currentStepIndex = visibleSteps.indexOf(step);
   const totalSteps = visibleSteps.length;
@@ -709,8 +719,14 @@ export function BeneficiaryForm({
         vulnerability_level: form.vulnerability_level || null,
         background_narrative: form.notes || null,
         photo_url: form.photo_url || null,
-        status: 'active',
-        is_active: true,
+        status: !beneficiary?.id && enrollmentChoice === 'waitlist' ? 'inactive' : 'active',
+        lifecycle_stage: beneficiary?.id
+          ? undefined
+          : enrollmentChoice === 'waitlist'
+            ? 'waiting_list'
+            : 'active',
+        is_active: !(!beneficiary?.id && enrollmentChoice === 'waitlist'),
+
         sector_data: form.sector_data && Object.keys(form.sector_data).length > 0
           ? form.sector_data
           : {},
@@ -773,7 +789,56 @@ export function BeneficiaryForm({
         if (error) throw error;
         beneficiaryId = data.id;
         uniqueId = data.unique_id;
+
+        // Waiting-list route: create a real application linked to this record so
+        // the pipeline ranks them alongside everyone else waiting.
+        if (enrollmentChoice === 'waitlist') {
+          try {
+            const { data: u } = await supabase.auth.getUser();
+            const { data: app, error: appErr } = await (supabase as any)
+              .from('waitlist_applications')
+              .insert({
+                organization_id: orgId,
+                beneficiary_id: beneficiaryId,
+                applicant_name: payload.display_name || `${form.first_name} ${form.last_name}`.trim(),
+                applicant_location: form.sub_county || form.county || null,
+                applicant_notes: form.notes || null,
+                status: 'applied',
+                created_by: u.user?.id ?? null,
+              })
+              .select('id')
+              .single();
+            if (appErr) throw appErr;
+
+            if (app?.id && waitlistNeedIds.length) {
+              const { data: needTypes } = await (supabase as any)
+                .from('need_types')
+                .select('id, default_cost, default_currency')
+                .in('id', waitlistNeedIds);
+              const byId = new Map<string, any>((needTypes || []).map((n: any) => [n.id as string, n]));
+              await (supabase as any).from('waitlist_application_needs').insert(
+                waitlistNeedIds.map((id) => ({
+                  organization_id: orgId,
+                  application_id: app.id,
+                  need_type_id: id,
+                  estimated_cost: byId.get(id)?.default_cost ?? null,
+                  currency: byId.get(id)?.default_currency ?? 'KES',
+                  priority: 'medium',
+                })),
+              );
+            }
+            queryClient.invalidateQueries({ queryKey: ['waitlist-applications'] });
+          } catch (e) {
+            logger.warn('Could not create waiting-list application', e);
+            toast({
+              title: 'Saved, but not added to the waiting list',
+              description: 'The record was created — add the waiting-list application manually.',
+              variant: 'destructive',
+            });
+          }
+        }
       }
+
 
       // Save / upsert guardians & beneficiary_guardians links.
       if (isIndividual && beneficiaryId) {
@@ -1020,6 +1085,15 @@ export function BeneficiaryForm({
             sectorLabel={config?.org_type}
           />
         )}
+        {step === 8 && (
+          <EnrollmentReadinessStep
+            choice={enrollmentChoice}
+            onChoiceChange={setEnrollmentChoice}
+            selectedNeedIds={waitlistNeedIds}
+            onNeedsChange={setWaitlistNeedIds}
+          />
+        )}
+
       </Card>
 
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>

@@ -68,6 +68,8 @@ const BoardPortal = lazy(() => import("./pages/BoardPortal"));
 const HouseholdProfile = lazy(() => import("./pages/HouseholdProfile"));
 const Households = lazy(() => import("./pages/Households"));
 const WaitlistManagement = lazy(() => import("./pages/WaitlistManagement"));
+const Alumni = lazy(() => import("./pages/Alumni"));
+
 const SponsorshipPackages = lazy(() => import("./pages/SponsorshipPackages"));
 const ConsentOverview = lazy(() => import("./pages/ConsentOverview"));
 const VisitManagement = lazy(() => import("./pages/VisitManagement"));
@@ -242,6 +244,12 @@ const App = () => (
                 <DashboardLayout><LazyRoute><WaitlistManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/alumni" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><Alumni /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/sponsorship-packages" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><SponsorshipPackages /></LazyRoute></DashboardLayout>

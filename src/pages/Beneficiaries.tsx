@@ -58,6 +58,12 @@ import {
 } from '@/components/workspace';
 import { usePagination } from '@/hooks/usePagination';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { LIFECYCLE_LABELS, normaliseStage, type LifecycleStage } from '@/lib/lifecycle';
+
+/** Lifecycle is authoritative; legacy `status` only backfills older rows. */
+const stageOf = (b: any): LifecycleStage =>
+  normaliseStage(b?.lifecycle_stage ?? (isActiveStatus(b?.status) ? 'active' : 'exited'));
+
 import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
 import { humanizeDbError } from '@/lib/dbErrors';
 
@@ -234,7 +240,7 @@ export default function Beneficiaries() {
         students: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
         adults: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
         groups: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
-        active: activeOnly.filter(b => isActiveStatus(b.status)).length,
+        active: activeOnly.filter(b => stageOf(b) === 'active').length,
       });
     } catch (error) {
       logger.error('Error fetching beneficiaries:', error);
@@ -335,7 +341,7 @@ export default function Beneficiaries() {
         b.institution_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesType = typeFilter === 'all' || b.beneficiary_type === typeFilter;
-      const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || stageOf(b) === statusFilter;
       const matchesProgram = programFilter === 'all' || (enrollmentMap[programFilter]?.has(b.id) ?? false);
       
       return matchesSearch && matchesType && matchesStatus && matchesProgram;
@@ -593,20 +599,21 @@ export default function Beneficiaries() {
             </SelectContent>
           </Select>
 
-          {/* Status Filter */}
+          {/* Lifecycle stage filter — alumni and exited are never folded into active */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-9 w-[calc(33%-0.35rem)] sm:w-36">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Stage" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status ({beneficiaries.length})</SelectItem>
-              <SelectItem value="active">Active ({beneficiaries.filter(b => b.status === 'active').length})</SelectItem>
-              <SelectItem value="inactive">Inactive ({beneficiaries.filter(b => b.status === 'inactive').length})</SelectItem>
-              <SelectItem value="graduated">Graduated ({beneficiaries.filter(b => b.status === 'graduated').length})</SelectItem>
-              <SelectItem value="dropped">Dropped ({beneficiaries.filter(b => b.status === 'dropped').length})</SelectItem>
-              <SelectItem value="replaced">Replaced ({beneficiaries.filter(b => b.status === 'replaced').length})</SelectItem>
+              <SelectItem value="all">All stages ({beneficiaries.length})</SelectItem>
+              {(['active', 'waiting_list', 'paused', 'alumni', 'exited', 'applicant'] as LifecycleStage[]).map(s => (
+                <SelectItem key={s} value={s}>
+                  {LIFECYCLE_LABELS[s]} ({beneficiaries.filter(b => stageOf(b) === s).length})
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+
 
           {/* Program Filter */}
           <Select value={programFilter} onValueChange={setProgramFilter}>
