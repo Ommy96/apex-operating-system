@@ -1052,7 +1052,11 @@ export default function BeneficiaryProfile() {
         </SheetContent>
       </Sheet>
 
+      {/* Shareable profile with safeguarding modes */}
+      <ShareProfileDialog open={shareOpen} onOpenChange={setShareOpen} beneficiary={beneficiary as any} />
+
       {/* Archive / delete flow */}
+
       <ArchiveBeneficiaryDialog
         target={archiveTarget}
         onOpenChange={(open) => !open && setArchiveTarget(null)}
