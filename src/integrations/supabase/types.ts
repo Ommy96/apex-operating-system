@@ -1434,10 +1434,14 @@ export type Database = {
           beneficiary_category: string | null
           beneficiary_code: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          bio: string | null
+          bio_updated_at: string | null
+          bio_updated_by: string | null
           branch_id: string | null
           care_arrangement: Database["public"]["Enums"]["care_arrangement_type"]
           care_arrangement_set_at: string | null
           care_arrangement_set_by: string | null
+          career_ambition: string | null
           case_worker_name: string | null
           consent_date: string | null
           consent_given: boolean | null
@@ -1454,6 +1458,7 @@ export type Database = {
           estate_village: string | null
           exit_reason: string | null
           family_status: string | null
+          favourite_subject: string | null
           first_name: string | null
           funding_required: number | null
           future_ambition: string | null
@@ -1466,6 +1471,7 @@ export type Database = {
           hiv_positive_since: number | null
           hiv_status: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies: string | null
+          hobbies_list: string[]
           home_county: string | null
           household_id: string | null
           household_size: number | null
@@ -1478,6 +1484,7 @@ export type Database = {
           institution_name: string | null
           institution_placement_date: string | null
           institution_type: string | null
+          interests: string[]
           is_active: boolean | null
           last_name: string | null
           latitude: number | null
@@ -1495,6 +1502,7 @@ export type Database = {
           occupation: string | null
           organization_id: string
           other_medical_conditions: string | null
+          personal_strengths: string | null
           phone: string | null
           photo_url: string | null
           primary_need: string | null
@@ -1533,10 +1541,14 @@ export type Database = {
           beneficiary_category?: string | null
           beneficiary_code?: string | null
           beneficiary_type: Database["public"]["Enums"]["beneficiary_type"]
+          bio?: string | null
+          bio_updated_at?: string | null
+          bio_updated_by?: string | null
           branch_id?: string | null
           care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
           care_arrangement_set_at?: string | null
           care_arrangement_set_by?: string | null
+          career_ambition?: string | null
           case_worker_name?: string | null
           consent_date?: string | null
           consent_given?: boolean | null
@@ -1553,6 +1565,7 @@ export type Database = {
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
+          favourite_subject?: string | null
           first_name?: string | null
           funding_required?: number | null
           future_ambition?: string | null
@@ -1565,6 +1578,7 @@ export type Database = {
           hiv_positive_since?: number | null
           hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies?: string | null
+          hobbies_list?: string[]
           home_county?: string | null
           household_id?: string | null
           household_size?: number | null
@@ -1577,6 +1591,7 @@ export type Database = {
           institution_name?: string | null
           institution_placement_date?: string | null
           institution_type?: string | null
+          interests?: string[]
           is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
@@ -1594,6 +1609,7 @@ export type Database = {
           occupation?: string | null
           organization_id: string
           other_medical_conditions?: string | null
+          personal_strengths?: string | null
           phone?: string | null
           photo_url?: string | null
           primary_need?: string | null
@@ -1632,10 +1648,14 @@ export type Database = {
           beneficiary_category?: string | null
           beneficiary_code?: string | null
           beneficiary_type?: Database["public"]["Enums"]["beneficiary_type"]
+          bio?: string | null
+          bio_updated_at?: string | null
+          bio_updated_by?: string | null
           branch_id?: string | null
           care_arrangement?: Database["public"]["Enums"]["care_arrangement_type"]
           care_arrangement_set_at?: string | null
           care_arrangement_set_by?: string | null
+          career_ambition?: string | null
           case_worker_name?: string | null
           consent_date?: string | null
           consent_given?: boolean | null
@@ -1652,6 +1672,7 @@ export type Database = {
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
+          favourite_subject?: string | null
           first_name?: string | null
           funding_required?: number | null
           future_ambition?: string | null
@@ -1664,6 +1685,7 @@ export type Database = {
           hiv_positive_since?: number | null
           hiv_status?: Database["public"]["Enums"]["hiv_status_type"] | null
           hobbies?: string | null
+          hobbies_list?: string[]
           home_county?: string | null
           household_id?: string | null
           household_size?: number | null
@@ -1676,6 +1698,7 @@ export type Database = {
           institution_name?: string | null
           institution_placement_date?: string | null
           institution_type?: string | null
+          interests?: string[]
           is_active?: boolean | null
           last_name?: string | null
           latitude?: number | null
@@ -1693,6 +1716,7 @@ export type Database = {
           occupation?: string | null
           organization_id?: string
           other_medical_conditions?: string | null
+          personal_strengths?: string | null
           phone?: string | null
           photo_url?: string | null
           primary_need?: string | null
@@ -2879,6 +2903,102 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_project_funding_summary"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      beneficiary_share_access_log: {
+        Row: {
+          accessed_at: string
+          id: string
+          organization_id: string
+          share_link_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          id?: string
+          organization_id: string
+          share_link_id: string
+        }
+        Update: {
+          accessed_at?: string
+          id?: string
+          organization_id?: string
+          share_link_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_share_access_log_share_link_id_fkey"
+            columns: ["share_link_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_share_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiary_share_links: {
+        Row: {
+          access_count: number
+          beneficiary_id: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          last_accessed_at: string | null
+          organization_id: string
+          revoked_at: string | null
+          share_mode: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          access_count?: number
+          beneficiary_id: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          last_accessed_at?: string | null
+          organization_id: string
+          revoked_at?: string | null
+          share_mode: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          access_count?: number
+          beneficiary_id?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          organization_id?: string
+          revoked_at?: string | null
+          share_mode?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiary_share_links_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_share_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiary_share_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -9106,6 +9226,57 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      interest_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          kind: string
+          label: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          kind?: string
+          label: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          kind?: string
+          label?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interest_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interest_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -17680,6 +17851,10 @@ export type Database = {
         Returns: string
       }
       get_org_subscription: { Args: { _org_id: string }; Returns: Json }
+      get_shared_beneficiary_profile: {
+        Args: { _token: string }
+        Returns: Json
+      }
       get_stakeholder_portal_data: { Args: { _token: string }; Returns: Json }
       get_unique_beneficiary_count: {
         Args: { _org_id: string }
@@ -17815,6 +17990,10 @@ export type Database = {
         }[]
       }
       seed_default_document_types: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
+      seed_default_interest_types: {
         Args: { _org_id: string }
         Returns: undefined
       }

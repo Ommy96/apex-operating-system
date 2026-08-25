@@ -1,6 +1,6 @@
 import {
   Building2, Palette, ShieldCheck, Users, Target, Sliders,
-  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle, Type, HeartHandshake, HeartPulse, FileText,
+  Wallet, KeyRound, Bell, Plug, Lock, CreditCard, AlertTriangle, Type, HeartHandshake, HeartPulse, FileText, Sparkles,
 } from 'lucide-react';
 
 export type SettingsGroup = 'Organisation' | 'Data collection' | 'System' | 'Account';
@@ -26,6 +26,7 @@ export const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   { id: 'needs',       label: 'Needs / Support types', description: 'Kinds of support you provide',  icon: HeartHandshake, group: 'Data collection' },
   { id: 'lifeevents', label: 'Life event types',   description: 'What can happen to the people you serve', icon: HeartPulse, group: 'Data collection' },
   { id: 'doctypes',   label: 'Document types',     description: 'Kinds of document you collect',   icon: FileText,   group: 'Data collection' },
+  { id: 'interests',  label: 'Hobbies & interests', description: 'Catalogue offered when writing a bio', icon: Sparkles, group: 'Data collection' },
   { id: 'terminology', label: 'Terminology',         description: 'Rename Programme / Project / Activity tiers', icon: Type, group: 'Data collection' },
 
   // System
