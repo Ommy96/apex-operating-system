@@ -501,8 +501,11 @@ export function BeneficiaryForm({
     if (Array.isArray(config?.custom_fields) && config.custom_fields.length > 0) {
       steps.push(7);
     }
+    // Enrollment vs waiting list — only when registering someone new.
+    if (!beneficiary?.id) steps.push(8);
     return steps;
-  }, [config, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+  }, [config, beneficiary?.id, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+
 
   const currentStepIndex = visibleSteps.indexOf(step);
   const totalSteps = visibleSteps.length;
