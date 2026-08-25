@@ -104,19 +104,31 @@ export function useCanonicalCounts() {
       if (projectsRes.error) throw projectsRes.error;
 
       const beneficiariesByType: Record<string, number> = {};
-      let activeBeneficiaries = 0;
+      const beneficiariesByStage: Record<string, number> = {};
       for (const b of beneficiaryRows) {
         const type = (b.beneficiary_type || 'unknown').toLowerCase();
         beneficiariesByType[type] = (beneficiariesByType[type] || 0) + 1;
-        if (isActiveStatus(b.status)) activeBeneficiaries += 1;
+        // Lifecycle is authoritative; legacy `status` is the fallback for rows
+        // that predate the lifecycle column.
+        const stage = normaliseStage(b.lifecycle_stage ?? (isActiveStatus(b.status) ? 'active' : 'exited'));
+        beneficiariesByStage[stage] = (beneficiariesByStage[stage] || 0) + 1;
       }
 
       const programmes = programmesRes.data || [];
       const projects = projectsRes.data || [];
 
+      // "Total" = all non-archived. Alumni and exited are reported separately.
+      const totalBeneficiaries = beneficiaryRows.length - (beneficiariesByStage.archived || 0);
+
       return {
-        totalBeneficiaries: beneficiaryRows.length,
-        activeBeneficiaries,
+        totalBeneficiaries,
+        activeBeneficiaries: beneficiariesByStage.active || 0,
+        waitingListBeneficiaries: beneficiariesByStage.waiting_list || 0,
+        pausedBeneficiaries: beneficiariesByStage.paused || 0,
+        alumniBeneficiaries: beneficiariesByStage.alumni || 0,
+        exitedBeneficiaries: beneficiariesByStage.exited || 0,
+        applicantBeneficiaries: beneficiariesByStage.applicant || 0,
+        beneficiariesByStage,
         beneficiariesByType,
         totalProgrammes: programmes.length,
         activeProgrammes: programmes.filter((p: any) => p.is_active !== false).length,
@@ -125,6 +137,7 @@ export function useCanonicalCounts() {
         totalDonors: donorsRes.count || 0,
         totalHouseholds: householdsRes.count || 0,
       };
+
     },
   });
 
