@@ -53,6 +53,8 @@ export default function WaitlistManagement() {
   const [matchPackageId, setMatchPackageId] = useState<string>("");
   const [matchProjectId, setMatchProjectId] = useState<string>("");
   const [donorName, setDonorName] = useState("");
+  const [basis, setBasis] = useState<RankingBasis>('combined');
+
 
   // Suggest the top need's type when opening match dialog to prioritise projects
   const topNeedTypeId = useMemo(() => {
