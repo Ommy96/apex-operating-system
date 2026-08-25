@@ -75,11 +75,13 @@ export default function WaitlistManagement() {
       funding_match: [], enrolled: [], declined: [],
     };
     for (const a of apps) g[a.status]?.push(a);
-    // Sort each column by vulnerability score desc
-    (Object.keys(g) as WaitlistStatus[]).forEach((k) =>
-      g[k].sort((a, b) => b.vulnerability_score - a.vulnerability_score));
+    // Rank each column by the chosen basis (combined vulnerability + waiting time by default)
+    (Object.keys(g) as WaitlistStatus[]).forEach((k) => {
+      g[k] = rankApplicants(g[k] as any, basis) as any;
+    });
     return g;
-  }, [apps]);
+  }, [apps, basis]);
+
 
   const addDraftNeed = () => {
     const unused = needTypes.find((t) => !draftNeeds.some((d) => d.need_type_id === t.id));
