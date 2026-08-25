@@ -18,6 +18,8 @@ import {
 import { useSponsorshipPackages } from "@/hooks/useSponsorshipPackages";
 import { useNeedTypes } from "@/hooks/useNeeds";
 import { formatMoney } from "@/lib/allocationEngine";
+import { rankApplicants, RANKING_BASES, daysWaiting, type RankingBasis } from "@/lib/lifecycle";
+
 
 function applicantName(a: WaitlistApplication) {
   const b = (a as any).beneficiaries;
@@ -51,6 +53,8 @@ export default function WaitlistManagement() {
   const [matchPackageId, setMatchPackageId] = useState<string>("");
   const [matchProjectId, setMatchProjectId] = useState<string>("");
   const [donorName, setDonorName] = useState("");
+  const [basis, setBasis] = useState<RankingBasis>('combined');
+
 
   // Suggest the top need's type when opening match dialog to prioritise projects
   const topNeedTypeId = useMemo(() => {
@@ -75,11 +79,13 @@ export default function WaitlistManagement() {
       funding_match: [], enrolled: [], declined: [],
     };
     for (const a of apps) g[a.status]?.push(a);
-    // Sort each column by vulnerability score desc
-    (Object.keys(g) as WaitlistStatus[]).forEach((k) =>
-      g[k].sort((a, b) => b.vulnerability_score - a.vulnerability_score));
+    // Rank each column by the chosen basis (combined vulnerability + waiting time by default)
+    (Object.keys(g) as WaitlistStatus[]).forEach((k) => {
+      g[k] = rankApplicants(g[k] as any, basis) as any;
+    });
     return g;
-  }, [apps]);
+  }, [apps, basis]);
+
 
   const addDraftNeed = () => {
     const unused = needTypes.find((t) => !draftNeeds.some((d) => d.need_type_id === t.id));
@@ -151,15 +157,29 @@ export default function WaitlistManagement() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" /> Waiting list
           </h1>
           <p className="text-sm text-muted-foreground">
-            Applicants ranked by vulnerability and unmet need. Enrolling creates the beneficiary, needs, and (if matched) sponsorship in one step.
+            {RANKING_BASES.find(b => b.value === basis)?.help ??
+              'Applicants ranked by vulnerability and unmet need.'}{' '}
+            Enrolling creates the beneficiary, needs, and (if matched) sponsorship in one step.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs text-muted-foreground whitespace-nowrap">Rank by</Label>
+          <Select value={basis} onValueChange={(v) => setBasis(v as RankingBasis)}>
+            <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {RANKING_BASES.map(b => (
+                <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Dialog open={newOpen} onOpenChange={(o) => { setNewOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 mr-1" /> New application</Button>
@@ -269,9 +289,12 @@ export default function WaitlistManagement() {
                         <span className="font-medium">{applicantName(a)}</span>
                         <Badge variant="outline" className="text-[10px] shrink-0">Score {a.vulnerability_score}</Badge>
                       </div>
-                      {a.applicant_age != null && (
-                        <div className="text-muted-foreground">Age {a.applicant_age}{a.applicant_location ? ` · ${a.applicant_location}` : ""}</div>
-                      )}
+                      <div className="text-muted-foreground">
+                        {a.applicant_age != null ? `Age ${a.applicant_age} · ` : ''}
+                        {a.applicant_location ? `${a.applicant_location} · ` : ''}
+                        Waiting {daysWaiting(a.applied_at)}d
+                      </div>
+
                       {needs.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {needs.map((n) => (
