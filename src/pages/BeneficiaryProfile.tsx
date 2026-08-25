@@ -30,6 +30,9 @@ import { ActivityTimeline } from '@/components/beneficiary/ActivityTimeline';
 import { BeneficiaryActivitiesSection } from '@/components/beneficiaries/BeneficiaryActivitiesSection';
 import { BeneficiaryOverviewTab } from '@/components/beneficiary/BeneficiaryOverviewTab';
 import { NeedsSection } from '@/components/beneficiary/NeedsSection';
+import { BeneficiaryLifecycleCard } from '@/components/beneficiary/BeneficiaryLifecycleCard';
+import { SponsorshipRelationshipSection } from '@/components/beneficiary/SponsorshipRelationshipSection';
+
 import { GroupMembersTab } from '@/components/beneficiary/GroupMembersTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
