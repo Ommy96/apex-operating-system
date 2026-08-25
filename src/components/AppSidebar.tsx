@@ -21,7 +21,7 @@ import {
   Sparkles, Smartphone, LayoutDashboard, Users, Settings, LogOut,
   Target, Shield, ShieldAlert, Lock, Wallet, BarChart3, Handshake,
   FileText, ClipboardCheck, Presentation,
-  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins,
+  Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins, GraduationCap,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
   BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
   Layers, FolderKanban, GanttChart as GanttIcon,
