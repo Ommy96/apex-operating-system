@@ -240,7 +240,7 @@ export default function Beneficiaries() {
         students: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'student').length,
         adults: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'adult').length,
         groups: activeOnly.filter(b => (b.beneficiary_type || '').toLowerCase() === 'group').length,
-        active: activeOnly.filter(b => isActiveStatus(b.status)).length,
+        active: activeOnly.filter(b => stageOf(b) === 'active').length,
       });
     } catch (error) {
       logger.error('Error fetching beneficiaries:', error);
