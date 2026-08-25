@@ -815,7 +815,7 @@ export function BeneficiaryForm({
                 .from('need_types')
                 .select('id, default_cost, default_currency')
                 .in('id', waitlistNeedIds);
-              const byId = new Map((needTypes || []).map((n: any) => [n.id, n]));
+              const byId = new Map<string, any>((needTypes || []).map((n: any) => [n.id as string, n]));
               await (supabase as any).from('waitlist_application_needs').insert(
                 waitlistNeedIds.map((id) => ({
                   organization_id: orgId,
