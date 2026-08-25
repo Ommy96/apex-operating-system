@@ -289,9 +289,12 @@ export default function WaitlistManagement() {
                         <span className="font-medium">{applicantName(a)}</span>
                         <Badge variant="outline" className="text-[10px] shrink-0">Score {a.vulnerability_score}</Badge>
                       </div>
-                      {a.applicant_age != null && (
-                        <div className="text-muted-foreground">Age {a.applicant_age}{a.applicant_location ? ` · ${a.applicant_location}` : ""}</div>
-                      )}
+                      <div className="text-muted-foreground">
+                        {a.applicant_age != null ? `Age ${a.applicant_age} · ` : ''}
+                        {a.applicant_location ? `${a.applicant_location} · ` : ''}
+                        Waiting {daysWaiting(a.applied_at)}d
+                      </div>
+
                       {needs.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {needs.map((n) => (
