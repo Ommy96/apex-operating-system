@@ -18,6 +18,8 @@ import {
 import { useSponsorshipPackages } from "@/hooks/useSponsorshipPackages";
 import { useNeedTypes } from "@/hooks/useNeeds";
 import { formatMoney } from "@/lib/allocationEngine";
+import { rankApplicants, RANKING_BASES, daysWaiting, type RankingBasis } from "@/lib/lifecycle";
+
 
 function applicantName(a: WaitlistApplication) {
   const b = (a as any).beneficiaries;
