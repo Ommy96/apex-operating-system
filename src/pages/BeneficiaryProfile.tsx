@@ -52,6 +52,9 @@ import { SchoolVisitDialog } from '@/components/visits/SchoolVisitDialog';
 import { ConsentVaultSection } from '@/components/consent/ConsentVaultSection';
 import { LifeEventsSection } from '@/components/beneficiary/LifeEventsSection';
 import { BeneficiaryNotesSection } from '@/components/beneficiary/BeneficiaryNotesSection';
+import { BeneficiaryBioTab } from '@/components/beneficiary/BeneficiaryBioTab';
+import { WhoTheyAreCard } from '@/components/beneficiary/WhoTheyAreCard';
+import { ShareProfileDialog } from '@/components/beneficiary/ShareProfileDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -180,6 +183,7 @@ export default function BeneficiaryProfile() {
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false); // legacy, unused
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [homeVisitOpen, setHomeVisitOpen] = useState(false);
   const [schoolVisitOpen, setSchoolVisitOpen] = useState(false);
@@ -473,6 +477,7 @@ export default function BeneficiaryProfile() {
 
   const tabs = [
     { value: 'overview', label: 'Overview', icon: Clock, show: true, legacy: false },
+    { value: 'bio', label: 'Bio', icon: BookOpen, show: beneficiary.beneficiary_type !== 'group', legacy: false },
     { value: 'members', label: 'Members', icon: Users, show: beneficiary.beneficiary_type === 'group', legacy: false },
     { value: 'programmes', label: 'Programmes', icon: FolderKanban, show: true, legacy: false },
     { value: 'academics', label: 'Education', icon: GraduationCap, show: orgConfig.collect_education_data && (isMinorAge || isTertiary || hasEducationData), legacy: !orgConfig.collect_education_data && hasEducationData },
@@ -659,6 +664,15 @@ export default function BeneficiaryProfile() {
                       >
                         {generatingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
                       </button>
+                      <button
+                        onClick={() => setShareOpen(true)}
+                        title="Share profile"
+                        aria-label="Share profile"
+                        className="h-9 w-9 rounded-md flex items-center justify-center hover:bg-muted"
+                        style={{ color: '#44403C' }}
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
@@ -682,6 +696,9 @@ export default function BeneficiaryProfile() {
                           ))}
                           <DropdownMenuItem onClick={handleDownloadReport}>
                             <Printer className="h-4 w-4 mr-2" /> Print record
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShareOpen(true)}>
+                            <Share2 className="h-4 w-4 mr-2" /> Share profile…
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -822,6 +839,13 @@ export default function BeneficiaryProfile() {
               {/* TAB: Overview */}
               <TabsContent value="overview" className="mt-0 p-6">
                 <div className="mb-5">
+                  <WhoTheyAreCard
+                    beneficiary={beneficiary as any}
+                    photoAllowed={!!beneficiary.consent_given || !!beneficiary.photo_url}
+                    onOpenBio={() => setActiveTab('bio')}
+                  />
+                </div>
+                <div className="mb-5">
                   <NeedsSection beneficiaryId={beneficiary.id} />
                 </div>
                 <BeneficiaryOverviewTab
@@ -872,6 +896,15 @@ export default function BeneficiaryProfile() {
                 </div>
                 <HomeVisitDialog open={homeVisitOpen} onOpenChange={setHomeVisitOpen} beneficiaryId={beneficiary.id} householdId={(beneficiary as any).household_id || null} />
                 <SchoolVisitDialog open={schoolVisitOpen} onOpenChange={setSchoolVisitOpen} beneficiaryId={beneficiary.id} />
+              </TabsContent>
+
+              {/* TAB: Bio — who they are, in their own story */}
+              <TabsContent value="bio" className="mt-0 p-4 sm:p-6">
+                <BeneficiaryBioTab
+                  beneficiary={beneficiary as any}
+                  canEdit={canEditInline}
+                  onUpdated={(patch) => applyLocal(patch)}
+                />
               </TabsContent>
 
               {/* TAB: Life & Notes — what happened TO them, plus staff commentary */}
