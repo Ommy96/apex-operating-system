@@ -32,12 +32,13 @@ export function DonorImpactStoriesTab() {
     );
   }
 
-  const nameById = new Map(
+  const nameById = new Map<string, string>(
     (sponsoredBeneficiaries || [])
       .map((bd: any) => bd.beneficiary)
       .filter(Boolean)
-      .map((b: any) => [b.id, b.display_name]),
+      .map((b: any) => [String(b.id), String(b.display_name ?? '')] as [string, string]),
   );
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
