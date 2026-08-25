@@ -157,15 +157,29 @@ export default function WaitlistManagement() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" /> Waiting list
           </h1>
           <p className="text-sm text-muted-foreground">
-            Applicants ranked by vulnerability and unmet need. Enrolling creates the beneficiary, needs, and (if matched) sponsorship in one step.
+            {RANKING_BASES.find(b => b.value === basis)?.help ??
+              'Applicants ranked by vulnerability and unmet need.'}{' '}
+            Enrolling creates the beneficiary, needs, and (if matched) sponsorship in one step.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs text-muted-foreground whitespace-nowrap">Rank by</Label>
+          <Select value={basis} onValueChange={(v) => setBasis(v as RankingBasis)}>
+            <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {RANKING_BASES.map(b => (
+                <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Dialog open={newOpen} onOpenChange={(o) => { setNewOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 mr-1" /> New application</Button>
