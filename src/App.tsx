@@ -78,6 +78,7 @@ const VisitManagement = lazy(() => import("./pages/VisitManagement"));
 const ComplaintIntake = lazy(() => import("./pages/ComplaintIntake"));
 const ComplaintManagement = lazy(() => import("./pages/ComplaintManagement"));
 const WhistleblowerForm = lazy(() => import("./pages/WhistleblowerForm"));
+const SharedProfile = lazy(() => import("./pages/SharedProfile"));
 const WhistleblowerManagement = lazy(() => import("./pages/WhistleblowerManagement"));
 const SafeguardingDashboard = lazy(() => import("./pages/SafeguardingDashboard"));
 const DeduplicationReview = lazy(() => import("./pages/DeduplicationReview"));
@@ -198,6 +199,7 @@ const App = () => (
 
             {/* Public intake forms (no auth) */}
             <Route path="/feedback/:orgSlug" element={<LazyRoute><ComplaintIntake /></LazyRoute>} />
+            <Route path="/shared/profile/:token" element={<LazyRoute><SharedProfile /></LazyRoute>} />
             <Route path="/report/:orgSlug" element={<LazyRoute><WhistleblowerForm /></LazyRoute>} />
             <Route path="/stakeholder/:token" element={<LazyRoute><StakeholderPortal /></LazyRoute>} />
             <Route path="/give/:orgSlug/:campaignSlug" element={<LazyRoute><PublicDonationPage /></LazyRoute>} />

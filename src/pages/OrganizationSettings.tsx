@@ -25,6 +25,7 @@ import { TerminologySettings } from '@/components/settings/TerminologySettings';
 import { NeedTypesSettings } from '@/components/settings/NeedTypesSettings';
 import { LifeEventTypesSettings } from '@/components/settings/LifeEventTypesSettings';
 import { DocumentTypesSettings } from '@/components/settings/DocumentTypesSettings';
+import { InterestTypesSettings } from '@/components/settings/InterestTypesSettings';
 
 const VALID = new Set(SETTINGS_SECTIONS.map((s) => s.id));
 
@@ -90,6 +91,7 @@ export default function OrganizationSettings() {
       case 'needs':         return <NeedTypesSettings />;
       case 'lifeevents':    return <LifeEventTypesSettings />;
       case 'doctypes':      return <DocumentTypesSettings />;
+      case 'interests':     return <InterestTypesSettings />;
       case 'terminology':   return <TerminologySettings />;
       case 'financial':     return <FinancialSettings section="fin-currency" />;
       case 'access':        return <UserAccessSettings section="user-settings" />;

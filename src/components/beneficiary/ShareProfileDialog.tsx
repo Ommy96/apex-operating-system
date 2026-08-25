@@ -144,8 +144,8 @@ export function ShareProfileDialog({ open, onOpenChange, beneficiary }: Props) {
         hasPhotoConsent: !!hasPhotoConsent,
         organization: {
           name: currentOrganization?.organization_name || 'Organisation',
-          logoUrl: branding?.logoUrl || branding?.logo_url || null,
-          primaryColor: branding?.primaryHex || branding?.primary_color || null,
+          logoUrl: branding?.logoUrl || null,
+          primaryColor: branding?.primaryColor || null,
           contact: (currentOrganization as any)?.email || null,
         },
         servicesReceived: extra.programmes.length,
