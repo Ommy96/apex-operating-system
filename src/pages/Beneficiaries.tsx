@@ -341,7 +341,7 @@ export default function Beneficiaries() {
         b.institution_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesType = typeFilter === 'all' || b.beneficiary_type === typeFilter;
-      const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || stageOf(b) === statusFilter;
       const matchesProgram = programFilter === 'all' || (enrollmentMap[programFilter]?.has(b.id) ?? false);
       
       return matchesSearch && matchesType && matchesStatus && matchesProgram;
