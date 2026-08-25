@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { isActiveStatus } from '@/lib/statusHelpers';
+import { normaliseStage } from '@/lib/lifecycle';
+
 
 /**
  * THE canonical counting definitions for the organisation.
