@@ -803,7 +803,7 @@ export function BeneficiaryForm({
                 applicant_name: payload.display_name || `${form.first_name} ${form.last_name}`.trim(),
                 applicant_location: form.sub_county || form.county || null,
                 applicant_notes: form.notes || null,
-                status: 'applied',
+                status: 'application',
                 created_by: u.user?.id ?? null,
               })
               .select('id')
