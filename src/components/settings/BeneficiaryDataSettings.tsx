@@ -20,6 +20,8 @@ import { logger } from '@/lib/logger';
 import { Loader2, Plus, X, GraduationCap, Heart, Briefcase, AlertTriangle, Globe, Users, Accessibility, Baby, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
+import { SponsorshipFundingModelCard } from './SponsorshipFundingModelCard';
+
 
 interface OrgTypePreset {
   value: OrgType;
