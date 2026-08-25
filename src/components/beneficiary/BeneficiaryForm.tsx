@@ -789,7 +789,56 @@ export function BeneficiaryForm({
         if (error) throw error;
         beneficiaryId = data.id;
         uniqueId = data.unique_id;
+
+        // Waiting-list route: create a real application linked to this record so
+        // the pipeline ranks them alongside everyone else waiting.
+        if (enrollmentChoice === 'waitlist') {
+          try {
+            const { data: u } = await supabase.auth.getUser();
+            const { data: app, error: appErr } = await (supabase as any)
+              .from('waitlist_applications')
+              .insert({
+                organization_id: orgId,
+                beneficiary_id: beneficiaryId,
+                applicant_name: payload.display_name || `${form.first_name} ${form.last_name}`.trim(),
+                applicant_location: form.sub_county || form.county || null,
+                applicant_notes: form.notes || null,
+                status: 'applied',
+                created_by: u.user?.id ?? null,
+              })
+              .select('id')
+              .single();
+            if (appErr) throw appErr;
+
+            if (app?.id && waitlistNeedIds.length) {
+              const { data: needTypes } = await (supabase as any)
+                .from('need_types')
+                .select('id, default_cost, default_currency')
+                .in('id', waitlistNeedIds);
+              const byId = new Map((needTypes || []).map((n: any) => [n.id, n]));
+              await (supabase as any).from('waitlist_application_needs').insert(
+                waitlistNeedIds.map((id) => ({
+                  organization_id: orgId,
+                  application_id: app.id,
+                  need_type_id: id,
+                  estimated_cost: byId.get(id)?.default_cost ?? null,
+                  currency: byId.get(id)?.default_currency ?? 'KES',
+                  priority: 'medium',
+                })),
+              );
+            }
+            queryClient.invalidateQueries({ queryKey: ['waitlist-applications'] });
+          } catch (e) {
+            logger.warn('Could not create waiting-list application', e);
+            toast({
+              title: 'Saved, but not added to the waiting list',
+              description: 'The record was created — add the waiting-list application manually.',
+              variant: 'destructive',
+            });
+          }
+        }
       }
+
 
       // Save / upsert guardians & beneficiary_guardians links.
       if (isIndividual && beneficiaryId) {
