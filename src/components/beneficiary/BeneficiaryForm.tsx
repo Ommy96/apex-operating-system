@@ -719,8 +719,14 @@ export function BeneficiaryForm({
         vulnerability_level: form.vulnerability_level || null,
         background_narrative: form.notes || null,
         photo_url: form.photo_url || null,
-        status: 'active',
-        is_active: true,
+        status: !beneficiary?.id && enrollmentChoice === 'waitlist' ? 'inactive' : 'active',
+        lifecycle_stage: beneficiary?.id
+          ? undefined
+          : enrollmentChoice === 'waitlist'
+            ? 'waiting_list'
+            : 'active',
+        is_active: !(!beneficiary?.id && enrollmentChoice === 'waitlist'),
+
         sector_data: form.sector_data && Object.keys(form.sector_data).length > 0
           ? form.sector_data
           : {},
