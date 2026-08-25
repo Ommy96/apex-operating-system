@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ApexLogo } from "@/components/brand/ApexLogo";
 import { PRODUCT_TAGLINE, VENDOR } from "@/config/brand";
@@ -159,12 +160,22 @@ export function AuthShell({
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1080px] flex-col">
         {/* Brand lockup */}
-        <Link to="/" className="mb-6 inline-flex w-fit flex-col gap-1">
-          <ApexLogo wordmarkClassName="text-[var(--auth-text)] text-lg" />
-          <span className="pl-9 text-xs tracking-wide text-[var(--auth-muted)]">
-            {PRODUCT_TAGLINE}
-          </span>
-        </Link>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <Link to="/" className="inline-flex w-fit flex-col gap-1">
+            <ApexLogo wordmarkClassName="text-[var(--auth-text)] text-lg" />
+            <span className="pl-9 text-xs tracking-wide text-[var(--auth-muted)]">
+              {PRODUCT_TAGLINE}
+            </span>
+          </Link>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs text-[var(--auth-muted)] transition-colors hover:text-[var(--auth-text)]"
+            style={{ borderColor: "var(--auth-border)" }}
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to ApexOS
+          </Link>
+        </div>
+
 
         <div className="flex flex-1 items-center">
           <div

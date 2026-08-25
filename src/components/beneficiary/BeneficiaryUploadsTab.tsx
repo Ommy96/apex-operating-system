@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { 
   Plus, 
@@ -67,6 +68,7 @@ interface UploadRecord {
   description: string | null;
   uploaded_by: string | null;
   created_at: string;
+  share_with_sponsor?: boolean;
 }
 
 const getDocumentIcon = (isConsent: boolean) => (isConsent ? FileCheck : FileText);
@@ -107,6 +109,21 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
       return data as UploadRecord[];
     },
     enabled: !!beneficiaryId,
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: async ({ id, share }: { id: string; share: boolean }) => {
+      const { error } = await supabase
+        .from("beneficiary_uploads")
+        .update({ share_with_sponsor: share } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      queryClient.invalidateQueries({ queryKey: ["beneficiary-uploads", beneficiaryId] });
+      toast.success(v.share ? "Shared with sponsor" : "No longer shared with sponsor");
+    },
+    onError: (e: any) => toast.error(e.message || "Could not change sharing"),
   });
 
   const deleteMutation = useMutation({
@@ -211,6 +228,12 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
     docTypes.find((d) => d.key === type)?.label || type || 'Unspecified';
   const isConsentType = (type: string | null) =>
     !!docTypes.find((d) => d.key === type)?.is_consent_type;
+  const isSensitiveType = (type: string | null) => {
+    const dt: any = docTypes.find((d) => d.key === type);
+    if (dt?.is_sensitive) return true;
+    if (dt?.is_consent_type) return true;
+    return /(consent|medical|health|intake|assessment|national_id|birth_cert|safeguard|legal|case)/i.test(type || "");
+  };
 
   const distinctTypes = new Set(uploads.map((u) => u.document_type).filter(Boolean)).size;
 
@@ -393,6 +416,23 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
                           <span className="text-xs text-muted-foreground">
                             {format(new Date(upload.created_at), "MMM d, yyyy")}
                           </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Switch
+                            id={`share-${upload.id}`}
+                            checked={!!upload.share_with_sponsor}
+                            disabled={isSensitiveType(upload.document_type) || shareMutation.isPending}
+                            onCheckedChange={(v) => shareMutation.mutate({ id: upload.id, share: v })}
+                            aria-label="Share with sponsor"
+                          />
+                          <label
+                            htmlFor={`share-${upload.id}`}
+                            className="text-xs text-muted-foreground cursor-pointer"
+                          >
+                            {isSensitiveType(upload.document_type)
+                              ? "Sensitive — can never be shared with sponsors"
+                              : "Share with sponsor"}
+                          </label>
                         </div>
                         {upload.description && (
                           <p className="text-sm text-muted-foreground mt-1">{upload.description}</p>

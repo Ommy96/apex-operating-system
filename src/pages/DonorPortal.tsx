@@ -30,7 +30,11 @@ import { DonorImpactFeed } from '@/components/donor-portal/DonorImpactFeed';
 import { DonorMoneyFlow } from '@/components/donor-portal/DonorMoneyFlow';
 import { DonorReportsTab } from '@/components/donor-portal/DonorReportsTab';
 import { DonorVisitRequestsTab } from '@/components/donor-portal/DonorVisitRequestsTab';
-import { useDonorFx } from '@/hooks/useDonorFx';
+import { useDonorFx, FX_DISCLOSURE } from '@/hooks/useDonorFx';
+import { FxAmount } from '@/components/donor-portal/FxAmount';
+import { DonorProgrammesTab } from '@/components/donor-portal/DonorProgrammesTab';
+import { SponsorBeneficiaryDetail } from '@/components/donor-portal/SponsorBeneficiaryDetail';
+import { UpcomingMilestones } from '@/components/donor-portal/UpcomingMilestones';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export default function DonorPortal() {
@@ -41,8 +45,9 @@ export default function DonorPortal() {
     fetchBeneficiaryAcademics, fetchBeneficiaryProgression,
     getDocumentDownloadUrl, isLoading, documentsLoading, isDonor,
     donorAllocations, lastUpdatedAt, refetchAll,
+    programmes, enrollments, totals, currency, sharedBeneficiaryDocuments,
   } = useDonorPortal();
-  const fx = useDonorFx((donorAccount as any)?.preferred_currency);
+  const fx = useDonorFx(currency);
 
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<string | null>(null);
   const [academics, setAcademics] = useState<any[]>([]);
@@ -50,13 +55,23 @@ export default function DonorPortal() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'recent'>('name');
+  const [programmeFilter, setProgrammeFilter] = useState<string | null>(null);
+  const [tab, setTab] = useState('feed');
   const debouncedSearch = useDebouncedValue(search, 200);
 
   const visibleBeneficiaries = useMemo(() => {
     const list = (sponsoredBeneficiaries || []).filter((bd: any) => bd.beneficiary);
     const term = debouncedSearch.trim().toLowerCase();
+    const byProgramme = programmeFilter
+      ? list.filter((bd: any) =>
+          bd.program_id === programmeFilter ||
+          (enrollments || []).some(
+            (e: any) => e.beneficiary_id === bd.beneficiary?.id && e.program_id === programmeFilter,
+          ),
+        )
+      : list;
     const filtered = term
-      ? list.filter((bd: any) => {
+      ? byProgramme.filter((bd: any) => {
           const b = bd.beneficiary;
           return (
             (b.display_name || '').toLowerCase().includes(term) ||
@@ -65,14 +80,14 @@ export default function DonorPortal() {
             (b.beneficiary_code || '').toLowerCase().includes(term)
           );
         })
-      : list;
+      : byProgramme;
     return [...filtered].sort((a: any, b: any) => {
       if (sortBy === 'recent') {
         return new Date(b.donation_date || 0).getTime() - new Date(a.donation_date || 0).getTime();
       }
       return (a.beneficiary.display_name || '').localeCompare(b.beneficiary.display_name || '');
     });
-  }, [sponsoredBeneficiaries, debouncedSearch, sortBy]);
+  }, [sponsoredBeneficiaries, debouncedSearch, sortBy, programmeFilter, enrollments]);
 
   if (loading || isLoading) {
     return (
@@ -224,9 +239,16 @@ export default function DonorPortal() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {fx.format(totalContributed, 'KES')}
+                  <FxAmount amount={totals.contributed} currency={totals.currency} fx={fx} />
                 </p>
-                <p className="text-sm text-muted-foreground">Total Contributed</p>
+                <p className="text-sm text-muted-foreground">
+                  Total Contributed
+                  {totals.source !== 'allocations' && (
+                    <span className="block text-[11px]">
+                      {totals.source === 'commitments' ? 'from commitments (not yet allocated)' : 'from recorded gifts'}
+                    </span>
+                  )}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -243,7 +265,38 @@ export default function DonorPortal() {
           </Card>
         </div>
 
-        <Tabs defaultValue="feed" className="space-y-6">
+        {programmes.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {totalSponsored} sponsored {totalSponsored === 1 ? 'beneficiary' : 'beneficiaries'}:
+            </span>
+            {programmes.map((p) => (
+              <Button
+                key={p.id}
+                size="sm"
+                variant={programmeFilter === p.id ? 'default' : 'outline'}
+                className="h-7 text-xs"
+                onClick={() => {
+                  setProgrammeFilter(programmeFilter === p.id ? null : p.id);
+                  setTab('beneficiaries');
+                }}
+              >
+                {p.count} {p.name}
+              </Button>
+            ))}
+            {programmeFilter && (
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setProgrammeFilter(null)}>
+                Clear filter
+              </Button>
+            )}
+          </div>
+        )}
+
+        <p className="text-[11px] text-muted-foreground">{FX_DISCLOSURE}</p>
+
+        <UpcomingMilestones />
+
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="bg-muted/50">
             <TabsTrigger value="feed" className="gap-2">
               <Sparkles className="h-4 w-4" /> Impact Feed
@@ -253,6 +306,9 @@ export default function DonorPortal() {
             </TabsTrigger>
             <TabsTrigger value="beneficiaries" className="gap-2">
               <Users className="h-4 w-4" /> My Beneficiaries
+            </TabsTrigger>
+            <TabsTrigger value="programmes" className="gap-2">
+              <Building2 className="h-4 w-4" /> Programmes
             </TabsTrigger>
             <TabsTrigger value="allocations" className="gap-2">
               <Wallet className="h-4 w-4" /> Allocations
@@ -398,7 +454,7 @@ export default function DonorPortal() {
               {/* Beneficiary Detail */}
               <div className="lg:col-span-2">
                 {selectedBeneficiary && selectedData ? (
-                  <BeneficiaryDetail
+                  <SponsorBeneficiaryDetail
                     data={selectedData}
                     academics={academics}
                     progression={progression}
@@ -415,6 +471,12 @@ export default function DonorPortal() {
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="programmes">
+            <DonorProgrammesTab
+              onSelectProgramme={(id) => { setProgrammeFilter(id); setTab('beneficiaries'); }}
+            />
           </TabsContent>
 
           <TabsContent value="allocations">
@@ -487,155 +549,6 @@ export default function DonorPortal() {
         </Tabs>
       </main>
     </div>
-  );
-}
-
-function BeneficiaryDetail({ data, academics, progression, loading }: {
-  data: any;
-  academics: any[];
-  progression: any[];
-  loading: boolean;
-}) {
-  const b = data.beneficiary;
-  if (!b) return null;
-
-  return (
-    <Card className="border-border/50">
-      <CardContent className="p-6 space-y-6">
-        {/* Profile Header */}
-        <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={b.photo_url} />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
-              {(b.first_name?.[0] || b.display_name?.[0] || '?').toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">{b.display_name}</h2>
-            <div className="flex flex-wrap items-center gap-2 mt-1">
-              <Badge className="bg-primary/10 text-primary border-0">{b.beneficiary_type}</Badge>
-              <Badge variant={b.status === 'active' ? 'default' : 'secondary'}>{b.status}</Badge>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Info Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-          {b.gender && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Gender</p>
-              <p className="font-medium text-foreground capitalize">{b.gender}</p>
-            </div>
-          )}
-          {b.date_of_birth && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Date of Birth</p>
-              <p className="font-medium text-foreground">{format(new Date(b.date_of_birth), 'MMM d, yyyy')}</p>
-            </div>
-          )}
-          {b.grade && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Grade</p>
-              <p className="font-medium text-foreground">{b.grade}</p>
-            </div>
-          )}
-          {b.academic_level && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Academic Level</p>
-              <p className="font-medium text-foreground capitalize">{b.academic_level}</p>
-            </div>
-          )}
-          {b.institution_name && (
-            <div className="col-span-2">
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Institution</p>
-              <p className="font-medium text-foreground flex items-center gap-1">
-                <School className="h-3.5 w-3.5" />{b.institution_name}
-              </p>
-            </div>
-          )}
-          {b.county && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">County</p>
-              <p className="font-medium text-foreground flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />{b.county}
-              </p>
-            </div>
-          )}
-          {data.amount_received && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wider">Your Contribution</p>
-              <p className="font-medium text-success">KES {data.amount_received.toLocaleString()}</p>
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Academics */}
-        <div>
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-primary" /> Academic Performance
-          </h3>
-          {loading ? (
-            <div className="flex justify-center py-6">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
-            </div>
-          ) : academics.length > 0 ? (
-            <div className="space-y-2">
-              {academics.slice(0, 6).map((a) => (
-                <div key={a.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg text-sm">
-                  <div>
-                    <span className="font-medium text-foreground">{a.academic_year} - {a.term}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {a.total_marks != null && (
-                      <span className="text-foreground font-semibold">
-                        {a.total_marks}{a.out_of ? `/${a.out_of}` : ''}
-                      </span>
-                    )}
-                    {a.overall_grade && (
-                      <Badge variant="outline">{a.overall_grade}</Badge>
-                    )}
-                    {a.position && (
-                      <span className="text-xs text-muted-foreground">Pos: {a.position}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground py-3">No academic records available</p>
-          )}
-        </div>
-
-        {/* Progression */}
-        {progression.length > 0 && (
-          <div>
-            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-accent" /> Academic Progression
-            </h3>
-            <div className="space-y-2">
-              {progression.slice(0, 5).map((p) => (
-                <div key={p.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">
-                      {p.previous_grade || '—'} → {p.new_grade || '—'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(p.progression_date), 'MMM d, yyyy')} · {p.progression_type}
-                    </p>
-                  </div>
-                  {p.is_repeating && <Badge variant="destructive" className="text-xs">Repeating</Badge>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 

@@ -3052,6 +3052,9 @@ export type Database = {
           file_url: string
           id: string
           organization_id: string
+          share_with_sponsor: boolean
+          shared_at: string | null
+          shared_by: string | null
           uploaded_by: string | null
         }
         Insert: {
@@ -3064,6 +3067,9 @@ export type Database = {
           file_url: string
           id?: string
           organization_id: string
+          share_with_sponsor?: boolean
+          shared_at?: string | null
+          shared_by?: string | null
           uploaded_by?: string | null
         }
         Update: {
@@ -3076,6 +3082,9 @@ export type Database = {
           file_url?: string
           id?: string
           organization_id?: string
+          share_with_sponsor?: boolean
+          shared_at?: string | null
+          shared_by?: string | null
           uploaded_by?: string | null
         }
         Relationships: [
@@ -5137,6 +5146,7 @@ export type Database = {
           fetched_at: string | null
           id: string
           rate: number
+          rate_date: string
           target_currency: string
         }
         Insert: {
@@ -5144,6 +5154,7 @@ export type Database = {
           fetched_at?: string | null
           id?: string
           rate: number
+          rate_date?: string
           target_currency: string
         }
         Update: {
@@ -5151,6 +5162,7 @@ export type Database = {
           fetched_at?: string | null
           id?: string
           rate?: number
+          rate_date?: string
           target_currency?: string
         }
         Relationships: []
@@ -5595,11 +5607,13 @@ export type Database = {
           id: string
           is_active: boolean
           is_consent_type: boolean
+          is_sensitive: boolean
           key: string
           label: string
           organization_id: string
           requires_expiry: boolean
           sort_order: number
+          sponsor_shareable: boolean
           updated_at: string
         }
         Insert: {
@@ -5608,11 +5622,13 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_consent_type?: boolean
+          is_sensitive?: boolean
           key: string
           label: string
           organization_id: string
           requires_expiry?: boolean
           sort_order?: number
+          sponsor_shareable?: boolean
           updated_at?: string
         }
         Update: {
@@ -5621,11 +5637,13 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_consent_type?: boolean
+          is_sensitive?: boolean
           key?: string
           label?: string
           organization_id?: string
           requires_expiry?: boolean
           sort_order?: number
+          sponsor_shareable?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -8546,52 +8564,85 @@ export type Database = {
       }
       impact_stories: {
         Row: {
+          ai_assisted: boolean
+          approved_at: string | null
+          approved_by: string | null
           author_id: string | null
           beneficiary_id: string | null
+          consent_checked: boolean
+          consent_checked_at: string | null
           created_at: string | null
           deleted_at: string | null
           id: string
           org_id: string
           photo_urls: string[] | null
+          program_id: string | null
           project_id: string | null
           published_at: string | null
+          rejection_reason: string | null
+          source_type: string | null
           status: string | null
           story_text: string | null
+          submitted_at: string | null
+          submitted_by: string | null
           tags: string[] | null
           theme: string | null
           title: string
+          updated_at: string
         }
         Insert: {
+          ai_assisted?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           beneficiary_id?: string | null
+          consent_checked?: boolean
+          consent_checked_at?: string | null
           created_at?: string | null
           deleted_at?: string | null
           id?: string
           org_id: string
           photo_urls?: string[] | null
+          program_id?: string | null
           project_id?: string | null
           published_at?: string | null
+          rejection_reason?: string | null
+          source_type?: string | null
           status?: string | null
           story_text?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
           tags?: string[] | null
           theme?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
+          ai_assisted?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           beneficiary_id?: string | null
+          consent_checked?: boolean
+          consent_checked_at?: string | null
           created_at?: string | null
           deleted_at?: string | null
           id?: string
           org_id?: string
           photo_urls?: string[] | null
+          program_id?: string | null
           project_id?: string | null
           published_at?: string | null
+          rejection_reason?: string | null
+          source_type?: string | null
           status?: string | null
           story_text?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
           tags?: string[] | null
           theme?: string | null
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -11110,6 +11161,7 @@ export type Database = {
           default_narrative_sections: Json | null
           default_new_staff_role: string | null
           description: string | null
+          donor_birthday_alerts_enabled: boolean
           dpo_email: string | null
           dpo_name: string | null
           email: string | null
@@ -11206,6 +11258,7 @@ export type Database = {
           default_narrative_sections?: Json | null
           default_new_staff_role?: string | null
           description?: string | null
+          donor_birthday_alerts_enabled?: boolean
           dpo_email?: string | null
           dpo_name?: string | null
           email?: string | null
@@ -11302,6 +11355,7 @@ export type Database = {
           default_narrative_sections?: Json | null
           default_new_staff_role?: string | null
           description?: string | null
+          donor_birthday_alerts_enabled?: boolean
           dpo_email?: string | null
           dpo_name?: string | null
           email?: string | null
@@ -15485,6 +15539,59 @@ export type Database = {
           },
         ]
       }
+      sponsor_correspondence: {
+        Row: {
+          beneficiary_id: string
+          created_at: string
+          donor_account_id: string
+          id: string
+          kind: string
+          message: string
+          organization_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id: string
+          created_at?: string
+          donor_account_id: string
+          id?: string
+          kind?: string
+          message: string
+          organization_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string
+          created_at?: string
+          donor_account_id?: string
+          id?: string
+          kind?: string
+          message?: string
+          organization_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_correspondence_donor_account_id_fkey"
+            columns: ["donor_account_id"]
+            isOneToOne: false
+            referencedRelation: "donor_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsor_relationships: {
         Row: {
           beneficiary_id: string
@@ -17842,6 +17949,10 @@ export type Database = {
           sub_county: string
         }[]
       }
+      fx_rate_on: {
+        Args: { _from: string; _on: string; _to: string }
+        Returns: number
+      }
       generate_beneficiary_unique_id: {
         Args: { _org_id: string }
         Returns: string
@@ -17906,6 +18017,10 @@ export type Database = {
         Returns: boolean
       }
       has_valid_photo_consent: {
+        Args: { _beneficiary_id: string }
+        Returns: boolean
+      }
+      is_donor_of_beneficiary: {
         Args: { _beneficiary_id: string }
         Returns: boolean
       }
