@@ -412,6 +412,35 @@ export function useMatchAndEnroll() {
         sponsorshipId = sponsor.id;
       }
 
+      // 4b) Sponsor RELATIONSHIP — who is personally connected (separate from the money)
+      if (donorAccountId || donorName) {
+        const { error: srErr } = await sb.from("sponsor_relationships").insert({
+          organization_id: orgId,
+          beneficiary_id: beneficiaryId,
+          donor_account_id: donorAccountId || null,
+          donor_name: donorName || null,
+          package_id: packageId || null,
+          relationship_type: "primary",
+          started_on: new Date().toISOString().slice(0, 10),
+          status: "active",
+          notes: `Matched from waiting list (application ${application.id})`,
+        });
+        if (srErr) throw new Error(`Failed to create sponsor relationship: ${srErr.message}`);
+      }
+
+      // 4c) Lifecycle — the applicant is now an active beneficiary
+      const { error: lErr } = await sb
+        .from("beneficiaries")
+        .update({
+          lifecycle_stage: "active",
+          lifecycle_changed_at: new Date().toISOString(),
+          status: "active",
+        })
+        .eq("id", beneficiaryId);
+      if (lErr) throw new Error(`Failed to activate beneficiary: ${lErr.message}`);
+
+
+
       // 5) Finally, mark the application enrolled with everything linked
       const { data, error } = await sb
         .from("waitlist_applications")
