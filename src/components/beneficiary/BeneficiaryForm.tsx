@@ -327,6 +327,9 @@ export function BeneficiaryForm({
   const queryClient = useQueryClient();
 
   const [step, setStep] = useState(0);
+  const [enrollmentChoice, setEnrollmentChoice] = useState<EnrollmentChoice>('enroll');
+  const [waitlistNeedIds, setWaitlistNeedIds] = useState<string[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [createdUniqueId, setCreatedUniqueId] = useState<string | null>(null);
