@@ -317,6 +317,9 @@ export function useMatchAndEnroll() {
             sub_county: application.applicant_location || null,
             location: application.applicant_location || null,
             status: "active",
+            lifecycle_stage: "active",
+            lifecycle_changed_at: new Date().toISOString(),
+
             year_enrolled: new Date().getFullYear(),
             background_narrative: application.applicant_notes || null,
           })
