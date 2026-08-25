@@ -242,6 +242,12 @@ const App = () => (
                 <DashboardLayout><LazyRoute><WaitlistManagement /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/alumni" element={
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <DashboardLayout><LazyRoute><Alumni /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/sponsorship-packages" element={
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><SponsorshipPackages /></LazyRoute></DashboardLayout>
