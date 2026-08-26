@@ -28,13 +28,11 @@ export function useOrgStaff(orgId?: string) {
     queryFn: async (): Promise<OrgStaffMember[]> => {
       const { data: members, error: membersError } = await supabase
         .from("organization_members")
-        .select("user_id, role, is_active")
+        .select("user_id, role")
         .eq("organization_id", orgId!);
       if (membersError) throw membersError;
 
-      const active = (members || []).filter(
-        (m: any) => m.is_active === undefined || m.is_active === null || m.is_active === true,
-      );
+      const active = members || [];
       const ids = active.map((m: any) => m.user_id).filter(Boolean);
       if (ids.length === 0) return [];
 
