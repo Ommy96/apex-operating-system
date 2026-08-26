@@ -83,14 +83,8 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
     enabled: !!projectId,
   });
 
-  const { data: orgMembers = [] } = useQuery({
-    queryKey: ["org-members-for-team", orgId],
-    queryFn: async () => {
-      const { data } = await supabase.from("organization_members").select("user_id, profiles(full_name, email)").eq("organization_id", orgId!);
-      return data || [];
-    },
-    enabled: !!orgId,
-  });
+
+
 
   const assignMutation = useMutation({
     mutationFn: async () => {
