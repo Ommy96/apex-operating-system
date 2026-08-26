@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Plus, Calendar, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isBefore, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
 import { toast } from "sonner";
+import { StaffSelect } from "@/components/StaffSelect";
 
 export default function MECalendar() {
   const { currentOrganization } = useOrganization();
@@ -53,14 +54,6 @@ export default function MECalendar() {
     enabled: !!orgId,
   });
 
-  const { data: orgMembers = [] } = useQuery({
-    queryKey: ["org-members-me", orgId],
-    queryFn: async () => {
-      const { data } = await supabase.from("organization_members").select("user_id, profiles(full_name, email)").eq("organization_id", orgId!);
-      return data || [];
-    },
-    enabled: !!orgId,
-  });
 
   const createSchedule = useMutation({
     mutationFn: async () => {
@@ -193,10 +186,7 @@ export default function MECalendar() {
                 </Select>
               </div>
               <div><Label>Assigned To</Label>
-                <Select value={scheduleForm.assigned_to} onValueChange={v => setScheduleForm(p => ({ ...p, assigned_to: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select officer" /></SelectTrigger>
-                  <SelectContent>{orgMembers.map((m: any) => <SelectItem key={m.user_id} value={m.user_id}>{(m.profiles as any)?.full_name || (m.profiles as any)?.email}</SelectItem>)}</SelectContent>
-                </Select>
+                <StaffSelect orgId={orgId} value={scheduleForm.assigned_to} onValueChange={v => setScheduleForm(p => ({ ...p, assigned_to: v }))} placeholder="Select officer" />
               </div>
               <Button onClick={() => createSchedule.mutate()} disabled={!scheduleForm.indicator_id || createSchedule.isPending} className="w-full">Schedule</Button>
             </div>
