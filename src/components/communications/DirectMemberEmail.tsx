@@ -34,28 +34,14 @@ export function DirectMemberEmail() {
     queryKey: ["org-members-emails", orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select("user_id, role")
-        .eq("organization_id", orgId);
+      const { data, error } = await supabase.rpc("list_org_staff", { _org_id: orgId });
       if (error) throw error;
-      const ids = (data || []).map((m: any) => m.user_id).filter(Boolean);
-      if (ids.length === 0) return [] as OrgMember[];
-      const { data: profs, error: profsError } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email")
-        .in("user_id", ids);
-      if (profsError) throw profsError;
-      const byUser = new Map((profs || []).map((p: any) => [p.user_id, p]));
-      return (data || []).map((m: any) => {
-        const p: any = byUser.get(m.user_id);
-        return {
-          user_id: m.user_id,
-          role: m.role,
-          full_name: p?.full_name || "Unknown",
-          email: p?.email || "",
-        };
-      }).filter((m: OrgMember) => m.email) as OrgMember[];
+      return (data || []).map((m: any) => ({
+        user_id: m.user_id,
+        role: m.org_role || "member",
+        full_name: m.full_name || "Unknown",
+        email: m.email || "",
+      })).filter((m: OrgMember) => m.email) as OrgMember[];
     },
     enabled: !!orgId,
   });

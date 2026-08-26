@@ -18025,6 +18025,16 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_org_staff: {
+        Args: { _org_id: string }
+        Returns: {
+          email: string
+          full_name: string
+          job_title: string
+          org_role: string
+          user_id: string
+        }[]
+      }
       merge_beneficiaries: {
         Args: {
           _candidate_id: string

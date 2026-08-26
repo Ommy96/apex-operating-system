@@ -39,6 +39,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { format } from "date-fns";
 import { ProjectBeneficiariesExport } from "@/components/projects/ProjectBeneficiariesExport";
 import { StaffSelect } from "@/components/StaffSelect";
+import { useOrgStaff } from "@/hooks/useOrgStaff";
 
 const AGE_GROUPS = [
   { label: '0-5', min: 0, max: 5 },
@@ -101,6 +102,9 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Removed"); },
   });
 
+  const { data: orgStaff = [] } = useOrgStaff(orgId);
+  const staffLabel = (userId: string) => orgStaff.find(s => s.user_id === userId)?.label;
+
   const getInitials = (name: string) => name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
   const roleLabels: Record<string, string> = { lead: "Lead", coordinator: "Coordinator", field_officer: "Field Officer", me_officer: "M&E Officer", finance: "Finance", team_member: "Team Member" };
   const sorted = [...teamMembers].sort((a: any, b: any) => (a.role_on_project === "lead" ? -1 : b.role_on_project === "lead" ? 1 : 0));
@@ -134,9 +138,9 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
       ) : (
         <div className="space-y-2">{sorted.map((m: any) => (
           <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials((m.profiles as any)?.full_name || "")}</AvatarFallback></Avatar>
+            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials((m.profiles as any)?.full_name || staffLabel(m.user_id) || "")}</AvatarFallback></Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{(m.profiles as any)?.full_name}</p>
+              <p className="text-sm font-medium text-foreground truncate">{(m.profiles as any)?.full_name || staffLabel(m.user_id) || "Unnamed member"}</p>
               <div className="flex items-center gap-2">
                 {m.role_on_project === "lead" && <Star className="h-3 w-3 text-warning" />}
                 <Badge variant="outline" className="text-[10px]">{roleLabels[m.role_on_project] || m.role_on_project}</Badge>
