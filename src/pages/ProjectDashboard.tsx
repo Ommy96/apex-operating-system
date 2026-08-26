@@ -38,6 +38,7 @@ import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { format } from "date-fns";
 import { ProjectBeneficiariesExport } from "@/components/projects/ProjectBeneficiariesExport";
+import { StaffSelect } from "@/components/StaffSelect";
 
 const AGE_GROUPS = [
   { label: '0-5', min: 0, max: 5 },
@@ -83,14 +84,8 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
     enabled: !!projectId,
   });
 
-  const { data: orgMembers = [] } = useQuery({
-    queryKey: ["org-members-for-team", orgId],
-    queryFn: async () => {
-      const { data } = await supabase.from("organization_members").select("user_id, profiles(full_name, email)").eq("organization_id", orgId!);
-      return data || [];
-    },
-    enabled: !!orgId,
-  });
+
+
 
   const assignMutation = useMutation({
     mutationFn: async () => {
@@ -120,10 +115,7 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
             <SheetHeader><SheetTitle>Assign Staff</SheetTitle></SheetHeader>
             <div className="space-y-4 mt-4">
               <div><Label>Staff *</Label>
-                <Select value={assignForm.user_id} onValueChange={v => setAssignForm(p => ({ ...p, user_id: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
-                  <SelectContent>{orgMembers.map((m: any) => <SelectItem key={m.user_id} value={m.user_id}>{(m.profiles as any)?.full_name || (m.profiles as any)?.email}</SelectItem>)}</SelectContent>
-                </Select>
+                <StaffSelect orgId={orgId} value={assignForm.user_id} onValueChange={v => setAssignForm(p => ({ ...p, user_id: v }))} />
               </div>
               <div><Label>Role</Label>
                 <Select value={assignForm.role_on_project} onValueChange={v => setAssignForm(p => ({ ...p, role_on_project: v }))}>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { StaffSelect } from "@/components/StaffSelect";
 
 interface Props {
   projectId: string;
@@ -34,18 +35,6 @@ export function ProjectSettingsSheet({ projectId, orgId, open, onOpenChange }: P
       return data;
     },
     enabled: open && !!projectId,
-  });
-
-  const { data: members = [] } = useQuery({
-    queryKey: ["project-org-members", orgId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("organization_members")
-        .select("user_id, profiles(full_name, email)")
-        .eq("organization_id", orgId!);
-      return data || [];
-    },
-    enabled: open && !!orgId,
   });
 
   useEffect(() => {
@@ -99,17 +88,12 @@ export function ProjectSettingsSheet({ projectId, orgId, open, onOpenChange }: P
           </div>
           <div className="space-y-1.5">
             <Label>Project manager</Label>
-            <Select value={form.project_manager_id} onValueChange={v => setForm(f => ({ ...f, project_manager_id: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">— Unassigned —</SelectItem>
-                {members.map((m: any) => (
-                  <SelectItem key={m.user_id} value={m.user_id}>
-                    {m.profiles?.full_name || m.profiles?.email || m.user_id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <StaffSelect
+              orgId={orgId}
+              value={form.project_manager_id}
+              onValueChange={v => setForm(f => ({ ...f, project_manager_id: v }))}
+              noneValue="__none__"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Geographic focus (comma-separated)</Label>
