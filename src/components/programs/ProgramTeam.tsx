@@ -72,23 +72,13 @@ export function ProgramTeam({ programId }: { programId?: string }) {
     queryKey: ["org-staff-list", orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data: members, error: membersError } = await supabase
-        .from("organization_members")
-        .select("user_id")
-        .eq("organization_id", orgId);
-      if (membersError) throw membersError;
-      const ids = (members || []).map((m: any) => m.user_id).filter(Boolean);
-      if (ids.length === 0) return [];
-      const { data: profs, error: profsError } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email")
-        .in("user_id", ids);
-      if (profsError) throw profsError;
-      const byUser = new Map((profs || []).map((p: any) => [p.user_id, p]));
-      return ids.map((id: string) => {
-        const p: any = byUser.get(id);
-        return { user_id: id, name: p?.full_name || p?.email || "Unnamed member", email: p?.email };
-      });
+      const { data, error } = await supabase.rpc("list_org_staff", { _org_id: orgId });
+      if (error) throw error;
+      return (data || []).map((m: any) => ({
+        user_id: m.user_id,
+        name: m.full_name || m.email || "Unnamed member",
+        email: m.email,
+      }));
     },
     enabled: !!orgId && open,
   });
