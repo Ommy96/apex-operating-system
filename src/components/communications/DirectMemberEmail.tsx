@@ -36,15 +36,26 @@ export function DirectMemberEmail() {
       if (!orgId) return [];
       const { data, error } = await supabase
         .from("organization_members")
-        .select("user_id, role, profiles(full_name, email)")
+        .select("user_id, role")
         .eq("organization_id", orgId);
       if (error) throw error;
-      return (data || []).map((m: any) => ({
-        user_id: m.user_id,
-        role: m.role,
-        full_name: m.profiles?.full_name || "Unknown",
-        email: m.profiles?.email || "",
-      })).filter((m: OrgMember) => m.email) as OrgMember[];
+      const ids = (data || []).map((m: any) => m.user_id).filter(Boolean);
+      if (ids.length === 0) return [] as OrgMember[];
+      const { data: profs, error: profsError } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .in("user_id", ids);
+      if (profsError) throw profsError;
+      const byUser = new Map((profs || []).map((p: any) => [p.user_id, p]));
+      return (data || []).map((m: any) => {
+        const p: any = byUser.get(m.user_id);
+        return {
+          user_id: m.user_id,
+          role: m.role,
+          full_name: p?.full_name || "Unknown",
+          email: p?.email || "",
+        };
+      }).filter((m: OrgMember) => m.email) as OrgMember[];
     },
     enabled: !!orgId,
   });
