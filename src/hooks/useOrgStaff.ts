@@ -18,7 +18,8 @@ export interface OrgStaffMember {
  * NOTE: there is NO foreign key between organization_members.user_id and
  * profiles.user_id, so PostgREST cannot embed `profiles(...)` — that embed
  * fails with a relationship error and, when the error is discarded, renders
- * a silently blank dropdown. Always fetch the two tables separately.
+ * a silently blank dropdown. Reads go through the `list_org_staff` RPC, which
+ * is org-scoped and returns only name/email/job title (no PII).
  */
 export function useOrgStaff(orgId?: string) {
   return useQuery({
@@ -26,35 +27,16 @@ export function useOrgStaff(orgId?: string) {
     enabled: !!orgId,
     staleTime: 60_000,
     queryFn: async (): Promise<OrgStaffMember[]> => {
-      const { data: members, error: membersError } = await supabase
-        .from("organization_members")
-        .select("user_id, role")
-        .eq("organization_id", orgId!);
-      if (membersError) throw membersError;
-
-      const active = members || [];
-      const ids = active.map((m: any) => m.user_id).filter(Boolean);
-      if (ids.length === 0) return [];
-
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email, job_title")
-        .in("user_id", ids);
-      if (profilesError) throw profilesError;
-
-      const byUser = new Map((profiles || []).map((p: any) => [p.user_id, p]));
-
-      return active.map((m: any) => {
-        const p: any = byUser.get(m.user_id);
-        return {
-          user_id: m.user_id,
-          role: m.role ?? null,
-          full_name: p?.full_name ?? null,
-          email: p?.email ?? null,
-          job_title: p?.job_title ?? null,
-          label: p?.full_name || p?.email || "Unnamed member",
-        };
-      }).sort((a, b) => a.label.localeCompare(b.label));
+      const { data, error } = await supabase.rpc("list_org_staff", { _org_id: orgId! });
+      if (error) throw error;
+      return (data || []).map((m: any) => ({
+        user_id: m.user_id,
+        role: m.org_role ?? null,
+        full_name: m.full_name ?? null,
+        email: m.email ?? null,
+        job_title: m.job_title ?? null,
+        label: m.full_name || m.email || "Unnamed member",
+      }));
     },
   });
 }
