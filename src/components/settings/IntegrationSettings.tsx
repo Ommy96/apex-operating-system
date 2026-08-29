@@ -4,7 +4,6 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plug, Key, Webhook, ExternalLink } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useOrgSettings } from '@/hooks/useOrgSettings';
