@@ -540,6 +540,31 @@ export default function Auth() {
                   <AuthSubmit loading={signInBusy}>
                     {signInBusy ? "Signing in…" : "Sign in"}
                   </AuthSubmit>
+
+                  {needsConfirm && (
+                    <div className="rounded-lg border border-[var(--auth-border)] bg-white/5 p-3 text-sm">
+                      <p className="text-[var(--auth-muted)]">
+                        Didn't get the confirmation email, or the link expired?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={resendBusy}
+                        className="mt-2 text-sm font-medium text-[var(--auth-teal-lt)] underline-offset-4 hover:underline disabled:opacity-60"
+                      >
+                        {resendBusy ? "Sending…" : "Resend confirmation email"}
+                      </button>
+                      {resendNote && (
+                        <p
+                          className={`mt-2 text-xs ${
+                            resendNote.ok ? "text-[var(--auth-teal-lt)]" : "text-[var(--auth-danger)]"
+                          }`}
+                        >
+                          {resendNote.text}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </form>
 
                 <p className="text-center text-sm text-[var(--auth-muted)] lg:hidden">
