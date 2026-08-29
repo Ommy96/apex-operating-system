@@ -38,6 +38,7 @@ import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPa
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { useSignedPhoto } from '@/components/beneficiary/SignedAvatarImage';
 import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
