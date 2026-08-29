@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Target, BookOpen } from 'lucide-react';
+import { SignedAvatarImage } from '@/components/beneficiary/SignedAvatarImage';
 
 interface Props {
   beneficiary: any;
@@ -30,7 +31,7 @@ export function WhoTheyAreCard({ beneficiary: b, photoAllowed = true, onOpenBio 
       <CardContent className="p-4 sm:p-5">
         <div className="flex items-start gap-3 sm:gap-4">
           <Avatar className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 ring-2 ring-primary/20">
-            {photoAllowed && b?.photo_url ? <AvatarImage src={b.photo_url} alt="" /> : null}
+            <SignedAvatarImage photoUrl={b?.photo_url} allowed={!!photoAllowed} />
             <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
           </Avatar>
 

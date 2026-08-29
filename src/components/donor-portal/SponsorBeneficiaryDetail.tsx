@@ -12,6 +12,7 @@ import { useDonorPortal } from '@/hooks/useDonorPortal';
 import { useDonorFx } from '@/hooks/useDonorFx';
 import { FxAmount } from './FxAmount';
 import { toast } from 'sonner';
+import { SignedAvatarImage } from '@/components/beneficiary/SignedAvatarImage';
 
 /**
  * Sponsor share mode, rendered in-app.
@@ -53,7 +54,7 @@ export function SponsorBeneficiaryDetail({
         {/* Header */}
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
-            {consented && b.photo_url ? <AvatarImage src={b.photo_url} alt="" /> : null}
+            <SignedAvatarImage photoUrl={b.photo_url} allowed={!!consented} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
               {(b.first_name?.[0] || b.display_name?.[0] || '?').toUpperCase()}
             </AvatarFallback>
