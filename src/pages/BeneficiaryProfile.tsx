@@ -616,8 +616,8 @@ export default function BeneficiaryProfile() {
                 {/* Avatar */}
                 <div className="relative shrink-0 bp-avatar-photo group">
                   <div className="h-[88px] w-[88px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden">
-                    {beneficiary.photo_url ? (
-                      <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
+                    {heroPhotoSrc ? (
+                      <img src={heroPhotoSrc} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[32px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}
