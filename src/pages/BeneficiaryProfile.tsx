@@ -177,6 +177,7 @@ export default function BeneficiaryProfile() {
   const canEditInline = !!can.editBeneficiaries;
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
+  const heroPhotoSrc = useSignedPhoto(beneficiary?.photo_url);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
