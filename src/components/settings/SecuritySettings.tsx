@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,18 +8,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Shield, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useOrgSettings } from "@/hooks/useOrgSettings";
+import { UnsavedBar } from "@/components/settings/UnsavedBar";
 
 export function SecuritySettings() {
   const { user } = useAuth();
-  const [timeout, setTimeoutVal] = useState(() => localStorage.getItem("session_timeout") || "60");
+  const { can, isSuperAdmin } = usePermissions();
+  const isAdmin = can.manageSettings || isSuperAdmin;
   const [signingOut, setSigningOut] = useState(false);
 
+  // Session timeout is an organisation-wide policy, persisted server-side so it
+  // survives a reload and applies on every device (localStorage kept in sync so
+  // the session watchdog can read it synchronously).
+  const security = useOrgSettings(
+    "security",
+    { sessionTimeout: localStorage.getItem("session_timeout") || "60" },
+    { successMessage: "Security settings saved" }
+  );
+
+  const timeout = String(security.values.sessionTimeout ?? "60");
   const has2FA = !!(user as any)?.factors?.length;
 
+  useEffect(() => {
+    localStorage.setItem("session_timeout", timeout);
+  }, [timeout]);
+
   const handleTimeoutChange = (val: string) => {
-    setTimeoutVal(val);
-    localStorage.setItem("session_timeout", val);
-    toast.success("Session timeout updated");
+    security.setField("sessionTimeout", val);
   };
 
   const handleSignOutOthers = async () => {
@@ -58,7 +74,7 @@ export function SecuritySettings() {
               <Label className="text-sm font-medium">Session Timeout</Label>
               <p className="text-xs text-muted-foreground mt-0.5">Auto-lock after period of inactivity</p>
             </div>
-            <Select value={timeout} onValueChange={handleTimeoutChange}>
+            <Select value={timeout} onValueChange={handleTimeoutChange} disabled={!isAdmin}>
               <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="15">15 minutes</SelectItem>
@@ -68,6 +84,17 @@ export function SecuritySettings() {
               </SelectContent>
             </Select>
           </div>
+
+          {isAdmin && (
+            <div className="flex justify-end">
+              <UnsavedBar
+                isDirty={security.isDirty}
+                isSaving={security.isSaving}
+                onSave={security.save}
+                onReset={security.reset}
+              />
+            </div>
+          )}
 
           {/* Sign out others */}
           <div className="flex items-center justify-between">
