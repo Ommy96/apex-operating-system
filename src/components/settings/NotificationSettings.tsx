@@ -28,11 +28,12 @@ export function NotificationSettings() {
     queryKey: ["notification-prefs", user?.id, orgId],
     queryFn: async () => {
       if (!user?.id || !orgId) return [];
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_notification_preferences")
         .select("*")
         .eq("user_id", user.id)
         .eq("org_id", orgId);
+      if (error) throw error;
       return data || [];
     },
     enabled: !!user?.id && !!orgId,
@@ -51,17 +52,26 @@ export function NotificationSettings() {
     mutationFn: async (newPrefs: Record<string, boolean>) => {
       if (!user?.id || !orgId) throw new Error("No user/org");
       for (const [key, enabled] of Object.entries(newPrefs)) {
-        const { data: existing } = await supabase
+        const { data: existing, error: readError } = await supabase
           .from("user_notification_preferences")
           .select("id")
           .eq("user_id", user.id)
           .eq("org_id", orgId)
           .eq("preference_key", key)
           .maybeSingle();
+        if (readError) throw readError;
+
         if (existing) {
-          await supabase.from("user_notification_preferences").update({ is_enabled: enabled }).eq("id", existing.id);
+          const { error } = await supabase
+            .from("user_notification_preferences")
+            .update({ is_enabled: enabled })
+            .eq("id", existing.id);
+          if (error) throw error;
         } else {
-          await supabase.from("user_notification_preferences").insert({ user_id: user.id, org_id: orgId, preference_key: key, is_enabled: enabled });
+          const { error } = await supabase
+            .from("user_notification_preferences")
+            .insert({ user_id: user.id, org_id: orgId, preference_key: key, is_enabled: enabled });
+          if (error) throw error;
         }
       }
     },
@@ -69,7 +79,16 @@ export function NotificationSettings() {
       queryClient.invalidateQueries({ queryKey: ["notification-prefs"] });
       toast.success("Notification preferences saved");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e: any) => {
+      // Roll the toggles back so a failed save visibly reverts.
+      if (savedPrefs) {
+        const map: Record<string, boolean> = {};
+        PREFS.forEach((p) => { map[p.key] = true; });
+        savedPrefs.forEach((sp: any) => { map[sp.preference_key] = sp.is_enabled; });
+        setPrefs(map);
+      }
+      toast.error(e?.message || "Could not save notification preferences");
+    },
   });
 
   return (
