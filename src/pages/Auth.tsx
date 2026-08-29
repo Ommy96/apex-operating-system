@@ -286,7 +286,7 @@ export default function Auth() {
         email: invitation.email,
         password: invPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: { full_name: invName.trim() },
         },
       });

@@ -17,6 +17,7 @@ import { MotionRoot } from "./components/motion/MotionRoot";
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
+const AuthConfirm = lazy(() => import("./pages/AuthConfirm"));
 const RegisterOrganization = lazy(() => import("./pages/RegisterOrganization"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Legal = lazy(() => import("./pages/Legal"));
@@ -191,6 +192,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LazyRoute><Index /></LazyRoute>} />
             <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
+            <Route path="/auth/confirm" element={<LazyRoute><AuthConfirm /></LazyRoute>} />
+            <Route path="/auth/callback" element={<LazyRoute><AuthConfirm /></LazyRoute>} />
             <Route path="/register-organization" element={<LazyRoute><RegisterOrganization /></LazyRoute>} />
             <Route path="/reset-password" element={<LazyRoute><ResetPassword /></LazyRoute>} />
             <Route path="/privacy" element={<LazyRoute><Legal /></LazyRoute>} />
