@@ -63,6 +63,9 @@ export default function Auth() {
   const [remember, setRemember] = useState(true);
   const [signInErrors, setSignInErrors] = useState<Record<string, string>>({});
   const [signInBusy, setSignInBusy] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendNote, setResendNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   // ── Sign up ────────────────────────────────────────────────────────────
   const [suName, setSuName] = useState("");
