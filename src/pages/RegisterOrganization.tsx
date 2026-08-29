@@ -169,7 +169,7 @@ export default function RegisterOrganization() {
       // 1 – create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.adminEmail, password: data.adminPassword,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { full_name: data.adminFullName } },
+        options: { emailRedirectTo: `${window.location.origin}/auth/confirm`, data: { full_name: data.adminFullName } },
       });
       if (authError) {
         if (authError.message.includes('already registered')) { form.setError('adminEmail', { message: 'Email already registered. Please sign in.' }); setStep(1); }

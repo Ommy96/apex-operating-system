@@ -38,6 +38,7 @@ import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPa
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
+import { useSignedPhoto } from '@/components/beneficiary/SignedAvatarImage';
 import { FundingCoverageBar } from '@/components/beneficiary/FundingCoverageBar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -177,6 +178,7 @@ export default function BeneficiaryProfile() {
   const canEditInline = !!can.editBeneficiaries;
   
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
+  const heroPhotoSrc = useSignedPhoto(beneficiary?.photo_url);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [dependants, setDependants] = useState<any[]>([]);
   const [siblings, setSiblings] = useState<any[]>([]);
@@ -616,8 +618,8 @@ export default function BeneficiaryProfile() {
                 {/* Avatar */}
                 <div className="relative shrink-0 bp-avatar-photo group">
                   <div className="h-[88px] w-[88px] sm:h-[96px] sm:w-[96px] rounded-full overflow-hidden">
-                    {beneficiary.photo_url ? (
-                      <img src={beneficiary.photo_url} alt={beneficiary.display_name} className="h-full w-full object-cover" />
+                    {heroPhotoSrc ? (
+                      <img src={heroPhotoSrc} alt={beneficiary.display_name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="bp-avatar-gradient h-full w-full flex items-center justify-center text-white text-[32px]" style={{ background: 'linear-gradient(145deg, #B45309, #1D9E8A)', fontFamily: "'Lora', serif", fontWeight: 600 }}>
                         {getInitials(beneficiary.display_name)}

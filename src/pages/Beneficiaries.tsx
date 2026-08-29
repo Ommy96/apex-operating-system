@@ -66,6 +66,7 @@ const stageOf = (b: any): LifecycleStage =>
 
 import { ArchiveBeneficiaryDialog } from '@/components/beneficiary/ArchiveBeneficiaryDialog';
 import { humanizeDbError } from '@/lib/dbErrors';
+import { SignedAvatarImage } from '@/components/beneficiary/SignedAvatarImage';
 
 interface Beneficiary {
   id: string;
@@ -714,9 +715,7 @@ export default function Beneficiaries() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9 border border-border/50">
-                            {beneficiary.photo_url ? (
-                              <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-                            ) : null}
+                            <SignedAvatarImage photoUrl={beneficiary.photo_url} alt={beneficiary.display_name} />
                             <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-xs font-medium">
                               {getInitials(beneficiary.display_name)}
                             </AvatarFallback>
@@ -876,9 +875,7 @@ export default function Beneficiaries() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <Avatar className="h-12 w-12 border border-border/50">
-                        {beneficiary.photo_url ? (
-                          <AvatarImage src={beneficiary.photo_url} alt={beneficiary.display_name} />
-                        ) : null}
+                        <SignedAvatarImage photoUrl={beneficiary.photo_url} alt={beneficiary.display_name} />
                         <AvatarFallback style={{ backgroundColor: getPastelColor(beneficiary.id) }} className="text-sm font-medium">
                           {getInitials(beneficiary.display_name)}
                         </AvatarFallback>
@@ -978,9 +975,7 @@ export default function Beneficiaries() {
               <div className={`bg-gradient-to-br ${gradientClass} px-6 py-6`}>
                 <div className="flex items-center gap-4">
                   <Avatar className="h-18 w-18 border-[3px] border-white/30 shadow-lg" style={{ height: '4.5rem', width: '4.5rem' }}>
-                    {selectedBeneficiary.photo_url ? (
-                      <AvatarImage src={selectedBeneficiary.photo_url} alt={selectedBeneficiary.display_name} />
-                    ) : null}
+                    <SignedAvatarImage photoUrl={selectedBeneficiary.photo_url} alt={selectedBeneficiary.display_name} />
                     <AvatarFallback
                       style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
                       className="text-lg font-bold text-white"

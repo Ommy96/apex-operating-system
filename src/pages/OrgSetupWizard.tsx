@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -35,10 +36,12 @@ export default function OrgSetupWizard() {
   const reconfigure = params.get('reconfigure') === '1';
   const { currentOrganization, refreshOrganization } = useOrganization();
   const { user } = useAuth();
+  const qc = useQueryClient();
   const orgId = currentOrganization?.organization_id;
 
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [savedCfg, setSavedCfg] = useState<any | null>(null);
 
   // Form state
   const [sector, setSector] = useState<SectorKey | null>(null);
@@ -58,6 +61,7 @@ export default function OrgSetupWizard() {
         .eq('id', orgId)
         .maybeSingle();
       const cfg: any = (data as any)?.setup_config || {};
+      setSavedCfg(cfg);
       if (cfg.sector) setSector(cfg.sector);
       if (cfg.country) setCountry(cfg.country);
       else if ((data as any)?.country) setCountry((data as any).country);
@@ -81,6 +85,32 @@ export default function OrgSetupWizard() {
     [sector]
   );
 
+  /** Plain-English diff between what is stored today and what is about to be applied. */
+  const changeSummary = useMemo(() => {
+    if (!savedCfg) return [];
+    const out: string[] = [];
+    const listDiff = (label: string, before: any[], after: any[]) => {
+      const b = new Set((before || []).map(String));
+      const a = new Set((after || []).map(String));
+      const added = [...a].filter((x) => !b.has(x));
+      const removed = [...b].filter((x) => !a.has(x));
+      if (added.length) out.push(`${label}: adding ${added.join(', ')}`);
+      if (removed.length) out.push(`${label}: no longer selected — ${removed.join(', ')} (existing records are kept)`);
+    };
+    if (savedCfg.sector && savedCfg.sector !== sector) {
+      out.push(`Sector changes from ${savedCfg.sector} to ${sector}`);
+    }
+    if (savedCfg.country && savedCfg.country !== country) {
+      out.push(`Country changes from ${savedCfg.country} to ${country}`);
+    }
+    if (savedCfg.reporting_style && savedCfg.reporting_style !== reporting) {
+      out.push(`Reporting style changes from ${savedCfg.reporting_style} to ${reporting}`);
+    }
+    listDiff('Beneficiary types', savedCfg.beneficiary_types || [], bTypes);
+    listDiff('Funding models', savedCfg.funding_models || [], funding);
+    return out;
+  }, [savedCfg, sector, country, reporting, bTypes, funding]);
+
   const canNext = (): boolean => {
     switch (step) {
       case 1: return !!sector;
@@ -97,10 +127,14 @@ export default function OrgSetupWizard() {
 
   const skip = async () => {
     if (!orgId) return;
-    await supabase
+    const { error } = await supabase
       .from('organizations')
       .update({ setup_completed: true, setup_completed_at: new Date().toISOString() } as any)
       .eq('id', orgId);
+    if (error) {
+      toast.error(error.message || 'Could not skip setup');
+      return;
+    }
     toast.message('Setup skipped. You can reconfigure anytime from Organisation Settings.');
     navigate('/dashboard', { replace: true });
   };
@@ -122,8 +156,9 @@ export default function OrgSetupWizard() {
       };
 
       // 1) Merge features into organizations.features_enabled and mark setup complete
-      const { data: orgRow } = await supabase
+      const { data: orgRow, error: orgReadErr } = await supabase
         .from('organizations').select('features_enabled,country' as any).eq('id', orgId).maybeSingle();
+      if (orgReadErr) throw orgReadErr;
       const mergedFeatures = { ...(((orgRow as any)?.features_enabled) || {}), ...features };
       const orgUpdate: any = {
         setup_completed: true,
@@ -132,11 +167,13 @@ export default function OrgSetupWizard() {
         features_enabled: mergedFeatures,
       };
       if (!(orgRow as any)?.country) orgUpdate.country = country;
-      await supabase.from('organizations').update(orgUpdate).eq('id', orgId);
+      const { error: orgWriteErr } = await supabase.from('organizations').update(orgUpdate).eq('id', orgId);
+      if (orgWriteErr) throw orgWriteErr;
 
       // 2) Upsert org_beneficiary_config (non-destructive merge of custom_fields)
-      const { data: existingCfg } = await supabase
+      const { data: existingCfg, error: cfgReadErr } = await supabase
         .from('org_beneficiary_config' as any).select('*').eq('organization_id', orgId).maybeSingle();
+      if (cfgReadErr) throw cfgReadErr;
       const existingFields: any[] = Array.isArray((existingCfg as any)?.custom_fields) ? (existingCfg as any).custom_fields : [];
       const existingNames = new Set(existingFields.map((f: any) => f?.name));
       const mergedFields = [...existingFields, ...preset.customFields.filter((f) => !existingNames.has(f.name))];
@@ -150,9 +187,12 @@ export default function OrgSetupWizard() {
         custom_vulnerability_tags: (existingCfg as any)?.custom_vulnerability_tags || [],
       };
       if (existingCfg) {
-        await supabase.from('org_beneficiary_config' as any).update(cfgPayload).eq('organization_id', orgId);
+        const { error } = await supabase
+          .from('org_beneficiary_config' as any).update(cfgPayload).eq('organization_id', orgId);
+        if (error) throw error;
       } else {
-        await supabase.from('org_beneficiary_config' as any).insert(cfgPayload);
+        const { error } = await supabase.from('org_beneficiary_config' as any).insert(cfgPayload);
+        if (error) throw error;
       }
 
       // 3) Seed starter logframe — only if none exists for the org (non-destructive)
@@ -201,6 +241,21 @@ export default function OrgSetupWizard() {
         }));
         await supabase.from('indicators').insert(indRows as any);
       }
+
+      // Verify the write actually landed before declaring success.
+      const { data: verify, error: verifyErr } = await supabase
+        .from('organizations').select('setup_config,setup_completed' as any).eq('id', orgId).maybeSingle();
+      if (verifyErr) throw verifyErr;
+      if (!(verify as any)?.setup_completed) {
+        throw new Error('The configuration could not be saved. You may not have permission to change organisation settings.');
+      }
+
+      // Drop every cached view of the organisation so the UI shows what persisted.
+      qc.invalidateQueries({ queryKey: ['organization-details'] });
+      qc.invalidateQueries({ queryKey: ['org-beneficiary-config'] });
+      qc.invalidateQueries({ queryKey: ['org-branding'] });
+      qc.invalidateQueries({ queryKey: ['org-settings'] });
+      setSavedCfg(setup_config);
 
       await refreshOrganization();
       toast.success(reconfigure ? 'Organisation reconfigured.' : `${preset.label} setup applied. You're all set!`);
@@ -407,6 +462,21 @@ export default function OrgSetupWizard() {
                 <Row label="Beneficiary types" value={bTypes.map((b) => BENEFICIARY_TYPES.find((x) => x.key === b)?.label).filter(Boolean).join(', ')} />
                 <Row label="Funding model" value={funding.map((f) => FUNDING_MODELS.find((x) => x.key === f)?.label).filter(Boolean).join(', ')} />
                 <Row label="Reporting style" value={REPORTING_STYLES.find((x) => x.key === reporting)?.label || ''} />
+                {changeSummary.length > 0 && (
+                  <div className="mt-5 rounded-lg border border-primary/40 bg-primary/5 p-4">
+                    <div className="text-xs font-medium uppercase tracking-wide text-primary mb-2">
+                      What will change
+                    </div>
+                    <ul className="text-sm space-y-1.5 list-disc list-inside text-foreground/80">
+                      {changeSummary.map((c) => <li key={c}>{c}</li>)}
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Nothing existing is deleted — custom fields, indicators and logframes you already
+                      have are kept and only missing items are added.
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-5 rounded-lg border border-border/70 bg-muted/40 p-4">
                   <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">We’ll set up for you</div>
                   <ul className="text-sm space-y-1.5 list-disc list-inside text-foreground/80">

@@ -63,6 +63,9 @@ export default function Auth() {
   const [remember, setRemember] = useState(true);
   const [signInErrors, setSignInErrors] = useState<Record<string, string>>({});
   const [signInBusy, setSignInBusy] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendNote, setResendNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   // ── Sign up ────────────────────────────────────────────────────────────
   const [suName, setSuName] = useState("");
@@ -207,15 +210,41 @@ export default function Auth() {
     if (Object.keys(errs).length) return focusFirstError();
 
     setSignInBusy(true);
+    setNeedsConfirm(false);
+    setResendNote(null);
     const { error } = await signIn(email, password);
     setSignInBusy(false);
     if (error) {
       const msg = humanAuthError(error.message);
+      if ((error.message || "").toLowerCase().includes("email not confirmed")) {
+        setNeedsConfirm(true);
+      }
       setSignInErrors({
         password: msg,
       });
       focusFirstError();
     }
+  };
+
+  /** Unverified email is otherwise a dead end — let the user request a new link. */
+  const handleResendConfirmation = async () => {
+    if (!isEmail(email)) {
+      setSignInErrors((p) => ({ ...p, email: "Please enter a valid email" }));
+      return;
+    }
+    setResendBusy(true);
+    setResendNote(null);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+    });
+    setResendBusy(false);
+    setResendNote(
+      error
+        ? { ok: false, text: humanAuthError(error.message) }
+        : { ok: true, text: `Confirmation email sent to ${email}. Check your inbox and spam folder.` },
+    );
   };
 
   const handleSignUp = (e: React.FormEvent) => {
@@ -286,7 +315,7 @@ export default function Auth() {
         email: invitation.email,
         password: invPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: { full_name: invName.trim() },
         },
       });
@@ -511,6 +540,31 @@ export default function Auth() {
                   <AuthSubmit loading={signInBusy}>
                     {signInBusy ? "Signing in…" : "Sign in"}
                   </AuthSubmit>
+
+                  {needsConfirm && (
+                    <div className="rounded-lg border border-[var(--auth-border)] bg-white/5 p-3 text-sm">
+                      <p className="text-[var(--auth-muted)]">
+                        Didn't get the confirmation email, or the link expired?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={resendBusy}
+                        className="mt-2 text-sm font-medium text-[var(--auth-teal-lt)] underline-offset-4 hover:underline disabled:opacity-60"
+                      >
+                        {resendBusy ? "Sending…" : "Resend confirmation email"}
+                      </button>
+                      {resendNote && (
+                        <p
+                          className={`mt-2 text-xs ${
+                            resendNote.ok ? "text-[var(--auth-teal-lt)]" : "text-[var(--auth-danger)]"
+                          }`}
+                        >
+                          {resendNote.text}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </form>
 
                 <p className="text-center text-sm text-[var(--auth-muted)] lg:hidden">
