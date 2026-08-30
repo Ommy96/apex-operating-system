@@ -187,6 +187,63 @@ export function GuardianFields({
           />
         </div>
       </div>
+
+      {showLocation && (
+        <div className="space-y-3 border-t pt-3">
+          <p className="text-xs font-medium text-muted-foreground">
+            Where this parent / guardian lives
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label>County</Label>
+              {countyOptions && countyOptions.length > 0 ? (
+                <Select
+                  value={value.county}
+                  onValueChange={(v) => onChange({ ...value, county: v, sub_county: '' })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select county" /></SelectTrigger>
+                  <SelectContent>
+                    {countyOptions.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input value={value.county} onChange={(e) => set('county', e.target.value)} />
+              )}
+            </div>
+            <div>
+              <Label>Sub-county</Label>
+              {(() => {
+                const subs = subCountyOptionsFor?.(value.county) ?? [];
+                return subs.length > 0 ? (
+                  <Select value={value.sub_county} onValueChange={(v) => set('sub_county', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      {subs.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={value.sub_county}
+                    onChange={(e) => set('sub_county', e.target.value)}
+                  />
+                );
+              })()}
+            </div>
+          </div>
+          <div>
+            <Label>Village / estate</Label>
+            <Input
+              value={value.estate_village}
+              onChange={(e) => set('estate_village', e.target.value)}
+            />
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }
