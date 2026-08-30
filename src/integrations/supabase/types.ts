@@ -1455,6 +1455,7 @@ export type Database = {
           disability_status: string | null
           display_name: string
           email: string | null
+          employment_status: string | null
           estate_village: string | null
           exit_reason: string | null
           family_status: string | null
@@ -1499,9 +1500,12 @@ export type Database = {
           marital_status: string | null
           member_count: number | null
           middle_name: string | null
+          national_id: string | null
+          number_of_children: number | null
           occupation: string | null
           organization_id: string
           other_medical_conditions: string | null
+          person_category: string | null
           personal_strengths: string | null
           phone: string | null
           photo_url: string | null
@@ -1562,6 +1566,7 @@ export type Database = {
           disability_status?: string | null
           display_name: string
           email?: string | null
+          employment_status?: string | null
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
@@ -1606,9 +1611,12 @@ export type Database = {
           marital_status?: string | null
           member_count?: number | null
           middle_name?: string | null
+          national_id?: string | null
+          number_of_children?: number | null
           occupation?: string | null
           organization_id: string
           other_medical_conditions?: string | null
+          person_category?: string | null
           personal_strengths?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -1669,6 +1677,7 @@ export type Database = {
           disability_status?: string | null
           display_name?: string
           email?: string | null
+          employment_status?: string | null
           estate_village?: string | null
           exit_reason?: string | null
           family_status?: string | null
@@ -1713,9 +1722,12 @@ export type Database = {
           marital_status?: string | null
           member_count?: number | null
           middle_name?: string | null
+          national_id?: string | null
+          number_of_children?: number | null
           occupation?: string | null
           organization_id?: string
           other_medical_conditions?: string | null
+          person_category?: string | null
           personal_strengths?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -8209,12 +8221,14 @@ export type Database = {
         Row: {
           address: string | null
           age: number | null
+          county: string | null
           created_at: string
           created_by: string | null
           date_of_death: string | null
           email: string | null
           employment_details: string | null
           employment_type: string | null
+          estate_village: string | null
           full_name: string
           guardian_type: Database["public"]["Enums"]["guardian_type"]
           id: string
@@ -8223,17 +8237,20 @@ export type Database = {
           organization_id: string
           phone: string | null
           source_of_income: string | null
+          sub_county: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           age?: number | null
+          county?: string | null
           created_at?: string
           created_by?: string | null
           date_of_death?: string | null
           email?: string | null
           employment_details?: string | null
           employment_type?: string | null
+          estate_village?: string | null
           full_name: string
           guardian_type: Database["public"]["Enums"]["guardian_type"]
           id?: string
@@ -8242,17 +8259,20 @@ export type Database = {
           organization_id: string
           phone?: string | null
           source_of_income?: string | null
+          sub_county?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           age?: number | null
+          county?: string | null
           created_at?: string
           created_by?: string | null
           date_of_death?: string | null
           email?: string | null
           employment_details?: string | null
           employment_type?: string | null
+          estate_village?: string | null
           full_name?: string
           guardian_type?: Database["public"]["Enums"]["guardian_type"]
           id?: string
@@ -8261,6 +8281,7 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           source_of_income?: string | null
+          sub_county?: string | null
           updated_at?: string
         }
         Relationships: [
