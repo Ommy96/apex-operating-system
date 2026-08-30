@@ -22,6 +22,11 @@ export interface GuardianFieldsValue {
   is_alive: boolean;
   employment_type: string;
   source_of_income: string;
+  /** Where the guardian lives — captured separately from the beneficiary's
+   *  own residence (an adult student often lives away from their parents). */
+  county: string;
+  sub_county: string;
+  estate_village: string;
 }
 
 export const EMPTY_GUARDIAN: GuardianFieldsValue = {
@@ -33,7 +38,11 @@ export const EMPTY_GUARDIAN: GuardianFieldsValue = {
   is_alive: true,
   employment_type: '',
   source_of_income: '',
+  county: '',
+  sub_county: '',
+  estate_village: '',
 };
+
 
 const RELATIONSHIP_OPTIONS = [
   'Mother',
