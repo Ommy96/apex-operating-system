@@ -418,7 +418,8 @@ export function BeneficiaryForm({
         .from('beneficiary_guardians')
         .select(
           `id, relationship, is_primary,
-           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income )`,
+           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income, county, sub_county, estate_village )`,
+
         )
         .eq('beneficiary_id', beneficiary.id);
       if (error || cancelled || !data) return;
