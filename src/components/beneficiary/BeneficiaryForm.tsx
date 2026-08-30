@@ -42,6 +42,14 @@ import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import { SectorFieldsStep } from './SectorFieldsStep';
 import { EnrollmentReadinessStep, type EnrollmentChoice } from './EnrollmentReadinessStep';
+import { CategoryStep } from './CategoryStep';
+import {
+  getCategoryDefinition,
+  hasSection,
+  categoryAgeMismatch,
+  inferPersonCategory,
+  type PersonCategory,
+} from '@/lib/beneficiaryCategories';
 
 import {
   GuardianFields,
@@ -51,6 +59,7 @@ import {
 } from './GuardianFields';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
+
 
 export interface BeneficiaryFormProps {
   beneficiary?: any;
