@@ -71,6 +71,8 @@ export interface BeneficiaryFormProps {
 interface FormState {
   // Step 1 — core identity
   beneficiary_category: BeneficiaryCategory;
+  person_category: PersonCategory;
+
   display_name: string;
   first_name: string;
   middle_name: string;
