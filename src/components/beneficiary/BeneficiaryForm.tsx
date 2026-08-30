@@ -94,6 +94,10 @@ interface FormState {
   disability_status: string;
   occupation: string;
   income_level: string;
+  employment_status: string;
+  source_of_income: string;
+  number_of_children: string;
+
 
   // Household
   household_size: string;
