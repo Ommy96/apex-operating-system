@@ -22,6 +22,11 @@ export interface GuardianFieldsValue {
   is_alive: boolean;
   employment_type: string;
   source_of_income: string;
+  /** Where the guardian lives — captured separately from the beneficiary's
+   *  own residence (an adult student often lives away from their parents). */
+  county: string;
+  sub_county: string;
+  estate_village: string;
 }
 
 export const EMPTY_GUARDIAN: GuardianFieldsValue = {
@@ -33,7 +38,11 @@ export const EMPTY_GUARDIAN: GuardianFieldsValue = {
   is_alive: true,
   employment_type: '',
   source_of_income: '',
+  county: '',
+  sub_county: '',
+  estate_village: '',
 };
+
 
 const RELATIONSHIP_OPTIONS = [
   'Mother',
@@ -60,6 +69,11 @@ interface Props {
   lockRelationship?: boolean;
   requireName?: boolean;
   relationshipOptions?: string[];
+  /** Show the guardian's own county / sub-county / village block. */
+  showLocation?: boolean;
+  /** Counties list for the location block (falls back to free text). */
+  countyOptions?: string[];
+  subCountyOptionsFor?: (county: string) => string[];
 }
 
 /**
@@ -74,7 +88,11 @@ export function GuardianFields({
   lockRelationship = false,
   requireName = false,
   relationshipOptions = RELATIONSHIP_OPTIONS,
+  showLocation = false,
+  countyOptions,
+  subCountyOptionsFor,
 }: Props) {
+
   const set = <K extends keyof GuardianFieldsValue>(key: K, v: GuardianFieldsValue[K]) => {
     const next = { ...value, [key]: v };
     if (key === 'relationship') {
@@ -169,6 +187,63 @@ export function GuardianFields({
           />
         </div>
       </div>
+
+      {showLocation && (
+        <div className="space-y-3 border-t pt-3">
+          <p className="text-xs font-medium text-muted-foreground">
+            Where this parent / guardian lives
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label>County</Label>
+              {countyOptions && countyOptions.length > 0 ? (
+                <Select
+                  value={value.county}
+                  onValueChange={(v) => onChange({ ...value, county: v, sub_county: '' })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select county" /></SelectTrigger>
+                  <SelectContent>
+                    {countyOptions.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input value={value.county} onChange={(e) => set('county', e.target.value)} />
+              )}
+            </div>
+            <div>
+              <Label>Sub-county</Label>
+              {(() => {
+                const subs = subCountyOptionsFor?.(value.county) ?? [];
+                return subs.length > 0 ? (
+                  <Select value={value.sub_county} onValueChange={(v) => set('sub_county', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      {subs.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={value.sub_county}
+                    onChange={(e) => set('sub_county', e.target.value)}
+                  />
+                );
+              })()}
+            </div>
+          </div>
+          <div>
+            <Label>Village / estate</Label>
+            <Input
+              value={value.estate_village}
+              onChange={(e) => set('estate_village', e.target.value)}
+            />
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }

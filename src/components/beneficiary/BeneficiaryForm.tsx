@@ -42,6 +42,14 @@ import { HouseholdSuggestionAlert } from './HouseholdSuggestionAlert';
 import { DuplicatePreSaveDialog, type DuplicateMatch } from './DuplicatePreSaveDialog';
 import { SectorFieldsStep } from './SectorFieldsStep';
 import { EnrollmentReadinessStep, type EnrollmentChoice } from './EnrollmentReadinessStep';
+import { CategoryStep } from './CategoryStep';
+import {
+  getCategoryDefinition,
+  hasSection,
+  categoryAgeMismatch,
+  inferPersonCategory,
+  type PersonCategory,
+} from '@/lib/beneficiaryCategories';
 
 import {
   GuardianFields,
@@ -51,6 +59,7 @@ import {
 } from './GuardianFields';
 
 export type BeneficiaryCategory = 'individual' | 'household' | 'group' | 'organisation';
+
 
 export interface BeneficiaryFormProps {
   beneficiary?: any;
@@ -62,6 +71,8 @@ export interface BeneficiaryFormProps {
 interface FormState {
   // Step 1 — core identity
   beneficiary_category: BeneficiaryCategory;
+  person_category: PersonCategory;
+
   display_name: string;
   first_name: string;
   middle_name: string;
@@ -83,6 +94,10 @@ interface FormState {
   disability_status: string;
   occupation: string;
   income_level: string;
+  employment_status: string;
+  source_of_income: string;
+  number_of_children: string;
+
 
   // Household
   household_size: string;
@@ -148,6 +163,7 @@ interface FormState {
 
 const EMPTY_STATE: FormState = {
   beneficiary_category: 'individual',
+  person_category: 'minor_student',
   display_name: '',
   first_name: '',
   middle_name: '',
@@ -167,6 +183,10 @@ const EMPTY_STATE: FormState = {
   disability_status: '',
   occupation: '',
   income_level: '',
+  employment_status: '',
+  source_of_income: '',
+  number_of_children: '',
+
   household_size: '',
   household_children: '',
   household_adults: '',
@@ -251,6 +271,7 @@ const parseTagArray = (value: unknown): string[] => {
 const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: BeneficiaryCategory): FormState => ({
   ...EMPTY_STATE,
   beneficiary_category: (beneficiary?.beneficiary_category as BeneficiaryCategory) || defaultCategory,
+  person_category: inferPersonCategory(beneficiary),
   display_name: beneficiary?.display_name ?? '',
   first_name: beneficiary?.first_name ?? '',
   middle_name: beneficiary?.middle_name ?? '',
@@ -270,6 +291,10 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   disability_status: beneficiary?.disability_status ?? '',
   occupation: beneficiary?.occupation ?? '',
   income_level: beneficiary?.income_level ?? '',
+  employment_status: beneficiary?.employment_status ?? '',
+  source_of_income: beneficiary?.source_of_income ?? '',
+  number_of_children: beneficiary?.number_of_children?.toString() ?? '',
+
   household_size: beneficiary?.household_size?.toString() ?? '',
   household_income_source: beneficiary?.source_of_income ?? '',
   group_name: beneficiary?.group_name ?? '',
@@ -393,7 +418,8 @@ export function BeneficiaryForm({
         .from('beneficiary_guardians')
         .select(
           `id, relationship, is_primary,
-           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income )`,
+           guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income, county, sub_county, estate_village )`,
+
         )
         .eq('beneficiary_id', beneficiary.id);
       if (error || cancelled || !data) return;
@@ -420,7 +446,11 @@ export function BeneficiaryForm({
             is_alive: g.is_alive !== false,
             employment_type: g.employment_type ?? '',
             source_of_income: g.source_of_income ?? '',
+            county: g.county ?? '',
+            sub_county: g.sub_county ?? '',
+            estate_village: g.estate_village ?? '',
           };
+
         });
       if (loaded.length) {
         setForm((prev) => ({ ...prev, guardians: loaded }));
