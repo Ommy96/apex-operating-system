@@ -69,6 +69,11 @@ interface Props {
   lockRelationship?: boolean;
   requireName?: boolean;
   relationshipOptions?: string[];
+  /** Show the guardian's own county / sub-county / village block. */
+  showLocation?: boolean;
+  /** Counties list for the location block (falls back to free text). */
+  countyOptions?: string[];
+  subCountyOptionsFor?: (county: string) => string[];
 }
 
 /**
@@ -83,7 +88,11 @@ export function GuardianFields({
   lockRelationship = false,
   requireName = false,
   relationshipOptions = RELATIONSHIP_OPTIONS,
+  showLocation = false,
+  countyOptions,
+  subCountyOptionsFor,
 }: Props) {
+
   const set = <K extends keyof GuardianFieldsValue>(key: K, v: GuardianFieldsValue[K]) => {
     const next = { ...value, [key]: v };
     if (key === 'relationship') {
