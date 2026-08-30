@@ -271,6 +271,7 @@ const parseTagArray = (value: unknown): string[] => {
 const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: BeneficiaryCategory): FormState => ({
   ...EMPTY_STATE,
   beneficiary_category: (beneficiary?.beneficiary_category as BeneficiaryCategory) || defaultCategory,
+  person_category: inferPersonCategory(beneficiary),
   display_name: beneficiary?.display_name ?? '',
   first_name: beneficiary?.first_name ?? '',
   middle_name: beneficiary?.middle_name ?? '',
@@ -290,6 +291,10 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   disability_status: beneficiary?.disability_status ?? '',
   occupation: beneficiary?.occupation ?? '',
   income_level: beneficiary?.income_level ?? '',
+  employment_status: beneficiary?.employment_status ?? '',
+  source_of_income: beneficiary?.source_of_income ?? '',
+  number_of_children: beneficiary?.number_of_children?.toString() ?? '',
+
   household_size: beneficiary?.household_size?.toString() ?? '',
   household_income_source: beneficiary?.source_of_income ?? '',
   group_name: beneficiary?.group_name ?? '',
