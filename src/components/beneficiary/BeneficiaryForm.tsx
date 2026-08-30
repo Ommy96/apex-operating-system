@@ -446,7 +446,11 @@ export function BeneficiaryForm({
             is_alive: g.is_alive !== false,
             employment_type: g.employment_type ?? '',
             source_of_income: g.source_of_income ?? '',
+            county: g.county ?? '',
+            sub_county: g.sub_county ?? '',
+            estate_village: g.estate_village ?? '',
           };
+
         });
       if (loaded.length) {
         setForm((prev) => ({ ...prev, guardians: loaded }));
