@@ -163,6 +163,7 @@ interface FormState {
 
 const EMPTY_STATE: FormState = {
   beneficiary_category: 'individual',
+  person_category: 'minor_student',
   display_name: '',
   first_name: '',
   middle_name: '',
@@ -182,6 +183,10 @@ const EMPTY_STATE: FormState = {
   disability_status: '',
   occupation: '',
   income_level: '',
+  employment_status: '',
+  source_of_income: '',
+  number_of_children: '',
+
   household_size: '',
   household_children: '',
   household_adults: '',
