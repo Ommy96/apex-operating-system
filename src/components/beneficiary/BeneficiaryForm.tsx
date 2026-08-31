@@ -1131,8 +1131,8 @@ export function BeneficiaryForm({
             update={update}
             subCounties={subCounties}
             term={term}
-            showNationalId={visibility.showNationalId}
-            showPhone={visibility.showPhone}
+            showNationalId={visibility.showNationalId && showSection('national_id')}
+            showPhone={visibility.showPhone && showSection('own_contact')}
           />
         )}
         {step === 1 && (
@@ -1140,9 +1140,18 @@ export function BeneficiaryForm({
             form={form}
             update={update}
             config={config}
+            showEconomic={showSection('economic')}
           />
         )}
-        {step === 2 && <Step3Family form={form} update={update} />}
+        {step === 2 && (
+          <Step3Family
+            form={form}
+            update={update}
+            showGuardianLocation={showSection('guardian_contact')}
+            showCareArrangement={showSection('care_arrangement')}
+            showFamilyStatus={showSection('family_status')}
+          />
+        )}
         {step === 3 && <Step4Education form={form} update={update} ageLabels={visibility.educationLabels} />}
         {step === 4 && (
           <Step5Health form={form} update={update} config={config} can={can} />
