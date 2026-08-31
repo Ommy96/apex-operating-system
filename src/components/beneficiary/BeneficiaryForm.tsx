@@ -26,7 +26,7 @@ import {
   type OrgBeneficiaryConfig,
 } from '@/hooks/useOrgBeneficiaryConfig';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
-import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
+import { KENYA_COUNTIES, COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
 import {
   Loader2,
   ChevronLeft,
@@ -258,7 +258,9 @@ const STEP_LABELS = [
   'Notes',
   'Sector details',
   'Enrollment',
+  'Category', // index 9 — rendered first in the flow
 ];
+
 
 const parseTagArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -351,7 +353,7 @@ export function BeneficiaryForm({
   const orgId = currentOrganization?.organization_id;
   const queryClient = useQueryClient();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(9);
   const [enrollmentChoice, setEnrollmentChoice] = useState<EnrollmentChoice>('enroll');
   const [waitlistNeedIds, setWaitlistNeedIds] = useState<string[]>([]);
 
@@ -518,13 +520,36 @@ export function BeneficiaryForm({
   const isGroup = form.beneficiary_category === 'group';
   const isOrganisation = form.beneficiary_category === 'organisation';
 
+  const categoryDef = getCategoryDefinition(form.person_category);
+  const showSection = (key: Parameters<typeof hasSection>[1]) =>
+    hasSection(form.person_category, key);
+
+  // Keep the legacy beneficiary_category in sync with the chosen person category.
+  useEffect(() => {
+    setForm((prev) =>
+      prev.beneficiary_category === categoryDef.legacyCategory
+        ? prev
+        : { ...prev, beneficiary_category: categoryDef.legacyCategory },
+    );
+  }, [categoryDef.legacyCategory]);
+
   // Determine which steps are visible
   const visibleSteps = useMemo(() => {
-    const steps: number[] = [0]; // Identity always
+    const steps: number[] = [9]; // Category selection always first
+    steps.push(0); // Identity always
     steps.push(1); // Demographics — always (but body adapts per category)
-    if (isIndividual && (config?.collect_household_data || true)) steps.push(2); // Family
-    if (config?.collect_education_data && (isIndividual || isHousehold) && (visibility.showEducation && (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3)))) steps.push(3);
-    if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
+    if (showSection('guardians') || showSection('care_arrangement') || showSection('family_status')) {
+      steps.push(2); // Family
+    }
+    if (
+      config?.collect_education_data &&
+      showSection('education') &&
+      visibility.showEducation &&
+      (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3))
+    ) {
+      steps.push(3);
+    }
+    if (config?.collect_health_data && showSection('medical') && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
     // Sector-specific step — only when the org configured custom fields
@@ -534,7 +559,9 @@ export function BeneficiaryForm({
     // Enrollment vs waiting list — only when registering someone new.
     if (!beneficiary?.id) steps.push(8);
     return steps;
-  }, [config, beneficiary?.id, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, beneficiary?.id, form.person_category, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+
 
 
   const currentStepIndex = visibleSteps.indexOf(step);
@@ -585,6 +612,14 @@ export function BeneficiaryForm({
     return true;
   };
 
+  const handleNextOnCategory = () => {
+    if (!form.person_category) {
+      toast({ title: 'Select a category', variant: 'destructive' });
+      return;
+    }
+    goNext();
+  };
+
   const handleNextOnStep1 = () => {
     if (!validateStep1()) return;
     if (form.consent_given && !form.consent_date) {
@@ -606,27 +641,34 @@ export function BeneficiaryForm({
       toast({ title: 'No organization', variant: 'destructive' });
       return;
     }
+    const mismatch = categoryAgeMismatch(form.person_category, visibility.age);
+    if (mismatch) {
+      toast({ title: 'Category does not match date of birth', description: mismatch, variant: 'destructive' });
+      setStep(9);
+      return;
+    }
     if (!validateStep1()) {
       setStep(0);
       return;
     }
     const filledGuardians = form.guardians.filter((g) => g.full_name.trim());
-    if (isIndividual && visibility.isMinor && filledGuardians.length === 0) {
+    if (categoryDef.guardiansRequired && filledGuardians.length === 0) {
       toast({
         title: 'Guardian required',
-        description: 'Minors must have at least one parent or guardian on file.',
+        description: `${categoryDef.label} requires at least one parent or guardian on file.`,
         variant: 'destructive',
       });
       const familyStep = visibleSteps.indexOf(2);
       if (familyStep >= 0) setStep(2);
       return;
     }
-    if (isIndividual && !form.care_arrangement) {
+    if (showSection('care_arrangement') && !form.care_arrangement) {
       toast({ title: 'Care arrangement is required', variant: 'destructive' });
       const fs = visibleSteps.indexOf(2);
       if (fs >= 0) setStep(2);
       return;
     }
+
     if (form.care_arrangement === 'under_guardian_care' && filledGuardians.length === 0) {
       toast({ title: 'At least one guardian required', variant: 'destructive' });
       const fs = visibleSteps.indexOf(2);
@@ -687,6 +729,7 @@ export function BeneficiaryForm({
       const payload: any = compactPayload({
         organization_id: orgId,
         beneficiary_category: form.beneficiary_category,
+        person_category: form.person_category,
         beneficiary_type: legacyType,
         display_name,
         first_name: isGroup || isOrganisation ? null : form.first_name || null,
@@ -710,6 +753,10 @@ export function BeneficiaryForm({
         occupation: config.collect_economic_data ? form.occupation || null : beneficiary?.id ? undefined : null,
         income_level: config.collect_economic_data ? form.income_level || null : beneficiary?.id ? undefined : null,
         household_size: form.household_size ? Number(form.household_size) : null,
+        employment_status: showSection('economic') ? form.employment_status || null : null,
+        number_of_children: showSection('economic') && form.number_of_children
+          ? Number(form.number_of_children)
+          : null,
         group_name: isGroup || isOrganisation ? form.group_name || null : null,
         member_count: form.member_count ? Number(form.member_count) : null,
         leader_name: isGroup ? form.leader_name || null : null,
@@ -894,7 +941,11 @@ export function BeneficiaryForm({
               is_alive: g.is_alive,
               employment_type: g.employment_type || null,
               source_of_income: g.source_of_income?.trim() || null,
+              county: g.county?.trim() || null,
+              sub_county: g.sub_county?.trim() || null,
+              estate_village: g.estate_village?.trim() || null,
             };
+
 
             let guardianId = g.id;
             if (guardianId) {
@@ -1018,7 +1069,7 @@ export function BeneficiaryForm({
               setForm({ ...EMPTY_STATE, beneficiary_category: defaultCategory });
               setCreatedId(null);
               setCreatedUniqueId(null);
-              setStep(0);
+              setStep(9);
             }}
           >
             Register another
@@ -1080,8 +1131,8 @@ export function BeneficiaryForm({
             update={update}
             subCounties={subCounties}
             term={term}
-            showNationalId={visibility.showNationalId}
-            showPhone={visibility.showPhone}
+            showNationalId={visibility.showNationalId && showSection('national_id')}
+            showPhone={visibility.showPhone && showSection('own_contact')}
           />
         )}
         {step === 1 && (
@@ -1089,9 +1140,18 @@ export function BeneficiaryForm({
             form={form}
             update={update}
             config={config}
+            showEconomic={showSection('economic')}
           />
         )}
-        {step === 2 && <Step3Family form={form} update={update} />}
+        {step === 2 && (
+          <Step3Family
+            form={form}
+            update={update}
+            showGuardianLocation={showSection('guardian_contact')}
+            showCareArrangement={showSection('care_arrangement')}
+            showFamilyStatus={showSection('family_status')}
+          />
+        )}
         {step === 3 && <Step4Education form={form} update={update} ageLabels={visibility.educationLabels} />}
         {step === 4 && (
           <Step5Health form={form} update={update} config={config} can={can} />
@@ -1113,6 +1173,14 @@ export function BeneficiaryForm({
               update('sector_data', { ...(form.sector_data || {}), [name]: value })
             }
             sectorLabel={config?.org_type}
+          />
+        )}
+        {step === 9 && (
+          <CategoryStep
+            value={form.person_category}
+            onChange={(v) => update('person_category', v)}
+            age={visibility.age}
+            term={term}
           />
         )}
         {step === 8 && (
@@ -1181,7 +1249,7 @@ export function BeneficiaryForm({
           )}
           {currentStepIndex < visibleSteps.length - 1 ? (
             <Button
-              onClick={step === 0 ? handleNextOnStep1 : goNext}
+              onClick={step === 0 ? handleNextOnStep1 : step === 9 ? handleNextOnCategory : goNext}
               disabled={isLoading}
             >
               Next <ChevronRight className="h-4 w-4 ml-1" />
@@ -1229,23 +1297,12 @@ function Step1Identity({
         </p>
       </div>
 
-      <div>
-        <Label>{term} category *</Label>
-        <Select
-          value={form.beneficiary_category}
-          onValueChange={(v) =>
-            update('beneficiary_category', v as BeneficiaryCategory)
-          }
-        >
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="individual">Individual — a single person</SelectItem>
-            <SelectItem value="household">Household — a family unit</SelectItem>
-            <SelectItem value="group">Group — community/self-help group</SelectItem>
-            <SelectItem value="organisation">Organisation — partner institution</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="rounded-md border bg-muted/40 px-3 py-2 text-xs">
+        <span className="text-muted-foreground">Registering as </span>
+        <span className="font-medium">{getCategoryDefinition(form.person_category).label}</span>
+        <span className="text-muted-foreground"> — change this on the Category step.</span>
       </div>
+
 
       {(isGroup || isOrg) && (
         <div>
@@ -1419,10 +1476,13 @@ function Step2Demographics({
   form,
   update,
   config,
+  showEconomic = false,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   config: OrgBeneficiaryConfig;
+  /** Category-driven: adults and households capture livelihood details. */
+  showEconomic?: boolean;
 }) {
   const cat = form.beneficiary_category;
   const visibility = useFieldVisibility(form.date_of_birth, config);
@@ -1483,8 +1543,33 @@ function Step2Demographics({
               </Select>
             </div>
           )}
-          {config.collect_economic_data && (
+          {(config.collect_economic_data || showEconomic) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Employment status</Label>
+                <Select
+                  value={form.employment_status}
+                  onValueChange={(v) => update('employment_status', v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employed">Employed</SelectItem>
+                    <SelectItem value="self_employed">Self-employed</SelectItem>
+                    <SelectItem value="casual">Casual labour</SelectItem>
+                    <SelectItem value="unemployed">Unemployed</SelectItem>
+                    <SelectItem value="retired">Retired</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Number of children</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.number_of_children}
+                  onChange={(e) => update('number_of_children', e.target.value)}
+                />
+              </div>
               <div>
                 <Label>Occupation</Label>
                 <Input
@@ -1619,10 +1704,24 @@ function Step2Demographics({
 function Step3Family({
   form,
   update,
+  showGuardianLocation = false,
+  showCareArrangement = true,
+  showFamilyStatus = true,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  /** Adult students often live away from their parents — capture parent residence. */
+  showGuardianLocation?: boolean;
+  showCareArrangement?: boolean;
+  showFamilyStatus?: boolean;
 }) {
+  const guardianLocationProps = showGuardianLocation
+    ? {
+        showLocation: true,
+        countyOptions: COUNTY_NAMES as unknown as string[],
+        subCountyOptionsFor: (c: string) => (c ? getSubCounties(c) : []),
+      }
+    : {};
   const status = form.family_status;
   const guardians = form.guardians;
 
@@ -1695,6 +1794,7 @@ function Step3Family({
       </div>
 
       {/* Care arrangement */}
+      {showCareArrangement && (
       <div className="rounded-lg border p-3 space-y-3">
         <div>
           <div className="text-sm font-semibold">How is this person cared for?</div>
@@ -1777,7 +1877,9 @@ function Step3Family({
           </p>
         )}
       </div>
+      )}
 
+      {showFamilyStatus && (
       <div>
         <Label>Family status</Label>
         <Select value={status} onValueChange={(v) => update('family_status', v)}>
@@ -1794,10 +1896,12 @@ function Step3Family({
           </SelectContent>
         </Select>
       </div>
+      )}
 
       {isBothParents && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Father"
             value={ensureRole('Father')}
             onChange={(v) => upsertRole('Father', v)}
@@ -1805,6 +1909,7 @@ function Step3Family({
             requireName
           />
           <GuardianFields
+            {...guardianLocationProps}
             title="Mother"
             value={ensureRole('Mother')}
             onChange={(v) => upsertRole('Mother', v)}
@@ -1817,6 +1922,7 @@ function Step3Family({
       {isSingleish && (
         <div className="border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Primary guardian"
             value={primaryGuardian}
             onChange={setPrimaryGuardian}
@@ -1828,6 +1934,7 @@ function Step3Family({
       {isOrphan && (
         <div className="border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Caregiver / contact"
             value={primaryGuardian}
             onChange={setPrimaryGuardian}
