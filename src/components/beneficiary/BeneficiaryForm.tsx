@@ -1794,6 +1794,7 @@ function Step3Family({
       </div>
 
       {/* Care arrangement */}
+      {showCareArrangement && (
       <div className="rounded-lg border p-3 space-y-3">
         <div>
           <div className="text-sm font-semibold">How is this person cared for?</div>
@@ -1877,6 +1878,7 @@ function Step3Family({
         )}
       </div>
 
+      {showFamilyStatus && (
       <div>
         <Label>Family status</Label>
         <Select value={status} onValueChange={(v) => update('family_status', v)}>
