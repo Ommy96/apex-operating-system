@@ -934,7 +934,11 @@ export function BeneficiaryForm({
               is_alive: g.is_alive,
               employment_type: g.employment_type || null,
               source_of_income: g.source_of_income?.trim() || null,
+              county: g.county?.trim() || null,
+              sub_county: g.sub_county?.trim() || null,
+              estate_village: g.estate_village?.trim() || null,
             };
+
 
             let guardianId = g.id;
             if (guardianId) {
