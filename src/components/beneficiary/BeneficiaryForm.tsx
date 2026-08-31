@@ -26,7 +26,7 @@ import {
   type OrgBeneficiaryConfig,
 } from '@/hooks/useOrgBeneficiaryConfig';
 import { useBeneficiaryTerminology } from '@/hooks/useBeneficiaryTerminology';
-import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
+import { KENYA_COUNTIES, COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
 import {
   Loader2,
   ChevronLeft,
@@ -1690,7 +1690,7 @@ function Step3Family({
   const guardianLocationProps = showGuardianLocation
     ? {
         showLocation: true,
-        countyOptions: COUNTY_NAMES,
+        countyOptions: COUNTY_NAMES as unknown as string[],
         subCountyOptionsFor: (c: string) => (c ? getSubCounties(c) : []),
       }
     : {};
