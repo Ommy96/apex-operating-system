@@ -612,6 +612,14 @@ export function BeneficiaryForm({
     return true;
   };
 
+  const handleNextOnCategory = () => {
+    if (!form.person_category) {
+      toast({ title: 'Select a category', variant: 'destructive' });
+      return;
+    }
+    goNext();
+  };
+
   const handleNextOnStep1 = () => {
     if (!validateStep1()) return;
     if (form.consent_given && !form.consent_date) {
@@ -714,6 +722,7 @@ export function BeneficiaryForm({
       const payload: any = compactPayload({
         organization_id: orgId,
         beneficiary_category: form.beneficiary_category,
+        person_category: form.person_category,
         beneficiary_type: legacyType,
         display_name,
         first_name: isGroup || isOrganisation ? null : form.first_name || null,
@@ -737,6 +746,10 @@ export function BeneficiaryForm({
         occupation: config.collect_economic_data ? form.occupation || null : beneficiary?.id ? undefined : null,
         income_level: config.collect_economic_data ? form.income_level || null : beneficiary?.id ? undefined : null,
         household_size: form.household_size ? Number(form.household_size) : null,
+        employment_status: showSection('economic') ? form.employment_status || null : null,
+        number_of_children: showSection('economic') && form.number_of_children
+          ? Number(form.number_of_children)
+          : null,
         group_name: isGroup || isOrganisation ? form.group_name || null : null,
         member_count: form.member_count ? Number(form.member_count) : null,
         leader_name: isGroup ? form.leader_name || null : null,
@@ -1140,6 +1153,14 @@ export function BeneficiaryForm({
               update('sector_data', { ...(form.sector_data || {}), [name]: value })
             }
             sectorLabel={config?.org_type}
+          />
+        )}
+        {step === 9 && (
+          <CategoryStep
+            value={form.person_category}
+            onChange={(v) => update('person_category', v)}
+            age={visibility.age}
+            term={term}
           />
         )}
         {step === 8 && (
