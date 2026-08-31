@@ -353,7 +353,7 @@ export function BeneficiaryForm({
   const orgId = currentOrganization?.organization_id;
   const queryClient = useQueryClient();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(9);
   const [enrollmentChoice, setEnrollmentChoice] = useState<EnrollmentChoice>('enroll');
   const [waitlistNeedIds, setWaitlistNeedIds] = useState<string[]>([]);
 
@@ -1045,7 +1045,7 @@ export function BeneficiaryForm({
               setForm({ ...EMPTY_STATE, beneficiary_category: defaultCategory });
               setCreatedId(null);
               setCreatedUniqueId(null);
-              setStep(0);
+              setStep(9);
             }}
           >
             Register another
@@ -1208,7 +1208,7 @@ export function BeneficiaryForm({
           )}
           {currentStepIndex < visibleSteps.length - 1 ? (
             <Button
-              onClick={step === 0 ? handleNextOnStep1 : goNext}
+              onClick={step === 0 ? handleNextOnStep1 : step === 9 ? handleNextOnCategory : goNext}
               disabled={isLoading}
             >
               Next <ChevronRight className="h-4 w-4 ml-1" />
