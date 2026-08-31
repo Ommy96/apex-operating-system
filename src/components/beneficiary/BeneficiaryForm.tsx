@@ -520,13 +520,36 @@ export function BeneficiaryForm({
   const isGroup = form.beneficiary_category === 'group';
   const isOrganisation = form.beneficiary_category === 'organisation';
 
+  const categoryDef = getCategoryDefinition(form.person_category);
+  const showSection = (key: Parameters<typeof hasSection>[1]) =>
+    hasSection(form.person_category, key);
+
+  // Keep the legacy beneficiary_category in sync with the chosen person category.
+  useEffect(() => {
+    setForm((prev) =>
+      prev.beneficiary_category === categoryDef.legacyCategory
+        ? prev
+        : { ...prev, beneficiary_category: categoryDef.legacyCategory },
+    );
+  }, [categoryDef.legacyCategory]);
+
   // Determine which steps are visible
   const visibleSteps = useMemo(() => {
-    const steps: number[] = [0]; // Identity always
+    const steps: number[] = [9]; // Category selection always first
+    steps.push(0); // Identity always
     steps.push(1); // Demographics — always (but body adapts per category)
-    if (isIndividual && (config?.collect_household_data || true)) steps.push(2); // Family
-    if (config?.collect_education_data && (isIndividual || isHousehold) && (visibility.showEducation && (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3)))) steps.push(3);
-    if (config?.collect_health_data && (isIndividual || isHousehold) && visibility.showHealth) steps.push(4);
+    if (showSection('guardians') || showSection('care_arrangement') || showSection('family_status')) {
+      steps.push(2); // Family
+    }
+    if (
+      config?.collect_education_data &&
+      showSection('education') &&
+      visibility.showEducation &&
+      (visibility.ageUnknown || (visibility.age !== null && visibility.age >= 3))
+    ) {
+      steps.push(3);
+    }
+    if (config?.collect_health_data && showSection('medical') && visibility.showHealth) steps.push(4);
     steps.push(5); // Vulnerability — always
     steps.push(6); // Notes — always
     // Sector-specific step — only when the org configured custom fields
@@ -536,7 +559,9 @@ export function BeneficiaryForm({
     // Enrollment vs waiting list — only when registering someone new.
     if (!beneficiary?.id) steps.push(8);
     return steps;
-  }, [config, beneficiary?.id, isIndividual, isHousehold, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, beneficiary?.id, form.person_category, visibility.showEducation, visibility.showHealth, visibility.age, visibility.ageUnknown]);
+
 
 
   const currentStepIndex = visibleSteps.indexOf(step);
