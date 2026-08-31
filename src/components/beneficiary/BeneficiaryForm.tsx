@@ -1676,10 +1676,24 @@ function Step2Demographics({
 function Step3Family({
   form,
   update,
+  showGuardianLocation = false,
+  showCareArrangement = true,
+  showFamilyStatus = true,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  /** Adult students often live away from their parents — capture parent residence. */
+  showGuardianLocation?: boolean;
+  showCareArrangement?: boolean;
+  showFamilyStatus?: boolean;
 }) {
+  const guardianLocationProps = showGuardianLocation
+    ? {
+        showLocation: true,
+        countyOptions: COUNTY_NAMES,
+        subCountyOptionsFor: (c: string) => (c ? getSubCounties(c) : []),
+      }
+    : {};
   const status = form.family_status;
   const guardians = form.guardians;
 
@@ -1855,6 +1869,7 @@ function Step3Family({
       {isBothParents && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Father"
             value={ensureRole('Father')}
             onChange={(v) => upsertRole('Father', v)}
@@ -1862,6 +1877,7 @@ function Step3Family({
             requireName
           />
           <GuardianFields
+            {...guardianLocationProps}
             title="Mother"
             value={ensureRole('Mother')}
             onChange={(v) => upsertRole('Mother', v)}
@@ -1874,6 +1890,7 @@ function Step3Family({
       {isSingleish && (
         <div className="border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Primary guardian"
             value={primaryGuardian}
             onChange={setPrimaryGuardian}
@@ -1885,6 +1902,7 @@ function Step3Family({
       {isOrphan && (
         <div className="border-t pt-3">
           <GuardianFields
+            {...guardianLocationProps}
             title="Caregiver / contact"
             value={primaryGuardian}
             onChange={setPrimaryGuardian}
