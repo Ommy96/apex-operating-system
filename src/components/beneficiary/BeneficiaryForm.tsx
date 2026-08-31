@@ -1476,10 +1476,13 @@ function Step2Demographics({
   form,
   update,
   config,
+  showEconomic = false,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   config: OrgBeneficiaryConfig;
+  /** Category-driven: adults and households capture livelihood details. */
+  showEconomic?: boolean;
 }) {
   const cat = form.beneficiary_category;
   const visibility = useFieldVisibility(form.date_of_birth, config);
@@ -1540,8 +1543,33 @@ function Step2Demographics({
               </Select>
             </div>
           )}
-          {config.collect_economic_data && (
+          {(config.collect_economic_data || showEconomic) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Employment status</Label>
+                <Select
+                  value={form.employment_status}
+                  onValueChange={(v) => update('employment_status', v)}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employed">Employed</SelectItem>
+                    <SelectItem value="self_employed">Self-employed</SelectItem>
+                    <SelectItem value="casual">Casual labour</SelectItem>
+                    <SelectItem value="unemployed">Unemployed</SelectItem>
+                    <SelectItem value="retired">Retired</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Number of children</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.number_of_children}
+                  onChange={(e) => update('number_of_children', e.target.value)}
+                />
+              </div>
               <div>
                 <Label>Occupation</Label>
                 <Input
