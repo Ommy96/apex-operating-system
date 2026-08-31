@@ -1288,23 +1288,12 @@ function Step1Identity({
         </p>
       </div>
 
-      <div>
-        <Label>{term} category *</Label>
-        <Select
-          value={form.beneficiary_category}
-          onValueChange={(v) =>
-            update('beneficiary_category', v as BeneficiaryCategory)
-          }
-        >
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="individual">Individual — a single person</SelectItem>
-            <SelectItem value="household">Household — a family unit</SelectItem>
-            <SelectItem value="group">Group — community/self-help group</SelectItem>
-            <SelectItem value="organisation">Organisation — partner institution</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="rounded-md border bg-muted/40 px-3 py-2 text-xs">
+        <span className="text-muted-foreground">Registering as </span>
+        <span className="font-medium">{getCategoryDefinition(form.person_category).label}</span>
+        <span className="text-muted-foreground"> — change this on the Category step.</span>
       </div>
+
 
       {(isGroup || isOrg) && (
         <div>
