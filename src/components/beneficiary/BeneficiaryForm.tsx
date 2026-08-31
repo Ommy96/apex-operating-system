@@ -258,7 +258,9 @@ const STEP_LABELS = [
   'Notes',
   'Sector details',
   'Enrollment',
+  'Category', // index 9 — rendered first in the flow
 ];
+
 
 const parseTagArray = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
