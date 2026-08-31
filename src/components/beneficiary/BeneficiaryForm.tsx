@@ -641,27 +641,34 @@ export function BeneficiaryForm({
       toast({ title: 'No organization', variant: 'destructive' });
       return;
     }
+    const mismatch = categoryAgeMismatch(form.person_category, visibility.age);
+    if (mismatch) {
+      toast({ title: 'Category does not match date of birth', description: mismatch, variant: 'destructive' });
+      setStep(9);
+      return;
+    }
     if (!validateStep1()) {
       setStep(0);
       return;
     }
     const filledGuardians = form.guardians.filter((g) => g.full_name.trim());
-    if (isIndividual && visibility.isMinor && filledGuardians.length === 0) {
+    if (categoryDef.guardiansRequired && filledGuardians.length === 0) {
       toast({
         title: 'Guardian required',
-        description: 'Minors must have at least one parent or guardian on file.',
+        description: `${categoryDef.label} requires at least one parent or guardian on file.`,
         variant: 'destructive',
       });
       const familyStep = visibleSteps.indexOf(2);
       if (familyStep >= 0) setStep(2);
       return;
     }
-    if (isIndividual && !form.care_arrangement) {
+    if (showSection('care_arrangement') && !form.care_arrangement) {
       toast({ title: 'Care arrangement is required', variant: 'destructive' });
       const fs = visibleSteps.indexOf(2);
       if (fs >= 0) setStep(2);
       return;
     }
+
     if (form.care_arrangement === 'under_guardian_care' && filledGuardians.length === 0) {
       toast({ title: 'At least one guardian required', variant: 'destructive' });
       const fs = visibleSteps.indexOf(2);
