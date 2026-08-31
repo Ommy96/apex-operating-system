@@ -1877,6 +1877,7 @@ function Step3Family({
           </p>
         )}
       </div>
+      )}
 
       {showFamilyStatus && (
       <div>
@@ -1895,6 +1896,7 @@ function Step3Family({
           </SelectContent>
         </Select>
       </div>
+      )}
 
       {isBothParents && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
