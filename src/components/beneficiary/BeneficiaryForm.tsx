@@ -1958,9 +1958,61 @@ function Step3Family({
         </p>
       )}
 
-      {!status && form.date_of_birth && (
+      {/* Guardian capture driven by care arrangement when no family status is chosen */}
+      {!status && form.care_arrangement === 'under_guardian_care' && (
+        <div className="border-t pt-3 space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <GuardianFields
+              {...guardianLocationProps}
+              title="Father"
+              value={ensureRole('Father')}
+              onChange={(v) => upsertRole('Father', v)}
+              lockRelationship
+            />
+            <GuardianFields
+              {...guardianLocationProps}
+              title="Mother"
+              value={ensureRole('Mother')}
+              onChange={(v) => upsertRole('Mother', v)}
+              lockRelationship
+            />
+          </div>
+
+          {guardians.map((g, i) => {
+            const rel = (g.relationship || '').toLowerCase();
+            if (rel === 'father' || rel === 'mother') return null;
+            return (
+              <div key={g.linkId || g.id || `extra-${i}`} className="space-y-2">
+                <GuardianFields
+                  {...guardianLocationProps}
+                  title="Other parent / guardian"
+                  value={g}
+                  onChange={(v) => setGuardianAt(i, v)}
+                />
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeGuardianAt(i)}>
+                  Remove this guardian
+                </Button>
+              </div>
+            );
+          })}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => update('guardians', [...guardians, { ...EMPTY_GUARDIAN }])}
+          >
+            Add another guardian
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            Fill in at least one parent or guardian with a full name.
+          </p>
+        </div>
+      )}
+
+      {!status && !form.care_arrangement && form.date_of_birth && (
         <p className="text-xs text-muted-foreground">
-          Select a family status above to capture parent or guardian details.
+          Select how this person is cared for above to capture parent or guardian details.
         </p>
       )}
     </div>
