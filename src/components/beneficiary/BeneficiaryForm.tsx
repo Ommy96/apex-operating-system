@@ -1898,89 +1898,54 @@ function Step3Family({
       </div>
       )}
 
-      {isBothParents && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Father"
-            value={ensureRole('Father')}
-            onChange={(v) => upsertRole('Father', v)}
-            lockRelationship
-            requireName
-          />
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Mother"
-            value={ensureRole('Mother')}
-            onChange={(v) => upsertRole('Mother', v)}
-            lockRelationship
-            requireName
-          />
-        </div>
-      )}
-
-      {isSingleish && (
-        <div className="border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Primary guardian"
-            value={primaryGuardian}
-            onChange={setPrimaryGuardian}
-            requireName
-          />
-        </div>
-      )}
-
-      {isOrphan && (
-        <div className="border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Caregiver / contact"
-            value={primaryGuardian}
-            onChange={setPrimaryGuardian}
-            requireName
-            relationshipOptions={[
-              'Grandparent',
-              'Aunt/Uncle',
-              'Sibling',
-              'Foster parent',
-              'Guardian',
-              'Neighbour',
-              'Other',
-            ]}
-          />
-        </div>
-      )}
-
-      {isIndependent && (
-        <p className="text-sm text-muted-foreground border-t pt-3">
-          No parent or guardian details required for an independent adult.
-        </p>
-      )}
-
-      {/* Guardian capture driven by care arrangement when no family status is chosen */}
-      {!status && form.care_arrangement === 'under_guardian_care' && (
+      {/* Guardian capture — driven ONLY by the live care arrangement.
+          Family status just picks the layout; it can never hide the section. */}
+      {underGuardianCare && (
         <div className="border-t pt-3 space-y-3">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {isOrphan ? (
             <GuardianFields
               {...guardianLocationProps}
-              title="Father"
-              value={ensureRole('Father')}
-              onChange={(v) => upsertRole('Father', v)}
-              lockRelationship
+              title="Caregiver / contact"
+              value={primaryGuardian}
+              onChange={setPrimaryGuardian}
+              requireName
+              relationshipOptions={[
+                'Grandparent', 'Aunt/Uncle', 'Sibling', 'Foster parent', 'Guardian', 'Neighbour', 'Other',
+              ]}
             />
+          ) : isSingleish ? (
             <GuardianFields
               {...guardianLocationProps}
-              title="Mother"
-              value={ensureRole('Mother')}
-              onChange={(v) => upsertRole('Mother', v)}
-              lockRelationship
+              title="Primary guardian"
+              value={primaryGuardian}
+              onChange={setPrimaryGuardian}
+              requireName
             />
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <GuardianFields
+                {...guardianLocationProps}
+                title="Father"
+                value={ensureRole('Father')}
+                onChange={(v) => upsertRole('Father', v)}
+                lockRelationship
+                requireName={isBothParents}
+              />
+              <GuardianFields
+                {...guardianLocationProps}
+                title="Mother"
+                value={ensureRole('Mother')}
+                onChange={(v) => upsertRole('Mother', v)}
+                lockRelationship
+                requireName={isBothParents}
+              />
+            </div>
+          )}
 
           {guardians.map((g, i) => {
             const rel = (g.relationship || '').toLowerCase();
-            if (rel === 'father' || rel === 'mother') return null;
+            if (!isOrphan && !isSingleish && (rel === 'father' || rel === 'mother')) return null;
+            if ((isOrphan || isSingleish) && i === primaryIndex) return null;
             return (
               <div key={g.linkId || g.id || `extra-${i}`} className="space-y-2">
                 <GuardianFields
@@ -2004,13 +1969,21 @@ function Step3Family({
           >
             Add another guardian
           </Button>
-          <p className="text-[11px] text-muted-foreground">
-            Fill in at least one parent or guardian with a full name.
-          </p>
+          {!hasNamedGuardian ? (
+            <p className="text-[12px] font-medium text-destructive">
+              Add at least one parent or guardian with a full name before finishing.
+            </p>
+          ) : null}
         </div>
       )}
 
-      {!status && !form.care_arrangement && form.date_of_birth && (
+      {!underGuardianCare && isIndependent && (
+        <p className="text-sm text-muted-foreground border-t pt-3">
+          No parent or guardian details required for an independent adult.
+        </p>
+      )}
+
+      {!form.care_arrangement && showCareArrangement && (
         <p className="text-xs text-muted-foreground">
           Select how this person is cared for above to capture parent or guardian details.
         </p>
