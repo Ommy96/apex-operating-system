@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
 import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -305,9 +306,9 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   leader_phone: beneficiary?.leader_phone ?? '',
   meeting_frequency: beneficiary?.group_schedule ?? '',
   family_status: beneficiary?.family_status ?? '',
-  care_arrangement: (beneficiary?.care_arrangement && beneficiary.care_arrangement !== 'unknown'
-    ? beneficiary.care_arrangement
-    : '') as FormState['care_arrangement'],
+  care_arrangement: (normaliseCareArrangement(beneficiary?.care_arrangement) === CARE_ARRANGEMENT.UNKNOWN
+    ? ''
+    : normaliseCareArrangement(beneficiary?.care_arrangement)) as FormState['care_arrangement'],
   care_institution_name: beneficiary?.institution_name ?? '',
   care_institution_type: beneficiary?.institution_type ?? '',
   care_institution_contact_person: beneficiary?.institution_contact_person ?? '',
@@ -391,16 +392,16 @@ export function BeneficiaryForm({
     let suggestion: FormState['care_arrangement'] = '';
     let reason: string | null = null;
     if (form.family_status === 'Independent adult') {
-      suggestion = 'independent';
+      suggestion = CARE_ARRANGEMENT.INDEPENDENT;
       reason = 'Suggested because family status is Independent adult.';
     } else if (form.family_status === 'Child-headed household') {
-      suggestion = 'head_of_household_with_dependents';
+      suggestion = CARE_ARRANGEMENT.HEAD_OF_HOUSEHOLD;
       reason = 'Suggested because family status is Child-headed household.';
     } else if (visibility.age !== null && visibility.age < 18) {
-      suggestion = 'under_guardian_care';
+      suggestion = CARE_ARRANGEMENT.UNDER_GUARDIAN_CARE;
       reason = `Suggested because age is ${visibility.age}.`;
     } else if (visibility.age !== null && visibility.age >= 25) {
-      suggestion = 'independent';
+      suggestion = CARE_ARRANGEMENT.INDEPENDENT;
       reason = `Suggested because age is ${visibility.age}.`;
     }
     if (suggestion) {
@@ -669,13 +670,13 @@ export function BeneficiaryForm({
       return;
     }
 
-    if (form.care_arrangement === 'under_guardian_care' && filledGuardians.length === 0) {
+    if (isUnderGuardianCare(form.care_arrangement) && filledGuardians.length === 0) {
       toast({ title: 'At least one guardian required', variant: 'destructive' });
       const fs = visibleSteps.indexOf(2);
       if (fs >= 0) setStep(2);
       return;
     }
-    if (form.care_arrangement === 'institutional_care') {
+    if (isInstitutionalCare(form.care_arrangement)) {
       if (!form.care_institution_name.trim() || !form.care_institution_type || !form.care_institution_contact_person.trim()) {
         toast({ title: 'Institution details required', description: 'Name, type and contact person are required.', variant: 'destructive' });
         const fs = visibleSteps.indexOf(2);
@@ -768,21 +769,21 @@ export function BeneficiaryForm({
         grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
         family_status: form.family_status || null,
         // Care arrangement
-        care_arrangement: (form.care_arrangement || 'unknown') as any,
+        care_arrangement: (form.care_arrangement || CARE_ARRANGEMENT.UNKNOWN) as any,
         ...(form.care_arrangement && (!beneficiary?.id || beneficiary.care_arrangement !== form.care_arrangement)
           ? {
               care_arrangement_set_by: (await supabase.auth.getUser()).data.user?.id ?? null,
               care_arrangement_set_at: new Date().toISOString(),
             }
           : {}),
-        institution_name: form.care_arrangement === 'institutional_care'
+        institution_name: isInstitutionalCare(form.care_arrangement)
           ? (form.care_institution_name || null)
           : (config.collect_education_data ? form.institution_name || null : beneficiary?.id ? undefined : null),
-        institution_type: form.care_arrangement === 'institutional_care' ? (form.care_institution_type || null) : null,
-        institution_contact_person: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_person || null) : null,
-        institution_contact_phone: form.care_arrangement === 'institutional_care' ? (form.care_institution_contact_phone || null) : null,
-        institution_placement_date: form.care_arrangement === 'institutional_care' ? (form.care_institution_placement_date || null) : null,
-        case_worker_name: form.care_arrangement === 'institutional_care' ? (form.care_case_worker_name || null) : null,
+        institution_type: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_type || null) : null,
+        institution_contact_person: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_contact_person || null) : null,
+        institution_contact_phone: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_contact_phone || null) : null,
+        institution_placement_date: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_placement_date || null) : null,
+        case_worker_name: isInstitutionalCare(form.care_arrangement) ? (form.care_case_worker_name || null) : null,
         hiv_status:
           config.collect_health_data && config.collect_hiv_status && (can as any)?.viewHIVData !== false
             ? (form.hiv_status as any) || null
@@ -836,7 +837,7 @@ export function BeneficiaryForm({
             } as any);
           } catch (e) { logger.warn('audit log failed', e); }
           // If moving away from under_guardian_care, demote (not delete) guardian links.
-          if (beneficiary.care_arrangement === 'under_guardian_care' && form.care_arrangement !== 'under_guardian_care') {
+          if (isUnderGuardianCare(beneficiary.care_arrangement) && !isUnderGuardianCare(form.care_arrangement)) {
             try {
               await supabase.from('beneficiary_guardians')
                 .update({ is_primary: false } as any)
@@ -1772,6 +1773,8 @@ function Step3Family({
   const isSingleish = status === 'Single parent' || status === 'Single orphan';
   const isOrphan = status === 'Double orphan' || status === 'Child-headed household';
   const isIndependent = status === 'Independent adult';
+  const underGuardianCare = isUnderGuardianCare(form.care_arrangement);
+  const hasNamedGuardian = guardians.some((g) => (g.full_name || '').trim().length > 0);
 
   // Primary guardian (single slot) — first non-empty record.
   const primaryIndex = guardians.findIndex((g) => g.full_name || g.relationship);
@@ -1804,10 +1807,10 @@ function Step3Family({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
-            { v: 'independent', t: 'Independent', d: 'Lives autonomously, makes own decisions.' },
-            { v: 'under_guardian_care', t: 'Under parental / guardian care', d: 'Depends on parents, guardians, or other family members.' },
-            { v: 'head_of_household_with_dependents', t: 'Head of household with dependents', d: 'The primary beneficiary; others depend on them.' },
-            { v: 'institutional_care', t: 'Institutional care', d: "Under a children's home, hospital, rehabilitation centre, or similar." },
+            { v: CARE_ARRANGEMENT.INDEPENDENT, t: CARE_ARRANGEMENT_LABELS.independent, d: 'Lives autonomously, makes own decisions.' },
+            { v: CARE_ARRANGEMENT.UNDER_GUARDIAN_CARE, t: CARE_ARRANGEMENT_LABELS.under_guardian_care, d: 'Depends on parents, guardians, or other family members.' },
+            { v: CARE_ARRANGEMENT.HEAD_OF_HOUSEHOLD, t: CARE_ARRANGEMENT_LABELS.head_of_household_with_dependents, d: 'The primary beneficiary; others depend on them.' },
+            { v: CARE_ARRANGEMENT.INSTITUTIONAL, t: CARE_ARRANGEMENT_LABELS.institutional_care, d: "Under a children's home, hospital, rehabilitation centre, or similar." },
           ].map(opt => {
             const selected = form.care_arrangement === opt.v;
             return (
@@ -1833,7 +1836,7 @@ function Step3Family({
         )}
 
         {/* Institutional care fields */}
-        {form.care_arrangement === 'institutional_care' && (
+        {isInstitutionalCare(form.care_arrangement) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t">
             <div>
               <Label>Institution name *</Label>
@@ -1871,7 +1874,7 @@ function Step3Family({
             </div>
           </div>
         )}
-        {form.care_arrangement === 'head_of_household_with_dependents' && (
+        {isHeadOfHousehold(form.care_arrangement) && (
           <p className="text-[11px] text-muted-foreground pt-2 border-t">
             After saving, link or register dependants from the profile's Relationships tab.
           </p>
@@ -1898,89 +1901,54 @@ function Step3Family({
       </div>
       )}
 
-      {isBothParents && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Father"
-            value={ensureRole('Father')}
-            onChange={(v) => upsertRole('Father', v)}
-            lockRelationship
-            requireName
-          />
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Mother"
-            value={ensureRole('Mother')}
-            onChange={(v) => upsertRole('Mother', v)}
-            lockRelationship
-            requireName
-          />
-        </div>
-      )}
-
-      {isSingleish && (
-        <div className="border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Primary guardian"
-            value={primaryGuardian}
-            onChange={setPrimaryGuardian}
-            requireName
-          />
-        </div>
-      )}
-
-      {isOrphan && (
-        <div className="border-t pt-3">
-          <GuardianFields
-            {...guardianLocationProps}
-            title="Caregiver / contact"
-            value={primaryGuardian}
-            onChange={setPrimaryGuardian}
-            requireName
-            relationshipOptions={[
-              'Grandparent',
-              'Aunt/Uncle',
-              'Sibling',
-              'Foster parent',
-              'Guardian',
-              'Neighbour',
-              'Other',
-            ]}
-          />
-        </div>
-      )}
-
-      {isIndependent && (
-        <p className="text-sm text-muted-foreground border-t pt-3">
-          No parent or guardian details required for an independent adult.
-        </p>
-      )}
-
-      {/* Guardian capture driven by care arrangement when no family status is chosen */}
-      {!status && form.care_arrangement === 'under_guardian_care' && (
+      {/* Guardian capture — driven ONLY by the live care arrangement.
+          Family status just picks the layout; it can never hide the section. */}
+      {underGuardianCare && (
         <div className="border-t pt-3 space-y-3">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {isOrphan ? (
             <GuardianFields
               {...guardianLocationProps}
-              title="Father"
-              value={ensureRole('Father')}
-              onChange={(v) => upsertRole('Father', v)}
-              lockRelationship
+              title="Caregiver / contact"
+              value={primaryGuardian}
+              onChange={setPrimaryGuardian}
+              requireName
+              relationshipOptions={[
+                'Grandparent', 'Aunt/Uncle', 'Sibling', 'Foster parent', 'Guardian', 'Neighbour', 'Other',
+              ]}
             />
+          ) : isSingleish ? (
             <GuardianFields
               {...guardianLocationProps}
-              title="Mother"
-              value={ensureRole('Mother')}
-              onChange={(v) => upsertRole('Mother', v)}
-              lockRelationship
+              title="Primary guardian"
+              value={primaryGuardian}
+              onChange={setPrimaryGuardian}
+              requireName
             />
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <GuardianFields
+                {...guardianLocationProps}
+                title="Father"
+                value={ensureRole('Father')}
+                onChange={(v) => upsertRole('Father', v)}
+                lockRelationship
+                requireName={isBothParents}
+              />
+              <GuardianFields
+                {...guardianLocationProps}
+                title="Mother"
+                value={ensureRole('Mother')}
+                onChange={(v) => upsertRole('Mother', v)}
+                lockRelationship
+                requireName={isBothParents}
+              />
+            </div>
+          )}
 
           {guardians.map((g, i) => {
             const rel = (g.relationship || '').toLowerCase();
-            if (rel === 'father' || rel === 'mother') return null;
+            if (!isOrphan && !isSingleish && (rel === 'father' || rel === 'mother')) return null;
+            if ((isOrphan || isSingleish) && i === primaryIndex) return null;
             return (
               <div key={g.linkId || g.id || `extra-${i}`} className="space-y-2">
                 <GuardianFields
@@ -2004,13 +1972,21 @@ function Step3Family({
           >
             Add another guardian
           </Button>
-          <p className="text-[11px] text-muted-foreground">
-            Fill in at least one parent or guardian with a full name.
-          </p>
+          {!hasNamedGuardian ? (
+            <p className="text-[12px] font-medium text-destructive">
+              Add at least one parent or guardian with a full name before finishing.
+            </p>
+          ) : null}
         </div>
       )}
 
-      {!status && !form.care_arrangement && form.date_of_birth && (
+      {!underGuardianCare && isIndependent && (
+        <p className="text-sm text-muted-foreground border-t pt-3">
+          No parent or guardian details required for an independent adult.
+        </p>
+      )}
+
+      {!form.care_arrangement && showCareArrangement && (
         <p className="text-xs text-muted-foreground">
           Select how this person is cared for above to capture parent or guardian details.
         </p>

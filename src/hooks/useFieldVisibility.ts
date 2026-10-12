@@ -1,3 +1,4 @@
+import { isUnderGuardianCare, isHeadOfHousehold, isInstitutionalCare } from '@/lib/careArrangement';
 import { calculateAge, getAgeGroup, getEducationLabels, isChild, isMinor, type AgeGroup, type EducationLabels } from '@/lib/ageUtils';
 import type { OrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
 
@@ -118,10 +119,10 @@ export function useFieldVisibility(
     showVulnerabilityAssessment: true,
 
     // Care arrangement-driven sections
-    showGuardianSection: care === 'under_guardian_care',
-    showDependantsSection: care === 'head_of_household_with_dependents',
-    showInstitutionSection: care === 'institutional_care',
-    guardianSectionRequired: care === 'under_guardian_care',
+    showGuardianSection: isUnderGuardianCare(care),
+    showDependantsSection: isHeadOfHousehold(care),
+    showInstitutionSection: isInstitutionalCare(care),
+    guardianSectionRequired: isUnderGuardianCare(care),
 
     // Meta
     age,

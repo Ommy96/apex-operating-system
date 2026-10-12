@@ -1,3 +1,4 @@
+import { careArrangementLabel } from "@/lib/careArrangement";
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -131,7 +132,7 @@ export function ProjectBeneficiariesExport({ projectId, projectName, organizatio
         "Sub-County": b.sub_county || "—",
         "Enrollment Date": b.enrolled_date || "—",
         Status: b.status || "—",
-        "Care Arrangement": b.care_arrangement || "—",
+        "Care Arrangement": b.care_arrangement ? careArrangementLabel(b.care_arrangement) : "—",
         "Sponsorship Status": sponsorshipLabel(Number(b.funding_required || 0), receivedByBen.get(b.id) || 0),
         "Vulnerability Level": b.vulnerability_level || "—",
       };
