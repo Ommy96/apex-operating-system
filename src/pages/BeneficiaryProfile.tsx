@@ -1,3 +1,4 @@
+import { CARE_ARRANGEMENT_LABELS, normaliseCareArrangement, isInstitutionalCare } from '@/lib/careArrangement';
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -576,14 +577,8 @@ export default function BeneficiaryProfile() {
 
         {/* ─── HERO — single row, no band ─── */}
         {(() => {
-          const ca = beneficiary.care_arrangement || 'unknown';
-          const careLabels: Record<string, string> = {
-            independent: 'Independent',
-            under_guardian_care: 'Under guardian care',
-            head_of_household_with_dependents: 'Head of household',
-            institutional_care: 'Institutional care',
-            unknown: 'Set care arrangement',
-          };
+          const ca = normaliseCareArrangement(beneficiary.care_arrangement);
+          const careLabels: Record<string, string> = { ...CARE_ARRANGEMENT_LABELS, unknown: 'Set care arrangement' };
           const sponsored = donors.length > 0;
           const totalReceived = donors.reduce((s, d) => s + (d.amount_received || 0), 0);
           const sponsorshipChip = !sponsored
@@ -757,7 +752,7 @@ export default function BeneficiaryProfile() {
 
         {/* ─── MAIN CONTENT (Tabs) — full width after side-aside removal ─── */}
         <div className="print-stack mt-6 md:mt-8">
-          {beneficiary.care_arrangement === 'institutional_care' && (
+          {isInstitutionalCare(beneficiary.care_arrangement) && (
             <div className="bp-card rounded-[14px] p-4 mb-4" style={{ background: '#FFFEF9', border: '1px solid #E7E2DA' }}>
               <div className="text-[12px] font-semibold mb-2" style={{ color: '#92400E' }}>Institution</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[13px]" style={{ color: '#1C1917' }}>
