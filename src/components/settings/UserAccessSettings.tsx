@@ -114,6 +114,43 @@ export function UserAccessSettings({ section }: Props) {
     enabled: !!currentOrganization?.organization_id && isAdmin && section === 'user-settings',
   });
 
+  // Email-confirmation state per member (admin only) — so an unconfirmed member is
+  // visible and recoverable instead of a dead end at sign-in.
+  const orgIdForAccounts = currentOrganization?.organization_id;
+  const { data: accountStatus } = useQuery({
+    queryKey: ['member-account-status', orgIdForAccounts],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('member-account-actions', {
+        body: { action: 'status', organization_id: orgIdForAccounts },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return (data?.members || {}) as Record<string, { email_confirmed_at: string | null }>;
+    },
+    enabled: !!orgIdForAccounts && isAdmin && section === 'user-settings',
+  });
+
+  const accountActionMutation = useMutation({
+    mutationFn: async ({ action, userId }: { action: 'resend_confirmation' | 'confirm_email'; userId: string }) => {
+      const { data, error } = await supabase.functions.invoke('member-account-actions', {
+        body: {
+          action,
+          organization_id: orgIdForAccounts,
+          user_id: userId,
+          redirect_to: `${window.location.origin}/auth/confirm`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data?.message as string;
+    },
+    onSuccess: (message) => {
+      queryClient.invalidateQueries({ queryKey: ['member-account-status', orgIdForAccounts] });
+      toast({ title: message || 'Done' });
+    },
+    onError: (e: any) => toast({ title: 'Could not complete', description: e?.message, variant: 'destructive' }),
+  });
+
   const removeMemberMutation = useMutation({
     mutationFn: async ({ userId }: { memberId: string; userId: string }) => {
       if (!currentOrganization?.organization_id) throw new Error('No org');
@@ -456,6 +493,25 @@ export function UserAccessSettings({ section }: Props) {
                       </Badge>
                     ))}
                     {member.user_id === user?.id && <Badge variant="outline" className="text-xs">You</Badge>}
+                    {isAdmin && accountStatus?.[member.user_id] && !accountStatus[member.user_id].email_confirmed_at && (
+                      <>
+                        <Badge variant="outline" className="text-xs" style={{ color: 'var(--status-warning)' }}>Email not confirmed</Badge>
+                        <Button
+                          variant="outline" size="sm" className="h-7 text-xs"
+                          disabled={accountActionMutation.isPending}
+                          onClick={() => accountActionMutation.mutate({ action: 'resend_confirmation', userId: member.user_id })}
+                        >
+                          <Send className="h-3 w-3 mr-1" /> Resend link
+                        </Button>
+                        <Button
+                          variant="outline" size="sm" className="h-7 text-xs"
+                          disabled={accountActionMutation.isPending}
+                          onClick={() => accountActionMutation.mutate({ action: 'confirm_email', userId: member.user_id })}
+                        >
+                          Mark confirmed
+                        </Button>
+                      </>
+                    )}
                     {isAdmin && member.user_id !== user?.id && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
