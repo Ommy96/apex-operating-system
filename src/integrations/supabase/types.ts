@@ -17311,6 +17311,224 @@ export type Database = {
           },
         ]
       }
+      vulnerability_assessments: {
+        Row: {
+          assessed_by: string
+          assessment_id: string
+          assessor_name: string
+          beneficiary_id: string | null
+          beneficiary_need_ids: string[]
+          category_id: string
+          category_label: string
+          created_at: string
+          decision_notes: string | null
+          deleted_at: string | null
+          entity_id: string | null
+          evidence: string
+          household_id: string | null
+          id: string
+          need_type_ids: string[]
+          next_review_date: string
+          organization_id: string
+          previous_version_id: string | null
+          recommended_intervention: string
+          review_decision: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_name: string | null
+          score: number | null
+          scoring_criteria: Json
+          scoring_enabled: boolean
+          sensitivity: string
+          severity: string
+          subject_kind: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          assessed_by: string
+          assessment_id: string
+          assessor_name: string
+          beneficiary_id?: string | null
+          beneficiary_need_ids?: string[]
+          category_id: string
+          category_label: string
+          created_at?: string
+          decision_notes?: string | null
+          deleted_at?: string | null
+          entity_id?: string | null
+          evidence: string
+          household_id?: string | null
+          id?: string
+          need_type_ids?: string[]
+          next_review_date: string
+          organization_id: string
+          previous_version_id?: string | null
+          recommended_intervention: string
+          review_decision?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          score?: number | null
+          scoring_criteria?: Json
+          scoring_enabled?: boolean
+          sensitivity?: string
+          severity: string
+          subject_kind: string
+          updated_at?: string
+          updated_by?: string | null
+          version: number
+        }
+        Update: {
+          assessed_by?: string
+          assessment_id?: string
+          assessor_name?: string
+          beneficiary_id?: string | null
+          beneficiary_need_ids?: string[]
+          category_id?: string
+          category_label?: string
+          created_at?: string
+          decision_notes?: string | null
+          deleted_at?: string | null
+          entity_id?: string | null
+          evidence?: string
+          household_id?: string | null
+          id?: string
+          need_type_ids?: string[]
+          next_review_date?: string
+          organization_id?: string
+          previous_version_id?: string | null
+          recommended_intervention?: string
+          review_decision?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_name?: string | null
+          score?: number | null
+          scoring_criteria?: Json
+          scoring_enabled?: boolean
+          sensitivity?: string
+          severity?: string
+          subject_kind?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vulnerability_assessments_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_organization_id_category_id_fkey"
+            columns: ["organization_id", "category_id"]
+            isOneToOne: false
+            referencedRelation: "vulnerability_categories"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_assessments_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "vulnerability_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vulnerability_categories: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          organization_id: string
+          sector: string
+          sensitivity: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          organization_id: string
+          sector?: string
+          sensitivity?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          organization_id?: string
+          sector?: string
+          sensitivity?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vulnerability_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vulnerability_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_application_needs: {
         Row: {
           application_id: string
@@ -17386,11 +17604,14 @@ export type Database = {
           applicant_name: string | null
           applicant_notes: string | null
           applied_at: string
+          assessment_priority: number
           beneficiary_id: string | null
           created_at: string
           created_by: string | null
           enrolled_at: string | null
+          entity_id: string | null
           guardian_contact: string | null
+          household_id: string | null
           id: string
           matched_at: string | null
           matched_donor_id: string | null
@@ -17410,11 +17631,14 @@ export type Database = {
           applicant_name?: string | null
           applicant_notes?: string | null
           applied_at?: string
+          assessment_priority?: number
           beneficiary_id?: string | null
           created_at?: string
           created_by?: string | null
           enrolled_at?: string | null
+          entity_id?: string | null
           guardian_contact?: string | null
+          household_id?: string | null
           id?: string
           matched_at?: string | null
           matched_donor_id?: string | null
@@ -17434,11 +17658,14 @@ export type Database = {
           applicant_name?: string | null
           applicant_notes?: string | null
           applied_at?: string
+          assessment_priority?: number
           beneficiary_id?: string | null
           created_at?: string
           created_by?: string | null
           enrolled_at?: string | null
+          entity_id?: string | null
           guardian_contact?: string | null
+          household_id?: string | null
           id?: string
           matched_at?: string | null
           matched_donor_id?: string | null
@@ -17458,6 +17685,20 @@ export type Database = {
             columns: ["beneficiary_id"]
             isOneToOne: false
             referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waitlist_applications_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
             referencedColumns: ["id"]
           },
           {
@@ -18164,6 +18405,10 @@ export type Database = {
         Returns: Json
       }
       rpc_allocate_donation: { Args: { _donation_id: string }; Returns: Json }
+      save_vulnerability_assessment: {
+        Args: { _org: string; _payload: Json; _previous?: string }
+        Returns: string
+      }
       search_children_for_linking: {
         Args: { _org_id: string; _search_term: string }
         Returns: {
@@ -18232,6 +18477,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      vulnerability_access: {
+        Args: { _action?: string; _org: string }
+        Returns: boolean
+      }
+      vulnerability_safe_priority: {
+        Args: { _ben: string; _entity: string; _house: string; _org: string }
+        Returns: number
       }
     }
     Enums: {
