@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { ensureWritten } from '@/lib/settingsWrite';
 import { Check, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import {
   SECTOR_PRESETS,
