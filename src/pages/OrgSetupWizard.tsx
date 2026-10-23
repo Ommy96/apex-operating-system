@@ -127,12 +127,17 @@ export default function OrgSetupWizard() {
 
   const skip = async () => {
     if (!orgId) return;
-    const { error } = await supabase
-      .from('organizations')
-      .update({ setup_completed: true, setup_completed_at: new Date().toISOString() } as any)
-      .eq('id', orgId);
-    if (error) {
-      toast.error(error.message || 'Could not skip setup');
+    try {
+      ensureWritten(
+        await supabase
+          .from('organizations')
+          .update({ setup_completed: true, setup_completed_at: new Date().toISOString() } as any)
+          .eq('id', orgId)
+          .select('id'),
+        'Setup status',
+      );
+    } catch (e: any) {
+      toast.error(e?.message || 'Could not skip setup');
       return;
     }
     toast.message('Setup skipped. You can reconfigure anytime from Organisation Settings.');
@@ -167,8 +172,10 @@ export default function OrgSetupWizard() {
         features_enabled: mergedFeatures,
       };
       if (!(orgRow as any)?.country) orgUpdate.country = country;
-      const { error: orgWriteErr } = await supabase.from('organizations').update(orgUpdate).eq('id', orgId);
-      if (orgWriteErr) throw orgWriteErr;
+      ensureWritten(
+        await supabase.from('organizations').update(orgUpdate).eq('id', orgId).select('id'),
+        'Organisation configuration',
+      );
 
       // 2) Upsert org_beneficiary_config (non-destructive merge of custom_fields)
       const { data: existingCfg, error: cfgReadErr } = await supabase
@@ -187,12 +194,16 @@ export default function OrgSetupWizard() {
         custom_vulnerability_tags: (existingCfg as any)?.custom_vulnerability_tags || [],
       };
       if (existingCfg) {
-        const { error } = await supabase
-          .from('org_beneficiary_config' as any).update(cfgPayload).eq('organization_id', orgId);
-        if (error) throw error;
+        ensureWritten(
+          await supabase
+            .from('org_beneficiary_config' as any).update(cfgPayload).eq('organization_id', orgId).select('id'),
+          'Beneficiary data settings',
+        );
       } else {
-        const { error } = await supabase.from('org_beneficiary_config' as any).insert(cfgPayload);
-        if (error) throw error;
+        ensureWritten(
+          await supabase.from('org_beneficiary_config' as any).insert(cfgPayload).select('id'),
+          'Beneficiary data settings',
+        );
       }
 
       // 3) Seed starter logframe — only if none exists for the org (non-destructive)

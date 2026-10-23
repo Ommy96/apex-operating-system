@@ -17,6 +17,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { ensureWritten } from '@/lib/settingsWrite';
 import { Loader2, Plus, X, GraduationCap, Heart, Briefcase, AlertTriangle, Globe, Users, Accessibility, Baby, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
