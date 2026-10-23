@@ -35,16 +35,20 @@ export function TerminologySettings() {
     if (!orgId) return;
     setSaving(true);
     try {
-      const { error } = await (supabase as any)
-        .from('organizations')
-        .update({
-          tier_label_program: form.program.trim() || DEFAULTS.program,
-          tier_label_project: form.project.trim() || DEFAULTS.project,
-          tier_label_activity: form.activity.trim() || DEFAULTS.activity,
-        })
-        .eq('id', orgId);
-      if (error) throw error;
+      ensureWritten(
+        await (supabase as any)
+          .from('organizations')
+          .update({
+            tier_label_program: form.program.trim() || DEFAULTS.program,
+            tier_label_project: form.project.trim() || DEFAULTS.project,
+            tier_label_activity: form.activity.trim() || DEFAULTS.activity,
+          })
+          .eq('id', orgId)
+          .select('id'),
+        'Terminology',
+      );
       await qc.invalidateQueries({ queryKey: ['org-tier-labels', orgId] });
+      qc.invalidateQueries({ queryKey: ['organization-details'] });
       toast({ title: 'Terminology saved' });
     } catch (e: any) {
       toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });
