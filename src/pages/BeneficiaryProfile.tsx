@@ -1,4 +1,4 @@
-import { CARE_ARRANGEMENT_LABELS, normaliseCareArrangement, isInstitutionalCare } from '@/lib/careArrangement';
+import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, type CareArrangement, normaliseCareArrangement, isInstitutionalCare } from '@/lib/careArrangement';
 import { logger } from "@/lib/logger";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -103,7 +103,7 @@ interface Beneficiary {
   grade: string | null;
   institution_name: string | null;
   // Care arrangement
-  care_arrangement?: 'unknown' | 'independent' | 'under_guardian_care' | 'head_of_household_with_dependents' | 'institutional_care' | null;
+  care_arrangement?: CareArrangement | null;
   institution_type?: string | null;
   institution_contact_person?: string | null;
   institution_contact_phone?: string | null;
@@ -605,7 +605,7 @@ export default function BeneficiaryProfile() {
               ? `${age} yrs${beneficiary.grade ? ` · ${beneficiary.grade}` : beneficiary.academic_level ? ` · ${beneficiary.academic_level}` : ''}`
               : 'Age not recorded'
             : beneficiary.occupation ? `Adult · ${beneficiary.occupation}` : 'Adult';
-          const careChip = { label: careLabels[ca], accent: ca === 'institutional_care' ? '#B45309' : ca === 'unknown' ? '#A8A29E' : brandHex };
+          const careChip = { label: careLabels[ca], accent: ca === CARE_ARRANGEMENT.INSTITUTIONAL ? '#B45309' : ca === CARE_ARRANGEMENT.UNKNOWN ? '#A8A29E' : brandHex };
 
           return (
             <div className="pb-5" style={{ borderBottom: '1px solid #E7E2DA' }}>
