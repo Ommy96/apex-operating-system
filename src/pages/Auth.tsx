@@ -541,10 +541,10 @@ export default function Auth() {
                     {signInBusy ? "Signing in…" : "Sign in"}
                   </AuthSubmit>
 
-                  {needsConfirm && (
+                  {needsConfirm ? (
                     <div className="rounded-lg border border-[var(--auth-border)] bg-white/5 p-3 text-sm">
                       <p className="text-[var(--auth-muted)]">
-                        Didn't get the confirmation email, or the link expired?
+                        Didn't get the confirmation email, or the link expired? Enter your email above and request a new one.
                       </p>
                       <button
                         type="button"
@@ -563,7 +563,18 @@ export default function Auth() {
                           {resendNote.text}
                         </p>
                       )}
+                      <p className="mt-2 text-xs text-[var(--auth-muted)]">
+                        Still stuck? Your organisation admin can confirm your account from Settings → Users.
+                      </p>
                     </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setNeedsConfirm(true)}
+                      className="block w-full text-center text-xs text-[var(--auth-muted)] underline-offset-4 hover:underline"
+                    >
+                      Didn't get your confirmation email?
+                    </button>
                   )}
                 </form>
 
