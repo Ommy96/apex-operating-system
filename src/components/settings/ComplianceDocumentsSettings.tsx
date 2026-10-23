@@ -1,5 +1,7 @@
 import { logger } from "@/lib/logger";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ensureWritten } from '@/lib/settingsWrite';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,12 +24,39 @@ function getExpiryStatus(expiryDate: string | null) {
 export function ComplianceDocumentsSettings() {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
-  const org = currentOrganization as any;
+  const qc = useQueryClient();
 
-  const [kraExpiry, setKraExpiry] = useState(org?.kra_exemption_expiry || '');
-  const [ngoExpiry, setNgoExpiry] = useState(org?.ngo_board_cert_expiry || '');
-  const [pboNumber, setPboNumber] = useState(org?.pbo_number || '');
-  const [pboExpiry, setPboExpiry] = useState(org?.pbo_expiry || '');
+  // Read the saved values from the organisation row itself. (Previously these were
+  // seeded from `currentOrganization`, which only carries id/name/slug/role — so the
+  // form always reopened blank and looked like the save had reverted.)
+  const { data: org, error: loadError } = useQuery({
+    queryKey: ['organization-compliance', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('kra_exemption_expiry, ngo_board_cert_expiry, pbo_number, pbo_expiry, kra_exemption_cert_url, ngo_board_cert_url')
+        .eq('id', orgId!)
+        .single();
+      if (error) throw error;
+      return data as any;
+    },
+    enabled: !!orgId,
+  });
+
+  const [kraExpiry, setKraExpiry] = useState('');
+  const [ngoExpiry, setNgoExpiry] = useState('');
+  const [pboNumber, setPboNumber] = useState('');
+  const [pboExpiry, setPboExpiry] = useState('');
+  useEffect(() => {
+    if (!org) return;
+    setKraExpiry(org.kra_exemption_expiry || '');
+    setNgoExpiry(org.ngo_board_cert_expiry || '');
+    setPboNumber(org.pbo_number || '');
+    setPboExpiry(org.pbo_expiry || '');
+  }, [org]);
+  useEffect(() => {
+    if (loadError) toast.error(`Could not load compliance details: ${(loadError as any).message}`);
+  }, [loadError]);
   const [uploading, setUploading] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
