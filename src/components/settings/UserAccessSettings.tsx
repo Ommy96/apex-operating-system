@@ -263,10 +263,16 @@ export function UserAccessSettings({ section }: Props) {
         throw error;
       }
       if (data?.error) throw new Error(data.error);
+      return (data?.warnings || []) as string[];
     },
-    onSuccess: () => {
-      toast({ title: 'Member created successfully' });
+    onSuccess: (warnings) => {
+      toast(
+        warnings.length
+          ? { title: 'Member created — with problems', description: warnings.join(' '), variant: 'destructive' }
+          : { title: 'Member created — they can sign in now (no email confirmation needed)' },
+      );
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      queryClient.invalidateQueries({ queryKey: ['member-account-status'] });
       setCreateDialogOpen(false);
       setNewMemberName('');
       setNewMemberEmail('');
