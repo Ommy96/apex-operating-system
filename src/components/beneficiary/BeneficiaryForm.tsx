@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
+import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, type CareArrangement, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
 import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -121,12 +121,7 @@ interface FormState {
   removed_guardian_link_ids: string[];
 
   // Care arrangement
-  care_arrangement:
-    | ''
-    | 'independent'
-    | 'under_guardian_care'
-    | 'head_of_household_with_dependents'
-    | 'institutional_care';
+  care_arrangement: '' | Exclude<CareArrangement, typeof CARE_ARRANGEMENT.UNKNOWN>;
   care_institution_name: string;
   care_institution_type: string;
   care_institution_contact_person: string;
@@ -770,7 +765,7 @@ export function BeneficiaryForm({
         family_status: form.family_status || null,
         // Care arrangement
         care_arrangement: (form.care_arrangement || CARE_ARRANGEMENT.UNKNOWN) as any,
-        ...(form.care_arrangement && (!beneficiary?.id || beneficiary.care_arrangement !== form.care_arrangement)
+        ...(form.care_arrangement && (!beneficiary?.id || normaliseCareArrangement(beneficiary.care_arrangement) !== form.care_arrangement)
           ? {
               care_arrangement_set_by: (await supabase.auth.getUser()).data.user?.id ?? null,
               care_arrangement_set_at: new Date().toISOString(),
@@ -823,7 +818,7 @@ export function BeneficiaryForm({
           .eq('organization_id', orgId);
         if (error) throw error;
         // Audit care_arrangement change on edit
-        if (form.care_arrangement && beneficiary.care_arrangement !== form.care_arrangement) {
+        if (form.care_arrangement && normaliseCareArrangement(beneficiary.care_arrangement) !== form.care_arrangement) {
           try {
             const { data: u } = await supabase.auth.getUser();
             await supabase.from('audit_logs').insert({

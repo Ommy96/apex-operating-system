@@ -75,8 +75,10 @@ export function useOrgBeneficiaryConfig() {
         .maybeSingle();
 
       if (error) {
+        // Surface the failure instead of silently showing defaults — a swallowed read
+        // error made saved settings look like they had reverted.
         logger.error('Failed to load org beneficiary config', error);
-        return { ...DEFAULT_CONFIG, organization_id: orgId } as OrgBeneficiaryConfig;
+        throw error;
       }
       if (!data) return { ...DEFAULT_CONFIG, organization_id: orgId } as OrgBeneficiaryConfig;
       return data as unknown as OrgBeneficiaryConfig;
@@ -88,6 +90,7 @@ export function useOrgBeneficiaryConfig() {
   return {
     config: query.data ?? ({ ...DEFAULT_CONFIG, organization_id: orgId ?? '' } as OrgBeneficiaryConfig),
     isLoading: query.isLoading,
+    error: query.error as Error | null,
     refetch: query.refetch,
   };
 }

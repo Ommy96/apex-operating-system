@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useSettingsForm } from '@/hooks/useSettingsForm';
+import { ensureWritten } from '@/lib/settingsWrite';
 
 /**
  * Generic per-organisation settings store backed by `public.org_settings`
@@ -68,20 +69,26 @@ export function useOrgSettings<T extends Record<string, any>>(
         else blob[k] = v;
       });
 
-      const { error } = await supabase
-        .from('org_settings' as any)
-        .upsert(
-          { organization_id: orgId, key, value: blob as any, updated_at: new Date().toISOString() },
-          { onConflict: 'organization_id,key' }
-        );
-      if (error) throw error;
+      ensureWritten(
+        await supabase
+          .from('org_settings' as any)
+          .upsert(
+            { organization_id: orgId, key, value: blob as any, updated_at: new Date().toISOString() },
+            { onConflict: 'organization_id,key' }
+          )
+          .select('id'),
+        'These settings'
+      );
 
       if (Object.keys(orgPatch).length) {
-        const { error: orgErr } = await supabase
-          .from('organizations')
-          .update({ ...orgPatch, updated_at: new Date().toISOString() } as any)
-          .eq('id', orgId);
-        if (orgErr) throw orgErr;
+        ensureWritten(
+          await supabase
+            .from('organizations')
+            .update({ ...orgPatch, updated_at: new Date().toISOString() } as any)
+            .eq('id', orgId)
+            .select('id'),
+          'Organisation fields'
+        );
       }
     },
     onSaved: () => {

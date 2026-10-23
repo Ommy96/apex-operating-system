@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useTierLabels } from '@/hooks/useTierLabels';
+import { ensureWritten } from '@/lib/settingsWrite';
 
 const DEFAULTS = { program: 'Programme', project: 'Project', activity: 'Activity' };
 
@@ -35,16 +36,20 @@ export function TerminologySettings() {
     if (!orgId) return;
     setSaving(true);
     try {
-      const { error } = await (supabase as any)
-        .from('organizations')
-        .update({
-          tier_label_program: form.program.trim() || DEFAULTS.program,
-          tier_label_project: form.project.trim() || DEFAULTS.project,
-          tier_label_activity: form.activity.trim() || DEFAULTS.activity,
-        })
-        .eq('id', orgId);
-      if (error) throw error;
+      ensureWritten(
+        await (supabase as any)
+          .from('organizations')
+          .update({
+            tier_label_program: form.program.trim() || DEFAULTS.program,
+            tier_label_project: form.project.trim() || DEFAULTS.project,
+            tier_label_activity: form.activity.trim() || DEFAULTS.activity,
+          })
+          .eq('id', orgId)
+          .select('id'),
+        'Terminology',
+      );
       await qc.invalidateQueries({ queryKey: ['org-tier-labels', orgId] });
+      qc.invalidateQueries({ queryKey: ['organization-details'] });
       toast({ title: 'Terminology saved' });
     } catch (e: any) {
       toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });

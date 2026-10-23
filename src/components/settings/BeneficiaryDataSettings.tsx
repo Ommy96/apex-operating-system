@@ -17,6 +17,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { ensureWritten } from '@/lib/settingsWrite';
 import { Loader2, Plus, X, GraduationCap, Heart, Briefcase, AlertTriangle, Globe, Users, Accessibility, Baby, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
@@ -68,7 +69,7 @@ const DEFAULT_TAGS = [
 ];
 
 export function BeneficiaryDataSettings() {
-  const { config, isLoading } = useOrgBeneficiaryConfig();
+  const { config, isLoading, error: loadError } = useOrgBeneficiaryConfig();
   const { currentOrganization } = useOrganization();
   const invalidate = useInvalidateOrgBeneficiaryConfig();
   const orgId = currentOrganization?.organization_id;
@@ -129,11 +130,13 @@ export function BeneficiaryDataSettings() {
         custom_fields: form.custom_fields || [],
       };
 
-      const { error } = await supabase
-        .from('org_beneficiary_config' as any)
-        .upsert(payload, { onConflict: 'organization_id' });
-
-      if (error) throw error;
+      ensureWritten(
+        await supabase
+          .from('org_beneficiary_config' as any)
+          .upsert(payload, { onConflict: 'organization_id' })
+          .select('id'),
+        'Beneficiary data settings',
+      );
       await invalidate();
       toast({ title: 'Settings saved' });
     } catch (e: any) {
@@ -148,6 +151,14 @@ export function BeneficiaryDataSettings() {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+        Could not load your saved beneficiary data settings: {loadError.message}. Nothing has been changed — reload to try again.
       </div>
     );
   }

@@ -127,21 +127,24 @@ Deno.serve(async (req) => {
     if (staff_id) profileUpdate.staff_id = staff_id;
     if (notes) profileUpdate.notes = notes;
 
-    await adminClient.from("profiles").update(profileUpdate).eq("user_id", newUser.user.id);
+    const warnings: string[] = [];
+    const { error: profileErr } = await adminClient.from("profiles").update(profileUpdate).eq("user_id", newUser.user.id);
+    if (profileErr) warnings.push(`Profile details not saved: ${profileErr.message}`);
 
     // Assign RBAC role if provided
     if (rbac_role_id) {
-      await adminClient.from("rbac_user_role_assignments").insert({
+      const { error: rbacErr } = await adminClient.from("rbac_user_role_assignments").insert({
         user_id: newUser.user.id,
         organization_id,
         role_id: rbac_role_id,
         assigned_by: callerUser.id,
         is_active: true,
       });
+      if (rbacErr) warnings.push(`Role not assigned: ${rbacErr.message}`);
     }
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUser.user.id }),
+      JSON.stringify({ success: true, user_id: newUser.user.id, warnings }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.whatsapp-send]
 verify_jwt = false
+
+[functions.member-account-actions]
+verify_jwt = false

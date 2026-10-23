@@ -16820,7 +16820,7 @@ export type Database = {
           created_at: string | null
           id: string
           is_enabled: boolean | null
-          org_id: string
+          organization_id: string
           preference_key: string
           updated_at: string | null
           user_id: string
@@ -16829,7 +16829,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_enabled?: boolean | null
-          org_id: string
+          organization_id: string
           preference_key: string
           updated_at?: string | null
           user_id: string
@@ -16838,7 +16838,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_enabled?: boolean | null
-          org_id?: string
+          organization_id?: string
           preference_key?: string
           updated_at?: string | null
           user_id?: string
@@ -16846,14 +16846,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_notification_preferences_org_id_fkey"
-            columns: ["org_id"]
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_notification_preferences_org_id_fkey"
-            columns: ["org_id"]
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_public_view"
             referencedColumns: ["id"]

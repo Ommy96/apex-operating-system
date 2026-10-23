@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { toast } from "sonner";
+import { ensureWritten } from "@/lib/settingsWrite";
 
 const PREFS = [
   { key: "grant_report_due", label: "Grant report due", desc: "Get notified when a grant report deadline is approaching" },
@@ -32,7 +33,7 @@ export function NotificationSettings() {
         .from("user_notification_preferences")
         .select("*")
         .eq("user_id", user.id)
-        .eq("org_id", orgId);
+        .eq("organization_id", orgId);
       if (error) throw error;
       return data || [];
     },
@@ -51,29 +52,19 @@ export function NotificationSettings() {
   const saveMutation = useMutation({
     mutationFn: async (newPrefs: Record<string, boolean>) => {
       if (!user?.id || !orgId) throw new Error("No user/org");
-      for (const [key, enabled] of Object.entries(newPrefs)) {
-        const { data: existing, error: readError } = await supabase
+      const rows = Object.entries(newPrefs).map(([key, enabled]) => ({
+        user_id: user.id,
+        organization_id: orgId,
+        preference_key: key,
+        is_enabled: enabled,
+      }));
+      ensureWritten(
+        await supabase
           .from("user_notification_preferences")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("org_id", orgId)
-          .eq("preference_key", key)
-          .maybeSingle();
-        if (readError) throw readError;
-
-        if (existing) {
-          const { error } = await supabase
-            .from("user_notification_preferences")
-            .update({ is_enabled: enabled })
-            .eq("id", existing.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from("user_notification_preferences")
-            .insert({ user_id: user.id, org_id: orgId, preference_key: key, is_enabled: enabled });
-          if (error) throw error;
-        }
-      }
+          .upsert(rows, { onConflict: "user_id,organization_id,preference_key" })
+          .select("id"),
+        "Notification preferences",
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notification-prefs"] });

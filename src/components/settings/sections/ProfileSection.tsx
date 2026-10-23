@@ -17,6 +17,7 @@ import { Upload, X, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { KENYA_COUNTIES } from '@/lib/kenyaCounties';
+import { ensureWritten } from '@/lib/settingsWrite';
 
 const TERMINOLOGIES = ['Beneficiary','Child','Client','Patient','Participant','Member','Student','Resident','Custom'];
 const ORG_TYPES: Array<{ value: string; label: string; desc: string }> = [
@@ -121,35 +122,41 @@ export function ProfileSection() {
     initial,
     save: async (v) => {
       if (!orgId) throw new Error('No organisation');
-      const { error: e1 } = await supabase
-        .from('organizations')
-        .update({
-          name: v.name,
-          email: v.email || null,
-          phone: v.phone || null,
-          website: v.website || null,
-          description: v.description || null,
-          physical_address: v.physical_address || null,
-          country: v.country || null,
-          county: v.county || null,
-          sub_county: v.sub_county || null,
-          year_founded: v.year_founded ? Number(v.year_founded) : null,
-          registration_number: v.registration_number || null,
-          pbo_number: v.pbo_number || null,
-          pbo_expiry: v.pbo_expiry || null,
-          ownership_type: v.ownership_type || null,
-          logo_url: v.logo_url || null,
-        } as any)
-        .eq('id', orgId);
-      if (e1) throw e1;
-      const { error: e2 } = await supabase
-        .from('org_beneficiary_config' as any)
-        .upsert({
-          organization_id: orgId,
-          org_type: v.org_type as any,
-          beneficiary_terminology: v.beneficiary_terminology,
-        }, { onConflict: 'organization_id' });
-      if (e2) throw e2;
+      ensureWritten(
+        await supabase
+          .from('organizations')
+          .update({
+            name: v.name,
+            email: v.email || null,
+            phone: v.phone || null,
+            website: v.website || null,
+            description: v.description || null,
+            physical_address: v.physical_address || null,
+            country: v.country || null,
+            county: v.county || null,
+            sub_county: v.sub_county || null,
+            year_founded: v.year_founded ? Number(v.year_founded) : null,
+            registration_number: v.registration_number || null,
+            pbo_number: v.pbo_number || null,
+            pbo_expiry: v.pbo_expiry || null,
+            ownership_type: v.ownership_type || null,
+            logo_url: v.logo_url || null,
+          } as any)
+          .eq('id', orgId)
+          .select('id'),
+        'Organisation profile'
+      );
+      ensureWritten(
+        await supabase
+          .from('org_beneficiary_config' as any)
+          .upsert({
+            organization_id: orgId,
+            org_type: v.org_type as any,
+            beneficiary_terminology: v.beneficiary_terminology,
+          }, { onConflict: 'organization_id' })
+          .select('id'),
+        'Organisation type'
+      );
     },
     onSaved: () => {
       refreshOrganization();

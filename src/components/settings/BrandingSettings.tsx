@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Palette, Upload, X, Target } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { ensureWritten } from "@/lib/settingsWrite";
 
 export function BrandingSettings() {
   const { currentOrganization } = useOrganization();
@@ -64,12 +65,15 @@ export function BrandingSettings() {
     if (!orgId) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("organizations").update({
-        primary_color: color,
-        logo_url: previewLogo,
-      }).eq("id", orgId);
-      if (error) throw error;
+      ensureWritten(
+        await supabase.from("organizations").update({
+          primary_color: color,
+          logo_url: previewLogo,
+        }).eq("id", orgId).select("id"),
+        "Branding",
+      );
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-details"] });
       toast.success("Branding saved");
     } catch (err: any) {
       toast.error(err.message);
