@@ -101,16 +101,19 @@ export function ComplianceDocumentsSettings() {
         ? { kra_exemption_cert_url: path }
         : { ngo_board_cert_url: path };
 
-      const { error: updateError } = await supabase
-        .from('organizations')
-        .update(updateField)
-        .eq('id', orgId);
-
-      if (updateError) throw updateError;
+      ensureWritten(
+        await supabase
+          .from('organizations')
+          .update(updateField)
+          .eq('id', orgId)
+          .select('id'),
+        'The certificate link',
+      );
+      qc.invalidateQueries({ queryKey: ['organization-compliance', orgId] });
       toast.success(`${docType === 'kra' ? 'KRA Certificate' : 'NGO Board Certificate'} uploaded successfully`);
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Upload error:', err);
-      toast.error('Failed to upload document');
+      toast.error(err?.message || 'Failed to upload document');
     } finally {
       setUploading(null);
     }
@@ -120,21 +123,25 @@ export function ComplianceDocumentsSettings() {
     if (!orgId) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({
-          kra_exemption_expiry: kraExpiry || null,
-          ngo_board_cert_expiry: ngoExpiry || null,
-          pbo_number: pboNumber || null,
-          pbo_expiry: pboExpiry || null,
-        })
-        .eq('id', orgId);
-
-      if (error) throw error;
+      ensureWritten(
+        await supabase
+          .from('organizations')
+          .update({
+            kra_exemption_expiry: kraExpiry || null,
+            ngo_board_cert_expiry: ngoExpiry || null,
+            pbo_number: pboNumber || null,
+            pbo_expiry: pboExpiry || null,
+          })
+          .eq('id', orgId)
+          .select('id'),
+        'Compliance details',
+      );
+      qc.invalidateQueries({ queryKey: ['organization-compliance', orgId] });
+      qc.invalidateQueries({ queryKey: ['organization-details'] });
       toast.success('Compliance details saved successfully');
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Save error:', err);
-      toast.error('Failed to save compliance details');
+      toast.error(err?.message || 'Failed to save compliance details');
     } finally {
       setSaving(false);
     }

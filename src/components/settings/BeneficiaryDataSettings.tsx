@@ -129,11 +129,13 @@ export function BeneficiaryDataSettings() {
         custom_fields: form.custom_fields || [],
       };
 
-      const { error } = await supabase
-        .from('org_beneficiary_config' as any)
-        .upsert(payload, { onConflict: 'organization_id' });
-
-      if (error) throw error;
+      ensureWritten(
+        await supabase
+          .from('org_beneficiary_config' as any)
+          .upsert(payload, { onConflict: 'organization_id' })
+          .select('id'),
+        'Beneficiary data settings',
+      );
       await invalidate();
       toast({ title: 'Settings saved' });
     } catch (e: any) {
