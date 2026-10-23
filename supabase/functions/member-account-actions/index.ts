@@ -95,13 +95,14 @@ Deno.serve(async (req) => {
     if (action === "confirm_email") {
       const { error } = await admin.auth.admin.updateUserById(user_id, { email_confirm: true });
       if (error) return json({ error: error.message });
-      await admin.from("audit_logs").insert({
+      const { error: auditErr } = await admin.from("audit_logs").insert({
         user_id: caller.id,
-        organization_id,
-        action: "member_email_confirmed_by_admin",
-        table_name: "auth.users",
-        record_id: user_id,
+        event_type: "member_email_confirmed_by_admin",
+        entity_type: "auth_user",
+        entity_id: user_id,
+        metadata: { organization_id, email: target.user.email },
       });
+      if (auditErr) console.error("audit log failed", auditErr.message);
       return json({ success: true, message: `${target.user.email} can now sign in.` });
     }
 
