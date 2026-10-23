@@ -69,7 +69,7 @@ const DEFAULT_TAGS = [
 ];
 
 export function BeneficiaryDataSettings() {
-  const { config, isLoading } = useOrgBeneficiaryConfig();
+  const { config, isLoading, error: loadError } = useOrgBeneficiaryConfig();
   const { currentOrganization } = useOrganization();
   const invalidate = useInvalidateOrgBeneficiaryConfig();
   const orgId = currentOrganization?.organization_id;
@@ -151,6 +151,14 @@ export function BeneficiaryDataSettings() {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+        Could not load your saved beneficiary data settings: {loadError.message}. Nothing has been changed — reload to try again.
       </div>
     );
   }
