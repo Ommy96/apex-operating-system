@@ -7,6 +7,8 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { ensureWritten } from '@/lib/settingsWrite';
 
 function preview(prefix: string, format: string, seq: number, orgName: string): string {
   const cleanPrefix =
@@ -27,6 +29,7 @@ function preview(prefix: string, format: string, seq: number, orgName: string): 
 export function BeneficiaryCodeFormatCard() {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
+  const qc = useQueryClient();
   const orgName = currentOrganization?.organization_name || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,18 +60,24 @@ export function BeneficiaryCodeFormatCard() {
   const save = async () => {
     if (!orgId) return;
     setSaving(true);
-    const { error } = await supabase
-      .from('organizations')
-      .update({
-        beneficiary_code_prefix: prefix.trim() || null,
-        beneficiary_code_format: format.trim() || '{prefix}-{yy}-{seq}',
-      } as any)
-      .eq('id', orgId);
-    setSaving(false);
-    if (error) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      ensureWritten(
+        await supabase
+          .from('organizations')
+          .update({
+            beneficiary_code_prefix: prefix.trim() || null,
+            beneficiary_code_format: format.trim() || '{prefix}-{yy}-{seq}',
+          } as any)
+          .eq('id', orgId)
+          .select('id'),
+        'Beneficiary ID format',
+      );
+      qc.invalidateQueries({ queryKey: ['organization-details'] });
       toast({ title: 'Beneficiary ID format saved' });
+    } catch (e: any) {
+      toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 

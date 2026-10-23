@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useTierLabels } from '@/hooks/useTierLabels';
+import { ensureWritten } from '@/lib/settingsWrite';
 
 const DEFAULTS = { program: 'Programme', project: 'Project', activity: 'Activity' };
 
