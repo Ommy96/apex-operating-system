@@ -18190,6 +18190,10 @@ export type Database = {
         Args: { _invitation_id: string; _user_id: string }
         Returns: boolean
       }
+      add_assessment_to_waitlist: {
+        Args: { _assessment: string }
+        Returns: string
+      }
       archive_beneficiary: {
         Args: { _beneficiary_id: string; _note?: string; _reason?: string }
         Returns: Json
@@ -18198,6 +18202,10 @@ export type Database = {
       beneficiary_link_counts: {
         Args: { _beneficiary_id: string }
         Returns: Json
+      }
+      can_read_vulnerability_history: {
+        Args: { _assessment: string; _org: string }
+        Returns: boolean
       }
       can_view_sensitive_life_events: {
         Args: { _org_id: string }
