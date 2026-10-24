@@ -36,6 +36,9 @@ export interface WaitlistApplication {
   project_id: string | null;
   status: WaitlistStatus;
   vulnerability_score: number;
+  assessment_priority?: number;
+  household_id?: string | null;
+  entity_id?: string | null;
   score_details: any;
   applied_at: string;
   scored_at: string | null;

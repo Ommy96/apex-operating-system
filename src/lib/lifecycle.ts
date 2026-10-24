@@ -94,6 +94,7 @@ export const RANKING_BASES: { value: RankingBasis; label: string; help: string }
 
 export interface RankableApplicant {
   vulnerability_score?: number | null;
+  assessment_priority?: number | null;
   applied_at?: string | null;
   needs?: Array<{ priority?: string | null; estimated_cost?: number | null }> | null;
 }
@@ -117,7 +118,7 @@ export const urgentNeedCount = (a: RankableApplicant): number =>
  * a slightly more vulnerable one who applied last week.
  */
 export const combinedPriority = (a: RankableApplicant): number => {
-  const vuln = Math.min(100, Number(a.vulnerability_score || 0));
+  const vuln = Math.min(100, Number(a.vulnerability_score || 0) + Number(a.assessment_priority || 0));
   const waitScore = Math.min(40, (daysWaiting(a.applied_at) / 540) * 40);
   const urgency = Math.min(15, urgentNeedCount(a) * 5);
   return Math.round(vuln + waitScore + urgency);
@@ -125,7 +126,7 @@ export const combinedPriority = (a: RankableApplicant): number => {
 
 export const rankValue = (a: RankableApplicant, basis: RankingBasis): number => {
   switch (basis) {
-    case 'vulnerability': return Number(a.vulnerability_score || 0);
+    case 'vulnerability': return Number(a.vulnerability_score || 0) + Number(a.assessment_priority || 0);
     case 'unmet_value': return unmetNeedValue(a);
     case 'urgent_needs': return urgentNeedCount(a);
     case 'waiting_time': return daysWaiting(a.applied_at);

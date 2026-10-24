@@ -36,6 +36,7 @@ import { SponsorshipRelationshipSection } from '@/components/beneficiary/Sponsor
 
 import { GroupMembersTab } from '@/components/beneficiary/GroupMembersTab';
 import { BeneficiaryRiskPanel } from '@/components/beneficiary/BeneficiaryRiskPanel';
+import { VulnerabilityAssessmentsPanel } from '@/components/beneficiary/VulnerabilityAssessmentsPanel';
 import { RelationshipsTab } from '@/components/beneficiary/RelationshipsTab';
 import { ProfileCompletenessMeter } from '@/components/beneficiary/ProfileCompletenessMeter';
 import { PhotoUploadButton } from '@/components/beneficiary/PhotoUploadButton';
@@ -844,6 +845,9 @@ export default function BeneficiaryProfile() {
                 </div>
                 <div className="mb-5">
                   <NeedsSection beneficiaryId={beneficiary.id} />
+                </div>
+                <div className="mb-5">
+                  <VulnerabilityAssessmentsPanel subject={{ kind: beneficiary.beneficiary_category === 'organisation' ? 'institution' : beneficiary.beneficiary_type === 'group' ? 'group' : 'beneficiary', beneficiaryId: beneficiary.id }} />
                 </div>
                 <BeneficiaryOverviewTab
                   beneficiary={beneficiary as any}

@@ -24,6 +24,7 @@ export const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   { id: 'programmes',  label: 'Programmes & M&E',    description: 'Indicators, visitation, reports', icon: Target,       group: 'Data collection' },
   { id: 'fields',      label: 'Custom fields',       description: 'Org-specific extra fields',       icon: Sliders,      group: 'Data collection' },
   { id: 'needs',       label: 'Needs / Support types', description: 'Kinds of support you provide',  icon: HeartHandshake, group: 'Data collection' },
+  { id: 'vulnerability', label: 'Vulnerability categories', description: 'Assessment categories and confidentiality', icon: ShieldCheck, group: 'Data collection' },
   { id: 'lifeevents', label: 'Life event types',   description: 'What can happen to the people you serve', icon: HeartPulse, group: 'Data collection' },
   { id: 'doctypes',   label: 'Document types',     description: 'Kinds of document you collect',   icon: FileText,   group: 'Data collection' },
   { id: 'interests',  label: 'Hobbies & interests', description: 'Catalogue offered when writing a bio', icon: Sparkles, group: 'Data collection' },
