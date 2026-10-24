@@ -231,7 +231,7 @@ export function BeneficiaryOverviewTab({
             onSave={numSaver('household_size', 'Household size')} />
         </PanelSection>
         <PanelSection title="Vulnerability" icon={ShieldAlert} open={!!openSections.vulnerability} onToggle={() => toggleSection('vulnerability')}>
-          <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={canSave}
+          <EditableRow label="Vulnerability level" value={beneficiary.vulnerability_level} canEdit={false}
             type="select" options={VULNERABILITY_OPTIONS}
             display={(v) => v ? String(v).charAt(0).toUpperCase() + String(v).slice(1) : 'No risk recorded'}
             onSave={makeSaver('vulnerability_level', 'Vulnerability level')} />

@@ -377,8 +377,9 @@ export default function HouseholdProfile() {
         </div>
       </div>
 
+      <VulnerabilityAssessmentsPanel subject={{ kind: 'household', householdId: household.id }} />
+
       <RegisterFamilySheet
-        
         open={registerOpen}
         onOpenChange={setRegisterOpen}
       />

@@ -13,6 +13,7 @@ import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { useEntityTypes } from "@/hooks/useEntityTypes";
 import { useEntities, Entity, EntityFormData } from "@/hooks/useEntities";
 import { EntityForm } from "@/components/EntityForm";
+import { VulnerabilityAssessmentsPanel } from '@/components/beneficiary/VulnerabilityAssessmentsPanel';
 import { getCardStyles, CardVariant } from "@/lib/cardStyles";
 import { getIconByName } from "@/lib/iconUtils";
 import * as XLSX from 'xlsx';
@@ -58,6 +59,7 @@ export default function EntityDataPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEntity, setEditingEntity] = useState<Entity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Entity | null>(null);
+  const [assessmentTarget, setAssessmentTarget] = useState<Entity | null>(null);
 
   const filteredEntities = useMemo(() => {
     return entities.filter(entity => {
@@ -331,6 +333,7 @@ export default function EntityDataPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setAssessmentTarget(entity)}>Vulnerability assessments</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleEdit(entity)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
@@ -353,6 +356,13 @@ export default function EntityDataPage() {
           </Table>
         </Card>
       )}
+
+      <Dialog open={!!assessmentTarget} onOpenChange={v => !v && setAssessmentTarget(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto print:hidden">
+          <DialogHeader><DialogTitle>{assessmentTarget?.display_name} · Assessments</DialogTitle></DialogHeader>
+          {assessmentTarget && <VulnerabilityAssessmentsPanel subject={{ kind: entityType.slug.toLowerCase().includes('group') ? 'group' : 'institution', entityId: assessmentTarget.id }} />}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
