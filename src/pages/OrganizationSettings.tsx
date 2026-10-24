@@ -23,6 +23,7 @@ import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { SubscriptionSettings } from '@/components/settings/SubscriptionSettings';
 import { TerminologySettings } from '@/components/settings/TerminologySettings';
 import { NeedTypesSettings } from '@/components/settings/NeedTypesSettings';
+import { VulnerabilityCategoriesSettings } from '@/components/settings/VulnerabilityCategoriesSettings';
 import { LifeEventTypesSettings } from '@/components/settings/LifeEventTypesSettings';
 import { DocumentTypesSettings } from '@/components/settings/DocumentTypesSettings';
 import { InterestTypesSettings } from '@/components/settings/InterestTypesSettings';
@@ -89,6 +90,7 @@ export default function OrganizationSettings() {
       case 'programmes':    return <MESettings section="me-logframe" />;
       case 'fields':        return <BeneficiaryDataSettings />;
       case 'needs':         return <NeedTypesSettings />;
+      case 'vulnerability': return <VulnerabilityCategoriesSettings />;
       case 'lifeevents':    return <LifeEventTypesSettings />;
       case 'doctypes':      return <DocumentTypesSettings />;
       case 'interests':     return <InterestTypesSettings />;

@@ -287,7 +287,7 @@ export default function WaitlistManagement() {
                     <div key={a.id} className="rounded-md border bg-background p-2 text-xs space-y-1.5">
                       <div className="flex items-start justify-between gap-2">
                         <span className="font-medium">{applicantName(a)}</span>
-                        <Badge variant="outline" className="text-[10px] shrink-0">Score {a.vulnerability_score}</Badge>
+                        <Badge variant="outline" className="text-[10px] shrink-0">Score {a.vulnerability_score + (a.assessment_priority || 0)}</Badge>
                       </div>
                       <div className="text-muted-foreground">
                         {a.applicant_age != null ? `Age ${a.applicant_age} · ` : ''}
@@ -308,6 +308,7 @@ export default function WaitlistManagement() {
                       {explanation && (
                         <div className="text-[10px] text-muted-foreground italic">{explanation}</div>
                       )}
+                      {!!a.assessment_priority && <p className="text-[10px] text-muted-foreground">Reviewed assessment +{a.assessment_priority}</p>}
                       {isEnrolled && beneficiary?.id && (
                         <Link to={`/beneficiaries/${beneficiary.id}`}
                           className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline">

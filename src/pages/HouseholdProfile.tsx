@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
+import { VulnerabilityAssessmentsPanel } from '@/components/beneficiary/VulnerabilityAssessmentsPanel';
 import { RecordNotFound } from "@/components/RecordNotFound";
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Crown, Home, Loader2, MapPin, Pencil, Plus, Users, Shield, GraduationCap, UserMinus, History, Undo2 } from 'lucide-react';
@@ -375,6 +376,8 @@ export default function HouseholdProfile() {
           </Card>
         </div>
       </div>
+
+      <VulnerabilityAssessmentsPanel subject={{ kind: 'household', householdId: household.id }} />
 
       <RegisterFamilySheet
         open={registerOpen}
