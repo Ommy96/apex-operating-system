@@ -322,7 +322,7 @@ export default function WaitlistManagement() {
                             <Calculator className="h-3 w-3 mr-1" /> Score
                           </Button>
                         )}
-                        {!isEnrolled && (
+                        {!isEnrolled && !a.household_id && !a.entity_id && (
                           <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]"
                             onClick={() => openMatch(a)}>
                             <HandCoins className="h-3 w-3 mr-1" /> Match & enroll
