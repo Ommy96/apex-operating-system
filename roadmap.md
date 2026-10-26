@@ -2,7 +2,7 @@
 
 ## Family and guardian capture
 - [ ] Extend existing family status options per organisation and migrate legacy labels without altering care responsibility.
-- [ ] Add live composition fields, preserve hidden data and multiple guardians, and keep own contacts age-specific.
+- [ ] Add live composition fields, preserve hidden data and multiple guardians, and keep own contacts age-specific — awaiting the referenced per-option field lists, absent from the upload.
 - [ ] Share options in profiles/reports and test live changes, preservation and adult/minor rules.
 - [ ] Verify signed-in save/readback and second-org/non-admin flows when a usable session is available.
 
