@@ -1458,6 +1458,7 @@ export type Database = {
           employment_status: string | null
           estate_village: string | null
           exit_reason: string | null
+          family_details: Json
           family_status: string | null
           favourite_subject: string | null
           first_name: string | null
@@ -1569,6 +1570,7 @@ export type Database = {
           employment_status?: string | null
           estate_village?: string | null
           exit_reason?: string | null
+          family_details?: Json
           family_status?: string | null
           favourite_subject?: string | null
           first_name?: string | null
@@ -1680,6 +1682,7 @@ export type Database = {
           employment_status?: string | null
           estate_village?: string | null
           exit_reason?: string | null
+          family_details?: Json
           family_status?: string | null
           favourite_subject?: string | null
           first_name?: string | null
@@ -2296,26 +2299,32 @@ export type Database = {
         Row: {
           beneficiary_id: string
           created_at: string
+          deleted_at: string | null
           guardian_id: string
           id: string
           is_primary: boolean | null
           relationship: string
+          updated_by: string | null
         }
         Insert: {
           beneficiary_id: string
           created_at?: string
+          deleted_at?: string | null
           guardian_id: string
           id?: string
           is_primary?: boolean | null
           relationship: string
+          updated_by?: string | null
         }
         Update: {
           beneficiary_id?: string
           created_at?: string
+          deleted_at?: string | null
           guardian_id?: string
           id?: string
           is_primary?: boolean | null
           relationship?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -10919,6 +10928,7 @@ export type Database = {
           collect_nutritional_status: boolean
           collect_religion: boolean
           created_at: string
+          custom_family_status_options: string[]
           custom_fields: Json
           custom_vulnerability_tags: Json
           id: string
@@ -10941,6 +10951,7 @@ export type Database = {
           collect_nutritional_status?: boolean
           collect_religion?: boolean
           created_at?: string
+          custom_family_status_options?: string[]
           custom_fields?: Json
           custom_vulnerability_tags?: Json
           id?: string
@@ -10963,6 +10974,7 @@ export type Database = {
           collect_nutritional_status?: boolean
           collect_religion?: boolean
           created_at?: string
+          custom_family_status_options?: string[]
           custom_fields?: Json
           custom_vulnerability_tags?: Json
           id?: string
