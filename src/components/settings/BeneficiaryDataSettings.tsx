@@ -22,6 +22,7 @@ import { Loader2, Plus, X, GraduationCap, Heart, Briefcase, AlertTriangle, Globe
 import { cn } from '@/lib/utils';
 import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
 import { SponsorshipFundingModelCard } from './SponsorshipFundingModelCard';
+import { DEFAULT_FAMILY_STATUSES, normaliseFamilyStatus } from '@/lib/familyStatus';
 
 
 interface OrgTypePreset {
@@ -77,6 +78,7 @@ export function BeneficiaryDataSettings() {
   const [form, setForm] = useState(config);
   const [saving, setSaving] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [newFamilyStatus, setNewFamilyStatus] = useState('');
 
   useEffect(() => {
     if (config) setForm(config);
@@ -128,6 +130,7 @@ export function BeneficiaryDataSettings() {
         beneficiary_terminology_plural: form.beneficiary_terminology_plural || null,
         custom_vulnerability_tags: form.custom_vulnerability_tags || [],
         custom_fields: form.custom_fields || [],
+        custom_family_status_options: form.custom_family_status_options || [],
       };
 
       ensureWritten(
@@ -230,6 +233,18 @@ export function BeneficiaryDataSettings() {
       </Card>
 
       <BeneficiaryCodeFormatCard />
+
+      <section className="space-y-3">
+        <h3 className="text-base font-semibold">Family status options</h3>
+        <div className="flex flex-wrap gap-2">{DEFAULT_FAMILY_STATUSES.map(status => <Badge key={status} variant="secondary">{status}</Badge>)}{(form.custom_family_status_options || []).map(status => <Badge key={status} variant="outline">{status}</Badge>)}</div>
+        <div className="flex gap-2"><Input aria-label="Additional family status" value={newFamilyStatus} onChange={e => setNewFamilyStatus(e.target.value)} /><Button type="button" variant="outline" onClick={() => {
+          const status = normaliseFamilyStatus(newFamilyStatus);
+          if (!status) return;
+          update('custom_family_status_options', [...new Set([...(form.custom_family_status_options || []), status])]);
+          setNewFamilyStatus('');
+          toast({ title: 'Option added', description: 'Save settings to make it available to your organisation.' });
+        }}><Plus className="h-4 w-4 mr-1" /> Add option</Button></div>
+      </section>
 
       <SponsorshipFundingModelCard />
 

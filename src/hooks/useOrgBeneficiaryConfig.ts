@@ -31,6 +31,7 @@ export interface OrgBeneficiaryConfig {
   beneficiary_terminology: string;
   beneficiary_terminology_plural?: string | null;
   custom_vulnerability_tags?: string[] | null;
+  custom_family_status_options?: string[] | null;
 }
 
 /** A single sector-specific beneficiary field, produced by the setup wizard

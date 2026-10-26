@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { FAMILY_STATUS, FAMILY_DETAIL_FIELDS, normaliseFamilyStatus, familyStatusOptions, hasHiddenFamilyDetails } from '@/lib/familyStatus';
 import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, type CareArrangement, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
 import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -117,6 +118,7 @@ interface FormState {
 
   // Step 3 — family
   family_status: string;
+  family_details: Record<string, string>;
   guardians: GuardianFieldsValue[];
   removed_guardian_link_ids: string[];
 
@@ -195,6 +197,7 @@ const EMPTY_STATE: FormState = {
   leader_name: '',
   leader_phone: '',
   family_status: '',
+  family_details: {},
   guardians: [],
   removed_guardian_link_ids: [],
   care_arrangement: '',
@@ -300,7 +303,8 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   leader_name: beneficiary?.leader_name ?? '',
   leader_phone: beneficiary?.leader_phone ?? '',
   meeting_frequency: beneficiary?.group_schedule ?? '',
-  family_status: beneficiary?.family_status ?? '',
+  family_status: normaliseFamilyStatus(beneficiary?.family_status),
+  family_details: { ...(beneficiary?.family_details || {}) },
   care_arrangement: (normaliseCareArrangement(beneficiary?.care_arrangement) === CARE_ARRANGEMENT.UNKNOWN
     ? ''
     : normaliseCareArrangement(beneficiary?.care_arrangement)) as FormState['care_arrangement'],
@@ -367,17 +371,9 @@ export function BeneficiaryForm({
   );
 
   // Age-aware field visibility
-  const visibility = useFieldVisibility(form.date_of_birth, config);
+  const visibility = useFieldVisibility(form.date_of_birth, config, form.care_arrangement);
 
-  // When the beneficiary becomes a minor (DOB makes them < 18),
-  // clear any National ID that was captured earlier so a stale value
-  // cannot be saved.
-  useEffect(() => {
-    if (visibility.isMinor && form.national_id) {
-      setForm((prev) => ({ ...prev, national_id: '' }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibility.isMinor]);
+  // Hidden identity fields remain in draft state; minor edits do not erase saved data.
 
   // Care arrangement: suggest a default the first time the registrar lands on
   // Step 3 (or whenever DOB/family status changes and no choice has been made).
@@ -386,10 +382,10 @@ export function BeneficiaryForm({
     if (form.care_arrangement) return;
     let suggestion: FormState['care_arrangement'] = '';
     let reason: string | null = null;
-    if (form.family_status === 'Independent adult') {
+    if (normaliseFamilyStatus(form.family_status) === FAMILY_STATUS.INDEPENDENT) {
       suggestion = CARE_ARRANGEMENT.INDEPENDENT;
       reason = 'Suggested because family status is Independent adult.';
-    } else if (form.family_status === 'Child-headed household') {
+    } else if (normaliseFamilyStatus(form.family_status) === FAMILY_STATUS.CHILD_HEADED) {
       suggestion = CARE_ARRANGEMENT.HEAD_OF_HOUSEHOLD;
       reason = 'Suggested because family status is Child-headed household.';
     } else if (visibility.age !== null && visibility.age < 18) {
@@ -420,7 +416,9 @@ export function BeneficiaryForm({
 
         )
         .eq('beneficiary_id', beneficiary.id);
-      if (error || cancelled || !data) return;
+      if (cancelled) return;
+      if (error) { toast({ title: 'Could not load saved guardians', description: error.message, variant: 'destructive' }); return; }
+      if (!data) return;
       const loaded: GuardianFieldsValue[] = data
         .filter((row: any) => row.guardians)
         .map((row: any) => {
@@ -836,7 +834,7 @@ export function BeneficiaryForm({
             try {
               await supabase.from('beneficiary_guardians')
                 .update({ is_primary: false } as any)
-                .eq('beneficiary_id', beneficiary.id);
+        .eq('beneficiary_id', beneficiary.id).is('deleted_at', null);
             } catch (e) { logger.warn('demote guardians failed', e); }
           }
         }
