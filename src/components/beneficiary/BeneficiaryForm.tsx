@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { FAMILY_STATUS, FAMILY_DETAIL_FIELDS, normaliseFamilyStatus, familyStatusOptions, hasHiddenFamilyDetails } from '@/lib/familyStatus';
 import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, type CareArrangement, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
 import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -117,6 +118,7 @@ interface FormState {
 
   // Step 3 — family
   family_status: string;
+  family_details: Record<string, string>;
   guardians: GuardianFieldsValue[];
   removed_guardian_link_ids: string[];
 
@@ -195,6 +197,7 @@ const EMPTY_STATE: FormState = {
   leader_name: '',
   leader_phone: '',
   family_status: '',
+  family_details: {},
   guardians: [],
   removed_guardian_link_ids: [],
   care_arrangement: '',
@@ -300,7 +303,8 @@ const createFormStateFromBeneficiary = (beneficiary: any, defaultCategory: Benef
   leader_name: beneficiary?.leader_name ?? '',
   leader_phone: beneficiary?.leader_phone ?? '',
   meeting_frequency: beneficiary?.group_schedule ?? '',
-  family_status: beneficiary?.family_status ?? '',
+  family_status: normaliseFamilyStatus(beneficiary?.family_status),
+  family_details: { ...(beneficiary?.family_details || {}) },
   care_arrangement: (normaliseCareArrangement(beneficiary?.care_arrangement) === CARE_ARRANGEMENT.UNKNOWN
     ? ''
     : normaliseCareArrangement(beneficiary?.care_arrangement)) as FormState['care_arrangement'],
@@ -367,17 +371,9 @@ export function BeneficiaryForm({
   );
 
   // Age-aware field visibility
-  const visibility = useFieldVisibility(form.date_of_birth, config);
+  const visibility = useFieldVisibility(form.date_of_birth, config, form.care_arrangement);
 
-  // When the beneficiary becomes a minor (DOB makes them < 18),
-  // clear any National ID that was captured earlier so a stale value
-  // cannot be saved.
-  useEffect(() => {
-    if (visibility.isMinor && form.national_id) {
-      setForm((prev) => ({ ...prev, national_id: '' }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibility.isMinor]);
+  // Hidden identity fields remain in draft state; minor edits do not erase saved data.
 
   // Care arrangement: suggest a default the first time the registrar lands on
   // Step 3 (or whenever DOB/family status changes and no choice has been made).
@@ -386,10 +382,10 @@ export function BeneficiaryForm({
     if (form.care_arrangement) return;
     let suggestion: FormState['care_arrangement'] = '';
     let reason: string | null = null;
-    if (form.family_status === 'Independent adult') {
+    if (normaliseFamilyStatus(form.family_status) === FAMILY_STATUS.INDEPENDENT) {
       suggestion = CARE_ARRANGEMENT.INDEPENDENT;
       reason = 'Suggested because family status is Independent adult.';
-    } else if (form.family_status === 'Child-headed household') {
+    } else if (normaliseFamilyStatus(form.family_status) === FAMILY_STATUS.CHILD_HEADED) {
       suggestion = CARE_ARRANGEMENT.HEAD_OF_HOUSEHOLD;
       reason = 'Suggested because family status is Child-headed household.';
     } else if (visibility.age !== null && visibility.age < 18) {
@@ -419,8 +415,10 @@ export function BeneficiaryForm({
            guardians ( id, full_name, guardian_type, national_id, phone, is_alive, employment_type, source_of_income, county, sub_county, estate_village )`,
 
         )
-        .eq('beneficiary_id', beneficiary.id);
-      if (error || cancelled || !data) return;
+        .eq('beneficiary_id', beneficiary.id).is('deleted_at', null);
+      if (cancelled) return;
+      if (error) { toast({ title: 'Could not load saved guardians', description: error.message, variant: 'destructive' }); return; }
+      if (!data) return;
       const loaded: GuardianFieldsValue[] = data
         .filter((row: any) => row.guardians)
         .map((row: any) => {
@@ -733,8 +731,9 @@ export function BeneficiaryForm({
         last_name: isGroup || isOrganisation ? null : form.last_name || null,
         date_of_birth: form.date_of_birth || null,
         gender: form.gender || null,
-        // Phone is hidden for minors; clear it so stale values aren't kept.
-        phone: visibility.isMinor ? null : (form.phone || null),
+        // Keep saved identity data when age hides the fields.
+        phone: visibility.isMinor ? (beneficiary?.id ? undefined : null) : (form.phone || null),
+        national_id: visibility.isMinor ? (beneficiary?.id ? undefined : null) : (form.national_id || null),
         county: form.county || null,
         sub_county: form.sub_county || null,
         estate_village: form.estate_village || null,
@@ -762,7 +761,8 @@ export function BeneficiaryForm({
           ? (form.academic_level as any) || null
           : beneficiary?.id ? undefined : null,
         grade: config.collect_education_data ? form.grade || null : beneficiary?.id ? undefined : null,
-        family_status: form.family_status || null,
+        family_status: normaliseFamilyStatus(form.family_status) || null,
+        family_details: form.family_details,
         // Care arrangement
         care_arrangement: (form.care_arrangement || CARE_ARRANGEMENT.UNKNOWN) as any,
         ...(form.care_arrangement && (!beneficiary?.id || normaliseCareArrangement(beneficiary.care_arrangement) !== form.care_arrangement)
@@ -774,11 +774,11 @@ export function BeneficiaryForm({
         institution_name: isInstitutionalCare(form.care_arrangement)
           ? (form.care_institution_name || null)
           : (config.collect_education_data ? form.institution_name || null : beneficiary?.id ? undefined : null),
-        institution_type: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_type || null) : null,
-        institution_contact_person: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_contact_person || null) : null,
-        institution_contact_phone: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_contact_phone || null) : null,
-        institution_placement_date: isInstitutionalCare(form.care_arrangement) ? (form.care_institution_placement_date || null) : null,
-        case_worker_name: isInstitutionalCare(form.care_arrangement) ? (form.care_case_worker_name || null) : null,
+        institution_type: form.care_institution_type || null,
+        institution_contact_person: form.care_institution_contact_person || null,
+        institution_contact_phone: form.care_institution_contact_phone || null,
+        institution_placement_date: form.care_institution_placement_date || null,
+        case_worker_name: form.care_case_worker_name || null,
         hiv_status:
           config.collect_health_data && config.collect_hiv_status && (can as any)?.viewHIVData !== false
             ? (form.hiv_status as any) || null
@@ -831,14 +831,7 @@ export function BeneficiaryForm({
               metadata: { organization_id: orgId } as any,
             } as any);
           } catch (e) { logger.warn('audit log failed', e); }
-          // If moving away from under_guardian_care, demote (not delete) guardian links.
-          if (isUnderGuardianCare(beneficiary.care_arrangement) && !isUnderGuardianCare(form.care_arrangement)) {
-            try {
-              await supabase.from('beneficiary_guardians')
-                .update({ is_primary: false } as any)
-                .eq('beneficiary_id', beneficiary.id);
-            } catch (e) { logger.warn('demote guardians failed', e); }
-          }
+          // Responsibility changes retain all guardian links and primary contacts.
         }
       } else {
         // Generate unique_id via RPC
@@ -918,10 +911,12 @@ export function BeneficiaryForm({
         try {
           // 1. Remove links the user deleted while editing.
           if (form.removed_guardian_link_ids.length) {
-            await supabase
+            const { error } = await supabase
               .from('beneficiary_guardians')
-              .delete()
+              .update({ deleted_at: new Date().toISOString() } as any)
+              .eq('beneficiary_id', beneficiaryId)
               .in('id', form.removed_guardian_link_ids);
+            if (error) throw error;
           }
 
           // 2. Upsert each filled guardian.
@@ -957,20 +952,22 @@ export function BeneficiaryForm({
                 .select('id')
                 .single();
               if (insErr) throw insErr;
-              guardianId = inserted!.id;
+              if (!inserted) throw new Error('Guardian was not saved');
+              guardianId = inserted.id;
             }
 
             // Link row
             if (g.linkId) {
-              await supabase
+              const { error } = await supabase
                 .from('beneficiary_guardians')
                 .update({
                   relationship: g.relationship || null,
                   is_primary: idx === 0,
                 } as any)
                 .eq('id', g.linkId);
+              if (error) throw error;
             } else {
-              await supabase
+              const { error } = await supabase
                 .from('beneficiary_guardians')
                 .insert({
                   beneficiary_id: beneficiaryId,
@@ -978,20 +975,17 @@ export function BeneficiaryForm({
                   relationship: g.relationship || null,
                   is_primary: idx === 0,
                 } as any);
+              if (error) throw error;
             }
           }
         } catch (e: any) {
-          logger.error('Failed to save guardian', e);
-          toast({
-            title: 'Could not save guardian information',
-            description: e?.message || 'Please try again.',
-            variant: 'destructive',
-          });
+          throw new Error(`Beneficiary saved, but guardian details were not: ${e?.message || 'Please retry.'}`);
         }
       }
 
       localStorage.removeItem(draftKey);
-      setCreatedId(beneficiaryId!);
+      if (!beneficiaryId) throw new Error('No saved beneficiary identifier returned');
+      setCreatedId(beneficiaryId);
       setCreatedUniqueId(uniqueId || null);
       // Invalidate downstream caches so Family side-panel and Relationships tab
       // refresh without a manual reload (Fix 1d).
@@ -1005,7 +999,7 @@ export function BeneficiaryForm({
         description: uniqueId ? `ID: ${uniqueId}` : undefined,
       });
 
-      if (onSuccess) onSuccess(beneficiaryId!);
+      if (onSuccess) onSuccess(beneficiaryId);
     } catch (error: any) {
       logger.error('BeneficiaryForm submit error', error);
       if (typeof error?.message === 'string' && error.message.includes('schema cache')) {
@@ -1146,6 +1140,7 @@ export function BeneficiaryForm({
             showGuardianLocation={showSection('guardian_contact')}
             showCareArrangement={showSection('care_arrangement')}
             showFamilyStatus={showSection('family_status')}
+            customFamilyStatuses={config.custom_family_status_options || []}
           />
         )}
         {step === 3 && <Step4Education form={form} update={update} ageLabels={visibility.educationLabels} />}
@@ -1703,6 +1698,7 @@ function Step3Family({
   showGuardianLocation = false,
   showCareArrangement = true,
   showFamilyStatus = true,
+  customFamilyStatuses = [],
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
@@ -1710,6 +1706,7 @@ function Step3Family({
   showGuardianLocation?: boolean;
   showCareArrangement?: boolean;
   showFamilyStatus?: boolean;
+  customFamilyStatuses?: string[];
 }) {
   const guardianLocationProps = showGuardianLocation
     ? {
@@ -1718,7 +1715,7 @@ function Step3Family({
         subCountyOptionsFor: (c: string) => (c ? getSubCounties(c) : []),
       }
     : {};
-  const status = form.family_status;
+  const status = normaliseFamilyStatus(form.family_status);
   const guardians = form.guardians;
 
   const setGuardianAt = (index: number, next: GuardianFieldsValue) => {
@@ -1764,10 +1761,10 @@ function Step3Family({
     }
   };
 
-  const isBothParents = status === 'Both parents present';
-  const isSingleish = status === 'Single parent' || status === 'Single orphan';
-  const isOrphan = status === 'Double orphan' || status === 'Child-headed household';
-  const isIndependent = status === 'Independent adult';
+  const isBothParents = status === FAMILY_STATUS.BOTH_PRESENT;
+  const isSingleish = status === FAMILY_STATUS.SINGLE_PARENT;
+  const isOrphan = [FAMILY_STATUS.BOTH_ABSENT, FAMILY_STATUS.CHILD_HEADED, FAMILY_STATUS.EXTENDED, FAMILY_STATUS.INSTITUTIONAL].some(v => v === status);
+  const isIndependent = status === FAMILY_STATUS.INDEPENDENT;
   const underGuardianCare = isUnderGuardianCare(form.care_arrangement);
   const hasNamedGuardian = guardians.some((g) => (g.full_name || '').trim().length > 0);
 
@@ -1812,7 +1809,10 @@ function Step3Family({
               <button
                 type="button"
                 key={opt.v}
-                onClick={() => update('care_arrangement', opt.v as any)}
+                onClick={() => {
+                  if (form.guardians.length || form.care_institution_name) toast({ title: 'Care details retained', description: 'Previously entered details may be hidden, but have not been removed.' });
+                  update('care_arrangement', opt.v as any);
+                }}
                 className={cn(
                   'text-left p-3 rounded-md border-2 transition-colors',
                   selected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
@@ -1880,26 +1880,29 @@ function Step3Family({
       {showFamilyStatus && (
       <div>
         <Label>Family status</Label>
-        <Select value={status} onValueChange={(v) => update('family_status', v)}>
+        <Select value={status} onValueChange={(v) => {
+          if (form.guardians.length || Object.values(form.family_details).some(Boolean)) toast({ title: 'Family details retained', description: 'Changing family status does not remove existing details.' });
+          update('family_status', v);
+        }}>
           <SelectTrigger>
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Both parents present">Both parents present</SelectItem>
-            <SelectItem value="Single parent">Single parent</SelectItem>
-            <SelectItem value="Single orphan">Single orphan</SelectItem>
-            <SelectItem value="Double orphan">Double orphan</SelectItem>
-            <SelectItem value="Child-headed household">Child-headed household</SelectItem>
-            <SelectItem value="Independent adult">Independent adult</SelectItem>
+            {familyStatusOptions(customFamilyStatuses, status).map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
       )}
 
+      {showFamilyStatus && (FAMILY_DETAIL_FIELDS[status] || []).map(field => <div key={field.key}><Label htmlFor={`family-${field.key}`}>{field.label}</Label><Textarea id={`family-${field.key}`} value={form.family_details[field.key] || ''} onChange={e => update('family_details', { ...form.family_details, [field.key]: e.target.value })} /></div>)}
+      {hasHiddenFamilyDetails(form.family_details, status) && <p className="text-xs text-warning">Previously entered family details are retained, although this option does not show them.</p>}
+      {!underGuardianCare && form.guardians.some(g => g.full_name) && <p className="text-xs text-warning">Parent / guardian details are retained. Select guardian care to edit them.</p>}
+
       {/* Guardian capture — driven ONLY by the live care arrangement.
           Family status just picks the layout; it can never hide the section. */}
       {underGuardianCare && (
         <div className="border-t pt-3 space-y-3">
+          <h4 className="text-sm font-semibold">Parent / guardian contacts</h4>
           {isOrphan ? (
             <GuardianFields
               {...guardianLocationProps}

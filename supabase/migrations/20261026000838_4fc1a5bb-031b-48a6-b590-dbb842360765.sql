@@ -1,0 +1,5 @@
+ALTER TABLE public.org_beneficiary_config ADD COLUMN IF NOT EXISTS custom_family_status_options text[] NOT NULL DEFAULT '{}';
+ALTER TABLE public.beneficiaries ADD COLUMN IF NOT EXISTS family_details jsonb NOT NULL DEFAULT '{}';
+ALTER TABLE public.beneficiary_guardians ADD COLUMN IF NOT EXISTS deleted_at timestamptz, ADD COLUMN IF NOT EXISTS updated_by uuid;
+UPDATE public.beneficiaries SET family_details=family_details || jsonb_build_object('legacy_family_status',family_status),family_status=CASE lower(btrim(family_status)) WHEN 'single orphan' THEN 'Single parent' WHEN 'single mother' THEN 'Single parent' WHEN 'single father' THEN 'Single parent' WHEN 'double orphan' THEN 'Both parents absent' WHEN 'orphan' THEN 'Both parents absent' WHEN 'guardian-led' THEN 'Extended family guardian' WHEN 'child-headed' THEN 'Child-headed household' END WHERE lower(btrim(family_status)) IN ('single orphan','single mother','single father','double orphan','orphan','guardian-led','child-headed');
+NOTIFY pgrst,'reload schema';
