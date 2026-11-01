@@ -7,6 +7,8 @@ import type { FieldVisibility } from '@/hooks/useFieldVisibility';
 import { InlineEditableField, type InlineFieldType } from './InlineEditableField';
 import { saveBeneficiaryField } from '@/lib/saveBeneficiaryField';
 import { COUNTY_NAMES, getSubCounties } from '@/lib/kenyaCounties';
+import { familyStatusOptions, normaliseFamilyStatus, FAMILY_DETAIL_FIELDS } from '@/lib/familyStatus';
+import { useOrgBeneficiaryConfig } from '@/hooks/useOrgBeneficiaryConfig';
 
 interface OverviewProps {
   beneficiary: any;
@@ -37,10 +39,6 @@ const VULNERABILITY_OPTIONS = [
   { label: 'High', value: 'high' },
   { label: 'Critical', value: 'critical' },
 ];
-const FAMILY_STATUS_OPTIONS = [
-  'Both parents present', 'Single mother', 'Single father',
-  'Orphan', 'Child-headed', 'Guardian-led', 'Other',
-];
 const YES_NO = [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }];
 
 export function BeneficiaryOverviewTab({
@@ -49,6 +47,8 @@ export function BeneficiaryOverviewTab({
   guardiansError = false, onRetryGuardians,
 }: OverviewProps) {
   const isMobile = useIsMobile();
+  const { config } = useOrgBeneficiaryConfig();
+  const familyOptions = familyStatusOptions(config.custom_family_status_options || [], beneficiary.family_status);
   const SECTION_KEYS = ['personal', 'contact', 'family', 'household', 'vulnerability', 'consent'] as const;
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const toggleSection = (k: string) =>
@@ -164,9 +164,10 @@ export function BeneficiaryOverviewTab({
             onSave={makeSaver('estate_village', 'Village / Estate')} />
         </PanelSection>
         <PanelSection title="Family" icon={Users} open={!!openSections.family} onToggle={() => toggleSection('family')}>
-          <EditableRow label="Family status" value={beneficiary.family_status} canEdit={canSave}
-            type="select" options={FAMILY_STATUS_OPTIONS}
+          <EditableRow label="Family status" value={normaliseFamilyStatus(beneficiary.family_status)} canEdit={canSave}
+            type="select" options={familyOptions}
             onSave={makeSaver('family_status', 'Family status')} />
+          {Object.values(FAMILY_DETAIL_FIELDS).flat().filter((field, index, all) => all.findIndex(f => f.key === field.key) === index).map(field => beneficiary.family_details?.[field.key] ? <div key={field.key} className="py-2 text-sm"><span className="text-muted-foreground">{field.label}</span><p className="whitespace-pre-wrap">{beneficiary.family_details[field.key]}</p></div> : null)}
 
           {/* Parents / guardians */}
           <div className="mt-3 mb-1 text-[11px]" style={{ color: '#78716C', fontWeight: 500 }}>Parents / guardians</div>

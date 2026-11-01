@@ -67,7 +67,7 @@ export default function HouseholdProfile() {
       const { data, error } = await supabase
         .from('beneficiary_guardians')
         .select('is_primary, beneficiary_id, guardians!inner(id, full_name, guardian_type, phone)')
-        .in('beneficiary_id', memberIds);
+        .in('beneficiary_id', memberIds).is('deleted_at', null);
       if (error) throw error;
       const map = new Map<string, any>();
       (data || []).forEach((row: any) => {

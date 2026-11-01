@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format, differenceInMonths } from 'date-fns';
+import { normaliseFamilyStatus, FAMILY_DETAIL_FIELDS } from '@/lib/familyStatus';
+import { careArrangementLabel } from '@/lib/careArrangement';
 
 // ---------- Types ----------
 interface Beneficiary {
@@ -45,6 +47,9 @@ interface Beneficiary {
   religion: string | null;
   background_narrative: string | null;
   created_at: string;
+  family_status?: string | null;
+  care_arrangement?: string | null;
+  family_details?: Record<string, string>;
 }
 
 interface Guardian {
@@ -452,11 +457,15 @@ async function buildPdf(data: BeneficiaryReportData): Promise<jsPDF> {
     ['Home county', beneficiary.home_county],
   ]);
 
-  if (guardians.length > 0) {
-    const guardianRows: Array<[string, string]> = guardians.slice(0, 4).map(g => [
+  if (guardians.length > 0 || beneficiary.family_status) {
+    const guardianRows: Array<[string, string]> = [
+      ['Care arrangement', careArrangementLabel(beneficiary.care_arrangement)],
+      ['Family status', normaliseFamilyStatus(beneficiary.family_status)],
+      ...Object.values(FAMILY_DETAIL_FIELDS).flat().filter((field, index, all) => all.findIndex(f => f.key === field.key) === index && !!beneficiary.family_details?.[field.key]).map(field => [field.label, beneficiary.family_details?.[field.key] || ''] as [string, string]),
+      ...guardians.map(g => [
       g.relationship || g.guardian_type,
       `${g.full_name}${g.phone ? ` · ${g.phone}` : ''}${g.is_alive === false ? ' (deceased)' : ''}`
-    ]);
+    ] as [string, string])];
     leftY = renderSection(leftX, leftY, 'Family', guardianRows);
   }
 

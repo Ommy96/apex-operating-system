@@ -39,6 +39,7 @@ export function useBeneficiaryGuardians(beneficiaryId: string | undefined) {
           )
         `)
         .eq('beneficiary_id', beneficiaryId)
+        .is('deleted_at', null)
         .order('is_primary', { ascending: false })
         .order('created_at', { foreignTable: 'guardians', ascending: false });
       if (error) {
