@@ -237,8 +237,8 @@ export function useOrganizationManagement() {
 
   const updateSubscription = useMutation({
     mutationFn: async ({ orgId, tier, features }: { orgId: string; tier: string; features?: Record<string, unknown> }) => {
-      const updateData: Record<string, unknown> = { subscription_tier: tier };
-      if (features) updateData.features_enabled = features;
+      const updateData: import('@/integrations/supabase/types').TablesUpdate<'organizations'> = { subscription_tier: tier };
+      if (features) updateData.features_enabled = features as import('@/integrations/supabase/types').Json;
       const { error } = await supabase.from('organizations').update(updateData).eq('id', orgId);
       if (error) throw error;
     },

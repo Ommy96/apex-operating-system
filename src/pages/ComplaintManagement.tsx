@@ -65,7 +65,7 @@ export default function ComplaintManagement() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: { id: string; [key: string]: any }) => {
+    mutationFn: async (updates: import('@/integrations/supabase/types').TablesUpdate<'complaints'> & { id: string }) => {
       const { id, ...rest } = updates;
       const { error } = await supabase.from('complaints').update(rest).eq('id', id);
       if (error) throw error;

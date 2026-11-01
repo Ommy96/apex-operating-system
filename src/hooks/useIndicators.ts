@@ -291,7 +291,7 @@ export function useUpdateIndicator() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Indicator> & { id: string }) => {
+    mutationFn: async ({ id, category: _joinedCategory, ...updates }: Partial<Indicator> & { id: string }) => {
       const { data, error } = await supabase
         .from('indicators')
         .update(updates)

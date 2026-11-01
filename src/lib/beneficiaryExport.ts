@@ -1,6 +1,8 @@
 import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 import type { SectorField } from '@/hooks/useOrgBeneficiaryConfig';
+import { normaliseFamilyStatus, FAMILY_DETAIL_FIELDS } from '@/lib/familyStatus';
+import { careArrangementLabel } from '@/lib/careArrangement';
 
 export interface ExportFilters {
   organizationId: string;
@@ -66,7 +68,9 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
   async function fetchIn(table: string, select: string, column: string, values: string[]) {
     const rows: any[] = [];
     for (const chunk of chunked(values)) {
-      const { data, error } = await supabase.from(table as any).select(select).in(column, chunk);
+      let query = supabase.from(table as any).select(select).in(column, chunk);
+      if (table === 'beneficiary_guardians') query = query.is('deleted_at', null);
+      const { data, error } = await query;
       if (error) throw error;
       rows.push(...((data as any[]) || []));
     }
@@ -162,6 +166,9 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
       'Name': p.safeName,
       'Type': b.beneficiary_type,
       'Category': b.beneficiary_category,
+      'Care Arrangement': careArrangementLabel(b.care_arrangement),
+      'Family Status': normaliseFamilyStatus(b.family_status),
+      ...Object.fromEntries(Object.values(FAMILY_DETAIL_FIELDS).flat().filter((field, index, all) => all.findIndex(f => f.key === field.key) === index).map(field => [field.label, b.family_details?.[field.key] || ''])),
       'Status': b.status,
       'Gender': b.gender,
       'Date of Birth': p.dateOfBirth,

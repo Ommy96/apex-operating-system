@@ -108,7 +108,6 @@ export const DynamicProgramForm = ({
             data: formData as unknown as Record<string, never>,
             created_by: userData?.user?.id,
             child_id: selectedChildId,
-            organization_id: currentOrganization.organization_id,
           }]);
         if (error) throw error;
         toast.success('Entry created successfully');
