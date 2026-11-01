@@ -44,7 +44,7 @@ export function WhistleblowerInner() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: { id: string; [key: string]: any }) => {
+    mutationFn: async (updates: import('@/integrations/supabase/types').TablesUpdate<'whistleblower_reports'> & { id: string }) => {
       const { id, ...rest } = updates;
       const { error } = await supabase.from('whistleblower_reports').update(rest).eq('id', id);
       if (error) throw error;

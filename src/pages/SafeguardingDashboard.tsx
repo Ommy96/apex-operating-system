@@ -108,7 +108,7 @@ export default function SafeguardingDashboard() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: { id: string; [key: string]: any }) => {
+    mutationFn: async (updates: import('@/integrations/supabase/types').TablesUpdate<'safeguarding_incidents'> & { id: string }) => {
       const { id, ...rest } = updates;
       const { error } = await supabase.from('safeguarding_incidents').update(rest).eq('id', id);
       if (error) throw error;

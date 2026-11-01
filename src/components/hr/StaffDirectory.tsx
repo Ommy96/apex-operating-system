@@ -189,7 +189,7 @@ export function StaffDirectory() {
     if (!selectedStaff) return;
     setIsSaving(true);
     try {
-      const updates: Record<string, unknown> = {};
+      const updates: import('@/integrations/supabase/types').TablesUpdate<'profiles'> = {};
       if (editValues.full_name !== undefined) updates.full_name = editValues.full_name;
       if (editValues.phone !== undefined) updates.phone = editValues.phone || null;
       if (editValues.national_id !== undefined) updates.national_id = editValues.national_id || null;

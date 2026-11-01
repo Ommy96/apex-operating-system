@@ -140,7 +140,6 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
             const cellValue = Number(disaggValues[cat.id]?.[val] || 0);
             rows.push({
               indicator_id: indicatorId,
-              organization_id: orgId,
               period_start: periodStart,
               period_end: periodEnd,
               actual_value: cellValue,
@@ -154,7 +153,6 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
         // Total row
         rows.push({
           indicator_id: indicatorId,
-          organization_id: orgId,
           period_start: periodStart,
           period_end: periodEnd,
           actual_value: total,
@@ -168,7 +166,6 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
       } else {
         const { error } = await supabase.from('indicator_values').insert({
           indicator_id: indicatorId,
-          organization_id: orgId,
           period_start: periodStart,
           period_end: periodEnd,
           actual_value: Number(singleValue) || 0,

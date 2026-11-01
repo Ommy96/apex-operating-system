@@ -311,7 +311,7 @@ export const BeneficiaryEnrollmentForm = ({
   // Update status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status, exitDate }: { id: string; status: string; exitDate?: string }) => {
-      const updates: Record<string, any> = { status };
+      const updates: import('@/integrations/supabase/types').TablesUpdate<'beneficiary_services'> = { status };
       if (exitDate) updates.exit_date = exitDate;
       if ((status || '').toLowerCase() === 'active') updates.exit_date = null;
       const { error } = await supabase.from('beneficiary_services').update(updates).eq('id', id);
