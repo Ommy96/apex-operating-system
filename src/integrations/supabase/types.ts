@@ -18215,6 +18215,10 @@ export type Database = {
         Args: { _beneficiary_id: string }
         Returns: Json
       }
+      beneficiary_visible_scoped: {
+        Args: { _b_id: string; _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_read_vulnerability_history: {
         Args: { _assessment: string; _org: string }
         Returns: boolean
@@ -18286,6 +18290,7 @@ export type Database = {
         Returns: string
       }
       get_org_subscription: { Args: { _org_id: string }; Returns: Json }
+      get_program_aggregate: { Args: { _program_id: string }; Returns: Json }
       get_shared_beneficiary_profile: {
         Args: { _token: string }
         Returns: Json
@@ -18342,6 +18347,10 @@ export type Database = {
       }
       has_valid_photo_consent: {
         Args: { _beneficiary_id: string }
+        Returns: boolean
+      }
+      household_visible_scoped: {
+        Args: { _h_id: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_donor_of_beneficiary: {
@@ -18424,6 +18433,10 @@ export type Database = {
         }
         Returns: Json
       }
+      revoke_staff_access: {
+        Args: { _note?: string; _org_id: string; _user_id: string }
+        Returns: Json
+      }
       rpc_allocate_donation: { Args: { _donation_id: string }; Returns: Json }
       save_vulnerability_assessment: {
         Args: { _org: string; _payload: Json; _previous?: string }
@@ -18484,8 +18497,20 @@ export type Database = {
         Args: { _beneficiary_id: string }
         Returns: Json
       }
+      user_assigned_program_ids: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: string[]
+      }
+      user_assigned_project_ids: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: string[]
+      }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_only_roles: {
+        Args: { _org_id: string; _role_names: string[]; _user_id: string }
         Returns: boolean
       }
       user_has_permission: {
@@ -18496,6 +18521,18 @@ export type Database = {
           _resource: string
           _user_id: string
         }
+        Returns: boolean
+      }
+      user_is_field_scoped: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_is_org_elevated: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_is_program_scoped: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       vulnerability_access: {
