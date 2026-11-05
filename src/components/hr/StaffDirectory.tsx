@@ -16,6 +16,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, UserPlus, RefreshCw, Mail, Loader2, Save } from 'lucide-react';
 import { AddStaffMemberSheet } from './AddStaffMemberSheet';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ShieldOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -59,6 +71,7 @@ const EMPLOYMENT_TYPE_COLORS: Record<string, string> = {
 export function StaffDirectory() {
   const { currentOrganization } = useOrganization();
   const { can, isSuperAdmin } = usePermissions();
+  const { user } = useAuth();
   const orgId = currentOrganization?.organization_id;
   const queryClient = useQueryClient();
 
@@ -69,6 +82,8 @@ export function StaffDirectory() {
   const [editValues, setEditValues] = useState<Partial<StaffMember>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [resendingFor, setResendingFor] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<StaffMember | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const canManageStaff = isSuperAdmin || can.manageStaff;
 

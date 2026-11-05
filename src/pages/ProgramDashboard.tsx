@@ -17,6 +17,8 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { usePermissions } from "@/hooks/usePermissions";
+import { ProgramAggregateBanner } from "@/components/programs/ProgramAggregateBanner";
 import { ProgramObservations, ProgramIndicators } from "@/components/programs";
 import { ProgramRollups } from "@/components/programs/ProgramRollups";
 import { ProgramProjects } from "@/components/programs/ProgramProjects";
@@ -52,6 +54,7 @@ const ProgramDashboard = () => {
   });
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
+  const { isProgramScoped } = usePermissions();
   const [activeTab, setActiveTab] = useState("overview");
 
   // Consolidated tab map: each new tab renders the union of the old sub-tabs listed.
