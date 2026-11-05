@@ -32,6 +32,7 @@ const ProgramReports = lazy(() => import("./pages/ProgramReports"));
 const ProjectEligibility = lazy(() => import("./pages/ProjectEligibility"));
 const BeneficiaryEligibility = lazy(() => import("./pages/BeneficiaryEligibility"));
 const LeadWorkspace = lazy(() => import("./pages/LeadWorkspace"));
+const StaffWorkspace = lazy(() => import("./pages/StaffWorkspace"));
 const ProgramManagerWorkspace = lazy(() => import("./pages/ProgramManagerWorkspace"));
 const BurnVsImpact = lazy(() => import("./pages/BurnVsImpact"));
 const AllProjects = lazy(() => import("./pages/AllProjects"));
@@ -304,6 +305,9 @@ const App = () => (
               <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
                 <DashboardLayout><LazyRoute><BeneficiaryEligibility /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
+            } />
+            <Route path="/workspace" element={
+              <ProtectedRoute><DashboardLayout><LazyRoute><StaffWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
             <Route path="/workspace/lead" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><LeadWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>

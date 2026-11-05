@@ -192,6 +192,7 @@ const ProgramDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {isProgramScoped && <ProgramAggregateBanner programId={programId} />}
       {/* ─── Hero Header ─── */}
       <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/[0.06] via-accent/[0.04] to-transparent p-6 md:p-8">
         {/* Decorative blobs */}
