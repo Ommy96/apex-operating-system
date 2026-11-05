@@ -87,6 +87,35 @@ export function StaffDirectory() {
 
   const canManageStaff = isSuperAdmin || can.manageStaff;
 
+  // Ends a departing staff member's access on the next request: deactivates
+  // their role assignments, ends team memberships and reassigns their pending
+  // approvals to the approving admin. Historical records are never deleted;
+  // access can be restored by assigning the roles again in Roles & Access.
+  const handleRevokeAccess = async () => {
+    if (!revokeTarget || !orgId) return;
+    setIsRevoking(true);
+    const { data, error } = await supabase.rpc('revoke_staff_access', {
+      _org_id: orgId,
+      _user_id: revokeTarget.user_id,
+      _note: null,
+    });
+    setIsRevoking(false);
+    if (error) {
+      toast.error(error.message || 'Could not end access');
+      return;
+    }
+    const summary = (data || {}) as Record<string, number>;
+    toast.success(
+      `Access ended for ${revokeTarget.full_name}` +
+        (summary.approvals_reassigned
+          ? ` — ${summary.approvals_reassigned} pending approval(s) reassigned to you`
+          : '')
+    );
+    setRevokeTarget(null);
+    queryClient.invalidateQueries({ queryKey: ['staff-members', orgId] });
+    queryClient.invalidateQueries({ queryKey: ['rbac-assignments-staff', orgId] });
+  };
+
   // Fetch staff members by joining profiles + organization_members
   const { data: staffMembers, isLoading } = useQuery({
     queryKey: ['staff-members', orgId],
@@ -341,6 +370,16 @@ export function StaffDirectory() {
                                 )}
                               </Button>
                             )}
+                            {status === 'active' && s.user_id !== user?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive"
+                                onClick={() => setRevokeTarget(s)}
+                              >
+                                <ShieldOff className="h-3.5 w-3.5 mr-1" /> End access
+                              </Button>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>
@@ -454,6 +493,29 @@ export function StaffDirectory() {
       </Sheet>
 
       <AddStaffMemberSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
+
+      <AlertDialog open={!!revokeTarget} onOpenChange={(open) => !open && setRevokeTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End access for {revokeTarget?.full_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Their roles and team assignments end immediately; any pending approvals assigned to
+              them are reassigned to you. Their historical records and past submissions are kept.
+              Access can be restored later by assigning their roles again in Roles &amp; Access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => { e.preventDefault(); handleRevokeAccess(); }}
+              disabled={isRevoking}
+            >
+              {isRevoking ? 'Ending…' : 'End access'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
