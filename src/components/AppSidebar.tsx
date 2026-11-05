@@ -311,6 +311,7 @@ export function AppSidebar() {
     {
       label: "My work",
       items: [
+        { title: "My Workspace", url: "/workspace", icon: LayoutGrid, show: true },
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
         { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },

@@ -5,6 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useOrganization } from './useOrganization';
 import { isSuperAdmin } from '@/lib/superAdmin';
+import {
+  isProgramScopedRoleSet,
+  isStaffScopedRoleSet,
+} from '@/lib/rbacRoles';
 
 export interface RbacRole {
   role_id: string;
@@ -191,13 +195,17 @@ export function usePermissions() {
   const isLoading = permissionsLoading || rolesLoading;
   const primaryRole = roles.length > 0 ? roles[0] : null;
 
-  // Capture-first field roles: the user holds only field_officer / data_entry
-  // roles in this org (and no org-wide elevation). Used to render the reduced,
-  // capture-first shell instead of the full management UI.
-  const isFieldOfficer =
-    !fullAccess &&
-    roles.length > 0 &&
-    roles.every((r) => r.role_name === 'field_officer' || r.role_name === 'data_entry');
+  // Capture-first field roles: the user holds only field_officer / data_entry /
+  // staff_member roles in this org (and no org-wide elevation). Used to render
+  // the reduced, capture-first shell instead of the full management UI, and to
+  // land these users in the staff portal. Mirrors the DB user_is_field_scoped.
+  const roleNames = roles.map((r) => r.role_name);
+  const isFieldOfficer = !fullAccess && isStaffScopedRoleSet(roleNames);
+
+  // Program Manager with no broader role: full detail only for assigned
+  // programmes (enforced in RLS); other programmes show aggregates only.
+  // Mirrors the DB user_is_program_scoped helper.
+  const isProgramScoped = !fullAccess && isProgramScopedRoleSet(roleNames);
 
   return {
     permissions,
@@ -211,5 +219,6 @@ export function usePermissions() {
     isSuperAdmin: superAdmin,
     isOrgAdmin: orgAdmin,
     isFieldOfficer,
+    isProgramScoped,
   };
 }

@@ -1,3 +1,14 @@
+# Permission system gap closure (audit 2026-11-02)
+- [x] Audit roles, catalogue, assignment scoping, Phase 5.2 comparison (report saved to Files).
+- [x] Add missing system roles (Project Manager, Staff Member) + aggregate permission; extend role seeding.
+- [x] Enforce role scoping in RLS (beneficiaries, households) with assigned-programme/project checks.
+- [x] Aggregate-only RPC `get_program_aggregate` with minimum-cell-size suppression + programme dashboard banner.
+- [x] Staff portal `/workspace` (operational) with default landing for field-scoped roles.
+- [x] Assignment revocation RPC + HR "End access" action.
+- [x] Automated role-constant tests + live RLS probes (program manager, field staff, revocation, cross-org).
+- [ ] Donor/Sponsor staff RBAC role: intentionally skipped — donor access exists via the donor portal; recorded as a design conflict.
+- [ ] Browser walkthrough signed-in as non-admin — external unmanaged Supabase provides no usable browser session.
+
 # Structured vulnerability assessments
 
 ## Family and guardian capture

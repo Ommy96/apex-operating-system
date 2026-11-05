@@ -43,7 +43,8 @@ const Dashboard = () => {
     if (leadLoading) return;
     if (isAdmin || isManagement) return;
     if (!permLoading && isFieldOfficer) {
-      navigate("/field-mode", { replace: true });
+      // Field staff land in the operational staff portal, not the admin shell.
+      navigate("/workspace", { replace: true });
       return;
     }
     if (isProjectLead) {

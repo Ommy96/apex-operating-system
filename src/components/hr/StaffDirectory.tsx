@@ -16,6 +16,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, UserPlus, RefreshCw, Mail, Loader2, Save } from 'lucide-react';
 import { AddStaffMemberSheet } from './AddStaffMemberSheet';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ShieldOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -59,6 +71,7 @@ const EMPLOYMENT_TYPE_COLORS: Record<string, string> = {
 export function StaffDirectory() {
   const { currentOrganization } = useOrganization();
   const { can, isSuperAdmin } = usePermissions();
+  const { user } = useAuth();
   const orgId = currentOrganization?.organization_id;
   const queryClient = useQueryClient();
 
@@ -69,8 +82,39 @@ export function StaffDirectory() {
   const [editValues, setEditValues] = useState<Partial<StaffMember>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [resendingFor, setResendingFor] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<StaffMember | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const canManageStaff = isSuperAdmin || can.manageStaff;
+
+  // Ends a departing staff member's access on the next request: deactivates
+  // their role assignments, ends team memberships and reassigns their pending
+  // approvals to the approving admin. Historical records are never deleted;
+  // access can be restored by assigning the roles again in Roles & Access.
+  const handleRevokeAccess = async () => {
+    if (!revokeTarget || !orgId) return;
+    setIsRevoking(true);
+    const { data, error } = await supabase.rpc('revoke_staff_access', {
+      _org_id: orgId,
+      _user_id: revokeTarget.user_id,
+      _note: null,
+    });
+    setIsRevoking(false);
+    if (error) {
+      toast.error(error.message || 'Could not end access');
+      return;
+    }
+    const summary = (data || {}) as Record<string, number>;
+    toast.success(
+      `Access ended for ${revokeTarget.full_name}` +
+        (summary.approvals_reassigned
+          ? ` — ${summary.approvals_reassigned} pending approval(s) reassigned to you`
+          : '')
+    );
+    setRevokeTarget(null);
+    queryClient.invalidateQueries({ queryKey: ['staff-members', orgId] });
+    queryClient.invalidateQueries({ queryKey: ['rbac-assignments-staff', orgId] });
+  };
 
   // Fetch staff members by joining profiles + organization_members
   const { data: staffMembers, isLoading } = useQuery({
@@ -326,6 +370,16 @@ export function StaffDirectory() {
                                 )}
                               </Button>
                             )}
+                            {status === 'active' && s.user_id !== user?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive"
+                                onClick={() => setRevokeTarget(s)}
+                              >
+                                <ShieldOff className="h-3.5 w-3.5 mr-1" /> End access
+                              </Button>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>
@@ -439,6 +493,29 @@ export function StaffDirectory() {
       </Sheet>
 
       <AddStaffMemberSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
+
+      <AlertDialog open={!!revokeTarget} onOpenChange={(open) => !open && setRevokeTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End access for {revokeTarget?.full_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Their roles and team assignments end immediately; any pending approvals assigned to
+              them are reassigned to you. Their historical records and past submissions are kept.
+              Access can be restored later by assigning their roles again in Roles &amp; Access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => { e.preventDefault(); handleRevokeAccess(); }}
+              disabled={isRevoking}
+            >
+              {isRevoking ? 'Ending…' : 'End access'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
