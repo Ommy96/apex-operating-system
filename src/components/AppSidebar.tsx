@@ -23,7 +23,7 @@ import {
   FileText, ClipboardCheck, Presentation,
   Megaphone, Zap, BrainCircuit, Activity, UserPlus, Building2, HandCoins, GraduationCap,
   MessageSquare, ShieldCheck, AlertTriangle, Banknote, ReceiptText,
-  BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart,
+  BookOpen, BookHeart, CalendarCheck, Map, ShoppingCart, CheckSquare, ClipboardList,
   Layers, FolderKanban, GanttChart as GanttIcon,
   TrendingUp, Home, MapPin, Network, LayoutGrid, Package,
 } from "lucide-react";

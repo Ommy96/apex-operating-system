@@ -20,7 +20,7 @@ import {
   type EntryType, type CaseStatus, type CasePriority,
 } from "@/hooks/useBeneficiaryCases";
 import { useWorkManagement, useCaseTasks } from "@/hooks/useWorkManagement";
-import { allowedCaseTransitions, type ManagedCaseStatus } from "@/lib/workManagement";
+import { allowedCaseTransitions, allowedTaskTransitions, type ManagedCaseStatus } from "@/lib/workManagement";
 import { usePermissions } from "@/hooks/usePermissions";
 
 const ENTRY_TYPES: { value: EntryType; label: string; icon: any }[] = [
@@ -96,7 +96,7 @@ export default function CaseDetail() {
           <div className="flex items-center gap-2">
             {!caseIsTerminal && <Select value={kase.case_status} onValueChange={(v) => requestStatusChange(v as CaseStatus)} disabled={updateCase.isPending}>
               <SelectTrigger className="w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value={kase.case_status} disabled>{kase.case_status.replaceAll("_", " ")}</SelectItem>{nextStatuses.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g," ")}</SelectItem>)}</SelectContent>
+            <SelectContent><SelectItem value={kase.case_status} disabled>{kase.case_status.replace(/_/g, " ")}</SelectItem>{nextStatuses.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g," ")}</SelectItem>)}</SelectContent>
             </Select>}
             {!caseIsTerminal && <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
               <SelectTrigger className="w-full sm:w-[120px]"><SelectValue /></SelectTrigger>
@@ -115,7 +115,7 @@ export default function CaseDetail() {
           {kase.is_sensitive && <Badge variant="outline" className="gap-1"><LockKeyhole className="h-3 w-3" /> Sensitive</Badge>}
           {can.viewSensitiveCases && !caseIsTerminal && <label className="flex items-center gap-2"><Checkbox checked={kase.is_sensitive} onCheckedChange={(checked) => updateCase.mutate({ id: kase.id, patch: { is_sensitive: checked === true } })} /> Mark sensitive</label>}
         </div>
-        {caseIsTerminal && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replaceAll("_", " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
+        {caseIsTerminal && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replace(/_/g, " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
       </div>
 
       <CaseTasksPanel caseId={kase.id} tasks={linkedTasks} isLoading={tasksLoading} staff={orgMembers.data ?? []} canManage={can.manageTasks} canView={can.viewTasks} onStatusChange={(taskId, status) => updateTaskStatus.mutate({ id: taskId, status })} />
@@ -202,7 +202,7 @@ function CaseTasksPanel({ caseId, tasks, isLoading, staff, canManage, canView, o
           <div className="min-w-0"><p className="truncate text-sm font-medium">{task.title}</p><p className="text-xs text-muted-foreground">{assigned?.full_name || "Unassigned"}{task.due_date ? ` · Due ${task.due_date}` : ""}{task.is_sensitive ? " · Sensitive" : ""}</p></div>
           <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as "todo" | "in_progress" | "blocked" | "completed" | "cancelled")} disabled={transitions.length === 0}>
             <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
-            <SelectContent>{transitions.length ? transitions.map((status) => <SelectItem key={status} value={status}>{status.replaceAll("_", " ")}</SelectItem>) : <SelectItem value={task.status} disabled>{task.status.replaceAll("_", " ")}</SelectItem>}</SelectContent>
+            <SelectContent><SelectItem value={task.status} disabled>{task.status.replace(/_/g, " ")}</SelectItem>{transitions.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
           </Select>
         </div>;
       })}

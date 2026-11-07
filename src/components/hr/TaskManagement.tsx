@@ -142,7 +142,7 @@ export function TaskManagement() {
         })}</div>
       </section>}
 
-      <div className="flex gap-1.5 flex-wrap">{["all", "todo", "in_progress", "blocked", "completed", "cancelled"].map((status) => <Button key={status} size="sm" variant={filter === status ? "default" : "outline"} onClick={() => setFilter(status)} className="text-xs h-7 px-2.5">{status === "all" ? "All" : status.replaceAll("_", " ")}</Button>)}</div>
+      <div className="flex gap-1.5 flex-wrap">{["all", "todo", "in_progress", "blocked", "completed", "cancelled"].map((status) => <Button key={status} size="sm" variant={filter === status ? "default" : "outline"} onClick={() => setFilter(status)} className="text-xs h-7 px-2.5">{status === "all" ? "All" : status.replace(/_/g, " ")}</Button>)}</div>
 
       {tasks.isLoading ? <div className="space-y-2"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : !filtered.length ? <Card className="border-dashed"><CardContent className="py-8 text-center text-muted-foreground"><CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-40" /><p>No tasks found</p></CardContent></Card> : <div className="space-y-2">
         {filtered.map((task) => {
@@ -156,14 +156,14 @@ export function TaskManagement() {
                 <div className="shrink-0 rounded-md bg-primary/10 p-2"><CheckSquare className="h-4 w-4 text-primary" /></div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{task.title}</p>
-                  <p className="text-xs text-muted-foreground">{assignee?.full_name || "Unassigned"}{task.due_date && ` · Due ${format(new Date(`${task.due_date}T00:00:00`), "MMM d")}`}{linkedCase?.case_number && ` · ${linkedCase.case_number}`}{task.related_record_type && ` · ${task.related_record_type.replaceAll("_", " ")}`}</p>
+                  <p className="text-xs text-muted-foreground">{assignee?.full_name || "Unassigned"}{task.due_date && ` · Due ${format(new Date(`${task.due_date}T00:00:00`), "MMM d")}`}{linkedCase?.case_number && ` · ${linkedCase.case_number}`}{task.related_record_type && ` · ${task.related_record_type.replace(/_/g, " ")}`}</p>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <Badge className={priorityColors[task.priority]}>{task.priority}</Badge>
                 <Select value={task.status} onValueChange={(value) => updateTaskStatus.mutate({ id: task.id, status: value as TaskStatus })} disabled={transitions.length === 0 || updateTaskStatus.isPending}>
                   <SelectTrigger className="h-7 w-auto min-w-[100px] text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value={task.status} disabled>{task.status.replaceAll("_", " ")}</SelectItem>{transitions.map((status) => <SelectItem key={status} value={status}>{status.replaceAll("_", " ")}</SelectItem>)}</SelectContent>
+                  <SelectContent><SelectItem value={task.status} disabled>{task.status.replace(/_/g, " ")}</SelectItem>{transitions.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>

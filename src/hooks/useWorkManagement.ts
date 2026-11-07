@@ -134,11 +134,9 @@ export function useWorkManagement() {
 
   const updateTaskStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: WorkTask["status"] }) => {
-      const { data, error } = await sb.from("staff_tasks").select("status").eq("id", id).single();
-      if (error) throw error;
       const { error: updateError } = await sb.from("staff_tasks").update({ status }).eq("id", id);
       if (updateError) throw updateError;
-      return { id, priorStatus: data.status as WorkTask["status"] };
+      return { id };
     },
     onSuccess: ({ id }) => {
       void queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
@@ -182,7 +180,7 @@ export function useWorkRecordOptions(type: WorkRecordType | "none") {
         need: { table: "beneficiary_needs", columns: "id,status,created_at,need_type:need_types(label)", date: "created_at", label: (r) => r.need_type?.label || `Need · ${r.status}` },
         home_visit: { table: "home_visits", columns: "id,visit_date,created_at", date: "visit_date", label: () => "Home visit" },
         school_visit: { table: "school_visits", columns: "id,visit_date,institution_name", date: "visit_date", label: (r) => r.institution_name || "School visit" },
-        donor_request: { table: "donation_intents", columns: "id,kind,created_at", date: "created_at", label: (r) => `Donation request · ${String(r.kind).replaceAll("_", " ")}` },
+        donor_request: { table: "donation_intents", columns: "id,kind,created_at", date: "created_at", label: (r) => `Donation request · ${String(r.kind).replace(/_/g, " ")}` },
       };
       const selected = config[type];
       let query = sb.from(selected.table).select(selected.columns).eq("organization_id", orgId).limit(100);
