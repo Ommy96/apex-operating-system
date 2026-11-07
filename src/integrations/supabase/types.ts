@@ -18258,10 +18258,6 @@ export type Database = {
         Args: { _org_id: string }
         Returns: boolean
       }
-      case_is_visible_scoped: {
-        Args: { _case_id: string; _org_id: string; _user_id: string }
-        Returns: boolean
-      }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
         Returns: boolean
@@ -18549,10 +18545,6 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
       slugify: { Args: { _txt: string }; Returns: string }
       soundex: { Args: { "": string }; Returns: string }
-      staff_task_is_visible_scoped: {
-        Args: { _org_id: string; _task_id: string; _user_id: string }
-        Returns: boolean
-      }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -18588,10 +18580,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      user_is_donor_for_org: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
       user_is_field_scoped: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -18611,10 +18599,6 @@ export type Database = {
       vulnerability_safe_priority: {
         Args: { _ben: string; _entity: string; _house: string; _org: string }
         Returns: number
-      }
-      work_management_source_org: {
-        Args: { _org_id: string; _record_id: string; _record_type: string }
-        Returns: boolean
       }
     }
     Enums: {
