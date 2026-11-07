@@ -1966,6 +1966,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           id: string
+          is_sensitive: boolean
           opened_date: string
           organization_id: string
           priority: string
@@ -1986,6 +1987,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          is_sensitive?: boolean
           opened_date?: string
           organization_id: string
           priority?: string
@@ -2006,6 +2008,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          is_sensitive?: boolean
           opened_date?: string
           organization_id?: string
           priority?: string
@@ -16100,15 +16103,22 @@ export type Database = {
         Row: {
           assigned_by: string | null
           assigned_to: string | null
+          case_id: string | null
           completed_at: string | null
           created_at: string
           description: string | null
           due_date: string | null
           id: string
+          is_sensitive: boolean
           organization_id: string
           priority: string
           program_id: string | null
           project_id: string | null
+          related_record_id: string | null
+          related_record_type: string | null
+          source_event_type: string | null
+          source_record_id: string | null
+          source_record_type: string | null
           status: string
           tags: string[] | null
           title: string
@@ -16117,15 +16127,22 @@ export type Database = {
         Insert: {
           assigned_by?: string | null
           assigned_to?: string | null
+          case_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
           id?: string
+          is_sensitive?: boolean
           organization_id: string
           priority?: string
           program_id?: string | null
           project_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          source_event_type?: string | null
+          source_record_id?: string | null
+          source_record_type?: string | null
           status?: string
           tags?: string[] | null
           title: string
@@ -16134,21 +16151,35 @@ export type Database = {
         Update: {
           assigned_by?: string | null
           assigned_to?: string | null
+          case_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
           id?: string
+          is_sensitive?: boolean
           organization_id?: string
           priority?: string
           program_id?: string | null
           project_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          source_event_type?: string | null
+          source_record_id?: string | null
+          source_record_type?: string | null
           status?: string
           tags?: string[] | null
           title?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "staff_tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "beneficiary_cases"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "staff_tasks_organization_id_fkey"
             columns: ["organization_id"]
@@ -18227,6 +18258,10 @@ export type Database = {
         Args: { _org_id: string }
         Returns: boolean
       }
+      case_is_visible_scoped: {
+        Args: { _case_id: string; _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
         Returns: boolean
@@ -18239,6 +18274,24 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      create_or_get_source_task: {
+        Args: {
+          _assigned_to?: string
+          _case_id?: string
+          _description?: string
+          _due_date?: string
+          _event_type: string
+          _is_sensitive?: boolean
+          _org_id: string
+          _priority?: string
+          _program_id?: string
+          _project_id?: string
+          _source_record_id: string
+          _source_record_type: string
+          _title: string
+        }
+        Returns: string
       }
       daitch_mokotoff: { Args: { "": string }; Returns: string[] }
       dmetaphone: { Args: { "": string }; Returns: string }
@@ -18294,6 +18347,14 @@ export type Database = {
       get_shared_beneficiary_profile: {
         Args: { _token: string }
         Returns: Json
+      }
+      get_staff_task_workload: {
+        Args: { _org_id: string }
+        Returns: {
+          open_tasks: number
+          overdue_tasks: number
+          staff_user_id: string
+        }[]
       }
       get_stakeholder_portal_data: { Args: { _token: string }; Returns: Json }
       get_unique_beneficiary_count: {
@@ -18488,6 +18549,10 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
       slugify: { Args: { _txt: string }; Returns: string }
       soundex: { Args: { "": string }; Returns: string }
+      staff_task_is_visible_scoped: {
+        Args: { _org_id: string; _task_id: string; _user_id: string }
+        Returns: boolean
+      }
       switch_user_organization: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -18523,6 +18588,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_is_donor_for_org: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       user_is_field_scoped: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -18542,6 +18611,10 @@ export type Database = {
       vulnerability_safe_priority: {
         Args: { _ben: string; _entity: string; _house: string; _org: string }
         Returns: number
+      }
+      work_management_source_org: {
+        Args: { _org_id: string; _record_id: string; _record_type: string }
+        Returns: boolean
       }
     }
     Enums: {
