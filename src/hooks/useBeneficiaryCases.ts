@@ -35,6 +35,7 @@ export interface BeneficiaryCase {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  is_sensitive: boolean;
   beneficiary?: { id: string; display_name: string | null; first_name: string | null; last_name: string | null; unique_id: string | null } | null;
 }
 
@@ -189,7 +190,10 @@ export function useUpdateCase() {
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<BeneficiaryCase> }) => {
       const upd: any = { ...patch, updated_by: user?.id ?? null };
-      if ((patch.case_status === "closed" || patch.case_status === "resolved") && !patch.closed_date) {
+      if (patch.case_status && !patch.closure_reason?.trim() && ["closed", "resolved", "lost_to_follow_up"].includes(patch.case_status)) {
+        throw new Error("Record a reason before closing or resolving a case");
+      }
+      if (patch.case_status && ["closed", "resolved", "lost_to_follow_up"].includes(patch.case_status) && !patch.closed_date) {
         upd.closed_date = new Date().toISOString().slice(0, 10);
       }
       const { data, error } = await sb.from("beneficiary_cases").update(upd).eq("id", id).select().single();
@@ -199,6 +203,7 @@ export function useUpdateCase() {
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["beneficiary-case", vars.id] });
       qc.invalidateQueries({ queryKey: ["beneficiary-cases"] });
+      qc.invalidateQueries({ queryKey: ["case-tasks"] });
       toast({ title: "Case updated" });
     },
     onError: (e: any) => toast({ title: "Update failed", description: e.message, variant: "destructive" }),

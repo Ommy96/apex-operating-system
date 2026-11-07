@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft, ClipboardList, Plus, AlertTriangle, MapPin, CheckCircle2,
-  Clock, MessageSquare, ArrowRightLeft, FileText, User,
+  Clock, MessageSquare, ArrowRightLeft, FileText, User, LockKeyhole,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,10 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   useBeneficiaryCase, useCaseEntries, useCreateCaseEntry, useUpdateCase, useCompleteFollowUp,
   type EntryType, type CaseStatus, type CasePriority,
 } from "@/hooks/useBeneficiaryCases";
+import { useWorkManagement, useCaseTasks } from "@/hooks/useWorkManagement";
+import { allowedCaseTransitions, type ManagedCaseStatus } from "@/lib/workManagement";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const ENTRY_TYPES: { value: EntryType; label: string; icon: any }[] = [
   { value: "visit", label: "Visit", icon: MapPin },
@@ -36,11 +41,35 @@ export default function CaseDetail() {
   const { data: entries, isLoading: entriesLoading } = useCaseEntries(id);
   const updateCase = useUpdateCase();
   const completeFollowUp = useCompleteFollowUp();
+  const { can } = usePermissions();
+  const { orgMembers, updateTaskStatus } = useWorkManagement();
+  const { data: linkedTasks = [], isLoading: tasksLoading } = useCaseTasks(id);
   const [openEntry, setOpenEntry] = useState(false);
+  const [closeStatus, setCloseStatus] = useState<CaseStatus | null>(null);
+  const [closureReason, setClosureReason] = useState("");
 
   if (isLoading || !kase) return <div className="p-6 space-y-3"><Skeleton className="h-12 w-64" /><Skeleton className="h-96 w-full" /></div>;
 
   const benefName = (kase.beneficiary?.display_name ?? `${kase.beneficiary?.first_name ?? ""} ${kase.beneficiary?.last_name ?? ""}`.trim()) || "Unknown";
+  const nextStatuses = allowedCaseTransitions(kase.case_status as ManagedCaseStatus);
+  const caseIsTerminal = ["closed", "resolved", "lost_to_follow_up"].includes(kase.case_status);
+  const requestStatusChange = (next: CaseStatus) => {
+    if (["closed", "resolved", "lost_to_follow_up"].includes(next)) {
+      setCloseStatus(next);
+      setClosureReason("");
+      return;
+    }
+    updateCase.mutate({ id: kase.id, patch: { case_status: next } });
+  };
+  const confirmClosure = async () => {
+    if (!closeStatus || !closureReason.trim()) return;
+    try {
+      await updateCase.mutateAsync({ id: kase.id, patch: { case_status: closeStatus, closure_reason: closureReason.trim() } });
+      setCloseStatus(null);
+    } catch {
+      // The mutation reports the database validation message through its toast.
+    }
+  };
 
   return (
     <div className="space-y-6 p-6 max-w-5xl mx-auto">
@@ -65,23 +94,31 @@ export default function CaseDetail() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Select value={kase.case_status} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { case_status: v as CaseStatus } })}>
+            {!caseIsTerminal && <Select value={kase.case_status} onValueChange={(v) => requestStatusChange(v as CaseStatus)} disabled={updateCase.isPending}>
               <SelectTrigger className="w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(["open","in_progress","referred","resolved","closed","lost_to_follow_up"] as CaseStatus[]).map(s => <SelectItem key={s} value={s}>{s.replace(/_/g," ")}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
+              <SelectContent><SelectItem value={kase.case_status} disabled>{kase.case_status.replaceAll("_", " ")}</SelectItem>{nextStatuses.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g," ")}</SelectItem>)}</SelectContent>
+            </Select>}
+            {!caseIsTerminal && <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
               <SelectTrigger className="w-full sm:w-[120px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(["low","normal","high","critical"] as CasePriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setOpenEntry(true)}><Plus className="h-4 w-4 mr-1" /> Add entry</Button>
+              <SelectContent>{(["low","normal","high","critical"] as CasePriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+            </Select>}
+            {!caseIsTerminal && <Button onClick={() => setOpenEntry(true)}><Plus className="h-4 w-4 mr-1" /> Add entry</Button>}
           </div>
         </div>
         {kase.summary && <p className="text-sm mt-3 p-3 bg-muted/40 rounded-md">{kase.summary}</p>}
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          <span>Assigned to</span>
+          <Select value={kase.assigned_to || "unassigned"} onValueChange={(value) => updateCase.mutate({ id: kase.id, patch: { assigned_to: value === "unassigned" ? null : value } })} disabled={!can.manageCases || caseIsTerminal}>
+            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Select staff" /></SelectTrigger>
+            <SelectContent><SelectItem value="unassigned">Unassigned</SelectItem>{(orgMembers.data ?? []).map((member: any) => <SelectItem key={member.user_id} value={member.user_id}>{member.full_name || member.email}</SelectItem>)}</SelectContent>
+          </Select>
+          {kase.is_sensitive && <Badge variant="outline" className="gap-1"><LockKeyhole className="h-3 w-3" /> Sensitive</Badge>}
+          {can.viewSensitiveCases && !caseIsTerminal && <label className="flex items-center gap-2"><Checkbox checked={kase.is_sensitive} onCheckedChange={(checked) => updateCase.mutate({ id: kase.id, patch: { is_sensitive: checked === true } })} /> Mark sensitive</label>}
+        </div>
+        {caseIsTerminal && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replaceAll("_", " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
       </div>
+
+      <CaseTasksPanel caseId={kase.id} tasks={linkedTasks} isLoading={tasksLoading} staff={orgMembers.data ?? []} canManage={can.manageTasks} canView={can.viewTasks} onStatusChange={(taskId, status) => updateTaskStatus.mutate({ id: taskId, status })} />
 
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-base">Case timeline</CardTitle></CardHeader>
@@ -136,8 +173,42 @@ export default function CaseDetail() {
       </Card>
 
       <NewEntrySheet open={openEntry} onOpenChange={setOpenEntry} caseId={kase.id} beneficiaryId={kase.beneficiary_id} />
+      <Dialog open={Boolean(closeStatus)} onOpenChange={(open) => { if (!open) setCloseStatus(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{closeStatus === "lost_to_follow_up" ? "Record follow-up outcome" : `Close case as ${closeStatus ?? ""}`}</DialogTitle></DialogHeader>
+          <div className="space-y-2"><Label>Closure reason *</Label><Textarea value={closureReason} onChange={(event) => setClosureReason(event.target.value)} rows={4} placeholder="Record why this case is closing" /></div>
+          <DialogFooter><Button variant="outline" onClick={() => setCloseStatus(null)}>Cancel</Button><Button onClick={confirmClosure} disabled={!closureReason.trim() || updateCase.isPending}>Save closure</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function CaseTasksPanel({ caseId, tasks, isLoading, staff, canManage, canView, onStatusChange }: { caseId: string; tasks: Array<{ id: string; title: string; status: string; priority: string; assigned_to: string | null; due_date: string | null; is_sensitive: boolean }>; isLoading: boolean; staff: any[]; canManage: boolean; canView: boolean; onStatusChange: (id: string, status: "todo" | "in_progress" | "blocked" | "completed" | "cancelled") => void }) {
+  const { createTask } = useWorkManagement();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [assignee, setAssignee] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  if (!canView) return null;
+  const saveTask = () => createTask.mutate({ title, assigned_to: assignee || undefined, due_date: dueDate || undefined, case_id: caseId }, { onSuccess: () => { setOpen(false); setTitle(""); setAssignee(""); setDueDate(""); } });
+  return <Card>
+    <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3"><CardTitle className="text-base">Tasks for this case</CardTitle>{canManage && <Button size="sm" onClick={() => setOpen(true)}><Plus className="mr-1 h-4 w-4" /> Add task</Button>}</CardHeader>
+    <CardContent className="space-y-2">
+      {isLoading ? <Skeleton className="h-16 w-full" /> : !tasks.length ? <p className="text-sm text-muted-foreground">No tasks linked to this case yet.</p> : tasks.map((task) => {
+        const transitions = allowedTaskTransitions(task.status as "todo" | "in_progress" | "blocked" | "completed" | "cancelled");
+        const assigned = staff.find((person: any) => person.user_id === task.assigned_to);
+        return <div key={task.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-2 last:border-0">
+          <div className="min-w-0"><p className="truncate text-sm font-medium">{task.title}</p><p className="text-xs text-muted-foreground">{assigned?.full_name || "Unassigned"}{task.due_date ? ` · Due ${task.due_date}` : ""}{task.is_sensitive ? " · Sensitive" : ""}</p></div>
+          <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as "todo" | "in_progress" | "blocked" | "completed" | "cancelled")} disabled={transitions.length === 0}>
+            <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+            <SelectContent>{transitions.length ? transitions.map((status) => <SelectItem key={status} value={status}>{status.replaceAll("_", " ")}</SelectItem>) : <SelectItem value={task.status} disabled>{task.status.replaceAll("_", " ")}</SelectItem>}</SelectContent>
+          </Select>
+        </div>;
+      })}
+    </CardContent>
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent><DialogHeader><DialogTitle>Add case task</DialogTitle></DialogHeader><div className="space-y-3"><div><Label>Task title *</Label><Input value={title} onChange={(event) => setTitle(event.target.value)} /></div><div><Label>Assign to</Label><Select value={assignee || "unassigned"} onValueChange={(value) => setAssignee(value === "unassigned" ? "" : value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="unassigned">Unassigned</SelectItem>{staff.map((person: any) => <SelectItem key={person.user_id} value={person.user_id}>{person.full_name || person.email}</SelectItem>)}</SelectContent></Select></div><div><Label>Due date</Label><Input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></div></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={saveTask} disabled={!title.trim() || createTask.isPending}>Create task</Button></DialogFooter></DialogContent></Dialog>
+  </Card>;
 }
 
 function NewEntrySheet({ open, onOpenChange, caseId, beneficiaryId }: { open: boolean; onOpenChange: (o: boolean) => void; caseId: string; beneficiaryId: string }) {

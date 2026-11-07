@@ -152,6 +152,13 @@ export function usePermissions() {
     viewHR: fullAccess || permissions.includes('hr.view.staff'),
     manageStaff: fullAccess || permissions.includes('users.manage.members') || permissions.includes('users.manage.staff') || permissions.includes('settings.manage.org_settings'),
 
+    // Task and case management
+    viewTasks: fullAccess || permissions.includes('tasks.view.tasks') || permissions.includes('tasks.manage.tasks'),
+    manageTasks: fullAccess || permissions.includes('tasks.manage.tasks'),
+    viewCases: fullAccess || permissions.includes('cases.view.cases') || permissions.includes('cases.manage.cases'),
+    manageCases: fullAccess || permissions.includes('cases.manage.cases'),
+    viewSensitiveCases: fullAccess || permissions.includes('cases.view.sensitive'),
+
     // Communications
     viewCommunications: fullAccess || permissions.includes('communications.view.communications'),
 

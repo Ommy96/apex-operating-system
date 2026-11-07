@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Target, Calendar, ClipboardList, FileText } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const IndicatorManagement = lazy(() => import("./IndicatorManagement"));
 const MECalendar = lazy(() => import("./MECalendar"));
@@ -33,6 +34,7 @@ function TabFallback() {
 }
 
 export default function MEConsolidated() {
+  const { can } = usePermissions();
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");
   const active: TabKey = useMemo(
@@ -68,9 +70,9 @@ export default function MEConsolidated() {
               <TabsTrigger value="forms" className="rounded-b-none data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary px-4 py-2">
                 Forms
               </TabsTrigger>
-              <TabsTrigger value="cases" className="rounded-b-none data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary px-4 py-2">
+              {can.viewCases && <TabsTrigger value="cases" className="rounded-b-none data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary px-4 py-2">
                 Cases
-              </TabsTrigger>
+              </TabsTrigger>}
               <TabsTrigger value="reports" className="rounded-b-none data-[state=active]:bg-background data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary px-4 py-2">
                 Reports
               </TabsTrigger>
@@ -85,7 +87,7 @@ export default function MEConsolidated() {
           {active === "indicators" && <IndicatorManagement />}
           {active === "data-collection" && <MECalendar />}
           {active === "forms" && <FormBuilderList />}
-          {active === "cases" && <CaseManagement />}
+          {active === "cases" && can.viewCases && <CaseManagement />}
           {active === "reports" && <ReportAssembly />}
         </Suspense>
       </ErrorBoundary>

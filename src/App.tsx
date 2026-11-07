@@ -105,6 +105,7 @@ const FormBuilderList = lazy(() => import("./pages/FormBuilderList"));
 const FormBuilderEditor = lazy(() => import("./pages/FormBuilderEditor"));
 const CaseManagement = lazy(() => import("./pages/CaseManagement"));
 const CaseDetail = lazy(() => import("./pages/CaseDetail"));
+const WorkTasks = lazy(() => import("./pages/WorkTasks"));
 const DataQualityDashboard = lazy(() => import("./pages/DataQualityDashboard"));
 const ReportAssembly = lazy(() => import("./pages/ReportAssembly"));
 const StakeholderAccessManagement = lazy(() => import("./pages/StakeholderAccessManagement"));
@@ -386,10 +387,19 @@ const App = () => (
                 <DashboardLayout><LazyRoute><FormBuilderEditor /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/cases" element={<Navigate to="/me?tab=cases" replace />} />
+            <Route path="/cases" element={
+              <ProtectedRoute requirePermission={{ module: 'cases', action: 'view', resource: 'cases' }}>
+                <DashboardLayout><LazyRoute><CaseManagement /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/cases/:id" element={
-              <ProtectedRoute requirePermission={{ module: 'me', action: 'view', resource: 'me' }}>
+              <ProtectedRoute requirePermission={{ module: 'cases', action: 'view', resource: 'cases' }}>
                 <DashboardLayout><LazyRoute><CaseDetail /></LazyRoute></DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/tasks" element={
+              <ProtectedRoute requirePermission={{ module: 'tasks', action: 'view', resource: 'tasks' }}>
+                <DashboardLayout><LazyRoute><WorkTasks /></LazyRoute></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/me/data-quality" element={

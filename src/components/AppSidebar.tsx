@@ -312,6 +312,8 @@ export function AppSidebar() {
       label: "My work",
       items: [
         { title: "My Workspace", url: "/workspace", icon: LayoutGrid, show: true },
+        { title: "Tasks", url: "/tasks", icon: CheckSquare, show: can.viewTasks },
+        { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewCases },
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms },
         { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
         { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
@@ -332,6 +334,7 @@ export function AppSidebar() {
       label: "People",
       items: [
         { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
+        { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewCases },
         { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
         { title: "Waiting list", url: "/waitlist", icon: UserPlus, show: can.viewBeneficiaries },
         { title: "Alumni", url: "/alumni", icon: GraduationCap, show: can.viewBeneficiaries },
@@ -377,6 +380,7 @@ export function AppSidebar() {
         { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
         { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
         { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
+        { title: "Tasks", url: "/tasks", icon: CheckSquare, show: can.viewTasks },
         { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
         { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries, featureFlag: 'field_mode' },

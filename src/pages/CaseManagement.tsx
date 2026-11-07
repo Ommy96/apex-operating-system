@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useBeneficiarySearch } from "@/hooks/useBeneficiarySearch";
 import { useNavigate } from "react-router-dom";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const statusBadge: Record<string, string> = {
   open: "bg-info/10 text-info",
@@ -40,6 +41,7 @@ export default function CaseManagement() {
   const [priority, setPriority] = useState<CasePriority | "all">("all");
   const [caseType, setCaseType] = useState<CaseType | "all">("all");
   const [openSheet, setOpenSheet] = useState(false);
+  const { can } = usePermissions();
 
   const { data: cases, isLoading } = useBeneficiaryCases({ search, status, priority, caseType });
 
@@ -49,7 +51,7 @@ export default function CaseManagement() {
         title="Case management"
         description="Track beneficiary support journeys, referrals and follow-ups"
         icon={ClipboardList}
-        actions={<Button onClick={() => setOpenSheet(true)}><Plus className="h-4 w-4 mr-1" /> Open case</Button>}
+        actions={can.manageCases ? <Button onClick={() => setOpenSheet(true)}><Plus className="h-4 w-4 mr-1" /> Open case</Button> : undefined}
       />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -87,7 +89,7 @@ export default function CaseManagement() {
           <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <h3 className="font-medium mb-1">No cases found</h3>
           <p className="text-sm text-muted-foreground mb-4">Open a case to track support delivered to a beneficiary.</p>
-          <Button onClick={() => setOpenSheet(true)}><Plus className="h-4 w-4 mr-1" /> Open case</Button>
+          {can.manageCases && <Button onClick={() => setOpenSheet(true)}><Plus className="h-4 w-4 mr-1" /> Open case</Button>}
         </CardContent></Card>
       ) : (
         <Card><CardContent className="p-0">
@@ -101,6 +103,7 @@ export default function CaseManagement() {
                       <span className="font-medium truncate">{name}</span>
                       <span className="text-xs text-muted-foreground">{c.case_number}</span>
                       {c.priority === "critical" && <AlertTriangle className="h-4 w-4 text-destructive" />}
+                      {c.is_sensitive && <Badge variant="outline">Sensitive</Badge>}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
                       {c.summary ?? <em>No summary</em>} · opened {c.opened_date}
@@ -119,7 +122,7 @@ export default function CaseManagement() {
         </CardContent></Card>
       )}
 
-      <NewCaseSheet open={openSheet} onOpenChange={setOpenSheet} />
+      {can.manageCases && <NewCaseSheet open={openSheet} onOpenChange={setOpenSheet} />}
     </div>
   );
 }

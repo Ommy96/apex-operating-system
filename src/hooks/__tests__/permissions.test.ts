@@ -49,6 +49,11 @@ function buildCan(permissions: string[], superAdmin: boolean) {
     viewPrograms: superAdmin || permissions.includes('programs.view.programs'),
     viewFinancials: superAdmin || permissions.includes('financial.view.financials'),
     viewHR: superAdmin || permissions.includes('hr.view.staff'),
+    viewTasks: superAdmin || permissions.includes('tasks.view.tasks') || permissions.includes('tasks.manage.tasks'),
+    manageTasks: superAdmin || permissions.includes('tasks.manage.tasks'),
+    viewCases: superAdmin || permissions.includes('cases.view.cases') || permissions.includes('cases.manage.cases'),
+    manageCases: superAdmin || permissions.includes('cases.manage.cases'),
+    viewSensitiveCases: superAdmin || permissions.includes('cases.view.sensitive'),
     manageSettings: superAdmin || permissions.includes('settings.manage.org_settings'),
     viewDonors: superAdmin || permissions.includes('donors.view.donors'),
   };
@@ -170,6 +175,13 @@ describe('Permission check logic', () => {
       expect(can.viewPrograms).toBe(false);
       expect(can.viewFinancials).toBe(false);
     });
+  });
+
+  it('keeps sensitive case access separate from normal task and case access', () => {
+    const staffCan = buildCan(['tasks.view.tasks', 'cases.view.cases'], false);
+    expect(staffCan.viewTasks).toBe(true);
+    expect(staffCan.viewCases).toBe(true);
+    expect(staffCan.viewSensitiveCases).toBe(false);
   });
 });
 
