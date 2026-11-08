@@ -517,7 +517,9 @@ const App = () => (
               <Navigate to="/safeguarding?tab=whistleblower" replace />
             } />
             <Route path="/deduplication" element={
-              <Navigate to="/beneficiaries?tab=deduplication" replace />
+              <ProtectedRoute requirePermission={{ module: 'beneficiaries', action: 'view', resource: 'beneficiaries' }}>
+                <LazyRoute><DeduplicationReview /></LazyRoute>
+              </ProtectedRoute>
             } />
 
             {/* Sprint 3: Financial routes */}

@@ -71,7 +71,7 @@ export default function DataQualityDashboard() {
           </h1>
         </div>
         <div className="flex gap-2 ml-auto">
-          <Button asChild variant="outline"><Link to="/beneficiaries?tab=deduplication">Duplicate review</Link></Button>
+          <Button asChild variant="outline"><Link to="/deduplication">Duplicate review</Link></Button>
           {canCorrect && <Button disabled={scan.isPending} onClick={() => {
             toast({ title: 'Scan started' });
             scan.mutate(undefined, { onSuccess: d => toast({ title: 'Scan complete', description: `${d.new_issues} new issues; ${d.failing_records} failing records.` }), onError: e => toast({ title: 'Scan failed', description: e.message, variant: 'destructive' }) });

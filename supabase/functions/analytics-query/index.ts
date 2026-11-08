@@ -1008,29 +1008,33 @@ async function operationsHandler(supa: any, orgId: string, body: Body): Promise<
   }
 
   if (metric === "data_quality") {
-    const { data, error } = await supa.from("data_quality_flags")
-      .select("id, resolved, project_id, flag_type, created_at").eq("organization_id", orgId).limit(20000);
-    if (error) throw new Error(error.message);
-    const rows: any[] = data ?? [];
-    const open = rows.filter((r) => !r.resolved).length;
+    const rows: any[] = [];
+    for (let offset = 0; ; offset += 500) {
+      const { data, error } = await supa.from('data_quality_flags')
+        .select('id, is_resolved, flag_type, created_at').eq('organization_id', orgId)
+        .is('deleted_at', null).order('id').range(offset, offset + 499);
+      if (error) throw new Error(error.message);
+      rows.push(...(data ?? []));
+      if (!data || data.length < 500) break;
+    }
+    const open = rows.filter((r) => !r.is_resolved).length;
     const score = rows.length ? Math.max(0, Math.round(100 - (open / rows.length) * 100)) : 100;
     const byProject = new Map<string, { open: number; total: number }>();
     for (const r of rows) {
-      const k = r.project_id || "Unassigned";
+      const k = titleCase(lower(r.flag_type || 'unknown'));
       const b = byProject.get(k) ?? { open: 0, total: 0 };
-      b.total += 1; if (!r.resolved) b.open += 1; byProject.set(k, b);
+      b.total += 1; if (!r.is_resolved) b.open += 1; byProject.set(k, b);
     }
     const series = Array.from(byProject.entries())
       .map(([k, v]) => ({ key: k, label: k, value: Math.max(0, Math.round(100 - (v.open / v.total) * 100)) }))
       .sort((a, b) => a.value - b.value);
     const p: Prepared = {
       rows, dateCol: "created_at",
-      dimOf: (r, d) => d === "project" ? (r.project_id || "Unassigned")
+      dimOf: (r, d) => d === "project" ? 'Project attribution unavailable'
         : d === "flag_type" ? titleCase(lower(r.flag_type || "unknown"))
-        : (r.resolved ? "Resolved" : "Open"),
+        : (r.is_resolved ? "Resolved" : "Open"),
       distributionSpecs: [
         { dimension: "resolution", label: "Open vs resolved flags", chart: "donut" },
-        { dimension: "project", label: "Data-quality flags by project", chart: "bar" },
         { dimension: "flag_type", label: "Flag types", chart: "bar" },
       ],
       previousValue: null,
