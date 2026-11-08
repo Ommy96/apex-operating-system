@@ -1,13 +1,15 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus, Target, AlertCircle } from 'lucide-react';
+import { achievementPercentage } from '@/lib/resultsFramework';
 import { cn } from '@/lib/utils';
 import { Indicator, IndicatorTarget } from '@/hooks/useIndicators';
 
 interface IndicatorCardProps {
   indicator: Indicator;
-  currentValue: number;
+  currentValue: number | null;
   previousValue?: number;
+  denominator?: number | null;
   target?: IndicatorTarget;
   trendPercentage?: number;
   onClick?: () => void;
@@ -19,6 +21,7 @@ export function IndicatorCard({
   currentValue,
   previousValue,
   target,
+  denominator,
   trendPercentage = 0,
   onClick,
   className,
@@ -36,13 +39,14 @@ export function IndicatorCard({
       : true;
 
   // Calculate progress towards target
-  const targetProgress = target ? (currentValue / target.target_value) * 100 : null;
+  const targetProgress = achievementPercentage(currentValue, target?.target_value, indicator.trend_direction, denominator);
   const isOnTrack = targetProgress !== null ? targetProgress >= 80 : null;
-  const isBelowMinimum = target?.minimum_value && currentValue < target.minimum_value;
-  const isAboveStretch = target?.stretch_value && currentValue >= target.stretch_value;
+  const isBelowMinimum = currentValue != null && target?.minimum_value && currentValue < target.minimum_value;
+  const isAboveStretch = currentValue != null && target?.stretch_value && currentValue >= target.stretch_value;
 
   // Format value based on unit
-  const formatValue = (value: number) => {
+  const formatValue = (value: number | null) => {
+    if (value == null) return 'Unavailable';
     if (indicator.unit === 'percentage') {
       return `${value.toFixed(indicator.decimal_places)}%`;
     }
@@ -81,7 +85,7 @@ export function IndicatorCard({
           </div>
           
           {/* Target status indicator */}
-          {target && (
+          {target && targetProgress != null && (
             <div className="flex-shrink-0 ml-2">
               {isAboveStretch ? (
                 <div className="flex items-center gap-1 text-success">
@@ -116,7 +120,7 @@ export function IndicatorCard({
         </div>
 
         {/* Trend */}
-        {indicator.show_trend && (
+        {indicator.show_trend && currentValue != null && (
           <div className="flex items-center gap-2">
             {isNeutralTrend ? (
               <div className="flex items-center gap-1 text-muted-foreground">

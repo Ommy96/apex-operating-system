@@ -3,8 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { allocationTotal, money, ALLOCATION_FX_DISCLOSURE } from '@/lib/donorMoney';
+import { useDonorResults } from '@/hooks/useResultsFramework';
 import { AllocationAmount } from './AllocationAmount';
 export function DonorImpactFeed() {
+  const approvedResults = useDonorResults();
   const { donorAccount, donorAllocations = [], totals, receivedDonations = [], currency, sponsoredBeneficiaries = [] } = useDonorPortal();
   const { data: updates = [], isLoading, error } = useQuery({
     queryKey: ['donor-portal', 'feed', donorAccount?.id, currency, 'all'], enabled: !!donorAccount,
@@ -23,6 +25,7 @@ export function DonorImpactFeed() {
       <div><p className="text-sm text-muted-foreground">Allocated</p><p className="text-xl font-semibold">{allocationTotal(donorAllocations, currency)}</p></div>
     </div>
     <p className="text-xs text-muted-foreground">{ALLOCATION_FX_DISCLOSURE}</p>
+    <section className="space-y-3"><h2 className="font-semibold">Approved reporting results</h2>{approvedResults.isLoading ? <Skeleton className="h-24" /> : approvedResults.error ? <p role="alert" className="text-destructive">Could not load approved results.</p> : !approvedResults.data?.length ? <p className="text-sm text-muted-foreground">No approved shared results for your programmes.</p> : approvedResults.data.map(r => <article key={r.id} className="border-b py-3"><h3 className="font-medium">{r.snapshot.name}</h3><p className="text-lg font-semibold">{r.snapshot.current ?? 'Unavailable'} {r.snapshot.unit}</p><p className="text-xs text-muted-foreground">Reporting period: {r.period_start} – {r.period_end} · approved version {r.version}</p><p className="text-sm">{r.snapshot.definition}</p><p className="text-xs text-muted-foreground">{r.snapshot.limitations}</p></article>)}</section>
     {error && <p role="alert" className="text-destructive">Could not load approved updates: {error.message}</p>}
     {isLoading ? <Skeleton className="h-32" /> : updates.map((u: any) => <article key={u.id} className="border-b py-4"><h3 className="font-semibold">{u.title}</h3><p className="text-sm whitespace-pre-wrap">{u.content}</p><time className="text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</time></article>)}
     {donorAllocations.map((a: any) => <article key={a.id} className="border-b py-4 flex justify-between gap-3"><div><h3 className="font-semibold">Allocation recorded</h3><time className="text-xs text-muted-foreground">{new Date(a.allocated_at).toLocaleDateString()}</time></div><AllocationAmount allocation={a} currency={currency} /></article>)}

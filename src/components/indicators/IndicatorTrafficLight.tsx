@@ -1,12 +1,15 @@
+import { achievementPercentage } from '@/lib/resultsFramework';
 interface TrafficLightProps {
   actual: number | null | undefined;
   target: number | null | undefined;
   size?: 'sm' | 'md';
+  direction?: string;
+  denominator?: number | null;
 }
 
-export function getTrafficLightStatus(actual: number | null | undefined, target: number | null | undefined) {
-  if (actual == null || target == null || target === 0) return { color: 'grey', label: 'No Data', pct: 0 };
-  const pct = (actual / target) * 100;
+export function getTrafficLightStatus(actual: number | null | undefined, target: number | null | undefined, direction = 'up_is_good', denominator: number | null = 1) {
+  const pct = achievementPercentage(actual, target, direction, denominator);
+  if (pct == null) return { color: 'grey', label: 'No Data', pct: null };
   if (pct >= 80) return { color: 'green', label: 'On Track', pct };
   if (pct >= 50) return { color: 'amber', label: 'At Risk', pct };
   return { color: 'red', label: 'Off Track', pct };
@@ -26,8 +29,8 @@ const labelColors: Record<string, string> = {
   grey: 'text-muted-foreground',
 };
 
-export function IndicatorTrafficLight({ actual, target, size = 'sm' }: TrafficLightProps) {
-  const status = getTrafficLightStatus(actual, target);
+export function IndicatorTrafficLight({ actual, target, size = 'sm', direction, denominator }: TrafficLightProps) {
+  const status = getTrafficLightStatus(actual, target, direction, denominator);
   const dotSize = size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3';
 
   return (
@@ -38,10 +41,10 @@ export function IndicatorTrafficLight({ actual, target, size = 'sm' }: TrafficLi
   );
 }
 
-export function TrafficLightSummaryBar({ indicators }: { indicators: Array<{ actual?: number | null; target?: number | null }> }) {
+export function TrafficLightSummaryBar({ indicators }: { indicators: Array<{ actual?: number | null; target?: number | null; direction?: string; denominator?: number | null }> }) {
   const counts = { green: 0, amber: 0, red: 0, grey: 0 };
   indicators.forEach(i => {
-    const s = getTrafficLightStatus(i.actual, i.target);
+    const s = getTrafficLightStatus(i.actual, i.target, i.direction, i.denominator);
     counts[s.color as keyof typeof counts]++;
   });
 

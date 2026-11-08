@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { useIndicators } from "@/hooks/useIndicators";
 import { NewIndicatorWizard } from "@/components/indicators/NewIndicatorWizard";
+import { OUTCOME_EVIDENCE_WARNING } from '@/lib/resultsFramework';
 
 export default function IndicatorManagement() {
   const { data: indicators, isLoading } = useIndicators();
@@ -56,6 +57,7 @@ export default function IndicatorManagement() {
           }
         />
 
+        <p className="border-l-4 border-warning pl-3 text-sm font-medium">{OUTCOME_EVIDENCE_WARNING}</p>
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-2 mb-4">

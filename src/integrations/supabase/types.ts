@@ -18366,6 +18366,16 @@ export type Database = {
         Args: { _assessment: string }
         Returns: string
       }
+      approve_results_period: {
+        Args: {
+          _amends?: string
+          _end: string
+          _indicator: string
+          _reason?: string
+          _start: string
+        }
+        Returns: string
+      }
       archive_beneficiary: {
         Args: { _beneficiary_id: string; _note?: string; _reason?: string }
         Returns: Json
@@ -18600,6 +18610,32 @@ export type Database = {
           org_role: string
           user_id: string
         }[]
+      }
+      list_results_snapshots: {
+        Args: { _indicator: string }
+        Returns: {
+          amendment_reason: string | null
+          amends_id: string | null
+          approved_at: string
+          approved_by: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          indicator_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          snapshot: Json
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "indicator_reporting_snapshots"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       log_donor_document_access: { Args: { _id: string }; Returns: undefined }
       merge_beneficiaries: {

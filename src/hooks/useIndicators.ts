@@ -34,6 +34,7 @@ export interface Indicator {
   template_source_id: string | null;
   is_active: boolean;
   sort_order: number;
+  target_value?: number | null;
   created_at: string;
   updated_at: string;
   category?: IndicatorCategory;
@@ -148,7 +149,7 @@ export function useIndicators() {
           category:indicator_categories(*)
         `)
         .eq('organization_id', orgId)
-        .eq('is_active', true)
+        .is('deleted_at', null)
         .order('sort_order');
       if (error) throw error;
       return data as Indicator[];
@@ -229,7 +230,7 @@ export function useCreateIndicatorCategory() {
         .from('indicator_categories')
         .insert([{
           ...category,
-          organization_id: currentOrganization?.organization_id!,
+          organization_id: currentOrganization?.organization_id ?? '',
         }])
         .select()
         .single();
@@ -270,7 +271,7 @@ export function useCreateIndicator() {
           template_source_id: indicator.template_source_id ?? null,
           is_active: indicator.is_active ?? true,
           sort_order: indicator.sort_order ?? 0,
-          organization_id: currentOrganization?.organization_id!,
+          organization_id: currentOrganization?.organization_id ?? '',
         }])
         .select()
         .single();

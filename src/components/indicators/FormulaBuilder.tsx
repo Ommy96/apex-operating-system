@@ -14,62 +14,13 @@ import { Switch } from '@/components/ui/switch';
 
 // Available tables and their fields
 const DATA_SOURCES = {
-  children: {
-    label: 'Children (Beneficiaries)',
-    fields: ['id', 'status', 'gender', 'academic_level', 'residence', 'parental_status', 'grade'],
-    dateFields: ['enrollment_date', 'date_of_birth', 'created_at'],
-    filterFields: [
-      { key: 'status', label: 'Status', options: ['active', 'inactive', 'graduated', 'transferred'] },
-      { key: 'gender', label: 'Gender', options: ['male', 'female', 'other'] },
-      { key: 'academic_level', label: 'Academic Level', options: ['ecde', 'primary', 'secondary', 'tertiary'] },
-      { key: 'residence', label: 'Residence', options: ['boarding', 'day'] },
-    ],
-  },
-  alumni: {
-    label: 'Alumni',
-    fields: ['id', 'gender', 'current_status', 'graduation_year', 'exit_year'],
-    dateFields: ['created_at'],
-    filterFields: [
-      { key: 'current_status', label: 'Current Status', options: ['employed', 'self_employed', 'studying', 'unemployed'] },
-      { key: 'gender', label: 'Gender', options: ['male', 'female', 'other'] },
-    ],
-  },
-  feeding_program: {
-    label: 'Feeding Program',
-    fields: ['id', 'gender', 'type', 'academic_level', 'education_sponsorship'],
-    dateFields: ['created_at'],
-    filterFields: [
-      { key: 'gender', label: 'Gender', options: ['male', 'female', 'other'] },
-      { key: 'education_sponsorship', label: 'Has Sponsorship', options: ['true', 'false'] },
-    ],
-  },
-  self_empowerment: {
-    label: 'Self-Empowerment Loans',
-    fields: ['id', 'gender', 'amount_requested', 'amount_approved', 'amount_status', 'is_active'],
-    dateFields: ['start_date', 'created_at'],
-    numericFields: ['amount_requested', 'amount_approved'],
-    filterFields: [
-      { key: 'is_active', label: 'Active', options: ['true', 'false'] },
-      { key: 'amount_status', label: 'Status', options: ['pending', 'approved', 'disbursed', 'rejected'] },
-      { key: 'gender', label: 'Gender', options: ['male', 'female', 'other'] },
-    ],
-  },
-  home_visit_reports: {
-    label: 'Home Visit Reports',
-    fields: ['id', 'location', 'staff'],
-    dateFields: ['visit_date', 'created_at'],
-    filterFields: [
-      { key: 'location', label: 'Location', options: ['coastal', 'nairobi'] },
-    ],
-  },
-  school_visit_reports: {
-    label: 'School Visit Reports',
-    fields: ['id', 'location', 'staff', 'school'],
-    dateFields: ['visit_date', 'created_at'],
-    filterFields: [
-      { key: 'location', label: 'Location', options: ['coastal', 'nairobi'] },
-    ],
-  },
+  beneficiaries: { label: 'Beneficiaries — distinct people (output)', fields: ['id', 'status', 'gender'], dateFields: ['created_at'], numericFields: [] as string[], filterFields: [
+    { key: 'status', label: 'Status', options: ['active', 'inactive', 'graduated'] }, { key: 'gender', label: 'Gender', options: ['Male', 'Female'] },
+  ] },
+  beneficiary_services: { label: 'Programme reach — distinct people (output)', fields: ['beneficiary_id', 'status'], dateFields: ['enrolled_date'], numericFields: [] as string[], filterFields: [
+    { key: 'status', label: 'Status', options: ['Active', 'Inactive', 'Completed'] },
+  ] },
+  beneficiary_progress_logs: { label: 'Measured beneficiary progress', fields: ['beneficiary_id', 'progress_value', 'category'], dateFields: ['log_date'], numericFields: ['progress_value'], filterFields: [] as Array<{ key: string; label: string; options: string[] }>, },
 };
 
 interface FormulaBuilderProps {
@@ -85,7 +36,7 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
 
   const updateFilter = (filterKey: string, value: string) => {
     const filters = { ...(config.filters || {}), [filterKey]: value };
-    if (!value) delete filters[filterKey];
+    if (!value || value === 'any') delete filters[filterKey];
     onChange({ ...config, filters });
   };
 
@@ -131,7 +82,7 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
               filters={config.numerator?.filters || {}}
               onFilterChange={(key, value) => {
                 const filters = { ...(config.numerator?.filters || {}), [key]: value };
-                if (!value) delete filters[key];
+                if (!value || value === 'any') delete filters[key];
                 updateNumerator('filters', filters);
               }}
             />
@@ -159,7 +110,7 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
               filters={config.denominator?.filters || {}}
               onFilterChange={(key, value) => {
                 const filters = { ...(config.denominator?.filters || {}), [key]: value };
-                if (!value) delete filters[key];
+                if (!value || value === 'any') delete filters[key];
                 updateDenominator('filters', filters);
               }}
             />
@@ -211,12 +162,12 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
       {tableConfig && tableConfig.dateFields.length > 0 && (
         <div className="space-y-2">
           <Label>Date Field (for period filtering)</Label>
-          <Select value={config.date_field || ''} onValueChange={(value) => updateConfig('date_field', value)}>
+          <Select value={config.date_field || ''} onValueChange={(value) => updateConfig('date_field', value === 'none' ? undefined : value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select date field (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No date filter</SelectItem>
+              <SelectItem value="none">No date filter</SelectItem>
               {tableConfig.dateFields.map((field) => (
                 <SelectItem key={field} value={field}>
                   {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -259,7 +210,7 @@ export function FormulaBuilder({ formulaType, config, onChange }: FormulaBuilder
                     <SelectValue placeholder={`Any ${filter.label.toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     {filter.options.map((option) => (
                       <SelectItem key={option} value={option}>
                         {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -312,13 +263,13 @@ function DataSourceSelector({
             <Select
               key={filter.key}
               value={filters[filter.key] || ''}
-              onValueChange={(val) => onFilterChange(filter.key, val)}
+              onValueChange={(val) => onFilterChange(filter.key, val === 'any' ? '' : val)}
             >
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder={filter.label} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any</SelectItem>
+                <SelectItem value="any">Any</SelectItem>
                 {filter.options.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}

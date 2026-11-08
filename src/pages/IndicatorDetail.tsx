@@ -24,6 +24,7 @@ import { useIndicatorVersions, useUpdateIndicatorWithVersioning } from "@/hooks/
 import { useIndicatorTargets, useIndicatorValues } from "@/hooks/useIndicators";
 import { DisaggregationPanel } from "@/components/indicators/DisaggregationPanel";
 import { useDataQualityFlags } from "@/hooks/useDataQuality";
+import { ResultsPeriodPanel } from '@/components/indicators/ResultsPeriodPanel';
 
 function useIndicator(id?: string) {
   return useQuery({
@@ -69,6 +70,8 @@ export default function IndicatorDetail() {
       baseline_value: indicator?.baseline_value ?? "",
       target_value: indicator?.target_value ?? "",
       unit: indicator?.unit ?? "",
+      limitations: indicator?.limitations ?? '',
+      trend_direction: indicator?.trend_direction ?? 'up_is_good',
     });
     setEditing(true);
   };
@@ -154,11 +157,12 @@ export default function IndicatorDetail() {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="max-w-full overflow-x-auto justify-start">
           <TabsTrigger value="overview"><Tag className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
           <TabsTrigger value="definition"><Layers className="h-4 w-4 mr-1" /> Definition</TabsTrigger>
           <TabsTrigger value="targets">Targets</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>
+          <TabsTrigger value="reporting">Reporting periods</TabsTrigger>
           <TabsTrigger value="disaggregation"><PieChart className="h-4 w-4 mr-1" /> Disaggregation</TabsTrigger>
           <TabsTrigger value="history"><History className="h-4 w-4 mr-1" /> History</TabsTrigger>
           <TabsTrigger value="quality"><ShieldAlert className="h-4 w-4 mr-1" /> Quality</TabsTrigger>
@@ -205,6 +209,8 @@ export default function IndicatorDetail() {
         <TabsContent value="definition" className="space-y-4 mt-4">
           <Card>
             <CardContent className="space-y-4 pt-6">
+              <div><Label>Limitations</Label>{editing ? <Textarea value={form.limitations} onChange={e => setForm({ ...form, limitations: e.target.value })} /> : <p className="text-sm">{indicator.limitations || 'No limitations documented.'}</p>}</div>
+              <div><Label>Achievement direction</Label>{editing ? <select className="border rounded-md p-2 bg-background text-foreground" value={form.trend_direction} onChange={e => setForm({ ...form, trend_direction: e.target.value })}><option value="up_is_good">Higher is better</option><option value="down_is_good">Lower is better</option><option value="neutral">Neutral</option></select> : <p className="text-sm">{indicator.trend_direction === 'down_is_good' ? 'Lower is better' : 'Higher is better'}</p>}</div>
               <div>
                 <Label className="text-xs uppercase text-muted-foreground">Name</Label>
                 {editing ? (
@@ -321,8 +327,9 @@ export default function IndicatorDetail() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="reporting"><ResultsPeriodPanel indicatorId={indicator.id} organizationId={indicator.organization_id} /></TabsContent>
         <TabsContent value="disaggregation" className="mt-4">
-          <DisaggregationPanel indicatorId={id!} />
+          <DisaggregationPanel indicatorId={indicator.id} />
         </TabsContent>
         <TabsContent value="history" className="mt-4">
           <Card>
@@ -352,7 +359,7 @@ export default function IndicatorDetail() {
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
-          <IndicatorQualityTab indicatorId={id!} />
+          <IndicatorQualityTab indicatorId={indicator.id} />
         </TabsContent>
       </Tabs>
 

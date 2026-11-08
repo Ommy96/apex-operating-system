@@ -30,6 +30,7 @@ import { Indicator, useIndicatorTargets, useIndicatorValues } from '@/hooks/useI
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths } from 'date-fns';
+import { achievementPercentage } from '@/lib/resultsFramework';
 import { cn } from '@/lib/utils';
 import {
   LineChart,
@@ -158,7 +159,8 @@ export function IndicatorDetailView({
      (t.period_type === 'quarterly' && t.period_value === Math.ceil((new Date().getMonth() + 1) / 3)))
   );
 
-  const currentValue = computedValue?.current.value ?? 0;
+  const currentValue = computedValue?.current.value ?? null;
+  const achievement = achievementPercentage(currentValue, currentTarget?.target_value, indicator.trend_direction);
   const trendPercentage = computedValue?.trendPercentage ?? 0;
   
   const isPositiveTrend = trendPercentage > 0;
@@ -170,7 +172,8 @@ export function IndicatorDetailView({
       ? isNegativeTrend 
       : true;
 
-  const formatValue = (value: number) => {
+  const formatValue = (value: number | null) => {
+    if (value == null) return 'Unavailable';
     if (indicator.unit === 'percentage') {
       return `${value.toFixed(indicator.decimal_places)}%`;
     }
@@ -197,16 +200,7 @@ export function IndicatorDetailView({
           value: v.actual_value,
         }));
     }
-    const months = [];
-    for (let i = 11; i >= 0; i--) {
-      const date = subMonths(new Date(), i);
-      months.push({
-        period: format(date, 'MMM yy'),
-        value: Math.round(currentValue * (0.7 + Math.random() * 0.6)),
-      });
-    }
-    if (months.length > 0) months[months.length - 1].value = currentValue;
-    return months;
+    return [];
   }, [historicalValues, currentValue]);
 
   return (
@@ -270,7 +264,7 @@ export function IndicatorDetailView({
                   )}
                 </div>
                 
-                {currentTarget && (
+                {currentTarget && achievement != null && (
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground mb-1">Target</p>
                     <p className="text-2xl font-semibold">{formatValue(currentTarget.target_value)}</p>
@@ -279,14 +273,14 @@ export function IndicatorDetailView({
                         <div 
                           className={cn(
                             'h-full rounded-full',
-                            (currentValue / currentTarget.target_value) >= 1 ? 'bg-success' :
-                            (currentValue / currentTarget.target_value) >= 0.8 ? 'bg-accent' : 'bg-warning'
+                            achievement >= 100 ? 'bg-success' :
+                            achievement >= 80 ? 'bg-accent' : 'bg-warning'
                           )}
-                          style={{ width: `${Math.min((currentValue / currentTarget.target_value) * 100, 100)}%` }}
+                          style={{ width: `${Math.min(achievement, 100)}%` }}
                         />
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {((currentValue / currentTarget.target_value) * 100).toFixed(0)}%
+                        {achievement.toFixed(0)}%
                       </span>
                     </div>
                   </div>

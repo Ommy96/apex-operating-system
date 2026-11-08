@@ -131,7 +131,7 @@ export function IndicatorsDashboard() {
             disabled={isComputing}
           >
             {isComputing ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Skeleton className="h-4 w-4 mr-2" />
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
@@ -227,7 +227,7 @@ export function IndicatorsDashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {[...computedValues.values()].filter(v => v.trendPercentage > 0).length}
+                  {indicators.filter(i => i.trend_direction === 'down_is_good' ? (computedValues.get(i.id)?.trendPercentage ?? 0) < 0 : (computedValues.get(i.id)?.trendPercentage ?? 0) > 0).length}
                 </p>
                 <p className="text-xs text-muted-foreground">Improving</p>
               </div>
@@ -271,7 +271,7 @@ export function IndicatorsDashboard() {
             <TrafficLightSummaryBar
               indicators={filteredIndicators.map((ind) => {
                 const computed = computedValues.get(ind.id);
-                return { actual: computed?.current.value ?? null, target: (ind as any).currentTarget ?? null };
+                return { actual: computed?.current.value ?? null, target: ind.target_value ?? null, direction: ind.trend_direction };
               })}
             />
           </CardContent>
@@ -330,7 +330,7 @@ export function IndicatorsDashboard() {
               <IndicatorCard
                 key={indicator.id}
                 indicator={indicator}
-                currentValue={computed?.current.value ?? 0}
+                currentValue={computed?.current.value ?? null}
                 previousValue={computed?.previous.value}
                 trendPercentage={computed?.trendPercentage}
                 onClick={() => handleIndicatorClick(indicator)}

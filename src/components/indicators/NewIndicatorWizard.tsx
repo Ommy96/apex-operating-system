@@ -9,9 +9,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { ChevronLeft, ChevronRight, AlertCircle, Check } from "lucide-react";
+import { FormulaBuilder } from './FormulaBuilder';
+import { OUTCOME_EVIDENCE_WARNING } from '@/lib/resultsFramework';
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Purpose", "Definition", "Targets", "Measurement", "Review"] as const;
@@ -57,6 +59,17 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
   const [validationMin, setValidationMin] = useState("");
   const [validationMax, setValidationMax] = useState("");
 
+  const [direction, setDirection] = useState('up_is_good');
+  const [formulaType, setFormulaType] = useState<'count' | 'sum' | 'average' | 'ratio' | 'percentage' | 'custom'>('custom');
+  const [formulaConfig, setFormulaConfig] = useState<Record<string, any>>({});
+  const [limitations, setLimitations] = useState('');
+  const [shareable, setShareable] = useState(false);
+  const [objectiveId, setObjectiveId] = useState('');
+  const { data: objectives = [] } = useQuery({ queryKey: ['results-objectives', currentOrganization?.organization_id], enabled: !!currentOrganization?.organization_id, queryFn: async () => {
+    const { data, error } = await supabase.from('logframe_entries').select('id,title,program_id,level').eq('org_id', currentOrganization?.organization_id ?? '').is('deleted_at', null);
+    if (error) throw error;
+    return data ?? [];
+  } });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const reset = () => {
@@ -67,7 +80,7 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
     setBaselineValue(""); setBaselineDate(""); setBaselineSource("");
     setTargetValue(""); setTargetDate(""); setReportingFrequency("quarterly"); setCollectionMethod("Field survey");
     setValidationMin(""); setValidationMax("");
-    setErrors({});
+    setErrors({}); setFormulaType('custom'); setFormulaConfig({}); setDirection('up_is_good'); setLimitations(''); setShareable(false); setObjectiveId('');
   };
 
   const validateStep = (): boolean => {
@@ -126,8 +139,12 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
         publish_status: publish ? "published" : "draft",
         published_at: publish ? new Date().toISOString() : null,
         is_active: publish,
-        formula_type: "count",
-        formula_config: {},
+        formula_type: formulaType,
+        formula_config: formulaConfig,
+        trend_direction: direction,
+        limitations,
+        donor_shareable: shareable,
+        logframe_entry_id: objectiveId || null,
         aggregation_period: reportingFrequency === "annual" ? "yearly" : reportingFrequency === "monthly" ? "monthly" : "quarterly",
       });
       if (error) throw error;
@@ -163,10 +180,12 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
           ))}
         </div>
 
+        <p className="border-l-4 border-warning pl-3 text-sm font-medium mb-4">{OUTCOME_EVIDENCE_WARNING}</p>
         <div className="space-y-4">
           {step === 0 && (
             <>
               <h3 className="font-medium">What are you measuring and why?</h3>
+              <div className="space-y-2"><Label>Objective</Label><Select value={objectiveId || 'none'} onValueChange={value => { const objective = objectives.find(o => o.id === value); setObjectiveId(value === 'none' ? '' : value); setProgramIds(objective ? [objective.program_id] : []); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No linked objective</SelectItem>{objectives.map(o => <SelectItem key={o.id} value={o.id}>{o.title} · {o.level}</SelectItem>)}</SelectContent></Select></div>
               <div className="space-y-2">
                 <Label>Indicator name *</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Percentage of enrolled girls who pass end-of-term exam" />
@@ -288,6 +307,11 @@ export function NewIndicatorWizard({ open, onOpenChange }: Props) {
           {step === 3 && (
             <>
               <h3 className="font-medium">How and when will this be measured?</h3>
+              <div className="space-y-2"><Label>Achievement direction</Label><Select value={direction} onValueChange={setDirection}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="up_is_good">Higher is better</SelectItem><SelectItem value="down_is_good">Lower is better</SelectItem><SelectItem value="neutral">Neutral</SelectItem></SelectContent></Select></div>
+              <div className="space-y-2"><Label>Calculation</Label><Select value={formulaType} onValueChange={v => { setFormulaType(v as typeof formulaType); setFormulaConfig({}); }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="custom">Manual measurement</SelectItem><SelectItem value="count">Distinct beneficiaries</SelectItem><SelectItem value="average">Average measured change</SelectItem><SelectItem value="sum">Sum measured change</SelectItem><SelectItem value="percentage">Percentage</SelectItem><SelectItem value="ratio">Ratio</SelectItem></SelectContent></Select></div>
+              {formulaType !== 'custom' && <FormulaBuilder formulaType={formulaType} config={formulaConfig} onChange={setFormulaConfig} />}
+              <div><Label>Limitations</Label><Textarea value={limitations} onChange={e => setLimitations(e.target.value)} /></div>
+              <label className="flex gap-2 text-sm"><Checkbox checked={shareable} onCheckedChange={v => setShareable(v === true)} />Share approved aggregate results with connected donors</label>
               <div className="space-y-2">
                 <Label>Reporting frequency *</Label>
                 <Select value={reportingFrequency} onValueChange={setReportingFrequency}>
