@@ -1,4 +1,10 @@
 # Permission system gap closure (audit 2026-11-02)
+## Data quality module
+- [ ] Inventory existing flags, fuzzy duplicate matching, review and merge transaction; report gaps before implementation.
+- [ ] Extend existing flags with stable template/record identity, approved configuration and scoped scan/recheck workflows.
+- [ ] Seed missing DOB, minor guardian, expired consent, unset care and unassessed need checks.
+- [ ] Extend duplicate review with persistent distinct decisions and exact preserved-link merge preview; never auto-merge.
+- [ ] Run rule/security tests and verify actual scan/correction/review flows where authentication is available.
 ## Results framework and indicators
 - [x] Inventory existing indicator/logframe and analytics paths; report legacy sources, duplicated calculations and mutable reporting gaps.
 - [x] Extend shared direction-aware calculations, distinct automated beneficiary sources and existing definition/baseline/target capture.
