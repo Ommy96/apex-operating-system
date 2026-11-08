@@ -822,6 +822,7 @@ export type Database = {
           donor_pool_id: string
           fx_at: string
           fx_rate: number
+          fx_snapshot: Json
           id: string
           native_currency: string
           organization_id: string
@@ -848,6 +849,7 @@ export type Database = {
           donor_pool_id: string
           fx_at: string
           fx_rate: number
+          fx_snapshot?: Json
           id?: string
           native_currency: string
           organization_id: string
@@ -874,6 +876,7 @@ export type Database = {
           donor_pool_id?: string
           fx_at?: string
           fx_rate?: number
+          fx_snapshot?: Json
           id?: string
           native_currency?: string
           organization_id?: string
@@ -15897,8 +15900,11 @@ export type Database = {
       }
       sponsorship_updates: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           beneficiary_id: string
           content: string | null
+          contribution_id: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -15916,8 +15922,11 @@ export type Database = {
           visible_to_donor: boolean
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           beneficiary_id: string
           content?: string | null
+          contribution_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -15935,8 +15944,11 @@ export type Database = {
           visible_to_donor?: boolean
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           beneficiary_id?: string
           content?: string | null
+          contribution_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -15959,6 +15971,13 @@ export type Database = {
             columns: ["beneficiary_id"]
             isOneToOne: false
             referencedRelation: "beneficiaries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_updates_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "donations"
             referencedColumns: ["id"]
           },
           {
@@ -16995,6 +17014,7 @@ export type Database = {
       }
       visit_requests: {
         Row: {
+          approved_response: string | null
           beneficiary_id: string
           completed_at: string | null
           created_at: string
@@ -17006,8 +17026,12 @@ export type Database = {
           id: string
           organization_id: string
           purpose: string | null
+          request_kind: string
           requested_by_user: string | null
           requested_date: string | null
+          response_approved_at: string | null
+          response_approved_by: string | null
+          response_draft: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           scheduled_date: string | null
@@ -17019,6 +17043,7 @@ export type Database = {
           visit_feedback: string | null
         }
         Insert: {
+          approved_response?: string | null
           beneficiary_id: string
           completed_at?: string | null
           created_at?: string
@@ -17030,8 +17055,12 @@ export type Database = {
           id?: string
           organization_id: string
           purpose?: string | null
+          request_kind?: string
           requested_by_user?: string | null
           requested_date?: string | null
+          response_approved_at?: string | null
+          response_approved_by?: string | null
+          response_draft?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           scheduled_date?: string | null
@@ -17043,6 +17072,7 @@ export type Database = {
           visit_feedback?: string | null
         }
         Update: {
+          approved_response?: string | null
           beneficiary_id?: string
           completed_at?: string | null
           created_at?: string
@@ -17054,8 +17084,12 @@ export type Database = {
           id?: string
           organization_id?: string
           purpose?: string | null
+          request_kind?: string
           requested_by_user?: string | null
           requested_date?: string | null
+          response_approved_at?: string | null
+          response_approved_by?: string | null
+          response_draft?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           scheduled_date?: string | null
@@ -18271,6 +18305,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_donor_request: {
+        Args: {
+          _beneficiary: string
+          _date?: string
+          _kind: string
+          _purpose: string
+        }
+        Returns: string
+      }
       create_or_get_source_task: {
         Args: {
           _assigned_to?: string
@@ -18292,6 +18335,11 @@ export type Database = {
       daitch_mokotoff: { Args: { "": string }; Returns: string[] }
       dmetaphone: { Args: { "": string }; Returns: string }
       dmetaphone_alt: { Args: { "": string }; Returns: string }
+      donor_contact_permitted: {
+        Args: { _beneficiary: string }
+        Returns: boolean
+      }
+      donor_review_allowed: { Args: { _org: string }; Returns: boolean }
       find_potential_duplicates: {
         Args: { _org_id: string }
         Returns: {
@@ -18333,6 +18381,20 @@ export type Database = {
       generate_beneficiary_unique_id: {
         Args: { _org_id: string }
         Returns: string
+      }
+      get_donor_requests: {
+        Args: never
+        Returns: {
+          approved_response: string
+          beneficiary_id: string
+          created_at: string
+          id: string
+          purpose: string
+          request_kind: string
+          requested_date: string
+          scheduled_date: string
+          status: string
+        }[]
       }
       get_org_member_role: {
         Args: { _org_id: string; _user_id: string }
@@ -18540,6 +18602,28 @@ export type Database = {
       seed_project_eligibility_rules: {
         Args: { _project_id: string; _sector?: string }
         Returns: undefined
+      }
+      set_donor_currency: {
+        Args: { _currency: string }
+        Returns: {
+          created_at: string | null
+          donor_name: string
+          email: string
+          id: string
+          is_active: boolean | null
+          last_login_at: string | null
+          organization_id: string
+          phone: string | null
+          preferred_currency: string
+          updated_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "donor_accounts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
