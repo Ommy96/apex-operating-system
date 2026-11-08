@@ -5293,7 +5293,9 @@ export type Database = {
       }
       data_quality_flags: {
         Row: {
+          beneficiary_id: string | null
           created_at: string
+          deleted_at: string | null
           entity_id: string
           entity_type: string
           flag_message: string
@@ -5302,13 +5304,19 @@ export type Database = {
           flagged_by: string
           id: string
           is_resolved: boolean
+          last_seen_at: string | null
           organization_id: string
           resolution_note: string | null
           resolved_at: string | null
           resolved_by: string | null
+          rule_id: string | null
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
+          beneficiary_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           entity_id: string
           entity_type: string
           flag_message: string
@@ -5317,13 +5325,19 @@ export type Database = {
           flagged_by?: string
           id?: string
           is_resolved?: boolean
+          last_seen_at?: string | null
           organization_id: string
           resolution_note?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          rule_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
+          beneficiary_id?: string | null
           created_at?: string
+          deleted_at?: string | null
           entity_id?: string
           entity_type?: string
           flag_message?: string
@@ -5332,10 +5346,14 @@ export type Database = {
           flagged_by?: string
           id?: string
           is_resolved?: boolean
+          last_seen_at?: string | null
           organization_id?: string
           resolution_note?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          rule_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -5358,6 +5376,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "data_quality_flags_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "data_quality_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_quality_rules: {
+        Row: {
+          config: Json
+          created_at: string
+          deleted_at: string | null
+          enabled: boolean
+          id: string
+          organization_id: string
+          template_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          deleted_at?: string | null
+          enabled?: boolean
+          id?: string
+          organization_id: string
+          template_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          deleted_at?: string | null
+          enabled?: boolean
+          id?: string
+          organization_id?: string
+          template_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_quality_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_quality_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18673,6 +18749,10 @@ export type Database = {
         Args: { _program_id: string }
         Returns: Json
       }
+      recheck_data_quality_issue: {
+        Args: { _issue: string; _note: string }
+        Returns: boolean
+      }
       recompute_need_status: {
         Args: { p_beneficiary_id: string }
         Returns: undefined
@@ -18736,6 +18816,7 @@ export type Database = {
         Args: { _org: string; _payload: Json; _previous?: string }
         Returns: string
       }
+      scan_data_quality: { Args: { _org: string }; Returns: Json }
       search_children_for_linking: {
         Args: { _org_id: string; _search_term: string }
         Returns: {
