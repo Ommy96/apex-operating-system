@@ -107,6 +107,16 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const [contribution, setContribution] = useState('');
+  const { data: received = [] } = useQuery({
+    queryKey: ['received-for-thanks', orgId], enabled: !!orgId,
+    queryFn: async () => { const { data, error } = await (supabase as any).from('donations').select('id,donor_name,amount,currency').eq('organization_id',orgId).in('status',['completed','succeeded','success','received']); if(error) throw error; return data || []; },
+  });
+  const thanks = useMutation({
+    mutationFn: async () => { const { data,error } = await (supabase as any).rpc('generate_donor_thanks',{_donation:contribution,_beneficiary:beneficiaryId || form.beneficiary_id}); if(error)throw error;if(!data)throw new Error('Draft was not saved'); },
+    onSuccess: () => {toast.success('Thank-you draft created; approval still required');qc.invalidateQueries({queryKey:['sponsorship-updates']});},
+    onError: (e: Error) => toast.error(e.message),
+  });
   const approve = useMutation({
     mutationFn: async (id: string) => {
       const result = await (supabase as any).from('sponsorship_updates').update({ visible_to_donor: true }).eq('id', id).eq('organization_id', orgId).select('id');
@@ -125,6 +135,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
         <Button size="sm" onClick={() => setOpen(true)}><Plus className="h-4 w-4 mr-1" /> New Update</Button>
       </div>
 
+      {beneficiaryId && <div className="flex flex-wrap gap-2"><Select value={contribution} onValueChange={setContribution}><SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Recorded received contribution" /></SelectTrigger><SelectContent>{received.map((d:any)=><SelectItem key={d.id} value={d.id}>{d.donor_name} · {d.currency} {d.amount}</SelectItem>)}</SelectContent></Select><Button variant="outline" disabled={!contribution || thanks.isPending} onClick={()=>thanks.mutate()}>Generate thank-you draft</Button></div>}
       {isLoading ? (
         <Skeleton className="h-32" />
       ) : (updates?.length || 0) === 0 ? (

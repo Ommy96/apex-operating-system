@@ -498,19 +498,9 @@ export function useDonorPortal(period: string = 'all') {
     const { data, error } = await supabase.storage
       .from('beneficiary-documents')
       .createSignedUrl(path, 300);
-    if (error) return null;
-    try {
-      await sb.from('audit_logs').insert({
-        organization_id: orgId,
-        user_id: user?.id,
-        action: 'donor_document_view',
-        entity_type: 'beneficiary_uploads',
-        entity_id: doc.id,
-        metadata: { donor_account_id: donorId, beneficiary_id: doc.beneficiary_id },
-      });
-    } catch {
-      /* audit failure must not block the donor */
-    }
+    if (error) throw error;
+    const { error: auditError } = await sb.rpc('log_donor_document_access', { _id: doc.id });
+    if (auditError) throw auditError;
     return data?.signedUrl || null;
   };
 

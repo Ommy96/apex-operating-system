@@ -18382,6 +18382,10 @@ export type Database = {
         Args: { _org_id: string }
         Returns: string
       }
+      generate_donor_thanks: {
+        Args: { _beneficiary: string; _donation: string }
+        Returns: string
+      }
       get_donor_requests: {
         Args: never
         Returns: {
@@ -18487,6 +18491,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      log_donor_document_access: { Args: { _id: string }; Returns: undefined }
       merge_beneficiaries: {
         Args: {
           _candidate_id: string
