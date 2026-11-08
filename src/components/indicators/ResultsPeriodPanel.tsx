@@ -14,7 +14,8 @@ export function ResultsPeriodPanel({ indicatorId, organizationId }: { indicatorI
   const [end, setEnd] = useState(new Date().toISOString().slice(0, 10));
   const [reason, setReason] = useState('');
   const { preview, approved, approve } = useResultsFramework(indicatorId, start, end, organizationId);
-  const { can } = usePermissions();
+  const { can, hasPermission } = usePermissions();
+  const canApprove = hasPermission('reports', 'approve', 'reports');
   const previous = approved.data?.find(s => s.period_start === start && s.period_end === end);
   const displayed = previous?.snapshot ?? preview.data;
   return <section className="space-y-4 py-4">
@@ -32,7 +33,7 @@ export function ResultsPeriodPanel({ indicatorId, organizationId }: { indicatorI
     {preview.error && <p role="alert" className="text-sm text-destructive">{preview.error.message}</p>}
     {approved.error && <p role="alert" className="text-sm text-destructive">{approved.error.message}</p>}
     {previous && preview.data && <p className="text-sm text-muted-foreground">Live actual: {preview.data.current ?? 'Unavailable'} · approved actual: {previous.snapshot.current ?? 'Unavailable'}</p>}
-    {can.generateReports && <div className="flex flex-wrap gap-3 items-end">{previous && <div className="flex-1 min-w-48"><Label htmlFor="amendment-reason">Amendment reason</Label><Input id="amendment-reason" value={reason} onChange={e => setReason(e.target.value)} /></div>}<Button disabled={approve.isPending || !preview.data || !!preview.error || (previous && !reason.trim())} onClick={() => approve.mutate({ amends: previous?.id, reason }, { onSuccess: () => setReason('') })}><Check className="h-4 w-4 mr-2" />{approve.isPending ? 'Approving…' : previous ? 'Approve amendment' : 'Approve period'}</Button></div>}
+    {canApprove && <div className="flex flex-wrap gap-3 items-end">{previous && <div className="flex-1 min-w-48"><Label htmlFor="amendment-reason">Amendment reason</Label><Input id="amendment-reason" value={reason} onChange={e => setReason(e.target.value)} /></div>}<Button disabled={approve.isPending || !preview.data || !!preview.error || (previous && !reason.trim())} onClick={() => approve.mutate({ amends: previous?.id, reason }, { onSuccess: () => setReason('') })}><Check className="h-4 w-4 mr-2" />{approve.isPending ? 'Approving…' : previous ? 'Approve amendment' : 'Approve period'}</Button></div>}
     <h3 className="font-semibold text-sm">Approved history</h3>
     {approved.data?.map(s => <article key={s.id} className="border-b py-3 text-sm"><div className="flex flex-wrap justify-between gap-2"><span>{s.period_start} – {s.period_end} · v{s.version} · {s.snapshot.current ?? 'Unavailable'} {s.snapshot.unit}</span>{can.exportReports && <Button size="sm" variant="ghost" onClick={() => exportToCsv([{ ...resultExportRow(s.snapshot), version: s.version, amendment_reason: s.amendment_reason }], 'approved-result')}>Export</Button>}</div>{s.amendment_reason && <p className="text-muted-foreground">{s.amendment_reason}</p>}</article>)}
   </section>;

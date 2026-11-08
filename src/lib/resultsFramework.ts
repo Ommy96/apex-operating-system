@@ -15,8 +15,8 @@ export interface ResultMeasurement {
   id: string; name: string; definition: string | null; baseline: number | null; target: number | null;
   current: number | null; numerator: number | null; denominator: number | null; direction: string;
   level: string | null; unit: string; period_start: string; period_end: string; limitations: string;
-  calculation_method: string | null; percent?: number | null; donor_shareable: boolean;
+  calculation_method: string | null; percent?: number | null; donor_shareable: boolean; program_ids?: string[];
 }
 export function resultExportRow(result: ResultMeasurement) {
-  return { ...result, percent: result.percent ?? achievementPercentage(result.current, result.target, result.direction, result.denominator) };
+  return { ...result, percent: Object.prototype.hasOwnProperty.call(result, 'percent') ? result.percent : achievementPercentage(result.current, result.target, result.direction, result.denominator) };
 }

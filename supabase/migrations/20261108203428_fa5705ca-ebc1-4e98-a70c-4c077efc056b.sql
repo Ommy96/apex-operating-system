@@ -1,0 +1,11 @@
+DO $$ DECLARE def text; BEGIN SELECT pg_get_functiondef('public.compute_results_indicator(uuid,date,date)'::regprocedure) INTO def; def:=replace(def,'''definition_version'',i.version','''definition_version'',i.version,''program_ids'',i.program_ids'); EXECUTE def; END $$;
+CREATE OR REPLACE FUNCTION app_private.get_donor_results() RETURNS TABLE(id uuid,indicator_id uuid,period_start date,period_end date,version integer,snapshot jsonb) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT s.id,s.indicator_id,s.period_start,s.period_end,s.version,s.snapshot-'formula'-'objective_id' FROM public.indicator_reporting_snapshots s JOIN public.donor_accounts d ON d.organization_id=s.organization_id AND d.user_id=auth.uid() AND d.is_active WHERE (s.snapshot->>'donor_shareable')::boolean AND EXISTS(SELECT 1 FROM public.beneficiary_donors bd WHERE bd.organization_id=d.organization_id AND bd.donor_name=d.donor_name AND s.snapshot->'program_ids' @> jsonb_build_array(bd.program_id)) AND NOT EXISTS(SELECT 1 FROM public.indicator_reporting_snapshots newer WHERE newer.indicator_id=s.indicator_id AND newer.period_start=s.period_start AND newer.period_end=s.period_end AND newer.version>s.version) AND (s.snapshot->>'numerator')::numeric>=5 AND ((s.snapshot->>'denominator')::numeric=1 OR ((s.snapshot->>'denominator')::numeric>=5 AND (s.snapshot->>'denominator')::numeric-(s.snapshot->>'numerator')::numeric>=5))
+$$;
+DO $$ BEGIN
+ IF public.results_achievement(20,10,'down_is_good',1) IS DISTINCT FROM 50::numeric THEN RAISE EXCEPTION 'Inverted achievement regression'; END IF;
+ IF public.results_achievement(20,0,'up_is_good',1) IS NOT NULL THEN RAISE EXCEPTION 'Zero target regression'; END IF;
+ IF public.results_achievement(20,10,'up_is_good',NULL) IS NOT NULL THEN RAISE EXCEPTION 'Unavailable denominator regression'; END IF;
+ IF has_table_privilege('authenticated','public.indicator_reporting_snapshots','UPDATE') OR has_table_privilege('anon','public.indicator_reporting_snapshots','SELECT') OR has_function_privilege('anon','public.approve_results_period(uuid,date,date,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'Snapshot privilege regression'; END IF;
+END $$;
+NOTIFY pgrst,'reload schema';

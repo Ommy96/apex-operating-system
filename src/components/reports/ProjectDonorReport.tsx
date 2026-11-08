@@ -90,7 +90,7 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
   });
 
   const approved = useDonorResults();
-  const indicators = { data: approved.data?.filter(r => r.period_start === periodStart && r.period_end === periodEnd).map(r => ({ ...r.snapshot, target_value: r.snapshot.target, report_version: r.version })) ?? [] };
+  const indicators = { data: approved.data?.filter(r => r.period_start === periodStart && r.period_end === periodEnd && r.snapshot.program_ids?.includes(project.data?.program_id)).map(r => ({ ...r.snapshot, target_value: r.snapshot.target, report_version: r.version })) ?? [] };
 
   const totalAllocated = (allocations.data || []).reduce((s: number, a: any) => s + Number(a.amount_base || 0), 0);
   const totalSpent = (expenses.data || []).reduce(
