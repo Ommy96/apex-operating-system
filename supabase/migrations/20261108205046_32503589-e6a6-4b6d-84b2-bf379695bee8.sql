@@ -1,0 +1,12 @@
+REVOKE ALL ON public.data_quality_rules FROM PUBLIC,anon,authenticated;
+ALTER FUNCTION public.scan_data_quality(uuid) SET SCHEMA app_private;
+ALTER FUNCTION public.recheck_data_quality_issue(uuid,text) SET SCHEMA app_private;
+CREATE FUNCTION public.scan_data_quality(_org uuid) RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_private.scan_data_quality(_org) $$;
+CREATE FUNCTION public.recheck_data_quality_issue(_issue uuid,_note text) RETURNS boolean LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_private.recheck_data_quality_issue(_issue,_note) $$;
+CREATE FUNCTION app_private.list_quality_rules(_org uuid) RETURNS SETOF public.data_quality_rules LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NOT app_private.quality_staff_access(_org) THEN RAISE EXCEPTION 'Not authorised'; END IF; RETURN QUERY SELECT * FROM public.data_quality_rules WHERE organization_id=_org AND deleted_at IS NULL ORDER BY template_key; END $$;
+CREATE FUNCTION public.list_quality_rules(_org uuid) RETURNS SETOF public.data_quality_rules LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT * FROM app_private.list_quality_rules(_org) $$;
+CREATE FUNCTION app_private.save_quality_rule(_id uuid,_enabled boolean,_config jsonb) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE org uuid; BEGIN SELECT organization_id INTO org FROM public.data_quality_rules WHERE id=_id; IF org IS NULL OR NOT app_private.quality_manage_access(org) THEN RAISE EXCEPTION 'Not authorised'; END IF; UPDATE public.data_quality_rules SET enabled=_enabled,config=_config WHERE id=_id; RETURN _id; END $$;
+CREATE FUNCTION public.save_quality_rule(_id uuid,_enabled boolean,_config jsonb) RETURNS uuid LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_private.save_quality_rule(_id,_enabled,_config) $$;
+REVOKE ALL ON FUNCTION public.scan_data_quality(uuid),public.recheck_data_quality_issue(uuid,text),public.list_quality_rules(uuid),public.save_quality_rule(uuid,boolean,jsonb),app_private.list_quality_rules(uuid),app_private.save_quality_rule(uuid,boolean,jsonb) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.scan_data_quality(uuid),public.recheck_data_quality_issue(uuid,text),public.list_quality_rules(uuid),public.save_quality_rule(uuid,boolean,jsonb),app_private.list_quality_rules(uuid),app_private.save_quality_rule(uuid,boolean,jsonb) TO authenticated,service_role;
+NOTIFY pgrst,'reload schema';

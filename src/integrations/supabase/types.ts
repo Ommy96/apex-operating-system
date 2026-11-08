@@ -18698,6 +18698,26 @@ export type Database = {
           user_id: string
         }[]
       }
+      list_quality_rules: {
+        Args: { _org: string }
+        Returns: {
+          config: Json
+          created_at: string
+          deleted_at: string | null
+          enabled: boolean
+          id: string
+          organization_id: string
+          template_key: string
+          updated_at: string
+          updated_by: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "data_quality_rules"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       list_results_snapshots: {
         Args: { _indicator: string }
         Returns: {
@@ -18812,6 +18832,10 @@ export type Database = {
         Returns: Json
       }
       rpc_allocate_donation: { Args: { _donation_id: string }; Returns: Json }
+      save_quality_rule: {
+        Args: { _config: Json; _enabled: boolean; _id: string }
+        Returns: string
+      }
       save_vulnerability_assessment: {
         Args: { _org: string; _payload: Json; _previous?: string }
         Returns: string
