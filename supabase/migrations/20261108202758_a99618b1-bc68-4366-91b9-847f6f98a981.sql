@@ -1,0 +1,14 @@
+CREATE POLICY results_indicator_scope ON public.indicators AS RESTRICTIVE FOR SELECT TO authenticated USING(public.results_indicator_access(id));
+CREATE POLICY results_value_scope ON public.indicator_values AS RESTRICTIVE FOR SELECT TO authenticated USING(public.results_indicator_access(indicator_id));
+CREATE POLICY results_version_scope ON public.indicator_versions AS RESTRICTIVE FOR SELECT TO authenticated USING(public.results_indicator_access(indicator_id));
+CREATE OR REPLACE FUNCTION public.validate_results_definition() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
+BEGIN
+ IF NEW.logframe_entry_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.logframe_entries e WHERE e.id=NEW.logframe_entry_id AND e.org_id=NEW.organization_id AND e.deleted_at IS NULL AND e.program_id=ANY(NEW.program_ids)) THEN RAISE EXCEPTION 'Objective must belong to the same organisation and programme'; END IF;
+ IF NEW.formula_type<>'custom' AND NEW.level IN ('outcome','impact') AND (NEW.formula_config->>'table' IN ('beneficiaries','beneficiary_services','activities','activity_disbursements','staff_tasks') OR NEW.formula_config->'numerator'->>'table' IN ('beneficiaries','beneficiary_services','activities','activity_disbursements','staff_tasks')) THEN RAISE EXCEPTION 'Enrollment, attendance, disbursement and task completion are not outcomes'; END IF;
+ NEW.updated_by:=auth.uid(); RETURN NEW;
+END $$;
+CREATE TRIGGER validate_results_definition BEFORE INSERT OR UPDATE ON public.indicators FOR EACH ROW EXECUTE FUNCTION public.validate_results_definition();
+CREATE OR REPLACE FUNCTION app_private.get_donor_results() RETURNS TABLE(id uuid,indicator_id uuid,period_start date,period_end date,version integer,snapshot jsonb) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT s.id,s.indicator_id,s.period_start,s.period_end,s.version,s.snapshot-'formula'-'objective_id' FROM public.indicator_reporting_snapshots s JOIN public.donor_accounts d ON d.organization_id=s.organization_id AND d.user_id=auth.uid() AND d.is_active WHERE (s.snapshot->>'donor_shareable')::boolean AND EXISTS(SELECT 1 FROM public.indicators i WHERE i.id=s.indicator_id AND EXISTS(SELECT 1 FROM public.beneficiary_donors bd WHERE bd.organization_id=d.organization_id AND bd.donor_name=d.donor_name AND bd.program_id=ANY(i.program_ids))) AND NOT EXISTS(SELECT 1 FROM public.indicator_reporting_snapshots newer WHERE newer.indicator_id=s.indicator_id AND newer.period_start=s.period_start AND newer.period_end=s.period_end AND newer.version>s.version) AND (s.snapshot->>'numerator')::numeric>=5 AND ((s.snapshot->>'denominator')::numeric=1 OR ((s.snapshot->>'denominator')::numeric>=5 AND (s.snapshot->>'denominator')::numeric-(s.snapshot->>'numerator')::numeric>=5))
+$$;
+NOTIFY pgrst,'reload schema';
