@@ -181,7 +181,7 @@ export function useWorkRecordOptions(type: WorkRecordType | "none") {
       };
       const selected = config[type];
       let query = sb.from(selected.table).select(selected.columns).eq("organization_id", orgId).limit(100);
-      if (["life_event", "home_visit", "school_visit"].includes(type)) query = query.is("deleted_at", null);
+      if (["life_event", "vulnerability_assessment", "home_visit", "school_visit"].includes(type)) query = query.is("deleted_at", null);
       if (selected.date) query = query.order(selected.date, { ascending: false });
       const { data, error } = await query;
       if (error) throw error;

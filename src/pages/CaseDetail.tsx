@@ -22,6 +22,7 @@ import {
 import { useWorkManagement, useCaseTasks } from "@/hooks/useWorkManagement";
 import { allowedCaseTransitions, allowedTaskTransitions, type ManagedCaseStatus } from "@/lib/workManagement";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/hooks/useAuth";
 
 const ENTRY_TYPES: { value: EntryType; label: string; icon: any }[] = [
   { value: "visit", label: "Visit", icon: MapPin },
@@ -42,6 +43,7 @@ export default function CaseDetail() {
   const updateCase = useUpdateCase();
   const completeFollowUp = useCompleteFollowUp();
   const { can } = usePermissions();
+  const { user } = useAuth();
   const { orgMembers, updateTaskStatus } = useWorkManagement();
   const { data: linkedTasks = [], isLoading: tasksLoading } = useCaseTasks(id);
   const [openEntry, setOpenEntry] = useState(false);
@@ -119,7 +121,7 @@ export default function CaseDetail() {
         {caseHasClosure && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replace(/_/g, " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
       </div>
 
-      <CaseTasksPanel caseId={kase.id} tasks={linkedTasks} isLoading={tasksLoading} staff={orgMembers.data ?? []} canManage={can.manageTasks} canView={can.viewTasks} onStatusChange={(taskId, status) => updateTaskStatus.mutate({ id: taskId, status })} />
+      <CaseTasksPanel caseId={kase.id} tasks={linkedTasks} isLoading={tasksLoading} staff={orgMembers.data ?? []} canManage={can.manageTasks} canView={can.viewTasks} userId={user?.id} onStatusChange={(taskId, status) => updateTaskStatus.mutate({ id: taskId, status })} />
 
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-base">Case timeline</CardTitle></CardHeader>
@@ -185,7 +187,7 @@ export default function CaseDetail() {
   );
 }
 
-function CaseTasksPanel({ caseId, tasks, isLoading, staff, canManage, canView, onStatusChange }: { caseId: string; tasks: Array<{ id: string; title: string; status: string; priority: string; assigned_to: string | null; due_date: string | null; is_sensitive: boolean }>; isLoading: boolean; staff: any[]; canManage: boolean; canView: boolean; onStatusChange: (id: string, status: "todo" | "in_progress" | "blocked" | "completed" | "cancelled") => void }) {
+function CaseTasksPanel({ caseId, tasks, isLoading, staff, canManage, canView, userId, onStatusChange }: { caseId: string; tasks: Array<{ id: string; title: string; status: string; priority: string; assigned_to: string | null; due_date: string | null; is_sensitive: boolean }>; isLoading: boolean; staff: any[]; canManage: boolean; canView: boolean; userId?: string; onStatusChange: (id: string, status: "todo" | "in_progress" | "blocked" | "completed" | "cancelled") => void }) {
   const { createTask } = useWorkManagement();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -201,10 +203,10 @@ function CaseTasksPanel({ caseId, tasks, isLoading, staff, canManage, canView, o
         const assigned = staff.find((person: any) => person.user_id === task.assigned_to);
         return <div key={task.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-2 last:border-0">
           <div className="min-w-0"><p className="truncate text-sm font-medium">{task.title}</p><p className="text-xs text-muted-foreground">{assigned?.full_name || "Unassigned"}{task.due_date ? ` · Due ${task.due_date}` : ""}{task.is_sensitive ? " · Sensitive" : ""}</p></div>
-          <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as "todo" | "in_progress" | "blocked" | "completed" | "cancelled")} disabled={transitions.length === 0}>
+          {(canManage || task.assigned_to === userId) && <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as "todo" | "in_progress" | "blocked" | "completed" | "cancelled")} disabled={transitions.length === 0}>
             <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value={task.status} disabled>{task.status.replace(/_/g, " ")}</SelectItem>{transitions.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
-          </Select>
+          </Select>}
         </div>;
       })}
     </CardContent>
