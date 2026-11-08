@@ -1,4 +1,10 @@
 # Permission system gap closure (audit 2026-11-02)
+## Results framework and indicators
+- [ ] Inventory existing indicator/logframe and analytics paths; report root calculation and snapshot gaps.
+- [ ] Extend shared direction-aware calculations, deduplicated automated sources and definitions/baseline/target capture.
+- [ ] Add immutable approved reporting periods and reasoned amendments; approved-only donor projection.
+- [ ] Include definitions, denominators, periods and limitations in exports; integrate existing analytics.
+- [ ] Run rule tests and verify live workflow, second-org and non-admin access where available.
 ## Donor portal completion
 - [x] Diagnose NSP-AID: 651 links / 547 distinct beneficiaries / KES 105,000 recorded sponsorship funding; no allocations or received donations. Replace zero-on-no-allocation feed and blocked currency persistence.
 - [x] Add immutable new-allocation FX snapshots, approved donor-safe request projection, received-only thank-you drafts, sharing guards and explicit contact-consent birthdays.
