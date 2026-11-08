@@ -8815,6 +8815,89 @@ export type Database = {
           },
         ]
       }
+      indicator_reporting_snapshots: {
+        Row: {
+          amendment_reason: string | null
+          amends_id: string | null
+          approved_at: string
+          approved_by: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          indicator_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          snapshot: Json
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          amendment_reason?: string | null
+          amends_id?: string | null
+          approved_at?: string
+          approved_by: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          indicator_id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          snapshot: Json
+          updated_at?: string
+          updated_by?: string | null
+          version: number
+        }
+        Update: {
+          amendment_reason?: string | null
+          amends_id?: string | null
+          approved_at?: string
+          approved_by?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          indicator_id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          snapshot?: Json
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_reporting_snapshots_amends_id_fkey"
+            columns: ["amends_id"]
+            isOneToOne: false
+            referencedRelation: "indicator_reporting_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_reporting_snapshots_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_reporting_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_reporting_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicator_targets: {
         Row: {
           created_at: string
@@ -8960,6 +9043,7 @@ export type Database = {
           computed_at: string | null
           created_at: string
           created_by: string | null
+          denominator: number | null
           dimension_key: string | null
           dimension_value: string | null
           disaggregation_category_id: string | null
@@ -8968,6 +9052,7 @@ export type Database = {
           indicator_id: string
           is_manual_override: boolean | null
           notes: string | null
+          numerator: number | null
           period_end: string
           period_start: string
           updated_at: string
@@ -8977,6 +9062,7 @@ export type Database = {
           computed_at?: string | null
           created_at?: string
           created_by?: string | null
+          denominator?: number | null
           dimension_key?: string | null
           dimension_value?: string | null
           disaggregation_category_id?: string | null
@@ -8985,6 +9071,7 @@ export type Database = {
           indicator_id: string
           is_manual_override?: boolean | null
           notes?: string | null
+          numerator?: number | null
           period_end: string
           period_start: string
           updated_at?: string
@@ -8994,6 +9081,7 @@ export type Database = {
           computed_at?: string | null
           created_at?: string
           created_by?: string | null
+          denominator?: number | null
           dimension_key?: string | null
           dimension_value?: string | null
           disaggregation_category_id?: string | null
@@ -9002,6 +9090,7 @@ export type Database = {
           indicator_id?: string
           is_manual_override?: boolean | null
           notes?: string | null
+          numerator?: number | null
           period_end?: string
           period_start?: string
           updated_at?: string
@@ -9131,12 +9220,14 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           disaggregation_dimensions: string[]
+          donor_shareable: boolean
           formula_config: Json
           formula_type: string
           id: string
           is_active: boolean | null
           is_template: boolean | null
           level: string | null
+          limitations: string | null
           logframe_entry_id: string | null
           name: string
           notes: string | null
@@ -9179,12 +9270,14 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           disaggregation_dimensions?: string[]
+          donor_shareable?: boolean
           formula_config?: Json
           formula_type: string
           id?: string
           is_active?: boolean | null
           is_template?: boolean | null
           level?: string | null
+          limitations?: string | null
           logframe_entry_id?: string | null
           name: string
           notes?: string | null
@@ -9227,12 +9320,14 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           disaggregation_dimensions?: string[]
+          donor_shareable?: boolean
           formula_config?: Json
           formula_type?: string
           id?: string
           is_active?: boolean | null
           is_template?: boolean | null
           level?: string | null
+          limitations?: string | null
           logframe_entry_id?: string | null
           name?: string
           notes?: string | null
@@ -18305,6 +18400,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      compute_results_indicator: {
+        Args: { _end: string; _indicator: string; _start: string }
+        Returns: Json
+      }
       create_donor_request: {
         Args: {
           _beneficiary: string
@@ -18398,6 +18497,17 @@ export type Database = {
           requested_date: string
           scheduled_date: string
           status: string
+        }[]
+      }
+      get_donor_results: {
+        Args: never
+        Returns: {
+          id: string
+          indicator_id: string
+          period_end: string
+          period_start: string
+          snapshot: Json
+          version: number
         }[]
       }
       get_org_member_role: {
@@ -18556,6 +18666,19 @@ export type Database = {
           _restore_as_head?: boolean
         }
         Returns: Json
+      }
+      results_achievement: {
+        Args: {
+          _actual: number
+          _denominator?: number
+          _direction: string
+          _target: number
+        }
+        Returns: number
+      }
+      results_indicator_access: {
+        Args: { _indicator: string }
+        Returns: boolean
       }
       revoke_staff_access: {
         Args: { _note?: string; _org_id: string; _user_id: string }
