@@ -36,6 +36,8 @@ import { DonorProgrammesTab } from '@/components/donor-portal/DonorProgrammesTab
 import { SponsorBeneficiaryDetail } from '@/components/donor-portal/SponsorBeneficiaryDetail';
 import { UpcomingMilestones } from '@/components/donor-portal/UpcomingMilestones';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { Skeleton } from '@/components/ui/skeleton';
+import { money } from '@/lib/donorMoney';
 
 export default function DonorPortal() {
   const { user, loading } = useAuth();
@@ -92,7 +94,7 @@ export default function DonorPortal() {
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        <Skeleton className="h-32 w-64" />
       </div>
     );
   }
@@ -171,7 +173,7 @@ export default function DonorPortal() {
     }
   };
 
-  const totalSponsored = sponsoredBeneficiaries?.length || 0;
+  const totalSponsored = new Set(sponsoredBeneficiaries?.map((b: any) => b.beneficiary?.id).filter(Boolean)).size;
   const totalContributed = sponsoredBeneficiaries?.reduce(
     (sum, bd) => sum + (bd.amount_received || 0), 0
   ) || 0;
@@ -239,13 +241,13 @@ export default function DonorPortal() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  <FxAmount amount={totals.contributed} currency={totals.currency} fx={fx} />
+                  {money(totals.recorded, totals.currency)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Total Contributed
-                  {totals.source !== 'allocations' && (
+                  Recorded Sponsorship Funding
+                  {true && (
                     <span className="block text-[11px]">
-                      {totals.source === 'commitments' ? 'from commitments (not yet allocated)' : 'from recorded gifts'}
+                      Recorded sponsorship funding · original currency; no allocation FX
                     </span>
                   )}
                 </p>
@@ -297,7 +299,7 @@ export default function DonorPortal() {
         <UpcomingMilestones />
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className="bg-muted/50">
+          <TabsList className="bg-muted/50 flex flex-wrap h-auto justify-start">
             <TabsTrigger value="feed" className="gap-2">
               <Sparkles className="h-4 w-4" /> Impact Feed
             </TabsTrigger>

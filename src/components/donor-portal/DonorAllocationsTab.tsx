@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
 import { useDonorFx } from '@/hooks/useDonorFx';
 import { format as fmtDate } from 'date-fns';
+import { allocationTotal, ALLOCATION_FX_DISCLOSURE } from '@/lib/donorMoney';
+import { AllocationAmount } from './AllocationAmount';
 import { Wallet, Layers, Building2, Users, ArrowRight } from 'lucide-react';
 
 const SCOPE_META: Record<string, { label: string; icon: any; color: string }> = {
@@ -24,29 +26,18 @@ export function DonorAllocationsTab() {
   const { donorAccount, donorAllocations, donorPools, allocationsLoading } = useDonorPortal();
   const fx = useDonorFx((donorAccount as any)?.preferred_currency);
 
-  // Aggregates
-  const totalAllocated = (donorAllocations || []).reduce(
-    (s, a: any) => s + fx.convert(Number(a.amount_base || 0), a.base_currency),
-    0,
-  );
-  const byScope = (donorAllocations || []).reduce((acc: Record<string, number>, a: any) => {
-    const v = fx.convert(Number(a.amount_base || 0), a.base_currency);
-    acc[a.scope] = (acc[a.scope] || 0) + v;
-    return acc;
-  }, {});
-  const unallocated = (donorPools || []).reduce(
-    (s, p: any) => s + fx.convert(Number(p.balance_base || 0), 'KES'),
-    0,
-  );
-
+  const totalAllocated = allocationTotal(donorAllocations || [], fx.target);
+  const byScope = Object.fromEntries(['direct_beneficiary', 'project_pool', 'program_unrestricted'].map(scope => [scope, allocationTotal((donorAllocations || []).filter((a: any) => a.scope === scope), fx.target)]));
+  const unallocated = 0; // Pool balances have no allocation-time snapshot; never restate them as allocated funds.
   return (
     <div className="space-y-6">
+      <p className="text-xs text-muted-foreground">{ALLOCATION_FX_DISCLOSURE}</p>
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           icon={<Wallet className="h-5 w-5 text-primary" />}
           label="Total Allocated"
-          value={fx.format(totalAllocated, fx.target)}
+          value={totalAllocated}
         />
         {(['direct_beneficiary', 'project_pool', 'program_unrestricted'] as const).map((s) => (
           <SummaryCard
@@ -56,7 +47,7 @@ export function DonorAllocationsTab() {
               return <I className={`h-5 w-5 ${SCOPE_META[s].color}`} />;
             })()}
             label={SCOPE_META[s].label}
-            value={fx.format(byScope[s] || 0, fx.target)}
+            value={byScope[s]}
           />
         ))}
       </div>
@@ -125,7 +116,7 @@ export function DonorAllocationsTab() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm text-foreground">
-                        {fx.format(Number(a.amount_base || 0), a.base_currency)}
+                        <AllocationAmount allocation={a} currency={fx.target} />
                       </p>
                       <div className="flex items-center justify-end gap-1.5 mt-0.5">
                         {a.native_currency !== fx.target && (

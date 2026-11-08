@@ -15,6 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { FileText, Image as ImageIcon, Video, Mail, Plus, ScrollText } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { ensureWritten } from "@/lib/settingsWrite";
 
 interface Props {
   beneficiaryId?: string;
@@ -49,7 +50,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
       let q = supabase
         .from("sponsorship_updates" as any)
         .select("*, beneficiaries(id, display_name)")
-        .eq("organization_id", orgId!)
+        .eq("organization_id", orgId || "")
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -67,7 +68,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
       const { data } = await supabase
         .from("beneficiaries")
         .select("id, display_name")
-        .eq("organization_id", orgId!)
+        .eq("organization_id", orgId || "")
         .is("deleted_at", null)
         .order("display_name")
         .limit(500);
@@ -91,6 +92,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
         file_url: form.file_url || null,
         scheduled_for: form.scheduled_for || null,
         sent_at: form.scheduled_for ? null : new Date().toISOString(),
+        visible_to_donor: false,
         created_by: user?.id,
         updated_by: user?.id,
       });
@@ -105,6 +107,14 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const approve = useMutation({
+    mutationFn: async (id: string) => {
+      const result = await (supabase as any).from('sponsorship_updates').update({ visible_to_donor: true }).eq('id', id).eq('organization_id', orgId).select('id');
+      ensureWritten(result, 'Sponsor update approval');
+    },
+    onSuccess: () => { toast.success('Update approved for sponsor'); qc.invalidateQueries({queryKey:['sponsorship-updates']}); qc.invalidateQueries({queryKey:['donor-portal']}); },
+    onError: (e: Error) => toast.error(e.message),
+  });
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -123,7 +133,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
         </CardContent></Card>
       ) : (
         <div className="space-y-2">
-          {updates!.map((u: any) => {
+          {(updates || []).map((u: any) => {
             const Icon = TYPE_ICONS[u.update_type] || FileText;
             return (
               <Card key={u.id}>
@@ -140,6 +150,7 @@ export function SponsorshipUpdatesPanel({ beneficiaryId }: Props) {
                     {!beneficiaryId && u.beneficiaries?.display_name && (
                       <p className="text-xs text-muted-foreground">For {u.beneficiaries.display_name}</p>
                     )}
+                    {!u.approved_at && <Button size="sm" variant="outline" disabled={approve.isPending} onClick={() => approve.mutate(u.id)}>Approve for sponsor</Button>}
                     {u.content && <p className="text-xs mt-1 line-clamp-2">{u.content}</p>}
                     {u.file_url && (
                       <a href={u.file_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Attachment</a>

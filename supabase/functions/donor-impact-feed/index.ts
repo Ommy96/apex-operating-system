@@ -60,30 +60,14 @@ Deno.serve(async (req) => {
     };
     const limit = Math.min(50, Math.max(5, body.limit ?? 20));
 
-    // Resolve donor from JWT
-    let donorAccountId = body.donor_account_id;
-    if (!donorAccountId) {
-      const token = authHeader.replace(/^Bearer\s+/i, "");
-      if (!token) {
-        return new Response(JSON.stringify({ ok: false, message: "Unauthorized" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      const { data: ures } = await supabase.auth.getUser(token);
-      const uid = ures?.user?.id;
-      if (!uid) {
-        return new Response(JSON.stringify({ ok: false, message: "Unauthorized" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      const { data: acct } = await supabase
-        .from("donor_accounts").select("id")
-        .eq("user_id", uid).eq("is_active", true).maybeSingle();
-      donorAccountId = acct?.id;
-      if (!donorAccountId) {
-        return new Response(JSON.stringify({ ok: true, posts: [], totals: null }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-    }
-
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData.user) throw new Error("Unauthorized");
+    const { data: account, error: accountError } = await supabase.from("donor_accounts")
+      .select("id, organization_id, donor_name").eq("user_id", authData.user.id).eq("is_active", true).maybeSingle();
+    if (accountError) throw accountError;
+    if (!account || (body.donor_account_id && body.donor_account_id !== account.id)) throw new Error("Forbidden");
+    const donorAccountId = account.id;
     // Load donor allocations (joined with beneficiary, activity_disbursement, project)
     const { data: allocs, error: allocErr } = await supabase
       .from("allocations")

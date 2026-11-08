@@ -1,0 +1,13 @@
+CREATE SCHEMA IF NOT EXISTS app_private;
+REVOKE ALL ON SCHEMA app_private FROM PUBLIC,anon; GRANT USAGE ON SCHEMA app_private TO authenticated;
+ALTER FUNCTION public.set_donor_currency(text) SET SCHEMA app_private;
+ALTER FUNCTION public.create_donor_request(uuid,text,text,date) SET SCHEMA app_private;
+ALTER FUNCTION public.get_donor_requests() SET SCHEMA app_private;
+ALTER FUNCTION public.donor_contact_permitted(uuid) SET SCHEMA app_private;
+CREATE FUNCTION public.set_donor_currency(_currency text) RETURNS SETOF public.donor_accounts LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT * FROM app_private.set_donor_currency(_currency) $$;
+CREATE FUNCTION public.create_donor_request(_beneficiary uuid,_kind text,_purpose text,_date date DEFAULT NULL) RETURNS uuid LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT app_private.create_donor_request(_beneficiary,_kind,_purpose,_date) $$;
+CREATE FUNCTION public.get_donor_requests() RETURNS TABLE(id uuid,beneficiary_id uuid,request_kind text,status text,purpose text,requested_date date,scheduled_date timestamptz,created_at timestamptz,approved_response text) LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $$ SELECT * FROM app_private.get_donor_requests() $$;
+CREATE FUNCTION public.donor_contact_permitted(_beneficiary uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $$ SELECT app_private.donor_contact_permitted(_beneficiary) $$;
+REVOKE ALL ON FUNCTION public.set_donor_currency(text),public.create_donor_request(uuid,text,text,date),public.get_donor_requests(),public.donor_contact_permitted(uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.set_donor_currency(text),public.create_donor_request(uuid,text,text,date),public.get_donor_requests(),public.donor_contact_permitted(uuid) TO authenticated;
+NOTIFY pgrst,'reload schema';

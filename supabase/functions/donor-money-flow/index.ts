@@ -27,25 +27,14 @@ Deno.serve(async (req) => {
       project_id?: string;
     };
 
-    let donorAccountId = body.donor_account_id;
-    if (!donorAccountId) {
-      const token = authHeader.replace(/^Bearer\s+/i, "");
-      const { data: ures } = await supabase.auth.getUser(token);
-      const uid = ures?.user?.id;
-      if (!uid) {
-        return new Response(JSON.stringify({ ok: false, message: "Unauthorized" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      const { data: acct } = await supabase
-        .from("donor_accounts").select("id, donor_name, organization_id")
-        .eq("user_id", uid).eq("is_active", true).maybeSingle();
-      donorAccountId = acct?.id;
-    }
-    if (!donorAccountId) {
-      return new Response(JSON.stringify({ ok: true, nodes: [], links: [], totals: {} }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData.user) throw new Error("Unauthorized");
+    const { data: account, error: accountError } = await supabase.from("donor_accounts")
+      .select("id, organization_id, donor_name").eq("user_id", authData.user.id).eq("is_active", true).maybeSingle();
+    if (accountError) throw accountError;
+    if (!account || (body.donor_account_id && body.donor_account_id !== account.id)) throw new Error("Forbidden");
+    const donorAccountId = account.id;
     const { data: donor } = await supabase.from("donor_accounts")
       .select("id, donor_name").eq("id", donorAccountId).maybeSingle();
 

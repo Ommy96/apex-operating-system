@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { CalendarClock, CheckCircle2, XCircle } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { ensureWritten } from "@/lib/settingsWrite";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STAGES = [
   { key: "requested", label: "Requested" },
@@ -49,10 +51,11 @@ export default function VisitManagement() {
 
   const transition = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: any }) => {
-      const { error } = await (supabase as any).from("visit_requests").update({ ...patch, updated_by: user?.id }).eq("id", id);
-      if (error) throw error;
+      const result = await (supabase as any).from("visit_requests").update({ ...patch, updated_by: user?.id }).eq("id", id).eq("organization_id",orgId).select("id");
+      ensureWritten(result, "Request");
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["visit-requests", orgId] }); toast.success("Updated"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["visit-requests", orgId] }); qc.invalidateQueries({queryKey:["donor-portal"]}); toast.success("Updated"); },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const grouped = STAGES.map(s => ({ ...s, items: requests.filter((r: any) => r.status === s.key) }));
@@ -64,7 +67,7 @@ export default function VisitManagement() {
         <p className="text-muted-foreground">Review, approve and schedule donor visit requests.</p>
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <Skeleton className="h-40" />}
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {grouped.map(stage => (
@@ -74,7 +77,7 @@ export default function VisitManagement() {
               {stage.items.map((r: any) => (
                 <div key={r.id} className="border rounded-md p-2 space-y-1">
                   <div className="text-sm font-medium">{r.beneficiary?.display_name || "Beneficiary"}</div>
-                  <div className="text-xs text-muted-foreground">{r.donor?.donor_name || "Donor"}</div>
+                  <div className="text-xs text-muted-foreground">{r.donor?.donor_name || "Donor"} · {(r.request_kind || "visit").replace("_", " ")}</div>
                   {r.requested_date && <div className="text-xs">Preferred: {format(parseISO(r.requested_date), "MMM d, yyyy")}</div>}
                   {r.scheduled_date && <div className="text-xs">Scheduled: {format(parseISO(r.scheduled_date), "MMM d, yyyy")}</div>}
                   {r.purpose && <div className="text-xs italic text-muted-foreground line-clamp-2">"{r.purpose}"</div>}
@@ -85,13 +88,13 @@ export default function VisitManagement() {
                         <Button size="sm" variant="ghost" onClick={() => transition.mutate({ id: r.id, patch: { status: "declined", reviewed_by: user?.id, reviewed_at: new Date().toISOString() } })}><XCircle className="h-3 w-3 mr-1" />Decline</Button>
                       </>
                     )}
-                    {r.status === "approved" && (
+                    {r.status === "approved" && r.request_kind === "visit" && (
                       <Button size="sm" onClick={() => { setScheduleFor(r); setScheduledAt(r.requested_date || ""); }}>Schedule</Button>
                     )}
                     {r.status === "scheduled" && (
                       <Button size="sm" onClick={() => transition.mutate({ id: r.id, patch: { status: "conducted" } })}>Mark conducted</Button>
                     )}
-                    {r.status === "conducted" && (
+                    {(r.status === "conducted" || (r.status === "approved" && r.request_kind !== "visit")) && (
                       <Button size="sm" onClick={() => { setFeedbackFor(r); setFeedback(""); }}>Add feedback</Button>
                     )}
                   </div>
@@ -117,10 +120,10 @@ export default function VisitManagement() {
       <Dialog open={!!feedbackFor} onOpenChange={(o) => !o && setFeedbackFor(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Visit feedback</DialogTitle></DialogHeader>
-          <Textarea rows={4} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Summary shared with the donor" />
+          <Textarea rows={4} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Write the donor-safe report or update for approval" />
           <DialogFooter>
             <Button variant="outline" onClick={() => setFeedbackFor(null)}>Cancel</Button>
-            <Button onClick={() => { transition.mutate({ id: feedbackFor.id, patch: { status: "completed", visit_feedback: feedback, completed_at: new Date().toISOString() } }); setFeedbackFor(null); }}>Complete</Button>
+            <Button onClick={() => { transition.mutate({ id: feedbackFor.id, patch: { status: "completed", approved_response: feedback, response_approved_at: new Date().toISOString(), completed_at: new Date().toISOString() } }); setFeedbackFor(null); }} disabled={!feedback.trim() || transition.isPending}>Approve response</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

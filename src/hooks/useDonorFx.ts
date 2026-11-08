@@ -52,9 +52,9 @@ export function useDonorFx(preferred: string | undefined) {
     const sorted = [...candidates].sort((a, b) =>
       String(a.rate_date || '').localeCompare(String(b.rate_date || '')),
     );
-    if (!onDate) return sorted[sorted.length - 1];
+    if (!onDate) return null;
     const onOrBefore = sorted.filter((r) => !r.rate_date || r.rate_date <= onDate);
-    return onOrBefore.length ? onOrBefore[onOrBefore.length - 1] : sorted[0];
+    return onOrBefore.length ? onOrBefore[onOrBefore.length - 1] : null;
   }
 
   /** Full conversion detail — used for hover disclosure. */
@@ -70,6 +70,7 @@ export function useDonorFx(preferred: string | undefined) {
       converted: false,
     };
     if (!amount || src === target) return base;
+    if (!on) return { ...base, target: src };
 
     const direct = pick(src, target, on);
     if (direct) {

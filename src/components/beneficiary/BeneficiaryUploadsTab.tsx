@@ -49,6 +49,7 @@ import {
 import { format } from "date-fns";
 import { SecureDocumentViewer, SecureDocument } from "@/components/documents/SecureDocumentViewer";
 import { beneficiaryDocumentPath, toStoragePath } from "@/lib/secureDocuments";
+import { ensureWritten } from '@/lib/settingsWrite';
 import { useDocumentTypes } from "@/hooks/useDocumentTypes";
 
 const BUCKET = "beneficiary-documents";
@@ -113,14 +114,15 @@ export function BeneficiaryUploadsTab({ beneficiaryId }: BeneficiaryUploadsTabPr
 
   const shareMutation = useMutation({
     mutationFn: async ({ id, share }: { id: string; share: boolean }) => {
-      const { error } = await supabase
+      const result = await supabase
         .from("beneficiary_uploads")
         .update({ share_with_sponsor: share } as any)
-        .eq("id", id);
-      if (error) throw error;
+        .eq("id", id).select("id");
+      ensureWritten(result, "Sponsor sharing");
     },
     onSuccess: (_d, v) => {
       queryClient.invalidateQueries({ queryKey: ["beneficiary-uploads", beneficiaryId] });
+      queryClient.invalidateQueries({ queryKey: ["donor-shared-beneficiary-documents"] });
       toast.success(v.share ? "Shared with sponsor" : "No longer shared with sponsor");
     },
     onError: (e: any) => toast.error(e.message || "Could not change sharing"),

@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
 import { useDonorFx, FX_DISCLOSURE } from '@/hooks/useDonorFx';
-import { FxAmount } from './FxAmount';
+import { money } from '@/lib/donorMoney';
 import { Building2, Users, Sparkles } from 'lucide-react';
 
 interface Props {
@@ -57,12 +57,8 @@ export function DonorProgrammesTab({ onSelectProgramme }: Props) {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">You contributed</p>
-                    <FxAmount
-                      amount={p.contributedBase}
-                      currency={p.currency || totals.currency}
-                      fx={fx}
-                      className="font-semibold text-success"
-                    />
+                    <span className="font-semibold text-success">{money(p.contributedBase, p.currency || totals.currency)}</span>
+                    <p className="text-xs text-muted-foreground">Recorded currency · no aggregate FX snapshot</p>
                   </div>
                 </div>
 

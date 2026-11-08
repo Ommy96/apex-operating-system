@@ -1,7 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { ensureWritten } from '@/lib/settingsWrite';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { contactBirthdayAllowed, receivedContribution } from '@/lib/donorMoney';
 
 const sb = supabase as any;
 
@@ -62,7 +65,7 @@ export function useDonorPortal(period: string = 'all') {
           notes,
           program_id,
           beneficiary:beneficiaries!beneficiary_donors_beneficiary_id_fkey(
-            id, display_name, first_name, photo_url, beneficiary_code,
+            id, first_name, photo_url, beneficiary_code,
             beneficiary_type, gender, grade, academic_level,
             institution_name, status, date_of_birth, county,
             bio, hobbies_list, interests, career_ambition,
@@ -72,14 +75,14 @@ export function useDonorPortal(period: string = 'all') {
         .eq('donor_name', donorAccount.donor_name)
         .eq('organization_id', donorAccount.organization_id);
       if (error) throw error;
-      return data || [];
+      return (data || []).map((row: any) => ({ ...row, beneficiary: row.beneficiary ? { ...row.beneficiary, display_name: row.beneficiary.consent_given ? row.beneficiary.first_name : 'Sponsored participant', photo_url: row.beneficiary.consent_given ? row.beneficiary.photo_url : null } : null }));
     },
     enabled: !!donorAccount,
     ...commonOpts,
   });
 
   const sponsoredIds = useMemo(
-    () => (sponsoredBeneficiaries || []).map((bd: any) => bd.beneficiary?.id).filter(Boolean),
+    () => Array.from(new Set((sponsoredBeneficiaries || []).map((bd: any) => bd.beneficiary?.id).filter(Boolean))),
     [sponsoredBeneficiaries],
   );
 
@@ -87,7 +90,7 @@ export function useDonorPortal(period: string = 'all') {
   /* Enrollments — which programmes/projects their beneficiaries are in   */
   /* ------------------------------------------------------------------ */
   const { data: enrollments = [] } = useQuery({
-    queryKey: ['donor-enrollments', donorId, sponsoredIds.length],
+    queryKey: ['donor-enrollments', donorId, sponsoredIds],
     queryFn: async () => {
       if (!sponsoredIds.length) return [];
       const out: any[] = [];
@@ -121,7 +124,7 @@ export function useDonorPortal(period: string = 'all') {
         .from('allocations')
         .select(`
           id, scope, status, amount_native, native_currency,
-          amount_base, base_currency, fx_rate, fx_at, allocated_at,
+          amount_base, base_currency, fx_rate, fx_at, fx_snapshot, allocated_at,
           beneficiary:beneficiaries!allocations_beneficiary_id_fkey(id, display_name, photo_url),
           project:projects!allocations_project_id_fkey(id, name),
           program:programs!allocations_program_id_fkey(id, name)
@@ -195,7 +198,7 @@ export function useDonorPortal(period: string = 'all') {
   });
 
   const { data: sharedBeneficiaryDocuments = [] } = useQuery({
-    queryKey: ['donor-shared-beneficiary-documents', donorId, sponsoredIds.length],
+    queryKey: ['donor-shared-beneficiary-documents', donorId, sponsoredIds],
     queryFn: async () => {
       if (!sponsoredIds.length) return [];
       const { data, error } = await sb
@@ -215,7 +218,7 @@ export function useDonorPortal(period: string = 'all') {
   /* Impact stories — beneficiary- or programme-connected                 */
   /* ------------------------------------------------------------------ */
   const { data: impactStories, isLoading: storiesLoading } = useQuery({
-    queryKey: ['donor-impact-stories', donorId, sponsoredIds.length],
+    queryKey: ['donor-impact-stories', donorId, sponsoredIds],
     queryFn: async () => {
       if (!donorId) return [];
       const { data, error } = await sb
@@ -274,15 +277,26 @@ export function useDonorPortal(period: string = 'all') {
     queryKey: ['donor-org', orgId],
     queryFn: async () => {
       if (!orgId) return null;
-      const { data } = await sb
+      const { data, error } = await sb
         .from('organizations')
         .select('id, name, website, donor_birthday_alerts_enabled')
         .eq('id', orgId)
         .maybeSingle();
+      if (error) throw error;
       return data;
     },
     enabled: !!orgId,
     ...commonOpts,
+  });
+
+  const { data: contactConsents = {} } = useQuery({
+    queryKey: ['donor-contact-consent', donorId, sponsoredIds],
+    enabled: !!donorId && sponsoredIds.length > 0,
+    queryFn: async () => Object.fromEntries(await Promise.all(sponsoredIds.map(async (id: any) => {
+      const { data, error } = await sb.rpc('donor_contact_permitted', { _beneficiary: id });
+      if (error) throw error;
+      return [id, data === true];
+    }))), ...commonOpts,
   });
 
   const milestones = useMemo(() => {
@@ -302,7 +316,7 @@ export function useDonorPortal(period: string = 'all') {
       const b = bd.beneficiary;
       if (!b) return;
 
-      if (birthdaysEnabled && b.date_of_birth && b.consent_given) {
+      if (contactBirthdayAllowed(b.date_of_birth, contactConsents[b.id] === true, birthdaysEnabled)) {
         const dob = new Date(b.date_of_birth);
         const next = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
         if (next < new Date(now.getFullYear(), now.getMonth(), now.getDate())) next.setFullYear(now.getFullYear() + 1);
@@ -339,7 +353,7 @@ export function useDonorPortal(period: string = 'all') {
     });
 
     return items.sort((a, b) => a.daysAway - b.daysAway);
-  }, [sponsoredBeneficiaries, org]);
+  }, [sponsoredBeneficiaries, org, contactConsents]);
 
   /* ------------------------------------------------------------------ */
   /* Mutations                                                            */
@@ -347,11 +361,8 @@ export function useDonorPortal(period: string = 'all') {
   const updatePreferredCurrency = useMutation({
     mutationFn: async (curr: string) => {
       if (!donorId) throw new Error('no_donor_account');
-      const { error } = await supabase
-        .from('donor_accounts')
-        .update({ preferred_currency: curr })
-        .eq('id', donorId);
-      if (error) throw error;
+      const result = await sb.rpc('set_donor_currency', { _currency: curr });
+      ensureWritten(result, 'Currency preference');
       return curr;
     },
     onMutate: async (curr: string) => {
@@ -416,51 +427,28 @@ export function useDonorPortal(period: string = 'all') {
     [
       'donor-account', 'donor-beneficiaries', 'donor-enrollments', 'donor-documents',
       'donor-shared-beneficiary-documents', 'donor-allocations', 'donor-intents',
-      'donor-pools', 'donor-impact-stories', 'donor-correspondence',
+      'donor-pools', 'donor-impact-stories', 'donor-correspondence', 'donor-portal',
     ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
   };
 
-  useEffect(() => {
-    if (!donorId) return;
-    const channel = supabase
-      .channel(`donor-portal-${donorId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'allocations' }, invalidateDonorKeys)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'donations' }, invalidateDonorKeys)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_donors' }, invalidateDonorKeys)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sponsor_relationships' }, invalidateDonorKeys)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'beneficiary_services' }, invalidateDonorKeys)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'impact_stories' }, invalidateDonorKeys)
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [donorId]);
+  useRealtimeSubscription(['allocations', 'donations', 'beneficiary_donors', 'sponsor_relationships', 'beneficiary_services', 'impact_stories', 'sponsorship_updates', 'visit_requests', 'beneficiary_uploads', 'managed_documents'].map(table => ({ table, orgId, enabled: !!donorId, queryKeys: [['donor-portal'], ...['donor-account', 'donor-beneficiaries', 'donor-allocations', 'donor-intents', 'donor-pools', 'donor-impact-stories', 'donor-documents', 'donor-shared-beneficiary-documents', 'donor-enrollments'].map(key => [key])] })));
 
   /* ------------------------------------------------------------------ */
   /* Totals: allocations first, committed intents / recorded gifts as     */
   /* the live fallback so real funding never reads as zero.               */
   /* ------------------------------------------------------------------ */
+  const { data: receivedDonations = [], dataUpdatedAt: receivedUpdatedAt } = useQuery({
+    queryKey: ['donor-portal', 'received', donorId, currency, period], enabled: !!donorId,
+    queryFn: async () => {
+      const { data, error } = await sb.from('donations').select('id, amount, currency, status, completed_at, created_at').eq('donor_account_id', donorId).eq('organization_id', orgId);
+      if (error) throw error;
+      return (data || []).filter(receivedContribution);
+    }, ...commonOpts,
+  });
   const totals = useMemo(() => {
-    const allocated = (donorAllocations || []).reduce(
-      (s: number, a: any) => s + (Number(a.amount_base) || 0), 0,
-    );
-    const allocatedCurrency = (donorAllocations || [])[0]?.base_currency || 'KES';
-    const committed = (donationIntents || []).reduce(
-      (s: number, i: any) => s + (Number(i.committed_amount) || 0), 0,
-    );
-    const committedCurrency = (donationIntents || [])[0]?.committed_currency || 'KES';
-    const recorded = (sponsoredBeneficiaries || []).reduce(
-      (s: number, bd: any) => s + (Number(bd.amount_received) || 0), 0,
-    );
-
-    const contributed = allocated > 0 ? allocated : committed > 0 ? committed : recorded;
-    const source: 'allocations' | 'commitments' | 'recorded_gifts' =
-      allocated > 0 ? 'allocations' : committed > 0 ? 'commitments' : 'recorded_gifts';
-    const currencyCode = allocated > 0 ? allocatedCurrency : committed > 0 ? committedCurrency : 'KES';
-
-    return { allocated, committed, recorded, contributed, currency: currencyCode, source };
-  }, [donorAllocations, donationIntents, sponsoredBeneficiaries]);
+    const recorded = (sponsoredBeneficiaries || []).reduce((sum: number, bd: any) => sum + Number(bd.amount_received || 0), 0);
+    return { recorded, contributed: recorded, currency: 'KES', source: 'recorded_gifts' as const };
+  }, [sponsoredBeneficiaries]);
 
   const fetchBeneficiaryAcademics = async (beneficiaryId: string) => {
     const { data, error } = await supabase
@@ -488,6 +476,7 @@ export function useDonorPortal(period: string = 'all') {
       .select('*')
       .eq('beneficiary_id', beneficiaryId)
       .eq('visible_to_donor', true)
+      .not('approved_at', 'is', null)
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -496,9 +485,10 @@ export function useDonorPortal(period: string = 'all') {
 
   const getDocumentDownloadUrl = async (fileUrl: string) => {
     const path = fileUrl.replace(/^.*\/managed-documents\//, '');
-    const { data } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from('managed-documents')
       .createSignedUrl(path, 300);
+    if (error) throw error;
     return data?.signedUrl || null;
   };
 
@@ -540,6 +530,7 @@ export function useDonorPortal(period: string = 'all') {
     donorPools,
     impactStories,
     totals,
+    receivedDonations,
     updatePreferredCurrency,
     sendCorrespondence,
     fetchBeneficiaryAcademics,
@@ -552,7 +543,7 @@ export function useDonorPortal(period: string = 'all') {
     allocationsLoading,
     storiesLoading,
     isDonor: !!donorAccount,
-    lastUpdatedAt: Math.max(accountUpdatedAt || 0, beneficiariesUpdatedAt || 0, allocationsUpdatedAt || 0),
+    lastUpdatedAt: Math.min(...[accountUpdatedAt, beneficiariesUpdatedAt, allocationsUpdatedAt, receivedUpdatedAt].filter(Boolean)),
     refetchAll: invalidateDonorKeys,
   };
 }
