@@ -25,3 +25,11 @@
 - [x] Extend existing waiting-list ranking and derive safe legacy summaries.
 - [x] Run focused rule tests and inspect anonymous grants, RLS and Umazi catalogue isolation.
 - [ ] Authenticated end-to-end creation, revision, donor/export exclusion and non-authorised-role checks: blocked by external Supabase with no usable browser session; Umazi currently has no beneficiaries.
+
+# Tasks and case management
+- [x] Extend existing task/case tables, links, assignment alerts and audit logs; keep cases and tasks distinct.
+- [x] Add idempotent source-task creation and enforce server-side status transitions, case closure reasons, sensitive access and assignment scope.
+- [x] Add task and case screens, linked case tasks, and staff workload counters; remove the duplicate legacy HR task editor.
+- [x] Run focused workflow tests and inspect tenant/sensitive policies and source record fields.
+- [ ] Verify authenticated create/assign/progress/close, duplicate scan, donor exclusion, direct API/file/export access, role revocation and Umazi cross-org behavior: no authenticated browser session or representative Umazi records available.
+- [ ] Verify workload totals against real assigned open/overdue tasks: current task table has no test records.

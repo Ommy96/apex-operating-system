@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useOrgStaff } from "@/hooks/useOrgStaff";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { toast } from "sonner";
 import type { WorkRecordType } from "@/lib/workManagement";
 
@@ -39,6 +41,10 @@ export function useWorkManagement() {
   const queryClient = useQueryClient();
   const orgId = currentOrganization?.organization_id;
 
+  useRealtimeSubscription([
+    { table: "staff_tasks", queryKeys: [["staff-tasks", orgId || ""], ["case-tasks"], ["task-workload"]], orgId, enabled: Boolean(orgId) },
+  ]);
+
   const tasks = useQuery({
     queryKey: ["staff-tasks", orgId],
     enabled: Boolean(orgId),
@@ -53,18 +59,7 @@ export function useWorkManagement() {
     },
   });
 
-  const orgMembers = useQuery({
-    queryKey: ["work-staff-options", orgId],
-    enabled: Boolean(orgId),
-    queryFn: async () => {
-      const { data, error } = await sb
-        .from("profiles")
-        .select("user_id, full_name, email")
-        .eq("organization_id", orgId);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+  const orgMembers = useOrgStaff(orgId);
 
   const cases = useQuery({
     queryKey: ["work-case-options", orgId],
@@ -134,7 +129,7 @@ export function useWorkManagement() {
 
   const updateTaskStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: WorkTask["status"] }) => {
-      const { error: updateError } = await sb.from("staff_tasks").update({ status }).eq("id", id);
+      const { error: updateError } = await sb.from("staff_tasks").update({ status }).eq("id", id).select("id").single();
       if (updateError) throw updateError;
       return { id };
     },
@@ -151,9 +146,11 @@ export function useWorkManagement() {
 }
 
 export function useCaseTasks(caseId: string | undefined) {
+  const { currentOrganization } = useOrganization();
+  const orgId = currentOrganization?.organization_id;
   return useQuery({
-    queryKey: ["case-tasks", caseId],
-    enabled: Boolean(caseId),
+    queryKey: ["case-tasks", orgId, caseId],
+    enabled: Boolean(orgId && caseId),
     queryFn: async (): Promise<WorkTask[]> => {
       const { data, error } = await sb
         .from("staff_tasks")

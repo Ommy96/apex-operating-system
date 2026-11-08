@@ -4,6 +4,7 @@ import {
   allowedTaskTransitions,
   canTransitionCaseStatus,
   canTransitionTaskStatus,
+  hasValidClosureReason,
   isOverdueTask,
   WORK_RECORD_TYPES,
 } from "@/lib/workManagement";
@@ -36,6 +37,9 @@ describe("case workflow rules", () => {
     expect(canTransitionCaseStatus("in_progress", "closed")).toBe(true);
     expect(canTransitionCaseStatus("closed", "open")).toBe(false);
     expect(allowedCaseTransitions("lost_to_follow_up")).toEqual([]);
+    expect(hasValidClosureReason("closed", "Support concluded")).toBe(true);
+    expect(hasValidClosureReason("closed", "   ")).toBe(false);
+    expect(hasValidClosureReason("in_progress", "")).toBe(true);
   });
 });
 

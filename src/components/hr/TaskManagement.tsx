@@ -99,7 +99,7 @@ export function TaskManagement() {
                       <SelectItem value="need">Need</SelectItem>
                       <SelectItem value="home_visit">Home visit</SelectItem>
                       <SelectItem value="school_visit">School visit</SelectItem>
-                      <SelectItem value="donor_request">Donor request</SelectItem>
+                      <SelectItem value="donor_request">Donation intent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

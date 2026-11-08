@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 import { useAuth } from "./useAuth";
 import { toast } from "@/hooks/use-toast";
+import { hasValidClosureReason } from "@/lib/workManagement";
 
 const sb = supabase as any;
 
@@ -190,7 +191,7 @@ export function useUpdateCase() {
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<BeneficiaryCase> }) => {
       const upd: any = { ...patch, updated_by: user?.id ?? null };
-      if (patch.case_status && !patch.closure_reason?.trim() && ["closed", "resolved", "lost_to_follow_up"].includes(patch.case_status)) {
+      if (patch.case_status && !hasValidClosureReason(patch.case_status, patch.closure_reason)) {
         throw new Error("Record a reason before closing or resolving a case");
       }
       if (patch.case_status && ["closed", "resolved", "lost_to_follow_up"].includes(patch.case_status) && !patch.closed_date) {

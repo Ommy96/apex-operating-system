@@ -244,75 +244,6 @@ export function useHR() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  // ========== TASK MANAGEMENT ==========
-  const tasks = useQuery({
-    queryKey: ["staff-tasks", orgId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("staff_tasks")
-        .select("*")
-        .eq("organization_id", orgId!)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!orgId,
-  });
-
-  const createTask = useMutation({
-    mutationFn: async (values: {
-      title: string;
-      description?: string;
-      assigned_to?: string;
-      priority?: string;
-      due_date?: string;
-      program_id?: string;
-      project_id?: string;
-      tags?: string[];
-    }) => {
-      const { data, error } = await supabase
-        .from("staff_tasks")
-        .insert({ ...values, organization_id: orgId!, assigned_by: user?.id })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
-      toast.success("Task created");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const updateTask = useMutation({
-    mutationFn: async ({ id, ...values }: { id: string; status?: string; priority?: string; title?: string; description?: string; due_date?: string }) => {
-      const updateData: any = { ...values };
-      if (values.status === "completed") {
-        updateData.completed_at = new Date().toISOString();
-      }
-      const { error } = await supabase.from("staff_tasks").update(updateData).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
-      toast.success("Task updated");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const deleteTask = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("staff_tasks").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
-      toast.success("Task deleted");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
   // ========== ORG MEMBERS (for staff selectors) ==========
   const orgMembers = useQuery({
     queryKey: ["org-members-hr", orgId],
@@ -333,7 +264,6 @@ export function useHR() {
     { table: "staff_contract_objectives", queryKeys: [["hr-contracts", orgId || ""]], enabled: !!orgId },
     { table: "leave_requests", queryKeys: [["leave-requests", orgId || ""]], orgId, enabled: !!orgId },
     { table: "staff_check_ins", queryKeys: [["check-ins", orgId || ""]], orgId, enabled: !!orgId },
-    { table: "staff_tasks", queryKeys: [["staff-tasks", orgId || ""]], orgId, enabled: !!orgId },
   ]);
 
   const deleteContract = useMutation({
@@ -376,7 +306,6 @@ export function useHR() {
     contracts, createContract, updateContract, deleteContract, createObjective, updateObjective,
     leaveTypes, createLeaveType, leaveRequests, createLeaveRequest, updateLeaveRequest, deleteLeaveRequest,
     checkIns, createCheckIn, checkOut, deleteCheckIn,
-    tasks, createTask, updateTask, deleteTask,
     orgMembers,
   };
 }

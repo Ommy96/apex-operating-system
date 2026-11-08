@@ -52,7 +52,8 @@ export default function CaseDetail() {
 
   const benefName = (kase.beneficiary?.display_name ?? `${kase.beneficiary?.first_name ?? ""} ${kase.beneficiary?.last_name ?? ""}`.trim()) || "Unknown";
   const nextStatuses = allowedCaseTransitions(kase.case_status as ManagedCaseStatus);
-  const caseIsTerminal = ["closed", "resolved", "lost_to_follow_up"].includes(kase.case_status);
+  const caseIsFinal = ["closed", "lost_to_follow_up"].includes(kase.case_status);
+  const caseHasClosure = ["resolved", "closed", "lost_to_follow_up"].includes(kase.case_status);
   const requestStatusChange = (next: CaseStatus) => {
     if (["closed", "resolved", "lost_to_follow_up"].includes(next)) {
       setCloseStatus(next);
@@ -94,28 +95,28 @@ export default function CaseDetail() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {!caseIsTerminal && <Select value={kase.case_status} onValueChange={(v) => requestStatusChange(v as CaseStatus)} disabled={updateCase.isPending}>
+            {!caseIsFinal && <Select value={kase.case_status} onValueChange={(v) => requestStatusChange(v as CaseStatus)} disabled={updateCase.isPending}>
               <SelectTrigger className="w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value={kase.case_status} disabled>{kase.case_status.replace(/_/g, " ")}</SelectItem>{nextStatuses.map((status) => <SelectItem key={status} value={status}>{status.replace(/_/g," ")}</SelectItem>)}</SelectContent>
             </Select>}
-            {!caseIsTerminal && <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
+            {!caseIsFinal && <Select value={kase.priority} onValueChange={(v) => updateCase.mutate({ id: kase.id, patch: { priority: v as CasePriority } })}>
               <SelectTrigger className="w-full sm:w-[120px]"><SelectValue /></SelectTrigger>
               <SelectContent>{(["low","normal","high","critical"] as CasePriority[]).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
             </Select>}
-            {!caseIsTerminal && <Button onClick={() => setOpenEntry(true)}><Plus className="h-4 w-4 mr-1" /> Add entry</Button>}
+            {!caseIsFinal && <Button onClick={() => setOpenEntry(true)}><Plus className="h-4 w-4 mr-1" /> Add entry</Button>}
           </div>
         </div>
         {kase.summary && <p className="text-sm mt-3 p-3 bg-muted/40 rounded-md">{kase.summary}</p>}
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span>Assigned to</span>
-          <Select value={kase.assigned_to || "unassigned"} onValueChange={(value) => updateCase.mutate({ id: kase.id, patch: { assigned_to: value === "unassigned" ? null : value } })} disabled={!can.manageCases || caseIsTerminal}>
+          <Select value={kase.assigned_to || "unassigned"} onValueChange={(value) => updateCase.mutate({ id: kase.id, patch: { assigned_to: value === "unassigned" ? null : value } })} disabled={!can.manageCases || caseIsFinal}>
             <SelectTrigger className="w-[220px]"><SelectValue placeholder="Select staff" /></SelectTrigger>
             <SelectContent><SelectItem value="unassigned">Unassigned</SelectItem>{(orgMembers.data ?? []).map((member: any) => <SelectItem key={member.user_id} value={member.user_id}>{member.full_name || member.email}</SelectItem>)}</SelectContent>
           </Select>
           {kase.is_sensitive && <Badge variant="outline" className="gap-1"><LockKeyhole className="h-3 w-3" /> Sensitive</Badge>}
-          {can.viewSensitiveCases && !caseIsTerminal && <label className="flex items-center gap-2"><Checkbox checked={kase.is_sensitive} onCheckedChange={(checked) => updateCase.mutate({ id: kase.id, patch: { is_sensitive: checked === true } })} /> Mark sensitive</label>}
+          {can.viewSensitiveCases && !caseIsFinal && <label className="flex items-center gap-2"><Checkbox checked={kase.is_sensitive} onCheckedChange={(checked) => updateCase.mutate({ id: kase.id, patch: { is_sensitive: checked === true } })} /> Mark sensitive</label>}
         </div>
-        {caseIsTerminal && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replace(/_/g, " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
+        {caseHasClosure && <div className="mt-3 border-t pt-3 text-sm"><p className="font-medium">Case {kase.case_status.replace(/_/g, " ")}{kase.closed_date ? ` · ${kase.closed_date}` : ""}</p><p className="text-muted-foreground">{kase.closure_reason}</p></div>}
       </div>
 
       <CaseTasksPanel caseId={kase.id} tasks={linkedTasks} isLoading={tasksLoading} staff={orgMembers.data ?? []} canManage={can.manageTasks} canView={can.viewTasks} onStatusChange={(taskId, status) => updateTaskStatus.mutate({ id: taskId, status })} />

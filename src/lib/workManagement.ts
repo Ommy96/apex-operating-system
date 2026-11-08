@@ -37,6 +37,10 @@ export function canTransitionCaseStatus(from: ManagedCaseStatus, to: ManagedCase
   return from === to || caseTransitions[from].includes(to);
 }
 
+export function hasValidClosureReason(status: ManagedCaseStatus, reason: string | null | undefined): boolean {
+  return !["resolved", "closed", "lost_to_follow_up"].includes(status) || Boolean(reason?.trim());
+}
+
 export const WORK_RECORD_TYPES = [
   "life_event",
   "vulnerability_assessment",
