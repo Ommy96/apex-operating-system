@@ -1,3 +1,4 @@
+import { achievementPercentage } from '@/lib/resultsFramework';
 import { useParams } from "react-router-dom";
 import { useStakeholderPortal } from "@/hooks/useStakeholderAccess";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Download, Building2, Target, Banknote, Users } from "lucide-react";
 import { format } from "date-fns";
 
-function StatusBadge({ pct }: { pct: number }) {
+function StatusBadge({ pct }: { pct: number | null }) {
+  if (pct == null) return <Badge variant="outline">No data</Badge>;
   if (pct >= 80) return <Badge className="bg-success/10 text-success">On track</Badge>;
   if (pct >= 50) return <Badge className="bg-warning/10 text-warning">At risk</Badge>;
   return <Badge className="bg-destructive/10 text-destructive">Off track</Badge>;
@@ -142,7 +144,7 @@ export default function StakeholderPortal() {
             ) : indicators.map((i: any) => {
               const target = Number(i.target_value) || 0;
               const latest = Number(i.latest_value) || 0;
-              const pct = target > 0 ? Math.min(100, (latest / target) * 100) : 0;
+              const pct = achievementPercentage(i.latest_value ?? null, i.target_value ?? null, i.trend_direction, i.denominator === undefined ? 1 : i.denominator);
               return (
                 <div key={i.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -154,7 +156,7 @@ export default function StakeholderPortal() {
                     </div>
                     <StatusBadge pct={pct} />
                   </div>
-                  <Progress value={pct} className="h-2 mt-3" />
+                  <Progress value={pct ?? 0} className="h-2 mt-3" />
                 </div>
               );
             })}

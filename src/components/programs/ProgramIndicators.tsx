@@ -1,3 +1,4 @@
+import { achievementPercentage, OUTCOME_EVIDENCE_WARNING } from '@/lib/resultsFramework';
 import { useState } from "react";
 import { Plus, Target, TrendingUp, Edit, Trash2, BarChart3, Percent, Hash, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -246,8 +247,7 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
   };
 
   const calculateProgress = (current: number | null, target: number | null) => {
-    if (!target || target === 0) return 0;
-    return Math.min(Math.round(((current || 0) / target) * 100), 100);
+    return achievementPercentage(current, target);
   };
 
   const getTypeColor = (type: string | null) => {
@@ -492,9 +492,9 @@ export const ProgramIndicators = ({ programId, projectId, showAddButton = true }
                       {indicator.measurement_unit === 'percentage' ? '%' : ''}
                     </span>
                   </div>
-                  <Progress value={progress} className="h-2" />
+                  <Progress value={progress ?? 0} className="h-2" />
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{progress}% achieved</span>
+                    <span className="text-xs text-muted-foreground">{progress == null ? 'Achievement unavailable' : `${progress.toFixed(0)}% achieved`}</span>
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"

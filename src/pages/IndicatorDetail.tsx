@@ -24,6 +24,7 @@ import { useIndicatorVersions, useUpdateIndicatorWithVersioning } from "@/hooks/
 import { useIndicatorTargets, useIndicatorValues } from "@/hooks/useIndicators";
 import { DisaggregationPanel } from "@/components/indicators/DisaggregationPanel";
 import { useDataQualityFlags } from "@/hooks/useDataQuality";
+import { IndicatorValueEntryForm } from '@/components/indicators/IndicatorValueEntryForm';
 import { ResultsPeriodPanel } from '@/components/indicators/ResultsPeriodPanel';
 
 function useIndicator(id?: string) {
@@ -52,6 +53,7 @@ export default function IndicatorDetail() {
   const { data: values = [] } = useIndicatorValues(id);
   const updateMut = useUpdateIndicatorWithVersioning();
 
+  const [recording, setRecording] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, any>>({});
   const [pendingReason, setPendingReason] = useState("");
@@ -299,6 +301,7 @@ export default function IndicatorDetail() {
         </TabsContent>
 
         <TabsContent value="data" className="mt-4">
+          {recording ? <IndicatorValueEntryForm indicatorId={indicator.id} onSuccess={() => setRecording(false)} onCancel={() => setRecording(false)} /> : <Button className="mb-3" onClick={() => setRecording(true)}>Record measurement</Button>}
           <Card>
             <CardContent className="pt-6">
               {values.length === 0 ? (

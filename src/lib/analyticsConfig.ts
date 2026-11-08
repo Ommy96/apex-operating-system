@@ -225,6 +225,7 @@ export const TABS: Record<TabKey, TabConfig> = {
     ],
     filters: [{ key: "programme", label: "Programme" }],
     metrics: [
+      { key: "approved_achievement", label: "Approved indicator achievement", defaultDimension: "month", goodDirection: "up" },
       { key: "indicator_average", label: "Indicator average", defaultDimension: "month", goodDirection: "up" },
       { key: "baseline_movement", label: "Baseline → current movement", defaultDimension: "project", goodDirection: "up" },
       { key: "beneficiaries_at_target", label: "Beneficiaries at target", defaultDimension: "month", goodDirection: "up" },

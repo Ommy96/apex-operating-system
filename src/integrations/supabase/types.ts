@@ -18366,6 +18366,17 @@ export type Database = {
         Args: { _assessment: string }
         Returns: string
       }
+      analytics_approved_results: {
+        Args: { _end: string; _org: string; _start: string }
+        Returns: {
+          id: string
+          indicator_id: string
+          period_end: string
+          period_start: string
+          snapshot: Json
+          version: number
+        }[]
+      }
       approve_results_period: {
         Args: {
           _amends?: string

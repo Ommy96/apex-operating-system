@@ -37,6 +37,8 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
 
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
+  const [numerator, setNumerator] = useState('');
+  const [denominator, setDenominator] = useState('');
   const [singleValue, setSingleValue] = useState('');
   const [disaggValues, setDisaggValues] = useState<Record<string, Record<string, string>>>({});
   const [justification, setJustification] = useState('');
@@ -46,10 +48,11 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
   const { data: rules = [] } = useQuery({
     queryKey: ['indicator-validation-rules', indicatorId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('indicator_validation_rules')
         .select('*')
         .eq('indicator_id', indicatorId);
+      if (error) throw error;
       return (data || []) as ValidationRule[];
     },
   });
@@ -58,13 +61,14 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
   const { data: previousValue } = useQuery({
     queryKey: ['indicator-prev-value', indicatorId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('indicator_values')
         .select('actual_value')
         .eq('indicator_id', indicatorId)
         .is('disaggregation_category_id', null)
         .order('created_at', { ascending: false })
         .limit(1);
+      if (error) throw error;
       return data?.[0]?.actual_value ?? null;
     },
   });
@@ -73,10 +77,11 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
   const { data: categories = [] } = useQuery({
     queryKey: ['indicator-disagg-categories', indicatorId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('indicator_disaggregations')
         .select('disaggregation_category_id, disaggregation_categories(id, name, values)')
         .eq('indicator_id', indicatorId);
+      if (error) throw error;
       if (!data) return [];
       return data
         .map((d: any) => d.disaggregation_categories)
@@ -92,14 +97,8 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
   const hasDisaggregations = categories.length > 0;
 
   // Calculate total from disaggregated values
-  const total = useMemo(() => {
-    if (!hasDisaggregations) return Number(singleValue) || 0;
-    let sum = 0;
-    Object.values(disaggValues).forEach(catVals => {
-      Object.values(catVals).forEach(v => { sum += Number(v) || 0; });
-    });
-    return sum;
-  }, [hasDisaggregations, singleValue, disaggValues]);
+  // Each disaggregation is another partition of the same people, not an additive population.
+  const total = Number(singleValue) || 0;
 
   // Validate on blur
   const validate = (value: number) => {
@@ -125,7 +124,7 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
   };
 
   const requiresJustification = warnings.length > 0;
-  const canSave = periodStart && periodEnd && (!requiresJustification || justification.trim().length > 0);
+  const canSave = periodStart && periodEnd && periodStart <= periodEnd && singleValue.trim() !== '' && (!requiresJustification || justification.trim().length > 0);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -156,6 +155,8 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
           period_start: periodStart,
           period_end: periodEnd,
           actual_value: total,
+          numerator: numerator === '' ? null : Number(numerator),
+          denominator: denominator === '' ? null : Number(denominator),
           disaggregation_category_id: null,
           disaggregation_value: null,
           notes,
@@ -168,7 +169,9 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
           indicator_id: indicatorId,
           period_start: periodStart,
           period_end: periodEnd,
-          actual_value: Number(singleValue) || 0,
+          actual_value: Number(singleValue),
+          numerator: numerator === '' ? null : Number(numerator),
+          denominator: denominator === '' ? null : Number(denominator),
           disaggregation_category_id: null,
           disaggregation_value: null,
           notes,
@@ -180,6 +183,7 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
     onSuccess: () => {
       toast.success('Value recorded');
       queryClient.invalidateQueries({ queryKey: ['indicator-values'] });
+      queryClient.invalidateQueries({ queryKey: ['results-preview'] });
       queryClient.invalidateQueries({ queryKey: ['indicator-prev-value'] });
       onSuccess();
     },
@@ -200,6 +204,8 @@ export function IndicatorValueEntryForm({ indicatorId, onSuccess, onCancel }: In
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-3"><div><Label>Numerator (if applicable)</Label><Input type="number" value={numerator} onChange={e => setNumerator(e.target.value)} /></div><div><Label>Denominator (if applicable)</Label><Input type="number" value={denominator} onChange={e => setDenominator(e.target.value)} /></div></div>
+      {hasDisaggregations && <div><Label>Unduplicated total value</Label><Input type="number" value={singleValue} onChange={e => setSingleValue(e.target.value)} onBlur={() => validate(total)} /></div>}
       {/* Value Entry */}
       {!hasDisaggregations ? (
         <div>
