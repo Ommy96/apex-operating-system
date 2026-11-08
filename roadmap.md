@@ -1,4 +1,9 @@
 # Permission system gap closure (audit 2026-11-02)
+## Donor portal completion
+- [ ] Diagnose NSP-AID live figures and currency persistence; unify live readers without inventing allocations or payments.
+- [ ] Use captured allocation FX, explicit document approval, approved visit-report/update requests, received-only acknowledgements and contact-consent birthdays.
+- [ ] Run rule tests, donor API isolation probes and preview checks; disclose signed-in/Umazi gaps.
+
 - [x] Audit roles, catalogue, assignment scoping, Phase 5.2 comparison (report saved to Files).
 - [x] Add missing system roles (Project Manager, Staff Member) + aggregate permission; extend role seeding.
 - [x] Enforce role scoping in RLS (beneficiaries, households) with assigned-programme/project checks.
