@@ -64,10 +64,11 @@ export function useUpdateIndicatorWithVersioning() {
       if (!current) throw new Error("Indicator not found");
 
       const isPublished = current.publish_status === "published";
-      const { count } = await (supabase as any)
+      const { count, error: valuesError } = await (supabase as any)
         .from("indicator_values")
         .select("id", { count: "exact", head: true })
         .eq("indicator_id", id);
+      if (valuesError) throw valuesError;
       const hasValues = (count ?? 0) > 0;
 
       if (isPublished && hasValues) {
@@ -102,6 +103,8 @@ export function useUpdateIndicatorWithVersioning() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["indicators"] });
+      queryClient.invalidateQueries({ queryKey: ["indicator"] });
+      queryClient.invalidateQueries({ queryKey: ["results-preview"] });
       queryClient.invalidateQueries({ queryKey: ["indicator-versions"] });
       toast({ title: "Indicator updated" });
     },

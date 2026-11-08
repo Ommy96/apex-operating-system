@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
 import { toast } from "sonner";
 
 export default function Analytics() {
@@ -71,6 +72,7 @@ export default function Analytics() {
             <p className="mt-1 text-[13px] text-muted-foreground">Explore your data across every dimension</p>
           </div>
           <div className="flex items-center gap-2">
+<Button variant="outline" asChild><Link to="/indicators">Results framework</Link></Button>
             <SavedViewsPopover onLoad={(q) => setQuestion(q)} />
             <ExportPopover targetRef={exportRef} rows={exportRows} baseName={`analytics-${question.tab}-${question.metric}`} />
           </div>

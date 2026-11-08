@@ -9,6 +9,7 @@ import { RestrictionBadge } from "@/components/funding/RestrictionBadge";
 import { CurrencyAmount } from "@/components/finance/CurrencyAmount";
 import { FileDown, Loader2 } from "lucide-react";
 import { exportNodeToPdf } from "@/lib/pdfExport";
+import { useDonorResults } from '@/hooks/useResultsFramework';
 import { toast } from "sonner";
 
 const sb = supabase as any;
@@ -88,33 +89,8 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
     },
   });
 
-  const indicators = useQuery({
-    queryKey: ["donor-scope-project-indicators", projectId],
-    queryFn: async () => {
-      const { data: inds } = await sb
-        .from("indicators")
-        .select("id, name, unit, target_value, project_id")
-        .eq("project_id", projectId)
-        .is("deleted_at", null);
-      const ids = (inds || []).map((i: any) => i.id);
-      if (!ids.length) return [];
-      const { data: vals } = await sb
-        .from("indicator_values")
-        .select("indicator_id, actual_value, period_end")
-        .in("indicator_id", ids)
-        .order("period_end", { ascending: false });
-      const latest = new Map<string, number>();
-      (vals || []).forEach((v: any) => {
-        if (!latest.has(v.indicator_id)) latest.set(v.indicator_id, Number(v.actual_value) || 0);
-      });
-      return (inds || []).map((i: any) => ({
-        ...i,
-        current: latest.get(i.id) ?? null,
-        percent:
-          i.target_value && latest.has(i.id) ? (latest.get(i.id)! / Number(i.target_value)) * 100 : null,
-      }));
-    },
-  });
+  const approved = useDonorResults();
+  const indicators = { data: approved.data?.filter(r => r.period_start === periodStart && r.period_end === periodEnd).map(r => ({ ...r.snapshot, target_value: r.snapshot.target, report_version: r.version })) ?? [] };
 
   const totalAllocated = (allocations.data || []).reduce((s: number, a: any) => s + Number(a.amount_base || 0), 0);
   const totalSpent = (expenses.data || []).reduce(
@@ -201,7 +177,7 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
           <CardHeader><CardTitle className="text-base">Indicator performance</CardTitle></CardHeader>
           <CardContent>
             {(indicators.data || []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">No indicators tracked for this project.</p>
+              <p className="text-sm text-muted-foreground">No approved shared indicators for this reporting period.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -210,7 +186,7 @@ export const ProjectDonorReport = forwardRef<HTMLDivElement, Props>(function Pro
                 <TableBody>
                   {(indicators.data || []).map((i: any) => (
                     <TableRow key={i.id}>
-                      <TableCell className="text-sm">{i.name}</TableCell>
+                      <TableCell className="text-sm">{i.name}<p className="text-xs text-muted-foreground">{i.definition}</p><p className="text-xs text-muted-foreground">{i.period_start} – {i.period_end} · denominator: {i.denominator ?? "Unavailable"} · {i.limitations}</p></TableCell>
                       <TableCell className="text-sm">{i.target_value ?? "—"} {i.unit || ""}</TableCell>
                       <TableCell className="text-sm">{i.current ?? "—"} {i.unit || ""}</TableCell>
                       <TableCell className="text-right text-sm">{i.percent !== null ? `${i.percent.toFixed(0)}%` : "—"}</TableCell>
