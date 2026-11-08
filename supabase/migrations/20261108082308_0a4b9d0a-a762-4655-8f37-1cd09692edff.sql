@@ -1,0 +1,1 @@
+SELECT proname,pg_get_functiondef(p.oid) AS definition FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE (n.nspname='app_private' AND proname IN ('get_staff_task_workload','case_is_visible_scoped','staff_task_is_visible_scoped')) OR (n.nspname='public' AND proname='seed_default_org_roles') ORDER BY n.nspname,proname;
