@@ -6652,6 +6652,7 @@ export type Database = {
         Row: {
           beneficiary_id_a: string
           beneficiary_id_b: string
+          deleted_at: string | null
           detected_at: string
           id: string
           match_reasons: Json
@@ -6661,10 +6662,13 @@ export type Database = {
           resolved_at: string | null
           resolved_by: string | null
           status: string
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
           beneficiary_id_a: string
           beneficiary_id_b: string
+          deleted_at?: string | null
           detected_at?: string
           id?: string
           match_reasons?: Json
@@ -6674,10 +6678,13 @@ export type Database = {
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           beneficiary_id_a?: string
           beneficiary_id_b?: string
+          deleted_at?: string | null
           detected_at?: string
           id?: string
           match_reasons?: Json
@@ -6687,6 +6694,8 @@ export type Database = {
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -18501,6 +18510,10 @@ export type Database = {
         Args: { _end: string; _indicator: string; _start: string }
         Returns: Json
       }
+      confirm_duplicate_distinct: {
+        Args: { _candidate: string; _note: string }
+        Returns: string
+      }
       create_donor_request: {
         Args: {
           _beneficiary: string
@@ -18765,6 +18778,10 @@ export type Database = {
         }
         Returns: string
       }
+      preview_beneficiary_merge: {
+        Args: { _canonical: string; _duplicate: string }
+        Returns: Json
+      }
       program_funding_health_score: {
         Args: { _program_id: string }
         Returns: Json
@@ -18826,6 +18843,16 @@ export type Database = {
       results_indicator_access: {
         Args: { _indicator: string }
         Returns: boolean
+      }
+      reviewed_beneficiary_merge: {
+        Args: {
+          _candidate: string
+          _canonical: string
+          _duplicate: string
+          _note: string
+          _preview: Json
+        }
+        Returns: Json
       }
       revoke_staff_access: {
         Args: { _note?: string; _org_id: string; _user_id: string }
