@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
       .select("id, donor_name").eq("id", donorAccountId).maybeSingle();
 
     let q = supabase.from("allocations")
-      .select("id, scope, amount_base, base_currency, allocated_at, beneficiary_id, project_id, program_id, donor_pool_id")
-      .eq("donor_account_id", donorAccountId);
+      .select("id, scope, amount_base, base_currency, amount_native, native_currency, fx_rate, fx_at, fx_snapshot, allocated_at, beneficiary_id, project_id, program_id, donor_pool_id")
+      .eq("donor_account_id", donorAccountId).eq("organization_id", account.organization_id).not("status","in","(cancelled,redirected)");
     if (body.from) q = q.gte("allocated_at", body.from);
     if (body.to) q = q.lte("allocated_at", body.to);
     if (body.project_id) q = q.eq("project_id", body.project_id);
@@ -119,6 +119,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       ok: true,
+      allocations: allocs || [],
       nodes: Array.from(nodes.values()),
       links: Array.from(links.values()),
       totals: {

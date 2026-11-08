@@ -1,8 +1,12 @@
 # Permission system gap closure (audit 2026-11-02)
 ## Donor portal completion
-- [ ] Diagnose NSP-AID live figures and currency persistence; unify live readers without inventing allocations or payments.
-- [ ] Use captured allocation FX, explicit document approval, approved visit-report/update requests, received-only acknowledgements and contact-consent birthdays.
-- [ ] Run rule tests, donor API isolation probes and preview checks; disclose signed-in/Umazi gaps.
+- [x] Diagnose NSP-AID: 651 links / 547 distinct beneficiaries / KES 105,000 recorded sponsorship funding; no allocations or received donations. Replace zero-on-no-allocation feed and blocked currency persistence.
+- [x] Add immutable new-allocation FX snapshots, approved donor-safe request projection, received-only thank-you drafts, sharing guards and explicit contact-consent birthdays.
+- [x] Run 15 focused tests, verify anonymous account-ID requests denied by both deployed report services, and check donor login desktop/mobile.
+- [ ] Signed-in NSP-AID, Donor A/B direct API/file/export and Umazi/non-admin approval workflow tests — external unmanaged Supabase has no available authenticated session.
+- [ ] Historical FX conversion for records with no captured rate — no truthful historical snapshot exists; figures remain in recorded currency.
+- [ ] Complete existing needs breakdown FX, optional birthday email dispatch, broader authored-impact-story approval/consent audit, organisation-document download audit and pagination beyond 1,000 allocation records — not fully implemented/verified this turn.
+- [ ] Review 649 pre-existing database security warnings — unchanged by donor migrations.
 
 - [x] Audit roles, catalogue, assignment scoping, Phase 5.2 comparison (report saved to Files).
 - [x] Add missing system roles (Project Manager, Staff Member) + aggregate permission; extend role seeding.

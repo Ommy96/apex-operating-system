@@ -131,7 +131,7 @@ export function useDonorPortal(period: string = 'all') {
         `)
         .eq('donor_account_id', donorId)
         .order('allocated_at', { ascending: false })
-        .limit(500);
+        .limit(1000);
       if (error) throw error;
       return data || [];
     },
@@ -264,7 +264,7 @@ export function useDonorPortal(period: string = 'all') {
       }
     });
     (donorAllocations || []).forEach((a: any) => {
-      if (a.program?.id) add(a.program.id, a.program.name, null, a.beneficiary?.id ?? null, Number(a.amount_base) || 0, a.base_currency || 'KES');
+      if (a.program?.id) add(a.program.id, a.program.name, null, a.beneficiary?.id ?? null);
     });
 
     return Array.from(map.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
