@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { DEFAULT_NEED_PRIORITY } from "@/lib/needPriority";
 import { FAMILY_STATUS, FAMILY_DETAIL_FIELDS, normaliseFamilyStatus, familyStatusOptions, hasHiddenFamilyDetails } from '@/lib/familyStatus';
 import { CARE_ARRANGEMENT, CARE_ARRANGEMENT_LABELS, type CareArrangement, normaliseCareArrangement, isUnderGuardianCare, isInstitutionalCare, isHeadOfHousehold } from '@/lib/careArrangement';
 import { useState, useEffect, useMemo } from 'react';
@@ -860,7 +861,8 @@ export function BeneficiaryForm({
         // the pipeline ranks them alongside everyone else waiting.
         if (enrollmentChoice === 'waitlist') {
           try {
-            const { data: u } = await supabase.auth.getUser();
+            const { data: u, error: uErr } = await supabase.auth.getUser();
+            if (uErr) throw uErr;
             const { data: app, error: appErr } = await (supabase as any)
               .from('waitlist_applications')
               .insert({
@@ -877,28 +879,30 @@ export function BeneficiaryForm({
             if (appErr) throw appErr;
 
             if (app?.id && waitlistNeedIds.length) {
-              const { data: needTypes } = await (supabase as any)
+              const { data: needTypes, error: needTypesErr } = await (supabase as any)
                 .from('need_types')
                 .select('id, default_cost, default_currency')
                 .in('id', waitlistNeedIds);
+              if (needTypesErr) throw needTypesErr;
               const byId = new Map<string, any>((needTypes || []).map((n: any) => [n.id as string, n]));
-              await (supabase as any).from('waitlist_application_needs').insert(
+              const { error: needsErr } = await (supabase as any).from('waitlist_application_needs').insert(
                 waitlistNeedIds.map((id) => ({
                   organization_id: orgId,
                   application_id: app.id,
                   need_type_id: id,
                   estimated_cost: byId.get(id)?.default_cost ?? null,
                   currency: byId.get(id)?.default_currency ?? 'KES',
-                  priority: 'medium',
+                  priority: DEFAULT_NEED_PRIORITY,
                 })),
               );
+              if (needsErr) throw needsErr;
             }
             queryClient.invalidateQueries({ queryKey: ['waitlist-applications'] });
           } catch (e) {
             logger.warn('Could not create waiting-list application', e);
             toast({
               title: 'Saved, but not added to the waiting list',
-              description: 'The record was created — add the waiting-list application manually.',
+              description: `The record was created — add the waiting-list application manually. Reason: ${(e as any)?.message ?? 'unknown error'}`,
               variant: 'destructive',
             });
           }
