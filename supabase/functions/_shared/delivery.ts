@@ -5,6 +5,17 @@
 
 export const EMAIL_FROM_DOMAIN = "noreply@apex.inferatechs.com";
 
+// Mirrored in src/lib/deliveryStatus.ts — change both together.
+export const DELIVERY_STATUS = {
+  QUEUED: "queued", SENDING: "sending", SENT: "sent", FAILED: "failed",
+  SKIPPED_QUIET_HOURS: "skipped_quiet_hours", SKIPPED_PREFERENCE: "skipped_preference",
+  BLOCKED_SENSITIVE: "blocked_sensitive", NOT_CONFIGURED: "not_configured",
+} as const;
+const S = DELIVERY_STATUS;
+export const normStatus = (s: unknown) => String(s ?? "").trim().toLowerCase();
+export const isSent = (s: unknown) => normStatus(s) === S.SENT;
+export const isSkipped = (s: unknown) => normStatus(s) === S.SKIPPED_QUIET_HOURS || normStatus(s) === S.SKIPPED_PREFERENCE;
+
 export type Channel = "email" | "whatsapp" | "sms";
 
 export interface DeliverInput {
@@ -155,42 +166,46 @@ export async function deliver(admin: any, input: DeliverInput): Promise<DeliverR
   };
 
   // Insert or find existing
-  const ins = await admin.from("message_deliveries").insert({ ...base, status: "queued" }).select("id,status").maybeSingle();
+  const ins = await admin.from("message_deliveries").insert({ ...base, status: S.QUEUED }).select("id,status").maybeSingle();
   let row = ins.data;
   if (ins.error) {
-    if (ins.error.code !== "23505") return { status: "failed", error: ins.error.message };
+    if (ins.error.code !== "23505") return { status: S.FAILED, error: ins.error.message };
     const ex = await admin.from("message_deliveries").select("id,status").eq("idempotency_key", key).single();
+    if (ex.error) return { status: S.FAILED, error: ex.error.message };
     row = ex.data;
-    if (!row) return { status: "failed", error: "Delivery record missing" };
-    if (["sent", "sending", "skipped_preference", "blocked_sensitive"].includes(row.status)) {
+    if (!row) return { status: S.FAILED, error: "Delivery record missing" };
+    if ([S.SENT, S.SENDING, S.SKIPPED_PREFERENCE, S.BLOCKED_SENSITIVE].includes(normStatus(row.status) as any)) {
       return { status: row.status, duplicate: true, deliveryId: row.id };
     }
   }
 
   const finish = async (status: string, extra: Record<string, unknown> = {}) => {
-    await admin.from("message_deliveries").update({ status, updated_at: new Date().toISOString(), ...extra }).eq("id", row.id);
+    const { error: upErr } = await admin.from("message_deliveries").update({ status, updated_at: new Date().toISOString(), ...extra }).eq("id", row.id);
+    if (upErr) console.error("delivery log update failed", upErr.message);
     return { status, deliveryId: row.id, error: (extra.last_error as string) ?? null };
   };
 
   // Atomic claim so concurrent retries cannot both send
   const claim = await admin.from("message_deliveries")
-    .update({ status: "sending", updated_at: new Date().toISOString() })
-    .eq("id", row.id).in("status", ["queued", "failed", "not_configured", "skipped_quiet_hours"])
+    .update({ status: S.SENDING, updated_at: new Date().toISOString() })
+    .eq("id", row.id).in("status", [S.QUEUED, S.FAILED, S.NOT_CONFIGURED, S.SKIPPED_QUIET_HOURS])
     .select("id,attempts");
-  if (claim.error || !claim.data?.length) return { status: "sending", duplicate: true, deliveryId: row.id };
+  if (claim.error || !claim.data?.length) return { status: S.SENDING, duplicate: true, deliveryId: row.id };
   const attempts = (claim.data[0].attempts ?? 0) + 1;
 
   const hit = findSensitiveContent(input.subject, input.text, input.html);
-  if (hit) return finish("blocked_sensitive", { attempts, last_error: `Blocked: message contains confidential detail ("${hit}"). Link to a secure page instead.` });
+  if (hit) return finish(S.BLOCKED_SENSITIVE, { attempts, last_error: `Blocked: message contains confidential detail ("${hit}"). Link to a secure page instead.` });
 
   if (!input.transactional && input.recipientUserId) {
-    const { data: pref } = await admin.from("user_notification_preferences")
+    const { data: pref, error: prefErr } = await admin.from("user_notification_preferences")
       .select("is_enabled").eq("user_id", input.recipientUserId).eq("preference_key", `channel:${input.channel}`).maybeSingle();
-    if (pref && pref.is_enabled === false) return finish("skipped_preference", { attempts, last_error: `Recipient turned off ${input.channel}` });
-    const { data: qs } = await admin.from("user_communication_settings")
+    if (prefErr) return finish(S.FAILED, { attempts, last_error: `Could not read recipient preferences: ${prefErr.message}` });
+    if (pref && pref.is_enabled === false) return finish(S.SKIPPED_PREFERENCE, { attempts, last_error: `Recipient turned off ${input.channel}` });
+    const { data: qs, error: qsErr } = await admin.from("user_communication_settings")
       .select("quiet_hours_enabled,quiet_start,quiet_end,timezone").eq("user_id", input.recipientUserId).maybeSingle();
+    if (qsErr) return finish(S.FAILED, { attempts, last_error: `Could not read quiet hours: ${qsErr.message}` });
     if (qs?.quiet_hours_enabled && inQuietHours(new Date(), qs.quiet_start, qs.quiet_end, qs.timezone || "Africa/Nairobi")) {
-      return finish("skipped_quiet_hours", { attempts, last_error: "Held: recipient quiet hours. Retry after quiet hours end." });
+      return finish(S.SKIPPED_QUIET_HOURS, { attempts, last_error: "Held: recipient quiet hours. Retry after quiet hours end." });
     }
   }
 
@@ -198,18 +213,19 @@ export async function deliver(admin: any, input: DeliverInput): Promise<DeliverR
     const r = input.channel === "email" ? await sendEmail(input, key)
       : input.channel === "whatsapp" ? await sendWhatsApp(input)
       : await sendSms(input);
-    if (r.ok) return finish("sent", { attempts, provider_message_id: r.id ?? null, sent_at: new Date().toISOString(), last_error: null });
-    return finish(r.notConfigured ? "not_configured" : "failed", { attempts, last_error: r.error });
+    if (r.ok) return finish(S.SENT, { attempts, provider_message_id: r.id ?? null, sent_at: new Date().toISOString(), last_error: null });
+    return finish(r.notConfigured ? S.NOT_CONFIGURED : S.FAILED, { attempts, last_error: r.error });
   } catch (e) {
-    return finish("failed", { attempts, last_error: (e as Error).message });
+    return finish(S.FAILED, { attempts, last_error: (e as Error).message });
   }
 }
 
 /** Re-run a stored delivery with its original key (used by the retry action). */
 export async function retryDelivery(admin: any, id: string): Promise<DeliverResult> {
-  const { data: d } = await admin.from("message_deliveries").select("*").eq("id", id).single();
-  if (!d) return { status: "failed", error: "Delivery not found" };
-  if (d.status === "sent") return { status: "sent", duplicate: true, deliveryId: id };
+  const { data: d, error } = await admin.from("message_deliveries").select("*").eq("id", id).single();
+  if (error) return { status: S.FAILED, error: error.message };
+  if (!d) return { status: S.FAILED, error: "Delivery not found" };
+  if (isSent(d.status)) return { status: S.SENT, duplicate: true, deliveryId: id };
   return deliver(admin, {
     organizationId: d.organization_id, channel: d.channel, source: d.source, idempotencyKey: d.idempotency_key,
     to: d.recipient_contact, recipientUserId: d.recipient_user_id, subject: d.subject,

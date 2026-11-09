@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
-import { deliver } from "../_shared/delivery.ts";
+import { deliver, isSent, isSkipped } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,15 +98,16 @@ serve(async (req) => {
           <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;">${esc(body)}</div>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
           <p style="color:#9ca3af;font-size:11px;margin:0;">Sent via ${esc(orgName)}'s communication system. Please do not reply.</p></div>`;
-      const { data: rp } = await adminClient.from("profiles").select("user_id").eq("email", email).maybeSingle();
+      const { data: rp, error: rpErr } = await adminClient.from("profiles").select("user_id").eq("email", email).maybeSingle();
+      if (rpErr) { results.failed++; results.errors.push(`${email}: ${rpErr.message}`); continue; }
       const r = await deliver(adminClient, {
         organizationId: organization_id, channel: "email", source: "send-member-email",
         idempotencyKey: `member-email:${organization_id}:${batchKey}:${String(email).toLowerCase()}`,
         to: email, recipientUserId: rp?.user_id ?? null, subject, html, fromName: orgName, createdBy: senderId,
       });
       if (r.duplicate) results.duplicates++;
-      else if (r.status === "sent") results.sent++;
-      else if (r.status.startsWith("skipped")) { results.skipped++; results.errors.push(`${email}: ${r.error}`); }
+      else if (isSent(r.status)) results.sent++;
+      else if (isSkipped(r.status)) { results.skipped++; results.errors.push(`${email}: ${r.error}`); }
       else { results.failed++; results.errors.push(`${email}: ${r.error}`); }
     }
 

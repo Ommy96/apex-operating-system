@@ -15,20 +15,14 @@ import { formatDistanceToNow } from "date-fns";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ensureWritten } from "@/lib/settingsWrite";
-
-const STATUS_LABEL: Record<string, string> = {
-  queued: "Queued", sending: "Sending", sent: "Sent", failed: "Failed",
-  skipped_quiet_hours: "Held (quiet hours)", skipped_preference: "Recipient opted out",
-  blocked_sensitive: "Blocked (confidential content)", not_configured: "Not sent — channel not set up",
-};
-const RETRYABLE = new Set(["failed", "not_configured", "skipped_quiet_hours"]);
+import { DELIVERY_STATUS, DELIVERY_STATUS_LABEL as STATUS_LABEL, isRetryable, isStatus, normStatus } from "@/lib/deliveryStatus";
 
 export function DeliveryLog() {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error: loadError } = useQuery({
     queryKey: ["message-deliveries", orgId || ""],
     enabled: !!orgId,
     queryFn: async () => {
@@ -39,6 +33,7 @@ export function DeliveryLog() {
       return data as any[];
     },
   });
+  useEffect(() => { if (loadError) toast.error(`Could not load delivery log: ${(loadError as Error).message}`); }, [loadError]);
   useRealtimeSubscription([{ table: "message_deliveries", queryKeys: [["message-deliveries", orgId || ""]], orgId, enabled: !!orgId }]);
 
   const retry = useMutation({
@@ -49,7 +44,7 @@ export function DeliveryLog() {
     },
     onSuccess: (r) => {
       if (r.success) toast.success(r.duplicate ? "Already sent — no duplicate was created" : "Message sent");
-      else toast.error(r.error || STATUS_LABEL[r.status] || "Not sent");
+      else toast.error(r.error || STATUS_LABEL[normStatus(r.status)] || "Not sent");
       qc.invalidateQueries({ queryKey: ["message-deliveries"] });
     },
     onError: (e: any) => toast.error(e.message),
@@ -68,15 +63,15 @@ export function DeliveryLog() {
                 <div className="min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="capitalize">{d.channel}</Badge>
-                    <Badge variant={d.status === "sent" ? "default" : RETRYABLE.has(d.status) || d.status === "blocked_sensitive" ? "destructive" : "secondary"}>
-                      {STATUS_LABEL[d.status] ?? d.status}
+                    <Badge variant={isStatus(d.status, DELIVERY_STATUS.SENT) ? "default" : isRetryable(d.status) || isStatus(d.status, DELIVERY_STATUS.BLOCKED_SENSITIVE) ? "destructive" : "secondary"}>
+                      {STATUS_LABEL[normStatus(d.status)] ?? d.status}
                     </Badge>
                     <span className="text-xs text-muted-foreground">{d.source} · {d.attempts} attempt(s) · {formatDistanceToNow(new Date(d.created_at), { addSuffix: true })}</span>
                   </div>
                   <p className="text-sm truncate">{d.subject || "(no subject)"} → {d.recipient_contact}</p>
-                  {d.last_error && d.status !== "sent" && <p className="text-xs text-destructive">{d.last_error}</p>}
+                  {d.last_error && !isStatus(d.status, DELIVERY_STATUS.SENT) && <p className="text-xs text-destructive">{d.last_error}</p>}
                 </div>
-                {RETRYABLE.has(d.status) && (
+                {isRetryable(d.status) && (
                   <Button size="sm" variant="outline" disabled={retry.isPending} onClick={() => retry.mutate(d.id)}>
                     <RotateCw className="h-3.5 w-3.5 mr-1" /> Retry
                   </Button>
@@ -92,7 +87,7 @@ export function DeliveryLog() {
 function QuietHoursCard() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error: loadError } = useQuery({
     queryKey: ["comm-settings", user?.id || ""],
     enabled: !!user?.id,
     queryFn: async () => {
@@ -101,6 +96,7 @@ function QuietHoursCard() {
       return data;
     },
   });
+  useEffect(() => { if (loadError) toast.error(`Could not load quiet hours: ${(loadError as Error).message}`); }, [loadError]);
   const [form, setForm] = useState({ quiet_hours_enabled: false, quiet_start: "21:00", quiet_end: "07:00" });
   useEffect(() => {
     if (data) setForm({ quiet_hours_enabled: data.quiet_hours_enabled, quiet_start: data.quiet_start.slice(0, 5), quiet_end: data.quiet_end.slice(0, 5) });

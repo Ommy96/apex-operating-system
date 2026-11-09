@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { deliver } from "../_shared/delivery.ts";
+import { deliver, isSent } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
           html: `<h2>Grant Report Reminder</h2><p>The report <strong>${esc(report.title || 'Untitled')}</strong> for grant <strong>${esc(grantName)}</strong> is ${daysLabel}.</p><p>Due date: ${new Date(report.due_date).toLocaleDateString('en-KE')}</p><p>Please submit the report as soon as possible to maintain compliance.</p>`,
           linkPath: "/grants",
         });
-        if (r.status === "sent" || r.duplicate) anySent = true;
+        if (isSent(r.status) || r.duplicate) anySent = true;
         else console.error("grant reminder delivery", r.status, r.error);
       }
       if (!anySent) continue; // nothing actually sent: do not log, so the next run retries

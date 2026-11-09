@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { deliver } from "../_shared/delivery.ts";
+import { deliver, isSent } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -174,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
             to: email, fromName: "ApexOS Analytics", transactional: true,
             subject: `${sub.name} — ${tabLabel} (${sub.frequency})`, html, linkPath: "/analytics",
           });
-          if (r.status !== "sent" && !r.duplicate) failures.push(`${email}: ${r.error}`);
+          if (!isSent(r.status) && !r.duplicate) failures.push(`${email}: ${r.error}`);
         }
         if (failures.length === sub.recipients.length) throw new Error(failures.join("; "));
 

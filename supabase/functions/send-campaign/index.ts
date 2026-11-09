@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { deliver } from "../_shared/delivery.ts";
+import { deliver, isSent } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,9 +42,10 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", campaign_id)
       .single();
     if (campError || !campaign) throw new Error("Campaign not found");
-    const { data: mem } = await supabaseAdmin.from("organization_members").select("role")
+    const { data: mem, error: memErr } = await supabaseAdmin.from("organization_members").select("role")
       .eq("user_id", user.id).eq("organization_id", campaign.organization_id).maybeSingle();
-    if (!mem || !["admin", "management"].includes(mem.role)) {
+    if (memErr) throw new Error(memErr.message);
+    if (!mem || !["admin", "management"].includes(String(mem.role).toLowerCase())) {
       return new Response(JSON.stringify({ error: "Only organisation admins can send campaigns" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
@@ -65,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
     const esc = (v: string) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
 
     for (const recipient of recipients || []) {
-      const channel = recipient.channel as "email" | "sms" | "whatsapp";
+      const channel = String(recipient.channel).toLowerCase() as "email" | "sms" | "whatsapp";
       const to = channel === "email" ? recipient.recipient_email : recipient.recipient_phone;
       if (!to || !["email", "sms", "whatsapp"].includes(channel)) {
         await supabaseAdmin.from("campaign_recipients").update({ status: "failed", error_message: "Missing contact for channel" }).eq("id", recipient.id);
@@ -81,11 +82,12 @@ const handler = async (req: Request): Promise<Response> => {
         whatsappTemplate: templateName ? { name: templateName } : undefined,
         createdBy: user.id,
       });
-      const ok = r.status === "sent";
-      await supabaseAdmin.from("campaign_recipients").update({
+      const ok = isSent(r.status);
+      const { error: recErr } = await supabaseAdmin.from("campaign_recipients").update({
         status: ok ? "sent" : "failed", error_message: ok ? null : r.error,
         sent_at: ok ? new Date().toISOString() : null, metadata: { ...(recipient.metadata || {}), delivery_id: r.deliveryId, delivery_status: r.status },
       }).eq("id", recipient.id);
+      if (recErr) console.error("recipient status update failed", recErr.message);
       if (ok) sentCount++; else failedCount++;
     }
 
