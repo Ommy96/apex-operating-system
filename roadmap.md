@@ -1,4 +1,9 @@
 # Permission system gap closure (audit 2026-11-02)
+## Analytics structured exports and privacy
+- [ ] Inventory existing question builder, exports, aggregate calculations and drill-down paths.
+- [ ] Build shared report data for branded PDF, Summary/Detail/Data dictionary Excel and structured CSV with context.
+- [ ] Enforce server-side permissions, minimum-cell suppression, aggregate-only drill-down and explicit report units.
+- [ ] Add progress and reliable prepared downloads; test matching figures, n=3 privacy, and actual download flows where available.
 ## Data quality module
 - [x] Inventory existing flags, fuzzy duplicate matching, review and merge transaction; report gaps before implementation.
 - [x] Extend existing flags with stable template/record identity, approved configuration and scoped scan/recheck workflows.
