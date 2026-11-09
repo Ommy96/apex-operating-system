@@ -1,20 +1,21 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { cellIsUnsafe, distinctPeople, protectPartition, validatedCellSize } from '../_shared/analyticsPrivacy.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? '';
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? '';
 
 type Range =
   | "30d" | "90d" | "12mo" | "ytd" | "last-year" | "all"
   | { from: string; to: string };
 
 interface Body {
+  minimumCellSize?: number;
+  unitOfAnalysis?: 'unique_beneficiaries' | 'participation_records';
+  export?: boolean;
+  privacyMinimum?: number;
+  aggregateOnly?: boolean;
   tab: string;
   metric: string;
   dimension: string;
@@ -201,6 +202,28 @@ function aggregate(rows: any[], keyOf: (r: any) => string, weight: (r: any) => n
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+async function readAll(makeQuery: () => any) {
+  const data: any[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const response = await makeQuery().order('id').range(offset, offset + 499);
+    if (response.error) throw new Error(response.error.message);
+    data.push(...(response.data ?? []));
+    if (!response.data || response.data.length < 500) return { data, error: null };
+  }
+}
+async function approvedResultsHandler(supa: any, orgId: string, body: Body): Promise<Result> {
+  const { from, to } = resolveRange(body.range);
+  const { data, error } = await supa.rpc('analytics_approved_results', { _org: orgId, _start: from.toISOString().slice(0,10), _end: to.toISOString().slice(0,10) });
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []).filter((r: any) => r.snapshot.percent != null);
+  const p: Prepared = { rows, dateCol: 'period_start', weight: r => Number(r.snapshot.percent), average: true, pointInTime: true, previousValue: null, previousReason: 'Approved reporting versions only', dimOf: (r,d) => isTimeDim(d) ? bucketKey(new Date(r.period_start), d) : r.snapshot.name, distributionSpecs: [] };
+  // Indicator-period means are not person counts; unknown participant support is withheld.
+  p.series = [...new Set(rows.map((r: any) => p.dimOf(r,body.dimension)))].map(key => {
+    const group = rows.filter((r: any) => p.dimOf(r,body.dimension) === key);
+    return { key: String(key), label: String(key), value: group.reduce((sum: number,r: any) => sum + Number(r.snapshot.percent),0) / group.length };
+  });
+  return finalize(supa, orgId, body, p, from, to);
+}
 
 function orderKeys(keys: string[], dim: string): string[] {
   if (dim === "age_group") {
@@ -267,7 +290,8 @@ function buildMatrix(
     const keep = totals.slice(0, MAX_COLS - 1).map((x) => x.c);
     const rest = colKeys.filter((c) => !keep.includes(c));
     for (const r of rowKeys) {
-      const m = cells.get(r)!;
+      const m = cells.get(r);
+      if (!m) continue;
       const other = rest.reduce((s, c) => s + (m.get(c) ?? 0), 0);
       rest.forEach((c) => m.delete(c));
       if (other) m.set("Other", other);
@@ -328,12 +352,13 @@ function buildDistributions(p: Prepared): Distribution[] {
   const weight = p.weight ?? (() => 1);
   for (const spec of p.distributionSpecs) {
     if (spec.split) {
-      const splitKeys = Array.from(new Set(p.rows.map((r) => p.dimOf(r, spec.split!)))).slice(0, 4);
+      const split = spec.split;
+      const splitKeys = Array.from(new Set(p.rows.map((r) => p.dimOf(r, split)))).slice(0, 4);
       const rowKeys = orderKeys(Array.from(new Set(p.rows.map((r) => p.dimOf(r, spec.dimension)))), spec.dimension);
       const splitRows = rowKeys.map((rk) => ({
         key: rk, label: rk,
         values: splitKeys.map((sk) =>
-          round2(p.rows.filter((r) => p.dimOf(r, spec.dimension) === rk && p.dimOf(r, spec.split!) === sk)
+          round2(p.rows.filter((r) => p.dimOf(r, spec.dimension) === rk && p.dimOf(r, split) === sk)
             .reduce((s, r) => s + weight(r), 0))),
       }));
       if (!splitRows.length) continue;
@@ -383,6 +408,13 @@ function bulkNotes(rows: any[], dateCol: string, dim: string): Map<string, strin
 async function finalize(
   supa: any, orgId: string, body: Body, p: Prepared, from: Date, to: Date,
 ): Promise<Result> {
+  if (body.unitOfAnalysis === 'unique_beneficiaries' && p.rows.some(r => r.beneficiary_id)) {
+    p.rows = distinctPeople(p.rows);
+    p.headline = undefined;
+    p.cumulativeBase = 0;
+    p.previousValue = null;
+    p.previousReason = 'Distinct-person comparison unavailable for this record source';
+  }
   const dim = body.dimension;
   const dim2 = body.dimension2 && body.dimension2 !== dim ? body.dimension2 : null;
   const weight = p.weight ?? (() => 1);
@@ -436,6 +468,42 @@ async function finalize(
   };
 
   await resolveLabels(supa, orgId, result);
+  const minimum = Math.max(validatedCellSize(body.privacyMinimum), validatedCellSize(body.minimumCellSize));
+  const counts = new Map<string, number>();
+  for (const row of p.rows) { const key = p.dimOf(row, dim); counts.set(key, (counts.get(key) ?? 0) + 1); }
+  const n = p.rows.length;
+  const safeSeries = protectPartition(result.series.map(s => ({ ...s, n: p.series || (timeDim && mode === 'cumulative') ? null : counts.get(s.key) ?? 0 })), n, minimum);
+  let suppressed = safeSeries.some(s => s.value == null);
+  result.series = safeSeries as SeriesRow[];
+  if (result.matrix) {
+    const matrixCounts = result.matrix.rows.map(a => result.matrix?.cols.map(b => p.rows.filter(r => p.dimOf(r, dim) === a.key && p.dimOf(r, dim2 ?? '') === b.key).length) ?? []);
+    if (matrixCounts.flat().some(c => cellIsUnsafe(c, n, minimum))) {
+      result.matrix.cells = result.matrix.cells.map(row => row.map(() => null)) as unknown as number[][];
+      result.matrix.observations = [`Cells and marginal totals suppressed: minimum cell size ${minimum}.`];
+      suppressed = true;
+    }
+  }
+  for (const d of result.distributions ?? []) {
+    const mapped = d.series.map(s => ({ ...s, n: s.key === 'Other' ? null : p.rows.filter(r => p.dimOf(r, d.dimension) === s.key).length }));
+    d.series = protectPartition(mapped, n, minimum) as SeriesRow[];
+    if (d.series.some(s => s.value == null) || d.splitRows) {
+      // Split support counts are not retained; withhold rather than infer them from weighted values.
+      if (d.splitRows) d.series = d.series.map(s => ({ ...s, value: null, n: null, note: 'Split cells withheld: denominator unavailable.' })) as unknown as SeriesRow[];
+      d.splitRows = undefined; d.splitKeys = undefined;
+      suppressed = suppressed || d.series.some(s => s.value == null);
+    }
+  }
+  if (suppressed || cellIsUnsafe(n, null, minimum)) {
+    result.series = result.series.map(s => ({ ...s, value: null, n: null, note: `Suppressed: minimum cell size ${minimum}; related cells withheld.` })) as unknown as SeriesRow[];
+    if (result.matrix) result.matrix.cells = result.matrix.cells.map(r => r.map(() => null)) as unknown as number[][];
+    result.distributions = result.distributions?.map(d => ({ ...d, series: d.series.map(s => ({ ...s, value: null, n: null })) as unknown as SeriesRow[], splitRows: undefined, splitKeys: undefined }));
+    suppressed = true;
+    result.headline.value = null as unknown as number;
+    result.headline.previousValue = null;
+    result.stats = undefined;
+  }
+  const unit = body.unitOfAnalysis === 'unique_beneficiaries' ? 'Unique beneficiaries' : p.rows.some(r => r.beneficiary_id) ? 'Participation records' : body.tab === 'people' && body.metric === 'beneficiaries' ? 'Unique beneficiaries' : `${body.metric.replace(/_/g, ' ')} records`;
+  Object.assign(result, { privacy: { minimumCellSize: minimum, aggregateOnly: !!body.aggregateOnly, suppressed }, context: { periodStart: from.toISOString(), periodEnd: to.toISOString(), filters: body.filters ?? {}, unitOfAnalysis: unit, definition: `Organisation-scoped ${body.metric.replace(/_/g, ' ')}; ${p.average ? 'mean of recorded values' : p.weight ? 'sum of recorded values' : 'record count'}.`, denominator: suppressed ? null : n, limitations: ['Only records accessible to the signed-in user are included.', 'Enrollment, attendance, disbursement and task completion are activities or outputs, not outcome evidence.', ...(suppressed ? [`Counts, percentages and related totals suppressed where support is below ${minimum} or unavailable; complementary suppression prevents subtraction.`] : []), 'Separate filtered queries may overlap; do not subtract published totals to infer individuals.'] } });
   return result;
 }
 
@@ -453,12 +521,13 @@ async function resolveLabels(supa: any, orgId: string, result: Result) {
   const [prog, proj, don] = await Promise.all([
     supa.from("programs").select("id, name").eq("organization_id", orgId).in("id", list),
     supa.from("projects").select("id, name").eq("organization_id", orgId).in("id", list),
-    supa.from("donor_accounts").select("id, name").eq("organization_id", orgId).in("id", list),
+    supa.from("donor_accounts").select("id, donor_name").eq("organization_id", orgId).in("id", list),
   ]);
   const map = new Map<string, string>();
   for (const set of [prog.data, proj.data, don.data]) {
-    for (const r of set ?? []) map.set(r.id, r.name);
+    for (const r of set ?? []) map.set(r.id, r.name ?? r.donor_name);
   }
+  for (const response of [prog, proj, don]) if (response.error) throw new Error(response.error.message);
   const relabel = (o: { key: string; label: string }) => { const n = map.get(o.key); if (n) o.label = n; };
   result.series.forEach(relabel);
   result.matrix?.rows.forEach(relabel);
@@ -485,13 +554,13 @@ async function peopleHandler(supa: any, orgId: string, body: Body): Promise<Resu
   let dateCol = "created_at";
   if (metric === "households") table = "households";
   else if (metric === "guardians") table = "guardians";
-  else if (metric === "enrolments") { table = "program_beneficiaries"; dateCol = "enrolled_at"; }
+  else if (metric === "enrolments") { table = "beneficiary_services"; dateCol = "enrolled_date"; }
 
   let selectCols = "id, created_at";
   if (table === "beneficiaries") {
     selectCols = "id, created_at, county, sub_county, gender, date_of_birth, care_arrangement, vulnerability_level, status";
-  } else if (table === "program_beneficiaries") {
-    selectCols = "id, enrolled_at, program_id, status";
+  } else if (table === "beneficiary_services") {
+    selectCols = "id, beneficiary_id, enrolled_date, program_id, status";
   } else if (table === "households") {
     selectCols = "id, created_at, county, sub_county";
   }
@@ -501,17 +570,15 @@ async function peopleHandler(supa: any, orgId: string, body: Body): Promise<Resu
     if (table === "beneficiaries" || table === "households") q = q.is("deleted_at", null);
     if (metric === "exits") q = q.eq("status", "exited");
     if (table === "beneficiaries") q = applyPeopleFilters(q, filters);
+    if (filters.programme && table === 'beneficiary_services') q = q.eq('program_id', filters.programme);
     return q;
   };
 
   const [currentRes, prevRes, baseRes] = await Promise.all([
-    base().gte(dateCol, from.toISOString()).lte(dateCol, to.toISOString()).limit(20000),
-    supa.from(table).select("id", { count: "exact", head: true }).eq("organization_id", orgId)
-      .gte(dateCol, prevFrom.toISOString()).lte(dateCol, prevTo.toISOString()),
-    supa.from(table).select("id", { count: "exact", head: true }).eq("organization_id", orgId)
-      .lt(dateCol, from.toISOString()),
+    readAll(() => base().gte(dateCol, from.toISOString()).lte(dateCol, to.toISOString())),
+    readAll(() => base().gte(dateCol, prevFrom.toISOString()).lte(dateCol, prevTo.toISOString())),
+    readAll(() => base().lt(dateCol, from.toISOString())),
   ]);
-  if (currentRes.error) throw new Error(currentRes.error.message);
   const rows: any[] = currentRes.data ?? [];
 
   const dimOf = (r: any, dim: string): string => {
@@ -549,8 +616,8 @@ async function peopleHandler(supa: any, orgId: string, body: Body): Promise<Resu
   const p: Prepared = {
     rows, dateCol, dimOf,
     distributionSpecs: specs,
-    previousValue: prevRes.count ?? null,
-    cumulativeBase: baseRes.count ?? 0,
+    previousValue: prevRes.data.length,
+    cumulativeBase: baseRes.data.length,
     chartType: (body.dimension === "county" || body.dimension === "sub_county") && !body.dimension2 ? "bar" : undefined,
   };
   return finalize(supa, orgId, body, p, from, to);
@@ -612,33 +679,33 @@ async function programmesHandler(supa: any, orgId: string, body: Body): Promise<
   }
 
   let table = "activities";
-  let dateCol = "activity_date";
-  let selectCols = "id, activity_date, activity_type, program_id, project_id, status, actual_participants";
+  let dateCol = "scheduled_at";
+  let selectCols = "id, scheduled_at, type, program_id, project_id, status";
   if (metric === "active_enrolments") {
-    table = "program_beneficiaries"; dateCol = "enrolled_at";
-    selectCols = "id, enrolled_at, program_id, project_id, status";
+    table = "beneficiary_services"; dateCol = "enrolled_date";
+    selectCols = "id, beneficiary_id, enrolled_date, program_id, project_id, status";
   }
 
   const base = () => {
     let q = supa.from(table).select(selectCols).eq("organization_id", orgId);
-    if (table === "activities") q = q.is("deleted_at", null);
+    if (body.filters?.programme) q = q.eq('program_id', body.filters.programme);
+    if (body.filters?.project) q = q.eq('project_id', body.filters.project);
     if (metric === "active_enrolments") q = q.eq("status", "active");
     return q;
   };
 
   const [rowsRes, prevRes] = await Promise.all([
-    base().gte(dateCol, from.toISOString()).lte(dateCol, to.toISOString()).limit(20000),
+    readAll(() => base().gte(dateCol, from.toISOString()).lte(dateCol, to.toISOString())),
     supa.from(table).select("id", { count: "exact", head: true }).eq("organization_id", orgId)
       .gte(dateCol, prevFrom.toISOString()).lte(dateCol, prevTo.toISOString()),
   ]);
-  if (rowsRes.error) throw new Error(rowsRes.error.message);
   let rows: any[] = rowsRes.data ?? [];
 
   const dimOf = (r: any, dim: string): string => {
     if (isTimeDim(dim)) return bucketKey(new Date(r[dateCol] ?? r.created_at), dim);
     if (dim === "programme") return r.program_id || "Unassigned";
     if (dim === "project") return r.project_id || "Unassigned";
-    if (dim === "activity_type") return r.activity_type ? titleCase(lower(r.activity_type)) : "Unknown";
+    if (dim === "activity_type") return r.type ? titleCase(lower(r.type)) : "Unknown";
     if (dim === "status") return r.status ? titleCase(lower(r.status)) : "Unknown";
     return "Unknown";
   };
@@ -649,6 +716,9 @@ async function programmesHandler(supa: any, orgId: string, body: Body): Promise<
   let previousValue: number | null = prevRes.count ?? null;
 
   if (metric === "average_attendance") {
+    const { data: participants, error: participantError } = await supa.from('activity_participants').select('activity_id').eq('organization_id', orgId).in('activity_id', rows.map(r => r.id));
+    if (participantError) throw new Error(participantError.message);
+    for (const row of rows) row.actual_participants = (participants ?? []).filter((p: any) => p.activity_id === row.id).length;
     weight = (r) => Number(r.actual_participants ?? 0);
     average = true;
     headline = rows.length ? round2(rows.reduce((s, r) => s + Number(r.actual_participants ?? 0), 0) / rows.length) : 0;
@@ -1076,11 +1146,33 @@ Deno.serve(async (req) => {
     if (!body?.tab || !body?.metric || !body?.dimension) {
       return ok({ error: "tab, metric and dimension are required" });
     }
+    const targetTab = body.tab === 'custom' ? body.sourceTab : body.tab;
+    const metrics: Record<string,string[]> = { people: ['beneficiaries','new_registrations','enrolments','exits','households','guardians'], programmes: ['active_programmes','activities_delivered','average_attendance','completion_rate','active_enrolments'], money: ['donations_received','allocations_made','funding_gaps','pool_balances','donor_count'], impact: ['approved_achievement','indicator_average','beneficiaries_at_target','baseline_movement','improvement_rate'], operations: ['field_logs','reports_submitted','reports_overdue','data_quality'] };
+    const dimensions = ['day','week','month','county','sub_county','gender','age_group','care_arrangement','vulnerability','programme','project','activity_type','status','donor','currency','donor_type','indicator','staff','timeliness','flag_type'];
+    if (!metrics[targetTab ?? '']?.includes(body.metric) || !dimensions.includes(body.dimension) || (body.dimension2 && !dimensions.includes(body.dimension2))) return ok({ error: 'Invalid analytics question' });
+    if (body.filters && (typeof body.filters !== 'object' || Array.isArray(body.filters) || Object.entries(body.filters).some(([k,v]) => !dimensions.includes(k) || typeof v !== 'string' || v.length > 200))) return ok({ error: 'Invalid analytics filters' });
+    if (body.minimumCellSize != null && validatedCellSize(body.minimumCellSize) !== body.minimumCellSize) return ok({ error: 'Minimum cell size must be an integer from 5 to 100' });
+    if (body.unitOfAnalysis && !['unique_beneficiaries','participation_records'].includes(body.unitOfAnalysis)) return ok({ error: 'Invalid unit of analysis' });
+    if (body.unitOfAnalysis === 'unique_beneficiaries' && !(targetTab === 'people' && ['beneficiaries','enrolments'].includes(body.metric) || targetTab === 'programmes' && body.metric === 'active_enrolments')) body.unitOfAnalysis = undefined;
+    const { data: allowed, error: permissionError } = await supa.rpc('user_has_permission', { _user_id: userData.user.id, _org_id: orgId, _module: 'reports', _action: 'view', _resource: 'analytics' });
+    if (permissionError || !allowed) return ok({ error: 'Not authorised to view analytics' });
+    if (body.export) {
+      const { data: exportAllowed, error: exportError } = await supa.rpc('user_has_permission', { _user_id: userData.user.id, _org_id: orgId, _module: 'reports', _action: 'export', _resource: 'reports' });
+      if (exportError || !exportAllowed) return ok({ error: 'Not authorised to export reports' });
+    }
+    const { data: roleScope, error: scopeError } = await supa.rpc('user_is_program_scoped', { _user_id: userData.user.id, _org_id: orgId });
+    if (scopeError) return ok({ error: scopeError.message });
+    body.aggregateOnly = !!roleScope;
+    // Never accept the internal threshold/role flags from the request.
+    body.privacyMinimum = 5;
+    if (targetTab === 'money' && (body.dimension === 'donor' || body.dimension2 === 'donor')) return ok({ error: 'Identifying donor grouping is unavailable in aggregate analytics; use programme or month.' });
+    if (body.aggregateOnly && Object.keys(body.filters ?? {}).some(k => !['programme','project','currency'].includes(k))) return ok({ error: 'Aggregate-only access cannot filter small demographic groups' });
 
     const run = (tab: string) => {
       if (tab === "people") return peopleHandler(supa, orgId, { ...body, tab: "people" });
       if (tab === "programmes") return programmesHandler(supa, orgId, { ...body, tab: "programmes" });
       if (tab === "money") return moneyHandler(supa, orgId, { ...body, tab: "money" });
+      if (tab === "impact" && body.metric === 'approved_achievement') return approvedResultsHandler(supa, orgId, body);
       if (tab === "impact") return impactHandler(supa, orgId, { ...body, tab: "impact" });
       if (tab === "operations") return operationsHandler(supa, orgId, { ...body, tab: "operations" });
       return null;

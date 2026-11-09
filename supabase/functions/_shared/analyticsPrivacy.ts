@@ -11,7 +11,7 @@ export function distinctPeople<T extends { beneficiary_id?: string | null; id?: 
   return rows.filter(r => { const key = r.beneficiary_id ?? r.id; if (!key || seen.has(key)) return false; seen.add(key); return true; });
 }
 /** Suppress whole partitions when a cell is unsafe, preventing subtraction from totals. */
-export function protectPartition<T extends { value: number | null; n?: number | null; note?: string }>(rows: T[], total: number | null, minimum: number): T[] {
+export function protectPartition<T extends { value: number | null; n?: number | null; note?: string }>(rows: T[], total: number | null, minimum: number): Array<Omit<T, 'value' | 'n'> & { value: number | null; n?: number | null; note?: string }> {
   const hide = rows.some(r => cellIsUnsafe(r.n, total, minimum));
   return rows.map(r => hide ? { ...r, value: null, n: null, note: `Suppressed: minimum cell size ${minimum}; complementary cells hidden to prevent inference.` } : r);
 }

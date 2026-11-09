@@ -37,7 +37,8 @@ interface Props {
   onToggleBreakdown: (dim: string) => void;
 }
 
-function formatNumber(n: number) {
+function formatNumber(n: number | null) {
+  if (n == null) return 'Suppressed / unavailable';
   return new Intl.NumberFormat().format(n);
 }
 
@@ -137,14 +138,16 @@ export function AnswerArea({
   }
 
   const series = result?.series ?? [];
-  const headlineVal = result?.headline.value ?? 0;
-  const di = deltaInfo(headlineVal, result?.headline.previousValue ?? null, mdef?.goodDirection ?? "up");
+  const headlineVal = result?.headline.value ?? null;
+  const di = deltaInfo(headlineVal ?? 0, result?.headline.previousValue ?? null, mdef?.goodDirection ?? "up");
   const lastUpdated = result?.headline.lastUpdated
     ? formatDistanceToNow(new Date(result.headline.lastUpdated), { addSuffix: true })
     : null;
 
   return (
     <div className="space-y-6">
+      <p className="text-xs text-muted-foreground">Unit of analysis: {result?.context?.unitOfAnalysis ?? 'Recorded data'}</p>
+      {result?.privacy?.suppressed && <p role="note" className="text-sm text-muted-foreground">Small cells and related totals are suppressed (minimum {result.privacy.minimumCellSize}); percentages are hidden to prevent identification.</p>}
       {/* Headline */}
       <div>
         <div className="flex items-baseline gap-3">
@@ -239,7 +242,7 @@ export function AnswerArea({
                   dataKey="value"
                   fill={accent}
                   radius={[0, 4, 4, 0]}
-                  onClick={(d: any) => onDrillDown(question.dimension, d.key)}
+                  onClick={(d: any) => { if (d.value != null && !result?.privacy?.aggregateOnly) onDrillDown(question.dimension, d.key); }}
                   cursor="pointer"
                 >
                   {series.map((s) => (
@@ -267,7 +270,7 @@ export function AnswerArea({
 
       {/* Distribution panel */}
       {!isLoading && result?.distributions && (
-        <DistributionPanel distributions={result.distributions} accent={accent} />
+          <DistributionPanel distributions={result.distributions} accent={accent} unit={result.context?.unitOfAnalysis} />
       )}
 
       {/* Breakdown chips */}

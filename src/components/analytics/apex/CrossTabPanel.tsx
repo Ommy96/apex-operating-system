@@ -34,16 +34,17 @@ export function CrossTabPanel({
   const data = useMemo(
     () =>
       matrix.rows.map((r, i) => {
-        const row: Record<string, string | number> = { label: r.label, key: r.key };
-        matrix.cols.forEach((c, j) => { row[c.label] = matrix.cells[i]?.[j] ?? 0; });
+        const row: Record<string, string | number | null> = { label: r.label, key: r.key };
+        matrix.cols.forEach((c, j) => { row[c.label] = matrix.cells[i]?.[j] ?? null; });
         return row;
       }),
     [matrix]
   );
 
-  const max = useMemo(() => Math.max(1, ...matrix.cells.flat()), [matrix]);
-  const rowTotals = matrix.cells.map((r) => r.reduce((s, v) => s + v, 0));
-  const colTotals = matrix.cols.map((_, j) => matrix.cells.reduce((s, r) => s + (r[j] ?? 0), 0));
+  const suppressed = matrix.cells.flat().some(v => v == null);
+  const max = useMemo(() => Math.max(1, ...matrix.cells.flat().map(v => v ?? 0)), [matrix]);
+  const rowTotals = matrix.cells.map((r) => r.reduce<number>((s, v) => s + (v ?? 0), 0));
+  const colTotals = matrix.cols.map((_, j) => matrix.cells.reduce<number>((s, r) => s + (r[j] ?? 0), 0));
 
   const modes: ViewMode[] = ["grouped", "stacked", "multiline", "heatmap", "table"];
 
@@ -102,8 +103,8 @@ export function CrossTabPanel({
                     {r.label}
                   </td>
                   {matrix.cols.map((c, j) => {
-                    const v = matrix.cells[i]?.[j] ?? 0;
-                    const intensity = view === "heatmap" ? v / max : 0;
+                    const v = matrix.cells[i]?.[j] ?? null;
+                    const intensity = view === "heatmap" ? (v ?? 0) / max : 0;
                     return (
                       <td
                         key={c.key}
@@ -114,20 +115,20 @@ export function CrossTabPanel({
                             : undefined
                         }
                       >
-                        {v ? nf.format(v) : "–"}
+                        {v == null ? 'Suppressed' : v ? nf.format(v) : "–"}
                       </td>
                     );
                   })}
-                  <td className="px-2 py-1.5 text-right font-medium tabular-nums text-foreground">{nf.format(rowTotals[i] ?? 0)}</td>
+                  <td className="px-2 py-1.5 text-right font-medium tabular-nums text-foreground">{suppressed ? 'Suppressed' : nf.format(rowTotals[i] ?? 0)}</td>
                 </tr>
               ))}
               <tr className="border-t border-border">
                 <td className="sticky left-0 z-10 bg-card px-2 py-1.5 text-[12px] font-medium text-muted-foreground">Total</td>
                 {colTotals.map((t, j) => (
-                  <td key={j} className="px-2 py-1.5 text-right font-medium tabular-nums text-foreground">{nf.format(t)}</td>
+                  <td key={j} className="px-2 py-1.5 text-right font-medium tabular-nums text-foreground">{suppressed ? 'Suppressed' : nf.format(t)}</td>
                 ))}
                 <td className="px-2 py-1.5 text-right font-medium tabular-nums text-foreground">
-                  {nf.format(rowTotals.reduce((s, v) => s + v, 0))}
+                  {suppressed ? 'Suppressed' : nf.format(rowTotals.reduce((s, v) => s + v, 0))}
                 </td>
               </tr>
             </tbody>

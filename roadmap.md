@@ -1,9 +1,12 @@
 # Permission system gap closure (audit 2026-11-02)
 ## Analytics structured exports and privacy
-- [ ] Inventory existing question builder, exports, aggregate calculations and drill-down paths.
-- [ ] Build shared report data for branded PDF, Summary/Detail/Data dictionary Excel and structured CSV with context.
-- [ ] Enforce server-side permissions, minimum-cell suppression, aggregate-only drill-down and explicit report units.
-- [ ] Add progress and reliable prepared downloads; test matching figures, n=3 privacy, and actual download flows where available.
+- [x] Inventory existing question builder, exports, aggregate calculations and drill-down paths; preserve existing charts/cross-tabs.
+- [x] Build shared data-driven PDF, Summary/Detail/Data dictionary Excel and structured CSV with context; remove screenshot exports.
+- [x] Add endpoint analytics/export permission checks, fixed input allowlists, minimum-cell and complementary suppression, aggregate-only filter/drill-down restrictions and report unit selection.
+- [x] Add progress and prepared downloads; nine frontend rule/export tests and four Deno privacy tests pass; browser helper downloads verified for all formats and PDF visually inspected.
+- [ ] Real signed-in same-view three-format export, aggregate-only role, Umazi/non-admin and mobile Safari workflow — external unmanaged Supabase has no authenticated test session; browser helper test used synthetic input and is not end-to-end verification.
+- [ ] Complete historical source pagination/filter/denominator reconciliation across all money/impact/operations handlers, organisation-wide persisted threshold settings and cross-query differencing protections — conservative suppression withholds unknown/cumulative/split support; existing secondary source paths remain unaudited.
+- [ ] High-volume worker/server export queue and logo/font-specific PDF branding — current exports use organisation name, vector charts and paginated tables with chunked PDF generation; very large Excel/CSV generation can still block briefly.
 ## Data quality module
 - [x] Inventory existing flags, fuzzy duplicate matching, review and merge transaction; report gaps before implementation.
 - [x] Extend existing flags with stable template/record identity, approved configuration and scoped scan/recheck workflows.

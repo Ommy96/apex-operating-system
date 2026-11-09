@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import {
-  exportElementToPdf,
+  generateAnalyticsFile,
   exportToCsv,
   exportToXlsx,
 } from "@/lib/analyticsExport";
@@ -33,11 +33,13 @@ export function AnalyticsExportMenu({ captureRef, tabLabel, csvRows, xlsxSheets 
   const baseName = `analytics-${tabLabel}`;
 
   const handlePdf = async () => {
-    if (!captureRef.current) return;
+    if (!csvRows?.length) return;
     setBusy(true);
     try {
-      await exportElementToPdf(captureRef.current, baseName);
-      toast({ title: "PDF exported", description: `${tabLabel} snapshot saved.` });
+      const blob = await generateAnalyticsFile({ title: tabLabel, organisation: 'ApexOS', timestamp: new Date().toISOString(), period: 'Not supplied', filters: '{}', unit: 'Recorded data', summary: [], detail: csvRows, dictionary: [{ field: 'limitations', definition: 'Legacy view: period, denominator and definitions unavailable.' }] }, 'pdf');
+      const { downloadBlob } = await import('@/lib/fileDelivery');
+      downloadBlob(blob, `${baseName}.pdf`);
+      toast({ title: "PDF exported" });
     } catch (e) {
       toast({
         title: "Export failed",
@@ -81,7 +83,7 @@ export function AnalyticsExportMenu({ captureRef, tabLabel, csvRows, xlsxSheets 
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handlePdf} disabled={busy}>
           <FileImage className="mr-2 h-4 w-4" />
-          PDF snapshot
+          PDF report
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCsv} disabled={busy || !csvRows?.length}>
           <FileText className="mr-2 h-4 w-4" />

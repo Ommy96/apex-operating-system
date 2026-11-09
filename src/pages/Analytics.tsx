@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { useBranding } from "@/hooks/useBranding";
 import { useAnalyticsUrlState } from "@/hooks/useAnalyticsUrlState";
-import { useAnalyticsQuery } from "@/hooks/useAnalyticsQuery";
+import { useAnalyticsQuery, fetchAnalytics } from "@/hooks/useAnalyticsQuery";
 import { useAnalyticsSavedViews } from "@/hooks/useAnalyticsSavedViews";
 import { TABS, TAB_ORDER, TabKey, AnalyticsQuestion } from "@/lib/analyticsConfig";
 import { QuestionBuilder } from "@/components/analytics/apex/QuestionBuilder";
@@ -14,23 +14,23 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
+import { buildAnalyticsReport } from '@/lib/analyticsReport';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Analytics() {
-  const { primaryColor } = useBranding();
+  const { primaryColor, orgName } = useBranding();
+  const { can } = usePermissions();
   const accent = primaryColor || "hsl(var(--primary))";
 
   const { question, update, reset, setQuestion } = useAnalyticsUrlState();
   const { data, isLoading, isError, error } = useAnalyticsQuery(question);
   const { save } = useAnalyticsSavedViews();
 
-  const exportRef = useRef<HTMLDivElement>(null);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
 
-  const exportRows = useMemo(
-    () => (data?.series ?? []).map((s) => ({ [question.dimension]: s.label, [question.metric]: s.value })),
-    [data, question.dimension, question.metric]
-  );
+  const supportsPeopleUnit = (question.tab === 'people' && ['beneficiaries', 'enrolments'].includes(question.metric)) || (question.tab === 'programmes' && question.metric === 'active_enrolments');
 
   const handleSwitchTab = (tab: TabKey) => update({ tab });
 
@@ -61,7 +61,7 @@ export default function Analytics() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         {/* Header */}
-        <header className="flex items-start justify-between gap-4">
+        <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Intelligence · Analytics
@@ -74,7 +74,7 @@ export default function Analytics() {
           <div className="flex items-center gap-2">
 <Button variant="outline" asChild><Link to="/indicators">Results framework</Link></Button>
             <SavedViewsPopover onLoad={(q) => setQuestion(q)} />
-            <ExportPopover targetRef={exportRef} rows={exportRows} baseName={`analytics-${question.tab}-${question.metric}`} />
+            <ExportPopover disabled={!can.exportReports || isLoading || realError || !data} getReport={async () => { await fetchAnalytics(question, true); if (!data) throw new Error('Load the report first'); return buildAnalyticsReport(question, data, orgName); }} baseName={`analytics-${question.tab}-${question.metric}`} />
           </div>
         </header>
 
@@ -117,7 +117,12 @@ export default function Analytics() {
         </div>
 
         {/* Answer */}
-        <div ref={exportRef} className="mt-6">
+        <div className="mt-4 flex flex-wrap gap-3 items-center">
+          <label className="text-xs text-muted-foreground">Minimum cell size</label>
+          <Select value={String(question.minimumCellSize ?? 5)} onValueChange={v => update({ minimumCellSize: Number(v) })}><SelectTrigger className="w-24" aria-label="Minimum cell size"><SelectValue /></SelectTrigger><SelectContent>{[5,10,15,20].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent></Select>
+          {supportsPeopleUnit && <Select value={question.unitOfAnalysis ?? (question.metric === 'beneficiaries' ? 'unique_beneficiaries' : 'participation_records')} onValueChange={v => update({ unitOfAnalysis: v as 'unique_beneficiaries' | 'participation_records' })}><SelectTrigger className="w-60" aria-label="Unit of analysis"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="unique_beneficiaries">Unique beneficiaries</SelectItem>{question.metric !== 'beneficiaries' && <SelectItem value="participation_records">Participation records</SelectItem>}</SelectContent></Select>}
+        </div>
+        <div className="mt-6">
           <AnswerArea
             question={question}
             result={data}
@@ -125,7 +130,7 @@ export default function Analytics() {
             isError={realError}
             errorMessage={errMsg}
             accent={accent}
-            onDrillDown={(dimension, value) => update({ drillDown: { dimension, value } })}
+            onDrillDown={(dimension, value) => { if (data?.privacy?.aggregateOnly || data?.privacy?.suppressed) { toast.info('Drill-down unavailable for protected aggregates'); return; } update({ drillDown: { dimension, value } }); }}
             onApplySuggestion={(patch) => update(patch)}
             onToggleBreakdown={handleToggleBreakdown}
           />

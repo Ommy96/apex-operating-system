@@ -12,8 +12,9 @@ const tooltipStyle = {
   fontSize: 12,
 };
 
-function DistributionCard({ d, accent }: { d: Distribution; accent: string }) {
-  const total = d.series.reduce((s, r) => s + r.value, 0);
+function DistributionCard({ d, accent, unit }: { d: Distribution; accent: string; unit?: string }) {
+  const suppressed = d.series.some(r => r.value == null);
+  const total = d.series.reduce((s, r) => s + (r.value ?? 0), 0);
   const stacked = d.splitRows && d.splitKeys?.length
     ? d.splitRows.map((r) => {
         const row: Record<string, string | number> = { label: r.label };
@@ -25,9 +26,9 @@ function DistributionCard({ d, accent }: { d: Distribution; accent: string }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <div className="text-sm font-medium text-foreground">{d.label}</div>
+          <div className="text-sm font-medium text-foreground">{d.label}<p className="text-xs font-normal text-muted-foreground">Unit: {unit ?? 'Supporting records'}</p></div>
         <div className="text-[12px] tabular-nums text-muted-foreground">
-          n = {new Intl.NumberFormat().format(Math.round(total))}
+          {suppressed ? 'n suppressed' : `n = ${new Intl.NumberFormat().format(Math.round(total))}`}
         </div>
       </div>
       <div className="h-[200px]">
@@ -68,15 +69,15 @@ function DistributionCard({ d, accent }: { d: Distribution; accent: string }) {
   );
 }
 
-export function DistributionPanel({ distributions, accent }: { distributions: Distribution[]; accent: string }) {
-  const usable = distributions.filter((d) => d.series.some((s) => s.value > 0));
+export function DistributionPanel({ distributions, accent, unit }: { distributions: Distribution[]; accent: string; unit?: string }) {
+  const usable = distributions.filter((d) => d.series.some((s) => (s.value ?? 0) > 0 || s.value == null));
   if (!usable.length) return null;
   return (
     <div>
       <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Who is in this data</div>
       <div className="grid gap-4 md:grid-cols-2">
         {usable.map((d) => (
-          <DistributionCard key={d.key} d={d} accent={accent} />
+          <DistributionCard key={d.key} d={d} accent={accent} unit={unit} />
         ))}
       </div>
     </div>

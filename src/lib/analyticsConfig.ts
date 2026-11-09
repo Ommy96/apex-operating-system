@@ -261,6 +261,8 @@ export const TABS: Record<TabKey, TabConfig> = {
 export const TAB_ORDER: TabKey[] = ["people", "programmes", "money", "impact", "operations", "custom"];
 
 export interface AnalyticsQuestion {
+  minimumCellSize?: number;
+  unitOfAnalysis?: 'unique_beneficiaries' | 'participation_records';
   tab: TabKey;
   metric: string;
   dimension: string;

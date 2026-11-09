@@ -18,6 +18,8 @@ function readFromParams(params: URLSearchParams): AnalyticsQuestion {
   const drillDimension = params.get("drill_dim");
   const drillValue = params.get("drill_val");
   return {
+    minimumCellSize: Math.max(5, Math.min(100, Number(params.get('min_cell')) || 5)),
+    unitOfAnalysis: params.get('unit') === 'unique_beneficiaries' ? 'unique_beneficiaries' : undefined,
     tab,
     metric,
     dimension,
@@ -32,6 +34,8 @@ function readFromParams(params: URLSearchParams): AnalyticsQuestion {
 
 function writeToParams(q: AnalyticsQuestion): URLSearchParams {
   const p = new URLSearchParams();
+  if (q.minimumCellSize) p.set('min_cell', String(q.minimumCellSize));
+  if (q.unitOfAnalysis) p.set('unit', q.unitOfAnalysis);
   p.set("tab", q.tab);
   if (q.metric) p.set("metric", q.metric);
   if (q.dimension) p.set("dim", q.dimension);
