@@ -1,127 +1,51 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { deliver } from "../_shared/delivery.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const json = (body: unknown) =>
+  new Response(JSON.stringify(body), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-interface WhatsAppRequest {
-  to: string; // E.164 phone number, e.g. 2547XXXXXXXX
-  recipient_name?: string;
-  recipient_type?: "donor" | "guardian" | "beneficiary" | "staff" | "other";
-  // Either free-form text ...
-  message?: string;
-  // ... or an approved template
-  template_name?: string;
-  template_language?: string; // default en_US
-  template_components?: unknown[];
-  organization_id?: string;
-  campaign_id?: string;
-}
-
-function normalizePhone(p: string): string {
-  return (p || "").replace(/[^\d]/g, "");
-}
-
-serve(async (req: Request) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-
   try {
-    const token = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
-    const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
-    if (!token || !phoneId) {
-      return json({ error: "WhatsApp not configured. Set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID." }, 200);
-    }
-
-    const body = (await req.json()) as WhatsAppRequest;
-    const to = normalizePhone(body.to);
-    if (!to) return json({ error: "Missing recipient phone (to)" }, 400);
-    if (!body.message && !body.template_name) {
-      return json({ error: "Provide either message or template_name" }, 400);
-    }
-
     const authHeader = req.headers.get("Authorization") || "";
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    if (!authHeader.startsWith("Bearer ")) return json({ success: false, error: "Unauthorized" });
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
+    const { data: u } = await userClient.auth.getUser();
+    if (!u.user) return json({ success: false, error: "Unauthorized" });
+    const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    // Resolve organization / sender (best-effort)
-    let orgId = body.organization_id || null;
-    let senderId: string | null = null;
-    if (authHeader.startsWith("Bearer ")) {
-      const anon = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
-        global: { headers: { Authorization: authHeader } },
-      });
-      const { data } = await anon.auth.getUser();
-      senderId = data.user?.id ?? null;
-      if (!orgId && senderId) {
-        const { data: mem } = await admin
-          .from("organization_members")
-          .select("organization_id")
-          .eq("user_id", senderId)
-          .eq("is_primary", true)
-          .maybeSingle();
-        orgId = mem?.organization_id ?? null;
-      }
-    }
+    const body = await req.json().catch(() => ({}));
+    const to = String(body.to || "").replace(/[^\d]/g, "");
+    if (to.length < 8 || to.length > 15) return json({ success: false, error: "Recipient phone must be an international number, e.g. 2547XXXXXXXX" });
+    if (!body.message && !body.template_name) return json({ success: false, error: "Provide a message or an approved template name" });
+    if (body.message && String(body.message).length > 4000) return json({ success: false, error: "Message too long" });
 
-    // Build payload for WhatsApp Business Cloud API
-    const payload: Record<string, unknown> = {
-      messaging_product: "whatsapp",
-      to,
-    };
-    if (body.template_name) {
-      payload.type = "template";
-      payload.template = {
-        name: body.template_name,
-        language: { code: body.template_language || "en_US" },
-        ...(body.template_components ? { components: body.template_components } : {}),
-      };
-    } else {
-      payload.type = "text";
-      payload.text = { preview_url: false, body: body.message };
-    }
+    const orgId: string | null = body.organization_id || null;
+    if (!orgId) return json({ success: false, error: "organization_id is required" });
+    const { data: mem } = await admin.from("organization_members").select("id").eq("user_id", u.user.id).eq("organization_id", orgId).maybeSingle();
+    if (!mem) return json({ success: false, error: "You are not a member of this organisation" });
 
-    const waRes = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+    const idempotencyKey = `whatsapp:${orgId}:${body.idempotency_key || crypto.randomUUID()}:${to}`;
+    const r = await deliver(admin, {
+      organizationId: orgId, channel: "whatsapp", source: "whatsapp-send", idempotencyKey, to,
+      recipientUserId: body.recipient_user_id ?? null,
+      text: body.message ?? undefined,
+      subject: body.template_name ?? null,
+      whatsappTemplate: body.template_name ? { name: body.template_name, language: body.template_language, components: body.template_components } : undefined,
+      createdBy: u.user.id,
     });
-    const waJson = await waRes.json().catch(() => ({}));
 
-    const ok = waRes.ok;
-    const errMsg = ok ? null : (waJson?.error?.message || `WhatsApp API error ${waRes.status}`);
+    await admin.from("stakeholder_messages").insert({
+      organization_id: orgId, sender_id: u.user.id, channel: "whatsapp",
+      recipient_type: body.recipient_type || "other", recipient_name: body.recipient_name || to, recipient_contact: to,
+      subject: body.template_name || null, body: body.message || `[template: ${body.template_name}]`,
+      direction: "outbound", status: r.status === "sent" ? "sent" : "failed", metadata: { delivery_id: r.deliveryId, delivery_status: r.status },
+    });
 
-    // Log to stakeholder_messages
-    if (orgId) {
-      await admin.from("stakeholder_messages").insert({
-        organization_id: orgId,
-        sender_id: senderId,
-        channel: "whatsapp",
-        recipient_type: body.recipient_type || "other",
-        recipient_name: body.recipient_name || to,
-        recipient_contact: to,
-        subject: body.template_name || null,
-        body: body.message || `[template: ${body.template_name}]`,
-        direction: "outbound",
-        status: ok ? "sent" : "failed",
-      });
-    }
-
-    if (!ok) return json({ error: errMsg, details: waJson }, 200);
-    return json({ success: true, whatsapp: waJson });
+    return json({ success: r.status === "sent", status: r.status, duplicate: !!r.duplicate, error: r.status === "sent" ? null : r.error, delivery_id: r.deliveryId });
   } catch (e) {
-    return json({ error: (e as Error).message }, 200);
+    return json({ success: false, error: (e as Error).message });
   }
 });

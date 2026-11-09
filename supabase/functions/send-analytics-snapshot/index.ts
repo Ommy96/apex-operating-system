@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { deliver } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -167,12 +165,18 @@ const handler = async (req: Request): Promise<Response> => {
           metrics,
         });
 
-        await resend.emails.send({
-          from: "ApexOS Analytics <noreply@apex.inferatechs.com>",
-          to: sub.recipients,
-          subject: `${sub.name} — ${tabLabel} (${sub.frequency})`,
-          html,
-        });
+        const periodKey = sub.next_send_at || new Date().toISOString().slice(0, 10);
+        const failures: string[] = [];
+        for (const email of sub.recipients as string[]) {
+          const r = await deliver(supabase, {
+            organizationId: sub.organization_id, channel: "email", source: "send-analytics-snapshot",
+            idempotencyKey: `analytics-snapshot:${sub.id}:${periodKey}:${String(email).toLowerCase()}`,
+            to: email, fromName: "ApexOS Analytics", transactional: true,
+            subject: `${sub.name} — ${tabLabel} (${sub.frequency})`, html, linkPath: "/analytics",
+          });
+          if (r.status !== "sent" && !r.duplicate) failures.push(`${email}: ${r.error}`);
+        }
+        if (failures.length === sub.recipients.length) throw new Error(failures.join("; "));
 
         const next = nextSendDate(sub.frequency);
         await supabase

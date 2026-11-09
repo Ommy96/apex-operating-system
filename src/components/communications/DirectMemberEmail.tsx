@@ -80,6 +80,7 @@ export function DirectMemberEmail() {
           subject,
           body,
           organization_id: orgId,
+          idempotency_key: crypto.randomUUID(),
         },
       });
       if (error) throw error;
@@ -87,7 +88,9 @@ export function DirectMemberEmail() {
       return data;
     },
     onSuccess: (data) => {
-      toast.success(`Email sent to ${data.sent} member(s)${data.failed > 0 ? `, ${data.failed} failed` : ""}`);
+      const extra = [data.failed ? `${data.failed} failed` : "", data.skipped ? `${data.skipped} held/opted out` : ""].filter(Boolean).join(", ");
+      if (data.sent > 0) toast.success(`Email sent to ${data.sent} member(s)${extra ? ` — ${extra}. See Delivery Log.` : ""}`);
+      else toast.error(`No emails were sent${extra ? ` — ${extra}` : ""}. ${data.errors?.[0] ?? ""}`);
       setSelectedEmails(new Set());
       setSubject("");
       setBody("");

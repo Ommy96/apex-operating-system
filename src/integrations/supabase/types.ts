@@ -10923,6 +10923,87 @@ export type Database = {
           },
         ]
       }
+      message_deliveries: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          link_path: string | null
+          organization_id: string | null
+          payload: Json
+          provider_message_id: string | null
+          recipient_contact: string
+          recipient_user_id: string | null
+          sent_at: string | null
+          source: string
+          status: string
+          subject: string | null
+          transactional: boolean
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          link_path?: string | null
+          organization_id?: string | null
+          payload?: Json
+          provider_message_id?: string | null
+          recipient_contact: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          source: string
+          status?: string
+          subject?: string | null
+          transactional?: boolean
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          link_path?: string | null
+          organization_id?: string | null
+          payload?: Json
+          provider_message_id?: string | null
+          recipient_contact?: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          transactional?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_entries: {
         Row: {
           child_id: string | null
@@ -17056,6 +17137,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_communication_settings: {
+        Row: {
+          quiet_end: string
+          quiet_hours_enabled: boolean
+          quiet_start: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          quiet_end?: string
+          quiet_hours_enabled?: boolean
+          quiet_start?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          quiet_end?: string
+          quiet_hours_enabled?: boolean
+          quiet_start?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_notification_preferences: {
         Row: {

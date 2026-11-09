@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { deliver } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,40 +66,28 @@ Deno.serve(async (req) => {
 
       if (emails.length === 0) continue;
 
-      // Send via Resend
-      const resendKey = Deno.env.get("RESEND_API_KEY");
       const grantInfo = report.grants as any;
       const grantName = grantInfo?.grant_name || "Grant";
       const daysLabel = daysUntilDue < 0
         ? `${Math.abs(daysUntilDue)} days overdue`
         : `due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`;
-
-      if (resendKey) {
-        const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend';
-        const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-
-        try {
-          await fetch(`${GATEWAY_URL}/emails`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${lovableKey}`,
-              "X-Connection-Api-Key": resendKey,
-            },
-            body: JSON.stringify({
-              from: "ApexOS <noreply@apex.inferatechs.com>",
-              to: emails,
-              subject: `[ACTION REQUIRED] Grant report ${daysLabel} — ${grantName}`,
-              html: `<h2>Grant Report Reminder</h2>
-                <p>The report <strong>${report.title || 'Untitled'}</strong> for grant <strong>${grantName}</strong> is ${daysLabel}.</p>
-                <p>Due date: ${new Date(report.due_date).toLocaleDateString('en-KE')}</p>
-                <p>Please submit the report as soon as possible to maintain compliance.</p>`,
-            }),
-          });
-        } catch (emailErr) {
-          console.error("Email send error:", emailErr);
-        }
+      const esc = (v: string) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
+      let anySent = false;
+      for (const m of (members || []) as any[]) {
+        const email = m.profiles?.email;
+        if (!email) continue;
+        const r = await deliver(supabase, {
+          organizationId: report.organization_id, channel: "email", source: "grant-deadline-reminders",
+          idempotencyKey: `grant-reminder:${report.id}:${reminderType}:${String(email).toLowerCase()}`,
+          to: email, recipientUserId: m.user_id, transactional: true,
+          subject: `[ACTION REQUIRED] Grant report ${daysLabel} — ${grantName}`,
+          html: `<h2>Grant Report Reminder</h2><p>The report <strong>${esc(report.title || 'Untitled')}</strong> for grant <strong>${esc(grantName)}</strong> is ${daysLabel}.</p><p>Due date: ${new Date(report.due_date).toLocaleDateString('en-KE')}</p><p>Please submit the report as soon as possible to maintain compliance.</p>`,
+          linkPath: "/grants",
+        });
+        if (r.status === "sent" || r.duplicate) anySent = true;
+        else console.error("grant reminder delivery", r.status, r.error);
       }
+      if (!anySent) continue; // nothing actually sent: do not log, so the next run retries
 
       // Log reminder
       await supabase.from("grant_reminder_logs").insert({
@@ -129,7 +118,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("Grant reminder error:", err);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: (err as Error).message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -175,7 +175,8 @@ export function useCommunications() {
       return data;
     },
     onSuccess: (data) => {
-      toast.success(`Campaign sent: ${data.sent} delivered, ${data.failed} failed`);
+      if (data.sent > 0) toast.success(`Campaign sent: ${data.sent} delivered${data.failed ? `, ${data.failed} failed — see Delivery Log` : ""}`);
+      else toast.error(`Nothing was sent: ${data.failed} failed. See Delivery Log for reasons.`);
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
     onError: (e: any) => toast.error(e.message),

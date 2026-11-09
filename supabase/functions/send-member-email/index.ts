@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
-import { Resend } from "npm:resend@2.0.0";
+import { deliver } from "../_shared/delivery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,9 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendKey) throw new Error("RESEND_API_KEY not configured");
-
+    
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -45,7 +43,8 @@ serve(async (req) => {
 
     const senderId = claimsData.claims.sub;
 
-    const { recipient_emails, subject, body, organization_id } = await req.json();
+    const { recipient_emails, subject, body, organization_id, idempotency_key } = await req.json();
+    const batchKey = idempotency_key || crypto.randomUUID();
 
     if (!recipient_emails?.length || !subject || !body || !organization_id) {
       return new Response(
@@ -88,44 +87,27 @@ serve(async (req) => {
     const orgName = org?.name || "Your Organization";
     const senderName = senderProfile?.full_name || "Admin";
 
-    const resend = new Resend(resendKey);
+    const results = { sent: 0, failed: 0, skipped: 0, duplicates: 0, errors: [] as string[] };
+    const esc = (v: string) => String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" } as any)[c]);
 
-    const results = { sent: 0, failed: 0, errors: [] as string[] };
-
-    // Send emails one by one (Resend free tier limit)
     for (const email of recipient_emails) {
-      try {
-        const { error: sendError } = await resend.emails.send({
-          from: `${orgName} <noreply@apex.inferatechs.com>`,
-          to: [email],
-          subject: subject,
-          html: `
-            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: #f8f9fa; border-radius: 8px; padding: 24px; margin-bottom: 20px;">
-                <h2 style="color: #1a1a2e; margin: 0 0 4px 0; font-size: 18px;">${orgName}</h2>
-                <p style="color: #6b7280; margin: 0; font-size: 13px;">Message from ${senderName}</p>
-              </div>
-              <h3 style="color: #1a1a2e; font-size: 16px; margin-bottom: 12px;">${subject}</h3>
-              <div style="color: #374151; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${body}</div>
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-              <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-                This email was sent via ${orgName}'s communication system. 
-                Please do not reply directly to this email.
-              </p>
-            </div>
-          `,
-        });
-
-        if (sendError) {
-          results.failed++;
-          results.errors.push(`${email}: ${sendError.message}`);
-        } else {
-          results.sent++;
-        }
-      } catch (e: any) {
-        results.failed++;
-        results.errors.push(`${email}: ${e.message}`);
-      }
+      const html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="margin:0 0 4px 0;font-size:18px;">${esc(orgName)}</h2>
+          <p style="color:#6b7280;margin:0 0 16px 0;font-size:13px;">Message from ${esc(senderName)}</p>
+          <h3 style="font-size:16px;">${esc(subject)}</h3>
+          <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;">${esc(body)}</div>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
+          <p style="color:#9ca3af;font-size:11px;margin:0;">Sent via ${esc(orgName)}'s communication system. Please do not reply.</p></div>`;
+      const { data: rp } = await adminClient.from("profiles").select("user_id").eq("email", email).maybeSingle();
+      const r = await deliver(adminClient, {
+        organizationId: organization_id, channel: "email", source: "send-member-email",
+        idempotencyKey: `member-email:${organization_id}:${batchKey}:${String(email).toLowerCase()}`,
+        to: email, recipientUserId: rp?.user_id ?? null, subject, html, fromName: orgName, createdBy: senderId,
+      });
+      if (r.duplicate) results.duplicates++;
+      else if (r.status === "sent") results.sent++;
+      else if (r.status.startsWith("skipped")) { results.skipped++; results.errors.push(`${email}: ${r.error}`); }
+      else { results.failed++; results.errors.push(`${email}: ${r.error}`); }
     }
 
     // Log the communication in stakeholder_messages

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Zap, Trash2, Play, History, MessageCircle } from "lucide-react";
 import { useAutomation } from "@/hooks/useAutomation";
+import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -61,6 +62,7 @@ export function WorkflowTriggers() {
     });
   };
 
+  const { currentOrganization } = useOrganization();
   const testRunRule = async (rule: any) => {
     const action = Array.isArray(rule.actions) ? rule.actions[0] : null;
     if (!action || action.type !== "send_whatsapp") {
@@ -79,12 +81,14 @@ export function WorkflowTriggers() {
         recipient_type: "other",
         message: action.message || `Automation triggered: ${rule.name}`,
         template_name: action.template_name || undefined,
+        organization_id: currentOrganization?.organization_id,
+        idempotency_key: crypto.randomUUID(),
       },
     });
-    if (error || (data as any)?.error) {
-      toast.error((data as any)?.error || error?.message || "WhatsApp send failed");
-    } else {
+    if (!error && (data as any)?.success === true) {
       toast.success("WhatsApp test sent");
+    } else {
+      toast.error((data as any)?.error || error?.message || "WhatsApp message was not sent");
     }
   };
 

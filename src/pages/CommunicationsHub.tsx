@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, Megaphone, Bell, Mail } from "lucide-react";
+import { MessageCircle, Megaphone, Bell, Mail, Send } from "lucide-react";
+import { DeliveryLog } from "@/components/communications/DeliveryLog";
 import { PageHeroHeader } from "@/components/PageHeroHeader";
 import { StakeholderMessages } from "@/components/communications/StakeholderMessages";
 import { CampaignManager } from "@/components/communications/CampaignManager";
@@ -19,6 +20,7 @@ export default function CommunicationsHub() {
     { id: "direct-email", label: "Direct Email", icon: Mail },
     { id: "messages", label: "Messages", icon: MessageCircle },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
+    { id: "deliveries", label: "Delivery Log", icon: Send },
     { id: "notifications", label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`, icon: Bell },
   ];
 
@@ -57,6 +59,10 @@ export default function CommunicationsHub() {
 
         <TabsContent value="campaigns">
           <CampaignManager />
+        </TabsContent>
+
+        <TabsContent value="deliveries">
+          <DeliveryLog />
         </TabsContent>
 
         <TabsContent value="notifications">
