@@ -77,6 +77,15 @@ export function useResolveFlag() {
 }
 
 export interface QualityRule { id: string; template_key: string; enabled: boolean; config: { project_id?: string } }
+export function useQualityProjects() {
+  const { currentOrganization } = useOrganization();
+  const org = currentOrganization?.organization_id;
+  return useQuery({ queryKey: ['quality-projects', org], enabled: !!org, queryFn: async () => {
+    const { data, error } = await supabase.from('projects').select('id, name').eq('organization_id', org ?? '').is('deleted_at', null).order('name');
+    if (error) throw error;
+    return data ?? [];
+  } });
+}
 export function useQualityRules() {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;

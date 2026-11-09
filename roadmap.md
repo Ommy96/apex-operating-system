@@ -1,10 +1,13 @@
 # Permission system gap closure (audit 2026-11-02)
 ## Data quality module
-- [ ] Inventory existing flags, fuzzy duplicate matching, review and merge transaction; report gaps before implementation.
-- [ ] Extend existing flags with stable template/record identity, approved configuration and scoped scan/recheck workflows.
-- [ ] Seed missing DOB, minor guardian, expired consent, unset care and unassessed need checks.
-- [ ] Extend duplicate review with persistent distinct decisions and exact preserved-link merge preview; never auto-merge.
-- [ ] Run rule/security tests and verify actual scan/correction/review flows where authentication is available.
+- [x] Inventory existing flags, fuzzy duplicate matching, review and merge transaction; report gaps before implementation.
+- [x] Extend existing flags with stable template/record identity, approved configuration and scoped scan/recheck workflows.
+- [x] Seed missing DOB, minor guardian, expired consent (records and documents), unset care and unassessed need checks; 20 rules across four organisations.
+- [x] Extend duplicate review with persistent distinct decisions and exact preserved-link merge preview; never auto-merge; restore the unreachable duplicate-review page.
+- [x] Run eight rule tests and SQL configuration/privilege assertions; build and linter checks pass without new warnings.
+- [ ] Signed-in scan twice/correct/recheck/confirm-different/merge and Umazi/non-admin/donor API checks — authenticated end-to-end checks are unavailable on external unmanaged Supabase.
+- [ ] Merge records carrying immutable assessments, form submissions or legacy file links — deliberately blocked until a preservation-safe history strategy is supplied; uniqueness collisions also abort without discarding records.
+- [ ] Legacy unsupported flag resolution, full legacy activity/form/case/visit issue mapping, scheduled scan dispatch and unspecified original Feature 3 sections — not supplied/fully implemented; unsupported issue closure is blocked rather than falsely confirmed.
 ## Results framework and indicators
 - [x] Inventory existing indicator/logframe and analytics paths; report legacy sources, duplicated calculations and mutable reporting gaps.
 - [x] Extend shared direction-aware calculations, distinct automated beneficiary sources and existing definition/baseline/target capture.

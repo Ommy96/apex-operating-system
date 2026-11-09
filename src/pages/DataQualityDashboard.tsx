@@ -13,14 +13,13 @@ import {
   useDataQualityFlags,
   useDataQualitySummary,
   useResolveFlag,
-  useQualityScan, useQualityRules, useSaveQualityRule,
+  useQualityScan, useQualityRules, useSaveQualityRule, useQualityProjects,
   type DataQualityFlag,
 } from "@/hooks/useDataQuality";
 import { formatDisplayDate } from "@/lib/dateUtils";
 import { QUALITY_TEMPLATES, qualityCorrectionPath } from '@/lib/dataQuality';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
 
 function severityIcon(s: string) {
   if (s === "error") return <AlertCircle className="h-4 w-4 text-destructive" />;
@@ -37,6 +36,7 @@ export default function DataQualityDashboard() {
   const resolveMut = useResolveFlag();
   const scan = useQualityScan();
   const rules = useQualityRules();
+  const projects = useQualityProjects();
   const saveRule = useSaveQualityRule();
   const { hasPermission } = usePermissions();
   const canManage = hasPermission('me', 'manage', 'validation_rules');
@@ -85,11 +85,10 @@ export default function DataQualityDashboard() {
         {rules.isLoading ? <Skeleton className="h-24" /> : <div className="divide-y">{rules.data?.map(r => <div key={r.id} className="py-3 flex flex-wrap gap-3 items-center">
           <span className="flex-1 min-w-48 text-sm">{QUALITY_TEMPLATES.find(t => t.key === r.template_key)?.label ?? r.template_key}</span>
           <span className="text-xs text-muted-foreground">{r.config.project_id ? 'Project scoped' : 'All permitted records'}</span>
-          {canManage && <Input aria-label={`Project scope for ${r.template_key}`} className="w-full sm:w-72" placeholder="Project ID (optional)" defaultValue={r.config.project_id ?? ''} onBlur={e => {
-            const value = e.target.value.trim();
-            if (value === (r.config.project_id ?? '')) return;
-            saveRule.mutate({ ...r, config: value ? { project_id: value } : {} }, { onSuccess: () => toast({ title: 'Rule scope saved' }), onError: err => toast({ title: 'Rule not saved', description: err.message, variant: 'destructive' }) });
-          }} />}
+          {canManage && <Select value={r.config.project_id ?? 'all'} disabled={saveRule.isPending || projects.isLoading} onValueChange={value => {
+            toast({ title: 'Saving rule scope…' });
+            saveRule.mutate({ ...r, config: value !== 'all' ? { project_id: value } : {} }, { onSuccess: () => toast({ title: 'Rule scope saved' }), onError: err => toast({ title: 'Rule not saved', description: err.message, variant: 'destructive' }) });
+          }}><SelectTrigger aria-label={`Project scope for ${r.template_key}`} className="w-full sm:w-72"><SelectValue placeholder="Project scope" /></SelectTrigger><SelectContent><SelectItem value="all">All permitted projects</SelectItem>{projects.data?.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select>}
           <Switch aria-label={`Enable ${r.template_key}`} checked={r.enabled} disabled={!canManage || saveRule.isPending} onCheckedChange={enabled => {
             toast({ title: 'Saving rule…' });
             saveRule.mutate({ ...r, enabled }, { onSuccess: () => toast({ title: 'Rule saved' }), onError: e => toast({ title: 'Rule not saved', description: e.message, variant: 'destructive' }) });
