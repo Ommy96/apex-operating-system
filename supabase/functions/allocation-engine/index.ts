@@ -112,7 +112,8 @@ async function upsertPool(
   withNull("scope_beneficiary_id", args.scope_beneficiary_id);
   withNull("scope_project_id", args.scope_project_id);
   withNull("scope_program_id", args.scope_program_id);
-  const { data: existing } = await q.maybeSingle();
+  const { data: existing, error: existingError } = await q.maybeSingle();
+  if (existingError) throw new Error(`Database read failed: ${existingError.message}`);
 
   if (existing) {
     const newNative = Number(existing.balance_native) + args.add_native;
