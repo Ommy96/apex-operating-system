@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -211,7 +212,7 @@ export default function OrgSetupWizard() {
       const { data: existingLogframes } = await supabase
         .from('logframes').select('id').eq('organization_id', orgId).limit(1);
       if (!existingLogframes || existingLogframes.length === 0) {
-        const { data: lf } = await supabase
+        const { data: lf, error: lfError } = await supabase
           .from('logframes')
           .insert({
             organization_id: orgId,
@@ -222,6 +223,7 @@ export default function OrgSetupWizard() {
           })
           .select('id')
           .single();
+        if (lfError) throw lfError;
         if (lf?.id) {
           const rows: any[] = [];
           rows.push({ logframe_id: lf.id, level_type: 'goal', title: preset.logframe.goal, sort_order: 0 });
@@ -231,7 +233,7 @@ export default function OrgSetupWizard() {
           preset.logframe.outputs.forEach((title, i) =>
             rows.push({ logframe_id: lf.id, level_type: 'output', title, sort_order: i + 10 })
           );
-          await supabase.from('logframe_levels').insert(rows);
+          await mustWrite("Creating logframe levels", supabase.from('logframe_levels').insert(rows));
         }
       }
 
@@ -251,7 +253,7 @@ export default function OrgSetupWizard() {
           is_template: false,
           created_by: user?.id || null,
         }));
-        await supabase.from('indicators').insert(indRows as any);
+        await mustWrite("Creating starter indicators", supabase.from('indicators').insert(indRows as any));
       }
 
       // Verify the write actually landed before declaring success.

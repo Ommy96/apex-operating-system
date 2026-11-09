@@ -4,6 +4,22 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
 import { Sparkles, ImageOff } from 'lucide-react';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+async function viewStoryPhoto(storyId: string) {
+  const win = window.open('', '_blank');
+  if (win) win.opener = null;
+  const { data, error } = await supabase.functions.invoke('donor-story-photo', { body: { story_id: storyId, index: 0 } });
+  const message = error?.message || (data as any)?.error;
+  if (message || !(data as any)?.url) {
+    win?.close();
+    toast.error(message || 'Photo not available');
+    return;
+  }
+  if (win) win.location.href = (data as any).url;
+  else window.location.assign((data as any).url);
+}
 
 export function DonorImpactStoriesTab() {
   const { impactStories, storiesLoading, sponsoredBeneficiaries } = useDonorPortal();
@@ -47,9 +63,14 @@ export function DonorImpactStoriesTab() {
         return (
           <Card key={s.id} className="border-border/50 overflow-hidden flex flex-col">
             {cover ? (
-              <div className="aspect-[16/9] bg-muted overflow-hidden">
-                <img src={cover} alt={s.title} loading="lazy" className="w-full h-full object-cover" />
-              </div>
+              <button
+                type="button"
+                onClick={() => viewStoryPhoto(s.id)}
+                className="aspect-[16/9] w-full bg-muted/40 flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground hover:bg-muted/60"
+              >
+                <Sparkles className="h-6 w-6 text-muted-foreground/60" />
+                View photo
+              </button>
             ) : (
               <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
                 <ImageOff className="h-8 w-8 text-muted-foreground/40" />

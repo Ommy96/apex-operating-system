@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -123,7 +124,7 @@ export function useOfflineSync() {
         // Also save a beneficiary visitation record if there's a beneficiary
         if (observationData.beneficiary_id) {
           try {
-            await supabase.from('beneficiary_visitations').insert({
+            await softWrite("Adding visit to timeline", supabase.from('beneficiary_visitations').insert({
               beneficiary_id: observationData.beneficiary_id,
               visit_type: _visit_type || 'field_visit',
               visit_date: observationData.observation_date,
@@ -134,7 +135,7 @@ export function useOfflineSync() {
               location: _location || null,
               organization_id: record.organizationId,
               created_by: record.userId,
-            });
+            }));
           } catch {
             // Non-fatal if visitation insert fails
           }

@@ -55,19 +55,21 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify caller is admin in the org or super admin
-    const { data: membership } = await adminClient
+    const { data: membership, error: membershipError } = await adminClient
       .from("organization_members")
       .select("role")
       .eq("user_id", callerUser.id)
       .eq("organization_id", organization_id)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
 
     const isCallerOrgAdmin = membership?.role === "admin";
 
-    const { data: isSuperAdmin } = await adminClient.rpc("has_role", {
+    const { data: isSuperAdmin, error: isSuperAdminError } = await adminClient.rpc("has_role", {
       _user_id: callerUser.id,
       _role: "admin",
     });
+    if (isSuperAdminError) throw new Error(`Database read failed: ${isSuperAdminError.message}`);
 
     if (!isCallerOrgAdmin && !isSuperAdmin) {
       return new Response(JSON.stringify({ error: "Only organization admins can create members" }), {

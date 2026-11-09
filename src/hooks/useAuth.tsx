@@ -30,8 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserRole = useCallback(async (userId: string) => {
     try {
-      const { data } = await supabase
+      const { data, error: dataError } = await supabase
         .rpc('get_user_role', { user_id: userId });
+      if (dataError) throw dataError;
       const globalRole = (data as string) || 'staff';
       // If the global user_roles table has no admin row for this user,
       // fall back to org-level membership: an admin/owner in ANY organization
@@ -40,10 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // membership individually.
       if (globalRole !== 'admin') {
         try {
-          const { data: memberships } = await supabase
+          const { data: memberships, error: membershipsError } = await supabase
             .from('organization_members')
             .select('role')
             .eq('user_id', userId);
+          if (membershipsError) throw membershipsError;
           const rows = (memberships as { role: string }[] | null) || [];
           const isOrgAdmin = rows.some(
             (m) =>
@@ -57,11 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (e) {
           logger.error('Org membership role lookup failed:', e);
+          toast({ title: 'Access check failed', description: `Could not check your organisation role: ${(e as any)?.message ?? 'unknown error'}`, variant: 'destructive' });
         }
       }
       return globalRole;
     } catch (error) {
       logger.error('Error fetching user role:', error);
+      toast({ title: 'Access check failed', description: `Could not load your role — limited access until you reload: ${(error as any)?.message ?? 'unknown error'}`, variant: 'destructive' });
       return 'staff';
     }
   }, []);
@@ -253,7 +257,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const role = await fetchUserRole(data.user.id);
         if (role === 'admin') {
-          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const { data: factorsData, error: factorsDataError } = await supabase.auth.mfa.listFactors();
+          if (factorsDataError) throw factorsDataError;
           const totpFactors = factorsData?.totp || [];
           if (totpFactors.length === 0) {
             sessionStorage.setItem('requires_2fa_setup', 'true');
@@ -263,6 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         logger.error('MFA check failed:', e);
+        toast({ title: 'Access check failed', description: `Could not check two-factor status: ${(e as any)?.message ?? 'unknown error'}`, variant: 'destructive' });
       }
     }
     

@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { VulnerabilityAssessmentsPanel } from '@/components/beneficiary/VulnerabilityAssessmentsPanel';
@@ -170,7 +171,7 @@ export default function HouseholdProfile() {
         .eq('id', householdId);
       if (error) throw error;
       try {
-        await supabase.from('audit_logs').insert({
+        await softWrite("Audit log", supabase.from('audit_logs').insert({
           event_type: 'change_household_head',
           entity_type: 'household',
           entity_id: householdId,
@@ -178,7 +179,7 @@ export default function HouseholdProfile() {
           old_values: { head_of_household_id: previousHeadId, head_guardian_id: guardianHeadId } as any,
           new_values: patch as any,
           metadata: { household_name: household.household_name } as any,
-        } as any);
+        } as any));
       } catch (_) { /* non-fatal */ }
       const newLabel = pickedHeadKind === 'beneficiary'
         ? members.find((m: any) => m.id === pickedHead)?.display_name

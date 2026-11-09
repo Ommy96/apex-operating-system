@@ -45,18 +45,20 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claims } = await userClient.auth.getClaims(token);
+    const { data: claims, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError) throw new Error(`Database read failed: ${claimsError.message}`);
     if (!claims?.claims?.sub) return ok({ error: "Unauthorized" });
     const userId = claims.claims.sub as string;
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    const { data: membership } = await admin
+    const { data: membership, error: membershipError } = await admin
       .from("organization_members")
       .select("user_id")
       .eq("organization_id", organizationId)
       .eq("user_id", userId)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
     if (!membership) return ok({ error: "Forbidden" });
 
     const m = mode || "beneficiary_project";
@@ -72,32 +74,37 @@ serve(async (req) => {
     } else if (m === "beneficiary") {
       if (!beneficiaryId) return ok({ error: "beneficiaryId required" });
       beneficiaryIds = [beneficiaryId];
-      const { data: pr } = await admin.from("projects").select("id").eq("organization_id", organizationId);
+      const { data: pr, error: prError } = await admin.from("projects").select("id").eq("organization_id", organizationId);
+      if (prError) throw new Error(`Database read failed: ${prError.message}`);
       projectIds = (pr || []).map((p: any) => p.id);
     } else if (m === "project") {
       if (!projectId) return ok({ error: "projectId required" });
       projectIds = [projectId];
       // beneficiaries not already exited from this project
-      const { data: enrolled } = await admin
+      const { data: enrolled, error: enrolledError } = await admin
         .from("beneficiary_services")
         .select("beneficiary_id")
         .eq("organization_id", organizationId)
         .eq("project_id", projectId);
+      if (enrolledError) throw new Error(`Database read failed: ${enrolledError.message}`);
       const enrolledIds = new Set((enrolled || []).map((r: any) => r.beneficiary_id));
-      const { data: bens } = await admin
+      const { data: bens, error: bensError } = await admin
         .from("beneficiaries")
         .select("id")
         .eq("organization_id", organizationId)
         .is("deleted_at", null);
+      if (bensError) throw new Error(`Database read failed: ${bensError.message}`);
       beneficiaryIds = (bens || []).map((b: any) => b.id).filter((id: string) => !enrolledIds.has(id));
     } else if (m === "recompute_all") {
-      const { data: pr } = await admin.from("projects").select("id").eq("organization_id", organizationId);
+      const { data: pr, error: prError } = await admin.from("projects").select("id").eq("organization_id", organizationId);
+      if (prError) throw new Error(`Database read failed: ${prError.message}`);
       projectIds = (pr || []).map((p: any) => p.id);
-      const { data: bens } = await admin
+      const { data: bens, error: bensError } = await admin
         .from("beneficiaries")
         .select("id")
         .eq("organization_id", organizationId)
         .is("deleted_at", null);
+      if (bensError) throw new Error(`Database read failed: ${bensError.message}`);
       beneficiaryIds = (bens || []).map((b: any) => b.id);
     } else {
       return ok({ error: "unknown mode" });
@@ -108,11 +115,12 @@ serve(async (req) => {
     }
 
     // Fetch all rules for the target projects
-    const { data: rules } = await admin
+    const { data: rules, error: rulesError } = await admin
       .from("project_eligibility_rules")
       .select("*")
       .eq("organization_id", organizationId)
       .in("project_id", projectIds);
+    if (rulesError) throw new Error(`Database read failed: ${rulesError.message}`);
     const rulesByProject = new Map<string, any[]>();
     for (const r of rules || []) {
       if (!rulesByProject.has(r.project_id)) rulesByProject.set(r.project_id, []);
@@ -120,18 +128,20 @@ serve(async (req) => {
     }
 
     // Fetch beneficiaries
-    const { data: bens } = await admin
+    const { data: bens, error: bensError } = await admin
       .from("beneficiaries")
       .select("*")
       .in("id", beneficiaryIds);
+    if (bensError) throw new Error(`Database read failed: ${bensError.message}`);
     const benById = new Map<string, any>((bens || []).map((b: any) => [b.id, b]));
 
     // Fetch baselines for these beneficiaries+projects so 'baseline.<key>' sources work
-    const { data: baselines } = await admin
+    const { data: baselines, error: baselinesError } = await admin
       .from("beneficiary_baselines")
       .select("beneficiary_id, project_id, indicator_key, value")
       .in("beneficiary_id", beneficiaryIds)
       .in("project_id", projectIds);
+    if (baselinesError) throw new Error(`Database read failed: ${baselinesError.message}`);
     const baselineByKey = new Map<string, Map<string, any>>();
     for (const b of baselines || []) {
       const k = `${b.beneficiary_id}:${b.project_id}`;

@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
@@ -255,7 +256,7 @@ export function useReorderFormFields() {
     mutationFn: async ({ formId, ordered }: { formId: string; ordered: { id: string; display_order: number }[] }) => {
       // Sequential updates — list is small
       for (const o of ordered) {
-        await sb.from("me_form_fields").update({ display_order: o.display_order }).eq("id", o.id);
+        await mustWrite("Reordering form fields", sb.from("me_form_fields").update({ display_order: o.display_order }).eq("id", o.id));
       }
       return { formId };
     },

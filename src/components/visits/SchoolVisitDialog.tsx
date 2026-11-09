@@ -48,13 +48,13 @@ export function SchoolVisitDialog({ open, onOpenChange, beneficiaryId, onSaved }
       if (photo && navigator.onLine) {
         try {
           const blob = await compressImage(photo);
-          const path = `${beneficiaryId}/school-visit/${Date.now()}.jpg`;
+          const path = `${currentOrganization.organization_id}/${beneficiaryId}/school-visit/${Date.now()}.jpg`;
           const { error } = await supabase.storage.from("beneficiary-documents").upload(path, blob);
-          if (!error) {
-            const { data } = supabase.storage.from("beneficiary-documents").getPublicUrl(path);
-            photoUrl = data.publicUrl;
-          }
-        } catch { /* ignore */ }
+          if (error) throw error;
+          photoUrl = path; // private bucket: store the object path, read via signed URL
+        } catch (photoErr: any) {
+          toast.error(`Photo was not saved: ${photoErr?.message ?? "upload failed"}`);
+        }
       }
 
       const payload: any = {

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { ORG_LOGO_EXT, orgLogoRejection } from "@/lib/orgLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useBranding } from "@/hooks/useBranding";
@@ -42,12 +43,12 @@ export function BrandingSettings() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !orgId) return;
-    if (file.size > 2 * 1024 * 1024) { toast.error("File too large — max 2MB"); return; }
+    const rejection = orgLogoRejection(file);
+    if (rejection) { toast.error(rejection); return; }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${orgId}/logo.${ext}`;
-      const { error: upErr } = await supabase.storage.from("org-logos").upload(path, file, { upsert: true });
+      const path = `${orgId}/logo.${ORG_LOGO_EXT[file.type.toLowerCase()]}`;
+      const { error: upErr } = await supabase.storage.from("org-logos").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data: urlData } = supabase.storage.from("org-logos").getPublicUrl(path);
       setPreviewLogo(urlData.publicUrl);

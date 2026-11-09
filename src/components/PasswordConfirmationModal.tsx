@@ -43,7 +43,8 @@ export function PasswordConfirmationModal({
     try {
       // Verify the admin's password by attempting a dummy sign-in
       // This is a secure way to verify password without storing it
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       if (!user.user?.email) {
         throw new Error('Unable to verify identity');
       }

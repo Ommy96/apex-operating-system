@@ -106,7 +106,8 @@ export function useCreateSponsorRelationship() {
     }) => {
       const orgId = currentOrganization?.organization_id;
       if (!orgId) throw new Error('No organization context');
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       const { data, error } = await sb
         .from('sponsor_relationships')
         .insert({
@@ -177,7 +178,8 @@ export function useEndSponsorship() {
       const orgId = currentOrganization?.organization_id;
       const { relationship, mode, reason, toBeneficiaryId } = args;
       const today = new Date().toISOString().slice(0, 10);
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
       if (mode === 'transfer' && !toBeneficiaryId) {
         throw new Error('Choose the beneficiary to transfer this sponsor to');

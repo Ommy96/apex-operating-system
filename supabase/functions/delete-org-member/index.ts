@@ -61,19 +61,21 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify caller is admin in the org or super admin
-    const { data: membership } = await adminClient
+    const { data: membership, error: membershipError } = await adminClient
       .from("organization_members")
       .select("role")
       .eq("user_id", callerId)
       .eq("organization_id", organization_id)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
 
     const isCallerOrgAdmin = membership?.role === "admin";
 
-    const { data: isSuperAdmin } = await adminClient.rpc("has_role", {
+    const { data: isSuperAdmin, error: isSuperAdminError } = await adminClient.rpc("has_role", {
       _user_id: callerId,
       _role: "admin",
     });
+    if (isSuperAdminError) throw new Error(`Database read failed: ${isSuperAdminError.message}`);
 
     if (!isCallerOrgAdmin && !isSuperAdmin) {
       return new Response(JSON.stringify({ error: "Only organization admins can remove members" }), {
@@ -83,24 +85,33 @@ Deno.serve(async (req) => {
     }
 
     // 1. Delete from organization_members
-    await adminClient
+    {
+      const { error: writeError } = await adminClient
       .from("organization_members")
       .delete()
       .eq("user_id", user_id)
       .eq("organization_id", organization_id);
+      if (writeError) throw new Error(`delete organization_members failed: ${writeError.message}`);
+    }
 
     // 2. Delete from rbac_user_role_assignments
-    await adminClient
+    {
+      const { error: writeError } = await adminClient
       .from("rbac_user_role_assignments")
       .delete()
       .eq("user_id", user_id)
       .eq("organization_id", organization_id);
+      if (writeError) throw new Error(`delete rbac_user_role_assignments failed: ${writeError.message}`);
+    }
 
     // 3. Clear profile org reference
-    await adminClient
+    {
+      const { error: writeError } = await adminClient
       .from("profiles")
       .update({ organization_id: null })
       .eq("user_id", user_id);
+      if (writeError) throw new Error(`update profiles failed: ${writeError.message}`);
+    }
 
     // 4. Delete the auth user entirely
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user_id);

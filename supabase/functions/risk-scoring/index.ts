@@ -34,16 +34,18 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claims } = await userClient.auth.getClaims(token);
+    const { data: claims, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError) throw new Error(`Database read failed: ${claimsError.message}`);
     if (!claims?.claims?.sub) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const userId = claims.claims.sub as string;
     const admin = createClient(supabaseUrl, serviceKey);
 
-    const { data: membership } = await admin
+    const { data: membership, error: membershipError } = await admin
       .from("organization_members").select("user_id")
       .eq("organization_id", organizationId).eq("user_id", userId).maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
     if (!membership) {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -131,23 +133,30 @@ serve(async (req) => {
 
       // Upsert latest row (one per beneficiary, dated today)
       const today = new Date().toISOString().slice(0, 10);
-      const { data: existing } = await admin
+      const { data: existing, error: existingError } = await admin
         .from("beneficiary_risk_scores")
         .select("id")
         .eq("beneficiary_id", b.id)
         .eq("organization_id", organizationId)
         .eq("assessment_date", today)
         .maybeSingle();
+      if (existingError) throw new Error(`Database read failed: ${existingError.message}`);
 
       if (existing?.id) {
-        await admin.from("beneficiary_risk_scores").update({
+        {
+          const { error: writeError } = await admin.from("beneficiary_risk_scores").update({
           risk_flags: flags, overall_risk_level: overall, assessed_by: userId, updated_at: new Date().toISOString(),
         }).eq("id", existing.id);
+          if (writeError) throw new Error(`update beneficiary_risk_scores failed: ${writeError.message}`);
+        }
       } else {
-        await admin.from("beneficiary_risk_scores").insert({
+        {
+          const { error: writeError } = await admin.from("beneficiary_risk_scores").insert({
           beneficiary_id: b.id, organization_id: organizationId,
           assessment_date: today, risk_flags: flags, overall_risk_level: overall, assessed_by: userId,
         });
+          if (writeError) throw new Error(`insert beneficiary_risk_scores failed: ${writeError.message}`);
+        }
       }
       updated++;
     }

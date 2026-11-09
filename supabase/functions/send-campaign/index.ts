@@ -51,7 +51,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Update status to sending
-    await supabaseAdmin.from("campaigns").update({ status: "sending" }).eq("id", campaign_id);
+    {
+      const { error: writeError } = await supabaseAdmin.from("campaigns").update({ status: "sending" }).eq("id", campaign_id);
+      if (writeError) throw new Error(`update campaigns failed: ${writeError.message}`);
+    }
 
     // Get recipients
     const { data: recipients, error: recipError } = await supabaseAdmin
@@ -92,13 +95,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Update campaign
-    await supabaseAdmin.from("campaigns").update({
+    {
+      const { error: writeError } = await supabaseAdmin.from("campaigns").update({
       status: failedCount === (recipients?.length || 0) ? "failed" : "sent",
       sent_at: new Date().toISOString(),
       sent_count: sentCount,
       failed_count: failedCount,
       delivered_count: sentCount,
     }).eq("id", campaign_id);
+      if (writeError) throw new Error(`update campaigns failed: ${writeError.message}`);
+    }
 
     // Per-recipient delivery is recorded in message_deliveries (status, attempts, errors).
 

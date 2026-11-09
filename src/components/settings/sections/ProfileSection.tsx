@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ORG_LOGO_EXT, orgLogoRejection } from "@/lib/orgLogo";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -172,15 +173,15 @@ export function ProfileSection() {
   const uploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !orgId) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: 'File too large', description: 'Max 2MB', variant: 'destructive' });
+    const rejection = orgLogoRejection(file);
+    if (rejection) {
+      toast({ title: 'Logo not accepted', description: rejection, variant: 'destructive' });
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${orgId}/logo.${ext}`;
-      const { error } = await supabase.storage.from('org-logos').upload(path, file, { upsert: true });
+      const path = `${orgId}/logo.${ORG_LOGO_EXT[file.type.toLowerCase()]}`;
+      const { error } = await supabase.storage.from('org-logos').upload(path, file, { upsert: true, contentType: file.type });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('org-logos').getPublicUrl(path);
       form.setField('logo_url', urlData.publicUrl);

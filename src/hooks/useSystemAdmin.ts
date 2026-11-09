@@ -283,10 +283,11 @@ export function useAllUsers() {
 
       const usersWithOrgs = await Promise.all(
         (profiles || []).map(async (profile) => {
-          const { data: memberships } = await supabase
+          const { data: memberships, error: membershipsError } = await supabase
             .from('organization_members')
             .select('organization_id, organizations:organization_id(id, name)')
             .eq('user_id', profile.user_id);
+          if (membershipsError) { toast.error(`Could not load memberships: ${membershipsError.message}`); throw membershipsError; }
 
           return {
             id: profile.user_id,

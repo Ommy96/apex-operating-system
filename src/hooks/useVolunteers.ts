@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -97,10 +98,11 @@ export function useVolunteers() {
         action: {
           label: "Undo",
           onClick: async () => {
-            await supabase
+            const undoResult = await softWrite("Undo", supabase
               .from("volunteers")
               .update({ is_deleted: false, deleted_at: null } as any)
-              .eq("id", id);
+              .eq("id", id));
+            if (undoResult.error) return;
             queryClient.invalidateQueries({ queryKey: ["volunteers"] });
             toast.success("Volunteer restored");
           },

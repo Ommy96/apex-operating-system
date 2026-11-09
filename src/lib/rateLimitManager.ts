@@ -15,7 +15,8 @@ export class RateLimitManager {
     windowMinutes: number = 60
   ): Promise<RateLimitResult> {
     try {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       if (!user.user) {
         throw new Error('User not authenticated');
       }

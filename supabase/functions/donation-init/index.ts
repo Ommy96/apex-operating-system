@@ -128,10 +128,13 @@ Deno.serve(async (req) => {
     });
     const stkData = await stkRes.json();
 
-    await admin.from("donations").update({
+    {
+      const { error: writeError } = await admin.from("donations").update({
       provider_reference: stkData.CheckoutRequestID || stkData.MerchantRequestID || null,
       metadata: { stk_response: stkData },
     }).eq("id", donation.id);
+      if (writeError) throw new Error(`update donations failed: ${writeError.message}`);
+    }
 
     if (stkData.ResponseCode === "0") {
       return respond({ success: true, donation_id: donation.id, message: "Check your phone and enter your M-Pesa PIN to complete the donation." });

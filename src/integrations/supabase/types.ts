@@ -18808,6 +18808,7 @@ export type Database = {
         Args: { _beneficiary_id: string }
         Returns: boolean
       }
+      is_org_admin_for_path: { Args: { _org_folder: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       list_org_staff: {
         Args: { _org_id: string }

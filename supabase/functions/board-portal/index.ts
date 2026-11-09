@@ -53,55 +53,60 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case "get_reports": {
-        const { data } = await adminClient
+        const { data, error: queryError } = await adminClient
           .from("board_reports")
           .select("*")
           .eq("organization_id", orgId)
           .in("status", ["published", "in_review", "approved"])
           .order("created_at", { ascending: false });
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         result = data;
         break;
       }
 
       case "get_report_sections": {
-        const { data } = await adminClient
+        const { data, error: queryError } = await adminClient
           .from("board_report_sections")
           .select("*")
           .eq("report_id", params.report_id)
           .eq("organization_id", orgId)
           .order("sort_order");
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         result = data;
         break;
       }
 
       case "get_comments": {
-        const { data } = await adminClient
+        const { data, error: queryError } = await adminClient
           .from("board_report_comments")
           .select("*")
           .eq("report_id", params.report_id)
           .eq("organization_id", orgId)
           .order("created_at", { ascending: true });
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         result = data;
         break;
       }
 
       case "get_approvals": {
-        const { data } = await adminClient
+        const { data, error: queryError } = await adminClient
           .from("board_report_approvals")
           .select("*, board_members(full_name)")
           .eq("report_id", params.report_id)
           .eq("organization_id", orgId);
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         result = data;
         break;
       }
 
       case "get_action_items": {
-        const { data } = await adminClient
+        const { data, error: queryError } = await adminClient
           .from("board_action_items")
           .select("*, board_members(full_name)")
           .eq("report_id", params.report_id)
           .eq("organization_id", orgId)
           .order("created_at");
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         result = data;
         break;
       }

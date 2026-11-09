@@ -100,22 +100,28 @@ Deno.serve(async (req) => {
 
     if (b2cData.ResponseCode === "0") {
       // Update transfer status
-      await adminClient.from("cash_transfers").update({
+      {
+        const { error: writeError } = await adminClient.from("cash_transfers").update({
         status: "processing",
         mpesa_transaction_id: b2cData.ConversationID || b2cData.OriginatorConversationID,
       }).eq("id", transferId);
+        if (writeError) throw new Error(`update cash_transfers failed: ${writeError.message}`);
+      }
 
       return new Response(
         JSON.stringify({ success: true, conversationId: b2cData.ConversationID }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      await adminClient.from("cash_transfers").update({
+      {
+        const { error: writeError } = await adminClient.from("cash_transfers").update({
         status: "failed",
         failure_reason: b2cData.ResponseDescription || "Unknown error",
         mpesa_result_code: b2cData.ResponseCode,
         mpesa_result_desc: b2cData.ResponseDescription,
       }).eq("id", transferId);
+        if (writeError) throw new Error(`update cash_transfers failed: ${writeError.message}`);
+      }
 
       return new Response(
         JSON.stringify({ error: b2cData.ResponseDescription }),

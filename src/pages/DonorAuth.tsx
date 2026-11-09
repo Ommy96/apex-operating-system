@@ -48,13 +48,14 @@ export default function DonorAuth() {
       if (signInError) throw signInError;
 
       // Verify this user is a donor
-      const { data: donorAccount } = await supabase
+      const { data: donorAccount, error: donorAccountError } = await supabase
         .from('donor_accounts')
         .select('id')
         .eq('email', data.email)
         .eq('is_active', true)
         .limit(1)
         .maybeSingle();
+      if (donorAccountError) throw donorAccountError;
 
       if (!donorAccount) {
         await supabase.auth.signOut();

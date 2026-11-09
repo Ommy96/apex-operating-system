@@ -56,12 +56,13 @@ serve(async (req) => {
     // Use service role to verify sender belongs to org and is admin
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: membership } = await adminClient
+    const { data: membership, error: membershipError } = await adminClient
       .from("organization_members")
       .select("role")
       .eq("user_id", senderId)
       .eq("organization_id", organization_id)
       .single();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
 
     if (!membership || !["admin", "management"].includes(membership.role)) {
       return new Response(
@@ -71,18 +72,20 @@ serve(async (req) => {
     }
 
     // Get sender profile
-    const { data: senderProfile } = await adminClient
+    const { data: senderProfile, error: senderProfileError } = await adminClient
       .from("profiles")
       .select("full_name, email")
       .eq("user_id", senderId)
       .single();
+    if (senderProfileError) throw new Error(`Database read failed: ${senderProfileError.message}`);
 
     // Get org name
-    const { data: org } = await adminClient
+    const { data: org, error: orgError } = await adminClient
       .from("organizations")
       .select("name")
       .eq("id", organization_id)
       .single();
+    if (orgError) throw new Error(`Database read failed: ${orgError.message}`);
 
     const orgName = org?.name || "Your Organization";
     const senderName = senderProfile?.full_name || "Admin";
@@ -112,7 +115,8 @@ serve(async (req) => {
     }
 
     // Log the communication in stakeholder_messages
-    await adminClient.from("stakeholder_messages").insert({
+    {
+      const { error: writeError } = await adminClient.from("stakeholder_messages").insert({
       organization_id,
       sender_id: senderId,
       channel: "email",
@@ -123,6 +127,8 @@ serve(async (req) => {
       subject,
       body,
     });
+      if (writeError) throw new Error(`insert stakeholder_messages failed: ${writeError.message}`);
+    }
 
     return new Response(JSON.stringify(results), {
       status: 200,

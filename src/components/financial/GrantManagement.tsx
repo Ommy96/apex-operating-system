@@ -21,6 +21,7 @@ import { format, differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { openSignedFile } from "@/lib/secureDocuments";
 import { BurnRateGauge } from "@/components/finance/BurnRateGauge";
 import { GrantFinancialReport } from "@/components/reports/GrantFinancialReport";
 import { DonorProgressReport } from "@/components/reports/DonorProgressReport";
@@ -120,15 +121,14 @@ export function GrantManagement() {
   const handleUploadDoc = async () => {
     if (!detailGrantId || !docFile || !orgId) return;
     try {
-      const filePath = `grants/${detailGrantId}/${Date.now()}_${docFile.name}`;
+      const filePath = `${orgId}/grants/${detailGrantId}/${Date.now()}_${docFile.name.replace(/[^a-zA-Z0-9._-]+/g, "-")}`;
       const { error: uploadErr } = await supabase.storage.from("documents").upload(filePath, docFile);
       if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
       createGrantDocument.mutate({
         grant_id: detailGrantId,
         document_name: docForm.document_name || docFile.name,
         document_type: docForm.document_type,
-        file_url: urlData.publicUrl,
+        file_url: filePath, // private bucket: object path, read via signed URL
         file_size: docFile.size,
         description: docForm.description || null,
       }, {
@@ -562,7 +562,7 @@ export function GrantManagement() {
                       <TableCell className="text-sm text-muted-foreground">{format(new Date(doc.created_at), "dd MMM yyyy")}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="h-4 w-4" /></a></Button>
+                          <Button variant="ghost" size="icon" aria-label="View document" onClick={async () => { const err = await openSignedFile("documents", doc.file_url, "view"); if (err) toast.error(err); }}><Eye className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => deleteGrantDocument.mutate(doc.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                         </div>
                       </TableCell>

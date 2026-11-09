@@ -42,7 +42,7 @@ export function toStoragePath(fileUrl: string, bucket: string): string | null {
 export async function createSignedDocumentUrl(
   bucket: string,
   fileUrl: string,
-  opts?: { download?: string; expiresIn?: number }
+  opts?: { download?: string | boolean; expiresIn?: number }
 ): Promise<{ url: string | null; error: string | null }> {
   const path = toStoragePath(fileUrl, bucket);
   if (!path) {
@@ -93,4 +93,32 @@ export function previewKind(name: string, mime?: string | null): PreviewKind {
     return "image";
   if (mime === "application/pdf" || lower.endsWith(".pdf")) return "pdf";
   return "other";
+}
+export const SIGNED_VIEW_TTL_SECONDS = 60;
+export const SIGNED_DOWNLOAD_TTL_SECONDS = 300;
+
+/**
+ * Generate a signed URL on click (never up front for lists) and open it.
+ * Returns an error message for the caller to toast, or null on success.
+ */
+export async function openSignedFile(
+  bucket: string,
+  fileRef: string,
+  mode: "view" | "download" = "view",
+  downloadName?: string,
+): Promise<string | null> {
+  // Open the tab synchronously so pop-up blockers keep the user gesture.
+  const win = window.open("", "_blank");
+  if (win) win.opener = null;
+  const { url, error } = await createSignedDocumentUrl(bucket, fileRef, {
+    expiresIn: mode === "download" ? SIGNED_DOWNLOAD_TTL_SECONDS : SIGNED_VIEW_TTL_SECONDS,
+    download: mode === "download" ? downloadName || true : undefined,
+  });
+  if (error || !url) {
+    win?.close();
+    return error || "Could not open the file";
+  }
+  if (win) win.location.href = url;
+  else window.location.assign(url);
+  return null;
 }

@@ -23,7 +23,8 @@ export function useSetLifecycleStage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (c: LifecycleChange) => {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       const legacyStatus =
         c.stage === 'active' ? 'active'
         : c.stage === 'alumni' ? 'graduated'

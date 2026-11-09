@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -175,12 +176,12 @@ export function OrganizationManagement() {
         } as any).eq('id', selectedOrg.id);
         if (error) throw error;
 
-        await supabase.from('partner_access_log' as any).insert({
+        await mustWrite("Recording partner access log", supabase.from('partner_access_log' as any).insert({
           organization_id: selectedOrg.id,
           action: 'granted',
           performed_by: user.id,
           notes: partnerNotes || 'Partner access granted',
-        });
+        }));
 
         toast.success(`Partner access granted to ${selectedOrg.name}. They now have full access to all features.`);
       } else {
@@ -190,12 +191,12 @@ export function OrganizationManagement() {
         } as any).eq('id', selectedOrg.id);
         if (error) throw error;
 
-        await supabase.from('partner_access_log' as any).insert({
+        await mustWrite("Recording partner access log", supabase.from('partner_access_log' as any).insert({
           organization_id: selectedOrg.id,
           action: 'revoked',
           performed_by: user.id,
           notes: partnerNotes || 'Partner access revoked',
-        });
+        }));
 
         toast.success(`Partner access revoked from ${selectedOrg.name}.`);
       }

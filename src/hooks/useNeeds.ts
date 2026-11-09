@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -151,7 +152,7 @@ export function useReturnNeedToAuto() {
         .eq('id', p.id);
       if (error) throw error;
       // Trigger on the update fires recompute automatically, but call RPC as belt-and-braces.
-      await supabase.rpc('recompute_need_status' as any, { p_beneficiary_id: p.beneficiary_id });
+      await mustWrite("Recomputing need status", supabase.rpc('recompute_need_status' as any, { p_beneficiary_id: p.beneficiary_id }));
     },
     onSuccess: (_, v) => qc.invalidateQueries({ queryKey: ['beneficiary-needs', v.beneficiary_id] }),
   });

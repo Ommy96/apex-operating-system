@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,7 +96,7 @@ export default function MECalendar() {
       const nextDue = new Date();
       const freq = selectedEvent.collection_frequency;
       nextDue.setDate(nextDue.getDate() + (freq === "monthly" ? 30 : freq === "quarterly" ? 90 : freq === "biannual" ? 180 : 365));
-      await supabase.from("me_data_schedule").update({ last_collected_at: now.toISOString(), next_due_date: format(nextDue, "yyyy-MM-dd") }).eq("id", selectedEvent.id);
+      await mustWrite("Updating collection schedule", supabase.from("me_data_schedule").update({ last_collected_at: now.toISOString(), next_due_date: format(nextDue, "yyyy-MM-dd") }).eq("id", selectedEvent.id));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me-schedules"] });

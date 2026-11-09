@@ -179,28 +179,37 @@ const handler = async (req: Request): Promise<Response> => {
         if (failures.length === sub.recipients.length) throw new Error(failures.join("; "));
 
         const next = nextSendDate(sub.frequency);
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from("analytics_report_subscriptions")
           .update({ last_sent_at: new Date().toISOString(), next_send_at: next })
           .eq("id", sub.id);
+          if (writeError) throw new Error(`update analytics_report_subscriptions failed: ${writeError.message}`);
+        }
 
-        await supabase.from("analytics_report_runs").insert({
+        {
+          const { error: writeError } = await supabase.from("analytics_report_runs").insert({
           subscription_id: sub.id,
           organization_id: sub.organization_id,
           status: "sent",
           recipients_count: sub.recipients.length,
         });
+          if (writeError) throw new Error(`insert analytics_report_runs failed: ${writeError.message}`);
+        }
 
         results.push({ id: sub.id, status: "sent", recipients: sub.recipients.length });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        await supabase.from("analytics_report_runs").insert({
+        {
+          const { error: writeError } = await supabase.from("analytics_report_runs").insert({
           subscription_id: sub.id,
           organization_id: sub.organization_id,
           status: "failed",
           recipients_count: sub.recipients.length,
           error_message: message,
         });
+          if (writeError) throw new Error(`insert analytics_report_runs failed: ${writeError.message}`);
+        }
         results.push({ id: sub.id, status: "failed", recipients: sub.recipients.length, error: message });
       }
     }

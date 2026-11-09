@@ -31,12 +31,13 @@ Deno.serve(async (req) => {
     const transactionId = result.TransactionID || "";
 
     // Find the matching transfer
-    const { data: transfers } = await supabase
+    const { data: transfers, error: transfersError } = await supabase
       .from("cash_transfers")
       .select("id, org_id")
       .or(`mpesa_transaction_id.eq.${conversationId},mpesa_transaction_id.eq.${result.OriginatorConversationID}`)
       .eq("status", "processing")
       .limit(1);
+    if (transfersError) throw new Error(`Database read failed: ${transfersError.message}`);
 
     const transfer = transfers?.[0];
     if (!transfer) {
@@ -46,7 +47,8 @@ Deno.serve(async (req) => {
 
     const isSuccess = resultCode === "0";
 
-    await supabase.from("cash_transfers").update({
+    {
+      const { error: writeError } = await supabase.from("cash_transfers").update({
       status: isSuccess ? "completed" : "failed",
       mpesa_result_code: resultCode,
       mpesa_result_desc: resultDesc,
@@ -54,14 +56,19 @@ Deno.serve(async (req) => {
       completed_at: isSuccess ? new Date().toISOString() : null,
       failure_reason: isSuccess ? null : resultDesc,
     }).eq("id", transfer.id);
+      if (writeError) throw new Error(`update cash_transfers failed: ${writeError.message}`);
+    }
 
     // Audit log
-    await supabase.from("audit_logs").insert({
+    {
+      const { error: writeError } = await supabase.from("audit_logs").insert({
       event_type: isSuccess ? "mpesa_transfer_completed" : "mpesa_transfer_failed",
       entity_type: "cash_transfers",
       entity_id: transfer.id,
       metadata: { resultCode, resultDesc, transactionId, conversationId },
     });
+      if (writeError) throw new Error(`insert audit_logs failed: ${writeError.message}`);
+    }
 
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
@@ -33,7 +34,7 @@ async function writeAudit(args: {
   reverted?: boolean;
 }) {
   try {
-    await supabase.from('audit_logs').insert({
+    await softWrite("Audit log", supabase.from('audit_logs').insert({
       event_type: args.reverted ? 'beneficiary_field_reverted' : 'beneficiary_field_updated',
       entity_type: 'beneficiary',
       entity_id: args.beneficiaryId,
@@ -41,7 +42,7 @@ async function writeAudit(args: {
       old_values: { [args.field]: args.oldValue ?? null } as any,
       new_values: { [args.field]: args.newValue ?? null } as any,
       metadata: { field: args.field, source: 'inline_edit', organization_id: args.organizationId } as any,
-    } as any);
+    } as any));
   } catch (e) {
     logger.warn('audit log insert failed', e);
   }

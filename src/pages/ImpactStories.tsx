@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, BookHeart, Image as ImageIcon, ShieldAlert, CheckCircle2, Send, Globe } from "lucide-react";
 import { toast } from "sonner";
+import { openSignedFile } from "@/lib/secureDocuments";
 
 const THEMES = ["education", "health", "livelihoods", "WASH", "protection", "other"];
 const STAGES = [
@@ -114,11 +115,10 @@ export default function ImpactStories() {
       }
       const photoUrls: string[] = [];
       for (const photo of photos) {
-        const path = `${orgId}/${Date.now()}_${photo.name}`;
+        const path = `${orgId}/${Date.now()}_${photo.name.replace(/[^a-zA-Z0-9._-]+/g, "-")}`;
         const { error } = await supabase.storage.from("impact-stories").upload(path, photo);
         if (error) throw error;
-        const { data: urlData } = supabase.storage.from("impact-stories").getPublicUrl(path);
-        photoUrls.push(urlData.publicUrl);
+        photoUrls.push(path); // private bucket: store object path, read via signed URL on click
       }
       const linkedProject: any = projects.find((p: any) => p.id === form.project_id);
       const { error } = await supabase.from("impact_stories").insert({
@@ -299,9 +299,17 @@ export default function ImpactStories() {
             return (
               <Card key={story.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 {story.photo_urls?.[0] ? (
-                  <div className="h-40 bg-muted overflow-hidden">
-                    <img src={story.photo_urls[0]} alt={story.title} loading="lazy" className="w-full h-full object-cover" />
-                  </div>
+                  <button
+                    type="button"
+                    className="h-32 w-full bg-muted/30 flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground hover:bg-muted/50"
+                    onClick={async () => {
+                      const err = await openSignedFile("impact-stories", story.photo_urls[0], "view");
+                      if (err) toast.error(err);
+                    }}
+                  >
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                    View photo{story.photo_urls.length > 1 ? ` (1 of ${story.photo_urls.length})` : ""}
+                  </button>
                 ) : (
                   <div className="h-32 bg-muted/30 flex items-center justify-center">
                     <ImageIcon className="h-8 w-8 text-muted-foreground/30" />

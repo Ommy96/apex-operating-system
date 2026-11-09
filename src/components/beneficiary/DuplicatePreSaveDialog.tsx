@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -89,7 +90,7 @@ export function DuplicatePreSaveDialog({
       // this pair so the same warning won't keep firing for an in-progress draft.
       // We can't insert a duplicate_candidates row without a real beneficiary id
       // (the constraint requires both ids to exist), so we audit-log instead.
-      await supabase.from('audit_logs').insert({
+      await softWrite("Audit log", supabase.from('audit_logs').insert({
         event_type: 'duplicate_marked_distinct_at_intake',
         entity_type: 'beneficiary',
         entity_id: existingId,
@@ -98,7 +99,7 @@ export function DuplicatePreSaveDialog({
           existing_id: existingId,
           new_record: newBeneficiarySnapshot,
         },
-      });
+      }));
       toast({ title: 'Marked as different person' });
     } catch (e) {
       // non-fatal

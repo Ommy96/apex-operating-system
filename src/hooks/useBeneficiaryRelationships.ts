@@ -63,7 +63,8 @@ export function useAddRelationship() {
     mutationFn: async ({ beneficiaryAId, beneficiaryBId, relationshipType, householdId }: AddRelationshipInput) => {
       if (!orgId) throw new Error('No organization');
       const inverse = INVERSE_RELATIONSHIPS[relationshipType];
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData, error: userDataError } = await supabase.auth.getUser();
+      if (userDataError) throw userDataError;
       const created_by = userData?.user?.id ?? null;
 
       const { error } = await supabase.from('beneficiary_relationships' as any).insert([

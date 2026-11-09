@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { openSignedFile } from "@/lib/secureDocuments";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,9 +94,10 @@ export function ConsentVaultSection({ beneficiaryId, householdId }: Props) {
                 </div>
               </div>
               {d.file_url && (
-                <Button size="sm" variant="ghost" asChild>
-                  <a href={d.file_url} target="_blank" rel="noreferrer"><Download className="h-4 w-4" /></a>
-                </Button>
+                <Button size="sm" variant="ghost" aria-label="Download consent document" onClick={async () => {
+                  const err = await openSignedFile("beneficiary-documents", d.file_url, "download", d.file_name || undefined);
+                  if (err) toast.error(err);
+                }}><Download className="h-4 w-4" /></Button>
               )}
               <Button size="sm" variant="ghost" onClick={() => remove.mutate(d.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
@@ -130,11 +132,11 @@ function UploadDialog({ open, onOpenChange, beneficiaryId, householdId, onDone }
       let file_url: string | null = null;
       let file_name: string | null = null;
       if (file) {
-        const path = `${beneficiaryId || householdId}/consent/${Date.now()}_${file.name}`;
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+        const path = `${orgId}/${beneficiaryId || householdId}/consent/${Date.now()}_${safeName}`;
         const { error: upErr } = await supabase.storage.from("beneficiary-documents").upload(path, file);
         if (upErr) throw upErr;
-        const { data } = supabase.storage.from("beneficiary-documents").getPublicUrl(path);
-        file_url = data.publicUrl;
+        file_url = path; // private bucket: store the object path, read via signed URL
         file_name = file.name;
       }
       const { error } = await (supabase as any).from("consent_documents").insert({

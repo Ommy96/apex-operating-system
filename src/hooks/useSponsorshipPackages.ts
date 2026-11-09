@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -170,6 +171,6 @@ export async function syncPackageCostFromItems(packageId: string) {
     .select("cost")
     .eq("package_id", packageId);
   const total = (items || []).reduce((s: number, i: any) => s + Number(i.cost || 0), 0);
-  await sb.from("sponsorship_packages").update({ monthly_cost: total }).eq("id", packageId);
+  await mustWrite("Updating package cost", sb.from("sponsorship_packages").update({ monthly_cost: total }).eq("id", packageId));
   return total;
 }

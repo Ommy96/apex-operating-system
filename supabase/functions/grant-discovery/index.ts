@@ -38,7 +38,8 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claims } = await userClient.auth.getClaims(token);
+    const { data: claims, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError) throw new Error(`Database read failed: ${claimsError.message}`);
     if (!claims?.claims?.sub) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 200,
@@ -50,12 +51,13 @@ serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceKey);
 
     // Tenant guard
-    const { data: membership } = await admin
+    const { data: membership, error: membershipError } = await admin
       .from("organization_members")
       .select("user_id")
       .eq("organization_id", organizationId)
       .eq("user_id", userId)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
     if (!membership) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 200,

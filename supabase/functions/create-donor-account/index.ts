@@ -51,17 +51,19 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify caller belongs to the org (or is super admin)
-    const { data: membership } = await adminClient
+    const { data: membership, error: membershipError } = await adminClient
       .from("organization_members")
       .select("role")
       .eq("user_id", callerUser.id)
       .eq("organization_id", organization_id)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
 
-    const { data: isSuperAdmin } = await adminClient.rpc("has_role", {
+    const { data: isSuperAdmin, error: isSuperAdminError } = await adminClient.rpc("has_role", {
       _user_id: callerUser.id,
       _role: "admin",
     });
+    if (isSuperAdminError) throw new Error(`Database read failed: ${isSuperAdminError.message}`);
 
     if (!membership && !isSuperAdmin) {
       return new Response(JSON.stringify({ error: "You don't have access to this organization" }), {

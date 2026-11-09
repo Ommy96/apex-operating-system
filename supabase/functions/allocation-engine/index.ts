@@ -32,21 +32,23 @@ async function getFxRate(
   if (f === t) return { rate: 1, at: new Date().toISOString() };
 
   // Try direct
-  const { data: direct } = await supabase
+  const { data: direct, error: directError } = await supabase
     .from("currency_rates")
     .select("rate, fetched_at")
     .eq("base_currency", f)
     .eq("target_currency", t)
     .maybeSingle();
+  if (directError) throw new Error(`Database read failed: ${directError.message}`);
   if (direct?.rate) return { rate: Number(direct.rate), at: direct.fetched_at ?? new Date().toISOString() };
 
   // Try inverse
-  const { data: inverse } = await supabase
+  const { data: inverse, error: inverseError } = await supabase
     .from("currency_rates")
     .select("rate, fetched_at")
     .eq("base_currency", t)
     .eq("target_currency", f)
     .maybeSingle();
+  if (inverseError) throw new Error(`Database read failed: ${inverseError.message}`);
   if (inverse?.rate && Number(inverse.rate) > 0) {
     return { rate: 1 / Number(inverse.rate), at: inverse.fetched_at ?? new Date().toISOString() };
   }
@@ -54,12 +56,13 @@ async function getFxRate(
   // Last resort: trigger a refresh, then retry once
   try {
     await supabase.functions.invoke("fetch-exchange-rates");
-    const { data: retry } = await supabase
+    const { data: retry, error: retryError } = await supabase
       .from("currency_rates")
       .select("rate, fetched_at")
       .eq("base_currency", f)
       .eq("target_currency", t)
       .maybeSingle();
+    if (retryError) throw new Error(`Database read failed: ${retryError.message}`);
     if (retry?.rate) return { rate: Number(retry.rate), at: retry.fetched_at ?? new Date().toISOString() };
   } catch (_) { /* ignore */ }
 
@@ -69,11 +72,12 @@ async function getFxRate(
 }
 
 async function getBaseCurrency(supabase: SupabaseClient, orgId: string): Promise<string> {
-  const { data } = await supabase
+  const { data, error: queryError } = await supabase
     .from("organizations")
     .select("settings")
     .eq("id", orgId)
     .maybeSingle();
+  if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
   const s = (data?.settings ?? {}) as Record<string, unknown>;
   return ((s.base_currency as string) || "KES").toUpperCase();
 }
@@ -157,11 +161,12 @@ async function decrementPool(
   native: number,
   base: number,
 ) {
-  const { data: cur } = await supabase
+  const { data: cur, error: curError } = await supabase
     .from("donor_pools")
     .select("balance_native, balance_base")
     .eq("id", poolId)
     .single();
+  if (curError) throw new Error(`Database read failed: ${curError.message}`);
   if (!cur) return;
   const { error } = await supabase
     .from("donor_pools")
@@ -193,7 +198,7 @@ async function itemiseByPackage(
   // 1) Locate the sponsorship (beneficiary_donors) with a package.
   //    donor_account_id link is not on beneficiary_donors, so we match by
   //    beneficiary_id and prefer records with a package attached.
-  const { data: sponsorships } = await supabase
+  const { data: sponsorships, error: sponsorshipsError } = await supabase
     .from("beneficiary_donors")
     .select("id, sponsorship_package_id, created_at")
     .eq("organization_id", args.organization_id)
@@ -201,14 +206,16 @@ async function itemiseByPackage(
     .not("sponsorship_package_id", "is", null)
     .order("created_at", { ascending: false })
     .limit(1);
+  if (sponsorshipsError) throw new Error(`Database read failed: ${sponsorshipsError.message}`);
   const sponsorship = sponsorships?.[0];
   if (!sponsorship?.sponsorship_package_id) return; // no package: nothing to itemise
 
-  const { data: items } = await supabase
+  const { data: items, error: itemsError } = await supabase
     .from("sponsorship_package_items")
     .select("id, item_label, item_type, cost, need_type_id")
     .eq("package_id", sponsorship.sponsorship_package_id)
     .order("sort_order", { ascending: true });
+  if (itemsError) throw new Error(`Database read failed: ${itemsError.message}`);
   if (!items || items.length === 0) return;
 
   const totalCost = items.reduce((s, i) => s + Number(i.cost || 0), 0);
@@ -238,20 +245,22 @@ async function itemiseByPackage(
   const needIds = Array.from(new Set(items.map((i) => i.need_type_id).filter(Boolean))) as string[];
   if (needIds.length === 0) return;
 
-  const { data: existingNeeds } = await supabase
+  const { data: existingNeeds, error: existingNeedsError } = await supabase
     .from("beneficiary_needs")
     .select("id, need_type_id, estimated_cost, status")
     .eq("organization_id", args.organization_id)
     .eq("beneficiary_id", args.beneficiary_id)
     .in("need_type_id", needIds);
+  if (existingNeedsError) throw new Error(`Database read failed: ${existingNeedsError.message}`);
 
   // Aggregate all historical line items for this beneficiary+need_type
-  const { data: history } = await supabase
+  const { data: history, error: historyError } = await supabase
     .from("allocation_line_items")
     .select("need_type_id, amount_base")
     .eq("organization_id", args.organization_id)
     .eq("beneficiary_id", args.beneficiary_id)
     .in("need_type_id", needIds);
+  if (historyError) throw new Error(`Database read failed: ${historyError.message}`);
   const totalByNeed = new Map<string, number>();
   (history ?? []).forEach((h: any) => {
     if (!h.need_type_id) return;
@@ -265,10 +274,13 @@ async function itemiseByPackage(
     if (est > 0 && funded >= est) newStatus = "met";
     else if (funded > 0) newStatus = "partially_met";
     if (newStatus !== bn.status) {
-      await supabase
+      {
+        const { error: writeError } = await supabase
         .from("beneficiary_needs")
         .update({ status: newStatus, met_by_sponsorship_id: sponsorship.id })
         .eq("id", bn.id);
+        if (writeError) throw new Error(`update beneficiary_needs failed: ${writeError.message}`);
+      }
     }
   }
 }
@@ -299,11 +311,12 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
   // Intent — defaults to unrestricted
   let intent: any = null;
   if (donation.donation_intent_id) {
-    const { data } = await supabase
+    const { data, error: queryError } = await supabase
       .from("donation_intents")
       .select("*")
       .eq("id", donation.donation_intent_id)
       .maybeSingle();
+    if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
     intent = data;
   }
   const kind: string = intent?.kind ?? "unrestricted";
@@ -390,20 +403,22 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     }
   } else if (scope === "project_pool") {
     // Rank active enrolled beneficiaries in the project; allocate until pool empty
-    const { data: enrolled } = await supabase
+    const { data: enrolled, error: enrolledError } = await supabase
       .from("beneficiary_services")
       .select("beneficiary_id, created_at")
       .eq("organization_id", orgId)
       .eq("project_id", scopeProj!)
       .eq("status", "active")
       .order("created_at", { ascending: true });
+    if (enrolledError) throw new Error(`Database read failed: ${enrolledError.message}`);
 
     // Per-beneficiary cap from project metadata (optional)
-    const { data: proj } = await supabase
+    const { data: proj, error: projError } = await supabase
       .from("projects")
       .select("id, program_id")
       .eq("id", scopeProj!)
       .maybeSingle();
+    if (projError) throw new Error(`Database read failed: ${projError.message}`);
     const perBenCap: number | null = null; // unlimited by default
 
     // Rank by eligibility_score DESC (primary), then risk DESC (tiebreaker).
@@ -477,11 +492,12 @@ async function allocateDonation(supabase: SupabaseClient, donationId: string, ac
     // program_unrestricted: held in pool, no auto-distribution
   }
 
-  const { data: poolAfter } = await supabase
+  const { data: poolAfter, error: poolAfterError } = await supabase
     .from("donor_pools")
     .select("id, balance_native, balance_base, currency")
     .eq("id", pool!.id)
     .single();
+  if (poolAfterError) throw new Error(`Database read failed: ${poolAfterError.message}`);
 
   return json(200, {
     success: true,
@@ -572,25 +588,30 @@ async function exitBeneficiary(
       if (uErr) throw uErr;
       afterStatus = "held";
       // Re-credit the donor pool that originated this allocation
-      const { data: cur } = await supabase
+      const { data: cur, error: curError } = await supabase
         .from("donor_pools")
         .select("balance_native, balance_base")
         .eq("id", a.donor_pool_id)
         .single();
+      if (curError) throw new Error(`Database read failed: ${curError.message}`);
       if (cur) {
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from("donor_pools")
           .update({
             balance_native: Number(cur.balance_native) + Number(a.amount_native),
             balance_base: Number(cur.balance_base) + Number(a.amount_base),
           })
           .eq("id", a.donor_pool_id);
+          if (writeError) throw new Error(`update donor_pools failed: ${writeError.message}`);
+        }
       }
     }
 
     // Log the override
     if (actorId) {
-      await supabase.from("allocation_overrides").insert({
+      {
+        const { error: writeError } = await supabase.from("allocation_overrides").insert({
         organization_id: a.organization_id,
         allocation_id: a.id,
         overridden_by: actorId,
@@ -600,6 +621,8 @@ async function exitBeneficiary(
         before_beneficiary_id: beforeBen,
         after_beneficiary_id: afterBen,
       });
+        if (writeError) throw new Error(`insert allocation_overrides failed: ${writeError.message}`);
+      }
     }
 
     results.push({ allocation_id: a.id, after_status: afterStatus, child_allocation: childAllocation });
@@ -706,7 +729,8 @@ async function topUpProject(
 
   // 4) Log override for audit trail
   if (actorId) {
-    await supabase.from("allocation_overrides").insert({
+    {
+      const { error: writeError } = await supabase.from("allocation_overrides").insert({
       organization_id: src.organization_id,
       allocation_id: alloc.id,
       overridden_by: actorId,
@@ -716,6 +740,8 @@ async function topUpProject(
       before_beneficiary_id: null,
       after_beneficiary_id: null,
     });
+      if (writeError) throw new Error(`insert allocation_overrides failed: ${writeError.message}`);
+    }
   }
 
   return json(200, { success: true, allocation: alloc, destinationPoolId: dest!.id });
@@ -735,7 +761,8 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       try {
-        const { data } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+        const { data, error: queryError } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+        if (queryError) throw new Error(`Database read failed: ${queryError.message}`);
         actorId = data?.user?.id ?? null;
       } catch (_) { /* anonymous / service call */ }
     }

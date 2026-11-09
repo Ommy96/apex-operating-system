@@ -44,21 +44,23 @@ Deno.serve(async (req) => {
       if (!reminderType) continue;
 
       // Check for duplicate
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("grant_reminder_logs")
         .select("id")
         .eq("grant_report_id", report.id)
         .eq("reminder_type", reminderType)
         .limit(1);
+      if (existingError) throw new Error(`Database read failed: ${existingError.message}`);
 
       if (existing && existing.length > 0) continue;
 
       // Get org admins and program managers
-      const { data: members } = await supabase
+      const { data: members, error: membersError } = await supabase
         .from("organization_members")
         .select("user_id, profiles(email, full_name)")
         .eq("organization_id", report.organization_id)
         .in("role", ["admin", "program_manager"]);
+      if (membersError) throw new Error(`Database read failed: ${membersError.message}`);
 
       const emails = (members || [])
         .map((m: any) => m.profiles?.email)
@@ -90,15 +92,19 @@ Deno.serve(async (req) => {
       if (!anySent) continue; // nothing actually sent: do not log, so the next run retries
 
       // Log reminder
-      await supabase.from("grant_reminder_logs").insert({
+      {
+        const { error: writeError } = await supabase.from("grant_reminder_logs").insert({
         grant_report_id: report.id,
         reminder_type: reminderType,
         sent_to: emails,
         channel: "email",
       });
+        if (writeError) throw new Error(`insert grant_reminder_logs failed: ${writeError.message}`);
+      }
 
       // In-app notification (to alert_instances)
-      await supabase.from("alert_instances").insert({
+      {
+        const { error: writeError } = await supabase.from("alert_instances").insert({
         organization_id: report.organization_id,
         title: `Grant report ${daysLabel}`,
         message: `Report "${report.title}" for ${grantName} is ${daysLabel}. Due: ${new Date(report.due_date).toLocaleDateString('en-KE')}`,
@@ -107,6 +113,8 @@ Deno.serve(async (req) => {
         related_entity_type: "grant_reports",
         related_entity_id: report.id,
       });
+        if (writeError) throw new Error(`insert alert_instances failed: ${writeError.message}`);
+      }
 
       sentCount++;
     }

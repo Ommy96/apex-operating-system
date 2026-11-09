@@ -35,8 +35,9 @@ Deno.serve(async (req) => {
     if (accountError) throw accountError;
     if (!account || (body.donor_account_id && body.donor_account_id !== account.id)) throw new Error("Forbidden");
     const donorAccountId = account.id;
-    const { data: donor } = await supabase.from("donor_accounts")
+    const { data: donor, error: donorError } = await supabase.from("donor_accounts")
       .select("id, donor_name").eq("id", donorAccountId).maybeSingle();
+    if (donorError) throw new Error(`Database read failed: ${donorError.message}`);
 
     let q = supabase.from("allocations")
       .select("id, scope, amount_base, base_currency, amount_native, native_currency, fx_rate, fx_at, fx_snapshot, allocated_at, beneficiary_id, project_id, program_id, donor_pool_id")

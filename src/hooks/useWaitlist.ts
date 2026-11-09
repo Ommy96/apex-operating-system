@@ -1,3 +1,4 @@
+import { mustWrite, softWrite } from "@/lib/checkedWrite";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -106,7 +107,7 @@ export function useUpsertWaitlist() {
 
       if (needs) {
         // Replace-set the needs (simple + predictable for the form)
-        await sb.from("waitlist_application_needs").delete().eq("application_id", data.id);
+        await mustWrite("Replacing waiting-list needs", sb.from("waitlist_application_needs").delete().eq("application_id", data.id));
         if (needs.length > 0) {
           const rows = needs.map((n) => ({
             organization_id: orgId,
@@ -387,7 +388,7 @@ export function useMatchAndEnroll() {
           .single();
         if (eErr) {
           if (createdBeneficiary) {
-            await sb.from("beneficiaries").delete().eq("id", beneficiaryId);
+            await softWrite("Rolling back new beneficiary", sb.from("beneficiaries").delete().eq("id", beneficiaryId));
           }
           throw new Error(`Failed to enroll into project: ${eErr.message}`);
         }

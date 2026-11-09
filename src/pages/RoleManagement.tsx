@@ -182,10 +182,11 @@ export default function RoleManagement() {
       if (insertErr) throw insertErr;
 
       // Copy permissions
-      const { data: perms } = await supabase
+      const { data: perms, error: permsError } = await supabase
         .from('rbac_role_permissions')
         .select('permission_id')
         .eq('role_id', sourceRole.id);
+      if (permsError) throw permsError;
 
       if (perms && perms.length > 0) {
         const { error: permErr } = await supabase

@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { logger } from '@/lib/logger';
 import { DEFAULT_NEED_PRIORITY } from "@/lib/needPriority";
 import { FAMILY_STATUS, FAMILY_DETAIL_FIELDS, normaliseFamilyStatus, familyStatusOptions, hasHiddenFamilyDetails } from '@/lib/familyStatus';
@@ -821,8 +822,9 @@ export function BeneficiaryForm({
         // Audit care_arrangement change on edit
         if (form.care_arrangement && normaliseCareArrangement(beneficiary.care_arrangement) !== form.care_arrangement) {
           try {
-            const { data: u } = await supabase.auth.getUser();
-            await supabase.from('audit_logs').insert({
+            const { data: u, error: uError } = await supabase.auth.getUser();
+            if (uError) throw uError;
+            await softWrite("Audit log", supabase.from('audit_logs').insert({
               event_type: 'change_care_arrangement',
               entity_type: 'beneficiary',
               entity_id: beneficiary.id,
@@ -830,23 +832,25 @@ export function BeneficiaryForm({
               old_values: { care_arrangement: beneficiary.care_arrangement ?? null } as any,
               new_values: { care_arrangement: form.care_arrangement } as any,
               metadata: { organization_id: orgId } as any,
-            } as any);
-          } catch (e) { logger.warn('audit log failed', e); }
+            } as any));
+          } catch (e) { logger.warn('audit log failed', e); toast({ title: 'Audit log not recorded', description: (e as any)?.message ?? 'unknown error', variant: 'destructive' }); }
           // Responsibility changes retain all guardian links and primary contacts.
         }
       } else {
         // Generate unique_id via RPC
         try {
-          const { data: idData } = await supabase.rpc(
+          const { data: idData, error: idDataError } = await supabase.rpc(
             'generate_beneficiary_unique_id' as any,
             { _org_id: orgId },
           );
+          if (idDataError) throw idDataError;
           if (idData && typeof idData === 'string') {
             payload.unique_id = idData;
             uniqueId = idData;
           }
         } catch (e) {
           logger.warn('Could not generate unique_id', e);
+          toast({ title: 'Could not generate a beneficiary code', description: `${(e as any)?.message ?? 'unknown error'} — the record will get a code from the database default.`, variant: 'destructive' });
         }
         const { data, error } = await supabase
           .from('beneficiaries')

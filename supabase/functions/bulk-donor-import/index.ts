@@ -106,11 +106,12 @@ Deno.serve(async (req) => {
 
     // Program mapping
     const programMap: Record<string, string> = {};
-    const { data: programs } = await supabase
+    const { data: programs, error: programsError } = await supabase
       .from("programs")
       .select("id, name")
       .eq("organization_id", org_id)
       .eq("is_active", true);
+    if (programsError) throw new Error(`Database read failed: ${programsError.message}`);
 
     if (programs) {
       for (const p of programs) {
@@ -119,10 +120,11 @@ Deno.serve(async (req) => {
     }
 
     // Get all existing beneficiaries
-    const { data: existingBeneficiaries } = await supabase
+    const { data: existingBeneficiaries, error: existingBeneficiariesError } = await supabase
       .from("beneficiaries")
       .select("id, display_name, first_name, last_name")
       .eq("organization_id", org_id);
+    if (existingBeneficiariesError) throw new Error(`Database read failed: ${existingBeneficiariesError.message}`);
 
     // Build lookup: normalize names for matching
     const normalize = (s: string) =>
@@ -142,11 +144,12 @@ Deno.serve(async (req) => {
     }
 
     // Get existing donor records to avoid duplicates
-    const { data: existingDonors } = await supabase
+    const { data: existingDonors, error: existingDonorsError } = await supabase
       .from("beneficiary_donors")
       .select("id, beneficiary_id, program_id, donor_name")
       .eq("organization_id", org_id)
       .eq("donor_name", donor_name);
+    if (existingDonorsError) throw new Error(`Database read failed: ${existingDonorsError.message}`);
 
     const existingDonorSet = new Set(
       (existingDonors || []).map((d) => `${d.beneficiary_id}_${d.program_id}`)

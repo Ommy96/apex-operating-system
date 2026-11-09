@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -30,7 +30,7 @@ export function UserRoleAssignment() {
   const [selectedRoleId, setSelectedRoleId] = useState('');
 
   // Fetch members with their RBAC roles
-  const { data: members = [], isLoading: membersLoading } = useQuery({
+  const { data: members = [], isLoading: membersLoading, error: membersError } = useQuery({
     queryKey: ['rbac-members', orgId],
     queryFn: async () => {
       if (!orgId) return [];
@@ -44,23 +44,26 @@ export function UserRoleAssignment() {
 
       // Get profiles
       const userIds = orgMembers.map(m => m.user_id);
-      const { data: profiles } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, full_name, email')
         .in('user_id', userIds);
+      if (profilesError) throw profilesError;
 
       // Get RBAC assignments
-      const { data: assignments } = await supabase
+      const { data: assignments, error: assignmentsError } = await supabase
         .from('rbac_user_role_assignments')
         .select('id, user_id, role_id')
         .eq('organization_id', orgId)
         .eq('is_active', true);
+      if (assignmentsError) throw assignmentsError;
 
       // Get roles for display
-      const { data: roles } = await supabase
+      const { data: roles, error: rolesError } = await supabase
         .from('rbac_roles')
         .select('id, name, display_name, color')
         .or(`is_system_role.eq.true,organization_id.eq.${orgId}`);
+      if (rolesError) throw rolesError;
 
       const roleMap = new Map(roles?.map(r => [r.id, r]) || []);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -92,6 +95,9 @@ export function UserRoleAssignment() {
     },
     enabled: !!orgId,
   });
+  useEffect(() => {
+    if (membersError) toast({ title: 'Could not load members and roles', description: (membersError as Error).message, variant: 'destructive' });
+  }, [membersError]);
 
   // Available roles
   const { data: availableRoles = [] } = useQuery({

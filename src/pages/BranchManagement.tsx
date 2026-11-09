@@ -27,7 +27,8 @@ function BranchDetail({ branch, onBack }: { branch: any; onBack: () => void }) {
   const { data: staff = [] } = useQuery({
     queryKey: ["branch-staff", branch.id, orgId],
     queryFn: async () => {
-      const { data } = await supabase.from("organization_members").select("*").eq("organization_id", orgId!).eq("branch_id", branch.id);
+      const { data, error: dataError } = await supabase.from("organization_members").select("*").eq("organization_id", orgId!).eq("branch_id", branch.id);
+      if (dataError) { toast.error(`Could not load branch staff: ${dataError.message}`); throw dataError; }
       return data || [];
     },
     enabled: !!orgId,

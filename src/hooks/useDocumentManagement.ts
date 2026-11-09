@@ -1,3 +1,4 @@
+import { mustWrite, softWrite } from "@/lib/checkedWrite";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,13 +100,13 @@ export function useDocumentManagement() {
   // Log access
   const logAccess = async (documentId: string, action: string, metadata?: any) => {
     if (!orgId || !user) return;
-    await supabase.from("document_access_logs").insert({
+    await softWrite("Document access log", supabase.from("document_access_logs").insert({
       document_id: documentId,
       organization_id: orgId,
       user_id: user.id,
       action,
       metadata: metadata || {},
-    });
+    }));
   };
 
   // Upload file to storage
@@ -173,7 +174,7 @@ export function useDocumentManagement() {
       if (docError) throw docError;
 
       // Create version 1
-      await supabase.from("document_versions").insert({
+      await mustWrite("Creating document version", supabase.from("document_versions").insert({
         document_id: doc.id,
         version_number: 1,
         file_url: filePath,
@@ -182,7 +183,7 @@ export function useDocumentManagement() {
         file_type: file.type,
         change_notes: "Initial upload",
         uploaded_by: user.id,
-      });
+      }));
 
       await logAccess(doc.id, "created");
       return doc;
@@ -220,7 +221,7 @@ export function useDocumentManagement() {
       await uploadFile(file, filePath);
 
       // Create version record
-      await supabase.from("document_versions").insert({
+      await mustWrite("Creating document version", supabase.from("document_versions").insert({
         document_id: documentId,
         version_number: newVersion,
         file_url: filePath,
@@ -229,10 +230,10 @@ export function useDocumentManagement() {
         file_type: file.type,
         change_notes: changeNotes || null,
         uploaded_by: user.id,
-      });
+      }));
 
       // Update document
-      await supabase
+      await mustWrite("Updating document", supabase
         .from("managed_documents")
         .update({
           current_version: newVersion,
@@ -242,7 +243,7 @@ export function useDocumentManagement() {
           current_file_type: file.type,
           updated_by: user.id,
         })
-        .eq("id", documentId);
+        .eq("id", documentId));
 
       await logAccess(documentId, "new_version", { version: newVersion });
     },

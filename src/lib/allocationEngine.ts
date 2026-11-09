@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { supabase } from "@/integrations/supabase/client";
 
 export type AllocationScope = "direct_beneficiary" | "project_pool" | "program_unrestricted";
@@ -70,7 +71,8 @@ export async function redirectAllocation(args: {
     .maybeSingle();
   if (aErr || !a) return { success: false, error: aErr?.message ?? "not_found" };
 
-  const { data: user } = await supabase.auth.getUser();
+  const { data: user, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
 
   // Mark redirected
   const { error: uErr } = await supabase
@@ -106,7 +108,7 @@ export async function redirectAllocation(args: {
   if (cErr) return { success: false, error: cErr.message };
 
   if (user?.user?.id) {
-    await supabase.from("allocation_overrides").insert({
+    await mustWrite("Recording allocation override", supabase.from("allocation_overrides").insert({
       organization_id: a.organization_id,
       allocation_id: a.id,
       overridden_by: user.user.id,
@@ -115,7 +117,7 @@ export async function redirectAllocation(args: {
       after_status: "redirected",
       before_beneficiary_id: a.beneficiary_id,
       after_beneficiary_id: args.newBeneficiaryId,
-    });
+    }));
   }
 
   return { success: true, child };

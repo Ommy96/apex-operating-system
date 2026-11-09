@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -71,12 +72,12 @@ export function HouseholdSuggestionAlert({ beneficiary, onDismiss }: HouseholdSu
   const dismiss = async (matchId: string) => {
     if (!orgId || !user?.id) return;
     setDismissed((prev) => new Set(prev).add(matchId));
-    await supabase.from('dismissed_household_suggestions' as any).insert({
+    await softWrite("Saving dismissed suggestion", supabase.from('dismissed_household_suggestions' as any).insert({
       organization_id: orgId,
       user_id: user.id,
       beneficiary_a_id: beneficiary.id,
       beneficiary_b_id: matchId,
-    } as any);
+    } as any));
   };
 
   const visibleMatches = matches.filter((m) => !dismissed.has(m.id));

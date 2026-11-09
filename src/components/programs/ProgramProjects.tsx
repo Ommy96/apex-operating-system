@@ -140,7 +140,8 @@ export function ProgramProjects({ programId }: ProgramProjectsProps) {
   const handleArchive = async () => {
     if (!archiveProject) return;
     try {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData, error: userDataError } = await supabase.auth.getUser();
+      if (userDataError) throw userDataError;
       const { error } = await supabase
         .from('projects')
         .update({ is_archived: true, archived_at: new Date().toISOString(), archived_by: userData?.user?.id ?? null })

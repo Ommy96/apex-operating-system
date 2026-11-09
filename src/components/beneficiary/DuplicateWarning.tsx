@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,12 +49,12 @@ export function DuplicateWarning({ firstName, lastName, dateOfBirth, phone, nati
   const handleDismiss = async () => {
     setDismissed(true);
     // Log to audit
-    await supabase.from('audit_logs').insert({
+    await softWrite("Audit log", supabase.from('audit_logs').insert({
       event_type: 'deduplication_dismissed',
       entity_type: 'beneficiary',
       user_id: user?.id,
       metadata: { new_name: `${firstName} ${lastName}`, matched_ids: duplicates.map((d: any) => d.id) },
-    });
+    }));
   };
 
   return (

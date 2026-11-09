@@ -1,3 +1,4 @@
+import { softWrite } from "@/lib/checkedWrite";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -56,13 +57,13 @@ export function HomeVisitDialog({ open, onOpenChange, beneficiaryId, householdId
       if (photo && navigator.onLine) {
         try {
           const blob = await compressImage(photo);
-          const path = `${beneficiaryId}/home-visit/${Date.now()}.jpg`;
+          const path = `${currentOrganization.organization_id}/${beneficiaryId}/home-visit/${Date.now()}.jpg`;
           const { error: upErr } = await supabase.storage.from("beneficiary-documents").upload(path, blob);
-          if (!upErr) {
-            const { data } = supabase.storage.from("beneficiary-documents").getPublicUrl(path);
-            photoUrl = data.publicUrl;
-          }
-        } catch { /* ignore */ }
+          if (upErr) throw upErr;
+          photoUrl = path; // private bucket: store the object path, read via signed URL
+        } catch (photoErr: any) {
+          toast.error(`Photo was not saved: ${photoErr?.message ?? "upload failed"}`);
+        }
       }
 
       const risk_flags: string[] = [];
@@ -95,7 +96,7 @@ export function HomeVisitDialog({ open, onOpenChange, beneficiaryId, householdId
 
         // Also write a beneficiary_visitations timeline entry
         try {
-          await supabase.from("beneficiary_visitations").insert({
+          await softWrite("Adding visit to timeline", supabase.from("beneficiary_visitations").insert({
             beneficiary_id: beneficiaryId,
             visit_type: "home_visit",
             visit_date: form.visit_date,
@@ -104,7 +105,7 @@ export function HomeVisitDialog({ open, onOpenChange, beneficiaryId, householdId
             location: gps ? `${gps.latitude},${gps.longitude}` : null,
             organization_id: currentOrganization.organization_id,
             created_by: user?.id,
-          });
+          }));
         } catch { /* non-fatal */ }
 
         toast.success("Home visit recorded");

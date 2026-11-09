@@ -91,13 +91,14 @@ Deno.serve(async (req) => {
       const detected: { kind: string; severity: "info" | "warning" | "critical"; detail: any }[] = [];
 
       // === Burn rate ===
-      const { data: allocations } = await supabase
+      const { data: allocations, error: allocationsError } = await supabase
         .from("allocations")
         .select("amount_base, base_currency, status, allocated_at")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
         .gte("allocated_at", startISO)
         .lte("allocated_at", endISO);
+      if (allocationsError) throw new Error(`Database read failed: ${allocationsError.message}`);
 
       const allocatedBase = (allocations || []).reduce(
         (s, a: any) => s + Number(a.amount_base ?? 0),
@@ -127,13 +128,14 @@ Deno.serve(async (req) => {
       }
 
       // === Report overdue ===
-      const { data: overdueReports } = await supabase
+      const { data: overdueReports, error: overdueReportsError } = await supabase
         .from("project_report_drafts")
         .select("id, period_end, submitted_at, status")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
         .is("submitted_at", null)
         .lt("period_end", fourteenDaysAgo);
+      if (overdueReportsError) throw new Error(`Database read failed: ${overdueReportsError.message}`);
       if ((overdueReports || []).length) {
         detected.push({
           kind: "report_overdue",
@@ -148,13 +150,14 @@ Deno.serve(async (req) => {
       }
 
       // === Allocations on hold > 14 days ===
-      const { data: heldAllocs } = await supabase
+      const { data: heldAllocs, error: heldAllocsError } = await supabase
         .from("allocations")
         .select("id, allocated_at, amount_base")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
         .eq("status", "held")
         .lte("allocated_at", fourteenDaysAgo);
+      if (heldAllocsError) throw new Error(`Database read failed: ${heldAllocsError.message}`);
       if ((heldAllocs || []).length) {
         detected.push({
           kind: "allocations_on_hold",
@@ -200,12 +203,13 @@ Deno.serve(async (req) => {
       }
 
       // === Attendance drop > 20% in 30 days (activity_participants.attended) ===
-      const { data: actsRecent } = await supabase
+      const { data: actsRecent, error: actsRecentError } = await supabase
         .from("activities")
         .select("id, completed_at, scheduled_at")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
         .gte("scheduled_at", sixtyDaysAgo);
+      if (actsRecentError) throw new Error(`Database read failed: ${actsRecentError.message}`);
       const recentActIds = (actsRecent || [])
         .filter((a: any) => a.scheduled_at >= thirtyDaysAgo)
         .map((a: any) => a.id);
@@ -214,10 +218,11 @@ Deno.serve(async (req) => {
         .map((a: any) => a.id);
       async function attRate(ids: string[]) {
         if (!ids.length) return null;
-        const { data: parts } = await supabase
+        const { data: parts, error: partsError } = await supabase
           .from("activity_participants")
           .select("attended")
           .in("activity_id", ids);
+        if (partsError) throw new Error(`Database read failed: ${partsError.message}`);
         const total = (parts || []).length;
         if (!total) return null;
         const att = (parts || []).filter((p: any) => p.attended).length;
@@ -269,7 +274,7 @@ Deno.serve(async (req) => {
       }
 
       // === Impact velocity from latest project report draft in this period ===
-      const { data: reportRows } = await supabase
+      const { data: reportRows, error: reportRowsError } = await supabase
         .from("project_report_drafts")
         .select("quantitative, period_start, period_end")
         .eq("organization_id", orgId)
@@ -278,6 +283,7 @@ Deno.serve(async (req) => {
         .gte("period_end", startISO)
         .order("generated_at", { ascending: false })
         .limit(1);
+      if (reportRowsError) throw new Error(`Database read failed: ${reportRowsError.message}`);
       let actual = 0;
       let planned = 0;
       const q: any = (reportRows && reportRows[0]?.quantitative) || {};
@@ -324,24 +330,28 @@ Deno.serve(async (req) => {
       if (!upErr) snapshotsWritten++;
 
       // === Persist flags (idempotent: skip if same kind already open) ===
-      const { data: openFlags } = await supabase
+      const { data: openFlags, error: openFlagsError } = await supabase
         .from("project_anomaly_flags")
         .select("id, kind")
         .eq("organization_id", orgId)
         .eq("project_id", projectId)
         .is("resolved_at", null);
+      if (openFlagsError) throw new Error(`Database read failed: ${openFlagsError.message}`);
       const openKinds = new Set((openFlags || []).map((f: any) => f.kind));
       const detectedKinds = new Set(detected.map((d) => d.kind));
 
       for (const f of detected) {
         if (openKinds.has(f.kind)) {
-          await supabase
+          {
+            const { error: writeError } = await supabase
             .from("project_anomaly_flags")
             .update({ detail: f.detail, severity: f.severity, detected_at: now.toISOString() })
             .eq("organization_id", orgId)
             .eq("project_id", projectId)
             .eq("kind", f.kind)
             .is("resolved_at", null);
+            if (writeError) throw new Error(`update project_anomaly_flags failed: ${writeError.message}`);
+          }
         } else {
           const { error: insErr } = await supabase
             .from("project_anomaly_flags")
@@ -358,7 +368,8 @@ Deno.serve(async (req) => {
       // Auto-resolve flags whose condition cleared
       for (const k of openKinds) {
         if (!detectedKinds.has(k as string)) {
-          await supabase
+          {
+            const { error: writeError } = await supabase
             .from("project_anomaly_flags")
             .update({
               resolved_at: now.toISOString(),
@@ -368,6 +379,8 @@ Deno.serve(async (req) => {
             .eq("project_id", projectId)
             .eq("kind", k)
             .is("resolved_at", null);
+            if (writeError) throw new Error(`update project_anomaly_flags failed: ${writeError.message}`);
+          }
           flagsResolved++;
         }
       }

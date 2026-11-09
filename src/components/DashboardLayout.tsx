@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { ReactNode, useEffect, useState } from "react";
 import { WorkspaceLayout } from "@/components/workspace";
 import { useBranding } from "@/hooks/useBranding";
@@ -71,7 +72,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const dismissAnnouncement = useMutation({
     mutationFn: async (announcementId: string) => {
       if (!user) return;
-      await supabase.from('platform_announcement_reads').insert({ announcement_id: announcementId, user_id: user.id });
+      await mustWrite("Marking announcement read", supabase.from('platform_announcement_reads').insert({ announcement_id: announcementId, user_id: user.id }));
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['platform-announcements'] }),
   });

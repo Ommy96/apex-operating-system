@@ -1,3 +1,4 @@
+import { mustWrite } from "@/lib/checkedWrite";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -99,13 +100,13 @@ export function useBoardReporting() {
         { section_type: "recommendations", title: "Recommendations & Next Steps", sort_order: 5 },
       ];
 
-      await supabase.from("board_report_sections").insert(
+      await mustWrite("Creating report sections", supabase.from("board_report_sections").insert(
         defaultSections.map((s) => ({
           ...s,
           report_id: data.id,
           organization_id: orgId!,
         }))
-      );
+      ));
 
       return data;
     },

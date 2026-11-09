@@ -42,14 +42,16 @@ Deno.serve(async (req) => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: `"${email}" is not a valid email address` });
 
     // Caller must belong to the organization (org-scoped)
-    const { data: membership } = await admin
+    const { data: membership, error: membershipError } = await admin
       .from("organization_members")
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organization_id)
       .maybeSingle();
+    if (membershipError) throw new Error(`Database read failed: ${membershipError.message}`);
 
-    const { data: isSuperAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+    const { data: isSuperAdmin, error: isSuperAdminError } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+    if (isSuperAdminError) throw new Error(`Database read failed: ${isSuperAdminError.message}`);
     if (!membership && !isSuperAdmin) return json({ error: "You do not have access to this organization" });
 
     if (!resendKey) {
@@ -90,10 +92,12 @@ Deno.serve(async (req) => {
     }
 
     // Inviter + org display info
-    const { data: profile } = await admin
+    const { data: profile, error: profileError } = await admin
       .from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
-    const { data: org } = await admin
+    if (profileError) throw new Error(`Database read failed: ${profileError.message}`);
+    const { data: org, error: orgError } = await admin
       .from("organizations").select("name").eq("id", organization_id).maybeSingle();
+    if (orgError) throw new Error(`Database read failed: ${orgError.message}`);
 
     const inviterName = profile?.full_name || profile?.email || "A colleague";
     const orgName = org?.name || organization_name || "your organization";
@@ -122,20 +126,26 @@ Deno.serve(async (req) => {
     if (sendError) {
       const reason = (sendError as any)?.message || "Unknown email provider error";
       console.error("send-invitation resend error:", JSON.stringify(sendError));
-      await admin.from("organization_invitations").update({
+      {
+        const { error: writeError } = await admin.from("organization_invitations").update({
         delivery_status: "failed",
         delivery_error: reason,
         send_attempts: (invitation.send_attempts ?? 0) + 1,
       }).eq("id", invitation.id);
+        if (writeError) throw new Error(`update organization_invitations failed: ${writeError.message}`);
+      }
       return json({ error: `Email could not be delivered: ${reason}`, invitation_id: invitation.id });
     }
 
-    await admin.from("organization_invitations").update({
+    {
+      const { error: writeError } = await admin.from("organization_invitations").update({
       delivery_status: "sent",
       delivery_error: null,
       last_sent_at: new Date().toISOString(),
       send_attempts: (invitation.send_attempts ?? 0) + 1,
     }).eq("id", invitation.id);
+      if (writeError) throw new Error(`update organization_invitations failed: ${writeError.message}`);
+    }
 
     console.log("Invitation email sent", { to: invitation.email, id: (sent as any)?.id });
 

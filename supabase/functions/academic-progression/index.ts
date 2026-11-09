@@ -64,12 +64,13 @@ Deno.serve(async (req) => {
       }
 
       // Check if already progressed this year
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('beneficiary_progression_history')
         .select('id')
         .eq('beneficiary_id', student.id)
         .eq('academic_year', currentYear)
-        .limit(1)
+        .limit(1);
+      if (existingError) throw new Error(`Database read failed: ${existingError.message}`);
 
       if (existing && existing.length > 0) {
         skippedCount++
@@ -84,12 +85,16 @@ Deno.serve(async (req) => {
 
       if (progression === 'graduated') {
         // Graduate the student
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from('beneficiaries')
           .update({ status: 'graduated' })
-          .eq('id', student.id)
+          .eq('id', student.id);
+          if (writeError) throw new Error(`update beneficiaries failed: ${writeError.message}`);
+        }
 
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from('beneficiary_progression_history')
           .insert({
             beneficiary_id: student.id,
@@ -101,20 +106,26 @@ Deno.serve(async (req) => {
             new_grade: 'Graduated',
             progression_type: 'automatic',
             notes: 'Automatically graduated after completing final year',
-          })
+          });
+          if (writeError) throw new Error(`insert beneficiary_progression_history failed: ${writeError.message}`);
+        }
 
         graduatedCount++
       } else {
         // Progress to next grade
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from('beneficiaries')
           .update({
             grade: progression.nextGrade,
             academic_level: progression.nextLevel,
           })
-          .eq('id', student.id)
+          .eq('id', student.id);
+          if (writeError) throw new Error(`update beneficiaries failed: ${writeError.message}`);
+        }
 
-        await supabase
+        {
+          const { error: writeError } = await supabase
           .from('beneficiary_progression_history')
           .insert({
             beneficiary_id: student.id,
@@ -125,7 +136,9 @@ Deno.serve(async (req) => {
             new_academic_level: progression.nextLevel,
             new_grade: progression.nextGrade,
             progression_type: 'automatic',
-          })
+          });
+          if (writeError) throw new Error(`insert beneficiary_progression_history failed: ${writeError.message}`);
+        }
 
         progressedCount++
       }

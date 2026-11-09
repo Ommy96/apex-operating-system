@@ -83,7 +83,8 @@ export const DynamicProgramForm = ({
         }
       }
 
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData, error: userDataError } = await supabase.auth.getUser();
+      if (userDataError) throw userDataError;
 
       if (editingEntry) {
         const { error } = await supabase
