@@ -28,6 +28,7 @@ import { useLeadProjects } from "@/hooks/useLeadProjects";
 import { SparklineTile } from "@/components/dashboard/SparklineTile";
 import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
 import { StaggerGrid } from "@/components/motion/StaggerGrid";
+import { ManagementPulse } from "@/components/dashboard/ManagementPulse";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -533,6 +534,9 @@ const Dashboard = () => {
           deltaLabel={reportsDue > 0 ? "Action needed" : "All clear"}
         />
       </StaggerGrid>
+
+      {/* OPERATIONS PULSE + DEMOGRAPHICS */}
+      <ManagementPulse />
 
       {/* SPONSORSHIP COVERAGE SNAPSHOT */}
       <div className="mb-4">
