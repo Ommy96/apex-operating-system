@@ -18703,6 +18703,14 @@ export type Database = {
         Args: { _beneficiary: string; _donation: string }
         Returns: string
       }
+      get_donor_funded_needs: {
+        Args: { _beneficiary: string }
+        Returns: {
+          need_name: string
+          need_status: string
+          need_type_id: string
+        }[]
+      }
       get_donor_requests: {
         Args: never
         Returns: {
