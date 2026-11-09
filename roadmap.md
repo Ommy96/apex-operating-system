@@ -12,4 +12,12 @@
 - [x] Run existing test suite as evidence (132/132 pass)
 - [x] Check browser auth availability (external Supabase → signed-in tests BLOCKED)
 
-- [ ] Platform-wide UI/UX transformation (uploaded brief) — next, after sponsored profile
+- Platform-wide UI/UX transformation (uploaded brief), in phases:
+  - [x] Phase 1: management menu regrouped into brief's module map (permission-gated)
+  - [ ] Phase 2: management Overview dashboard redesign
+  - [ ] Phase 3: Tasks & Cases workspace (kanban/table/calendar)
+  - [ ] Phase 4: Data Quality + Impact dashboards
+  - [ ] Phase 5: Roles & Access (categorised permissions)
+  - [ ] Phase 6: Funding & Sponsorship (committed/received/disbursed)
+  - [ ] Phase 7: Registration wizard + beneficiary profile
+  - [ ] Phase 8: Analytics, Communications, staff/donor workspace menus

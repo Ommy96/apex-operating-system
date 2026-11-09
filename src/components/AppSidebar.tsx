@@ -321,26 +321,24 @@ export function AppSidebar() {
     },
   ];
 
+  // Management workspace — grouped to match the ApexOS module map.
+  // Every item is permission-gated; groups with no visible items are hidden.
   const fullMenuGroups: MenuGroup[] = [
     {
-      label: "Home",
+      label: "Overview",
       items: [
+        { title: "Overview", url: "/dashboard", icon: LayoutDashboard, show: true },
         { title: "My Programme", url: "/workspace/program", icon: Layers, show: isProgramManager },
         { title: "My Workspace", url: "/workspace/lead", icon: LayoutGrid, show: isProjectLead },
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, show: true },
       ],
     },
     {
       label: "People",
       items: [
         { title: termPlural, url: "/beneficiaries", icon: Users, show: can.viewBeneficiaries },
-        { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewCases },
-        { title: "Households", url: "/households", icon: Home, show: can.viewBeneficiaries },
+        { title: "Households & Groups", url: "/households", icon: Home, show: can.viewBeneficiaries },
         { title: "Waiting list", url: "/waitlist", icon: UserPlus, show: can.viewBeneficiaries },
         { title: "Alumni", url: "/alumni", icon: GraduationCap, show: can.viewBeneficiaries },
-
-        { title: "Sponsorship packages", url: "/sponsorship-packages", icon: Package, show: can.viewBeneficiaries },
-        { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
       ],
     },
     {
@@ -349,74 +347,75 @@ export function AppSidebar() {
         { title: "Programs", url: "/programs-management", icon: Target, show: can.viewPrograms, badgeCount: overdueMilestones },
         { title: "Projects", url: "/projects", icon: FolderKanban, show: can.viewPrograms },
         { title: "Activities", url: "/activities", icon: Activity, show: can.viewPrograms },
-        { title: "M&E", url: "/me", icon: Activity, show: can.viewME, badgeCount: overdueCollections },
-        { title: "Logframe & ToC", url: "/me?tab=logframe", icon: Network, show: can.viewME },
-      ],
-    },
-    {
-      label: "Intelligence",
-      items: [
-        { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
-        { title: "Grant Discovery", url: "/ai/grants", icon: Sparkles, show: true },
-        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
-        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: TrendingUp, show: can.viewAnalytics || can.viewReports || superAdmin },
-        { title: "Analytics", url: "/analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
-        { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms || can.viewBeneficiaries },
-      ],
-    },
-    {
-      label: "Funding",
-      items: [
-        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
-        { title: "Funding Intelligence", url: "/funding/intelligence", icon: TrendingUp, show: can.viewFinancials },
-        { title: "Allocation Engine", url: "/funding/allocation-engine", icon: Layers, show: can.viewFinancials },
-        { title: "Donations Inbox", url: "/funding/donations-inbox", icon: HandCoins, show: can.viewFinancials },
-      ],
-    },
-    {
-      label: "Operations",
-      items: [
-        { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
-        { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
-        { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
-        { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
-        { title: "Tasks", url: "/tasks", icon: CheckSquare, show: can.viewTasks },
-        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
-        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
         { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: can.viewBeneficiaries, featureFlag: 'field_mode' },
       ],
     },
     {
-      label: "Engagement",
+      label: "Tasks & Cases",
       items: [
-        { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
+        { title: "Tasks", url: "/tasks", icon: CheckSquare, show: can.viewTasks },
+        { title: "Cases", url: "/cases", icon: ClipboardList, show: can.viewCases },
+        { title: "Visit Requests", url: "/staff/visits", icon: CalendarCheck, show: can.viewBeneficiaries },
       ],
     },
     {
-      label: "Accountability",
+      label: "Insight & Impact",
       items: [
-        { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
-        { title: "Safeguarding", url: "/safeguarding", icon: ShieldCheck, show: can.viewSafeguarding },
-        { title: "Whistleblower", url: "/whistleblower", icon: AlertTriangle, show: superAdmin || can.viewAccountability },
+        { title: "Analytics", url: "/analytics", icon: BarChart3, show: can.viewReports || can.viewAnalytics },
+        { title: "Impact & Outcomes", url: "/me", icon: TrendingUp, show: can.viewME, badgeCount: overdueCollections },
+        { title: "Logframe & ToC", url: "/me?tab=logframe", icon: Network, show: can.viewME },
+        { title: "Data Quality", url: "/me/data-quality", icon: ShieldCheck, show: can.viewME },
+        { title: "Duplicates", url: "/deduplication", icon: Layers, show: can.viewBeneficiaries },
+        { title: "Reports", url: "/me/reports", icon: FileText, show: can.viewME },
+        { title: "Map view", url: "/map", icon: MapPin, show: can.viewPrograms || can.viewBeneficiaries },
+        { title: "AI Assistant", url: "/ai-insights", icon: BrainCircuit, show: can.viewAI, featureFlag: 'ai_insights' },
+        { title: "Risk Intelligence", url: "/risk-intelligence", icon: ShieldAlert, show: can.viewRisk },
+        { title: "Burn vs Impact", url: "/intelligence/burn-vs-impact", icon: Activity, show: can.viewAnalytics || can.viewReports || superAdmin },
+      ],
+    },
+    {
+      label: "Funding & Sponsorship",
+      items: [
+        { title: "Donors", url: "/donors", icon: HandCoins, show: can.viewDonors },
+        { title: "Sponsorship packages", url: "/sponsorship-packages", icon: Package, show: can.viewBeneficiaries },
+        { title: "Allocation Engine", url: "/funding/allocation-engine", icon: Layers, show: can.viewFinancials },
+        { title: "Donations Inbox", url: "/funding/donations-inbox", icon: HandCoins, show: can.viewFinancials },
+        { title: "Funding Intelligence", url: "/funding/intelligence", icon: TrendingUp, show: can.viewFinancials },
+        { title: "Grant Discovery", url: "/ai/grants", icon: Sparkles, show: true },
+        { title: "Financial", url: "/financial", icon: Wallet, show: can.viewFinancials },
+        { title: "Cash Transfers", url: "/cash-transfers", icon: Banknote, show: can.viewFinancials },
+        { title: "Expense Claims", url: "/expense-claims", icon: ReceiptText, show: true },
+        { title: "Partners", url: "/partners", icon: Handshake, show: can.viewPartners },
+      ],
+    },
+    {
+      label: "Communications",
+      items: [
+        { title: "Communications", url: "/communications", icon: Megaphone, show: can.viewCommunications },
+        { title: "Impact Stories", url: "/impact-stories", icon: BookHeart, show: can.viewPrograms },
       ],
     },
     {
       label: "Governance",
       items: [
+        { title: "Complaints", url: "/complaints", icon: MessageSquare, show: can.viewAccountability },
+        { title: "Safeguarding", url: "/safeguarding", icon: ShieldCheck, show: can.viewSafeguarding },
+        { title: "Whistleblower", url: "/whistleblower", icon: AlertTriangle, show: superAdmin || can.viewAccountability },
         { title: "Documents", url: "/document-management", icon: FileText, show: can.viewDocuments },
         { title: "Compliance", url: "/compliance", icon: ClipboardCheck, show: can.viewCompliance },
         { title: "Consent Vault", url: "/governance/consent", icon: ShieldCheck, show: can.viewCompliance || can.viewBeneficiaries },
-        { title: "Visit Requests", url: "/staff/visits", icon: ClipboardCheck, show: can.viewBeneficiaries },
         { title: "Board Portal", url: "/board-reporting", icon: Presentation, show: can.viewBoard },
         { title: "Learning Log", url: "/lessons-learned", icon: BookOpen, show: can.viewPrograms },
-        { title: "Impact Stories", url: "/impact-stories", icon: BookHeart, show: can.viewPrograms },
       ],
     },
     {
-      label: "Administration",
+      label: "Staff & Access",
       items: [
+        { title: "HR & Staff", url: "/hr", icon: UserPlus, show: can.viewHR },
         { title: "Roles & Access", url: "/role-management", icon: Lock, show: can.manageRoles || can.manageCustomRoles },
-        { title: "Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
+        { title: "Branches", url: "/branches", icon: Building2, show: can.viewBranches, featureFlag: 'multi_branch' },
+        { title: "Automation", url: "/automation", icon: Zap, show: can.viewAutomation, featureFlag: 'automation' },
+        { title: "Organization Settings", url: "/organization-settings", icon: Settings, show: can.manageSettings || superAdmin },
       ],
     },
   ];
