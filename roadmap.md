@@ -11,3 +11,5 @@
 - [x] Part 9: Final audit report + top-10 actions → /mnt/documents/ApexOS_PostImplementation_Audit_2026-11-09.md
 - [x] Run existing test suite as evidence (132/132 pass)
 - [x] Check browser auth availability (external Supabase → signed-in tests BLOCKED)
+
+- [ ] Platform-wide UI/UX transformation (uploaded brief) — next, after sponsored profile
