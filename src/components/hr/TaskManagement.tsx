@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { AlertTriangle, CheckSquare, Plus } from "lucide-react";
+import { AlertTriangle, CheckSquare, Plus, List, Columns3, CalendarDays, Search } from "lucide-react";
+import { TaskBoard, TaskCalendar, sortTasks } from "@/components/hr/TaskViews";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,19 @@ export function TaskManagement() {
 
   const members = orgMembers.data ?? [];
   const allTasks = tasks.data ?? [];
-  const filtered = filter === "all" ? allTasks : allTasks.filter((task) => task.status === filter);
+  const [view, setView] = useState<"list" | "board" | "calendar">("list");
+  const [search, setSearch] = useState("");
+  const [assignee, setAssignee] = useState("all");
+  const [sortBy, setSortBy] = useState<"due" | "priority" | "title">("due");
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = allTasks.filter((task) =>
+      (filter === "all" || task.status.toLowerCase() === filter) &&
+      (assignee === "all" || (assignee === "unassigned" ? !task.assigned_to : task.assigned_to === assignee)) &&
+      (!q || task.title.toLowerCase().includes(q) || (task.description || "").toLowerCase().includes(q)));
+    return sortTasks(list, sortBy);
+  }, [allTasks, filter, assignee, search, sortBy]);
+  const boardTasks = useMemo(() => filtered.filter((t) => t.status.toLowerCase() !== "cancelled"), [filtered]);
   const memberById = useMemo(() => new Map(members.map((member: any) => [member.user_id, member])), [members]);
   const caseById = useMemo(() => new Map((cases.data ?? []).map((item: any) => [item.id, item])), [cases.data]);
   const today = new Date().toISOString().slice(0, 10);
@@ -142,9 +155,25 @@ export function TaskManagement() {
         })}</div>
       </section>}
 
-      <div className="flex gap-1.5 flex-wrap">{["all", "todo", "in_progress", "blocked", "completed", "cancelled"].map((status) => <Button key={status} size="sm" variant={filter === status ? "default" : "outline"} onClick={() => setFilter(status)} className="text-xs h-7 px-2.5">{status === "all" ? "All" : status.replace(/_/g, " ")}</Button>)}</div>
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative"><Search className="absolute left-2 top-2 h-3.5 w-3.5 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks" className="h-8 w-48 pl-7 text-xs" aria-label="Search tasks" /></div>
+          <Select value={assignee} onValueChange={setAssignee}><SelectTrigger className="h-8 w-40 text-xs" aria-label="Filter by assignee"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Everyone</SelectItem><SelectItem value="unassigned">Unassigned</SelectItem>{members.map((member: any) => <SelectItem key={member.user_id} value={member.user_id}>{member.full_name || member.email}</SelectItem>)}</SelectContent></Select>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}><SelectTrigger className="h-8 w-36 text-xs" aria-label="Sort tasks"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="due">Sort: due date</SelectItem><SelectItem value="priority">Sort: priority</SelectItem><SelectItem value="title">Sort: title</SelectItem></SelectContent></Select>
+        </div>
+        <div className="inline-flex rounded-lg border p-0.5" role="tablist" aria-label="Task view">
+          {([["list", List, "List"], ["board", Columns3, "Board"], ["calendar", CalendarDays, "Calendar"]] as const).map(([key, Icon, label]) => (
+            <Button key={key} role="tab" aria-selected={view === key} size="sm" variant={view === key ? "default" : "ghost"} className="h-7 gap-1 px-2.5 text-xs" onClick={() => setView(key)}><Icon className="h-3.5 w-3.5" />{label}</Button>
+          ))}
+        </div>
+      </div>
 
-      {tasks.isLoading ? <div className="space-y-2"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : !filtered.length ? <Card className="border-dashed"><CardContent className="py-8 text-center text-muted-foreground"><CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-40" /><p>No tasks found</p></CardContent></Card> : <div className="space-y-2">
+      {view === "list" && <div className="flex gap-1.5 flex-wrap">{["all", "todo", "in_progress", "blocked", "completed", "cancelled"].map((status) => <Button key={status} size="sm" variant={filter === status ? "default" : "outline"} onClick={() => setFilter(status)} className="text-xs h-7 px-2.5">{status === "all" ? "All" : status.replace(/_/g, " ")}</Button>)}</div>}
+
+      {view === "board" && (tasks.isLoading ? <Skeleton className="h-64 w-full" /> : <TaskBoard tasks={boardTasks as any} disabled={updateTaskStatus.isPending} memberName={(id) => { const m = id ? memberById.get(id) as any : null; return m?.full_name || m?.email || "Unassigned"; }} onMove={(id, status) => updateTaskStatus.mutate({ id, status })} />)}
+      {view === "calendar" && (tasks.isLoading ? <Skeleton className="h-64 w-full" /> : <TaskCalendar tasks={filtered as any} memberName={(id) => { const m = id ? memberById.get(id) as any : null; return m?.full_name || m?.email || "Unassigned"; }} />)}
+
+      {view === "list" && (tasks.isLoading ? <div className="space-y-2"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div> : !filtered.length ? <Card className="border-dashed"><CardContent className="py-8 text-center text-muted-foreground"><CheckSquare className="h-10 w-10 mx-auto mb-2 opacity-40" /><p>No tasks found</p></CardContent></Card> : <div className="space-y-2">
         {filtered.map((task) => {
           const assignee = memberById.get(task.assigned_to) as any;
           const overdue = isOverdueTask(task.status, task.due_date, today);
@@ -170,7 +199,7 @@ export function TaskManagement() {
             {task.is_sensitive && <p className="mt-2 flex items-center gap-1 text-xs text-warning"><AlertTriangle className="h-3 w-3" /> Sensitive work</p>}
           </CardContent></Card>;
         })}
-      </div>}
+      </div>)}
     </div>
   );
 }

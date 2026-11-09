@@ -15,7 +15,7 @@
 - Platform-wide UI/UX transformation (uploaded brief), in phases:
   - [x] Phase 1: management menu regrouped into brief's module map (permission-gated)
   - [~] Phase 2: Overview — operations pulse + demographics added; full layout rework pending
-  - [ ] Phase 3: Tasks & Cases workspace (kanban/table/calendar)
+  - [x] Phase 3: Tasks — list/board/calendar, search, assignee filter, sort (cases timeline pending)
   - [ ] Phase 4: Data Quality + Impact dashboards
   - [ ] Phase 5: Roles & Access (categorised permissions)
   - [ ] Phase 6: Funding & Sponsorship (committed/received/disbursed)
