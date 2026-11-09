@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDonorPortal } from '@/hooks/useDonorPortal';
-import { format } from 'date-fns';
+import { format, differenceInYears } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Heart, Users, FileText, Download, GraduationCap, MapPin,
@@ -33,6 +33,7 @@ import { DonorVisitRequestsTab } from '@/components/donor-portal/DonorVisitReque
 import { useDonorFx, FX_DISCLOSURE } from '@/hooks/useDonorFx';
 import { FxAmount } from '@/components/donor-portal/FxAmount';
 import { DonorProgrammesTab } from '@/components/donor-portal/DonorProgrammesTab';
+import { DonorPortrait } from '@/components/donor-portal/DonorPortrait';
 import { SponsorBeneficiaryDetail } from '@/components/donor-portal/SponsorBeneficiaryDetail';
 import { UpcomingMilestones } from '@/components/donor-portal/UpcomingMilestones';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -390,50 +391,37 @@ export default function DonorPortal() {
                   </div>
                 )}
 
-                <ScrollArea className="h-[min(60dvh,600px)]">
-                  <div className="space-y-2 pr-2">
+                <ScrollArea className="h-[min(70dvh,720px)]">
+                  <ul className="grid grid-cols-2 gap-3 pr-2" aria-label="Sponsored beneficiaries">
                     {visibleBeneficiaries.map((bd: any) => {
                       const b = bd.beneficiary as any;
                       if (!b) return null;
                       const isSelected = selectedBeneficiary === b.id;
+                      const consented = !!b.consent_given;
+                      const age = b.date_of_birth ? differenceInYears(new Date(), new Date(b.date_of_birth)) : null;
+                      const prog = (enrollments || []).find((e: any) => e.beneficiary_id === b.id)?.program?.name;
                       return (
-                        <Card
-                          key={bd.id}
-                          className={`cursor-pointer transition-all hover:shadow-md ${
-                            isSelected ? 'ring-2 ring-primary shadow-md' : 'border-border/50'
-                          }`}
-                          onClick={() => handleViewBeneficiary(b.id)}
-                        >
-                          <CardContent className="p-4 flex items-center gap-3">
-                            <Avatar className="h-11 w-11">
-                              <AvatarImage src={b.photo_url} />
-                              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                {(b.first_name?.[0] || b.display_name?.[0] || '?').toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground text-sm truncate">
-                                {b.display_name}
+                        <li key={bd.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleViewBeneficiary(b.id)}
+                            aria-pressed={isSelected}
+                            className={`w-full text-left rounded-2xl border bg-card p-2 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isSelected ? 'ring-2 ring-primary' : 'border-border/50'}`}
+                          >
+                            <DonorPortrait photoPath={b.photo_url} consented={consented} name={consented ? b.first_name : null} compact />
+                            <div className="px-1 pt-2 pb-1 space-y-1">
+                              <p className="font-semibold text-foreground text-sm truncate">
+                                {consented ? b.display_name : 'Sponsored participant'}
                               </p>
-                              {b.beneficiary_code && (
-                                <p className="text-[11px] text-muted-foreground font-mono truncate">
-                                  {b.beneficiary_code}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                  {b.beneficiary_type}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">{b.grade || ''}</span>
-                              </div>
+                              {age != null && <p className="text-xs text-muted-foreground">{age} years</p>}
+                              {prog && <Badge variant="secondary" className="text-[10px] max-w-full truncate">{prog}</Badge>}
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </CardContent>
-                        </Card>
+                          </button>
+                        </li>
                       );
                     })}
                     {totalSponsored > 0 && visibleBeneficiaries.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
+                      <li className="col-span-2 text-center py-12 text-muted-foreground">
                         <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">
                           No sponsored beneficiaries match “{debouncedSearch}”
@@ -441,15 +429,15 @@ export default function DonorPortal() {
                         <Button variant="link" size="sm" onClick={() => setSearch('')}>
                           Clear search
                         </Button>
-                      </div>
+                      </li>
                     )}
                     {totalSponsored === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
+                      <li className="col-span-2 text-center py-12 text-muted-foreground">
                         <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">No sponsored beneficiaries yet</p>
-                      </div>
+                      </li>
                     )}
-                  </div>
+                  </ul>
                 </ScrollArea>
               </div>
 

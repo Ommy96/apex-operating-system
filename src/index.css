@@ -803,3 +803,31 @@ html, body { max-width: 100%; overflow-x: hidden; }
   -webkit-box-shadow: 0 0 0 1000px #16202F inset;
   caret-color: var(--auth-text);
 }
+
+/* Donor sponsored-beneficiary profile: scoped dark theme */
+@layer base {
+  .donor-theme {
+    --background: 173 39% 5%;
+    --foreground: 162 35% 94%;
+    --card: 171 33% 8%;
+    --card-foreground: 162 35% 94%;
+    --popover: 171 33% 8%;
+    --popover-foreground: 162 35% 94%;
+    --muted: 177 32% 12%;
+    --muted-foreground: 166 13% 62%;
+    --border: 175 30% 17%;
+    --input: 175 30% 17%;
+    --primary: 161 77% 43%;
+    --primary-foreground: 164 79% 7%;
+    --ring: 161 77% 43%;
+    --secondary: 177 32% 12%;
+    --secondary-foreground: 162 35% 94%;
+    --donor-heading: 0 0% 100%;
+    --donor-secondary: 164 17% 76%;
+    --donor-link: 159 70% 63%;
+    --donor-warm: 39 88% 59%;
+    --donor-inset: 177 32% 12%;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}

@@ -24,6 +24,13 @@ export default {
 				display: ['DM Sans', 'sans-serif'],
 			},
 			colors: {
+				donor: {
+					heading: 'hsl(var(--donor-heading))',
+					secondary: 'hsl(var(--donor-secondary))',
+					link: 'hsl(var(--donor-link))',
+					warm: 'hsl(var(--donor-warm))',
+					inset: 'hsl(var(--donor-inset))',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

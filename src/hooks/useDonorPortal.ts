@@ -75,7 +75,7 @@ export function useDonorPortal(period: string = 'all') {
         .eq('donor_name', donorAccount.donor_name)
         .eq('organization_id', donorAccount.organization_id);
       if (error) throw error;
-      return (data || []).map((row: any) => ({ ...row, beneficiary: row.beneficiary ? { ...row.beneficiary, display_name: row.beneficiary.consent_given ? row.beneficiary.first_name : 'Sponsored participant', photo_url: row.beneficiary.consent_given ? row.beneficiary.photo_url : null } : null }));
+      return (data || []).map((row: any) => ({ ...row, beneficiary: row.beneficiary ? { ...row.beneficiary, display_name: row.beneficiary.consent_given ? row.beneficiary.first_name : 'Sponsored participant', first_name: row.beneficiary.consent_given ? row.beneficiary.first_name : null, bio: row.beneficiary.consent_given ? row.beneficiary.bio : null, photo_url: row.beneficiary.consent_given ? row.beneficiary.photo_url : null } : null }));
     },
     enabled: !!donorAccount,
     ...commonOpts,
@@ -483,6 +483,25 @@ export function useDonorPortal(period: string = 'all') {
     return data || [];
   };
 
+  const fetchFundedNeeds = async (beneficiaryId: string) => {
+    const { data, error } = await sb.rpc('get_donor_funded_needs', { _beneficiary: beneficiaryId });
+    if (error) throw error;
+    return (data || []) as { need_type_id: string; need_name: string; need_status: string | null }[];
+  };
+
+  const fetchSharedUploads = async (beneficiaryId: string) => {
+    const { data, error } = await sb
+      .from('beneficiary_uploads')
+      .select('id, document_name, document_type, description, file_url, shared_at, created_at')
+      .eq('beneficiary_id', beneficiaryId)
+      .eq('share_with_sponsor', true)
+      .not('shared_at', 'is', null)
+      .order('shared_at', { ascending: false })
+      .limit(12);
+    if (error) throw error;
+    return data || [];
+  };
+
   const getDocumentDownloadUrl = async (fileUrl: string) => {
     const path = fileUrl.replace(/^.*\/managed-documents\//, '');
     const { data, error } = await supabase.storage
@@ -526,6 +545,8 @@ export function useDonorPortal(period: string = 'all') {
     fetchBeneficiaryAcademics,
     fetchBeneficiaryProgression,
     fetchBeneficiaryUpdates,
+    fetchFundedNeeds,
+    fetchSharedUploads,
     getDocumentDownloadUrl,
     getSharedDocumentUrl,
     isLoading: accountLoading || beneficiariesLoading,
