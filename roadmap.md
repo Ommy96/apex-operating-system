@@ -1,5 +1,8 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
+- [x] Correct repeated role choices: organisation-scoped catalogue, identical-grant deduplication, distinct-grant labels; preserve stored roles/access.
+- [ ] Verify corrected role choices signed in as Umazi and non-admin (external authentication unavailable).
+
 - [x] Part 1: Feature-by-feature implementation verification (9 areas)
 - [x] Part 2: Database & architecture audit (tables, FK, RLS, storage, functions, jobs, isolation)
 - [x] Part 3: Security & permissions testing (per role; blocked items marked BLOCKED)

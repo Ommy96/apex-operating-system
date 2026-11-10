@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -51,6 +51,7 @@ import {
 import { PermissionMatrix } from '@/components/rbac/PermissionMatrix';
 import { UserRoleAssignment } from '@/components/rbac/UserRoleAssignment';
 import { toast } from '@/hooks/use-toast';
+import { organisationRoleCatalogue } from '@/lib/roleCatalogue';
 
 interface RbacRole {
   id: string;
@@ -95,24 +96,33 @@ export default function RoleManagement() {
   const canManageRoles = can.manageCustomRoles || isSuperAdmin;
 
   // Fetch all roles (system + org-specific)
-  const { data: roles = [], isLoading } = useQuery({
+  const { data: roles = [], isLoading, error: rolesError } = useQuery({
     queryKey: ['rbac-all-roles', orgId],
     queryFn: async () => {
-      let query = supabase
+      if (!orgId) return [];
+      const query = supabase
         .from('rbac_roles')
         .select('*')
         .eq('is_active', true)
+        .or(`organization_id.is.null,organization_id.eq.${orgId}`)
         .order('is_system_role', { ascending: false })
         .order('display_name');
       
       const { data, error } = await query;
       if (error) throw error;
-      return (data as RbacRole[]).filter(r => 
-        r.is_system_role || r.organization_id === orgId
-      );
+      if (!data?.length) return [];
+      const { data: permissions, error: permissionsError } = await supabase
+        .from('rbac_role_permissions')
+        .select('role_id, permission_id')
+        .in('role_id', data.map(role => role.id));
+      if (permissionsError) throw permissionsError;
+      return organisationRoleCatalogue(data as RbacRole[], orgId, permissions || []);
     },
     enabled: !!orgId,
   });
+  useEffect(() => {
+    if (rolesError) toast({ title: 'Could not load roles', description: (rolesError as Error).message, variant: 'destructive' });
+  }, [rolesError]);
 
   // Count users per role
   const { data: roleCounts = {} } = useQuery({
@@ -309,7 +319,7 @@ export default function RoleManagement() {
                       <RoleIcon name={role.icon} color={role.color} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm">{role.display_name}</p>
+                          <p className="font-semibold text-sm">{role.choiceLabel}</p>
                           <Badge variant="outline" className="text-[10px]">System</Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{role.description}</p>

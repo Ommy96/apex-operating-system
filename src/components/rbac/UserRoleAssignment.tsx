@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Search, UserPlus, Shield, Loader2, X, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { organisationRoleCatalogue } from '@/lib/roleCatalogue';
 
 interface MemberWithRoles {
   user_id: string;
@@ -100,21 +101,31 @@ export function UserRoleAssignment() {
   }, [membersError]);
 
   // Available roles
-  const { data: availableRoles = [] } = useQuery({
+  const { data: availableRoles = [], error: availableRolesError } = useQuery({
     queryKey: ['rbac-available-roles', orgId],
     queryFn: async () => {
+      if (!orgId) return [];
       const { data, error } = await supabase
         .from('rbac_roles')
-        .select('id, name, display_name, color, is_system_role')
+        .select('id, name, display_name, color, is_system_role, organization_id, created_at')
         .eq('is_active', true)
-        .or(`is_system_role.eq.true,organization_id.eq.${orgId}`)
+        .or(`organization_id.is.null,organization_id.eq.${orgId}`)
         .neq('name', 'super_admin')
         .order('display_name');
       if (error) throw error;
-      return data;
+      if (!data?.length) return [];
+      const { data: permissions, error: permissionsError } = await supabase
+        .from('rbac_role_permissions')
+        .select('role_id, permission_id')
+        .in('role_id', data.map(role => role.id));
+      if (permissionsError) throw permissionsError;
+      return organisationRoleCatalogue(data, orgId, permissions || []);
     },
     enabled: !!orgId,
   });
+  useEffect(() => {
+    if (availableRolesError) toast({ title: 'Could not load available roles', description: (availableRolesError as Error).message, variant: 'destructive' });
+  }, [availableRolesError]);
 
   const assignRole = useMutation({
     mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
@@ -258,7 +269,7 @@ export function UserRoleAssignment() {
                 <SelectItem key={role.id} value={role.id}>
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: role.color }} />
-                    {role.display_name}
+                    {role.choiceLabel}
                     {role.is_system_role && <Badge variant="outline" className="text-[10px] ml-1">System</Badge>}
                   </span>
                 </SelectItem>
