@@ -1,6 +1,7 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
 - [x] Correct repeated role choices: organisation-scoped catalogue, identical-grant deduplication, distinct-grant labels; preserve stored roles/access.
+- [x] Assignment dropdown: one choice per standard role, choosing the fewest-grant version without altering existing assignments.
 - [ ] Verify corrected role choices signed in as Umazi and non-admin (external authentication unavailable).
 
 - [x] Part 1: Feature-by-feature implementation verification (9 areas)

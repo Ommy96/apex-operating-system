@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Search, UserPlus, Shield, Loader2, X, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { organisationRoleCatalogue } from '@/lib/roleCatalogue';
+import { assignmentRoleChoices, organisationRoleCatalogue } from '@/lib/roleCatalogue';
 
 interface MemberWithRoles {
   user_id: string;
@@ -119,7 +119,7 @@ export function UserRoleAssignment() {
         .select('role_id, permission_id')
         .in('role_id', data.map(role => role.id));
       if (permissionsError) throw permissionsError;
-      return organisationRoleCatalogue(data, orgId, permissions || []);
+      return assignmentRoleChoices(organisationRoleCatalogue(data, orgId, permissions || []));
     },
     enabled: !!orgId,
   });

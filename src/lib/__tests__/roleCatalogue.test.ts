@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { organisationRoleCatalogue } from '../roleCatalogue';
+import { organisationRoleCatalogue, assignmentRoleChoices } from '../roleCatalogue';
 
 const role = (id: string, organization_id: string | null, name = 'field_officer', is_system_role = true) => ({
   id, organization_id, name, is_system_role, display_name: name, created_at: id,
 });
 describe('organisation role catalogue', () => {
+  it('offers each standard role once and never selects the broader duplicate by default', () => {
+    const roles = [role('1', 'h2ho', 'program_manager'), role('2', 'h2ho', 'program_manager')];
+    const grants = [{ role_id: '1', permission_id: 'read' }, { role_id: '1', permission_id: 'edit' }, { role_id: '2', permission_id: 'read' }];
+    expect(assignmentRoleChoices(organisationRoleCatalogue(roles, 'h2ho', grants)).map(r => r.id)).toEqual(['2']);
+  });
   it('excludes other organisations, including for a super-admin-visible catalogue', () => {
     const roles = [role('1', 'h2ho'), role('2', 'umazi')];
     expect(organisationRoleCatalogue(roles, 'h2ho', []).map(r => r.id)).toEqual(['1']);

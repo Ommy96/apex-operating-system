@@ -7,6 +7,20 @@ export interface CatalogueRole {
   created_at: string;
 }
 
+/** New assignments use one least-privilege choice per standard role; existing assignments are untouched. */
+export function assignmentRoleChoices<T extends CatalogueRole & { permissionCount: number; choiceLabel: string }>(roles: T[]): T[] {
+  const seen = new Set<string>();
+  return roles.slice().sort((a, b) => a.permissionCount - b.permissionCount ||
+    a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)).filter(role => {
+    if (!role.is_system_role) return true;
+    const key = role.name.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map(role => ({ ...role, choiceLabel: role.display_name }))
+    .sort((a, b) => a.display_name.localeCompare(b.display_name));
+}
+
 /** Keep different permission sets distinct; never union grants or change stored roles. */
 export function organisationRoleCatalogue<T extends CatalogueRole>(
   roles: T[],
