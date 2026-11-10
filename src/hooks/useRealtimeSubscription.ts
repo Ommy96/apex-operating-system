@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+let channelCounter = 0;
+
 interface RealtimeConfig {
   /** Supabase table name to subscribe to */
   table: string;
@@ -31,7 +33,7 @@ export function useRealtimeSubscription(configs: RealtimeConfig[]) {
     const activeConfigs = configs.filter(c => c.enabled !== false);
     if (activeConfigs.length === 0) return;
 
-    const channelName = `realtime_${activeConfigs.map(c => c.table).join("_")}_${Date.now()}`;
+    const channelName = `realtime_${activeConfigs.map(c => c.table).join("_")}_${Date.now()}_${++channelCounter}_${Math.random().toString(36).slice(2, 8)}`;
     let channel = supabase.channel(channelName);
 
     activeConfigs.forEach((config) => {
