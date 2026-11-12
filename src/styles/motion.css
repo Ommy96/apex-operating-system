@@ -118,3 +118,28 @@ html[data-reduced-motion="true"] .sparkline-path {
   animation: none;
   stroke-dashoffset: 0 !important;
 }
+/* --- Tabs: scrollable strip with edge fade ----------------- */
+.tabs-scroll {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+.tabs-scroll::-webkit-scrollbar { display: none; }
+.tabs-scroll > [role="tab"] { scroll-snap-align: start; }
+.tabs-scroll[data-fade-left="true"][data-fade-right="true"] {
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+}
+.tabs-scroll[data-fade-left="true"]:not([data-fade-right="true"]) {
+  mask-image: linear-gradient(to right, transparent, #000 24px);
+}
+.tabs-scroll[data-fade-right="true"]:not([data-fade-left="true"]) {
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+
+/* --- Reduced motion (app toggle / OS) for new motion -------- */
+html[data-reduced-motion="true"] .animate-tab-enter,
+html[data-reduced-motion="true"] [role="dialog"],
+html[data-reduced-motion="true"] [data-sonner-toast] {
+  animation: none !important;
+}
+html[data-reduced-motion="true"] .tabs-scroll { scroll-behavior: auto; }

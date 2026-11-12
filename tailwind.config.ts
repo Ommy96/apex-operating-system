@@ -118,6 +118,10 @@ export default {
 				'128': '32rem'
 			},
 			keyframes: {
+				'tab-enter': {
+					from: { opacity: '0', transform: 'translateY(5px)' },
+					to: { opacity: '1', transform: 'translateY(0)' }
+				},
 				'accordion-down': {
 					from: { height: '0' },
 					to: { height: 'var(--radix-accordion-content-height)' }
@@ -156,6 +160,7 @@ export default {
 				}
 			},
 			animation: {
+				'tab-enter': 'tab-enter 240ms cubic-bezier(0.16, 1, 0.3, 1)',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.2s ease-out',
