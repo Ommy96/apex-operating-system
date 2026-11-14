@@ -1,5 +1,8 @@
 project_id = "ncfjekjomwkfbremlyhx"
 
+[functions.vulnerability-map]
+verify_jwt = false
+
 [functions.reporting-nudge]
 verify_jwt = false
 

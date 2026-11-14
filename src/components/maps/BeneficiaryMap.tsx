@@ -1,10 +1,18 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Layers, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useVulnerabilityMap } from '@/hooks/useVulnerabilityMap';
+import { ColdZoneList } from './ColdZoneList';
+import type { MapArea } from '../../../supabase/functions/_shared/vulnerabilityMap';
 
 const KENYA_CENTROIDS: Record<string, [number, number]> = {
   'Mombasa': [-4.0435, 39.6682], 'Kwale': [-4.1737, 39.4521], 'Kilifi': [-3.5107, 39.9093],
@@ -32,18 +40,23 @@ interface BeneficiaryMapProps {
 export function BeneficiaryMap({ orgId }: BeneficiaryMapProps) {
   const token = import.meta.env.VITE_MAPBOX_TOKEN;
   const [useCluster, setUseCluster] = useState(true);
+  const [vulnerability, setVulnerability] = useState(false);
+  const { can } = usePermissions();
+  const coverage = useVulnerabilityMap(orgId, vulnerability);
+  const showVulnerability = vulnerability && coverage.access.data === true;
 
   const { data: beneficiaries = [], isLoading } = useQuery({
     queryKey: ['beneficiary-map-data', orgId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('beneficiaries')
         .select('id, display_name, county, sub_county, latitude, longitude')
         .eq('organization_id', orgId)
         .is('deleted_at', null);
+      if (error) { toast.error(error.message); throw error; }
       return data || [];
     },
-    enabled: !!orgId,
+    enabled: !!orgId && !vulnerability,
   });
 
   const mappedCount = useMemo(() =>
@@ -51,23 +64,12 @@ export function BeneficiaryMap({ orgId }: BeneficiaryMapProps) {
     [beneficiaries]
   );
 
-  if (!token) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="py-16 text-center">
-          <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-warning" />
-          <h3 className="font-medium mb-1">Map unavailable</h3>
-          <p className="text-sm text-muted-foreground">Configure VITE_MAPBOX_TOKEN in your environment to enable maps.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary">{mappedCount} beneficiaries mapped</Badge>
-        <Button
+      <div className="flex flex-wrap items-center gap-2">
+        {coverage.access.data && <div className="flex items-center gap-2"><Switch id="vulnerability-layer" checked={vulnerability} onCheckedChange={setVulnerability} /><Label htmlFor="vulnerability-layer">Vulnerability & visit coverage</Label></div>}
+        {!vulnerability && <Badge variant="secondary">{mappedCount} beneficiaries mapped</Badge>}
+        {!vulnerability && <Button
           variant="outline"
           size="sm"
           className="ml-auto gap-1.5 h-7 text-xs"
@@ -76,27 +78,32 @@ export function BeneficiaryMap({ orgId }: BeneficiaryMapProps) {
         >
           {useCluster ? <Layers className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
           {useCluster ? 'Cluster view' : 'Individual view'}
-        </Button>
+        </Button>}
       </div>
-      <MapboxRenderer token={token} beneficiaries={beneficiaries} useCluster={useCluster} />
+      {showVulnerability && <div className="flex flex-wrap gap-4 text-xs text-muted-foreground" aria-label="High and critical need legend"><span className="flex items-center gap-1"><i className="map-need-low h-3 w-3 rounded-full" /> Less than 25%</span><span className="flex items-center gap-1"><i className="map-need-medium h-3 w-3 rounded-full" /> 25–49%</span><span className="flex items-center gap-1"><i className="map-need-high h-3 w-3 rounded-full" /> 50% or more</span></div>}
+      <div className={showVulnerability ? 'grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]' : ''}>
+        {!token ? <div className="border border-dashed py-16 text-center"><AlertTriangle className="h-10 w-10 mx-auto mb-3 text-warning" /><h3 className="font-medium">Map unavailable</h3></div> : (showVulnerability ? coverage.map.isLoading : isLoading) ? <Skeleton className="h-[calc(100vh-200px)]" /> : <MapboxRenderer token={token} beneficiaries={vulnerability ? [] : beneficiaries} useCluster={useCluster} areas={showVulnerability ? coverage.map.data?.areas : undefined} />}
+        {showVulnerability && <ColdZoneList data={coverage.map.data} loading={coverage.map.isLoading} canManage={can.manageSettings} saving={coverage.saveGap.isPending} onSave={days => coverage.saveGap.mutate(days)} />}
+      </div>
+      {showVulnerability && coverage.map.error && <p role="alert" className="text-sm text-destructive">{coverage.map.error.message}</p>}
     </div>
   );
 }
 
-function MapboxRenderer({ token, beneficiaries, useCluster }: { token: string; beneficiaries: any[]; useCluster: boolean }) {
+function MapboxRenderer({ token, beneficiaries, useCluster, areas }: { token: string; beneficiaries: any[]; useCluster: boolean; areas?: MapArea[] }) {
   const [MapModule, setMapModule] = useState<any>(null);
 
-  useMemo(() => {
+  useEffect(() => {
     import('react-map-gl/mapbox').then(mod => setMapModule(mod));
   }, []);
 
-  if (!MapModule) return <div className="h-[calc(100vh-200px)] bg-muted animate-pulse rounded-lg" />;
+  if (!MapModule) return <Skeleton className="h-[calc(100vh-200px)] rounded-lg" />;
 
   const { default: MapGL, Marker, Popup, Source, Layer } = MapModule;
-  return <MapInner MapGL={MapGL} Marker={Marker} Popup={Popup} Source={Source} Layer={Layer} token={token} beneficiaries={beneficiaries} useCluster={useCluster} />;
+  return <MapInner key={areas ? 'coverage' : 'beneficiaries'} MapGL={MapGL} Marker={Marker} Popup={Popup} Source={Source} Layer={Layer} token={token} beneficiaries={beneficiaries} useCluster={useCluster} areas={areas} />;
 }
 
-function MapInner({ MapGL, Marker, Popup, Source, Layer, token, beneficiaries, useCluster }: any) {
+function MapInner({ MapGL, Marker, Popup, Source, Layer, token, beneficiaries, useCluster, areas }: any) {
   const [popup, setPopup] = useState<any>(null);
   const [mapRef, setMapRef] = useState<any>(null);
 
@@ -195,10 +202,14 @@ function MapInner({ MapGL, Marker, Popup, Source, Layer, token, beneficiaries, u
         mapStyle="mapbox://styles/mapbox/light-v11"
         mapboxAccessToken={token}
         style={{ width: '100%', height: '100%' }}
-        interactiveLayerIds={useCluster ? ['clusters', 'unclustered-point'] : []}
-        onClick={useCluster ? handleClusterClick : undefined}
+        interactiveLayerIds={!areas && useCluster ? ['clusters', 'unclustered-point'] : []}
+        onClick={!areas && useCluster ? handleClusterClick : undefined}
       >
-        {useCluster ? (
+        {areas ? areas.filter((a: MapArea) => !a.suppressed && a.centroid && a.high_share != null).map((a: MapArea) => {
+          if (!a.centroid) return null;
+          const tone = (a.high_share ?? 0) >= 0.5 ? 'map-need-high' : (a.high_share ?? 0) >= 0.25 ? 'map-need-medium' : 'map-need-low';
+          return <Marker key={`${a.county}:${a.area_kind}:${a.area}`} longitude={a.centroid[0]} latitude={a.centroid[1]}><div className="flex flex-col items-center gap-1"><span className={`${tone} h-8 w-8 rounded-full border-2`} aria-hidden="true" /><span className="rounded bg-background px-2 py-1 text-xs font-medium text-foreground shadow-sm capitalize">{a.area} · {Math.round((a.high_share ?? 0) * 100)}%</span></div></Marker>;
+        }) : useCluster ? (
           <Source id="beneficiaries-cluster" type="geojson" data={geojson} cluster={true} clusterMaxZoom={12} clusterRadius={50}>
             <Layer {...clusterLayer} />
             <Layer {...clusterCountLayer} />

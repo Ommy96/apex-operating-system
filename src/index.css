@@ -20,7 +20,14 @@
 /* ApexOS — "Refined Clarity" Design System */
 
 @layer base {
+  .map-need-low { background-color: var(--map-need-low); border-color: var(--map-need-border); }
+  .map-need-medium { background-color: var(--map-need-medium); border-color: var(--map-need-border); }
+  .map-need-high { background-color: var(--map-need-high); border-color: var(--map-need-border); }
   :root {
+    --map-need-low: #234d70;
+    --map-need-medium: #62899e;
+    --map-need-high: #e9b970;
+    --map-need-border: #ffffff;
     /* Typography */
     --font-display: 'DM Sans', sans-serif;
     --font-body: 'DM Sans', sans-serif;
@@ -219,6 +226,10 @@
   }
 
   .dark {
+    --map-need-low: #2b5575;
+    --map-need-medium: #7497a8;
+    --map-need-high: #f5cb85;
+    --map-need-border: #0a0f1e;
     --brand-ink: #F0F2F8;
     --brand-ink-2: #A8B0C2;
     --brand-ink-3: #606980;

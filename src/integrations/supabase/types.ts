@@ -18721,6 +18721,10 @@ export type Database = {
         Args: { _org_id: string }
         Returns: boolean
       }
+      can_view_vulnerability_map: {
+        Args: { _org_id: string }
+        Returns: boolean
+      }
       check_org_usage_limit: {
         Args: { _limit_type: string; _org_id: string }
         Returns: boolean
@@ -18912,6 +18916,7 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      get_vulnerability_map: { Args: { _org_id: string }; Returns: Json }
       grant_all_permissions_to_org_admins: { Args: never; Returns: number }
       hard_delete_beneficiary: {
         Args: {
@@ -19177,6 +19182,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      set_vulnerability_map_gap: {
+        Args: { _days: number; _org_id: string }
+        Returns: string
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
