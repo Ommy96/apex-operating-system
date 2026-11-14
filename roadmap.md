@@ -1,5 +1,13 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
+## Adoption prompts (run in uploaded order)
+- [ ] A: Global header sync indicator — blocked: useOfflineSync has independent upload timers per caller; prompt forbids working around unsafe dual use.
+- [x] A: Compliance tray alerts and red-only dashboard banner, shared expiry rules and settings cache.
+- [ ] A: Signed-in checks including Umazi/non-admin and 390px header — external authentication unavailable.
+- [ ] S1: Await the referenced S1 brief, not included in this upload.
+- [ ] B: HR Staff Submission Ledger — follows S1.
+- [ ] C: Aggregate vulnerability map and cold zones — follows B.
+
 - [x] Correct repeated role choices: organisation-scoped catalogue, identical-grant deduplication, distinct-grant labels; preserve stored roles/access.
 - [x] Assignment dropdown: one choice per standard role, choosing the fewest-grant version without altering existing assignments.
 - [ ] Verify corrected role choices signed in as Umazi and non-admin (external authentication unavailable).

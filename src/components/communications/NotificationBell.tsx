@@ -11,6 +11,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCommunications } from "@/hooks/useCommunications";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useNavigate } from 'react-router-dom';
+import { useComplianceAlerts } from '@/hooks/useComplianceAlerts';
+import { COMPLIANCE_LEVEL, COMPLIANCE_SETTINGS_URL } from '@/lib/complianceAlerts';
 
 const severityStyles: Record<string, string> = {
   info: "bg-info/10 text-info",
@@ -22,20 +25,23 @@ const severityStyles: Record<string, string> = {
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllRead } = useCommunications();
+  const complianceAlerts = useComplianceAlerts();
+  const navigate = useNavigate();
+  const trayCount = unreadCount + complianceAlerts.length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative h-8 w-8">
+        <Button variant="ghost" size="icon" className="relative h-8 w-8" aria-label="Notifications">
           <Bell className="h-4 w-4" />
-          {unreadCount > 0 && (
+          {trayCount > 0 && (
             <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px] bg-destructive text-destructive-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {trayCount > 9 ? "9+" : trayCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-80 max-w-[calc(100vw-2rem)] p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h4 className="text-sm font-semibold">Notifications</h4>
           {unreadCount > 0 && (
@@ -51,7 +57,25 @@ export function NotificationBell() {
           )}
         </div>
         <ScrollArea className="h-80">
-          {notifications.length === 0 ? (
+          {complianceAlerts.map(alert => (
+            <Button key={alert.id} variant="ghost"
+              className="h-auto w-full rounded-none justify-start whitespace-normal px-4 py-3 text-left border-b"
+              onClick={() => { setOpen(false); navigate(COMPLIANCE_SETTINGS_URL); }}>
+              <div className="min-w-0 w-full space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold">{alert.title}</span>
+                  <Badge variant="outline" className={cn('text-[10px]',
+                    alert.level.toLowerCase() === COMPLIANCE_LEVEL.RED.toLowerCase()
+                      ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                      : 'border-warning/30 bg-warning/10 text-warning')}>
+                    {alert.label}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground font-normal">{alert.message}</p>
+              </div>
+            </Button>
+          ))}
+          {notifications.length === 0 && complianceAlerts.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
               No notifications
             </div>
