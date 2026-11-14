@@ -23,6 +23,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { NotificationBell } from "@/components/communications/NotificationBell";
+import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { SyncStatusIndicator } from '@/components/field/SyncStatusIndicator';
+import { FIELD_MODE_SYNC_URL, SYNC_CONFLICT_RESOLUTION } from '@/lib/syncIndicator';
 
 interface WorkspaceHeaderProps {
   onCommandOpen: () => void;
@@ -163,6 +166,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
   const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isOnline, isSyncing, stats, conflicts } = useOfflineSync();
 
   const handleLogout = async () => {
     await signOut();
@@ -178,7 +182,7 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
     <header 
       role="banner" 
       aria-label="Application header" 
-      className="h-14 flex items-center justify-between px-6 gap-4 sticky top-0 z-40"
+      className="h-14 flex items-center justify-between px-3 md:px-6 gap-2 md:gap-4 sticky top-0 z-40"
       style={{ 
         background: 'var(--brand-surface)', 
         borderBottom: '1px solid var(--brand-border)' 
@@ -246,6 +250,10 @@ export function WorkspaceHeader({ onCommandOpen }: WorkspaceHeaderProps) {
 
       {/* Right Section */}
       <div className="flex items-center gap-2 shrink-0">
+        <SyncStatusIndicator isOnline={isOnline} isSyncing={isSyncing}
+          pending={stats.pending} failed={stats.failed}
+          conflicts={conflicts.filter(c => c.resolution.toLowerCase() === SYNC_CONFLICT_RESOLUTION.PENDING.toLowerCase()).length}
+          compactOnMobile hideWhenSynced onClick={() => navigate(FIELD_MODE_SYNC_URL)} />
         {/* Notification Bell */}
         <NotificationBell />
 

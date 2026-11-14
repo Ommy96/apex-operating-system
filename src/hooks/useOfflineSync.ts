@@ -1,5 +1,5 @@
 import { softWrite } from "@/lib/checkedWrite";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { createContext, createElement, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -8,9 +8,8 @@ import {
   getRecordsByStatus,
   updateRecordStatus,
   saveOfflineRecord,
-  clearSyncedRecords,
+  deleteRecord,
   OfflineRecord,
-  SyncStatus,
   setRecordRetry,
   logConflict,
   getConflicts,
@@ -31,7 +30,7 @@ export interface SyncStats {
   total: number;
 }
 
-export function useOfflineSync() {
+function useOfflineSyncEngine() {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
@@ -41,24 +40,33 @@ export function useOfflineSync() {
   const [stats, setStats] = useState<SyncStats>({ pending: 0, syncing: 0, synced: 0, failed: 0, total: 0 });
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const syncLock = useRef(false);
+  const syncLatest = useRef<() => Promise<void>>(async () => {});
+  const scopeRef = useRef({ orgId, userId: user?.id });
+  scopeRef.current = { orgId, userId: user?.id };
+  const ownsRecord = (r: OfflineRecord) => r.organizationId === orgId && r.userId === user?.id;
 
   const refreshRecords = useCallback(async () => {
     try {
-      const all = await getAllRecords();
+      const all = (await getAllRecords()).filter(r => r.organizationId === orgId && r.userId === user?.id);
+      if (scopeRef.current.orgId !== orgId || scopeRef.current.userId !== user?.id) return;
       setRecords(all);
       const pending = all.filter(r => r.status === 'pending').length;
       const syncing = all.filter(r => r.status === 'syncing').length;
       const synced = all.filter(r => r.status === 'synced').length;
       const failed = all.filter(r => r.status === 'failed').length;
       setStats({ pending, syncing, synced, failed, total: all.length });
-      try { setConflicts(await getConflicts()); } catch {}
+      try { setConflicts((await getConflicts()).filter(c => all.some(r => r.id === c.recordId))); } catch {}
     } catch {
       // IndexedDB may not be available
     }
-  }, []);
+  }, [orgId, user?.id]);
 
   // Initial load + request persistent storage
   useEffect(() => {
+    setRecords([]);
+    setConflicts([]);
+    setStats({ pending: 0, syncing: 0, synced: 0, failed: 0, total: 0 });
     refreshRecords();
     requestPersistentStorage();
   }, [refreshRecords]);
@@ -77,20 +85,20 @@ export function useOfflineSync() {
 
   // Auto-sync when online
   useEffect(() => {
-    if (isOnline && !isSyncing) {
+    if (isOnline && user?.id && orgId) {
       syncIntervalRef.current = setInterval(() => {
-        syncAll();
+        void syncLatest.current();
       }, 30000); // every 30s
     }
     return () => { if (syncIntervalRef.current) clearInterval(syncIntervalRef.current); };
-  }, [isOnline, isSyncing]);
+  }, [isOnline, user?.id, orgId]);
 
   // Trigger sync when coming back online
   useEffect(() => {
     if (isOnline && stats.pending > 0) {
-      syncAll();
+      void syncLatest.current();
     }
-  }, [isOnline]);
+  }, [isOnline, orgId, user?.id, stats.pending]);
 
   const syncRecord = async (record: OfflineRecord): Promise<boolean> => {
     try {
@@ -273,11 +281,12 @@ export function useOfflineSync() {
   };
 
   const syncAll = async () => {
-    if (isSyncing || !isOnline) return;
+    if (syncLock.current || !isOnline || !user?.id || !orgId) return;
+    syncLock.current = true;
     setIsSyncing(true);
     try {
-      const pending = await getRecordsByStatus('pending');
-      const failed = await getRecordsByStatus('failed');
+      const pending = (await getRecordsByStatus('pending')).filter(ownsRecord);
+      const failed = (await getRecordsByStatus('failed')).filter(ownsRecord);
       const now = Date.now();
       const readyFailed = failed.filter(r => r.retryCount < 6 && (!r.nextRetryAt || new Date(r.nextRetryAt).getTime() <= now));
       const toSync = [...pending, ...readyFailed];
@@ -288,6 +297,7 @@ export function useOfflineSync() {
       let failCount = 0;
 
       for (const record of toSync) {
+        if (scopeRef.current.orgId !== orgId || scopeRef.current.userId !== user.id || !navigator.onLine) break;
         const success = await syncRecord(record);
         if (success) successCount++;
         else failCount++;
@@ -295,14 +305,18 @@ export function useOfflineSync() {
 
       if (successCount > 0) toast.success(`Synced ${successCount} record(s)`);
       if (failCount > 0) toast.error(`${failCount} record(s) failed to sync`);
+    } catch (error) {
+      toast.error(`Could not sync records: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
+      syncLock.current = false;
       setIsSyncing(false);
-      refreshRecords();
+      await refreshRecords();
     }
   };
+  syncLatest.current = syncAll;
 
   const retryFailed = async () => {
-    const failed = await getRecordsByStatus('failed');
+    const failed = (await getRecordsByStatus('failed')).filter(ownsRecord);
     for (const r of failed) {
       await updateRecordStatus(r.id, 'pending');
     }
@@ -334,12 +348,14 @@ export function useOfflineSync() {
   };
 
   const cleanSynced = async () => {
-    await clearSyncedRecords();
+    const synced = (await getRecordsByStatus('synced')).filter(ownsRecord);
+    for (const record of synced) await deleteRecord(record.id);
     await refreshRecords();
     toast.success("Cleared synced records");
   };
 
   const resolveConflict = async (id: string, resolution: 'local_wins' | 'server_wins', notes?: string) => {
+    if (!conflicts.some(c => c.id === id)) return;
     await resolveConflictDb(id, resolution, notes);
     await refreshRecords();
   };
@@ -357,4 +373,17 @@ export function useOfflineSync() {
     refreshRecords,
     resolveConflict,
   };
+}
+
+const OfflineSyncContext = createContext<ReturnType<typeof useOfflineSyncEngine> | null>(null);
+
+export function OfflineSyncProvider({ children }: { children: ReactNode }) {
+  const sync = useOfflineSyncEngine();
+  return createElement(OfflineSyncContext.Provider, { value: sync }, children);
+}
+
+export function useOfflineSync() {
+  const sync = useContext(OfflineSyncContext);
+  if (!sync) throw new Error('useOfflineSync must be used within OfflineSyncProvider');
+  return sync;
 }

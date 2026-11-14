@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
+import { OfflineSyncProvider } from './hooks/useOfflineSync';
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SuperAdminRoute } from "./components/SuperAdminRoute";
 import { SessionManager } from "./components/SessionManager";
@@ -184,6 +185,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <OrganizationProvider>
+        <OfflineSyncProvider>
         <SessionManager>
           <TooltipProvider>
           <MotionRoot>
@@ -575,6 +577,7 @@ const App = () => (
           </MotionRoot>
           </TooltipProvider>
         </SessionManager>
+        </OfflineSyncProvider>
       </OrganizationProvider>
     </AuthProvider>
   </QueryClientProvider>

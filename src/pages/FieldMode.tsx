@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { captureGPS, compressImage } from "@/lib/offlineStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FIELD_MODE_TAB } from '@/lib/syncIndicator';
 import { SyncStatusIndicator } from "@/components/field/SyncStatusIndicator";
 import { QuickVisitFlow } from "@/components/field/QuickVisitFlow";
 import { VoiceTextarea } from "@/components/field/VoiceTextarea";
@@ -28,7 +29,11 @@ import { QuickFieldLog } from "@/components/field/QuickFieldLog";
 export default function FieldMode() {
   const navigate = useNavigate();
   const { isOnline, isSyncing, stats, addRecord, syncAll, retryFailed, cleanSynced, records, conflicts, resolveConflict } = useOfflineSync();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>(FIELD_MODE_TAB.DASHBOARD);
+  useEffect(() => {
+    if (searchParams.get('tab')?.toLowerCase() === FIELD_MODE_TAB.SYNC.toLowerCase()) setActiveTab(FIELD_MODE_TAB.SYNC);
+  }, [searchParams]);
   const [beneficiaryFormOpen, setBeneficiaryFormOpen] = useState(false);
   const [observationFormOpen, setObservationFormOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);

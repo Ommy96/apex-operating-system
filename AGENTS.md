@@ -1,5 +1,7 @@
 # Project rules
 
+- Offline sync has one app-level provider and a synchronous upload lock; all consumers share state and timers, and queue reads/uploads remain scoped to the current organisation and user to prevent duplicate uploads and cross-account exposure.
+
 - Compliance tray and dashboard alerts share the settings query and expiry helper; this keeps saved certificate dates and urgency thresholds consistent without storing duplicate notifications.
 
 - Role catalogues scope to the current organisation, prefer local system roles over global templates, and collapse only identical system permission sets; preserve distinct grants and stored assignments to avoid accidental access changes.
