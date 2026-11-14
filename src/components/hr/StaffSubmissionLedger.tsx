@@ -27,6 +27,7 @@ export function StaffSubmissionLedger() {
   const [project, setProject] = useState(REPORT_FILTER_ALL);
   const [cadenceFilter, setCadenceFilter] = useState(REPORT_FILTER_ALL);
   const [status, setStatus] = useState(REPORT_FILTER_ALL);
+  const [rollupPeriod, setRollupPeriod] = useState('');
   const [open, setOpen] = useState(false);
   const [scopeType, setScopeType] = useState<string>(REPORT_SCOPE.PROGRAM);
   const [scope, setScope] = useState('');
@@ -36,13 +37,15 @@ export function StaffSubmissionLedger() {
   const [selected, setSelected] = useState<string[]>([]);
   const { ledger, options, create, nudge } = useReportingLedger(from, to, canManage);
   const cells = ledger.data || [];
-  const programChoices = [...new Map(cells.filter(c => c.program_id).map(c => [c.program_id, { id: c.program_id as string, name: c.program_name || c.scope_name }])).values()];
-  const projectChoices = [...new Map(cells.filter(c => c.project_id).map(c => [c.project_id, { id: c.project_id as string, name: c.scope_name }])).values()];
+  const programChoices = options.data?.programs || [...new Map(cells.filter(c => c.program_id).map(c => [c.program_id, { id: c.program_id as string, name: c.program_name || c.scope_name }])).values()];
+  const projectChoices = options.data?.projects || [...new Map(cells.filter(c => c.project_id).map(c => [c.project_id, { id: c.project_id as string, name: c.scope_name }])).values()];
   const filtered = cells.filter(c => (reportMatches(program, REPORT_FILTER_ALL) || c.program_id === program) && (reportMatches(project, REPORT_FILTER_ALL) || c.project_id === project) && (reportMatches(cadenceFilter, REPORT_FILTER_ALL) || reportMatches(c.cadence, cadenceFilter)));
   const visible = filtered.filter(c => reportMatches(status, REPORT_FILTER_ALL) || reportMatches(c.status, status));
   const periods = [...new Set(visible.map(c => `${c.period_start}|${c.period_end}`))].sort();
   const staff = [...new Map(visible.map(c => [c.user_id, c.staff_name])).entries()];
   const rollupPrograms = options.data?.programs || programChoices;
+  const rollupPeriods = [...new Set(filtered.map(c => c.period_start))].sort();
+  const selectedPeriod = rollupPeriods.includes(rollupPeriod) ? rollupPeriod : rollupPeriods.at(-1) || '';
   const isProgram = reportMatches(scopeType, REPORT_SCOPE.PROGRAM);
   const team = (options.data?.staff || []).filter(s => (isProgram ? s.program_ids : s.project_ids).includes(scope));
   const chosenProject = options.data?.projects.find(p => p.id === scope);
@@ -62,10 +65,9 @@ export function StaffSubmissionLedger() {
     </div>
     {ledger.isLoading ? <Skeleton className="h-48 w-full" /> : ledger.error ? <p role="alert" className="text-destructive">{ledger.error.message}</p> : <>
       <div className="overflow-x-auto border rounded-lg"><table className="w-full text-sm"><thead className="bg-muted/50"><tr><th className="p-3 text-left min-w-40">Staff member</th>{periods.map(p => <th key={p} className="p-3 min-w-44 text-left font-medium">{p.split('|')[0]}<span className="block text-xs text-muted-foreground">to {p.split('|')[1]}</span></th>)}</tr></thead><tbody>{staff.map(([id, name]) => <tr key={id} className="border-t"><th className="p-3 text-left align-top font-medium">{name}</th>{periods.map(period => <td key={period} className="p-3 align-top"><div className="space-y-3">{visible.filter(c => c.user_id === id && `${c.period_start}|${c.period_end}` === period).map(c => <div key={c.obligation_id} className="space-y-1"><p className="text-xs font-medium">{c.scope_name}</p><p className="text-xs text-muted-foreground">{c.form_name}</p><Badge variant="outline" className={statusClass(c.status)}>{c.status}</Badge>{canManage && reportMatches(c.status, REPORT_STATUS.OVERDUE) && <Button variant="ghost" size="sm" className="h-7 text-xs" disabled={nudge.isPending} onClick={() => nudge.mutate([c])}><Send className="h-3 w-3 mr-1" />Nudge</Button>}{c.last_nudged_at && <p className="text-xs text-muted-foreground">Nudged {format(new Date(c.last_nudged_at), 'dd MMM HH:mm')}</p>}</div>)}</div></td>)}</tr>)}</tbody></table>{!staff.length && <p className="p-8 text-center text-muted-foreground">No reporting obligations in this selection.</p>}</div>
-      <div className="space-y-3"><h3 className="font-semibold">Programme compliance</h3>{rollupPrograms.filter(p => reportMatches(program, REPORT_FILTER_ALL) || p.id === program).map(p => {
+      <div className="space-y-3"><h3 className="font-semibold">Programme compliance</h3>{rollupPeriods.length > 0 && <Choice label="Reporting period starting" value={selectedPeriod} onChange={setRollupPeriod} choices={rollupPeriods.map(p => ({ id: p, name: p }))} />}{rollupPrograms.filter(p => reportMatches(program, REPORT_FILTER_ALL) || p.id === program).map(p => {
         const matching = filtered.filter(c => c.program_id === p.id);
-        const periodsForProgram = [...new Set(matching.map(c => c.period_start))].sort();
-        const latestPeriod = periodsForProgram.at(-1);
+        const latestPeriod = selectedPeriod;
         const recent = matching.filter(c => c.period_start === latestPeriod);
         const totals = reportingRollup(recent);
         return <div key={p.id} className="flex flex-wrap justify-between items-center gap-2 border-b pb-3"><div><p className="font-medium">{p.name} — {totals.total ? `${totals.submitted} of ${totals.total} reports submitted (${totals.percentage}%)` : 'No obligations set'}</p>{latestPeriod && <p className="text-xs text-muted-foreground">Period starting {latestPeriod} · distinct obligations</p>}</div>{canManage && matching.some(c => reportMatches(c.status, REPORT_STATUS.OVERDUE)) && <Button variant="outline" size="sm" disabled={nudge.isPending} onClick={() => nudge.mutate(matching.filter(c => reportMatches(c.status, REPORT_STATUS.OVERDUE)))}><Send className="h-3 w-3 mr-2" />Nudge overdue</Button>}</div>;

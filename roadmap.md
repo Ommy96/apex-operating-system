@@ -5,7 +5,10 @@
 - [x] A: Compliance tray alerts and red-only dashboard banner, shared expiry rules and settings cache.
 - [ ] A: Signed-in checks including Umazi/non-admin and 390px header — external authentication unavailable.
 - [ ] S1: Await the referenced S1 brief, not included in this upload.
-- [ ] B: HR Staff Submission Ledger — obligation model, scoped derived periods, HR matrix/filters, team bulk creation, programme rollups, idempotent audited reminders and verification.
+- [x] B: Obligation model, scoped derived periods, HR matrix/filters, team bulk creation, selected-period programme rollups and idempotent audited reminders.
+- [ ] B: Verification a–f (submission flip, overdue boundary, programme lead, own-only/API and Umazi isolation, twice-send-once) — external authenticated testing unavailable; no existing submissions or obligations to exercise.
+- [x] B: Zero-obligation denominator verified in a focused test; full suite 161 passed. Signed-out reminder call denied without sending.
+- [ ] B: Signed-in HR matrix/bulk-create and zero-obligation screen — external authentication unavailable.
 - [ ] C: Aggregate vulnerability map and cold zones — follows B.
 
 - [x] Correct repeated role choices: organisation-scoped catalogue, identical-grant deduplication, distinct-grant labels; preserve stored roles/access.

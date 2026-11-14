@@ -33,7 +33,7 @@ export function useReportingLedger(from: string, to: string, canManage: boolean)
       const { data, error } = await supabase.rpc('reporting_team_options', { _org_id: orgId });
       if (error) throw error;
       return data as unknown as ReportingOptions;
-    }, enabled: Boolean(orgId) && canManage,
+    }, enabled: Boolean(orgId),
   });
   useEffect(() => { if (ledger.error || options.error) toast.error((ledger.error || options.error)?.message); }, [ledger.error, options.error]);
   useRealtimeSubscription([
