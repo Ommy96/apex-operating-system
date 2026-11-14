@@ -1,5 +1,7 @@
 # Project rules
 
+- Reporting obligations use anchored cadence periods and live M&E existence checks, with server-scoped ledger/team RPCs; reminders reuse source tasks, audit_logs and deliver() with one obligation-period key so retries preserve history without duplicate sends.
+
 - Offline sync has one app-level provider and a synchronous upload lock; all consumers share state and timers, and queue reads/uploads remain scoped to the current organisation and user to prevent duplicate uploads and cross-account exposure.
 
 - Compliance tray and dashboard alerts share the settings query and expiry helper; this keeps saved certificate dates and urgency thresholds consistent without storing duplicate notifications.

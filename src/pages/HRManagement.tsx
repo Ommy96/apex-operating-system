@@ -5,6 +5,7 @@ import { StaffDirectory } from "@/components/hr/StaffDirectory";
 import { VolunteerDirectory } from "@/components/hr/VolunteerDirectory";
 import { VolunteerAssignments } from "@/components/hr/VolunteerAssignments";
 import { VolunteerHoursLog } from "@/components/hr/VolunteerHoursLog";
+import { StaffSubmissionLedger } from '@/components/hr/StaffSubmissionLedger';
 
 export default function HRManagement() {
   return (
@@ -52,6 +53,7 @@ export default function HRManagement() {
             <TabsTrigger value="analytics" className="gap-1.5 text-xs">
               <BarChart3 className="h-3.5 w-3.5" /> Analytics
             </TabsTrigger>
+            <TabsTrigger value="reporting" className="gap-1.5 text-xs"><FileText className="h-3.5 w-3.5" />Submissions</TabsTrigger>
           </TabsList>
         </div>
 
@@ -64,6 +66,7 @@ export default function HRManagement() {
         <TabsContent value="gps"><FieldCheckIns /></TabsContent>
         <TabsContent value="tasks"><TaskManagement /></TabsContent>
         <TabsContent value="analytics"><HRAnalytics /></TabsContent>
+        <TabsContent value="reporting"><StaffSubmissionLedger /></TabsContent>
       </Tabs>
     </div>
   );

@@ -1,5 +1,8 @@
 project_id = "ncfjekjomwkfbremlyhx"
 
+[functions.reporting-nudge]
+verify_jwt = false
+
 [functions.send-invitation]
 verify_jwt = false
 
