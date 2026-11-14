@@ -9,8 +9,10 @@
 - [ ] B: Verification a–f (submission flip, overdue boundary, programme lead, own-only/API and Umazi isolation, twice-send-once) — external authenticated testing unavailable; no existing submissions or obligations to exercise.
 - [x] B: Zero-obligation denominator verified in a focused test; full suite 161 passed. Signed-out reminder call denied without sending.
 - [ ] B: Signed-in HR matrix/bulk-create and zero-obligation screen — external authentication unavailable.
-- [ ] C: Server-scoped aggregate vulnerability map, safe area centroids, suppression, ranked cold zones and organisation visit-gap setting.
-- [ ] C: Verification a–g including network privacy, restricted roles, Umazi isolation, empty state and greyscale.
+- [x] C: Server-scoped aggregate vulnerability map, suppression, ranked cold zones and audited organisation visit-gap setting; existing map reused, edge deployed.
+- [x] C: Seven focused privacy/threshold tests and full suite (168 passed); colour luminance differs in both themes. Anonymous RPC access revoked.
+- [ ] C: Complete administrative centroid coverage — current allowlist covers 11 named sub-counties; unmapped areas are listed without fabricated pins, villages await verified public centres.
+- [ ] C: Live verification a–f, saved threshold readback, responsive map framing and theme contrast — external authentication unavailable; /map redirects to /auth and database test role cannot execute authenticated RPCs.
 
 - [x] Correct repeated role choices: organisation-scoped catalogue, identical-grant deduplication, distinct-grant labels; preserve stored roles/access.
 - [x] Assignment dropdown: one choice per standard role, choosing the fewest-grant version without altering existing assignments.

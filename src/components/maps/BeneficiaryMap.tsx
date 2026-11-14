@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Layers, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
@@ -13,6 +12,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useVulnerabilityMap } from '@/hooks/useVulnerabilityMap';
 import { ColdZoneList } from './ColdZoneList';
 import type { MapArea } from '../../../supabase/functions/_shared/vulnerabilityMap';
+import { HIGH_CONCENTRATION, MEDIUM_CONCENTRATION } from '../../../supabase/functions/_shared/vulnerabilityMap';
 
 const KENYA_CENTROIDS: Record<string, [number, number]> = {
   'Mombasa': [-4.0435, 39.6682], 'Kwale': [-4.1737, 39.4521], 'Kilifi': [-3.5107, 39.9093],
@@ -207,7 +207,7 @@ function MapInner({ MapGL, Marker, Popup, Source, Layer, token, beneficiaries, u
       >
         {areas ? areas.filter((a: MapArea) => !a.suppressed && a.centroid && a.high_share != null).map((a: MapArea) => {
           if (!a.centroid) return null;
-          const tone = (a.high_share ?? 0) >= 0.5 ? 'map-need-high' : (a.high_share ?? 0) >= 0.25 ? 'map-need-medium' : 'map-need-low';
+          const tone = (a.high_share ?? 0) >= HIGH_CONCENTRATION ? 'map-need-high' : (a.high_share ?? 0) >= MEDIUM_CONCENTRATION ? 'map-need-medium' : 'map-need-low';
           return <Marker key={`${a.county}:${a.area_kind}:${a.area}`} longitude={a.centroid[0]} latitude={a.centroid[1]}><div className="flex flex-col items-center gap-1"><span className={`${tone} h-8 w-8 rounded-full border-2`} aria-hidden="true" /><span className="rounded bg-background px-2 py-1 text-xs font-medium text-foreground shadow-sm capitalize">{a.area} · {Math.round((a.high_share ?? 0) * 100)}%</span></div></Marker>;
         }) : useCluster ? (
           <Source id="beneficiaries-cluster" type="geojson" data={geojson} cluster={true} clusterMaxZoom={12} clusterRadius={50}>

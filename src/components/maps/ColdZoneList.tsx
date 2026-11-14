@@ -5,12 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Save, MapPinOff } from 'lucide-react';
 import type { VulnerabilityMapData } from '@/hooks/useVulnerabilityMap';
+import { DEFAULT_VISIT_GAP_DAYS, HIGH_CONCENTRATION } from '../../../supabase/functions/_shared/vulnerabilityMap';
 
 export function ColdZoneList({ data, loading, canManage, saving, onSave }: { data?: VulnerabilityMapData; loading: boolean; canManage: boolean; saving: boolean; onSave: (days: number) => void }) {
-  const [days, setDays] = useState(45);
+  const [days, setDays] = useState(DEFAULT_VISIT_GAP_DAYS);
   useEffect(() => { if (data) setDays(data.visit_gap_days); }, [data]);
   return <aside className="min-w-0 space-y-4">
-    <div><h2 className="text-lg font-semibold">Cold zones</h2><p className="text-sm text-muted-foreground">At least 50% high / critical need · {data?.visit_gap_days ?? 45}+ days without a visit</p></div>
+    <div><h2 className="text-lg font-semibold">Cold zones</h2><p className="text-sm text-muted-foreground">At least {HIGH_CONCENTRATION * 100}% high / critical need · {data?.visit_gap_days ?? DEFAULT_VISIT_GAP_DAYS}+ days without a visit</p></div>
     {canManage && <div className="flex items-end gap-2"><div><Label htmlFor="visit-gap">Visit gap (days)</Label><Input id="visit-gap" type="number" min={1} max={3650} value={days} onChange={e => setDays(Number(e.target.value))} /></div><Button variant="outline" size="icon" aria-label="Save visit-gap threshold" title="Save visit-gap threshold" disabled={saving || !Number.isInteger(days) || days < 1 || days > 3650} onClick={() => onSave(days)}><Save className="h-4 w-4" /></Button></div>}
     {loading ? <Skeleton className="h-48 w-full" /> : data && <>
       {!data.cold_zones.length && <p className="py-8 text-sm text-muted-foreground">No areas qualify as cold zones.</p>}

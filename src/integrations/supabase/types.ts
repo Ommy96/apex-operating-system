@@ -19185,7 +19185,9 @@ export type Database = {
       }
       set_vulnerability_map_gap: {
         Args: { _days: number; _org_id: string }
-        Returns: string
+        Returns: {
+          id: string
+        }[]
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
