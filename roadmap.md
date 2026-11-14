@@ -1,5 +1,12 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
+## Staff assignment fix (current request only)
+- [x] Diagnose exact live project-team read, FK/profile policies and missing offboarding column.
+- [ ] Repair project list with checked reads, staff names, skeleton/empty/error/retry states and verified writes.
+- [ ] Mount existing programme Team tab under staff/role management permission; end-date removals.
+- [x] Add missing project-team update timestamp; end-date access immediately and prevent field project assignments granting sibling programmes.
+- [ ] Run focused tests and report verification a–g, including unavailable authenticated checks.
+
 ## Adoption prompts (run in uploaded order)
 - [x] A: Global header sync indicator — shared app-level sync owner, upload lock, scoped queue, quiet synced state, mobile icon/count and link to sync tab.
 - [x] A: Compliance tray alerts and red-only dashboard banner, shared expiry rules and settings cache.

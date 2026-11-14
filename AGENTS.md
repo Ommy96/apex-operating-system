@@ -1,5 +1,7 @@
 # Project rules
 
+- Team lists read assignment rows separately from staff names (existing organisation staff RPC), and end-date removals with checked returned IDs; profile embeds must not assume optional profile columns, and field project assignments must not imply sibling-project access.
+
 - Vulnerability maps aggregate distinct active people server-side under explicit permission and assigned scope; public RPCs suppress unsafe partitions and the edge allowlist adds administrative centroids only, never person GPS or sensitive assessment content. Cold-zone settings reuse org_settings and audited server writes.
 
 - Reporting obligations use anchored cadence periods and live M&E existence checks, with server-scoped ledger/team RPCs; reminders reuse source tasks, audit_logs and deliver() with one obligation-period key so retries preserve history without duplicate sends.

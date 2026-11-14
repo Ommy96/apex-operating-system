@@ -14803,6 +14803,7 @@ export type Database = {
           project_id: string
           role_on_project: string | null
           start_date: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -14812,6 +14813,7 @@ export type Database = {
           project_id: string
           role_on_project?: string | null
           start_date?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -14821,6 +14823,7 @@ export type Database = {
           project_id?: string
           role_on_project?: string | null
           start_date?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
