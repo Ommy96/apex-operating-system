@@ -15584,6 +15584,116 @@ export type Database = {
         }
         Relationships: []
       }
+      reporting_obligations: {
+        Row: {
+          cadence: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          ends_on: string | null
+          form_id: string | null
+          grace_days: number
+          id: string
+          is_active: boolean
+          organization_id: string
+          program_id: string | null
+          project_id: string | null
+          scope_type: string
+          starts_on: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          cadence: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          ends_on?: string | null
+          form_id?: string | null
+          grace_days?: number
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          program_id?: string | null
+          project_id?: string | null
+          scope_type: string
+          starts_on?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          cadence?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          ends_on?: string | null
+          form_id?: string | null
+          grace_days?: number
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          program_id?: string | null
+          project_id?: string | null
+          scope_type?: string
+          starts_on?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporting_obligations_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "me_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporting_obligations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_funding_summary"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       risk_reviews: {
         Row: {
           created_at: string
@@ -18593,6 +18703,16 @@ export type Database = {
         Args: { _b_id: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
+      can_manage_reporting: { Args: { _org: string }; Returns: boolean }
+      can_read_reporting: {
+        Args: {
+          _org: string
+          _program: string
+          _project: string
+          _user: string
+        }
+        Returns: boolean
+      }
       can_read_vulnerability_history: {
         Args: { _assessment: string; _org: string }
         Returns: boolean
@@ -18742,6 +18862,10 @@ export type Database = {
       }
       get_org_subscription: { Args: { _org_id: string }; Returns: Json }
       get_program_aggregate: { Args: { _program_id: string }; Returns: Json }
+      get_reporting_ledger: {
+        Args: { _from: string; _org_id: string; _to: string }
+        Returns: Json
+      }
       get_shared_beneficiary_profile: {
         Args: { _token: string }
         Returns: Json
@@ -18895,6 +19019,10 @@ export type Database = {
         }
         Returns: string
       }
+      prepare_reporting_nudge: {
+        Args: { _obligation: string; _period: string }
+        Returns: Json
+      }
       preview_beneficiary_merge: {
         Args: { _canonical: string; _duplicate: string }
         Returns: Json
@@ -18939,6 +19067,7 @@ export type Database = {
         }
         Returns: Json
       }
+      reporting_team_options: { Args: { _org_id: string }; Returns: Json }
       restore_household_member: {
         Args: {
           _beneficiary_id: string
