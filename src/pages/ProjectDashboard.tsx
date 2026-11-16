@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useResolvedRecordId } from "@/hooks/useResolvedRecordId";
 import { RecordNotFound } from "@/components/RecordNotFound";
@@ -40,6 +40,9 @@ import { format } from "date-fns";
 import { ProjectBeneficiariesExport } from "@/components/projects/ProjectBeneficiariesExport";
 import { StaffSelect } from "@/components/StaffSelect";
 import { useOrgStaff } from "@/hooks/useOrgStaff";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { canAssignTeam, PROJECT_TEAM_ROLE, teamValueMatches } from "@/lib/teamAssignment";
 
 const AGE_GROUPS = [
   { label: '0-5', min: 0, max: 5 },
@@ -70,19 +73,22 @@ function getStatusBadgeClass(status: string | null) {
   return styles[status || "planning"] || styles.planning;
 }
 
-function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: string }) {
+export function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: string }) {
   const queryClient = useQueryClient();
+  const { can, hasPermission } = usePermissions();
+  const canManageTeam = canAssignTeam(can, hasPermission);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [assignForm, setAssignForm] = useState({ user_id: "", role_on_project: "team_member", start_date: "" });
+  const [assignForm, setAssignForm] = useState({ user_id: "", role_on_project: PROJECT_TEAM_ROLE.MEMBER as string, start_date: "" });
 
-  const { data: teamMembers = [], isLoading } = useQuery({
-    queryKey: ["project-team", projectId],
+  const { data: teamMembers = [], isLoading, error: teamError, refetch } = useQuery({
+    queryKey: ["project-team", orgId, projectId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("project_team_members").select("*, profiles(full_name, email, avatar_url)").eq("project_id", projectId).is("end_date", null);
+      const { data, error } = await supabase.from("project_team_members").select("*").eq("project_id", projectId).is("end_date", null);
       if (error) throw error;
       return data;
     },
-    enabled: !!projectId,
+    enabled: !!projectId && !!orgId,
+    retry: false,
   });
 
 
@@ -90,30 +96,34 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
 
   const assignMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("project_team_members").insert({ project_id: projectId, user_id: assignForm.user_id, role_on_project: assignForm.role_on_project, start_date: assignForm.start_date || null });
+      const { data, error } = await supabase.from("project_team_members").insert({ project_id: projectId, user_id: assignForm.user_id, role_on_project: assignForm.role_on_project, start_date: assignForm.start_date || null }).select("id");
       if (error) throw error;
+      if (!data?.length) throw new Error("Staff assignment was not saved. Check your access and retry.");
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Staff assigned"); setAssignOpen(false); setAssignForm({ user_id: "", role_on_project: "team_member", start_date: "" }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Staff assigned"); setAssignOpen(false); setAssignForm({ user_id: "", role_on_project: PROJECT_TEAM_ROLE.MEMBER, start_date: "" }); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const removeMutation = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from("project_team_members").update({ end_date: new Date().toISOString().split("T")[0] }).eq("id", id); if (error) throw error; },
+    mutationFn: async (id: string) => { const { data, error } = await supabase.from("project_team_members").update({ end_date: format(new Date(), "yyyy-MM-dd") }).eq("id", id).eq("project_id", projectId).select("id"); if (error) throw error; if (!data?.length) throw new Error("Assignment was not ended. Check your access and retry."); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["project-team"] }); toast.success("Removed"); },
+    onError: (e: Error) => toast.error(e.message),
   });
 
-  const { data: orgStaff = [] } = useOrgStaff(orgId);
+  const { data: orgStaff = [], isLoading: staffLoading, error: staffError, refetch: retryStaff } = useOrgStaff(orgId);
+  const readError = teamError || staffError;
+  useEffect(() => { if (readError) toast.error(readError.message); }, [readError]);
   const staffLabel = (userId: string) => orgStaff.find(s => s.user_id === userId)?.label;
 
   const getInitials = (name: string) => name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
   const roleLabels: Record<string, string> = { lead: "Lead", coordinator: "Coordinator", field_officer: "Field Officer", me_officer: "M&E Officer", finance: "Finance", team_member: "Team Member" };
-  const sorted = [...teamMembers].sort((a: any, b: any) => (a.role_on_project === "lead" ? -1 : b.role_on_project === "lead" ? 1 : 0));
+  const sorted = [...teamMembers].sort((a, b) => Number(teamValueMatches(b.role_on_project, PROJECT_TEAM_ROLE.LEAD)) - Number(teamValueMatches(a.role_on_project, PROJECT_TEAM_ROLE.LEAD)));
 
   return (
     <Card><CardContent className="p-4 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-foreground">Project Team</h3>
-        <Sheet open={assignOpen} onOpenChange={setAssignOpen}>
+        {canManageTeam && <Sheet open={assignOpen} onOpenChange={setAssignOpen}>
           <SheetTrigger asChild><Button size="sm" variant="outline"><UserPlus className="h-4 w-4 mr-1" /> Assign Staff</Button></SheetTrigger>
           <SheetContent>
             <SheetHeader><SheetTitle>Assign Staff</SheetTitle></SheetHeader>
@@ -131,22 +141,22 @@ function ProjectTeamTab({ projectId, orgId }: { projectId: string; orgId?: strin
               <Button onClick={() => assignMutation.mutate()} disabled={!assignForm.user_id || assignMutation.isPending} className="w-full">Assign</Button>
             </div>
           </SheetContent>
-        </Sheet>
+        </Sheet>}
       </div>
-      {isLoading ? <div className="text-center py-6 text-muted-foreground">Loading...</div> : sorted.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">No team members assigned yet.</div>
+      {readError ? <div role="alert" className="space-y-3 py-6"><p className="text-sm text-destructive">Could not load the project team: {readError.message}</p><Button variant="outline" onClick={() => { void refetch(); void retryStaff(); }}>Retry</Button></div> : isLoading || staffLoading ? <div className="space-y-2 py-6"><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /></div> : sorted.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">No staff assigned yet</div>
       ) : (
         <div className="space-y-2">{sorted.map((m: any) => (
           <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials((m.profiles as any)?.full_name || staffLabel(m.user_id) || "")}</AvatarFallback></Avatar>
+            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials(staffLabel(m.user_id) || "")}</AvatarFallback></Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{(m.profiles as any)?.full_name || staffLabel(m.user_id) || "Unnamed member"}</p>
+              <p className="text-sm font-medium text-foreground truncate">{staffLabel(m.user_id) || "Unnamed member"}</p>
               <div className="flex items-center gap-2">
-                {m.role_on_project === "lead" && <Star className="h-3 w-3 text-warning" />}
+                {teamValueMatches(m.role_on_project, PROJECT_TEAM_ROLE.LEAD) && <Star className="h-3 w-3 text-warning" />}
                 <Badge variant="outline" className="text-[10px]">{roleLabels[m.role_on_project] || m.role_on_project}</Badge>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeMutation.mutate(m.id)}><X className="h-3 w-3" /></Button>
+            {canManageTeam && <Button variant="ghost" size="icon" aria-label="End assignment" disabled={removeMutation.isPending} className="h-7 w-7" onClick={() => removeMutation.mutate(m.id)}><X className="h-3 w-3" /></Button>}
           </div>
         ))}</div>
       )}

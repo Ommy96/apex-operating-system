@@ -2,10 +2,12 @@
 
 ## Staff assignment fix (current request only)
 - [x] Diagnose exact live project-team read, FK/profile policies and missing offboarding column.
-- [ ] Repair project list with checked reads, staff names, skeleton/empty/error/retry states and verified writes.
-- [ ] Mount existing programme Team tab under staff/role management permission; end-date removals.
+- [x] Repair project list with checked reads, staff names, skeleton/empty/error/retry states and returned-ID checks on writes.
+- [x] Mount existing programme Team tab under staff/role management permission; end-date removals.
 - [x] Add missing project-team update timestamp; end-date access immediately and prevent field project assignments granting sibling programmes.
-- [ ] Run focused tests and report verification a–g, including unavailable authenticated checks.
+- [x] Run focused tests: 11 passed, including forced project/programme failures and successful retries; full suite 179 passed and preview build OK.
+- [ ] Verification a–f: assignment/readback, exact assigned-project RPC output, single-field-role beneficiary scope, removal reload and Umazi isolation — external authenticated session unavailable; database read tool cannot execute the assigned-project RPC.
+- [ ] Verification g: live signed-in forced failure remains unavailable; both list error/retry paths pass isolated tests.
 
 ## Adoption prompts (run in uploaded order)
 - [x] A: Global header sync indicator — shared app-level sync owner, upload lock, scoped queue, quiet synced state, mobile icon/count and link to sync tab.

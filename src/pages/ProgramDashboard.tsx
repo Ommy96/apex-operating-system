@@ -39,6 +39,7 @@ import { ProgramOnlyEnrollments } from "@/components/programs/ProgramOnlyEnrollm
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
 import { FundingHealthBadge } from "@/components/finance/FundingHealthBadge";
 import { GenerateWithAIButton } from "@/components/ai/GenerateWithAIButton";
+import { canAssignTeam, TEAM_TAB } from "@/lib/teamAssignment";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   planning: { label: "Planning", color: "text-muted-foreground", bg: "bg-muted/60", dot: "bg-muted-foreground" },
@@ -54,7 +55,8 @@ const ProgramDashboard = () => {
   });
   const navigate = useNavigate();
   const { currentOrganization } = useOrganization();
-  const { isProgramScoped } = usePermissions();
+  const { isProgramScoped, can, hasPermission } = usePermissions();
+  const canManageTeam = canAssignTeam(can, hasPermission);
   const [activeTab, setActiveTab] = useState("overview");
 
   // Consolidated tab map: each new tab renders the union of the old sub-tabs listed.
@@ -321,6 +323,7 @@ const ProgramDashboard = () => {
               { value: "funding", icon: DollarSign, label: "Funding" },
               { value: "risks", icon: ShieldAlert, label: "Risks & Issues" },
               { value: "reports", icon: Package, label: "Reports" },
+              ...(canManageTeam ? [{ value: TEAM_TAB, icon: Users, label: "Team" }] : []),
             ].map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <tab.icon className="h-4 w-4" />
@@ -330,6 +333,11 @@ const ProgramDashboard = () => {
           </TabsList>
         </div>
 
+        {canManageTeam && programId && (
+          <TabsContent value={TEAM_TAB} className="mt-6">
+            <ProgramTeam programId={programId} />
+          </TabsContent>
+        )}
         {isOldTabActive("overview") && (
           <TabsContent value="overview" forceMount className="mt-6 space-y-6">
             {programId && currentOrganization?.organization_id && (
