@@ -3,11 +3,15 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, Target, TrendingDown, Percent } from 'lucide-react';
 import { useOrgSponsorshipMetrics } from '@/hooks/useSponsorshipCoverage';
+import { useMyDataScope } from '@/hooks/useMyDataScope';
 
 export function SponsorshipMetrics() {
-  const { data: metrics, isLoading } = useOrgSponsorshipMetrics();
+  const { data: scope, isLoading: scopeLoading } = useMyDataScope();
+  const orgWide = scope?.scope === 'organization';
+  const scopeIds = !scope ? [] : orgWide ? null : scope.programIds;
+  const { data: metrics, isLoading } = useOrgSponsorshipMetrics(scopeIds, !!scope);
 
-  if (isLoading) {
+  if (scopeLoading || isLoading) {
     return <Skeleton className="h-48 w-full rounded-xl" />;
   }
 
@@ -27,6 +31,9 @@ export function SponsorshipMetrics() {
         <CardTitle className="text-base flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" />
           Sponsorship Coverage Intelligence
+          <span className="ml-auto text-xs font-normal text-muted-foreground">
+            {orgWide ? 'Organisation-wide' : 'Your programmes'}
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

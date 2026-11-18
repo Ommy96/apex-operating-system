@@ -18791,14 +18791,6 @@ export type Database = {
         Returns: boolean
       }
       donor_review_allowed: { Args: { _org: string }; Returns: boolean }
-      effective_beneficiary_visibility: {
-        Args: { _b: string; _org: string; _user: string }
-        Returns: boolean
-      }
-      effective_household_visibility: {
-        Args: { _h: string; _org: string; _user: string }
-        Returns: boolean
-      }
       find_potential_duplicates: {
         Args: { _org_id: string }
         Returns: {

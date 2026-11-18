@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
@@ -52,6 +53,7 @@ import { PermissionMatrix } from '@/components/rbac/PermissionMatrix';
 import { UserRoleAssignment } from '@/components/rbac/UserRoleAssignment';
 import { toast } from '@/hooks/use-toast';
 import { organisationRoleCatalogue } from '@/lib/roleCatalogue';
+import { DATA_SCOPE_OPTIONS, DEFAULT_CUSTOM_ROLE_SCOPE, type DataScope } from '@/lib/dataScope';
 
 interface RbacRole {
   id: string;
@@ -64,6 +66,7 @@ interface RbacRole {
   icon: string;
   organization_id: string | null;
   created_at: string;
+  data_scope?: string | null;
 }
 
 const iconMap: Record<string, any> = {
@@ -91,7 +94,7 @@ export default function RoleManagement() {
   const [selectedRole, setSelectedRole] = useState<RbacRole | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [newRole, setNewRole] = useState({ name: '', display_name: '', description: '', color: '#6366f1' });
+  const [newRole, setNewRole] = useState<{ name: string; display_name: string; description: string; color: string; data_scope: DataScope }>({ name: '', display_name: '', description: '', color: '#6366f1', data_scope: DEFAULT_CUSTOM_ROLE_SCOPE });
 
   const canManageRoles = can.manageCustomRoles || isSuperAdmin;
 
@@ -155,6 +158,7 @@ export default function RoleManagement() {
         display_name: newRole.display_name,
         description: newRole.description || null,
         color: newRole.color,
+        data_scope: newRole.data_scope,
         is_system_role: false,
         is_active: true,
       });
@@ -164,7 +168,7 @@ export default function RoleManagement() {
       toast({ title: 'Role created successfully' });
       queryClient.invalidateQueries({ queryKey: ['rbac-all-roles'] });
       setCreateDialogOpen(false);
-      setNewRole({ name: '', display_name: '', description: '', color: '#6366f1' });
+      setNewRole({ name: '', display_name: '', description: '', color: '#6366f1', data_scope: DEFAULT_CUSTOM_ROLE_SCOPE });
     },
     onError: (err: any) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -232,15 +236,18 @@ export default function RoleManagement() {
   const updateRole = useMutation({
     mutationFn: async () => {
       if (!selectedRole) return;
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('rbac_roles')
         .update({
           display_name: newRole.display_name,
           description: newRole.description,
           color: newRole.color,
+          data_scope: newRole.data_scope,
         })
-        .eq('id', selectedRole.id);
+        .eq('id', selectedRole.id)
+        .select('id');
       if (error) throw error;
+      if (!data?.length) throw new Error('This role could not be changed. Standard roles keep their built-in data scope.');
     },
     onSuccess: () => {
       toast({ title: 'Role updated' });
@@ -381,7 +388,7 @@ export default function RoleManagement() {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedRole(role);
-                                    setNewRole({ name: role.name, display_name: role.display_name, description: role.description || '', color: role.color });
+                                    setNewRole({ name: role.name, display_name: role.display_name, description: role.description || '', color: role.color, data_scope: ((role.data_scope as DataScope) || DEFAULT_CUSTOM_ROLE_SCOPE) });
                                     setEditDialogOpen(true);
                                   }}
                                 >
@@ -509,6 +516,16 @@ export default function RoleManagement() {
               />
             </div>
             <div>
+              <Label>Data scope</Label>
+              <Select value={newRole.data_scope} onValueChange={v => setNewRole(p => ({ ...p, data_scope: v as DataScope }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DATA_SCOPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">{DATA_SCOPE_OPTIONS.find(o => o.value === newRole.data_scope)?.hint}</p>
+            </div>
+            <div>
               <Label>Color</Label>
               <div className="flex items-center gap-3 mt-1">
                 <input
@@ -556,6 +573,16 @@ export default function RoleManagement() {
                 onChange={e => setNewRole(p => ({ ...p, description: e.target.value }))}
                 rows={3}
               />
+            </div>
+            <div>
+              <Label>Data scope</Label>
+              <Select value={newRole.data_scope} onValueChange={v => setNewRole(p => ({ ...p, data_scope: v as DataScope }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DATA_SCOPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">{DATA_SCOPE_OPTIONS.find(o => o.value === newRole.data_scope)?.hint}</p>
             </div>
             <div>
               <Label>Color</Label>

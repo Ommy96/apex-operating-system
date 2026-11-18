@@ -29,6 +29,7 @@ import { SparklineTile } from "@/components/dashboard/SparklineTile";
 import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
 import { StaggerGrid } from "@/components/motion/StaggerGrid";
 import { ManagementPulse } from "@/components/dashboard/ManagementPulse";
+import { useMyDataScope } from "@/hooks/useMyDataScope";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -38,6 +39,16 @@ const Dashboard = () => {
   const { can, isFieldOfficer, isLoading: permLoading } = usePermissions();
   const { term, termPlural } = useBeneficiaryTerminology();
   const orgId = currentOrganization?.organization_id;
+  const { data: myScope } = useMyDataScope();
+  const scoped = !!myScope && myScope.scope !== 'organization';
+  // Scoped users only see grants linked to their programmes (via grant_programs).
+  const scopedGrantIds = async (): Promise<string[] | null> => {
+    if (!scoped) return null;
+    if (!myScope!.programIds.length) return [];
+    const { data, error } = await supabase.from('grant_programs').select('grant_id').in('program_id', myScope!.programIds);
+    if (error) { toast({ title: 'Could not load grants', description: error.message, variant: 'destructive' }); throw error; }
+    return [...new Set((data ?? []).map((g: any) => g.grant_id))];
+  };
 
   // Project Lead users land on their scoped workspace instead of the org dashboard.
   const { isProjectLead, loading: leadLoading } = useLeadProjects();
@@ -104,21 +115,26 @@ const Dashboard = () => {
 
   // Active grants count + total portfolio
   const { data: grantData, isLoading: grantsLoading } = useQuery({
-    queryKey: ['dashboard-grants', orgId],
+    queryKey: ['dashboard-grants', orgId, myScope],
     queryFn: async () => {
       if (!orgId) return { count: 0, totalAmount: 0 };
-      const { data } = await supabase
+      const ids = await scopedGrantIds();
+      if (ids && ids.length === 0) return { count: 0, totalAmount: 0 };
+      let q = supabase
         .from('grants')
         .select('id, grant_amount')
         .eq('organization_id', orgId)
         .eq('status', 'active');
+      if (ids) q = q.in('id', ids);
+      const { data, error } = await q;
+      if (error) { toast({ title: 'Could not load grants', description: error.message, variant: 'destructive' }); throw error; }
       const grants = data || [];
       return {
         count: grants.length,
         totalAmount: grants.reduce((s, g) => s + (g.grant_amount || 0), 0),
       };
     },
-    enabled: !!orgId,
+    enabled: !!orgId && !!myScope,
     staleTime: 30000,
   });
 
@@ -139,19 +155,24 @@ const Dashboard = () => {
 
   // Reports due (grant_reports not submitted, due within 30 days)
   const { data: reportsDue = 0, isLoading: reportsLoading } = useQuery({
-    queryKey: ['dashboard-reports-due', orgId],
+    queryKey: ['dashboard-reports-due', orgId, myScope],
     queryFn: async () => {
       if (!orgId) return 0;
       const thirtyDaysFromNow = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
-      const { count } = await supabase
+      const ids = await scopedGrantIds();
+      if (ids && ids.length === 0) return 0;
+      let q = supabase
         .from('grant_reports')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', orgId)
         .not('status', 'in', '("submitted","approved")')
         .lte('due_date', thirtyDaysFromNow);
+      if (ids) q = q.in('grant_id', ids);
+      const { count, error } = await q;
+      if (error) { toast({ title: 'Could not load reports due', description: error.message, variant: 'destructive' }); throw error; }
       return count || 0;
     },
-    enabled: !!orgId,
+    enabled: !!orgId && !!myScope,
     staleTime: 60000,
   });
 
@@ -461,6 +482,13 @@ const Dashboard = () => {
           <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--brand-ink)', letterSpacing: '-0.4px' }}>
             {greeting}, {firstName}
           </h1>
+          {scoped && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {myScope!.scope === 'none'
+                ? 'You have no active role, so no records are shown.'
+                : `Showing your ${myScope!.scope === 'program' ? 'programmes' : 'projects'}: ${myScope!.names.length ? myScope!.names.join(', ') : 'none assigned yet'}`}
+            </p>
+          )}
           <p style={{ fontSize: 12, color: 'var(--brand-ink-3)', marginTop: 3 }}>
             {formattedDate}{currentOrganization?.organization_id ? ` · ${currentOrganization?.organization_id && (currentOrganization as any)?.organizations?.name ? (currentOrganization as any).organizations.name : ''}` : ''}
           </p>
@@ -523,7 +551,7 @@ const Dashboard = () => {
           tone="teal"
           isLoading={activitiesLoading}
           value={`${activityData?.completed || 0} / ${activityData?.total || 0}`}
-          deltaLabel={`${activityData?.total ? Math.round(((activityData?.completed || 0) / activityData.total) * 100) : 0}% completed`}
+          deltaLabel={`${activityData?.total ? Math.round(((activityData?.completed || 0) / activityData.total) * 100) : 0}% completed${scoped ? ' · Organisation-wide' : ''}`}
         />
         <SparklineTile
           label="REPORTS DUE"

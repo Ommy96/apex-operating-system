@@ -274,20 +274,29 @@ export function useProgramCoverage(programId: string | undefined) {
   });
 }
 
-export function useOrgSponsorshipMetrics() {
+/**
+ * @param scopeProgramIds null = organisation-wide; an array restricts totals to
+ *   those programmes (scoped users). An empty array yields zero totals.
+ */
+export function useOrgSponsorshipMetrics(scopeProgramIds: string[] | null = null, enabled = true) {
   const { currentOrganization } = useOrganization();
   const orgId = currentOrganization?.organization_id;
 
   return useQuery({
-    queryKey: ['org-sponsorship-metrics', orgId],
+    queryKey: ['org-sponsorship-metrics', orgId, scopeProgramIds],
+    enabled: !!orgId && enabled,
     queryFn: async () => {
       if (!orgId) return null;
+      if (scopeProgramIds && scopeProgramIds.length === 0) return { totalRequired: 0, totalReceived: 0, gap: 0, coverageRate: 0 };
 
-      // Get all programs with sponsorship projects
-      const { data: projects } = await supabase
+      // Get all programs with sponsorship projects (restricted to scope when given)
+      let projectQuery = supabase
         .from('projects')
         .select('id, name, program_id, estimated_cost, sponsorship_required')
         .eq('organization_id', orgId);
+      if (scopeProgramIds) projectQuery = projectQuery.in('program_id', scopeProgramIds);
+      const { data: projects, error: projectsError } = await projectQuery;
+      if (projectsError) throw projectsError;
 
       const sponsorshipProjects = (projects || []).filter(p => (p as any).sponsorship_required || (p as any).estimated_cost > 0);
       const programIds = [...new Set(sponsorshipProjects.map(p => p.program_id).filter(Boolean))] as string[];
@@ -339,6 +348,5 @@ export function useOrgSponsorshipMetrics() {
         coverageRate: totalRequired > 0 ? Math.min(100, Math.round((totalReceived / totalRequired) * 100)) : 0,
       };
     },
-    enabled: !!orgId,
   });
 }
