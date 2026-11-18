@@ -15325,6 +15325,7 @@ export type Database = {
           color: string | null
           created_at: string | null
           created_by: string | null
+          data_scope: string
           description: string | null
           display_name: string
           icon: string | null
@@ -15340,6 +15341,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_scope?: string
           description?: string | null
           display_name: string
           icon?: string | null
@@ -15355,6 +15357,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_scope?: string
           description?: string | null
           display_name?: string
           icon?: string | null
@@ -18683,6 +18686,10 @@ export type Database = {
           version: number
         }[]
       }
+      apply_default_role_permissions: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
       approve_results_period: {
         Args: {
           _amends?: string
@@ -18784,6 +18791,14 @@ export type Database = {
         Returns: boolean
       }
       donor_review_allowed: { Args: { _org: string }; Returns: boolean }
+      effective_beneficiary_visibility: {
+        Args: { _b: string; _org: string; _user: string }
+        Returns: boolean
+      }
+      effective_household_visibility: {
+        Args: { _h: string; _org: string; _user: string }
+        Returns: boolean
+      }
       find_potential_duplicates: {
         Args: { _org_id: string }
         Returns: {
@@ -18938,10 +18953,6 @@ export type Database = {
       }
       has_valid_photo_consent: {
         Args: { _beneficiary_id: string }
-        Returns: boolean
-      }
-      household_visible_scoped: {
-        Args: { _h_id: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_donor_of_beneficiary: {
