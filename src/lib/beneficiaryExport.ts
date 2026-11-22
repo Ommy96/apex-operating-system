@@ -140,6 +140,10 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
       ),
     ]);
 
+  for (const result of [programsRes, projectsRes, configRes, orgRes]) {
+    if (result.error) throw result.error;
+  }
+
   const guardianIds = Array.from(new Set((bgRes.data || []).map((g: any) => g.guardian_id).filter(Boolean)));
   const guardiansRes = guardianIds.length
     ? await fetchIn('guardians', 'id, full_name, guardian_type, phone, email, is_alive', 'id', guardianIds)
@@ -172,6 +176,9 @@ export async function exportBeneficiariesToExcel(filters: ExportFilters) {
       'Status': b.status,
       'Gender': b.gender,
       'Date of Birth': p.dateOfBirth,
+      'Institution name': b.institution_name || '',
+      'Class / grade / year': b.grade || '',
+      'Academic level': b.academic_level || '',
       'Age': p.age ?? '',
       'Age Band': p.ageBand,
       'Country': b.country || '',

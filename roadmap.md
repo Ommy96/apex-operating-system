@@ -1,5 +1,12 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
+## Remove duplicate sector fields (current request)
+- [x] Check stored sector data: query returned no rows; no education migration or undated history decisions needed.
+- [x] Remove five duplicate names from existing configs without changing other custom fields.
+- [x] Remove education seed duplicates, keep indicators, add settings duplicate warning, and include core education columns in exports.
+- [x] Verify cleanup in H2HO and preservation of all five Umazi fields; zero retained attendance/term/sponsorship rows; duplicate guard and genuine-field/export checks pass.
+- [ ] Verify a–d authenticated edit/save, registration/enrollment, genuine custom-step rendering and download as H2HO/Umazi non-admin — external unmanaged auth cannot mint sessions. Existing Category step means student counts are 8 editing / 9 registering, not the brief’s 7 / 8; no unrelated step removed.
+
 ## Staff assignment fix (current request only)
 - [x] Diagnose exact live project-team read, FK/profile policies and missing offboarding column.
 - [x] Repair project list with checked reads, staff names, skeleton/empty/error/retry states and returned-ID checks on writes.

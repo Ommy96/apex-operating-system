@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils';
 import { BeneficiaryCodeFormatCard } from './BeneficiaryCodeFormatCard';
 import { SponsorshipFundingModelCard } from './SponsorshipFundingModelCard';
 import { DEFAULT_FAMILY_STATUSES, normaliseFamilyStatus } from '@/lib/familyStatus';
+import { CustomBeneficiaryFields } from './CustomBeneficiaryFields';
+import { customFieldWarnings } from '@/lib/beneficiaryCustomFields';
 
 
 interface OrgTypePreset {
@@ -113,6 +115,11 @@ export function BeneficiaryDataSettings() {
 
   const save = async () => {
     if (!orgId) return;
+    const warnings = customFieldWarnings(form.custom_fields || []);
+    if (warnings.length) {
+      toast({ title: 'Duplicate custom fields', description: warnings.join('; '), variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -326,6 +333,8 @@ export function BeneficiaryDataSettings() {
           </div>
         </CardContent>
       </Card>
+
+      <CustomBeneficiaryFields fields={form.custom_fields || []} onChange={fields => update('custom_fields', fields)} />
 
       <div className="flex justify-end">
         <Button onClick={save} disabled={saving}>

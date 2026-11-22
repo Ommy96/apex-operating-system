@@ -79,13 +79,7 @@ export const SECTOR_PRESETS: SectorPreset[] = [
     terminology: 'Student',
     beneficiaryTypes: ['child', 'youth', 'school', 'household'],
     configFlags: { collect_education_data: true, collect_household_data: true, collect_health_data: true },
-    customFields: [
-      { name: 'current_school', label: 'Current school', type: 'text', group: 'Education' },
-      { name: 'current_grade', label: 'Current grade / class', type: 'text', group: 'Education' },
-      { name: 'attendance_rate', label: 'Attendance %', type: 'number', group: 'Education' },
-      { name: 'last_term_score', label: 'Last term average score', type: 'number', group: 'Education' },
-      { name: 'sponsorship_status', label: 'Sponsorship status', type: 'select', group: 'Sponsorship' },
-    ],
+    customFields: [],
     features: ['sponsorship', 'academic_tracking'],
     logframe: {
       title: 'Education programme — starter logframe',

@@ -1,5 +1,7 @@
 # Project rules
 
+- Beneficiary custom fields reuse the existing sector step and config; settings validate names and labels against shared core-field rules, and exports read education from core columns to avoid duplicate sources of truth.
+
 - Team lists read assignment rows separately from staff names (existing organisation staff RPC), and end-date removals with checked returned IDs; profile embeds must not assume optional profile columns, and field project assignments must not imply sibling-project access.
 
 - Vulnerability maps aggregate distinct active people server-side under explicit permission and assigned scope; public RPCs suppress unsafe partitions and the edge allowlist adds administrative centroids only, never person GPS or sensitive assessment content. Cold-zone settings reuse org_settings and audited server writes.
