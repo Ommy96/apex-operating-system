@@ -328,8 +328,7 @@ export function AppSidebar() {
       label: "Overview",
       items: [
         { title: "Overview", url: "/dashboard", icon: LayoutDashboard, show: true },
-        { title: "My Programme", url: "/workspace/program", icon: Layers, show: isProgramManager },
-        { title: "My Workspace", url: "/workspace/lead", icon: LayoutGrid, show: isProjectLead },
+                { title: "My Workspace", url: "/workspace", icon: LayoutGrid, show: isProjectLead || isProgramManager },
       ],
     },
     {

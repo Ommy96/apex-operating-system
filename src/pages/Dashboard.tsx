@@ -24,7 +24,6 @@ import { useBeneficiaryTerminology } from "@/hooks/useBeneficiaryTerminology";
 import { useCanonicalCounts } from "@/hooks/useCanonicalCounts";
 import { formatDistanceToNow } from "date-fns";
 import { SponsorshipMetrics } from "@/components/financial/SponsorshipMetrics";
-import { useLeadProjects } from "@/hooks/useLeadProjects";
 import { SparklineTile } from "@/components/dashboard/SparklineTile";
 import { IntelligencePanel, type IntelSignal } from "@/components/dashboard/IntelligencePanel";
 import { StaggerGrid } from "@/components/motion/StaggerGrid";
@@ -50,20 +49,6 @@ const Dashboard = () => {
     return [...new Set((data ?? []).map((g: any) => g.grant_id))];
   };
 
-  // Project Lead users land on their scoped workspace instead of the org dashboard.
-  const { isProjectLead, loading: leadLoading } = useLeadProjects();
-  useEffect(() => {
-    if (leadLoading) return;
-    if (isAdmin || isManagement) return;
-    if (!permLoading && isFieldOfficer) {
-      // Field staff land in the operational staff portal, not the admin shell.
-      navigate("/workspace", { replace: true });
-      return;
-    }
-    if (isProjectLead) {
-      navigate("/workspace/lead", { replace: true });
-    }
-  }, [leadLoading, isAdmin, isManagement, isProjectLead, isFieldOfficer, permLoading, navigate]);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const firstName = userName.split(' ')[0];

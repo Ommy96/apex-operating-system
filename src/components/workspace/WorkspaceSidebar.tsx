@@ -40,6 +40,7 @@ import { NotificationBell } from "@/components/communications/NotificationBell";
 import { isSuperAdmin } from "@/lib/superAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTierLabels } from "@/hooks/useTierLabels";
+import { useStaffScope } from "@/hooks/useStaffScope";
 
 interface MenuItemProps {
   item: { title: string; url: string; icon: any };
@@ -127,7 +128,7 @@ export function WorkspaceSidebar() {
   const T = useTierLabels();
 
   // Logically grouped navigation with permission checks
-  const menuGroups: MenuGroup[] = [
+  const orgMenuGroups: MenuGroup[] = [
     {
       label: "Home",
       items: [
@@ -206,6 +207,34 @@ export function WorkspaceSidebar() {
       ],
     },
   ];
+
+  // Scoped staff get a short workspace menu, not the organisation menu with items hidden.
+  const { data: staffScope } = useStaffScope();
+  const deptModules = new Set((staffScope?.departments ?? []).flatMap((d) => d.modules.map((m) => m.toLowerCase())));
+  const scopedMenuGroups: MenuGroup[] = [
+    {
+      label: "Home",
+      items: [
+        { title: "My workspace", url: "/workspace", icon: Home, show: true },
+        { title: "My beneficiaries", url: "/beneficiaries", icon: Users, show: true },
+        { title: "My programmes", url: "/programs-management", icon: Target, show: true },
+        { title: "My projects", url: "/projects", icon: FolderKanban, show: true },
+        { title: "Activities", url: "/activities", icon: Activity, show: true },
+        { title: "Tasks", url: "/tasks", icon: ListChecks, show: true },
+        { title: "Reports", url: "/analytics", icon: BarChart3, show: true },
+        { title: "Field Mode", url: "/field-mode", icon: Smartphone, show: true },
+      ],
+    },
+    {
+      label: "Department",
+      items: [
+        { title: "M&E", url: "/me", icon: TrendingUp, show: deptModules.has("indicators") || deptModules.has("results") },
+        { title: "Grants", url: "/grants", icon: HandCoins, show: deptModules.has("grants") },
+        { title: "Budgets", url: "/budgets", icon: Wallet, show: deptModules.has("budgets") },
+      ],
+    },
+  ];
+  const menuGroups: MenuGroup[] = staffScope && !staffScope.orgReach ? scopedMenuGroups : orgMenuGroups;
 
   // ── Collapsible groups state ──
   const storageKey = useMemo(

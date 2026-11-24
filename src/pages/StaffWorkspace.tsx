@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { QuickFieldLog } from "@/components/field/QuickFieldLog";
+import { ScopedWorkspaceOverview } from "@/components/workspace/ScopedWorkspaceOverview";
 
 /**
  * Operational staff portal (/workspace). Field-scoped staff land here by
@@ -196,6 +197,8 @@ export default function StaffWorkspace() {
           </Button>
         </div>
       </header>
+
+      <ScopedWorkspaceOverview onRecordVisit={() => setVisitOpen(true)} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Assigned people */}

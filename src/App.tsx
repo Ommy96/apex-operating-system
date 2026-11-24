@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ScopedHomeGate } from "@/components/ScopedHomeGate";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { OfflineSyncProvider } from './hooks/useOfflineSync';
@@ -32,9 +33,7 @@ const ProjectReports = lazy(() => import("./pages/ProjectReports"));
 const ProgramReports = lazy(() => import("./pages/ProgramReports"));
 const ProjectEligibility = lazy(() => import("./pages/ProjectEligibility"));
 const BeneficiaryEligibility = lazy(() => import("./pages/BeneficiaryEligibility"));
-const LeadWorkspace = lazy(() => import("./pages/LeadWorkspace"));
 const StaffWorkspace = lazy(() => import("./pages/StaffWorkspace"));
-const ProgramManagerWorkspace = lazy(() => import("./pages/ProgramManagerWorkspace"));
 const BurnVsImpact = lazy(() => import("./pages/BurnVsImpact"));
 const AllProjects = lazy(() => import("./pages/AllProjects"));
 const Activities = lazy(() => import("./pages/Activities"));
@@ -212,7 +211,7 @@ const App = () => (
             <Route path="/give/:orgSlug/:campaignSlug" element={<LazyRoute><PublicDonationPage /></LazyRoute>} />
 
             <Route path="/dashboard" element={
-              <ProtectedRoute><DashboardLayout><LazyRoute><Dashboard /></LazyRoute></DashboardLayout></ProtectedRoute>
+              <ProtectedRoute><ScopedHomeGate><DashboardLayout><LazyRoute><Dashboard /></LazyRoute></DashboardLayout></ScopedHomeGate></ProtectedRoute>
             } />
             <Route path="/programs-management" element={
               <ProtectedRoute requirePermission={{ module: 'programs', action: 'view', resource: 'programs' }}>
@@ -312,13 +311,9 @@ const App = () => (
             <Route path="/workspace" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><StaffWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />
-            <Route path="/workspace/lead" element={
-              <ProtectedRoute><DashboardLayout><LazyRoute><LeadWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
-            } />
-            <Route path="/workspace/program" element={
-              <ProtectedRoute><DashboardLayout><LazyRoute><ProgramManagerWorkspace /></LazyRoute></DashboardLayout></ProtectedRoute>
-            } />
-            <Route path="/my-project" element={<Navigate to="/workspace/lead" replace />} />
+            <Route path="/workspace/lead" element={<Navigate to="/workspace" replace />} />
+            <Route path="/workspace/program" element={<Navigate to="/workspace" replace />} />
+            <Route path="/my-project" element={<Navigate to="/workspace" replace />} />
             <Route path="/intelligence/burn-vs-impact" element={
               <ProtectedRoute><DashboardLayout><LazyRoute><BurnVsImpact /></LazyRoute></DashboardLayout></ProtectedRoute>
             } />

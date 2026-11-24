@@ -8,7 +8,7 @@ Top-level groups and items as wired in `src/components/AppSidebar.tsx`:
 
 | Group | Item | Route | Visibility |
 |---|---|---|---|
-| HOME | My Workspace | `/workspace/lead` | Only when the current user has `project_lead`/manager rights on at least one project (via `useLeadProjects`). |
+| HOME | My Workspace | `/workspace` | Only when the current user has `project_lead`/manager rights on at least one project (via `useLeadProjects`). |
 | HOME | Dashboard | `/dashboard` | Everyone. |
 | PEOPLE | Beneficiaries | `/beneficiaries` | `can.viewBeneficiaries` |
 | PEOPLE | Households | `/households` | `can.viewBeneficiaries` |
