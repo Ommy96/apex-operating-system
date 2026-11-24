@@ -5556,6 +5556,172 @@ export type Database = {
           },
         ]
       }
+      department_members: {
+        Row: {
+          created_at: string
+          department_id: string
+          end_date: string | null
+          id: string
+          is_lead: boolean
+          organization_id: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id: string
+          end_date?: string | null
+          id?: string
+          is_lead?: boolean
+          organization_id: string
+          start_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string
+          end_date?: string | null
+          id?: string
+          is_lead?: boolean
+          organization_id?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_members_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      department_programmes: {
+        Row: {
+          created_at: string
+          department_id: string
+          organization_id: string
+          program_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id: string
+          organization_id: string
+          program_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string
+          organization_id?: string
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_programmes_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_programmes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_programmes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_programmes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_programmes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_program_funding_summary"
+            referencedColumns: ["program_id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          created_at: string
+          data_reach: string
+          description: string | null
+          head_user_id: string | null
+          id: string
+          is_active: boolean
+          modules: string[]
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_reach?: string
+          description?: string | null
+          head_user_id?: string | null
+          id?: string
+          is_active?: boolean
+          modules?: string[]
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_reach?: string
+          description?: string | null
+          head_user_id?: string | null
+          id?: string
+          is_active?: boolean
+          modules?: string[]
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_public_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disaggregation_categories: {
         Row: {
           created_at: string | null
@@ -14800,6 +14966,7 @@ export type Database = {
           created_at: string | null
           end_date: string | null
           id: string
+          is_lead: boolean
           project_id: string
           role_on_project: string | null
           start_date: string | null
@@ -14810,6 +14977,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          is_lead?: boolean
           project_id: string
           role_on_project?: string | null
           start_date?: string | null
@@ -14820,6 +14988,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          is_lead?: boolean
           project_id?: string
           role_on_project?: string | null
           start_date?: string | null
@@ -19019,6 +19188,7 @@ export type Database = {
         }
         Returns: Json
       }
+      my_scope: { Args: never; Returns: Json }
       next_beneficiary_code: { Args: { _org_id: string }; Returns: string }
       next_household_code: { Args: { _org_id: string }; Returns: string }
       next_unique_slug: {
