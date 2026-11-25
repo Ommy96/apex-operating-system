@@ -229,8 +229,8 @@ export function WorkspaceSidebar() {
       label: "Department",
       items: [
         { title: "M&E", url: "/me", icon: TrendingUp, show: deptModules.has("indicators") || deptModules.has("results") },
-        { title: "Grants", url: "/grants", icon: HandCoins, show: deptModules.has("grants") },
-        { title: "Budgets", url: "/budgets", icon: Wallet, show: deptModules.has("budgets") },
+        { title: "Grants", url: "/financial", icon: HandCoins, show: deptModules.has("grants") },
+        { title: "Budgets", url: "/financial", icon: Wallet, show: deptModules.has("budgets") && !deptModules.has("grants") },
       ],
     },
   ];

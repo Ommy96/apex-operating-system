@@ -11,6 +11,7 @@ import { SETTINGS_SECTIONS } from '@/components/settings/registry';
 
 import { ProfileSection } from '@/components/settings/sections/ProfileSection';
 import { DangerZoneSection } from '@/components/settings/sections/DangerZoneSection';
+import { DepartmentsSettings } from '@/components/settings/DepartmentsSettings';
 import { BrandingSettings } from '@/components/settings/BrandingSettings';
 import { ComplianceDocumentsSettings } from '@/components/settings/ComplianceDocumentsSettings';
 import { BeneficiaryDataSettings } from '@/components/settings/BeneficiaryDataSettings';
@@ -96,6 +97,7 @@ export default function OrganizationSettings() {
       case 'interests':     return <InterestTypesSettings />;
       case 'terminology':   return <TerminologySettings />;
       case 'financial':     return <FinancialSettings section="fin-currency" />;
+      case 'departments':   return <DepartmentsSettings />;
       case 'access':        return <UserAccessSettings section="user-settings" />;
       case 'notifications': return <NotificationSettings />;
       case 'integrations':  return <IntegrationSettings section="int-services" />;

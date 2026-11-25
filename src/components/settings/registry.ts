@@ -32,6 +32,7 @@ export const SETTINGS_SECTIONS: SettingsSectionDef[] = [
 
   // System
   { id: 'financial',   label: 'Financial',           description: 'Currency, fiscal year, M-Pesa',   icon: Wallet,       group: 'System' },
+  { id: 'departments', label: 'Departments',         description: 'Functional teams and their data reach', icon: Building2, group: 'System' },
   { id: 'access',      label: 'Users & access',      description: 'Staff, 2FA policy, session',      icon: KeyRound,     group: 'System' },
   { id: 'notifications', label: 'Notifications',     description: 'Org-wide notification defaults',  icon: Bell,         group: 'System' },
   { id: 'integrations', label: 'Integrations',       description: 'M-Pesa, SMS, KoboToolbox, more',  icon: Plug,         group: 'System' },

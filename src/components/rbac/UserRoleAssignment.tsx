@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Search, UserPlus, Shield, Loader2, X, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { assignmentRoleChoices, organisationRoleCatalogue } from '@/lib/roleCatalogue';
+import { MemberLinkSummary, MemberLinksDrawer, useOrgLinks } from '@/components/rbac/MemberLinks';
 
 interface MemberWithRoles {
   user_id: string;
@@ -29,6 +30,8 @@ export function UserRoleAssignment() {
   const [search, setSearch] = useState('');
   const [assignDialog, setAssignDialog] = useState<{ userId: string; name: string } | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState('');
+  const [linksFor, setLinksFor] = useState<{ user_id: string; name: string } | null>(null);
+  const { data: orgLinks } = useOrgLinks(orgId);
 
   // Fetch members with their RBAC roles
   const { data: members = [], isLoading: membersLoading, error: membersError } = useQuery({
@@ -211,6 +214,7 @@ export function UserRoleAssignment() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{member.full_name}</p>
                     <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                    <MemberLinkSummary links={orgLinks} userId={member.user_id} roleNames={member.roles.map(r => r.display_name)} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     {member.roles.map(role => (
@@ -243,6 +247,9 @@ export function UserRoleAssignment() {
                       <UserPlus className="h-3.5 w-3.5 mr-1" />
                       Assign
                     </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setLinksFor({ user_id: member.user_id, name: member.full_name })}>
+                      Manage
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -250,6 +257,8 @@ export function UserRoleAssignment() {
           ))}
         </div>
       </ScrollArea>
+
+      {orgId && <MemberLinksDrawer orgId={orgId} member={linksFor} onClose={() => setLinksFor(null)} />}
 
       {/* Assign Role Dialog */}
       <Dialog open={!!assignDialog} onOpenChange={() => { setAssignDialog(null); setSelectedRoleId(''); }}>
