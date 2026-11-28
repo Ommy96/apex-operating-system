@@ -1,5 +1,12 @@
 # ApexOS Post-Implementation Audit (audit-only, no fixes)
 
+## S1 v2 — authorization containment (current request)
+- [x] Inventory vulnerable RPCs, signup callers, role policies and storage state; confirmation is enabled.
+- [x] Replace registration/invitation signatures and revoke anonymous/internal helper access.
+- [ ] Finish authenticated signup completion, URL conflict recovery and safe invitation preview.
+- [ ] Harden RBAC writes, last-admin protection, profile promotion, merge and allocation chain; verify preserved functions.
+- [ ] Run tests and publish a numbered evidence report including all blocked real-user flows.
+
 ## Remove duplicate sector fields (current request)
 - [x] Check stored sector data: query returned no rows; no education migration or undated history decisions needed.
 - [x] Remove five duplicate names from existing configs without changing other custom fields.
@@ -20,7 +27,7 @@
 - [x] A: Global header sync indicator — shared app-level sync owner, upload lock, scoped queue, quiet synced state, mobile icon/count and link to sync tab.
 - [x] A: Compliance tray alerts and red-only dashboard banner, shared expiry rules and settings cache.
 - [ ] A: Signed-in checks including Umazi/non-admin and 390px header — external authentication unavailable.
-- [ ] S1: Await the referenced S1 brief, not included in this upload.
+- [~] S1 v2: uploaded; containment work tracked above.
 - [x] B: Obligation model, scoped derived periods, HR matrix/filters, team bulk creation, selected-period programme rollups and idempotent audited reminders.
 - [ ] B: Verification a–f (submission flip, overdue boundary, programme lead, own-only/API and Umazi isolation, twice-send-once) — external authenticated testing unavailable; no existing submissions or obligations to exercise.
 - [x] B: Zero-obligation denominator verified in a focused test; full suite 161 passed. Signed-out reminder call denied without sending.

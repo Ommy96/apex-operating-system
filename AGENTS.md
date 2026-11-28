@@ -1,5 +1,7 @@
 # Project rules
 
+- Organisation and invitation signup completion runs through the shared authenticated completion helper after session establishment; invitations use token-and-email-bound server assignment and safe previews, never browser-written roles.
+
 - Beneficiary custom fields reuse the existing sector step and config; settings validate names and labels against shared core-field rules, and exports read education from core columns to avoid duplicate sources of truth.
 
 - Team lists read assignment rows separately from staff names (existing organisation staff RPC), and end-date removals with checked returned IDs; profile embeds must not assume optional profile columns, and field project assignments must not imply sibling-project access.

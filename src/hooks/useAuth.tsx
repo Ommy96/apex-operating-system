@@ -217,27 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    // Check rate limit before attempting login
-    try {
-      const { data: allowed, error: rlError } = await supabase.rpc('check_rate_limit', {
-        user_id_param: '00000000-0000-0000-0000-000000000000', // anonymous UUID for pre-auth
-        action_type_param: `login:${email.toLowerCase()}`,
-        max_attempts: 5,
-        window_minutes: 15,
-      });
-
-      if (rlError) {
-        logger.error('Rate limit check failed:', rlError);
-        // Proceed anyway if rate limit check itself fails (don't lock users out due to infra issue)
-      } else if (allowed === false) {
-        const msg = 'Too many login attempts. Please wait 15 minutes before trying again.';
-        toast({ title: "Login blocked", description: msg, variant: "destructive" });
-        return { error: { message: msg } };
-      }
-    } catch (err) {
-      logger.error('Rate limit RPC error:', err);
-    }
-
+    // Hosted Supabase Auth enforces pre-auth rate limits; privileged DB RPCs require a session.
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,

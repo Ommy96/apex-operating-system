@@ -18836,10 +18836,7 @@ export type Database = {
     }
     Functions: {
       _org_initials: { Args: { _org_id: string }; Returns: string }
-      accept_invitation: {
-        Args: { _invitation_id: string; _user_id: string }
-        Returns: boolean
-      }
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       add_assessment_to_waitlist: {
         Args: { _assessment: string }
         Returns: string
@@ -18873,7 +18870,6 @@ export type Database = {
         Args: { _beneficiary_id: string; _note?: string; _reason?: string }
         Returns: Json
       }
-      auto_approve_request: { Args: { request_id: string }; Returns: boolean }
       beneficiary_link_counts: {
         Args: { _beneficiary_id: string }
         Returns: Json
@@ -19039,6 +19035,14 @@ export type Database = {
           version: number
         }[]
       }
+      get_invitation_preview: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          organization_name: string
+          role_display_name: string
+        }[]
+      }
       get_org_member_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: string
@@ -19179,15 +19183,6 @@ export type Database = {
         }
       }
       log_donor_document_access: { Args: { _id: string }; Returns: undefined }
-      merge_beneficiaries: {
-        Args: {
-          _candidate_id: string
-          _canonical_id: string
-          _duplicate_id: string
-          _note?: string
-        }
-        Returns: Json
-      }
       my_scope: { Args: never; Returns: Json }
       next_beneficiary_code: { Args: { _org_id: string }; Returns: string }
       next_household_code: { Args: { _org_id: string }; Returns: string }
@@ -19223,7 +19218,6 @@ export type Database = {
       register_organization: {
         Args: {
           _address?: string
-          _admin_user_id?: string
           _country?: string
           _county?: string
           _description?: string

@@ -17,6 +17,7 @@ import {
   ArrowLeft, ArrowRight, Building2, User, Mail, Lock, Phone, Globe, MapPin,
   Sparkles, CheckCircle2, LogOut, FileText, Crown, Zap, Shield, Check, Eye, EyeOff, Loader2
 } from 'lucide-react';
+import { completePendingAuth, type PendingOrganization } from '@/lib/completePendingAuth';
 import { useAuth } from '@/hooks/useAuth';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -166,68 +167,45 @@ export default function RegisterOrganization() {
   const handleSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // 1 – create user account
+      const selectedPlan = PLANS.find(p => p.id === data.plan) || PLANS[0];
+      const pending: PendingOrganization = {
+        name: data.organizationName, slug: data.organizationSlug, type: data.organizationType,
+        description: data.description, email: data.email, phone: data.phone,
+        website: data.website, address: data.address, country: data.country, county: data.county,
+        registration_number: data.registrationNumber, subscription_tier: data.plan,
+        features_enabled: {
+          max_users: selectedPlan.limits.users === -1 ? 9999 : selectedPlan.limits.users,
+          max_beneficiaries: selectedPlan.limits.beneficiaries === -1 ? 999999 : selectedPlan.limits.beneficiaries,
+          reports_enabled: true, indicators_enabled: data.plan !== 'free', custom_entities: data.plan === 'enterprise',
+        },
+      };
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.adminEmail, password: data.adminPassword,
-        options: { emailRedirectTo: `${window.location.origin}/auth/confirm`, data: { full_name: data.adminFullName } },
+        options: { emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          data: { full_name: data.adminFullName, pending_organization: pending } },
       });
-      if (authError) {
-        if (authError.message.includes('already registered')) { form.setError('adminEmail', { message: 'Email already registered. Please sign in.' }); setStep(1); }
-        else throw authError;
-        setIsLoading(false); return;
-      }
-      if (!authData.user) throw new Error('Failed to create user account');
-
-      // Supabase returns a fake user (empty identities) when the email is
-      // already registered. Detect and surface a proper error instead of
-      // hitting the auth.users FK violation in register_organization.
-      if (!authData.user.identities || authData.user.identities.length === 0) {
+      if (authError) throw authError;
+      if (!authData.user || !authData.user.identities?.length) {
         form.setError('adminEmail', { message: 'Email already registered. Please sign in.' });
         setStep(1);
-        setIsLoading(false);
         return;
       }
-
-      // 2 – build features config
-      const selectedPlan = PLANS.find(p => p.id === data.plan) || PLANS[0];
-      const featuresEnabled = {
-        max_users: selectedPlan.limits.users === -1 ? 9999 : selectedPlan.limits.users,
-        max_beneficiaries: selectedPlan.limits.beneficiaries === -1 ? 999999 : selectedPlan.limits.beneficiaries,
-        reports_enabled: true,
-        indicators_enabled: data.plan !== 'free',
-        custom_entities: data.plan === 'enterprise',
-      };
-
-      // 3 – create org via SECURITY DEFINER RPC (bypasses RLS safely)
-      const { data: rpcResult, error: rpcError } = await supabase.rpc('register_organization', {
-        _org_name: data.organizationName,
-        _org_slug: data.organizationSlug,
-        _org_type: data.organizationType,
-        _description: data.description || null,
-        _email: data.email || null,
-        _phone: data.phone || null,
-        _website: data.website || null,
-        _address: data.address || null,
-        _country: data.country || null,
-        _county: data.county || null,
-        _registration_number: data.registrationNumber || null,
-        _subscription_tier: data.plan,
-        _features_enabled: featuresEnabled,
-        _admin_user_id: authData.user.id,
-      });
-
-      if (rpcError) {
-        if (rpcError.message.includes('slug_taken')) {
-          form.setError('organizationSlug', { message: 'This URL is already taken' });
-          setStep(0);
-          setIsLoading(false);
+      // Confirmation-enabled signup has no session: persist details, never call the RPC yet.
+      if (authData.session) {
+        try {
+          await completePendingAuth(authData.user);
+          navigate('/dashboard');
           return;
+        } catch (error) {
+          if ((error as Error).message.includes('slug_taken')) {
+            navigate('/auth/confirm');
+            return;
+          }
+          throw error;
         }
-        throw rpcError;
       }
-
       setRegistrationComplete(true);
-      toast.success('Organization registered successfully!');
+      toast.success('Check your email to confirm and finish registration.');
     } catch (error: any) {
       logger.error('Registration error:', error);
       toast.error(error.message || 'Failed to register organization');
@@ -248,7 +226,7 @@ export default function RegisterOrganization() {
             </div>
             <CardTitle className="text-2xl">Welcome Aboard! 🎉</CardTitle>
             <CardDescription className="text-base">
-              Your organization has been created. Check your email to verify your account, then sign in to start.
+              Check your email to verify your account. Your organisation will be created after confirmation; your details are saved.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pb-8">

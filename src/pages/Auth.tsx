@@ -14,18 +14,16 @@ import {
   GoogleButton,
   RULES,
 } from "@/components/auth/AuthFields";
+import { completePendingAuth } from '@/lib/completePendingAuth';
+import { toast } from 'sonner';
 import { PRODUCT_NAME } from "@/config/brand";
 
 type Mode = "signin" | "signup" | "forgot";
 
 interface InvitationData {
-  id: string;
   email: string;
-  role: string;
-  organization_id: string;
-  status: string;
-  expires_at: string;
-  organization?: { name: string };
+  role_display_name: string;
+  organization_name: string;
 }
 
 /** Map raw Supabase auth errors to specific, human messages. */
@@ -100,36 +98,16 @@ export default function Auth() {
       setInvitationLoading(true);
       setInvitationError(null);
       try {
-        const { data, error } = await supabase
-          .from("organization_invitations")
-          .select(
-            `id, email, role, organization_id, status, expires_at, organizations:organization_id (name)`,
-          )
-          .eq("token", token)
-          .single();
-
-        if (error) {
-          setInvitationError("Invalid invitation link");
-          return;
-        }
-        if (!data) {
-          setInvitationError("Invitation not found");
-          return;
-        }
-        if (data.status !== "pending") {
-          setInvitationError("This invitation has already been used or cancelled");
-          return;
-        }
-        if (new Date(data.expires_at) < new Date()) {
-          setInvitationError("This invitation has expired");
-          return;
-        }
-        setInvitation({
-          ...data,
-          organization: data.organizations as unknown as { name: string },
-        });
-      } catch {
-        setInvitationError("Failed to load invitation");
+        const { data, error } = await supabase.rpc('get_invitation_preview', { _token: token });
+        if (error) throw error;
+        const preview = data?.[0];
+        if (!preview) throw new Error('This invitation is invalid, expired or already used.');
+        setInvitation(preview);
+        setEmail(preview.email);
+      } catch (error) {
+        const message = (error as Error).message || 'Failed to load invitation';
+        setInvitationError(message);
+        toast.error(message);
       } finally {
         setInvitationLoading(false);
       }
@@ -187,7 +165,8 @@ export default function Auth() {
   }
 
   if (user && !inviteToken) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={user.user_metadata.pending_organization || user.user_metadata.pending_invitation_token
+      ? '/auth/confirm' : '/dashboard'} replace />;
   }
 
   const focusFirstError = () => {
@@ -213,17 +192,26 @@ export default function Auth() {
     setNeedsConfirm(false);
     setResendNote(null);
     const { error } = await signIn(email, password);
-    setSignInBusy(false);
     if (error) {
       const msg = humanAuthError(error.message);
-      if ((error.message || "").toLowerCase().includes("email not confirmed")) {
-        setNeedsConfirm(true);
-      }
-      setSignInErrors({
-        password: msg,
-      });
+      if ((error.message || '').toLowerCase().includes('email not confirmed')) setNeedsConfirm(true);
+      setSignInErrors({ password: msg });
       focusFirstError();
+    } else {
+      try {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!data.session) throw new Error('Sign-in did not create a session.');
+        await completePendingAuth(data.session.user, inviteToken);
+        navigate('/dashboard');
+      } catch (completionError) {
+        const message = (completionError as Error).message;
+        toast.error(message);
+        if (message.includes('slug_taken')) navigate('/auth/confirm');
+        else setSignInErrors({ password: message });
+      }
     }
+    setSignInBusy(false);
   };
 
   /** Unverified email is otherwise a dead end — let the user request a new link. */
@@ -316,30 +304,18 @@ export default function Auth() {
         password: invPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
-          data: { full_name: invName.trim() },
+          data: { full_name: invName.trim(), pending_invitation_token: inviteToken },
         },
       });
       if (signUpError) throw signUpError;
 
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ full_name: invName.trim(), organization_id: invitation.organization_id })
-          .eq("user_id", authData.user.id);
-        if (profileError) logger.error("Profile update error:", profileError);
-
-        const { error: acceptError } = await supabase.rpc("accept_invitation", {
-          _invitation_id: invitation.id,
-          _user_id: authData.user.id,
-        });
-        if (acceptError) logger.error("Accept invitation error:", acceptError);
-
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: authData.user.id, role: "staff" });
-        if (roleError) logger.error("Role creation error:", roleError);
-
-        navigate("/auth");
+      if (!authData.user || !authData.user.identities?.length) throw new Error('That email is already registered. Sign in to accept this invitation.');
+      if (authData.session) {
+        await completePendingAuth(authData.user, inviteToken);
+        navigate('/dashboard');
+      } else {
+        toast.success('Check your email to confirm and accept the invitation.');
+        navigate(`/auth?invite=${encodeURIComponent(inviteToken || '')}&mode=signin`);
       }
     } catch (error: any) {
       logger.error("Signup error:", error);
@@ -351,7 +327,7 @@ export default function Auth() {
   };
 
   // ── Invitation screen ──────────────────────────────────────────────────
-  if (inviteToken) {
+  if (inviteToken && mode !== "signin") {
     return (
       <AuthShell
         showAccent={false}
@@ -386,9 +362,9 @@ export default function Auth() {
                   <div className="text-sm">
                     <p className="text-[var(--auth-text)]">
                       You&apos;ve been invited to join{" "}
-                      <span className="font-semibold">{invitation.organization?.name}</span> as{" "}
+                      <span className="font-semibold">{invitation.organization_name}</span> as{" "}
                       <span className="font-semibold capitalize">
-                        {invitation.role.replace(/_/g, " ")}
+                        {invitation.role_display_name}
                       </span>
                       .
                     </p>
@@ -396,7 +372,9 @@ export default function Auth() {
                 </div>
               </div>
 
-              <form onSubmit={handleInviteSignUp} className="space-y-4" noValidate>
+              {user ? <AuthSubmit onClick={() => navigate(`/auth/confirm?invite=${encodeURIComponent(inviteToken)}`)}>
+                Accept invitation
+              </AuthSubmit> : <form onSubmit={handleInviteSignUp} className="space-y-4" noValidate>
                 <AuthInput
                   label="Email"
                   icon={<Mail className="h-4 w-4" />}
@@ -443,12 +421,13 @@ export default function Auth() {
                 <AuthSubmit loading={invBusy}>
                   {invBusy ? "Creating account…" : "Accept & create account"}
                 </AuthSubmit>
-              </form>
+              </form>}
             </>
           ) : null}
 
           <Link
-            to="/auth"
+            to={`/auth?invite=${encodeURIComponent(inviteToken || '')}&mode=signin`}
+            onClick={() => switchMode("signin")}
             className="inline-flex items-center gap-2 text-sm text-[var(--auth-muted)] transition-colors hover:text-[var(--auth-text)]"
           >
             <ArrowLeft className="h-4 w-4" /> Back to sign in
